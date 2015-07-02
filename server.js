@@ -1,8 +1,23 @@
-var http = require('http');
+var read = require('read');
 
-http.createServer(function (req, res) {
-  res.writeHead(200, {'Content-Type': 'text/plain'});
-  res.end('Andromeda Viewer\n');
-}).listen(process.env.PORT || 8000, process.env.IP);
+console.log('Andromeda is running!\nNot ready for production!\n');
 
-console.log('Andromeda is running!\nNot ready for production!');
+console.log('Please enter your sl-login.');
+
+read({ prompt: 'Avatar name (first.last): ' }, function (er, name) {
+  if (er) {
+    console.error('Invalid login!');
+    return;
+  }
+  read({ prompt: 'Password: ', silent: true }, function (er, password) {
+    if (er) {
+      console.error('Something went wrong!');
+      return;
+    }
+    if (password.length === 0) {
+      console.error('Password is to short!');
+      return;
+    }
+    console.log('Your login is: %s', name);
+  });
+});
