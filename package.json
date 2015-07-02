@@ -1,0 +1,22 @@
+{
+  "name": "andromeda-viewer",
+  "version": "0.0.1",
+  "description": "Small web-client for connecting to the virtual world of Second Life.",
+  "main": "server.js",
+  "scripts": {
+    "test": "semistandard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Terreii/andromeda-viewer.git"
+  },
+  "author": "Christopher Astfalk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Terreii/andromeda-viewer/issues"
+  },
+  "homepage": "https://github.com/Terreii/andromeda-viewer",
+  "devDependencies": {
+    "semistandard": "^6.1.1"
+  }
+}
