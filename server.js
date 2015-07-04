@@ -6,6 +6,7 @@ var read = require('read');
 var xmlrpc = require('xmlrpc');
 
 var viewerInfo = require('./js/viewerInfo');
+var parseFullName = require('./js/avatarName');
 
 // SL uses its own tls-certificate
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -62,30 +63,3 @@ read({prompt: 'Avatar name (first.last): '}, function (er, name) {
     });
   });
 });
-
-// parses an avatar name
-// Searches for a dot or white space that separates the first and last names
-// if neither is given, then 'resident' will be used for the last name
-function parseFullName (name) {
-  if (typeof name !== 'string') {
-    throw new TypeError('Name must be a string');
-  }
-  name = name.trim();
-
-  var parts;
-  var parsed = name.match(/[\.\s]/);
-  // if the first name and last name are given
-  if (parsed) {
-    parts = name.split(parsed[0]);
-  } else {
-    parts = [
-      name,
-      'Resident'
-    ];
-  }
-
-  return {
-    first: parts[0],
-    last: parts[1]
-  };
-}
