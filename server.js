@@ -1,21 +1,11 @@
 'use strict';
 
 var crypto = require('crypto');
-var os = require('os');
 
 var read = require('read');
 var xmlrpc = require('xmlrpc');
 
-var macaddress;
-// the macaddress can be found in node version 0.12 in os.networkInterfaces()
-require('macaddress').one(function (error, mac) {
-  if (!error) {
-    macaddress = mac;
-  } else {
-    macaddress = '00:00:00:00:00:00';
-    console.error('Mac address wasn\'t found!');
-  }
-});
+var viewerInfo = require('./js/viewerInfo');
 
 // SL uses its own tls-certificate
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -49,18 +39,6 @@ read({prompt: 'Avatar name (first.last): '}, function (er, name) {
     hash.update(password, 'ascii');
     var passwdFinal = '$1$' + hash.digest('hex');
 
-    var osName;
-    switch (os.platform()) {
-      case 'darwin':
-        osName = 'Mac';
-        break;
-      case 'win32':
-        osName = 'Win';
-        break;
-      default:
-        osName = 'Lin';
-    }
-
     var xmlrpcClient = xmlrpc.createSecureClient({
       host: 'login.agni.lindenlab.com',
       port: 443,
@@ -72,10 +50,10 @@ read({prompt: 'Avatar name (first.last): '}, function (er, name) {
       last: parsedName.last,
       passwd: passwdFinal,
       start: 'last',
-      channel: 'andromeda',
-      version: '0.0.0.1',
-      platform: osName,
-      mac: macaddress,
+      channel: viewerInfo.name,
+      version: viewerInfo.version,
+      platform: viewerInfo.platform,
+      mac: viewerInfo.mac,
       options: [],
       agree_to_tos: 'true',
       read_critical: 'true'
