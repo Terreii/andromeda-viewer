@@ -4,7 +4,7 @@
   "description": "Small web-client for connecting to the virtual world of Second Life.",
   "main": "server.js",
   "scripts": {
-    "test": "semistandard"
+    "test": "semistandard && semistandard test/*.js && mocha"
   },
   "repository": {
     "type": "git",
@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Terreii/andromeda-viewer",
   "devDependencies": {
+    "mocha": "^2.2.5",
     "semistandard": "^6.1.1"
   },
   "dependencies": {
