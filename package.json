@@ -4,7 +4,7 @@
   "description": "Small web-client for connecting to the virtual world of Second Life.",
   "main": "server.js",
   "scripts": {
-    "test": "semistandard && mocha"
+    "test": "semistandard && semistandard test/*.js && mocha"
   },
   "repository": {
     "type": "git",
