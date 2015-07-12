@@ -1,3 +1,5 @@
+'use strict';
+
 var describe = require('mocha').describe;
 var it = require('mocha').it;
 var assert = require('assert');
@@ -14,11 +16,10 @@ describe('viewerInfo', function () {
     assert.equal(true, /^(Mac|Win|Lin)$/.test(viewerInfo.platform));
   });
 
-  it('should have the local MAC address after a time', function (done) {
-    setTimeout(function () {
-      var mac = viewerInfo.mac;
-      assert.equal(true, mac != null && mac !== '00:00:00:00:00:00');
+  it('should give the MAC address back with a callback', function (done) {
+    viewerInfo.getMAC(function (macaddress) {
+      assert.equal(true, /([0-9a-f]{2}:){5}[0-9a-f]{2}/i.test(macaddress));
       done();
-    }, 10);
+    });
   });
 });
