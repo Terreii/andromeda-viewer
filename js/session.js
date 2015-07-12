@@ -6,7 +6,17 @@ var xmlrpc = require('xmlrpc');
 
 var viewerInfo = require('./viewerInfo');
 
+// true if there is a running session
+var isLoggedIn = false;
+
+// Stores the result of the xmlrpc login & tracks the changes
+var sessionInfo;
+
+// Logges the user in. Uses the XML-RPC for it.
 function login (firstName, lastName, password, callback) {
+  if (isLoggedIn) {
+    throw new Error('There is allready an avatar logged in!');
+  }
   viewerInfo.getMAC(function (macaddress) {
     var hash = crypto.createHash('md5');
     hash.update(password, 'ascii');
@@ -30,10 +40,37 @@ function login (firstName, lastName, password, callback) {
       options: [],
       agree_to_tos: 'true',
       read_critical: 'true'
-    }], callback);
+    }], function (error, data) {
+      if (error) {
+        callback(error);
+        return;
+      }
+      isLoggedIn = true;
+      sessionInfo = data;
+      connectToSim(sessionInfo.sim_ip, sessionInfo.sim_port,
+        sessionInfo.circuit_code, callback);
+    });
   });
 }
 
+// Placeholder for the logiut process
+function logout () {
+  if (!isLoggedIn) {
+    throw new Error('You aren\'t logged in!');
+  }
+  console.error("I'm sorry " + sessionInfo.firstName +
+    ", I'm afraid I can't do that.");
+}
+
+// Login to a sim. Is called on the login process and sim-change
+function connectToSim (ip, port, circuit_code, callback) {
+  callback(undefined, sessionInfo);
+}
+
 module.exports = {
-  login: login
+  login: login,
+  logout: logout,
+  get isLoggedIn () {
+    return isLoggedIn;
+  }
 };
