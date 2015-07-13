@@ -244,4 +244,34 @@ describe('networkMessages', function () {
       });
     });
   });
+
+  describe('Messages', function () {
+    var buffer = new Buffer(4 + 4 * (1 + 4 * 3) + 1);
+    buffer.writeUInt8(255, 0);
+    buffer.writeUInt8(255, 1);
+    buffer.writeUInt16BE(1, 2);
+
+    var U32 = messages.types.U32;
+
+    var testMessage = messages.parseBody(buffer);
+    it('should return the TestMessage', function () {
+      assert.equal(true,
+        testMessage instanceof messages.messageTypes.TestMessage);
+    });
+    it('should have Blocks: TestBlock1 and TestBlock2', function () {
+      assert.equal('object', typeof testMessage.TestBlock1);
+      assert.equal('object', typeof testMessage.TestBlock2);
+      assert.equal(true, Array.isArray(testMessage.blocks));
+      assert.equal(2, testMessage.blocks.length);
+    });
+    it('should have one U32 in an array in the TestBlock1', function () {
+      assert.equal(true, testMessage.TestBlock1.blocks[0][0] instanceof U32);
+    });
+    it('should have 3 U32 in 4 Arrays in TestBlock2', function () {
+      var block2 = testMessage.TestBlock2;
+      assert.equal(4, block2.blocks.length);
+      assert.equal(3, block2.blocks[0].length);
+      assert.equal(true, block2.blocks[0][0] instanceof U32);
+    });
+  });
 });

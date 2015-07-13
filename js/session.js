@@ -5,6 +5,7 @@ var crypto = require('crypto');
 var xmlrpc = require('xmlrpc');
 
 var viewerInfo = require('./viewerInfo');
+var messages = require('./networkMessages');
 
 // true if there is a running session
 var isLoggedIn = false;
@@ -65,6 +66,7 @@ function logout () {
 // Login to a sim. Is called on the login process and sim-change
 function connectToSim (ip, port, circuit_code, callback) {
   callback(undefined, sessionInfo);
+  messages.types.BOOL(new Buffer(1));
 }
 
 module.exports = {

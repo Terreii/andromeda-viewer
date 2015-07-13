@@ -23,14 +23,14 @@ Null.prototype = new MessageDataType();
 // Arrays
 
 function Fixed (buffer, offset, size) {
-  offset = offset  || 0;
+  offset = offset || 0;
   this.size = size;
   this.value = buffer.slice(offset, offset + size);
 }
 Fixed.prototype = new MessageDataType();
 
 function Variable1 (buffer, offset) {
-  offset = offset  || 0;
+  offset = offset || 0;
   this.size = buffer.readUInt8(offset);
   var start = offset + 1;
   this.value = buffer.slice(start, start + this.size);
@@ -38,7 +38,7 @@ function Variable1 (buffer, offset) {
 Variable1.prototype = new MessageDataType();
 
 function Variable2 (buffer, offset) {
-  offset = offset  || 0;
+  offset = offset || 0;
   this.size = buffer.readUInt16BE(offset);
   var start = offset + 2;
   this.value = buffer.slice(start, start + this.size);
@@ -53,70 +53,70 @@ function NumberType (sined) {
 NumberType.prototype = new MessageDataType();
 
 function U8 (buffer, offset) {
-  offset = offset  || 0;
+  offset = offset || 0;
   this.value = buffer.readUInt8(offset);
 }
 U8.prototype = new NumberType(false);
 U8.prototype.size = 1;
 
 function U16 (buffer, offset) {
-  offset = offset  || 0;
+  offset = offset || 0;
   this.value = buffer.readUInt16LE(offset);
 }
 U16.prototype = new NumberType(false);
 U16.prototype.size = 2;
 
 function U32 (buffer, offset) {
-  offset = offset  || 0;
+  offset = offset || 0;
   this.value = buffer.readUInt32LE(offset);
 }
 U32.prototype = new NumberType(false);
 U32.prototype.size = 4;
 
 function U64 (buffer, offset) {
-  offset = offset  || 0;
+  offset = offset || 0;
   // TODO
 }
 U64.prototype = new NumberType(false);
 U64.prototype.size = 8;
 
 function S8 (buffer, offset) {
-  offset = offset  || 0;
+  offset = offset || 0;
   this.value = buffer.readInt8(offset);
 }
 S8.prototype = new NumberType(true);
 S8.prototype.size = 1;
 
 function S16 (buffer, offset) {
-  offset = offset  || 0;
+  offset = offset || 0;
   this.value = buffer.readInt16LE(offset);
 }
 S16.prototype = new NumberType(true);
 S16.prototype.size = 2;
 
 function S32 (buffer, offset) {
-  offset = offset  || 0;
+  offset = offset || 0;
   this.value = buffer.readInt32LE(offset);
 }
 S32.prototype = new NumberType(true);
 S32.prototype.size = 4;
 
 function S64 (buffer, offset) {
-  offset = offset  || 0;
+  offset = offset || 0;
   // TODO
 }
 S64.prototype = new NumberType(true);
 S64.prototype.size = 8;
 
 function F32 (buffer, offset) {
-  offset = offset  || 0;
+  offset = offset || 0;
   this.value = buffer.readFloatLE(offset);
 }
 F32.prototype = new NumberType(true);
 F32.prototype.size = 4;
 
 function F64 (buffer, offset) {
-  offset = offset  || 0;
+  offset = offset || 0;
   this.value = buffer.readDoubleLE(offset);
 }
 F64.prototype = new NumberType(true);
@@ -125,7 +125,7 @@ F64.prototype.size = 8;
 // Vectors
 
 function LLVector3 (buffer, offset) {
-  offset = offset  || 0;
+  offset = offset || 0;
   this.value = [
     buffer.readFloatLE(offset),
     buffer.readFloatLE(offset + 4),
@@ -136,7 +136,7 @@ LLVector3.prototype = new MessageDataType();
 LLVector3.prototype.size = 12;
 
 function LLVector3d (buffer, offset) {
-  offset = offset  || 0;
+  offset = offset || 0;
   this.value = [
     buffer.readDoubleLE(offset),
     buffer.readDoubleLE(offset + 8),
@@ -147,7 +147,7 @@ LLVector3d.prototype = new MessageDataType();
 LLVector3d.prototype.size = 24;
 
 function LLVector4 (buffer, offset) {
-  offset = offset  || 0;
+  offset = offset || 0;
   this.value = [
     buffer.readFloatLE(offset),
     buffer.readFloatLE(offset + 4),
@@ -163,21 +163,21 @@ var LLQuaternion = LLVector3;
 // Data
 
 function LLUUID (buffer, offset) {
-  offset = offset  || 0;
+  offset = offset || 0;
   this.value = uuid.unparse(buffer, offset);
 }
 LLUUID.prototype = new MessageDataType();
 LLUUID.prototype.size = 16;
 
 function BOOL (buffer, offset) {
-  offset = offset  || 0;
+  offset = offset || 0;
   this.value = buffer.readUInt8(offset) !== 0;
 }
 BOOL.prototype = new MessageDataType();
 BOOL.prototype.size = 1;
 
 function IPADDR (buffer, offset) {
-  offset = offset  || 0;
+  offset = offset || 0;
   this.value = buffer.readUInt8(offset) + '.' +
     buffer.readUInt8(offset + 1) + '.' +
     buffer.readUInt8(offset + 2) + '.' +
@@ -187,11 +187,120 @@ IPADDR.prototype = new MessageDataType();
 IPADDR.prototype.size = 4;
 
 function IPPORT (buffer, offset) {
-  offset = offset  || 0;
+  offset = offset || 0;
   this.value = buffer.readUInt16LE(offset);
 }
 IPPORT.prototype = new MessageDataType();
 IPPORT.prototype.size = 2;
+
+// Starts with the packet body http://wiki.secondlife.com/wiki/Packet_Layout
+function parseBody (packetBody) {
+  if (!(packetBody instanceof Buffer)) {
+    throw new TypeError('packetBody neads a Buffer!');
+  }
+
+  var toParse;
+  var num;
+  var offset;
+
+  if (packetBody.readUInt8(0) < 255) {
+    toParse = high;
+    num = packetBody.readUInt8(0);
+    offset = 1;
+  } else if (packetBody.readUInt8(1) < 255) {
+    toParse = medium;
+    num = packetBody.readUInt8(1);
+    offset = 2;
+  } else if (packetBody.readUInt16BE(2) < 65530) { // 0xFFFA
+    toParse = low;
+    num = packetBody.readUInt16BE(2);
+    offset = 4;
+  } else {
+    toParse = fixed;
+    num = packetBody.readUInt32BE(0);
+    offset = 4;
+  }
+
+  if (!toParse[num]) {
+    throw new Error('no message of this type');
+  }
+
+  var body = new toParse[num](packetBody.slice(offset));
+
+  return body;
+}
+
+// Parse a block of a message.
+// buffer is the Buffer from where it will be extracted
+// offset where to start in the buffer
+// quantity: how often this block is in the packet
+//    null if it is variable and stored in the packet
+// layout is an array of the types in the block (in order)
+function parseBlock (buffer, offset, quantity, layout) {
+  var originalOffset = offset;
+  if (quantity === null) {
+    quantity = buffer.readUInt8(0);
+    offset++;
+  }
+
+  var allBlocks = [];
+
+  for (var i = 0; i < quantity; i++) {
+    var block = layout.map(function (Type) {
+      var unit = new Type(buffer, offset);
+      offset += +unit.size;
+      return unit;
+    });
+    allBlocks.push(block);
+  }
+
+  return {
+    blocks: allBlocks,
+    size: offset - originalOffset
+  };
+}
+
+function MessageProto () {
+  this.size = 0;
+}
+MessageProto.prototype.blocks = [];
+MessageProto.prototype.frequency = 'fixed';
+MessageProto.prototype.num = 0;
+MessageProto.prototype.isSameFrequency = function (frequency) {
+  return this.frequency === frequency.toString().toLowerCase();
+};
+
+function TestMessage (packetBody) {
+  var TestBlock1 = parseBlock(packetBody, 0, 1, [U32]);
+  var TestBlock2 = parseBlock(packetBody, TestBlock1.size, 4, [U32, U32, U32]);
+
+  this.size = TestBlock1.size + TestBlock2.size;
+  this.TestBlock1 = TestBlock1;
+  this.TestBlock2 = TestBlock2;
+  this.blocks = [
+    TestBlock1,
+    TestBlock2
+  ];
+}
+TestMessage.prototype = new MessageProto();
+TestMessage.prototype.frequency = 'low';
+TestMessage.prototype.num = 1;
+
+var high = {
+
+};
+
+var medium = {
+
+};
+
+var low = {
+  1: TestMessage
+};
+
+var fixed = {
+
+};
 
 module.exports = {
   types: {
@@ -217,5 +326,11 @@ module.exports = {
     BOOL: BOOL,
     IPADDR: IPADDR,
     IPPORT: IPPORT
+  },
+
+  parseBody: parseBody,
+
+  messageTypes: {
+    TestMessage: TestMessage
   }
 };
