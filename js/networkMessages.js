@@ -193,6 +193,10 @@ function IPPORT (buffer, offset) {
 IPPORT.prototype = new MessageDataType();
 IPPORT.prototype.size = 2;
 
+function createBody (type, data) {
+
+}
+
 // Starts with the packet body http://wiki.secondlife.com/wiki/Packet_Layout
 function parseBody (packetBody) {
   if (!(packetBody instanceof Buffer)) {
@@ -260,15 +264,19 @@ function parseBlock (buffer, offset, quantity, layout) {
   };
 }
 
+// Messages
+
 function MessageProto () {
-  this.size = 0;
+  this.size = 0; // Size in bytes
 }
+// stores a reference to all blocks
 MessageProto.prototype.blocks = [];
+// How often will this type be sent? Also for identification
 MessageProto.prototype.frequency = 'fixed';
+// Number in the frequency
 MessageProto.prototype.num = 0;
-MessageProto.prototype.isSameFrequency = function (frequency) {
-  return this.frequency === frequency.toString().toLowerCase();
-};
+// Are 1 to 255 zero bytes in the body encoded to take 2 bytes?
+MessageProto.prototype.zerocoded = false;
 
 function TestMessage (packetBody) {
   var TestBlock1 = parseBlock(packetBody, 0, 1, [U32]);
@@ -285,6 +293,7 @@ function TestMessage (packetBody) {
 TestMessage.prototype = new MessageProto();
 TestMessage.prototype.frequency = 'low';
 TestMessage.prototype.num = 1;
+TestMessage.prototype.zerocoded = true;
 
 var high = {
 
@@ -329,6 +338,8 @@ module.exports = {
   },
 
   parseBody: parseBody,
+
+  createBody: createBody,
 
   messageTypes: {
     TestMessage: TestMessage
