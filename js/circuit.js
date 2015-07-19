@@ -175,4 +175,4 @@ function extractAcks (msg, ackStart) {
   return acks;
 }
 
-module.exports.send = Circuit;
+module.exports = Circuit;

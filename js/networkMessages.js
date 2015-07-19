@@ -1,5 +1,8 @@
 'use strict';
 
+var util = require('util');
+var fs = require('fs');
+
 var uuid = require('uuid');
 
 // This module implements the packages
@@ -193,155 +196,238 @@ function IPPORT (buffer, offset) {
 IPPORT.prototype = new MessageDataType();
 IPPORT.prototype.size = 2;
 
+var types = {
+  Null: Null,
+  Fixed: Fixed,
+  Variable1: Variable1,
+  Variable2: Variable2,
+  U8: U8,
+  U16: U16,
+  U32: U32,
+  U64: U64,
+  S8: S8,
+  S16: S16,
+  S32: S32,
+  S64: S64,
+  F32: F32,
+  F64: F64,
+  LLVector3: LLVector3,
+  LLVector3d: LLVector3d,
+  LLVector4: LLVector4,
+  LLQuaternion: LLQuaternion,
+  LLUUID: LLUUID,
+  BOOL: BOOL,
+  IPADDR: IPADDR,
+  IPPORT: IPPORT
+};
+
+// stores all messages
+var allMessages = [];
+
+// messagesByName[Messagename]
+var messagesByName = {};
+
+// inside the frequency-objects the message will be stored with their number
+var messagesByFrequency = {
+  High: {}, // Should be 29 templates
+  Medium: {}, // Should be 17 templates
+  Low: {}, // Should be 426 templates
+  Fixed: {} // Should be 3 templates
+};
+
+// parse the message_template.msg and creates the templates for the messages
+// http://secondlife.com/app/message_template/master_message_template.msg
+// results in:
+// [
+//   {
+//     name: String,
+//     frequency: 'High'|'Medium'|'Low'|'Fixed',
+//     number: Number,
+//     trusted: Boolean,
+//     zerocoded: Boolean,
+//     isOld: undefined|String,
+//     body: [
+//       {
+//         name: String,
+//         quantity: 'Single'|'Multiple'|'Variable',
+//         times: Number, // only if quantity is Multiple
+//         variables: [
+//           name: String,
+//           type: types,
+//           times: Number|NaN // by "Fixed"/"Variable"
+//         ]
+//       }
+//     ]
+//   }
+// ]
+
+// fs.readFile(process.cwd() + '/master_message_template.msg', {encoding: 'utf8'},
+    // (function (err, data) {
+(function () {
+  var data = fs.readFileSync(process.cwd() + '/master_message_template.msg', {encoding: 'utf8'});
+  // if (err) {
+  //   console.error(err);
+  //   return;
+  // }
+  allMessages = data.split('\n').map(function (line) {
+    // remove the commens
+    return line.replace(/\/\/.*$/, '').replace(/^\s+$/g, '');
+  }).filter(function (line) {
+    return line.length !== 0 && line !== 'version 2.0';
+  }).reduce(function (combined, line) { // combine the blocks together
+    switch (line.charAt(0)) {
+      case '{': // start a new block
+        combined.thisMessage = [];
+        break;
+      case '}': // the block is done
+        combined.finished.push(combined.thisMessage);
+        break;
+      default:
+        combined.thisMessage.push(line);
+        break;
+    }
+    return combined;
+  }, {
+    finished: [],
+    thisMessage: null
+  }).finished.map(function (message) {
+    // parse a message
+    var head = message[0].trim().split(/\s+/g);
+    var body = message.slice(1).reduce(function (blocks, line) {
+      var trimed = line.trim();
+      if (trimed.length === 1 && trimed.charAt(0) === '{') {
+        blocks.thisBlock = {
+          name: '',
+          quantity: '',
+          times: 0,
+          variables: []
+        };
+      } else if (trimed.length === 1 && trimed.charAt(0) === '}') {
+        blocks.all.push(blocks.thisBlock);
+      } else if (trimed.charAt(0) !== '{') {
+        // block info has no { at the beginning
+        var info = trimed.split(/\s+/g);
+        blocks.thisBlock.name = info[0];
+        blocks.thisBlock.quantity = info[1];
+        blocks.thisBlock.times = +info[2];
+      } else if (trimed.charAt(0) === '{' && trimed.length > 2) {
+        // all variables have the fromat { name type quantity? }
+        var variable = trimed.split(/\s+/g);
+        blocks.thisBlock.variables.push({
+          name: variable[1],
+          type: variable[2],
+          times: +variable[3]
+        });
+      }
+      return blocks;
+    }, {
+      all: [],
+      thisBlock: null
+    }).all;
+    return {
+      name: head[0],
+      frequency: head[1],
+      number: +head[2],
+      trusted: head[3] === 'Trusted',
+      zerocoded: head[4] === 'Zerocoded',
+      isOld: head[5],
+      body: body
+    };
+  });
+
+  allMessages.forEach(function (message) {
+    messagesByName[message.name] = message;
+    messagesByFrequency[message.frequency][message.number] = message;
+  });
+})();
+
+// Message -> buffer (for sending)
 function createBody (type, data) {
 
 }
 
+// buffer -> Message
 // Starts with the packet body http://wiki.secondlife.com/wiki/Packet_Layout
 function parseBody (packetBody) {
   if (!(packetBody instanceof Buffer)) {
     throw new TypeError('packetBody neads a Buffer!');
   }
 
-  var toParse;
+  var frequency;
   var num;
   var offset;
 
   if (packetBody.readUInt8(0) < 255) {
-    toParse = high;
+    frequency = 'High';
     num = packetBody.readUInt8(0);
     offset = 1;
   } else if (packetBody.readUInt8(1) < 255) {
-    toParse = medium;
+    frequency = 'Medium';
     num = packetBody.readUInt8(1);
     offset = 2;
   } else if (packetBody.readUInt16BE(2) < 65530) { // 0xFFFA
-    toParse = low;
+    frequency = 'Low';
     num = packetBody.readUInt16BE(2);
     offset = 4;
   } else {
-    toParse = fixed;
+    frequency = 'Fixed';
     num = packetBody.readUInt32BE(0);
     offset = 4;
   }
 
-  if (!toParse[num]) {
+  if (!messagesByFrequency[frequency][num]) {
     throw new Error('no message of this type');
   }
 
-  var body = new toParse[num](packetBody.slice(offset));
+  var body = new ReceivedMessage(messagesByFrequency[frequency][num],
+    packetBody.slice(offset));
 
   return body;
 }
 
-// Parse a block of a message.
-// buffer is the Buffer from where it will be extracted
-// offset where to start in the buffer
-// quantity: how often this block is in the packet
-//    null if it is variable and stored in the packet
-// layout is an array of the types in the block (in order)
-function parseBlock (buffer, offset, quantity, layout) {
-  var originalOffset = offset;
-  if (quantity === null) {
-    quantity = buffer.readUInt8(0);
-    offset++;
-  }
-
-  var allBlocks = [];
-
-  for (var i = 0; i < quantity; i++) {
-    var block = layout.map(function (Type) {
-      var unit = new Type(buffer, offset);
-      offset += +unit.size;
-      return unit;
-    });
-    allBlocks.push(block);
-  }
-
-  return {
-    blocks: allBlocks,
-    size: offset - originalOffset
-  };
-}
-
-// Messages
-
 function MessageProto () {
-  this.size = 0; // Size in bytes
+  this.size = 0;
 }
-// stores a reference to all blocks
-MessageProto.prototype.blocks = [];
-// How often will this type be sent? Also for identification
-MessageProto.prototype.frequency = 'fixed';
-// Number in the frequency
-MessageProto.prototype.num = 0;
-// Are 1 to 255 zero bytes in the body encoded to take 2 bytes?
-MessageProto.prototype.zerocoded = false;
+MessageProto.prototype = {
+  name: 'Proto',
+  frequency: 'Low',
+  size: 0,
+  number: 0,
+  trusted: false,
+  zerocoded: false,
+  isOld: NaN,
+  body: [],
+  buffer: new Buffer(0)
+};
 
-function TestMessage (packetBody) {
-  var TestBlock1 = parseBlock(packetBody, 0, 1, [U32]);
-  var TestBlock2 = parseBlock(packetBody, TestBlock1.size, 4, [U32, U32, U32]);
+// Class for all Buffer -> Message action (on socket in)
+function ReceivedMessage (template, buffer) {
+  if (typeof template === 'string') {
+    template = messagesByName[template];
+  }
+  this.name = template.name;
+  this.frequency = template.frequency;
+  this.number = template.number;
+  this.trusted = template.trusted;
+  this.zerocoded = template.zerocoded;
+  this.isOld = template.isOld;
 
-  this.size = TestBlock1.size + TestBlock2.size;
-  this.TestBlock1 = TestBlock1;
-  this.TestBlock2 = TestBlock2;
-  this.blocks = [
-    TestBlock1,
-    TestBlock2
-  ];
+  var blocks = [];
+  // parse the blocks
+  this.blocks = blocks;
 }
-TestMessage.prototype = new MessageProto();
-TestMessage.prototype.frequency = 'low';
-TestMessage.prototype.num = 1;
-TestMessage.prototype.zerocoded = true;
+util.inherits(ReceivedMessage, MessageProto);
 
-var high = {
+// Class for all Messages that will be sent to the grid
+function MessageToSend () {
 
-};
-
-var medium = {
-
-};
-
-var low = {
-  1: TestMessage
-};
-
-var fixed = {
-
-};
+}
+util.inherits(MessageToSend, MessageProto);
 
 module.exports = {
-  types: {
-    Null: Null,
-    Fixed: Fixed,
-    Variable1: Variable1,
-    Variable2: Variable2,
-    U8: U8,
-    U16: U16,
-    U32: U32,
-    U64: U64,
-    S8: S8,
-    S16: S16,
-    S32: S32,
-    S64: S64,
-    F32: F32,
-    F64: F64,
-    LLVector3: LLVector3,
-    LLVector3d: LLVector3d,
-    LLVector4: LLVector4,
-    LLQuaternion: LLQuaternion,
-    LLUUID: LLUUID,
-    BOOL: BOOL,
-    IPADDR: IPADDR,
-    IPPORT: IPPORT
-  },
+  types: types,
 
   parseBody: parseBody,
 
-  createBody: createBody,
-
-  messageTypes: {
-    TestMessage: TestMessage
-  }
+  createBody: createBody
 };
