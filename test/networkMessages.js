@@ -254,24 +254,35 @@ describe('networkMessages', function () {
     var U32 = messages.types.U32;
 
     var testMessage = messages.parseBody(buffer);
+
     it('should return the TestMessage', function () {
-      assert.equal(true,
-        testMessage instanceof messages.messageTypes.TestMessage);
+      assert.equal(true, testMessage instanceof messages.MessageProto);
+      assert.equal(true, testMessage instanceof messages.ReceivedMessage);
     });
-    it('should have Blocks: TestBlock1 and TestBlock2', function () {
+    it('should have Blocks: TestBlock1 and NeighborBlock', function () {
       assert.equal('object', typeof testMessage.TestBlock1);
-      assert.equal('object', typeof testMessage.TestBlock2);
+      assert.equal('TestBlock1', testMessage.TestBlock1.name);
+      assert.equal('object', typeof testMessage.NeighborBlock);
+      assert.equal('NeighborBlock', testMessage.NeighborBlock.name);
       assert.equal(true, Array.isArray(testMessage.blocks));
       assert.equal(2, testMessage.blocks.length);
     });
     it('should have one U32 in an array in the TestBlock1', function () {
-      assert.equal(true, testMessage.TestBlock1.blocks[0][0] instanceof U32);
+      assert.equal(1, testMessage.TestBlock1.data.length);
+      assert.equal('Test1', testMessage.TestBlock1.data[0].Test1.name);
+      assert.equal('U32', testMessage.TestBlock1.data[0].Test1.type);
+      assert.equal(true, testMessage.TestBlock1.data[0].Test1.value instanceof
+        U32);
     });
-    it('should have 3 U32 in 4 Arrays in TestBlock2', function () {
-      var block2 = testMessage.TestBlock2;
-      assert.equal(4, block2.blocks.length);
-      assert.equal(3, block2.blocks[0].length);
-      assert.equal(true, block2.blocks[0][0] instanceof U32);
+    it('should have 3 U32 in 4 Arrays in NeighborBlock', function () {
+      var block2 = testMessage.NeighborBlock;
+      assert.equal(4, block2.data.length);
+      assert.equal('object', typeof block2.data[0].Test0);
+      assert.equal('object', typeof block2.data[0].Test1);
+      assert.equal('object', typeof block2.data[0].Test2);
+      assert.equal(3, block2.data[0].all.length);
+      assert.equal('Test1', block2.data[0].Test1.name);
+      assert.equal(true, block2.data[0].Test1.value instanceof U32);
     });
   });
 });

@@ -252,9 +252,11 @@ var messagesByFrequency = {
 //         quantity: 'Single'|'Multiple'|'Variable',
 //         times: Number, // only if quantity is Multiple
 //         variables: [
-//           name: String,
-//           type: types,
-//           times: Number|NaN // by "Fixed"/"Variable"
+//           {
+//             name: String,
+//             type: types,
+//             times: Number|NaN // by "Fixed"/"Variable"
+//           }
 //         ]
 //       }
 //     ]
@@ -401,6 +403,32 @@ MessageProto.prototype = {
 };
 
 // Class for all Buffer -> Message action (on socket in)
+//
+// {
+//   name: String,
+//   frequency: 'High'|'Medium'|'Low'|'Fixed',
+//   number: Number,
+//   trusted: Boolean,
+//   zerocoded: Boolean,
+//   isOld: undefined|String,
+//   size: Number,
+//   buffer: Buffer, // only of the message body
+//   body: [
+//     { // block
+//       name: String,
+//       data: [ // times the quantity of the block
+//         {
+//           nameOfTheVariable: {
+//             name: String,
+//             type: String,
+//             value: MessageDataType
+//           },
+//           all: [] // all variables
+//         }
+//       ]
+//     }
+//   ]
+// };
 function ReceivedMessage (template, buffer) {
   if (typeof template === 'string') {
     template = messagesByName[template];
@@ -409,12 +437,61 @@ function ReceivedMessage (template, buffer) {
   this.frequency = template.frequency;
   this.number = template.number;
   this.trusted = template.trusted;
+  // no need for decoding, was done in circuit
   this.zerocoded = template.zerocoded;
   this.isOld = template.isOld;
 
-  var blocks = [];
+  var self = this;
   // parse the blocks
+  var offset = 0;
+  var blocks = template.body.map(function (blockTemplate) {
+    var thisBlock = {
+      name: blockTemplate.name,
+      data: []
+    };
+    // that the block is accessible through the name
+    self[thisBlock.name] = thisBlock;
+    var quantity = 0;
+    switch (blockTemplate.quantity) {
+      case 'Single':
+        quantity = 1;
+        break;
+      case 'Multiple':
+        quantity = blockTemplate.times;
+        break;
+      case 'Variable':
+        quantity = buffer.readUInt8(offset);
+        offset++;
+        break;
+      default:
+        quantity = 0;
+    }
+    for (var i = 0; i < quantity; ++i) {
+      var data = {};
+      data.all = blockTemplate.variables.map(function (variableTempl) {
+        // parse the variables
+        var vari = {
+          name: variableTempl.name,
+          type: variableTempl.type,
+          value: null // will store the actual value
+        };
+        if (vari.type === 'Variable') {
+          vari.type = 'Variable' + variableTempl.times;
+        }
+        var Type = types[vari.type];
+        vari.value = new Type(buffer, offset, variableTempl.times);
+        offset += vari.value.size;
+        // that the variable is accessible through the name
+        data[variableTempl.name] = vari;
+        return vari;
+      });
+      thisBlock.data.push(data);
+    }
+    return thisBlock;
+  });
   this.blocks = blocks;
+  this.size = offset; // ??? or something other
+  this.buffer = buffer.slice(0, offset);
 }
 util.inherits(ReceivedMessage, MessageProto);
 
@@ -429,5 +506,11 @@ module.exports = {
 
   parseBody: parseBody,
 
-  createBody: createBody
+  createBody: createBody,
+
+  MessageProto: MessageProto,
+
+  ReceivedMessage: ReceivedMessage,
+
+  MessageToSend: MessageToSend
 };
