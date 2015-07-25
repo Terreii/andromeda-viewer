@@ -17,11 +17,17 @@ MessageDataType.prototype = {
   },
   size: 0
 };
+MessageDataType.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  return offset;
+};
 
 function Null () {
   this.value = null;
 }
 Null.prototype = new MessageDataType();
+Null.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  return offset;
+};
 
 // Arrays
 
@@ -31,6 +37,21 @@ function Fixed (buffer, offset, size) {
   this.value = buffer.slice(offset, offset + size);
 }
 Fixed.prototype = new MessageDataType();
+Fixed.writeToBuffer = function writeToBuffer (buffer, value, offset, length) {
+  if (!Array.isArray(value)) {
+    throw new TypeError('value must be an Array!');
+  }
+  for (var i = 0; i < value.length; i++) {
+    var v = value[i];
+    if (v >= 0) {
+      buffer.writeUInt8(v, offset);
+    } else {
+      buffer.writeInt8(v, offset);
+    }
+    offset++;
+  }
+  return offset;
+};
 
 function Variable1 (buffer, offset) {
   offset = offset || 0;
@@ -39,6 +60,23 @@ function Variable1 (buffer, offset) {
   this.value = buffer.slice(start, start + this.size);
 }
 Variable1.prototype = new MessageDataType();
+Variable1.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  if (typeof value.length === 'undefined' || value.length > 255) {
+    throw new TypeError('value must not be bigger than 255 bytes!');
+  }
+  buffer.writeUInt8(value.length, offset);
+  offset++;
+  for (var i = 0; i < value.length; ++i) {
+    var v = value[i];
+    if (v >= 0) {
+      buffer.writeUInt8(v, offset);
+    } else {
+      buffer.writeInt8(v, offset);
+    }
+    offset++;
+  }
+  return offset;
+};
 
 function Variable2 (buffer, offset) {
   offset = offset || 0;
@@ -47,6 +85,23 @@ function Variable2 (buffer, offset) {
   this.value = buffer.slice(start, start + this.size);
 }
 Variable2.prototype = new MessageDataType();
+Variable2.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  if (typeof value.length === 'undefined' || value.length > 65535) {
+    throw new TypeError('value must not be bigger than 65535 bytes!');
+  }
+  buffer.writeUInt16BE(value.length, offset);
+  offset++;
+  for (var i = 0; i < value.length; ++i) {
+    var v = value[i];
+    if (v >= 0) {
+      buffer.writeUInt8(v, offset);
+    } else {
+      buffer.writeInt8(v, offset);
+    }
+    offset++;
+  }
+  return offset;
+};
 
 // Numbers
 
@@ -61,6 +116,10 @@ function U8 (buffer, offset) {
 }
 U8.prototype = new NumberType(false);
 U8.prototype.size = 1;
+U8.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  buffer.writeUInt8(value, offset);
+  return offset + 1;
+};
 
 function U16 (buffer, offset) {
   offset = offset || 0;
@@ -68,6 +127,10 @@ function U16 (buffer, offset) {
 }
 U16.prototype = new NumberType(false);
 U16.prototype.size = 2;
+U16.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  buffer.writeUInt16LE(value, offset);
+  return offset + 2;
+};
 
 function U32 (buffer, offset) {
   offset = offset || 0;
@@ -75,13 +138,23 @@ function U32 (buffer, offset) {
 }
 U32.prototype = new NumberType(false);
 U32.prototype.size = 4;
+U32.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  buffer.writeUInt32LE(value, offset);
+  return offset + 4;
+};
 
 function U64 (buffer, offset) {
   offset = offset || 0;
   // TODO
+  console.log('U64 is not jet implemented!');
 }
 U64.prototype = new NumberType(false);
 U64.prototype.size = 8;
+U64.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  // TODO
+  console.log('U64 is not jet implemented!');
+  return offset + 8;
+};
 
 function S8 (buffer, offset) {
   offset = offset || 0;
@@ -89,6 +162,10 @@ function S8 (buffer, offset) {
 }
 S8.prototype = new NumberType(true);
 S8.prototype.size = 1;
+S8.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  buffer.writeInt8(value, offset);
+  return offset + 1;
+};
 
 function S16 (buffer, offset) {
   offset = offset || 0;
@@ -96,6 +173,10 @@ function S16 (buffer, offset) {
 }
 S16.prototype = new NumberType(true);
 S16.prototype.size = 2;
+S16.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  buffer.writeInt16LE(value, offset);
+  return offset + 2;
+};
 
 function S32 (buffer, offset) {
   offset = offset || 0;
@@ -103,13 +184,23 @@ function S32 (buffer, offset) {
 }
 S32.prototype = new NumberType(true);
 S32.prototype.size = 4;
+S32.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  buffer.writeInt32LE(value, offset);
+  return offset + 4;
+};
 
 function S64 (buffer, offset) {
   offset = offset || 0;
   // TODO
+  console.log('S64 is not jet implemented!');
 }
 S64.prototype = new NumberType(true);
 S64.prototype.size = 8;
+S64.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  // TODO
+  console.log('S64 is not jet implemented!');
+  return offset + 8;
+};
 
 function F32 (buffer, offset) {
   offset = offset || 0;
@@ -117,6 +208,10 @@ function F32 (buffer, offset) {
 }
 F32.prototype = new NumberType(true);
 F32.prototype.size = 4;
+F32.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  buffer.writeFloatLE(value, offset);
+  return offset + 4;
+};
 
 function F64 (buffer, offset) {
   offset = offset || 0;
@@ -124,6 +219,10 @@ function F64 (buffer, offset) {
 }
 F64.prototype = new NumberType(true);
 F64.prototype.size = 8;
+F64.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  buffer.writeDoubleLE(value, offset);
+  return offset + 8;
+};
 
 // Vectors
 
@@ -137,6 +236,16 @@ function LLVector3 (buffer, offset) {
 }
 LLVector3.prototype = new MessageDataType();
 LLVector3.prototype.size = 12;
+LLVector3.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  if (!Array.isArray(value)) {
+    throw new TypeError('value must be a array of numbers!');
+  }
+  for (var i = 0; i < 3; i++) {
+    buffer.writeFloatLE(value[i], offset);
+    offset += 4;
+  }
+  return offset;
+};
 
 function LLVector3d (buffer, offset) {
   offset = offset || 0;
@@ -148,6 +257,16 @@ function LLVector3d (buffer, offset) {
 }
 LLVector3d.prototype = new MessageDataType();
 LLVector3d.prototype.size = 24;
+LLVector3d.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  if (!Array.isArray(value)) {
+    throw new TypeError('value must be a array of numbers!');
+  }
+  for (var i = 0; i < 3; i++) {
+    buffer.writeDoubleLE(value[i], offset);
+    offset += 8;
+  }
+  return offset;
+};
 
 function LLVector4 (buffer, offset) {
   offset = offset || 0;
@@ -160,6 +279,16 @@ function LLVector4 (buffer, offset) {
 }
 LLVector4.prototype = new MessageDataType();
 LLVector4.prototype.size = 16;
+LLVector4.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  if (!Array.isArray(value)) {
+    throw new TypeError('value must be a array of numbers!');
+  }
+  for (var i = 0; i < 4; i++) {
+    buffer.writeFloatLE(value[i], offset);
+    offset += 4;
+  }
+  return offset;
+};
 
 var LLQuaternion = LLVector3;
 
@@ -171,6 +300,10 @@ function LLUUID (buffer, offset) {
 }
 LLUUID.prototype = new MessageDataType();
 LLUUID.prototype.size = 16;
+LLUUID.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  uuid.parse(value, buffer, offset);
+  return offset + 16;
+};
 
 function BOOL (buffer, offset) {
   offset = offset || 0;
@@ -178,6 +311,10 @@ function BOOL (buffer, offset) {
 }
 BOOL.prototype = new MessageDataType();
 BOOL.prototype.size = 1;
+BOOL.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  buffer.writeUInt8(Number(value), offset);
+  return offset + 1;
+};
 
 function IPADDR (buffer, offset) {
   offset = offset || 0;
@@ -188,6 +325,19 @@ function IPADDR (buffer, offset) {
 }
 IPADDR.prototype = new MessageDataType();
 IPADDR.prototype.size = 4;
+IPADDR.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  if (typeof value === 'string') {
+    value = value.split('.');
+  }
+  if (Array.isArray(value)) {
+    value.forEach(function (byte, i) {
+      buffer.writeUInt8(Number(byte), offset + i);
+    });
+    return offset + 4;
+  } else {
+    throw new TypeError('Must be a string or an array!');
+  }
+};
 
 function IPPORT (buffer, offset) {
   offset = offset || 0;
@@ -195,6 +345,10 @@ function IPPORT (buffer, offset) {
 }
 IPPORT.prototype = new MessageDataType();
 IPPORT.prototype.size = 2;
+IPPORT.writeToBuffer = function writeToBuffer (buffer, value, offset) {
+  buffer.writeUInt16LE(+value, offset);
+  return offset + 2;
+};
 
 var types = {
   Null: Null,
@@ -344,8 +498,112 @@ var messagesByFrequency = {
 })();
 
 // Message -> buffer (for sending)
+// expects:
+// type: String The name of the Message Type
+// data:
+// {
+//   nameOfTheBlock: [   // times the quantity needed
+//     {
+//       variableName: value
+//     }
+//   ]
+// }
 function createBody (type, data) {
+  if (typeof type !== 'string') {
+    throw new TypeError('type must be a string!');
+  }
+  var template = messagesByName[type];
+  if (template === undefined) {
+    throw new Error('Message Template with the name ' + type +
+      ' doesn\'t exist!');
+  }
 
+  var head; // the head is the number of the message type
+  switch (template.frequency) {
+    case 'High':
+      head = new Buffer([template.number]);
+      break;
+    case 'Medium':
+      head = new Buffer(2);
+      head.writeUInt8(255, 0);
+      head.writeUInt8(template.number, 1);
+      break;
+    case 'Low':
+      head = new Buffer(4);
+      head.writeUInt16BE(65535, 0);
+      head.writeUInt16BE(template.number, 2);
+      break;
+    case 'Fixed':
+      head = new Buffer(4);
+      head.writeUInt32BE(template.number, 0);
+      break;
+    default:
+      head = new Buffer(4);
+  }
+
+  // for every block in the template it creates a buffer
+  var body = template.body.map(function (blockTemplate) {
+    var dataBlock = data[blockTemplate.name];
+    if (!Array.isArray(dataBlock)) {
+      throw new TypeError(blockTemplate.name +
+        ' is not defined in the message data');
+    }
+    if ((blockTemplate.quantity === 'Single' && dataBlock.length !== 1) ||
+        (blockTemplate.quantity === 'Multiple' &&
+        dataBlock.length !== blockTemplate.times)) {
+      throw new TypeError('Quantity mismatch');
+    }
+
+    // size in bytes, excludes Variable1 and Variable2
+    var size = blockTemplate.variables.reduce(function (size, vari) {
+      var typeSize = types[vari.type].prototype.size;
+      if (vari.type === 'Fixed') {
+        typeSize = vari.times;
+      }
+      if (!typeSize) {
+        typeSize = 0;
+      }
+      return size + typeSize;
+    }, 0);
+
+    var body = [];
+    if (blockTemplate.quantity === 'Variable') {
+      body.push(new Buffer([dataBlock.length]));
+    } else {
+      body.push(new Buffer(0));
+    }
+
+    dataBlock.forEach(function (block) { // same block times the quantity
+      var buffer = new Buffer(size);
+      var offset = 0;
+      for (var i = 0, times = blockTemplate.variables.length; i < times; ++i) {
+        var varTemplate = blockTemplate.variables[i];
+        var varType = types[varTemplate.type];
+        var value = block[varTemplate.name];
+        if (varType === Variable1 || varType === Variable2) {
+          // expand the buffer
+          buffer = Buffer.concat([
+            buffer,
+            // Variable1 has one length byte, Variable2 has 2
+            new Buffer(value.length + ((varType === Variable1) ? 1 : 2))
+          ]);
+        }
+        offset = varType.writeToBuffer(buffer, value, offset);
+      }
+      body.push(buffer);
+    });
+    return Buffer.concat(body);
+  });
+
+  // combine all buffers into one array
+  var allBuffers = [head];
+  Array.prototype.push.apply(allBuffers, body);
+
+  return {
+    needsZeroencode: template.zerocoded,
+    couldBeTrusted: template.trusted,
+    buffer: Buffer.concat(allBuffers)
+  };
 }
 
 // buffer -> Message
@@ -495,12 +753,6 @@ function ReceivedMessage (template, buffer) {
 }
 util.inherits(ReceivedMessage, MessageProto);
 
-// Class for all Messages that will be sent to the grid
-function MessageToSend () {
-
-}
-util.inherits(MessageToSend, MessageProto);
-
 module.exports = {
   types: types,
 
@@ -510,7 +762,5 @@ module.exports = {
 
   MessageProto: MessageProto,
 
-  ReceivedMessage: ReceivedMessage,
-
-  MessageToSend: MessageToSend
+  ReceivedMessage: ReceivedMessage
 };

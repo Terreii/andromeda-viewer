@@ -246,43 +246,102 @@ describe('networkMessages', function () {
   });
 
   describe('Messages', function () {
-    var buffer = new Buffer(4 + 4 * (1 + 4 * 3) + 1);
-    buffer.writeUInt8(255, 0);
-    buffer.writeUInt8(255, 1);
-    buffer.writeUInt16BE(1, 2);
+    describe('parseBody', function () {
+      var buffer = new Buffer(4 + 4 * (1 + 4 * 3) + 1);
+      buffer.writeUInt8(255, 0);
+      buffer.writeUInt8(255, 1);
+      buffer.writeUInt16BE(1, 2);
 
-    var U32 = messages.types.U32;
+      var U32 = messages.types.U32;
 
-    var testMessage = messages.parseBody(buffer);
+      var testMessage = messages.parseBody(buffer);
 
-    it('should return the TestMessage', function () {
-      assert.equal(true, testMessage instanceof messages.MessageProto);
-      assert.equal(true, testMessage instanceof messages.ReceivedMessage);
+      it('should return the TestMessage', function () {
+        assert.equal(true, testMessage instanceof messages.MessageProto);
+        assert.equal(true, testMessage instanceof messages.ReceivedMessage);
+      });
+      it('should have Blocks: TestBlock1 and NeighborBlock', function () {
+        assert.equal('object', typeof testMessage.TestBlock1);
+        assert.equal('TestBlock1', testMessage.TestBlock1.name);
+        assert.equal('object', typeof testMessage.NeighborBlock);
+        assert.equal('NeighborBlock', testMessage.NeighborBlock.name);
+        assert.equal(true, Array.isArray(testMessage.blocks));
+        assert.equal(2, testMessage.blocks.length);
+      });
+      it('should have one U32 in an array in the TestBlock1', function () {
+        assert.equal(1, testMessage.TestBlock1.data.length);
+        assert.equal('Test1', testMessage.TestBlock1.data[0].Test1.name);
+        assert.equal('U32', testMessage.TestBlock1.data[0].Test1.type);
+        assert.equal(true, testMessage.TestBlock1.data[0].Test1.value instanceof
+          U32);
+      });
+      it('should have 3 U32 in 4 Arrays in NeighborBlock', function () {
+        var block2 = testMessage.NeighborBlock;
+        assert.equal(4, block2.data.length);
+        assert.equal('object', typeof block2.data[0].Test0);
+        assert.equal('object', typeof block2.data[0].Test1);
+        assert.equal('object', typeof block2.data[0].Test2);
+        assert.equal(3, block2.data[0].all.length);
+        assert.equal('Test1', block2.data[0].Test1.name);
+        assert.equal(true, block2.data[0].Test1.value instanceof U32);
+      });
     });
-    it('should have Blocks: TestBlock1 and NeighborBlock', function () {
-      assert.equal('object', typeof testMessage.TestBlock1);
-      assert.equal('TestBlock1', testMessage.TestBlock1.name);
-      assert.equal('object', typeof testMessage.NeighborBlock);
-      assert.equal('NeighborBlock', testMessage.NeighborBlock.name);
-      assert.equal(true, Array.isArray(testMessage.blocks));
-      assert.equal(2, testMessage.blocks.length);
-    });
-    it('should have one U32 in an array in the TestBlock1', function () {
-      assert.equal(1, testMessage.TestBlock1.data.length);
-      assert.equal('Test1', testMessage.TestBlock1.data[0].Test1.name);
-      assert.equal('U32', testMessage.TestBlock1.data[0].Test1.type);
-      assert.equal(true, testMessage.TestBlock1.data[0].Test1.value instanceof
-        U32);
-    });
-    it('should have 3 U32 in 4 Arrays in NeighborBlock', function () {
-      var block2 = testMessage.NeighborBlock;
-      assert.equal(4, block2.data.length);
-      assert.equal('object', typeof block2.data[0].Test0);
-      assert.equal('object', typeof block2.data[0].Test1);
-      assert.equal('object', typeof block2.data[0].Test2);
-      assert.equal(3, block2.data[0].all.length);
-      assert.equal('Test1', block2.data[0].Test1.name);
-      assert.equal(true, block2.data[0].Test1.value instanceof U32);
+
+    describe('createBody', function () {
+      var buffer;
+      it('should create a Object with a Buffer out of a JSON like object',
+          function () {
+        var testMessage = {
+          TestBlock1: [
+            {
+              Test1: 1337
+            }
+          ],
+          NeighborBlock: [
+            {
+              Test0: 0,
+              Test1: 1,
+              Test2: 2
+            },
+            {
+              Test0: 3,
+              Test1: 4,
+              Test2: 5
+            },
+            {
+              Test0: 6,
+              Test1: 7,
+              Test2: 8
+            },
+            {
+              Test0: 9,
+              Test1: 10,
+              Test2: 11
+            }
+          ]
+        };
+        var obj = messages.createBody('TestMessage', testMessage);
+        assert.equal(true, obj.needsZeroencode);
+        assert.equal(false, obj.couldBeTrusted);
+        assert.equal(true, Buffer.isBuffer(obj.buffer));
+        buffer = obj.buffer;
+      });
+      it('should have a length of 56 bytes', function () {
+        assert.equal(56, buffer.length);
+      });
+      it('should have the correct message number', function () {
+        assert.equal(65535, buffer.readUInt16BE(0));
+        assert.equal(1, buffer.readUInt16BE(2));
+      });
+      it('should store in TestBlock1 the correct value', function () {
+        assert.equal(1337, buffer.readUInt32LE(4));
+      });
+      it('should store in NeighborBlock the correct values', function (done) {
+        for (var i = 0; i < 12; i++) {
+          assert.equal(i, buffer.readUInt32LE(8 + i * 4));
+        }
+        done();
+      });
     });
   });
 });
