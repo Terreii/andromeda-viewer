@@ -60,7 +60,7 @@ describe('networkMessages', function () {
 
     describe('Variable2', function () {
       var size = Math.floor(Math.random() * 20) + 1;
-      var array = [0, size];
+      var array = [size, 0];
       for (var i = 1; i < size + 50; i++) {
         array.push(i);
       }

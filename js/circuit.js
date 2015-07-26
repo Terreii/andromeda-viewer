@@ -30,6 +30,7 @@ function Circuit (hostIP, hostPort, circuitCode) {
       if (is) {
         flags -= bit;
       }
+      return is;
     };
     var isZeroEncoded = flagCheck(128);
     var isReliable = flagCheck(64);

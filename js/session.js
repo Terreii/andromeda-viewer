@@ -13,6 +13,8 @@ var isLoggedIn = false;
 // Stores the result of the xmlrpc login & tracks the changes
 var sessionInfo;
 
+var activeCircuit;
+
 // Logges the user in. Uses the XML-RPC for it.
 function login (firstName, lastName, password, callback) {
   if (isLoggedIn) {
@@ -66,8 +68,63 @@ function logout () {
 // Login to a sim. Is called on the login process and sim-change
 function connectToSim (ip, port, circuit_code, callback) {
   callback(undefined, sessionInfo);
-  var connection = new Circuit(ip, port, circuit_code);
-  connection.send();
+  activeCircuit = new Circuit(ip, port, circuit_code);
+  activeCircuit.send('UseCircuitCode', {
+    CircuitCode: [
+      {
+        Code: circuit_code,
+        SessionID: sessionInfo.session_id,
+        ID: sessionInfo.agent_id
+      }
+    ]
+  });
+
+  activeCircuit.send('CompleteAgentMovement', {
+    AgentData: [
+      {
+        AgentID: sessionInfo.agent_id,
+        SessionID: sessionInfo.session_id,
+        CircuitCode: circuit_code
+      }
+    ]
+  });
+
+  activeCircuit.send('AgentUpdate', {
+    AgentData: [
+      {
+        AgentID: sessionInfo.agent_id,
+        SessionID: sessionInfo.session_id,
+        BodyRotation: [0, 0, 0],
+        HeadRotation: [0, 0, 0],
+        State: 0,
+        CameraCenter: [0, 0, 0],
+        CameraAtAxis: [0, 0, 0],
+        CameraLeftAxis: [0, 0, 0],
+        CameraUpAxis: [0, 0, 0],
+        Far: 0,
+        ControlFlags: 0,
+        Flags: 0
+      }
+    ]
+  });
+
+  activeCircuit.send('UUIDNameRequest', {
+    UUIDNameBlock: [
+      {
+        ID: sessionInfo.agent_id
+      }
+    ]
+  });
+
+  activeCircuit.on('packetReceived', function (data) {
+    console.log(data);
+    data.body.blocks.forEach(function (block) {
+      console.log(block.name);
+      block.data.forEach(function (d) {
+        console.log(d);
+      });
+    });
+  });
 }
 
 module.exports = {

@@ -80,7 +80,9 @@ Variable1.writeToBuffer = function writeToBuffer (buffer, value, offset) {
 
 function Variable2 (buffer, offset) {
   offset = offset || 0;
-  this.size = buffer.readUInt16BE(offset);
+  // On http://wiki.secondlife.com/wiki/Message it says it is big-endian
+  // but it is actually a little-endian!
+  this.size = buffer.readUInt16LE(offset);
   var start = offset + 2;
   this.value = buffer.slice(start, start + this.size);
 }
@@ -89,7 +91,7 @@ Variable2.writeToBuffer = function writeToBuffer (buffer, value, offset) {
   if (typeof value.length === 'undefined' || value.length > 65535) {
     throw new TypeError('value must not be bigger than 65535 bytes!');
   }
-  buffer.writeUInt16BE(value.length, offset);
+  buffer.writeUInt16LE(value.length, offset);
   offset++;
   for (var i = 0; i < value.length; ++i) {
     var v = value[i];
@@ -739,6 +741,12 @@ function ReceivedMessage (template, buffer) {
         var Type = types[vari.type];
         vari.value = new Type(buffer, offset, variableTempl.times);
         offset += vari.value.size;
+        if (Type === Variable1) {
+          offset += 1;
+        }
+        if (Type === Variable2) {
+          offset += 2;
+        }
         // that the variable is accessible through the name
         data[variableTempl.name] = vari;
         return vari;
