@@ -5,6 +5,7 @@ var os = require('os');
 var packageJSON = require('../package.json');
 
 var macaddress;
+var macaddressCallbacks = [];
 // the macaddress can be found in node version 0.12 in os.networkInterfaces()
 require('macaddress').one(function (error, mac) {
   if (!error) {
@@ -13,6 +14,10 @@ require('macaddress').one(function (error, mac) {
     macaddress = '00:00:00:00:00:00';
     console.error('Mac address wasn\'t found!');
   }
+  macaddressCallbacks.forEach(function (fn) {
+    fn(macaddress);
+  });
+  macaddressCallbacks = [];
 });
 
 var platform;
@@ -37,7 +42,13 @@ module.exports = {
   get platform () {
     return platform;
   },
-  get mac () {
-    return macaddress;
+  getMAC: function (callback) {
+    if (macaddress) {
+      setTimeout(function () {
+        callback(macaddress);
+      }, 0);
+    } else {
+      macaddressCallbacks.push(callback);
+    }
   }
 };
