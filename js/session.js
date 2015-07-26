@@ -63,6 +63,17 @@ function logout () {
   }
   console.error("I'm sorry " + sessionInfo.firstName +
     ", I'm afraid I can't do that.");
+
+  activeCircuit.send('LogoutRequest', {
+    AgentData: [
+      {
+        AgentID: sessionInfo.agent_id,
+        SessionID: sessionInfo.session_id
+      }
+    ]
+  });
+
+  // TODO wait for the LogoutReply
 }
 
 // Login to a sim. Is called on the login process and sim-change
@@ -117,14 +128,43 @@ function connectToSim (ip, port, circuit_code, callback) {
   });
 
   activeCircuit.on('packetReceived', function (data) {
-    console.log(data);
-    data.body.blocks.forEach(function (block) {
-      console.log(block.name);
-      block.data.forEach(function (d) {
-        console.log(d);
-      });
-    });
+    console.log('On: ' + new Date().toISOString() + '    ', data.body.name);
   });
+
+  activeCircuit.on('RegionHandshake', sendRegionHandshakeReply);
+
+  activeCircuit.on('StartPingCheck', CompletePingCheck);
+}
+
+function sendRegionHandshakeReply (RegionHandshake) {
+  // RegionHandshake.body.blocks[0].data.
+  var flags = RegionHandshake.body.RegionInfo.data[0].RegionFlags.value.value;
+  activeCircuit.send('RegionHandshakeReply', {
+    AgentData: [
+      {
+        AgentID: sessionInfo.agent_id,
+        SessionID: sessionInfo.session_id
+      }
+    ],
+    RegionInfo: [
+      {
+        Flags: flags
+      }
+    ]
+  });
+  console.log('Handshake', flags);
+}
+
+function CompletePingCheck (StartPingCheck) {
+  var id = StartPingCheck.body.PingID.data[0].PingID.value.value;
+  activeCircuit.send('CompletePingCheck', {
+    PingID: [
+      {
+        PingID: id
+      }
+    ]
+  });
+  console.log('Ping:', id);
 }
 
 module.exports = {

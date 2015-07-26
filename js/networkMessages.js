@@ -147,14 +147,18 @@ U32.writeToBuffer = function writeToBuffer (buffer, value, offset) {
 
 function U64 (buffer, offset) {
   offset = offset || 0;
-  // TODO
-  console.log('U64 is not jet implemented!');
+  // TODO   -----------------------------------------------------------
+  this.value = [
+    buffer.readUInt32LE(offset + 4),
+    buffer.readUInt32LE(offset)
+  ];
 }
 U64.prototype = new NumberType(false);
 U64.prototype.size = 8;
 U64.writeToBuffer = function writeToBuffer (buffer, value, offset) {
   // TODO
-  console.log('U64 is not jet implemented!');
+  buffer.writeUInt32LE(value[1], offset);
+  buffer.writeUInt32LE(value[0], offset + 4);
   return offset + 8;
 };
 
@@ -193,14 +197,18 @@ S32.writeToBuffer = function writeToBuffer (buffer, value, offset) {
 
 function S64 (buffer, offset) {
   offset = offset || 0;
-  // TODO
-  console.log('S64 is not jet implemented!');
+  // TODO   -----------------------------------------------------------
+  this.value = [
+    buffer.readInt32LE(offset + 4),
+    buffer.readUInt32LE(offset)
+  ];
 }
 S64.prototype = new NumberType(true);
 S64.prototype.size = 8;
 S64.writeToBuffer = function writeToBuffer (buffer, value, offset) {
   // TODO
-  console.log('S64 is not jet implemented!');
+  buffer.writeInt32LE(value[1], offset);
+  buffer.writeUInt32LE(value[0], offset + 4);
   return offset + 8;
 };
 
