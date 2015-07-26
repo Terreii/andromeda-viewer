@@ -27,7 +27,7 @@ describe('networkMessages', function () {
         array.push(i);
       }
       var buffer = new Buffer(array);
-      var fixed = new messages.types.Fixed(buffer, 2, size);
+      var fixed = new messages.types.Fixed(buffer, 2, 'name', size);
       it('should have the size of ' + size, function () {
         assert.equal(size, fixed.size);
       });
@@ -272,8 +272,7 @@ describe('networkMessages', function () {
         assert.equal(1, testMessage.TestBlock1.data.length);
         assert.equal('Test1', testMessage.TestBlock1.data[0].Test1.name);
         assert.equal('U32', testMessage.TestBlock1.data[0].Test1.type);
-        assert.equal(true, testMessage.TestBlock1.data[0].Test1.value instanceof
-          U32);
+        assert.equal(true, testMessage.TestBlock1.data[0].Test1 instanceof U32);
       });
       it('should have 3 U32 in 4 Arrays in NeighborBlock', function () {
         var block2 = testMessage.NeighborBlock;
@@ -283,7 +282,7 @@ describe('networkMessages', function () {
         assert.equal('object', typeof block2.data[0].Test2);
         assert.equal(3, block2.data[0].all.length);
         assert.equal('Test1', block2.data[0].Test1.name);
-        assert.equal(true, block2.data[0].Test1.value instanceof U32);
+        assert.equal(true, block2.data[0].Test1 instanceof U32);
       });
     });
 

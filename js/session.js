@@ -138,7 +138,7 @@ function connectToSim (ip, port, circuit_code, callback) {
 
 function sendRegionHandshakeReply (RegionHandshake) {
   // RegionHandshake.body.blocks[0].data.
-  var flags = RegionHandshake.body.RegionInfo.data[0].RegionFlags.value.value;
+  var flags = RegionHandshake.body.RegionInfo.data[0].RegionFlags.value;
   activeCircuit.send('RegionHandshakeReply', {
     AgentData: [
       {
@@ -156,7 +156,7 @@ function sendRegionHandshakeReply (RegionHandshake) {
 }
 
 function CompletePingCheck (StartPingCheck) {
-  var id = StartPingCheck.body.PingID.data[0].PingID.value.value;
+  var id = StartPingCheck.body.PingID.data[0].PingID.value;
   activeCircuit.send('CompletePingCheck', {
     PingID: [
       {
