@@ -756,6 +756,12 @@ util.inherits(ReceivedMessage, MessageProto);
 module.exports = {
   types: types,
 
+  messageTypes: {
+    all: allMessages,
+    byName: messagesByName,
+    byFrequency: messagesByFrequency
+  },
+
   parseBody: parseBody,
 
   createBody: createBody,

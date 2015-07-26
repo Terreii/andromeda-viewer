@@ -4,7 +4,8 @@
  * The circuit is the connection to the sim server
  *
  * Is a EventEmitter
- * emits the event 'packetReceived'
+ * emits on a packet in an event with the name of the message type
+ * and the event 'packetReceived'
  */
 
 var util = require('util');
@@ -21,7 +22,7 @@ function Circuit (hostIP, hostPort, circuitCode) {
   this.sequenceNumber = 0;
   this.senderSequenceNumber = 0;
   var self = this;
-  this.socket = dgram.createSocket('udp4', function (msg, rinfo) {
+  this.socket = dgram.createSocket('udp4', function socketIn (msg, rinfo) {
     // extract the flags
     var flags = msg.readUInt8(0);
     var flagCheck = function (bit) {
@@ -38,7 +39,7 @@ function Circuit (hostIP, hostPort, circuitCode) {
     var senderSequenceNumber = msg.readUInt32BE(1);
     self.senderSequenceNumber = senderSequenceNumber;
 
-    var bodyStart = msg.readUInt8(5) + 5;
+    var bodyStart = msg.readUInt8(5) + 6;
 
     var msgBody = msg.slice(bodyStart);
 
@@ -48,19 +49,23 @@ function Circuit (hostIP, hostPort, circuitCode) {
 
     var parsedBody = networkMessages.parseBody(msgBody);
 
-    var acks = [];
+    var acks;
     if (hasAck) {
-      acks = extractAcks(msg, bodyStart + parsedBody.size);
+      acks = extractAcks(msg);
+    } else {
+      acks = [];
     }
 
-    self.emit('packetReceived', {
+    var toEmitObj = {
       isZeroEncoded: isZeroEncoded,
       isReliable: isReliable,
       isResent: isResent,
-      hasAck: hasAck,
       body: parsedBody,
+      hasAck: hasAck,
       acks: acks
-    });
+    };
+    self.emit(parsedBody.name, toEmitObj);
+    self.emit('packetReceived', toEmitObj); // for debugging
   });
   this.socket.bind();
   this.acks = [];
@@ -69,37 +74,40 @@ util.inherits(Circuit, events.EventEmitter);
 
 // Send a Packet.
 // Uses networkMessages to construct the body
-Circuit.prototype.send = function (messageType, body) {
-  var type = networkMessages.messageTypes[messageType];
-  if (!type) {
-    throw new TypeError('No message type with the name: ' + messageType);
-  }
+// messageType must be a string matching one of the names of message templates
+// http://secondlife.com/app/message_template/master_message_template.msg
+Circuit.prototype.send = function (messageType, data) {
+  // if no message with the type of messageType exist, than createBody will
+  // throw an error
+  var body = networkMessages.createBody(messageType, data);
 
   // http://wiki.secondlife.com/wiki/Packet_Layout
-  var header = new Buffer(5);
-
-  var bodyBuffer = networkMessages.createBody(messageType, body);
-
-  // Set header byte 0 flags
-
-  if (type.zerocoded) {
-    header.writeUInt8(header.readUInt8(0) + 128, 0); // LL_ZERO_CODE_FLAG 0x80
-    bodyBuffer = zero_encode(bodyBuffer);
-  }
-
-  if (this.acks.length > 0) {
-    header.writeUInt8(header.readUInt8(0) + 16, 0); // LL_ACK_FLAG 0x10
-    bodyBuffer = addAcks(this.acks, bodyBuffer);
-    this.acks = [];
-  }
-
+  var header = new Buffer(6);
+  header.writeUInt8(0, 0); // Buffer doesn't start with 0s
   header.writeUInt32BE(this.sequenceNumber, 1);
   this.sequenceNumber++;
   if (this.sequenceNumber > 4294967295) {
     this.sequenceNumber = 0;
   }
+  header.writeUInt8(0, 5);
 
-  var packet = Buffer.concat([header, bodyBuffer]);
+  // Set header byte 0 flags
+
+  if (body.needsZeroencode) {
+    header.writeUInt8(header.readUInt8(0) + 128, 0); // LL_ZERO_CODE_FLAG 0x80
+    body.buffer = zero_encode(body.buffer);
+  }
+
+  var acksBuffer;
+  if (this.acks.length > 0) {
+    header.writeUInt8(header.readUInt8(0) + 16, 0); // LL_ACK_FLAG 0x10
+    acksBuffer = createAcksBuffer(this.acks);
+    this.acks = [];
+  } else {
+    acksBuffer = new Buffer(0);
+  }
+
+  var packet = Buffer.concat([header, body.buffer, acksBuffer]);
 
   this.socket.send(packet, 0, packet.length, this.port, this.ip);
 };
@@ -160,18 +168,31 @@ function zero_decode (inputbuf) {
   return new Buffer(data);
 }
 
-function addAcks (acks, buffer) {
-  return buffer;
+// Adds the Acks
+function createAcksBuffer (acks) {
+  var acksBuffer = new Buffer(acks.length * 4 + 1);
+  acks.forEach(function (ack, i) {
+    ack = +ack; // to Number
+    if (Number.isNaN(ack)) {
+      ack = 0;
+    }
+    acksBuffer.writeUInt32LE(ack, i * 4);
+  });
+  acksBuffer.writeUInt8(acks.length, acksBuffer.length - 1);
+  return acksBuffer;
 }
 
 // Extracts the Acks
-// for war acks are used is unknown to me
-function extractAcks (msg, ackStart) {
-  var count = msg.readUInt8(msg.length - 1);
+// for what acks are used is unknown to me
+function extractAcks (msg) {
+  var offset = msg.length - 1; // in the last byte is the number of acks stored
   var acks = [];
-  for (var i = 0; i < count; i++) {
-    acks.push(msg.readUInt32LE(ackStart + (i * 4)));
+  // it reads the acks backwards
+  for (var count = msg.readUInt8(offset); count > 0; count--) {
+    offset -= 4;
+    acks.push(msg.readUInt32LE(offset));
   }
+  acks.reverse();
   return acks;
 }
 
