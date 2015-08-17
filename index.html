@@ -7,8 +7,8 @@
     <script src="bundle.js" async defer></script>
   </head>
   <body>
-    <h1>Hello World!</h1>
-    <div>
+    <div id="login">
+      <h1>Login to <span id="loginViewerName">viewer Name</span></h1>
       <div>
         <input type="text" id="loginName" placeholder="Avatar Name" autocomplete="username"/>
       </div>
@@ -17,6 +17,9 @@
       </div>
       <div>
         <input type="button" id="loginButton" value="Login" disabled/>
+      </div>
+      <div id="loginErrorMessage">
+        Error message
       </div>
     </div>
   </body>
