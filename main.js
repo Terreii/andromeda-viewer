@@ -7,6 +7,7 @@
 
 var viewerInfo = require('./js/viewerInfo');
 var parseFullName = require('./js/avatarName');
+var session = require('./js/session');
 
 function displayLoginError (message) {
   var messageDisplay = document.getElementById('loginErrorMessage');
@@ -31,7 +32,10 @@ button.addEventListener('click', function (event) {
   }
 
   var userName = parseFullName(loginName);
-  console.log(userName);
+
+  session.login(userName.first, userName.last, password, function (err, sinfo) {
+    console.log(err, sinfo);
+  });
 });
 
 button.disabled = false;

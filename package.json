@@ -4,8 +4,9 @@
   "description": "Small web-client for connecting to the virtual world of Second Life.",
   "main": "server.js",
   "scripts": {
-    "build": "browserify main.js > bundle.js",
+    "build": "node ./tools/createMessageTemplate.js && browserify main.js > jsBuilds/bundle.js",
     "prestart": "npm run build",
+    "pretest": "npm run build",
     "test": "semistandard && semistandard test/*.js && mocha"
   },
   "repository": {

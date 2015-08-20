@@ -17,7 +17,7 @@ var server = http.createServer(function (req, res) {
   var path = reqURL.pathname;
 
   // no files from the directories js/, node_modules/ or test/ are allowed!
-  if (/(?:\/js)|(?:node_modules)|(?:test)/i.test(path)) {
+  if (/^\/(?:js)|(?:node_modules)|(?:test)|(?:tools)\//i.test(path)) {
     res.writeHead(403, {'Content-Type': 'text/plain'});
     res.end('403 - Forbidden\n');
     return;
@@ -25,6 +25,9 @@ var server = http.createServer(function (req, res) {
 
   if (path === '/') {
     path = '/index.html';
+  } else if (/^\/.+\.js/i.test(path)) {
+    // redirection of all js files to jsBuilds/
+    path = '/jsBuilds' + path;
   }
 
   var filePath = '.' + path;
