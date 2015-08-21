@@ -1,7 +1,6 @@
 'use strict';
 
 var util = require('util');
-// var fs = require('fs');
 
 var uuid = require('uuid');
 
@@ -462,7 +461,7 @@ var messagesByFrequency = {
   Fixed: {} // Should be 3 templates
 };
 
-// stores all messages
+// stores all messages in a easy to fined way
 messageTemplate.forEach(function (message) {
   messagesByName[message.name] = message;
   messagesByFrequency[message.frequency][message.number] = message;
