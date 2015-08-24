@@ -4,6 +4,9 @@
   "description": "Small web-client for connecting to the virtual world of Second Life.",
   "main": "server.js",
   "scripts": {
+    "build": "node ./tools/createMessageTemplate.js && browserify main.js > jsBuilds/bundle.js",
+    "prestart": "npm run build",
+    "pretest": "npm run build",
     "test": "semistandard && semistandard test/*.js && mocha"
   },
   "repository": {
@@ -17,13 +20,14 @@
   },
   "homepage": "https://github.com/Terreii/andromeda-viewer",
   "devDependencies": {
+    "browserify": "^11.0.0",
     "mocha": "^2.2.5",
     "semistandard": "^6.1.1"
   },
   "dependencies": {
     "macaddress": "^0.2.8",
-    "read": "^1.0.6",
     "uuid": "^2.0.1",
+    "websocket": "^1.0.21",
     "xmlrpc": "^1.3.1"
   }
 }

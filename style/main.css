@@ -1,0 +1,29 @@
+body {
+  padding: 0.5cm;
+  background-color: rgb(228, 228, 228);
+}
+
+#login {
+  background-color: rgb(77, 80, 85);
+  color: rgb(255, 255, 255);
+  border-radius: 1em;
+  padding: 0.8em;
+  max-width: 30em;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+#loginViewerName {
+  text-transform: capitalize;
+}
+
+#loginErrorMessage {
+  display: none;
+  background-color: rgb(255, 0, 0);
+  border-radius: 0.3em;
+  margin-top: 0.3em;
+  padding: 0.3em;
+}

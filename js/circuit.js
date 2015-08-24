@@ -10,21 +10,45 @@
 
 var util = require('util');
 var events = require('events');
-var dgram = require('dgram');
 
 var networkMessages = require('./networkMessages');
 
 function Circuit (hostIP, hostPort, circuitCode) {
   this.ip = hostIP;
+  this.ipArray = this.ip.split('.').map(function (part) {
+    return Number(part);
+  });
   this.port = hostPort;
   this.circuitCode = circuitCode;
   // sequenceNumber is the id of a packet. It will be increased for every packed
   this.sequenceNumber = 0;
   this.senderSequenceNumber = 0;
   var self = this;
-  this.socket = dgram.createSocket('udp4', function socketIn (msg, rinfo) {
+
+  this.websocketIsOpen = false;
+  this.websocket = new window.WebSocket(
+    window.location.origin.replace(/^http/, 'ws') // http -> ws  &  https -> wss
+  );
+  this.websocket.binaryType = 'arraybuffer';
+  this.websocket.onopen = function () {
+    self.websocketIsOpen = true;
+    self.cachedMessages.forEach(function (buffer) {
+      self.websocket.send(buffer);
+    });
+    self.cachedMessages = [];
+  };
+  this.cachedMessages = [];
+  this.websocket.onmessage = function (message) {
+    var msg = new Buffer(message.data);
+
+    var ip = msg.readUInt8(0) + '.' +
+      msg.readUInt8(1) + '.' +
+      msg.readUInt8(2) + '.' +
+      msg.readUInt8(3);
+    var port = msg.readUInt16LE(4);
+
     // extract the flags
-    var flags = msg.readUInt8(0);
+    var flags = msg.readUInt8(6);
     var flagCheck = function (bit) {
       var is = flags >= bit;
       if (is) {
@@ -37,10 +61,10 @@ function Circuit (hostIP, hostPort, circuitCode) {
     var isResent = flagCheck(32);
     var hasAck = flagCheck(16);
 
-    var senderSequenceNumber = msg.readUInt32BE(1);
+    var senderSequenceNumber = msg.readUInt32BE(7);
     self.senderSequenceNumber = senderSequenceNumber;
 
-    var bodyStart = msg.readUInt8(5) + 6;
+    var bodyStart = msg.readUInt8(11) + 12;
 
     var msgBody = msg.slice(bodyStart);
 
@@ -63,12 +87,14 @@ function Circuit (hostIP, hostPort, circuitCode) {
       isResent: isResent,
       body: parsedBody,
       hasAck: hasAck,
-      acks: acks
+      acks: acks,
+      ip: ip,
+      port: port
     };
     self.emit(parsedBody.name, toEmitObj);
     self.emit('packetReceived', toEmitObj); // for debugging
-  });
-  this.socket.bind();
+  };
+
   this.acks = [];
 }
 util.inherits(Circuit, events.EventEmitter);
@@ -108,9 +134,19 @@ Circuit.prototype.send = function (messageType, data) {
     acksBuffer = new Buffer(0);
   }
 
-  var packet = Buffer.concat([header, body.buffer, acksBuffer]);
+  var ipPort = new Buffer(6);
+  for (var i = 0; i < 4; i++) {
+    ipPort.writeUInt8(this.ipArray[i], i);
+  }
+  ipPort.writeUInt16LE(this.port, 4);
 
-  this.socket.send(packet, 0, packet.length, this.port, this.ip);
+  var packet = Buffer.concat([ipPort, header, body.buffer, acksBuffer]);
+
+  if (this.websocketIsOpen) {
+    this.websocket.send(packet.buffer);
+  } else {
+    this.cachedMessages.push(packet);
+  }
 };
 
 // 0's in packet body are run length encoded, such that series of 1 to 255 zero
