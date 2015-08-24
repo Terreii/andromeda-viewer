@@ -1,19 +1,21 @@
 'use strict';
 
-var os = require('os');
-
 var packageJSON = require('../package.json');
 
 var platform;
-switch (os.platform()) {
-  case 'darwin':
-    platform = 'Mac';
-    break;
-  case 'win32':
-    platform = 'Win';
-    break;
-  default:
-    platform = 'Lin';
+if (typeof window !== 'undefined') {
+  switch (window.navigator.platform) {
+    case 'MacIntel':
+      platform = 'Mac';
+      break;
+    case 'Win32':
+      platform = 'Win';
+      break;
+    default:
+      platform = 'Lin';
+  }
+} else { // for testing
+  platform = 'Lin';
 }
 
 module.exports = {

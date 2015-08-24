@@ -579,8 +579,9 @@ function createBody (type, data) {
 // buffer -> Message
 // Starts with the packet body http://wiki.secondlife.com/wiki/Packet_Layout
 function parseBody (packetBody) {
-  if (!(packetBody instanceof Buffer)) {
-    throw new TypeError('packetBody neads a Buffer!');
+  // browserify changes the Buffer to a Uint8Array
+  if (!(packetBody instanceof Buffer || packetBody instanceof Uint8Array)) {
+    throw new TypeError('packetBody needs a Buffer!');
   }
 
   var frequency;

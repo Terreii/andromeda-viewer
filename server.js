@@ -148,7 +148,7 @@ function Bridge (wsConnection) {
       message
     ]);
     // add IP address
-    var ipParts = rinfo.split('.');
+    var ipParts = rinfo.address.split('.');
     for (var i = 0; i < 4; i++) {
       buffy.writeUInt8(Number(ipParts[i]), i);
     }
