@@ -2,8 +2,6 @@
 
 var crypto = require('crypto');
 
-var xmlrpc = require('xmlrpc');
-
 var viewerInfo = require('./viewerInfo');
 var Circuit = require('./circuit');
 
@@ -15,48 +13,56 @@ var sessionInfo;
 
 var activeCircuit;
 
-// Logges the user in. Uses the XML-RPC for it.
+// Logon the user. It will send a XMLHttpRequest to the server.
 function login (firstName, lastName, password, callback) {
   if (isLoggedIn) {
-    throw new Error('There is allready an avatar logged in!');
+    throw new Error('There is already an avatar logged in!');
   }
-  viewerInfo.getMAC(function (macaddress) {
-    var hash = crypto.createHash('md5');
-    hash.update(password, 'ascii');
-    var passwdFinal = '$1$' + hash.digest('hex');
 
-    var xmlrpcClient = xmlrpc.createSecureClient({
-      host: 'login.agni.lindenlab.com',
-      port: 443,
-      path: '/cgi-bin/login.cgi'
-    });
+  var hash = crypto.createHash('md5');
+  hash.update(password, 'ascii');
+  var passwdFinal = '$1$' + hash.digest('hex');
 
-    xmlrpcClient.methodCall('login_to_simulator', [{
-      first: firstName,
-      last: lastName,
-      passwd: passwdFinal,
-      start: 'last',
-      channel: viewerInfo.name,
-      version: viewerInfo.version,
-      platform: viewerInfo.platform,
-      mac: macaddress,
-      options: [],
-      agree_to_tos: 'true',
-      read_critical: 'true'
-    }], function (error, data) {
-      if (error) {
-        callback(error);
-        return;
-      }
-      isLoggedIn = true;
-      sessionInfo = data;
+  var loginData = {
+    first: firstName,
+    last: lastName,
+    passwd: passwdFinal,
+    start: 'last',
+    channel: viewerInfo.name,
+    version: viewerInfo.version,
+    platform: viewerInfo.platform,
+    // mac will be added on the server side
+    options: [],
+    agree_to_tos: 'true',
+    read_critical: 'true'
+  };
+
+  var xhr = new window.XMLHttpRequest();
+  xhr.open('POST', 'login');
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.responseType = 'json';
+  xhr.onload = function () {
+    var response;
+    if (typeof this.response === 'string') { // IE doesn't support json response
+      response = JSON.parse(this.response);
+    } else {
+      response = this.response;
+    }
+
+    isLoggedIn = response.login === 'true';
+    if (isLoggedIn) {
+      sessionInfo = response;
       connectToSim(sessionInfo.sim_ip, sessionInfo.sim_port,
         sessionInfo.circuit_code, callback);
-    });
-  });
+    } else {
+      // error
+      callback(response);
+    }
+  };
+  xhr.send(JSON.stringify(loginData));
 }
 
-// Placeholder for the logiut process
+// Placeholder for the logout process
 function logout () {
   if (!isLoggedIn) {
     throw new Error('You aren\'t logged in!');

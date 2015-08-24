@@ -10,7 +10,6 @@
 
 var util = require('util');
 var events = require('events');
-// var dgram = require('dgram');
 
 var networkMessages = require('./networkMessages');
 
@@ -27,7 +26,9 @@ function Circuit (hostIP, hostPort, circuitCode) {
   var self = this;
 
   this.websocketIsOpen = false;
-  this.websocket = new window.WebSocket('wss://' + document.location.hostname);
+  this.websocket = new window.WebSocket(
+    window.location.origin.replace(/^http/, 'ws') // http -> ws  &  https -> wss
+  );
   this.websocket.binaryType = 'arraybuffer';
   this.websocket.onopen = function () {
     self.websocketIsOpen = true;
