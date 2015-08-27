@@ -31,10 +31,21 @@ button.addEventListener('click', function (event) {
     return;
   }
 
+  button.disabled = true;
+  button.value = 'Connecting ...';
+
   var userName = parseFullName(loginName);
 
   session.login(userName.first, userName.last, password, function (err, sinfo) {
-    console.log(err, sinfo);
+    if (err) {
+      console.error(err);
+      button.disabled = false;
+      button.value = 'Login';
+      displayLoginError(err.message);
+    } else {
+      var display = require('./js/ui/display.jsx');
+      display();
+    }
   });
 });
 
