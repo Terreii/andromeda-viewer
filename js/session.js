@@ -4,12 +4,13 @@ var crypto = require('crypto');
 
 var viewerInfo = require('./viewerInfo');
 var Circuit = require('./circuit');
+var simActionsForUI = require('./actions/simAction.js');
 
 // true if there is a running session
 var isLoggedIn = false;
 
 // Stores the result of the xmlrpc login & tracks the changes
-var sessionInfo;
+var sessionInfo = {};
 
 var activeCircuit;
 
@@ -133,9 +134,7 @@ function connectToSim (ip, port, circuit_code, callback) {
     ]
   });
 
-  activeCircuit.on('packetReceived', function (data) {
-    console.log('On: ' + new Date().toISOString() + '    ', data.body.name);
-  });
+  activeCircuit.on('packetReceived', simActionsForUI);
 
   activeCircuit.on('RegionHandshake', sendRegionHandshakeReply);
 
@@ -178,5 +177,26 @@ module.exports = {
   logout: logout,
   get isLoggedIn () {
     return isLoggedIn;
+  },
+  getActiveCircuit: function () {
+    return activeCircuit || {};
+  },
+  getInfo: function (infoName) {
+    return sessionInfo[infoName];
+  },
+  getInfoNames: function () {
+    var list = [];
+    for (var name in sessionInfo) {
+      if (sessionInfo.hasOwnProperty(name)) {
+        list.push(name);
+      }
+    }
+    return list;
+  },
+  getAvatarName: function () {
+    return {
+      first: sessionInfo.first_name.replace(/"/g, ''),
+      last: sessionInfo.last_name
+    };
   }
 };

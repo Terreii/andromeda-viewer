@@ -38,12 +38,14 @@ button.addEventListener('click', function (event) {
 
   session.login(userName.first, userName.last, password, function (err, sinfo) {
     if (err) {
+      // Displays the error message from the server
       console.error(err);
       button.disabled = false;
       button.value = 'Login';
       displayLoginError(err.message);
     } else {
-      var display = require('./js/ui/display.jsx');
+      // start everything
+      var display = require('./js/components/main.jsx');
       display();
     }
   });
