@@ -38,8 +38,8 @@ var Chat = React.createClass({
     var messages = this.state.messages.map(function (msg, i, all) {
       return (
         <li>
-          <div>{msg.fromName}</div>
-          <div>{msg.message}</div>
+          <div>{msg.get('fromName')}</div>
+          <div>{msg.get('message')}</div>
         </li>
       );
     });

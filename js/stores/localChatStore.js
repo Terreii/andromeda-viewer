@@ -4,10 +4,13 @@
  * Stores all LocalChat-Messanges
  */
 
-var Dispatcher = require('../uiDispatcher.js');
 var Store = require('flux/utils').Store;
+var Immutable = require('immutable');
 
-var chat = [];
+var Dispatcher = require('../uiDispatcher.js');
+
+// This stores data
+var chat = Immutable.List([]);
 
 var sourceTypes = [
   'system',
@@ -41,14 +44,17 @@ function addToChatFromServer (chatData) {
     message: chatData.Message.value.toString('utf8'),
     time: new Date()
   };
-  chat.push(msg);
+  chat = chat.push(Immutable.Map(msg));
 }
 
+// Filter the data
 var localChatStore = new Store(Dispatcher);
 localChatStore.__onDispatch = function (payload) {
   switch (payload.actionType) {
     case 'serverMSG':
-      if (payload.name === 'ChatFromSimulator') {
+      if (payload.name === 'ChatFromSimulator' &&
+          payload.ChatData.data[0].ChatType.value !== 4 && // Start/stop typing
+          payload.ChatData.data[0].ChatType.value !== 5) {
         addToChatFromServer(payload.ChatData.data[0]);
         this.__emitChange();
       }
