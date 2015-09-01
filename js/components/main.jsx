@@ -10,7 +10,7 @@ module.exports = function () {
     React.render(
       <div>
         <div id='menuBar'>
-          <span>Hello {name.first} {name.last}</span>
+          <span>Hello {name.getName()}</span>
           <a href='#' onclick={session.logout}>logout</a>
         </div>
         <ChatBox />

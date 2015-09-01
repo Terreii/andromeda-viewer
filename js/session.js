@@ -5,6 +5,7 @@ var crypto = require('crypto');
 var viewerInfo = require('./viewerInfo');
 var Circuit = require('./circuit');
 var simActionsForUI = require('./actions/simAction.js');
+var AvatarName = require('./avatarName.js');
 
 // true if there is a running session
 var isLoggedIn = false;
@@ -194,9 +195,6 @@ module.exports = {
     return list;
   },
   getAvatarName: function () {
-    return {
-      first: sessionInfo.first_name.replace(/"/g, ''),
-      last: sessionInfo.last_name
-    };
+    return new AvatarName(sessionInfo.first_name, sessionInfo.last_name);
   }
 };
