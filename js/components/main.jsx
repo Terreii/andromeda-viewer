@@ -2,18 +2,18 @@
 
 var React = require('react');
 var session = require('../session.js');
-var Chat = require('./chat.jsx');
+var ChatBox = require('./chatBox.jsx');
 
 module.exports = function () {
   var name = session.getAvatarName();
   var render = function () {
     React.render(
       <div>
-        <h1>
-          Hello {name.first} {name.last}
-        </h1>
-        <a href='#' onclick={session.logout}>logout</a>
-        <Chat />
+        <div id='menuBar'>
+          <span>Hello {name.first} {name.last}</span>
+          <a href='#' onclick={session.logout}>logout</a>
+        </div>
+        <ChatBox />
       </div>,
       document.body
     );

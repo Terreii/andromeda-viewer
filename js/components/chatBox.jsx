@@ -1,13 +1,15 @@
 'use strict';
 
 /*
- * Chat View
+ * Displays all Chats (localchat and IMs)
  *
  * will later also host all Instant Messages
  */
 
 var React = require('react');
+
 var localChatStore = require('../stores/localChatStore.js');
+var ChatDialog = require('./chatDialog.jsx');
 
 function getChat () {
   return {
@@ -15,7 +17,7 @@ function getChat () {
   };
 }
 
-var Chat = React.createClass({
+var ChatBox = React.createClass({
   displayName: 'ChatBox',
 
   getInitialState: function () {
@@ -35,22 +37,12 @@ var Chat = React.createClass({
   },
 
   render: function () {
-    var messages = this.state.messages.map(function (msg, i, all) {
-      return (
-        <li>
-          <div>{msg.get('fromName')}</div>
-          <div>{msg.get('message')}</div>
-        </li>
-      );
-    });
     return (
-      <div>Chats
-        <ul>
-          {messages}
-        </ul>
+      <div className='ChatBox'>Chats
+        <ChatDialog data={this.state.messages} />
       </div>
     );
   }
 });
 
-module.exports = Chat;
+module.exports = ChatBox;
