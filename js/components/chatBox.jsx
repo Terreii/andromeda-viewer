@@ -10,6 +10,7 @@ var React = require('react');
 
 var localChatStore = require('../stores/localChatStore.js');
 var ChatDialog = require('./chatDialog.jsx');
+var chatMessageActions = require('../actions/chatMessageActions.js');
 
 function getChat () {
   return {
@@ -39,7 +40,9 @@ var ChatBox = React.createClass({
   render: function () {
     return (
       <div className='ChatBox'>Chats
-        <ChatDialog data={this.state.messages} />
+        <ChatDialog data={this.state.messages} sendTo={function (text) {
+          chatMessageActions.sendLocalChatMessage(text, 1, 0);
+        }}/>
       </div>
     );
   }

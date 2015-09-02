@@ -1,14 +1,13 @@
 'use strict';
 
 /*
- * Displays a single conversation/dialog
+ * Displays a single conversation/dialog. Also the input
  */
 
 var React = require('react');
 var Immutable = require('immutable');
 
-var chatMessageActions = require('../actions/chatMessageActions.js');
-
+// Adds to all Numbers a leading zero if it has only one digit
 function leadingZero (num) {
   var numStr = String(num);
   if (numStr.length === 1) {
@@ -22,7 +21,8 @@ var ChatDialog = React.createClass({
 
   // https://facebook.github.io/react/docs/reusable-components.html
   propTypes: {
-    data: React.PropTypes.instanceOf(Immutable.List)
+    data: React.PropTypes.instanceOf(Immutable.List).isRequired,
+    sendTo: React.PropTypes.func.isRequired
   },
 
   getInitialState: function () {
@@ -76,7 +76,7 @@ var ChatDialog = React.createClass({
       event.preventDefault();
       var text = this.state.text.trim();
       if (text) {
-        chatMessageActions.sendLocalChatMessage(text, 1, 0);
+        this.props.sendTo(text);
       }
       this.setState({
         text: ''
@@ -88,7 +88,7 @@ var ChatDialog = React.createClass({
     event.preventDefault();
     var text = this.state.text.trim();
     if (text) {
-      chatMessageActions.sendLocalChatMessage(text, 1, 0);
+      this.props.sendTo(text);
     }
     this.setState({
       text: ''

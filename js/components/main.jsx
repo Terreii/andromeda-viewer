@@ -11,6 +11,7 @@ module.exports = function () {
       <div>
         <div id='menuBar'>
           <span>Hello {name.getName()}</span>
+          <span>Message of the day: {session.getMessageOfTheDay()}</span>
           <a href='#' onclick={session.logout}>logout</a>
         </div>
         <ChatBox />
