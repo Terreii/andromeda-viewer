@@ -58,6 +58,8 @@ localChatStore.__onDispatch = function (payload) {
         addToChatFromServer(payload.ChatData.data[0]);
         this.__emitChange();
       }
+      break;
+
   }
 };
 localChatStore.getMessages = function () {

@@ -48,18 +48,27 @@ body {
   justify-content: space-between;
 }
 
+#menuBar > * {
+  margin: .4em;
+}
+
 .ChatBox {
   background-color: rgb(77, 80, 85);
   color: rgb(255, 255, 255);
+  margin-top: 2em;
   padding: 1em;
   border-radius: 1em;
 }
 
-.ChatDialog > div > span {
+.ChatDialog > div > div > span {
   padding-right: 0.3em;
   font-size: 120%;
 }
 
 .ChatDialog .avatar:after {
   content: ":";
+}
+
+.ChatDialog .ChatTextSend {
+  margin: .4em;
 }

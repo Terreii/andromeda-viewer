@@ -101,7 +101,7 @@ Variable2.writeToBuffer = function writeToBuffer (buffer, value, offset) {
     throw new TypeError('value must not be bigger than 65535 bytes!');
   }
   buffer.writeUInt16LE(value.length, offset);
-  offset++;
+  offset += 2;
   for (var i = 0; i < value.length; ++i) {
     var v = value[i];
     if (v >= 0) {
@@ -526,6 +526,9 @@ function createBody (type, data) {
 
     // size in bytes, excludes Variable1 and Variable2
     var size = blockTemplate.variables.reduce(function (size, vari) {
+      if (vari.type === 'Variable') {
+        return size;
+      }
       var typeSize = types[vari.type].prototype.size;
       if (vari.type === 'Fixed') {
         typeSize = vari.times;
@@ -548,7 +551,11 @@ function createBody (type, data) {
       var offset = 0;
       for (var i = 0, times = blockTemplate.variables.length; i < times; ++i) {
         var varTemplate = blockTemplate.variables[i];
-        var varType = types[varTemplate.type];
+        var type = varTemplate.type;
+        if (type === 'Variable') {
+          type += varTemplate.times;
+        }
+        var varType = types[type];
         var value = block[varTemplate.name];
         if (varType === Variable1 || varType === Variable2) {
           // expand the buffer

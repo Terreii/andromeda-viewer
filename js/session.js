@@ -158,7 +158,6 @@ function sendRegionHandshakeReply (RegionHandshake) {
       }
     ]
   });
-  console.log('Handshake', flags);
 }
 
 function CompletePingCheck (StartPingCheck) {
@@ -170,7 +169,6 @@ function CompletePingCheck (StartPingCheck) {
       }
     ]
   });
-  console.log('Ping:', id);
 }
 
 module.exports = {
@@ -196,5 +194,32 @@ module.exports = {
   },
   getAvatarName: function () {
     return new AvatarName(sessionInfo.first_name, sessionInfo.last_name);
+  },
+  getSimIp: function () {
+    return sessionInfo.sim_ip;
+  },
+  getSimPort: function () {
+    return sessionInfo.sim_port;
+  },
+  getMessageOfTheDay: function () {
+    return sessionInfo.message;
+  },
+  getCircuitCode: function () {
+    return sessionInfo.circuit_code;
+  },
+  getAgentId: function () {
+    return sessionInfo.agent_id;
+  },
+  getInventoryHost: function () {
+    return sessionInfo.inventory_host;
+  },
+  getSeedCapability: function () {
+    return sessionInfo.seed_capability;
+  },
+  getAgentAccess: function () {
+    return sessionInfo.agent_access;
+  },
+  getSessionId: function () {
+    return sessionInfo.session_id;
   }
 };

@@ -7,6 +7,8 @@
 var React = require('react');
 var Immutable = require('immutable');
 
+var chatMessageActions = require('../actions/chatMessageActions.js');
+
 function leadingZero (num) {
   var numStr = String(num);
   if (numStr.length === 1) {
@@ -21,6 +23,12 @@ var ChatDialog = React.createClass({
   // https://facebook.github.io/react/docs/reusable-components.html
   propTypes: {
     data: React.PropTypes.instanceOf(Immutable.List)
+  },
+
+  getInitialState: function () {
+    return {
+      text: ''
+    };
   },
 
   render: function () {
@@ -40,8 +48,51 @@ var ChatDialog = React.createClass({
     });
 
     return (
-      <div className='ChatDialog'>{messages}</div>
+      <div className='ChatDialog'>
+        <div>{messages}</div>
+        <div className='ChatTextSend'>
+          <input
+            type='text'
+            className=''
+            name='chatInput'
+            value={this.state.text}
+            onChange={this._onChange}
+            onKeyDown={this._onKeyDown}
+          />
+          <input type='button' onClick={this._onClick} value='Send'/>
+        </div>
+      </div>
     );
+  },
+
+  _onChange: function (event, value) {
+    this.setState({
+      text: event.target.value
+    });
+  },
+
+  _onKeyDown: function (event) {
+    if (event.keyCode === 13) {
+      event.preventDefault();
+      var text = this.state.text.trim();
+      if (text) {
+        chatMessageActions.sendLocalChatMessage(text, 1, 0);
+      }
+      this.setState({
+        text: ''
+      });
+    }
+  },
+
+  _onClick: function (event) {
+    event.preventDefault();
+    var text = this.state.text.trim();
+    if (text) {
+      chatMessageActions.sendLocalChatMessage(text, 1, 0);
+    }
+    this.setState({
+      text: ''
+    });
   }
 });
 
