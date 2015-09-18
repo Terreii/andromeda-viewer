@@ -7,16 +7,24 @@
  */
 
 var React = require('react');
+var ReactTabs = require('react-tabs');
+var Tab = ReactTabs.Tab;
+var Tabs = ReactTabs.Tabs;
+var TabList = ReactTabs.TabList;
+var TabPanel = ReactTabs.TabPanel;
 
 var localChatStore = require('../stores/localChatStore.js');
+var IMStore = require('../stores/IMStore.js');
 var ChatDialog = require('./chatDialog.jsx');
 var chatMessageActions = require('../actions/chatMessageActions.js');
 
 function getChat () {
   return {
-    messages: localChatStore.getMessages()
+    localChat: localChatStore.getMessages()
   };
 }
+
+console.log(IMStore);
 
 var ChatBox = React.createClass({
   displayName: 'ChatBox',
@@ -40,9 +48,20 @@ var ChatBox = React.createClass({
   render: function () {
     return (
       <div className='ChatBox'>Chats
-        <ChatDialog data={this.state.messages} sendTo={function (text) {
-          chatMessageActions.sendLocalChatMessage(text, 1, 0);
-        }}/>
+        <Tabs>
+          <TabList>
+            <Tab>Local</Tab>
+            <Tab>Test</Tab>
+          </TabList>
+          <TabPanel>
+            <ChatDialog data={this.state.localChat} sendTo={function (text) {
+              chatMessageActions.sendLocalChatMessage(text, 1, 0);
+            }}/>
+          </TabPanel>
+          <TabPanel>
+            <p>Hello World!</p>
+          </TabPanel>
+        </Tabs>
       </div>
     );
   }

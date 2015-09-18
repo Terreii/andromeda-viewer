@@ -3,7 +3,8 @@
 var Dispatcher = require('../uiDispatcher.js');
 
 var toSendTypes = [ // add here Message-Types that will be processed in the UI
-  'ChatFromSimulator'
+  'ChatFromSimulator',
+  'ImprovedInstantMessage'
 ];
 
 // Gets all messages from the SIM and filters them for the UI

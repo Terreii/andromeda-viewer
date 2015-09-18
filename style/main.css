@@ -60,6 +60,10 @@ body {
   border-radius: 1em;
 }
 
+.ChatBox .react-tabs {
+  color: rgb(0, 0, 0);
+}
+
 .ChatDialog > div > div > span {
   padding-right: 0.3em;
   font-size: 120%;
