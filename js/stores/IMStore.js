@@ -56,11 +56,9 @@ function addIMTo (message) {
 var IMStore = new Store(Dispatcher);
 IMStore.__onDispatch = function (payload) {
   switch (payload.actionType) {
-    case 'serverMSG':
-      if (payload.name === 'ImprovedInstantMessage') {
-        addIMTo(payload);
-        this.__emitChange();
-      }
+    case 'ImprovedInstantMessage':
+      addIMTo(payload);
+      this.__emitChange();
       break;
     default:
       break;

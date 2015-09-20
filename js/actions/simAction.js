@@ -14,7 +14,7 @@ module.exports = function (msg) {
     return type === msg.body.name;
   })) {
     var toSendMsg = msg.body;
-    toSendMsg.actionType = 'serverMSG';
+    toSendMsg.actionType = msg.body.name;
     Dispatcher.dispatch(toSendMsg);
   }
 };

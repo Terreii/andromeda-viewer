@@ -31,6 +31,9 @@ var chatTypes = [
 
 // Add the messanges from the server/sim
 function addToChatFromServer (chatData) {
+  if (chatData.ChatType.value === 4 || chatData.ChatType.value === 5) {
+    return; // Start/stop typing
+  }
   var sourceT = sourceTypes[Number(chatData.SourceType.value) || 0];
   var chatT = chatTypes[Number(chatData.ChatType.value) || 0];
   var msg = {
@@ -51,13 +54,9 @@ function addToChatFromServer (chatData) {
 var localChatStore = new Store(Dispatcher);
 localChatStore.__onDispatch = function (payload) {
   switch (payload.actionType) {
-    case 'serverMSG':
-      if (payload.name === 'ChatFromSimulator' &&
-          payload.ChatData.data[0].ChatType.value !== 4 && // Start/stop typing
-          payload.ChatData.data[0].ChatType.value !== 5) {
-        addToChatFromServer(payload.ChatData.data[0]);
-        this.__emitChange();
-      }
+    case 'ChatFromSimulator':
+      addToChatFromServer(payload.ChatData.data[0]);
+      this.__emitChange();
       break;
 
   }

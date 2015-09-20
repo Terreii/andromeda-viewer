@@ -39,18 +39,17 @@ function addNameFromLocalChat (msg) {
 
 var nameStore = new Store(Dispatcher);
 nameStore.__onDispatch = function (payload) {
+  var didChange = false;
   switch (payload.actionType) {
-    case 'serverMSG':
-      var didChange = false;
-      if (payload.name === 'ChatFromSimulator') {
-        didChange = addNameFromLocalChat(payload.ChatData.data[0]);
-      } else if (payload.name === 'ImprovedInstantMessage') {
-        didChange = addNameFromIM(payload);
-      }
-      if (didChange) {
-        this.__emitChange();
-      }
+    case 'ChatFromSimulator':
+      didChange = addNameFromLocalChat(payload.ChatData.data[0]);
       break;
+    case 'ImprovedInstantMessage':
+      didChange = addNameFromIM(payload);
+      break;
+  }
+  if (didChange) {
+    this.__emitChange();
   }
 };
 nameStore.hasNameOf = function (uuid) {
