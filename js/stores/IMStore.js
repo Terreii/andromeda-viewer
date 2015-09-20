@@ -19,10 +19,14 @@ function addIMTo (message) {
   if (dialog === 41 || dialog === 42) { // filter start/end typing
     return;
   }
+
+  var toAgentID = messageBlock.ToAgentID.value;
+  var fromId = message.AgentData.data[0].AgentID.value;
+
   var msg = Immutable.Map({
-    fromId: message.AgentData.data[0].AgentID.value,
+    fromId: fromId,
     fromGroup: messageBlock.FromGroup.value,
-    toAgentID: messageBlock.ToAgentID.value,
+    toAgentID: toAgentID,
     parentEstateID: messageBlock.ParentEstateID.value,
     regionID: messageBlock.RegionID.value,
     position: messageBlock.Position.value,
@@ -32,12 +36,12 @@ function addIMTo (message) {
     timestamp: messageBlock.Timestamp.value,
     fromAgentName: fromCharArrayToString(messageBlock.FromAgentName.value),
     message: fromCharArrayToString(messageBlock.Message.value),
-    binaryBucket: messageBlock.BinaryBucket.value
+    binaryBucket: messageBlock.BinaryBucket.value,
+    time: new Date()
   });
-  console.log(msg, msg.toObject());
 
   // if it is send by this user the conversation will be of the toAgentId
-  var conv = (session.getAgentId() === msg.fromId) ? msg.toAgentID : msg.fromId;
+  var conv = (session.getAgentId() === fromId) ? toAgentID : fromId;
 
   var convStore;
   if (chats.has(conv)) {
@@ -55,6 +59,7 @@ IMStore.__onDispatch = function (payload) {
     case 'serverMSG':
       if (payload.name === 'ImprovedInstantMessage') {
         addIMTo(payload);
+        this.__emitChange();
       }
       break;
     default:
@@ -62,7 +67,7 @@ IMStore.__onDispatch = function (payload) {
   }
 };
 IMStore.getChat = function () {
-
+  return chats;
 };
 
 function fromCharArrayToString (buffer) {

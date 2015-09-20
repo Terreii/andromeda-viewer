@@ -15,16 +15,16 @@ var TabPanel = ReactTabs.TabPanel;
 
 var localChatStore = require('../stores/localChatStore.js');
 var IMStore = require('../stores/IMStore.js');
+var nameStore = require('../stores/nameStore.js');
 var ChatDialog = require('./chatDialog.jsx');
 var chatMessageActions = require('../actions/chatMessageActions.js');
 
 function getChat () {
   return {
-    localChat: localChatStore.getMessages()
+    localChat: localChatStore.getMessages(),
+    IMs: IMStore.getChat()
   };
 }
-
-console.log(IMStore);
 
 var ChatBox = React.createClass({
   displayName: 'ChatBox',
@@ -34,11 +34,18 @@ var ChatBox = React.createClass({
   },
 
   componentDidMount: function () {
-    this.__removeToken = localChatStore.addListener(this._onChange);
+    var removeToken = [
+      localChatStore.addListener(this._onChange),
+      IMStore.addListener(this._onChange),
+      nameStore.addListener(this._onChange)
+    ];
+    this.__removeToken = removeToken;
   },
 
   componentWillUnmount: function () {
-    this.__removeToken.remove();
+    this.__removeToken.forEach(function (token) {
+      token.remove();
+    });
   },
 
   _onChange: function () {
@@ -46,21 +53,40 @@ var ChatBox = React.createClass({
   },
 
   render: function () {
+    var self = this;
+    var imsNames = this.state.IMs.keySeq().toJSON();
+    var ims = imsNames.map(function (key) {
+      var name;
+      if (nameStore.hasNameOf(key)) {
+        name = nameStore.getNameOf(key);
+      } else {
+        name = key;
+      }
+      return <Tab>{name}</Tab>;
+    });
+    var panels = imsNames.map(function (key) {
+      return (
+        <TabPanel>
+          <ChatDialog data={self.state.IMs.get(key)} sendTo={ function (text) {
+            console.log(text);
+          } } />
+        </TabPanel>
+      );
+    });
+
     return (
-      <div className='ChatBox'>Chats
+      <div className='ChatBox'>
         <Tabs>
           <TabList>
             <Tab>Local</Tab>
-            <Tab>Test</Tab>
+            {ims}
           </TabList>
           <TabPanel>
-            <ChatDialog data={this.state.localChat} sendTo={function (text) {
+            <ChatDialog data={this.state.localChat} sendTo={ function (text) {
               chatMessageActions.sendLocalChatMessage(text, 1, 0);
-            }}/>
+            } }/>
           </TabPanel>
-          <TabPanel>
-            <p>Hello World!</p>
-          </TabPanel>
+          {panels}
         </Tabs>
       </div>
     );
