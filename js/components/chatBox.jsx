@@ -65,10 +65,12 @@ var ChatBox = React.createClass({
       return <Tab>{name}</Tab>;
     });
     var panels = imsNames.map(function (key) {
+      var messages = self.state.IMs.get(key);
+      var id = messages.get(0).get('id');
       return (
         <TabPanel>
-          <ChatDialog data={self.state.IMs.get(key)} sendTo={ function (text) {
-            chatMessageActions.sendInstantMessage(text, key);
+          <ChatDialog data={messages} isIM='true' sendTo={ function (text) {
+            chatMessageActions.sendInstantMessage(text, key, id);
           } } />
         </TabPanel>
       );

@@ -12,7 +12,7 @@ var session = require('../session.js');
 
 var chats = Immutable.Map();
 
-function addIMTo (message) {
+function addIMFromServer (message) {
   var messageBlock = message.MessageBlock.data[0];
   var dialog = messageBlock.Dialog.value;
 
@@ -24,6 +24,7 @@ function addIMTo (message) {
   var fromId = message.AgentData.data[0].AgentID.value;
 
   var msg = Immutable.Map({
+    sessionID: message.AgentData.data[0].SessionID.value,
     fromId: fromId,
     fromGroup: messageBlock.FromGroup.value,
     toAgentID: toAgentID,
@@ -40,6 +41,32 @@ function addIMTo (message) {
     time: new Date()
   });
 
+  addToChats(fromId, toAgentID, msg);
+}
+
+function addIMFromViewer (message) {
+  var msg = Immutable.Map({
+    sessionID: message.SessionID,
+    fromId: message.AgentID,
+    fromGroup: message.FromGroup,
+    toAgentID: message.ToAgentID,
+    parentEstateID: message.ParentEstateID,
+    regionID: message.RegionID,
+    position: message.Position,
+    offline: message.Offline,
+    dialog: message.Dialog,
+    id: message.ID,
+    timestamp: message.Timestamp,
+    fromAgentName: message.FromAgentName,
+    message: message.Message,
+    binaryBucket: message.BinaryBucket,
+    time: new Date()
+  });
+
+  addToChats(message.AgentID, message.ToAgentID, msg);
+}
+
+function addToChats (fromId, toAgentID, msg) {
   // if it is send by this user the conversation will be of the toAgentId
   var conv = (session.getAgentId() === fromId) ? toAgentID : fromId;
 
@@ -57,7 +84,11 @@ var IMStore = new Store(Dispatcher);
 IMStore.__onDispatch = function (payload) {
   switch (payload.actionType) {
     case 'ImprovedInstantMessage':
-      addIMTo(payload);
+      addIMFromServer(payload);
+      this.__emitChange();
+      break;
+    case 'SelfSendImprovedInstantMessage':
+      addIMFromViewer(payload);
       this.__emitChange();
       break;
     default:

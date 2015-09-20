@@ -7,8 +7,13 @@
 var Store = require('flux/utils').Store;
 
 var Dispatcher = require('../uiDispatcher.js');
+var session = require('../session.js');
 
 var names = {};
+
+setTimeout(function () {
+  names[session.getAgentId()] = session.getAvatarName().getFullName();
+}, 50);
 
 // Adds the names of the sending Avatar/Agent from IMs
 function addNameFromIM (msg) {

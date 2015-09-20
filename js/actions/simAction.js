@@ -10,10 +10,11 @@ var toSendTypes = [ // add here Message-Types that will be processed in the UI
 // Gets all messages from the SIM and filters them for the UI
 
 module.exports = function (msg) {
-  if (toSendTypes.some(function (type) {
+  var msgIsForUI = toSendTypes.some(function (type) {
     return type === msg.body.name;
-  })) {
-    var toSendMsg = msg.body;
+  });
+  if (msgIsForUI) {
+    var toSendMsg = Object.create(msg.body);
     toSendMsg.actionType = msg.body.name;
     Dispatcher.dispatch(toSendMsg);
   }

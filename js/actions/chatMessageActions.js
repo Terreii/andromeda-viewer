@@ -4,6 +4,8 @@
  * Sends a message to the server.
  */
 
+var Dispatcher = require('../uiDispatcher.js');
+
 var session = require('../session.js');
 
 module.exports = {
@@ -27,7 +29,7 @@ module.exports = {
     });
   },
 
-  sendInstantMessage: function (text, to) {
+  sendInstantMessage: function (text, to, id) {
     try {
       session.getActiveCircuit().send('ImprovedInstantMessage', {
         AgentData: [
@@ -45,13 +47,30 @@ module.exports = {
             Position: session.getPosition(),
             Offline: 0,
             Dialog: 0,
-            ID: session.getSessionId(),
+            ID: id,
             Timestamp: Math.floor(Date.now() / 1000),
             FromAgentName: session.getAvatarName().getFullName(),
             Message: text,
             BinaryBucket: new Buffer([0])
           }
         ]
+      });
+      Dispatcher.dispatch({
+        actionType: 'SelfSendImprovedInstantMessage',
+        AgentID: session.getAgentId(),
+        SessionID: session.getSessionId(),
+        FromGroup: false,
+        ToAgentID: to,
+        ParentEstateID: session.getParentEstateID(),
+        RegionID: session.getRegionID(),
+        Position: session.getPosition(),
+        Offline: 0,
+        Dialog: 0,
+        ID: id,
+        Timestamp: Math.floor(Date.now() / 1000),
+        FromAgentName: session.getAvatarName().getFullName(),
+        Message: text,
+        BinaryBucket: new Buffer([0])
       });
     } catch (e) {
       console.error(e);
