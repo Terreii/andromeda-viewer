@@ -22,7 +22,7 @@ var fs = require('fs');
 //           {
 //             name: String,
 //             type: types,
-//             times: Number|NaN // by "Fixed"/"Variable"
+//             times: Number|NaN // by "Fixed"
 //           }
 //         ]
 //       }
@@ -80,9 +80,13 @@ fs.readFile(process.cwd() + '/tools/master_message_template.msg',
       } else if (trimed.charAt(0) === '{' && trimed.length > 2) {
         // all variables have the fromat { name type quantity? }
         var variable = trimed.split(/\s+/g);
+        var type = variable[2];
+        if (type === 'Variable') {
+          type += variable[3].trim();
+        }
         blocks.thisBlock.variables.push({
           name: variable[1],
-          type: variable[2],
+          type: type,
           times: +variable[3]
         });
       }

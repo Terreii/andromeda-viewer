@@ -6,10 +6,6 @@
 
 var session = require('../session.js');
 
-function toCString (text) {
-  return Buffer.concat([new Buffer(text), new Buffer([0])]);
-}
-
 module.exports = {
   sendLocalChatMessage: function (text, type, channel) {
     // Sends messages from the localchat
@@ -23,7 +19,7 @@ module.exports = {
       ],
       ChatData: [
         {
-          Message: toCString(text),
+          Message: text,
           Type: type,
           Channel: channel
         }
@@ -50,9 +46,9 @@ module.exports = {
             Offline: 0,
             Dialog: 0,
             ID: session.getSessionId(),
-            Timestamp: Date.now(),
-            FromAgentName: toCString(session.getAvatarName()),
-            Message: toCString(text),
+            Timestamp: Math.floor(Date.now() / 1000),
+            FromAgentName: session.getAvatarName().getFullName(),
+            Message: text,
             BinaryBucket: new Buffer([0])
           }
         ]

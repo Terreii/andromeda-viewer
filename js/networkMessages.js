@@ -22,6 +22,9 @@ MessageDataType.prototype = {
 MessageDataType.writeToBuffer = function writeToBuffer (buffer, value, offset) {
   return offset;
 };
+MessageDataType.createBuffer = function createBuffer (value) {
+  return new Buffer(0);
+};
 
 function Null () {
   this.value = null;
@@ -30,6 +33,9 @@ Null.prototype = new MessageDataType();
 Null.prototype.type = 'Null';
 Null.writeToBuffer = function writeToBufferNull (buffer, value, offset) {
   return offset;
+};
+Null.createBuffer = function createBufferNull (value) {
+  return new Buffer(0);
 };
 
 // Arrays
@@ -58,6 +64,18 @@ Fixed.writeToBuffer = function writeToBufferFixed (buffer, value, offset,
   }
   return offset;
 };
+Fixed.createBuffer = function createBufferFixed (value, length) {
+  var buffy = new Buffer(length);
+  if (typeof value === 'string') {
+    buffy.write(value.substr(0, length));
+  } else {
+    for (var i = 0; i < length; ++i) {
+      var v = (i < value.length) ? +value[i] : 0;
+      buffy.writeUInt8(v, i);
+    }
+  }
+  return buffy;
+};
 
 function Variable1 (buffer, offset, name) {
   offset = offset || 0;
@@ -85,6 +103,28 @@ Variable1.writeToBuffer = function writeToBufferVariable1 (buffer, value,
     offset++;
   }
   return offset;
+};
+Variable1.createBuffer = function createBufferVariable1 (value) {
+  if (typeof value.length === 'undefined' || value.length > 255) {
+    throw new TypeError('value must not be bigger than 255 bytes!');
+  }
+  var buffy;
+  if (typeof value === 'string') {
+    var text = new Buffer(value, 'utf8');
+    var length = new Buffer([text.length + 1]);
+    buffy = Buffer.concat([
+      length,
+      text,
+      new Buffer([0])
+    ]);
+  } else {
+    buffy = new Buffer(value.length + 1);
+    buffy.writeUInt8(value.length, 0);
+    for (var i = 0; i < value.length; ++i) {
+      buffy.writeUInt8(value[i], i + 1);
+    }
+  }
+  return buffy;
 };
 
 function Variable2 (buffer, offset, name) {
@@ -116,6 +156,29 @@ Variable2.writeToBuffer = function writeToBufferVariable2 (buffer, value,
   }
   return offset;
 };
+Variable2.createBuffer = function createBufferVariable2 (value) {
+  if (typeof value.length === 'undefined' || value.length > 65535) {
+    throw new TypeError('value must not be bigger than 65535 bytes!');
+  }
+  var buffy;
+  if (typeof value === 'string') {
+    var text = new Buffer(value, 'utf8');
+    var length = new Buffer(2);
+    length.writeUInt16LE(text.length + 1, 0);
+    buffy = Buffer.concat([
+      length,
+      text,
+      new Buffer([0])
+    ]);
+  } else {
+    buffy = new Buffer(value.length + 2);
+    buffy.writeUInt16LE(value.length, 0);
+    for (var i = 0; i < value.length; ++i) {
+      buffy.writeUInt8(value[i], i + 2);
+    }
+  }
+  return buffy;
+};
 
 // Numbers
 
@@ -137,6 +200,9 @@ U8.writeToBuffer = function writeToBufferU8 (buffer, value, offset) {
   buffer.writeUInt8(value, offset);
   return offset + 1;
 };
+U8.createBuffer = function createBufferU8 (value) {
+  return new Buffer([+value]);
+};
 
 function U16 (buffer, offset, name) {
   offset = offset || 0;
@@ -150,6 +216,11 @@ U16.writeToBuffer = function writeToBufferU16 (buffer, value, offset) {
   buffer.writeUInt16LE(value, offset);
   return offset + 2;
 };
+U16.createBuffer = function createBufferU16 (value) {
+  var buffy = new Buffer(2);
+  buffy.writeInt16LE(+value, 0);
+  return buffy;
+};
 
 function U32 (buffer, offset, name) {
   offset = offset || 0;
@@ -162,6 +233,11 @@ U32.prototype.type = 'U32';
 U32.writeToBuffer = function writeToBufferU32 (buffer, value, offset) {
   buffer.writeUInt32LE(value, offset);
   return offset + 4;
+};
+U32.createBuffer = function createBufferU32 (value) {
+  var buffy = new Buffer(4);
+  buffy.writeUInt32LE(+value, 0);
+  return buffy;
 };
 
 function U64 (buffer, offset, name) {
@@ -182,6 +258,12 @@ U64.writeToBuffer = function writeToBufferU64 (buffer, value, offset) {
   buffer.writeUInt32LE(value[0], offset + 4);
   return offset + 8;
 };
+U64.createBuffer = function createBufferU64 (value) {
+  var buffy = new Buffer(8);
+  buffy.writeUInt32LE(value[0], 0);
+  buffy.writeUInt32LE(value[1], 4);
+  return buffy;
+};
 
 function S8 (buffer, offset, name) {
   offset = offset || 0;
@@ -194,6 +276,11 @@ S8.prototype.type = 'S8';
 S8.writeToBuffer = function writeToBufferS8 (buffer, value, offset) {
   buffer.writeInt8(value, offset);
   return offset + 1;
+};
+S8.createBuffer = function createBufferS8 (value) {
+  var buffy = new Buffer(1);
+  buffy.writeInt8(+value, 0);
+  return buffy;
 };
 
 function S16 (buffer, offset, name) {
@@ -208,6 +295,11 @@ S16.writeToBuffer = function writeToBufferS16 (buffer, value, offset) {
   buffer.writeInt16LE(value, offset);
   return offset + 2;
 };
+S16.createBuffer = function createBufferS16 (value) {
+  var buffy = new Buffer(2);
+  buffy.writeInt16LE(+value, 0);
+  return buffy;
+};
 
 function S32 (buffer, offset, name) {
   offset = offset || 0;
@@ -220,6 +312,11 @@ S32.prototype.type = 'S32';
 S32.writeToBuffer = function writeToBufferS32 (buffer, value, offset) {
   buffer.writeInt32LE(value, offset);
   return offset + 4;
+};
+S32.createBuffer = function createBufferS32 (value) {
+  var buffy = new Buffer(4);
+  buffy.writeInt32LE(+value, 0);
+  return buffy;
 };
 
 function S64 (buffer, offset, name) {
@@ -240,6 +337,12 @@ S64.writeToBuffer = function writeToBufferS64 (buffer, value, offset) {
   buffer.writeUInt32LE(value[0], offset + 4);
   return offset + 8;
 };
+S64.createBuffer = function createBufferS64 (value) {
+  var buffy = new Buffer(8);
+  buffy.writeInt32LE(value[1], 0);
+  buffy.writeUInt32LE(value[0], 4);
+  return buffy;
+};
 
 function F32 (buffer, offset, name) {
   offset = offset || 0;
@@ -253,6 +356,11 @@ F32.writeToBuffer = function writeToBufferF32 (buffer, value, offset) {
   buffer.writeFloatLE(value, offset);
   return offset + 4;
 };
+F32.createBuffer = function createBufferF32 (value) {
+  var buffy = new Buffer(4);
+  buffy.writeFloatLE(+value, 0);
+  return buffy;
+};
 
 function F64 (buffer, offset, name) {
   offset = offset || 0;
@@ -265,6 +373,11 @@ F64.prototype.type = 'F64';
 F64.writeToBuffer = function writeToBufferF64 (buffer, value, offset) {
   buffer.writeDoubleLE(value, offset);
   return offset + 8;
+};
+F64.createBuffer = function createBufferF64 (value) {
+  var buffy = new Buffer(8);
+  buffy.writeDoubleLE(+value, 0);
+  return buffy;
 };
 
 // Vectors
@@ -292,6 +405,13 @@ LLVector3.writeToBuffer = function writeToBufferLLVector3 (buffer, value,
   }
   return offset;
 };
+LLVector3.createBuffer = function createBufferLLVector3 (value) {
+  var buffy = new Buffer(12);
+  for (var i = 0; i < 3; ++i) {
+    buffy.writeFloatLE(value[i] || 0, i * 4);
+  }
+  return buffy;
+};
 
 function LLVector3d (buffer, offset, name) {
   offset = offset || 0;
@@ -315,6 +435,13 @@ LLVector3d.writeToBuffer = function writeToBufferLLVector3d (buffer, value,
     offset += 8;
   }
   return offset;
+};
+LLVector3d.createBuffer = function createBufferLLVector3d (value) {
+  var buffy = new Buffer(24);
+  for (var i = 0; i < 3; ++i) {
+    buffy.writeDoubleLE(value[i] || 0, i * 8);
+  }
+  return buffy;
 };
 
 function LLVector4 (buffer, offset, name) {
@@ -341,6 +468,13 @@ LLVector4.writeToBuffer = function writeToBufferLLVector4 (buffer, value,
   }
   return offset;
 };
+LLVector4.createBuffer = function createBufferLLVector4 (value) {
+  var buffy = new Buffer(16);
+  for (var i = 0; i < 4; ++i) {
+    buffy.writeFloatLE(value[i] || 0, i * 4);
+  }
+  return buffy;
+};
 
 function LLQuaternion (buffer, offset, name) {
   offset = offset || 0;
@@ -365,6 +499,13 @@ LLQuaternion.writeToBuffer = function writeToBufferLLQuaternion (buffer, value,
   }
   return offset;
 };
+LLQuaternion.createBuffer = function createBufferLLQuaternion (value) {
+  var buffy = new Buffer(12);
+  for (var i = 0; i < 3; ++i) {
+    buffy.writeFloatLE(value[i] || 0, i * 4);
+  }
+  return buffy;
+};
 
 // Data
 
@@ -380,6 +521,11 @@ LLUUID.writeToBuffer = function writeToBufferLLUUID (buffer, value, offset) {
   uuid.parse(value, buffer, offset);
   return offset + 16;
 };
+LLUUID.createBuffer = function createBufferLLUUID (value) {
+  var buffy = new Buffer(16);
+  uuid.parse(value, buffy, 0);
+  return buffy;
+};
 
 function BOOL (buffer, offset, name) {
   offset = offset || 0;
@@ -392,6 +538,11 @@ BOOL.prototype.type = 'BOOL';
 BOOL.writeToBuffer = function writeToBufferBOOL (buffer, value, offset) {
   buffer.writeUInt8(Number(value), offset);
   return offset + 1;
+};
+BOOL.createBuffer = function createBufferBOOL (value) {
+  var buffy = new Buffer(1);
+  buffy.writeUInt8(value ? 1 : 0, 0);
+  return buffy;
 };
 
 function IPADDR (buffer, offset, name) {
@@ -418,6 +569,20 @@ IPADDR.writeToBuffer = function writeToBufferIPADDR (buffer, value, offset) {
     throw new TypeError('Must be a string or an array!');
   }
 };
+IPADDR.createBuffer = function createBufferIPADDR (value) {
+  var buffy = new Buffer(4);
+  if (typeof value === 'string') {
+    value = value.split('.');
+  }
+  if (Array.isArray(value)) {
+    value.forEach(function (byte, i) {
+      buffy.writeUInt8(Number(byte), i);
+    });
+    return buffy;
+  } else {
+    throw new TypeError('Must be a string or an array!');
+  }
+};
 
 function IPPORT (buffer, offset, name) {
   offset = offset || 0;
@@ -430,6 +595,11 @@ IPPORT.prototype.type = 'IPPORT';
 IPPORT.writeToBuffer = function writeToBufferIPPORT (buffer, value, offset) {
   buffer.writeUInt16LE(+value, offset);
   return offset + 2;
+};
+IPPORT.createBuffer = function createBufferIPPORT (value) {
+  var buffy = new Buffer(2);
+  buffy.writeUInt16LE(+value, 0);
+  return buffy;
 };
 
 var types = {
@@ -531,7 +701,7 @@ function createBody (type, data) {
       throw new TypeError('Quantity mismatch');
     }
 
-    // size in bytes, excludes Variable1 and Variable2
+    /* / size in bytes, excludes Variable1 and Variable2
     var size = blockTemplate.variables.reduce(function (size, vari) {
       if (vari.type === 'Variable') {
         return size;
@@ -544,7 +714,7 @@ function createBody (type, data) {
         typeSize = 0;
       }
       return size + typeSize;
-    }, 0);
+    }, 0); // */
 
     var body = [];
     if (blockTemplate.quantity === 'Variable') {
@@ -554,32 +724,19 @@ function createBody (type, data) {
     }
 
     dataBlock.forEach(function (block) { // same block times the quantity
-      var buffer = new Buffer(size);
-      var offset = 0;
-      for (var i = 0, times = blockTemplate.variables.length; i < times; ++i) {
-        var varTemplate = blockTemplate.variables[i];
-        var type = varTemplate.type;
-        if (type === 'Variable') {
-          type += varTemplate.times;
-        }
-        var varType = types[type];
+      var bufferArr = blockTemplate.variables.map(function (varTemplate) {
+        var varType = types[varTemplate.type];
         var value = block[varTemplate.name];
-        if (varType === Variable1 || varType === Variable2) {
-          // expand the buffer
-          buffer = Buffer.concat([
-            buffer,
-            // Variable1 has one length byte, Variable2 has 2
-            new Buffer(value.length + ((varType === Variable1) ? 1 : 2))
-          ]);
-        }
         try {
-          offset = varType.writeToBuffer(buffer, value, offset);
+          var buff = varType.createBuffer(value, varTemplate.times);
         } catch (e) {
-          console.error(e, buffer, type, block, varTemplate, offset);
+          console.error(e, varTemplate, value);
           throw e;
         }
-      }
-      body.push(buffer);
+        return buff;
+      });
+
+      body.push(Buffer.concat(bufferArr));
     });
     return Buffer.concat(body);
   });
