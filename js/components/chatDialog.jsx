@@ -7,6 +7,8 @@
 var React = require('react');
 var Immutable = require('immutable');
 
+var nameStore = require('../stores/nameStore.js');
+
 // Adds to all Numbers a leading zero if it has only one digit
 function leadingZero (num) {
   var numStr = String(num);
@@ -22,7 +24,14 @@ var ChatDialog = React.createClass({
   // https://facebook.github.io/react/docs/reusable-components.html
   propTypes: {
     data: React.PropTypes.instanceOf(Immutable.List).isRequired,
-    sendTo: React.PropTypes.func.isRequired
+    sendTo: React.PropTypes.func.isRequired,
+    isIM: React.PropTypes.bool
+  },
+
+  getDefaultProps: function () {
+    return {
+      isIM: false
+    };
   },
 
   getInitialState: function () {
@@ -32,8 +41,10 @@ var ChatDialog = React.createClass({
   },
 
   render: function () {
+    var self = this;
     var messages = this.props.data.map(function (msg) {
       var time = msg.get('time');
+      var fromId = self.props.isIM ? msg.get('fromId') : msg.get('sourceID');
       return (
         <div className='message'>
           <span className='time'>
@@ -41,7 +52,7 @@ var ChatDialog = React.createClass({
             {leadingZero(time.getMinutes())}:
             {leadingZero(time.getSeconds())}
           </span>
-          <span className='avatar'>{msg.get('fromName')}</span>
+          <span className='avatar'>{nameStore.getNameOf(fromId)}</span>
           <span className='messageText'>{msg.get('message')}</span>
         </div>
       );

@@ -13,6 +13,14 @@ var isLoggedIn = false;
 // Stores the result of the xmlrpc login & tracks the changes
 var sessionInfo = {};
 
+var regionInfo = {};
+var regionID;
+
+var position = {
+  position: [],
+  lookAt: []
+};
+
 var activeCircuit;
 
 // Logon the user. It will send a XMLHttpRequest to the server.
@@ -139,11 +147,30 @@ function connectToSim (ip, port, circuit_code, callback) {
 
   activeCircuit.on('RegionHandshake', sendRegionHandshakeReply);
 
+  activeCircuit.on('AgentMovementComplete', function (AgentMovement) {
+    var info = AgentMovement.body.Data.data[0];
+    position.position = info.Position;
+    position.lookAt = info.LookAt;
+  });
+
   activeCircuit.on('StartPingCheck', CompletePingCheck);
+
+  activeCircuit.on('RegionInfo', RegionInfo);
+
+  setTimeout(function () {
+    activeCircuit.send('RequestRegionInfo', {
+      AgentData: [
+        {
+          AgentID: sessionInfo.agent_id,
+          SessionID: sessionInfo.session_id
+        }
+      ]
+    });
+  }, 100);
 }
 
 function sendRegionHandshakeReply (RegionHandshake) {
-  // RegionHandshake.body.blocks[0].data.
+  regionID = RegionHandshake.body.RegionInfo2.data[0].RegionID.value;
   var flags = RegionHandshake.body.RegionInfo.data[0].RegionFlags.value;
   activeCircuit.send('RegionHandshakeReply', {
     AgentData: [
@@ -169,6 +196,17 @@ function CompletePingCheck (StartPingCheck) {
       }
     ]
   });
+}
+
+function RegionInfo (info) {
+  regionInfo = info.body.RegionInfo.data[0];
+
+  var regionInfo2 = info.body.RegionInfo2.data[0];
+  regionInfo.ProductSKU = regionInfo2.ProductSKU;
+  regionInfo.ProductName = regionInfo2.ProductName;
+  regionInfo.MaxAgents32 = regionInfo2.MaxAgents32;
+  regionInfo.HardMaxAgents = regionInfo2.HardMaxAgents;
+  regionInfo.HardMaxObjects = regionInfo2.HardMaxObjects;
 }
 
 module.exports = {
@@ -221,5 +259,14 @@ module.exports = {
   },
   getSessionId: function () {
     return sessionInfo.session_id;
+  },
+  getParentEstateID: function () {
+    return regionInfo.ParentEstateID.value;
+  },
+  getRegionID: function () {
+    return regionID;
+  },
+  getPosition: function () {
+    return position.position.value;
   }
 };

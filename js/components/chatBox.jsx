@@ -68,7 +68,7 @@ var ChatBox = React.createClass({
       return (
         <TabPanel>
           <ChatDialog data={self.state.IMs.get(key)} sendTo={ function (text) {
-            console.log(text);
+            chatMessageActions.sendInstantMessage(text, key);
           } } />
         </TabPanel>
       );
