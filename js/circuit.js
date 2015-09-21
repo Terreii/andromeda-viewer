@@ -81,6 +81,11 @@ function Circuit (hostIP, hostPort, circuitCode) {
       acks = [];
     }
 
+    if (isReliable) {
+      self.acks.push(senderSequenceNumber);
+      sendAcks(self);
+    }
+
     var toEmitObj = {
       isZeroEncoded: isZeroEncoded,
       isReliable: isReliable,
@@ -231,6 +236,23 @@ function extractAcks (msg) {
   }
   acks.reverse();
   return acks;
+}
+
+// Sends all acks after 250ms
+function sendAcks (self) {
+  setTimeout(function () {
+    if (self.acks.length > 0) {
+      var data = {
+        Packets: self.acks.map(function (ack) {
+          return {
+            ID: ack
+          };
+        })
+      };
+      self.acks = [];
+      self.send('PacketAck', data);
+    }
+  }, 250);
 }
 
 module.exports = Circuit;

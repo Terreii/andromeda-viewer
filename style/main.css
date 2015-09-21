@@ -27,3 +27,52 @@ body {
   margin-top: 0.3em;
   padding: 0.3em;
 }
+
+#menuBar {
+  position: fixed;
+  top: 0em;
+  left: 0em;
+  width: 100%;
+  background-color: rgb(67, 142, 255);
+  background-color: rgba(67, 142, 255, 0.8);
+  padding-top: .5em;
+  padding-bottom: .5em;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+#menuBar > * {
+  margin: .4em;
+}
+
+.ChatBox {
+  background-color: rgb(77, 80, 85);
+  color: rgb(255, 255, 255);
+  margin-top: 2em;
+  padding: 1em;
+  border-radius: 1em;
+}
+
+.ChatBox .react-tabs {
+  color: rgb(0, 0, 0);
+}
+
+.ChatDialog > div > div > span {
+  padding-right: 0.3em;
+  font-size: 120%;
+}
+
+.ChatDialog .avatar:after {
+  content: ":";
+}
+
+.ChatDialog .ChatTextSend {
+  margin: .4em;
+}

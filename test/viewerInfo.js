@@ -7,7 +7,6 @@ var assert = require('assert');
 var viewerInfo = require('../js/viewerInfo');
 
 describe('viewerInfo', function () {
-
   it('should have the viewer name', function () {
     assert.equal('andromeda-viewer', viewerInfo.name);
   });

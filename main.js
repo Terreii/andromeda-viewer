@@ -6,7 +6,7 @@
  */
 
 var viewerInfo = require('./js/viewerInfo');
-var parseFullName = require('./js/avatarName');
+var AvatarName = require('./js/avatarName');
 var session = require('./js/session');
 
 function displayLoginError (message) {
@@ -31,10 +31,23 @@ button.addEventListener('click', function (event) {
     return;
   }
 
-  var userName = parseFullName(loginName);
+  button.disabled = true;
+  button.value = 'Connecting ...';
+
+  var userName = new AvatarName(loginName);
 
   session.login(userName.first, userName.last, password, function (err, sinfo) {
-    console.log(err, sinfo);
+    if (err) {
+      // Displays the error message from the server
+      console.error(err);
+      button.disabled = false;
+      button.value = 'Login';
+      displayLoginError(err.message);
+    } else {
+      // start everything
+      var display = require('./js/components/main.jsx');
+      display();
+    }
   });
 });
 

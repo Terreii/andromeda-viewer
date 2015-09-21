@@ -4,12 +4,22 @@ var crypto = require('crypto');
 
 var viewerInfo = require('./viewerInfo');
 var Circuit = require('./circuit');
+var simActionsForUI = require('./actions/simAction.js');
+var AvatarName = require('./avatarName.js');
 
 // true if there is a running session
 var isLoggedIn = false;
 
 // Stores the result of the xmlrpc login & tracks the changes
-var sessionInfo;
+var sessionInfo = {};
+
+var regionInfo = {};
+var regionID;
+
+var position = {
+  position: [],
+  lookAt: []
+};
 
 var activeCircuit;
 
@@ -133,17 +143,34 @@ function connectToSim (ip, port, circuit_code, callback) {
     ]
   });
 
-  activeCircuit.on('packetReceived', function (data) {
-    console.log('On: ' + new Date().toISOString() + '    ', data.body.name);
-  });
+  activeCircuit.on('packetReceived', simActionsForUI);
 
   activeCircuit.on('RegionHandshake', sendRegionHandshakeReply);
 
+  activeCircuit.on('AgentMovementComplete', function (AgentMovement) {
+    var info = AgentMovement.body.Data.data[0];
+    position.position = info.Position;
+    position.lookAt = info.LookAt;
+  });
+
   activeCircuit.on('StartPingCheck', CompletePingCheck);
+
+  activeCircuit.on('RegionInfo', RegionInfo);
+
+  setTimeout(function () {
+    activeCircuit.send('RequestRegionInfo', {
+      AgentData: [
+        {
+          AgentID: sessionInfo.agent_id,
+          SessionID: sessionInfo.session_id
+        }
+      ]
+    });
+  }, 100);
 }
 
 function sendRegionHandshakeReply (RegionHandshake) {
-  // RegionHandshake.body.blocks[0].data.
+  regionID = RegionHandshake.body.RegionInfo2.data[0].RegionID.value;
   var flags = RegionHandshake.body.RegionInfo.data[0].RegionFlags.value;
   activeCircuit.send('RegionHandshakeReply', {
     AgentData: [
@@ -158,7 +185,6 @@ function sendRegionHandshakeReply (RegionHandshake) {
       }
     ]
   });
-  console.log('Handshake', flags);
 }
 
 function CompletePingCheck (StartPingCheck) {
@@ -170,7 +196,17 @@ function CompletePingCheck (StartPingCheck) {
       }
     ]
   });
-  console.log('Ping:', id);
+}
+
+function RegionInfo (info) {
+  regionInfo = info.body.RegionInfo.data[0];
+
+  var regionInfo2 = info.body.RegionInfo2.data[0];
+  regionInfo.ProductSKU = regionInfo2.ProductSKU;
+  regionInfo.ProductName = regionInfo2.ProductName;
+  regionInfo.MaxAgents32 = regionInfo2.MaxAgents32;
+  regionInfo.HardMaxAgents = regionInfo2.HardMaxAgents;
+  regionInfo.HardMaxObjects = regionInfo2.HardMaxObjects;
 }
 
 module.exports = {
@@ -178,5 +214,59 @@ module.exports = {
   logout: logout,
   get isLoggedIn () {
     return isLoggedIn;
+  },
+  getActiveCircuit: function () {
+    return activeCircuit || {};
+  },
+  getInfo: function (infoName) {
+    return sessionInfo[infoName];
+  },
+  getInfoNames: function () {
+    var list = [];
+    for (var name in sessionInfo) {
+      if (sessionInfo.hasOwnProperty(name)) {
+        list.push(name);
+      }
+    }
+    return list;
+  },
+  getAvatarName: function () {
+    return new AvatarName(sessionInfo.first_name, sessionInfo.last_name);
+  },
+  getSimIp: function () {
+    return sessionInfo.sim_ip;
+  },
+  getSimPort: function () {
+    return sessionInfo.sim_port;
+  },
+  getMessageOfTheDay: function () {
+    return sessionInfo.message;
+  },
+  getCircuitCode: function () {
+    return sessionInfo.circuit_code;
+  },
+  getAgentId: function () {
+    return sessionInfo.agent_id;
+  },
+  getInventoryHost: function () {
+    return sessionInfo.inventory_host;
+  },
+  getSeedCapability: function () {
+    return sessionInfo.seed_capability;
+  },
+  getAgentAccess: function () {
+    return sessionInfo.agent_access;
+  },
+  getSessionId: function () {
+    return sessionInfo.session_id;
+  },
+  getParentEstateID: function () {
+    return regionInfo.ParentEstateID.value;
+  },
+  getRegionID: function () {
+    return regionID;
+  },
+  getPosition: function () {
+    return position.position.value;
   }
 };

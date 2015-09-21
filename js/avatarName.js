@@ -6,28 +6,53 @@
 
 // first.last and first last will become {first: 'first', last: 'last'}
 
-function parseFullName (name) {
-  if (typeof name !== 'string') {
-    throw new TypeError('Name must be a string');
-  }
-  name = name.trim();
-
-  var parts;
-  var parsed = name.match(/[\.\s]/);
-  // if the first name and last name are given
-  if (parsed) {
-    parts = name.split(parsed[0]);
-  } else {
-    parts = [
-      name,
-      'Resident'
-    ];
-  }
-
-  return {
-    first: parts[0],
-    last: parts[1]
-  };
+function cleanName (name) {
+  return name.trim().replace(/"/g, '');
 }
 
-module.exports = parseFullName;
+function AvatarName (name) {
+  if (typeof name === 'object' && typeof name.first === 'string') {
+    this.first === cleanName(name.first);
+    this.last === cleanName(name.last || 'Resident');
+  } else if (typeof name === 'string' && arguments.length === 1) {
+    var seperator = name.match(/[\.\s]/); // either a dot or a space
+    if (seperator) {
+      var parts = name.split(seperator[0]);
+      this.first = cleanName(parts[0]);
+      this.last = cleanName(parts[1]);
+    } else {
+      this.first = cleanName(name);
+      this.last = 'Resident';
+    }
+  } else if (typeof name === 'string' && typeof arguments[1] === 'string') {
+    this.first = cleanName(name);
+    this.last = cleanName(arguments[1]);
+  }
+}
+AvatarName.prototype = {
+  getFullName: function () {
+    return this.first + ' ' + this.last;
+  },
+  getName: function () {
+    if (this.last === 'Resident') {
+      return this.first;
+    } else {
+      return this.getFullName();
+    }
+  },
+  toString: function () {
+    return this.getName();
+  },
+  compare: function (other, strict) {
+    if (typeof other === 'string') {
+      other = other.trim();
+      return other === this.getName() || other === this.getFullName();
+    }
+    if (strict && !(other instanceof AvatarName)) {
+      return false;
+    }
+    return other.first === this.first && other.last === this.last;
+  }
+};
+
+module.exports = AvatarName;

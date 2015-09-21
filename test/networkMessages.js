@@ -81,7 +81,7 @@ describe('networkMessages', function () {
       var posBuffer = new Buffer([1, 2, 3, 4, 5, 6, 7, 8]);
       var negBuffer = new Buffer([-1, -2, -3, -4, -5, -6, -7, -8]);
       it('U8 should have the unsigned value of the given position',
-          function () {
+      function () {
         var offset = Math.floor(Math.random() * 8);
         assert.equal(posBuffer.readUInt8(offset),
           new messages.types.U8(posBuffer, offset).value);
@@ -90,7 +90,7 @@ describe('networkMessages', function () {
       });
 
       it('U16 should have the unsigned value of the given position',
-          function () {
+      function () {
         var offset = Math.floor(Math.random() * 4);
         assert.equal(posBuffer.readUInt16LE(offset),
           new messages.types.U16(posBuffer, offset).value);
@@ -99,7 +99,7 @@ describe('networkMessages', function () {
       });
 
       it('U32 should have the unsigned value of the given position',
-          function () {
+      function () {
         var offset = Math.floor(Math.random() * 2);
         assert.equal(posBuffer.readUInt32LE(offset),
           new messages.types.U32(posBuffer, offset).value);
@@ -289,7 +289,7 @@ describe('networkMessages', function () {
     describe('createBody', function () {
       var buffer;
       it('should create a Object with a Buffer out of a JSON like object',
-          function () {
+      function () {
         var testMessage = {
           TestBlock1: [
             {
