@@ -58,7 +58,7 @@ var ChatBox = React.createClass({
     var ims = imsNames.map(function (key) {
       var name;
       if (nameStore.hasNameOf(key)) {
-        name = nameStore.getNameOf(key);
+        name = nameStore.getNameOf(key).getName();
       } else {
         name = key;
       }

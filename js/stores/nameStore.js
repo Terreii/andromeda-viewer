@@ -8,12 +8,26 @@ var Store = require('flux/utils').Store;
 
 var Dispatcher = require('../uiDispatcher.js');
 var session = require('../session.js');
+var AvatarName = require('../avatarName.js');
 
 var names = {};
 
 setTimeout(function () {
-  names[session.getAgentId()] = session.getAvatarName().getFullName();
+  names[session.getAgentId()] = session.getAvatarName();
 }, 50);
+
+// Only adds a Name to names if it is new or did change
+function addName (uuid, nameString) {
+  if (nameString instanceof Uint8Array || nameString instanceof Buffer) {
+    nameString = fromCharArrayToString(nameString);
+  }
+  if (!names[uuid] || !names[uuid].compare(nameString)) {
+    names[uuid] = new AvatarName(nameString);
+    return true;
+  } else {
+    return false;
+  }
+}
 
 // Adds the names of the sending Avatar/Agent from IMs
 function addNameFromIM (msg) {
@@ -21,23 +35,16 @@ function addNameFromIM (msg) {
     return;
   }
   var id = msg.AgentData.data[0].AgentID.value;
-  var name = msg.MessageBlock.data[0].FromAgentName.value.toString('utf8');
-  if (name[id] !== name) {
-    names[id] = name;
-    return true;
-  }
-  return false;
+  var name = msg.MessageBlock.data[0].FromAgentName.value;
+  return addName(id, name);
 }
 
 // Adds the names of the sending Avatar/Agent from the local Chat
 function addNameFromLocalChat (msg) {
   if (msg.SourceType.value === 1) {
     var id = msg.SourceID.value;
-    var name = msg.FromName.value.toString('utf8');
-    if (names[id] !== name) {
-      names[id] = name;
-      return true;
-    }
+    var name = msg.FromName.value;
+    return addName(id, name);
   }
   return false;
 }
@@ -69,5 +76,10 @@ nameStore.getNameOf = function (uuid) {
     return '';
   }
 };
+
+function fromCharArrayToString (buffer) {
+  var str = buffer.toString();
+  return str.substring(0, str.length - 1);
+}
 
 module.exports = nameStore;

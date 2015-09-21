@@ -28,6 +28,8 @@ function AvatarName (name) {
     this.first = cleanName(name);
     this.last = cleanName(arguments[1]);
   }
+  this.first = this.first.trim();
+  this.last = this.last.trim();
 }
 AvatarName.prototype = {
   getFullName: function () {
@@ -40,7 +42,14 @@ AvatarName.prototype = {
       return this.getFullName();
     }
   },
+  toString: function () {
+    return this.getName();
+  },
   compare: function (other, strict) {
+    if (typeof other === 'string') {
+      other = other.trim();
+      return other === this.getName() || other === this.getFullName();
+    }
     if (strict && !(other instanceof AvatarName)) {
       return false;
     }
