@@ -31,7 +31,10 @@ var fs = require('fs');
 // ]
 
 fs.readFile(process.cwd() + '/tools/master_message_template.msg',
-    {encoding: 'utf8'}, function (err, data) {
+  {encoding: 'utf8'},
+  parseMessageTemplate);
+
+function parseMessageTemplate (err, data) {
   if (err) {
     console.error(err);
     return;
@@ -110,4 +113,4 @@ fs.readFile(process.cwd() + '/tools/master_message_template.msg',
 
   fs.writeFileSync(process.cwd() + '/jsBuilds/messageTemplate.json', dataJson,
     'utf8');
-});
+}

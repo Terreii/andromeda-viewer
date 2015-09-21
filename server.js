@@ -192,7 +192,7 @@ function processLogin (req, res) {
       reqData.mac = macaddress;
 
       xmlrpcClient.methodCall('login_to_simulator', [reqData],
-          function (err, data) {
+      function (err, data) {
         res.writeHead(200, {'Content-Type': 'application/json'});
         if (err) {
           res.end(JSON.stringify(err));
