@@ -45,7 +45,7 @@ var ChatDialog = React.createClass({
     var messages = this.props.data.map(function (msg) {
       var time = msg.get('time');
       var fromId = self.props.isIM ? msg.get('fromId') : msg.get('sourceID');
-      var name = nameStore.getNameOf(fromId).getName();
+      var name = nameStore.getNameOf(fromId).toString();
       return (
         <div className='message'>
           <span className='time'>
@@ -59,14 +59,18 @@ var ChatDialog = React.createClass({
       );
     });
 
+    var placeholderText = 'Send ' +
+      ((this.props.isIM) ? 'Instant Message' : 'to local chat');
+
     return (
       <div className='ChatDialog'>
         <div>{messages}</div>
         <div className='ChatTextSend'>
           <input
             type='text'
-            className=''
+            className='ChatDialogTextBox'
             name='chatInput'
+            placeholder={placeholderText}
             value={this.state.text}
             onChange={this._onChange}
             onKeyDown={this._onKeyDown}
