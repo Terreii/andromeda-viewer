@@ -48,13 +48,13 @@ var ChatDialog = React.createClass({
       var fromId = self.props.isIM ? msg.get('fromId') : msg.get('sourceID');
       var name = nameStore.getNameOf(fromId).toString();
       return (
-        <div className='message'>
+        <div className={style.message}>
           <span className='time'>
             {leadingZero(time.getHours())}:
             {leadingZero(time.getMinutes())}:
             {leadingZero(time.getSeconds())}
           </span>
-          <span className='avatar'>{name}</span>
+          <span className={style.avatar}>{name}</span>
           <span className='messageText'>{msg.get('message')}</span>
         </div>
       );
@@ -66,17 +66,21 @@ var ChatDialog = React.createClass({
     return (
       <div className={style.ChatDialog}>
         <div className={style.messageOutput}>{messages}</div>
-        <div className='ChatTextSend'>
+        <div className={style.ChatTextSend}>
           <input
             type='text'
-            className='ChatDialogTextBox'
+            className={style.textBox}
             name='chatInput'
             placeholder={placeholderText}
             value={this.state.text}
             onChange={this._onChange}
             onKeyDown={this._onKeyDown}
           />
-          <input type='button' onClick={this._onClick} value='Send'/>
+          <input
+            type='button'
+            className={style.send}
+            value='Send'
+            onClick={this._onClick}/>
         </div>
       </div>
     );

@@ -78,30 +78,3 @@ body {
 .ChatBox .react-tabs {
   color: rgb(0, 0, 0);
 }
-
-.message > span {
-  padding-right: 0.3em;
-  font-size: 120%;
-}
-
-.ChatDialog .avatar:after {
-  content: ":";
-}
-
-.ChatDialog .ChatTextSend {
-  margin: .4em;
-  display: flex;
-  flex-direction: row;
-}
-
-.ChatDialog .ChatTextSend input {
-  flex: 1 0 auto;
-}
-
-.ChatTextSend input:first-child {
-  margin-right: 0.5em;
-}
-
-.ChatDialog .ChatTextSend .ChatDialogTextBox {
-  flex: 4 0 auto;
-}
