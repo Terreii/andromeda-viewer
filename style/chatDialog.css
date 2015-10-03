@@ -1,0 +1,14 @@
+
+/*
+ * Style for the chatDialog
+ */
+
+.ChatDialog {
+  margin: 0.3em;
+  display: flex;
+  flex-direction: column;
+}
+
+.messageOutput {
+  flex: 1 1 100%;
+}

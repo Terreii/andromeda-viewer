@@ -8,6 +8,7 @@ var React = require('react');
 var Immutable = require('immutable');
 
 var nameStore = require('../stores/nameStore.js');
+var style = require('../../style/chatDialog.css');
 
 // Adds to all Numbers a leading zero if it has only one digit
 function leadingZero (num) {
@@ -63,8 +64,8 @@ var ChatDialog = React.createClass({
       ((this.props.isIM) ? 'Instant Message' : 'to local chat');
 
     return (
-      <div className='ChatDialog'>
-        <div className='ChatDialogMessagesOut'>{messages}</div>
+      <div className={style.ChatDialog}>
+        <div className={style.messageOutput}>{messages}</div>
         <div className='ChatTextSend'>
           <input
             type='text'
