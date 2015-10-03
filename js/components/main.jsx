@@ -1,8 +1,10 @@
 'use strict';
 
 var React = require('react');
+
 var session = require('../session.js');
 var ChatBox = require('./chatBox.jsx');
+var style = require('../../style/menuBar.css');
 
 module.exports = function () {
   var name = session.getAvatarName();
@@ -12,16 +14,16 @@ module.exports = function () {
     var messageOfTheDayLink = messageOfTheDay.substr(messageOfTheDayIndex);
     var messageOfTheDayText = messageOfTheDay.substr(0, messageOfTheDayIndex);
     React.render(
-      <div className='main'>
-        <div id='menuBar'>
+      <div className={style.main}>
+        <div id='menuBar' className={style.menuBar}>
           <span>Hello {name.getName()}</span>
           <span>Message of the day: {messageOfTheDayText}
             <a
               href={messageOfTheDayLink}
               target='blank'
-              className='menuBarLink'>{messageOfTheDayLink}</a>
+              className={style.daylyMessageLink}>{messageOfTheDayLink}</a>
           </span>
-          <a href='#' className='menuBarLink' onclick={session.logout}>logout</a>
+          <a href='#' className={style.logout} onclick={session.logout}>logout</a>
         </div>
         <ChatBox />
       </div>,
