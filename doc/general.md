@@ -26,3 +26,6 @@ Second Lifes XML-RPC response will then be translated back to JSON and send to t
 A WebSocket is then opend by the client. For every WebSocket-connection the server listen on a new UDP-Port, to seperat multiple clients.
 
 **No client-data will be saved server-side**
+
+## Client View
+Facebooks [FLUX](http://facebook.github.io/flux/) is used instead of a traditional MVC modell. The view-component is [React](https://facebook.github.io/react/).
