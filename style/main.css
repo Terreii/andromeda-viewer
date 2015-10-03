@@ -81,11 +81,17 @@ body {
 
 .ChatDialog {
   margin: 0.3em;
+  display: flex;
+  flex-direction: column;
 }
 
-.ChatDialog > div > div > span {
+.message > span {
   padding-right: 0.3em;
   font-size: 120%;
+}
+
+.ChatDialogMessagesOut {
+  flex: 1 1 100%;
 }
 
 .ChatDialog .avatar:after {

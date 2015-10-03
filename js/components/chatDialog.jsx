@@ -64,7 +64,7 @@ var ChatDialog = React.createClass({
 
     return (
       <div className='ChatDialog'>
-        <div>{messages}</div>
+        <div className='ChatDialogMessagesOut'>{messages}</div>
         <div className='ChatTextSend'>
           <input
             type='text'
