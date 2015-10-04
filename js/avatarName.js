@@ -12,8 +12,8 @@ function cleanName (name) {
 
 function AvatarName (name) {
   if (typeof name === 'object' && typeof name.first === 'string') {
-    this.first === cleanName(name.first);
-    this.last === cleanName(name.last || 'Resident');
+    this.first = cleanName(name.first);
+    this.last = cleanName(name.last || 'Resident');
   } else if (typeof name === 'string' && arguments.length === 1) {
     var seperator = name.match(/[\.\s]/); // either a dot or a space
     if (seperator) {
