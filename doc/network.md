@@ -11,7 +11,7 @@ For a list of all messages of the SL-protocol look in the [tools/master_message_
 
 For an exact description of every message, look in the SL-wiki under [all messages](http://wiki.secondlife.com/wiki/Category:Messages) or go directly to **wiki.secondlife.com/wiki/[_put message name here_]**.
 
-## JSON Layout
+## JSON Layout for incoming messages
 After every packet is processed to will have following layout:
 
 ```javascript
@@ -56,6 +56,22 @@ After every packet is processed to will have following layout:
 
 In every data-Object there is for every variable an Object with its name and the value.
 It also has under all an Array containing all variable objects.
+
+## JSON Layout for outgoing messages
+
+```javascript
+{
+  nameOfTheBlock: [   // times the quantity needed
+    {
+      variableName: value
+    }
+  ]
+}
+ ```
+* `nameOfTheBlock` the name as it is in the wiki and template file. Containing as many objects as needed. Single will have one.
+  * `variableName` the name of the variable as it is in the wiki and template file. It value should be in the range and the type of the varibale.
+
+To identify which message it is, the first argument of the send-method of a circuit is the name of the message as a String.
 
 ## Wiki
 * [Message Layout](http://wiki.secondlife.com/wiki/Message_Layout)
