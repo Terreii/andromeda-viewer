@@ -111,6 +111,6 @@ function parseMessageTemplate (err, data) {
 
   var dataJson = JSON.stringify(allMessages);
 
-  fs.writeFileSync(process.cwd() + '/jsBuilds/messageTemplate.json', dataJson,
+  fs.writeFileSync(process.cwd() + '/builds/messageTemplate.json', dataJson,
     'utf8');
 }

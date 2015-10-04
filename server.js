@@ -45,8 +45,8 @@ function returnFile (path, res) {
   } else if (path === '/') {
     path = '/index.html';
   } else if (/^\/.+\.js/i.test(path)) {
-    // redirection of all js files to jsBuilds/
-    path = '/jsBuilds' + path;
+    // redirection of all js files to builds/
+    path = '/builds' + path;
   }
 
   var filePath = '.' + path;

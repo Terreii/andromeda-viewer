@@ -1,0 +1,38 @@
+
+/*
+ * Style for the chatDialog
+ */
+
+.ChatDialog {
+  margin: 0.3em;
+  display: flex;
+  flex-direction: column;
+}
+
+.messageOutput {
+  flex: 1 1 100%;
+}
+
+.message > span {
+  padding-right: 0.3em;
+  font-size: 120%;
+}
+
+.avatar:after {
+  content: ":";
+}
+
+.ChatTextSend {
+  margin: .4em;
+  display: flex;
+  flex-direction: row;
+}
+
+.send {
+  flex: 1 0 auto;
+}
+
+.textBox {
+  flex: 4 0 auto;
+  margin-right: 0.5em;
+}

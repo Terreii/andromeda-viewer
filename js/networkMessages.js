@@ -4,7 +4,7 @@ var util = require('util');
 
 var uuid = require('uuid');
 
-var messageTemplate = require('../jsBuilds/messageTemplate.json');
+var messageTemplate = require('../builds/messageTemplate.json');
 
 // This module implements the packages
 // http://wiki.secondlife.com/wiki/Message
