@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "build": "node ./tools/createMessageTemplate.js && browserify -p [ css-modulesify -o builds/main.css ] main.js > builds/bundle.js",
+    "help": "markdown-chalk",
     "prestart": "npm run build",
     "pretest": "npm run build",
     "test": "semistandard && semistandard test/*.js && mocha"
@@ -24,6 +25,7 @@
     "css-modulesify": "^0.9.0",
     "flux": "^2.1.1",
     "immutable": "^3.7.4",
+    "markdown-chalk": "^1.1.0",
     "mocha": "^2.2.5",
     "react": "^0.13.3",
     "react-tabs": "^0.4.0",

@@ -14,6 +14,11 @@ You need to have [node.js](https://nodejs.org/) installed.
 For how to use npm, please read the [npm-documentation](https://docs.npmjs.com/).
 
 The npm script for this project are:
+
+> npm run help
+
+Prints out this README.md.
+
 > npm run build
 
 Builds the viewer. The viewer is in a unusable state after cloning.
@@ -22,7 +27,7 @@ Builds the viewer. The viewer is in a unusable state after cloning.
 
 Runs `npm run build` and all tests after it completed. Please use this instead of `npm run build`!
 
-> npm run
+> npm start
 
 Starts the server. The viewer can then be used on the local computer.
 
