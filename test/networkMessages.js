@@ -58,14 +58,14 @@ describe('networkMessages', function () {
       });
       it('should throw an error if non array like structures are given to ' +
         'createBuffer', function () {
-          try {
-            var test = messages.types.Variable1.createBuffer({'0': 2});
-            test = messages.types.Variable1.createBuffer({length: 256});
-            assert.equal(null, test);
-          } catch (e) {
-            assert.equal(true, true);
-          }
-        });
+        try {
+          var test = messages.types.Variable1.createBuffer({'0': 2});
+          test = messages.types.Variable1.createBuffer({length: 256});
+          assert.equal(null, test);
+        } catch (e) {
+          assert.equal(true, true);
+        }
+      });
     });
 
     describe('Variable2', function () {
@@ -87,14 +87,14 @@ describe('networkMessages', function () {
       });
       it('should throw an error if non array like structures are given to ' +
         'createBuffer', function () {
-          try {
-            var test = messages.types.Variable1.createBuffer({'0': 2});
-            test = messages.types.Variable1.createBuffer({length: 65536});
-            assert.equal(null, test);
-          } catch (e) {
-            assert.equal(true, true);
-          }
-        });
+        try {
+          var test = messages.types.Variable1.createBuffer({'0': 2});
+          test = messages.types.Variable1.createBuffer({length: 65536});
+          assert.equal(null, test);
+        } catch (e) {
+          assert.equal(true, true);
+        }
+      });
     });
 
     describe('Numbers', function () {
