@@ -76,6 +76,15 @@ nameStore.getNameOf = function (uuid) {
     return '';
   }
 };
+nameStore.getNames = function () {
+  var list = [];
+  for (var uuid in names) {
+    if (names.hasOwnProperty(uuid)) {
+      list.push(names[uuid].getFullName());
+    }
+  }
+  return list;
+};
 
 function fromCharArrayToString (buffer) {
   var str = buffer.toString();

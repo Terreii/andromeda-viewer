@@ -1,34 +1,60 @@
 'use strict';
 
 var React = require('react');
+var ReactDom = require('react-dom');
+var Container = require('flux/utils').Container;
+
+var IMStore = require('../stores/IMStore.js');
+var localChatStore = require('../stores/localChatStore.js');
+var nameStore = require('../stores/nameStore.js');
 
 var session = require('../session.js');
 var ChatBox = require('./chatBox.jsx');
 var style = require('../../style/menuBar.css');
 
-module.exports = function () {
-  var name = session.getAvatarName();
-  var render = function () {
+var App = React.createClass({
+  render: function appRender () {
+    var name = session.getAvatarName();
     var messageOfTheDay = session.getMessageOfTheDay();
     var messageOfTheDayIndex = messageOfTheDay.search('http');
     var messageOfTheDayLink = messageOfTheDay.substr(messageOfTheDayIndex);
     var messageOfTheDayText = messageOfTheDay.substr(0, messageOfTheDayIndex);
-    React.render(
-      <div className={style.main}>
-        <div id='menuBar' className={style.menuBar}>
-          <span>Hello {name.getName()}</span>
-          <span>Message of the day: {messageOfTheDayText}
-            <a
-              href={messageOfTheDayLink}
-              target='blank'
-              className={style.daylyMessageLink}>{messageOfTheDayLink}</a>
-          </span>
-          <a href='#' className={style.logout} onclick={session.logout}>logout</a>
-        </div>
-        <ChatBox />
-      </div>,
-      document.body
-    );
+
+    return (<div className={style.main}>
+      <div id='menuBar' className={style.menuBar}>
+        <span>Hello {name.getName()}</span>
+        <span>Message of the day: {messageOfTheDayText}
+          <a
+            href={messageOfTheDayLink}
+            target='blank'
+            className={style.daylyMessageLink}>{messageOfTheDayLink}</a>
+        </span>
+        <a href='#' className={style.logout} onClick={session.logout}>logout</a>
+      </div>
+      <ChatBox />
+    </div>);
+  }
+});
+App.getStores = function getStores () {
+  return [
+    IMStore,
+    localChatStore,
+    nameStore
+  ];
+};
+App.calculateState = function calculateState () {
+  return {
+    chatIM: IMStore.getChat(),
+    localChat: localChatStore.getMessages(),
+    names: nameStore.getNames()
   };
-  render();
+};
+
+var AppContainer = Container.create(App);
+
+module.exports = function () {
+  var renderDiv = document.querySelector('#login');
+  renderDiv.id = 'app';
+
+  ReactDom.render(<AppContainer/>, renderDiv);
 };
