@@ -100,8 +100,8 @@ function Bridge (wsConnection) {
         message.readUInt8(2) + '.' +
         message.readUInt8(3);
 
-      var slayer = message.slice(6);
-      self.udp.send(slayer, 0, slayer.length, message.readUInt16LE(4), ip);
+      var buffy = message.slice(6);
+      self.udp.send(buffy, 0, buffy.length, message.readUInt16LE(4), ip);
     }
   });
   this.websocket.on('close', function (message) {
@@ -125,7 +125,6 @@ function Bridge (wsConnection) {
     // add port
     buffy.writeUInt16LE(rinfo.port, 4);
 
-    // self.websocket.sendBytes(buffy);
     self.websocket.send(buffy, { binary: true, mask: true });
   });
   this.udp.on('close', function (message) {
