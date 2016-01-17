@@ -1,7 +1,7 @@
-'use strict';
+'use strict'
 
-var Dispatcher = require('flux').Dispatcher;
+var Dispatcher = require('flux').Dispatcher
 
-var instance = new Dispatcher();
+var instance = new Dispatcher()
 
-module.exports = instance;
+module.exports = instance

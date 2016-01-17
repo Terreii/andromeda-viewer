@@ -7,7 +7,7 @@
     "build": "node ./tools/createMessageTemplate.js && browserify -p [ css-modulesify -o builds/main.css ] main.js > builds/bundle.js",
     "prestart": "npm run build",
     "pretest": "npm run build",
-    "test": "standard main.js server.js test/*.js && mocha"
+    "test": "standard && mocha"
   },
   "repository": {
     "type": "git",
