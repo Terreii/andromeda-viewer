@@ -15,6 +15,9 @@
   },
   "author": "Christopher Astfalk <christopher.astfalk@gmail.com>",
   "license": "MIT",
+  "engines": {
+    "node": ">=4.2.4"
+  },
   "bugs": {
     "url": "https://github.com/Terreii/andromeda-viewer/issues"
   },
