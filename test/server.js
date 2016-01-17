@@ -1,6 +1,5 @@
 'use strict';
 
-var child_process = require('child_process');
 var http = require('http');
 
 var mocha = require('mocha');
@@ -8,9 +7,7 @@ var describe = mocha.describe;
 var it = mocha.it;
 var assert = require('assert');
 
-var child = child_process.fork('server.js', [], {
-  silent: true
-});
+require('../server.js');
 
 describe('server.js', function () {
   this.slow(3000);
@@ -34,6 +31,4 @@ describe('server.js', function () {
       done();
     });
   });
-
-  child.kill();
 });
