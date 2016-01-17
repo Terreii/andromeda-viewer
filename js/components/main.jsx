@@ -1,6 +1,7 @@
 'use strict';
 
 var React = require('react');
+var ReactDom = require('react-dom');
 
 var session = require('../session.js');
 var ChatBox = require('./chatBox.jsx');
@@ -13,7 +14,7 @@ module.exports = function () {
     var messageOfTheDayIndex = messageOfTheDay.search('http');
     var messageOfTheDayLink = messageOfTheDay.substr(messageOfTheDayIndex);
     var messageOfTheDayText = messageOfTheDay.substr(0, messageOfTheDayIndex);
-    React.render(
+    ReactDom.render(
       <div className={style.main}>
         <div id='menuBar' className={style.menuBar}>
           <span>Hello {name.getName()}</span>
@@ -23,7 +24,7 @@ module.exports = function () {
               target='blank'
               className={style.daylyMessageLink}>{messageOfTheDayLink}</a>
           </span>
-          <a href='#' className={style.logout} onclick={session.logout}>logout</a>
+          <a href='#' className={style.logout} onClick={session.logout}>logout</a>
         </div>
         <ChatBox />
       </div>,
