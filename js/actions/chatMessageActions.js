@@ -1,12 +1,12 @@
-'use strict';
+'use strict'
 
 /*
  * Sends a message to the server.
  */
 
-var Dispatcher = require('../uiDispatcher.js');
+var Dispatcher = require('../uiDispatcher.js')
 
-var session = require('../session.js');
+var session = require('../session.js')
 
 module.exports = {
   sendLocalChatMessage: function (text, type, channel) {
@@ -26,7 +26,7 @@ module.exports = {
           Channel: channel
         }
       ]
-    });
+    })
   },
 
   sendInstantMessage: function (text, to, id) {
@@ -54,7 +54,7 @@ module.exports = {
             BinaryBucket: new Buffer([0])
           }
         ]
-      });
+      })
       Dispatcher.dispatch({
         actionType: 'SelfSendImprovedInstantMessage',
         AgentID: session.getAgentId(),
@@ -71,9 +71,9 @@ module.exports = {
         FromAgentName: session.getAvatarName().getFullName(),
         Message: text,
         BinaryBucket: new Buffer([0])
-      });
+      })
     } catch (e) {
-      console.error(e);
+      console.error(e)
     }
   }
-};
+}
