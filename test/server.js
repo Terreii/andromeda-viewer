@@ -19,7 +19,7 @@ describe('server.js', function () {
     setTimeout(function () {
       http.get(serverUrl, function (res) {
         assert.equal(200, res.statusCode);
-        assert.equal('text/html', res.headers['content-type']);
+        assert.equal('text/html; charset=UTF-8', res.headers['content-type']);
         done();
       });
     }, 1000);
@@ -27,7 +27,7 @@ describe('server.js', function () {
 
   it('should reject request for files in js/', function (done) {
     http.get(serverUrl + 'js/circuit.js', function (res) {
-      assert.equal(403, res.statusCode);
+      assert.equal(404, res.statusCode);
       done();
     });
   });
