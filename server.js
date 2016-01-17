@@ -26,8 +26,10 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 var app = express();
 expressWs(app); // Adding ws to express
 
+// Returns all files in builds when they are requested
 app.use(express.static('builds'));
 
+// reads and returns index.html for / and style/login.css for /login.css
 app.get('/', function (req, res) {
   res.sendFile('index.html', {root: process.cwd()});
 });
@@ -36,6 +38,8 @@ app.get('/login.css', function (req, res) {
   res.sendFile('login.css', {root: process.cwd() + '/style'});
 });
 
+// Processes the login request.
+// It gets a JSON Post and makes a XML-RPC to the login-server
 app.post('/login', bodyParser.json(), function processLogin (req, res) {
   var reqData = req.body;
 
@@ -45,7 +49,7 @@ app.post('/login', bodyParser.json(), function processLogin (req, res) {
     path: '/cgi-bin/login.cgi'
   });
 
-  reqData.mac = macaddress;
+  reqData.mac = macaddress; // adding the needed mac-address
 
   var method = 'login_to_simulator';
 
@@ -59,6 +63,7 @@ app.post('/login', bodyParser.json(), function processLogin (req, res) {
   });
 });
 
+// Incomming WebSockets are processed here
 app.ws('/', function (ws, req) {
   if (websocketOriginIsAllowed(req)) {
     allBridge.push(new Bridge(ws));
