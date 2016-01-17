@@ -26,7 +26,7 @@ describe('networkMessages', function () {
       for (var i = 0; i < size + 50; i++) {
         array.push(i);
       }
-      var buffer = new Buffer(array);
+      var buffer = messages.types.Fixed.createBuffer(array, size + 2);
       var fixed = new messages.types.Fixed(buffer, 2, 'name', size);
       it('should have the size of ' + size, function () {
         assert.equal(size, fixed.size);
@@ -41,11 +41,11 @@ describe('networkMessages', function () {
 
     describe('Variable1', function () {
       var size = Math.floor(Math.random() * 20) + 1;
-      var array = [size];
-      for (var i = 1; i < size + 50; i++) {
+      var array = [];
+      for (var i = 1; i <= size; i++) {
         array.push(i);
       }
-      var buffer = new Buffer(array);
+      var buffer = messages.types.Variable1.createBuffer(array);
       var variable = new messages.types.Variable1(buffer, 0);
       it('should have a size of ' + size, function () {
         assert.equal(size, variable.size);
@@ -56,15 +56,25 @@ describe('networkMessages', function () {
       it('should have a buffer with 1 at index 0', function () {
         assert.equal(1, variable.value.readUInt8(0));
       });
+      it('should throw an error if non array like structures are given to ' +
+        'createBuffer', function () {
+        try {
+          var test = messages.types.Variable1.createBuffer({'0': 2});
+          test = messages.types.Variable1.createBuffer({length: 256});
+          assert.equal(null, test);
+        } catch (e) {
+          assert.equal(true, true);
+        }
+      });
     });
 
     describe('Variable2', function () {
       var size = Math.floor(Math.random() * 20) + 1;
-      var array = [size, 0];
-      for (var i = 1; i < size + 50; i++) {
+      var array = [];
+      for (var i = 1; i <= size; i++) {
         array.push(i);
       }
-      var buffer = new Buffer(array);
+      var buffer = messages.types.Variable2.createBuffer(array);
       var variable = new messages.types.Variable2(buffer, 0);
       it('should have a size of ' + size, function () {
         assert.equal(size, variable.size);
@@ -74,6 +84,16 @@ describe('networkMessages', function () {
       });
       it('should have a buffer with 1 at index 0', function () {
         assert.equal(1, variable.value.readUInt8(0));
+      });
+      it('should throw an error if non array like structures are given to ' +
+        'createBuffer', function () {
+        try {
+          var test = messages.types.Variable1.createBuffer({'0': 2});
+          test = messages.types.Variable1.createBuffer({length: 65536});
+          assert.equal(null, test);
+        } catch (e) {
+          assert.equal(true, true);
+        }
       });
     });
 
@@ -87,6 +107,7 @@ describe('networkMessages', function () {
           new messages.types.U8(posBuffer, offset).value);
         assert.equal(negBuffer.readUInt8(offset),
           new messages.types.U8(negBuffer, offset).value);
+        assert.deepEqual(new Buffer([3]), messages.types.U8.createBuffer(3));
       });
 
       it('U16 should have the unsigned value of the given position',
@@ -96,6 +117,8 @@ describe('networkMessages', function () {
           new messages.types.U16(posBuffer, offset).value);
         assert.equal(negBuffer.readUInt16LE(offset),
           new messages.types.U16(negBuffer, offset).value);
+        var buffy = new Buffer([3, 0]);
+        assert.deepEqual(buffy, messages.types.U16.createBuffer(3));
       });
 
       it('U32 should have the unsigned value of the given position',
@@ -105,6 +128,8 @@ describe('networkMessages', function () {
           new messages.types.U32(posBuffer, offset).value);
         assert.equal(negBuffer.readUInt32LE(offset),
           new messages.types.U32(negBuffer, offset).value);
+        var buffy = new Buffer([3, 0, 0, 0]);
+        assert.deepEqual(buffy, messages.types.U32.createBuffer(3));
       });
 
       it('S8 should have the signed value of the given position', function () {
@@ -113,6 +138,7 @@ describe('networkMessages', function () {
           new messages.types.S8(posBuffer, offset).value);
         assert.equal(negBuffer.readInt8(offset),
           new messages.types.S8(negBuffer, offset).value);
+        assert.deepEqual(new Buffer([-3]), messages.types.S8.createBuffer(-3));
       });
 
       it('S16 should have the signed value of the given position', function () {
@@ -121,6 +147,8 @@ describe('networkMessages', function () {
           new messages.types.S16(posBuffer, offset).value);
         assert.equal(negBuffer.readInt16LE(offset),
           new messages.types.S16(negBuffer, offset).value);
+        var buffy = new Buffer([-3, 255]);
+        assert.deepEqual(buffy, messages.types.S16.createBuffer(-3));
       });
 
       it('S32 should have the signed value of the given position', function () {
@@ -129,6 +157,8 @@ describe('networkMessages', function () {
           new messages.types.S32(posBuffer, offset).value);
         assert.equal(negBuffer.readInt32LE(offset),
           new messages.types.S32(negBuffer, offset).value);
+        var buffy = new Buffer([-3, 255, 255, 255]);
+        assert.deepEqual(buffy, messages.types.S32.createBuffer(-3));
       });
 
       it('F32 should have the value of the given position', function () {
@@ -137,6 +167,8 @@ describe('networkMessages', function () {
         buffer.writeFloatLE(value, 4);
         assert.equal(buffer.readFloatLE(4),
           new messages.types.F32(buffer, 4).value);
+        assert.deepEqual(buffer.slice(4),
+          messages.types.F32.createBuffer(value));
       });
 
       it('F64 should have the value of the given position', function () {
@@ -145,6 +177,7 @@ describe('networkMessages', function () {
         buffer.writeDoubleLE(value, 0);
         assert.equal(buffer.readDoubleLE(0),
           new messages.types.F64(buffer, 0).value);
+        assert.deepEqual(buffer, messages.types.F64.createBuffer(value));
       });
     });
 
@@ -159,11 +192,14 @@ describe('networkMessages', function () {
           buffer.readFloatLE(8),
           buffer.readFloatLE(12)
         ], new messages.types.LLVector3(buffer, 4).value);
+        assert.deepEqual(buffer.slice(4),
+          messages.types.LLVector3.createBuffer([2.2, 3.3, 4.4]));
       });
 
       it('LLVector3d should store a array of 3 floats', function () {
         var buffer = new Buffer(4 * 8);
-        [1.1, 2.2, 3.3, 4.4].forEach(function (num, i) {
+        var array = [1.1, 2.2, 3.3, 4.4];
+        array.forEach(function (num, i) {
           buffer.writeDoubleLE(num, i * 8);
         });
         assert.deepEqual([
@@ -171,11 +207,14 @@ describe('networkMessages', function () {
           buffer.readDoubleLE(16),
           buffer.readDoubleLE(24)
         ], new messages.types.LLVector3d(buffer, 8).value);
+        assert.deepEqual(buffer.slice(8),
+          messages.types.LLVector3d.createBuffer(array.slice(1)));
       });
 
       it('LLVector4 should store a array of 3 floats', function () {
         var buffer = new Buffer(5 * 4);
-        [1.1, 2.2, 3.3, 4.4, 5.5].forEach(function (num, i) {
+        var array = [1.1, 2.2, 3.3, 4.4, 5.5];
+        array.forEach(function (num, i) {
           buffer.writeFloatLE(num, i * 4);
         });
         assert.deepEqual([
@@ -184,6 +223,8 @@ describe('networkMessages', function () {
           buffer.readFloatLE(12),
           buffer.readFloatLE(16)
         ], new messages.types.LLVector4(buffer, 4).value);
+        assert.deepEqual(buffer.slice(4),
+          messages.types.LLVector4.createBuffer(array.slice(1)));
       });
 
       it('LLQuaternion should store a array of 3 floats', function () {
@@ -196,6 +237,8 @@ describe('networkMessages', function () {
           buffer.readFloatLE(8),
           buffer.readFloatLE(12)
         ], new messages.types.LLQuaternion(buffer, 4).value);
+        assert.deepEqual(buffer.slice(4),
+          messages.types.LLQuaternion.createBuffer([2.2, 3.3, 4.4]));
       });
     });
 
@@ -205,6 +248,7 @@ describe('networkMessages', function () {
         uuid.v1({}, buffer);
         var idString = uuid.unparse(buffer);
         assert.equal(idString, new messages.types.LLUUID(buffer, 0).value);
+        assert.deepEqual(buffer, messages.types.LLUUID.createBuffer(idString));
       });
     });
 
@@ -215,6 +259,8 @@ describe('networkMessages', function () {
           new messages.types.BOOL(buffer, 0).value);
         assert.equal(buffer.readUInt8(1) !== 0,
           new messages.types.BOOL(buffer, 1).value);
+        assert.equal(1, messages.types.BOOL.createBuffer(true)[0]);
+        assert.equal(0, messages.types.BOOL.createBuffer(false)[0]);
       });
     });
 
@@ -241,6 +287,14 @@ describe('networkMessages', function () {
       it('should parse a valid ip-port', function () {
         assert.equal(buffer.readUInt16LE(4),
           new messages.types.IPPORT(buffer, 4).value);
+      });
+      it('should create valid buffers', function () {
+        var addr = new Buffer([1, 2, 3, 4]);
+        assert.deepEqual(addr, messages.types.IPADDR.createBuffer('1.2.3.4'));
+        assert.deepEqual(addr,
+          messages.types.IPADDR.createBuffer([1, 2, 3, 4]));
+        var port = new Buffer([136, 19]);
+        assert.deepEqual(port, messages.types.IPPORT.createBuffer(5000));
       });
     });
   });
