@@ -4,7 +4,8 @@
   "description": "Small web-client for connecting to the virtual world of Second Life.",
   "main": "server.js",
   "scripts": {
-    "build": "node ./tools/createMessageTemplate.js && browserify -p [ css-modulesify -o builds/main.css ] main.js > builds/bundle.js",
+    "build": "node ./tools/createMessageTemplate.js && browserify -p [ css-modulesify -o builds/main.css ] main.js -o builds/bundle.js",
+    "watch": "node ./tools/createMessageTemplate.js && watchify -p [ css-modulesify -o builds/main.css ] main.js -o builds/bundle.js --debug --verbose",
     "help": "markdown-chalk",
     "prestart": "npm run build",
     "pretest": "npm run build",
@@ -14,7 +15,11 @@
     "type": "git",
     "url": "https://github.com/Terreii/andromeda-viewer.git"
   },
-  "author": "Christopher Astfalk <christopher.astfalk@gmail.com>",
+  "author": {
+    "name": "Christopher Astfalk",
+    "email": "christopher.astfalk@icloud.com",
+    "url": "http://christopher-astfalk.de/"
+  },
   "license": "MIT",
   "engines": {
     "node": ">=4.2.4"
@@ -25,6 +30,7 @@
   "homepage": "https://github.com/Terreii/andromeda-viewer",
   "devDependencies": {
     "browserify": "^13.0.0",
+    "watchify": "^3.7.0",
     "css-modulesify": "^0.16.0",
     "flux": "^2.1.1",
     "immutable": "^3.7.4",
