@@ -9,16 +9,24 @@ Small web-client for connecting to the virtual world of [Second Life](https://se
 _**This viewer is not production ready!**_
 
 ## Contributing
-Please read the documentation first. You can find it in the **doc-folder**. Start with **general.md**.
+Feel free to contribute in any way you like. You can't programm? You are still needed!
+
+Please read and review the documentation. You can find it in the **doc-folder**.
+
+#### Having questions?
+Contact me at any time.
 
 ### How to get started
-You need to have [node.js](https://nodejs.org/) installed.
+You need to have [node.js](https://nodejs.org/) version 4.2.4 or higher installed.
 
 For how to use npm, please read the [npm-documentation](https://docs.npmjs.com/).
+
+Everything needed for this project should be a npm dependency. All can be installed by running _npm install_
 
 The npm script for this project are:
 
 > npm run help
+
 
 Prints out this README.md.
 
