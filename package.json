@@ -8,6 +8,7 @@
     "watch": "node ./tools/createMessageTemplate.js && watchify -p [ css-modulesify -o builds/main.css ] main.js -o builds/bundle.js --debug --verbose",
     "help": "markdown-chalk",
     "prestart": "npm run build",
+    "pretest": "npm run build",
     "test": "standard && mocha"
   },
   "repository": {
