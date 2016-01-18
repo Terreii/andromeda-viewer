@@ -27,16 +27,19 @@ The npm script for this project are:
 
 > npm run help
 
-
 Prints out this README.md.
 
 > npm run build
 
 Builds the viewer. The viewer is in a unusable state after cloning.
 
+> npm run watch
+
+Builds the viewer. It continues to run and build the viewer when a file changes. Best developing experience!
+
 > npm test
 
-Runs `npm run build` and all tests after it completed. Please use this instead of `npm run build`!
+Runs all tests. Please run this before committing!
 
 > npm start
 
