@@ -1,27 +1,27 @@
-'use strict';
+'use strict'
 
 /*
  * Stores all IM-Chats and IM-Messanges
  */
 
-var Store = require('flux/utils').Store;
-var Immutable = require('immutable');
+var Store = require('flux/utils').Store
+var Immutable = require('immutable')
 
-var Dispatcher = require('../uiDispatcher.js');
-var session = require('../session.js');
+var Dispatcher = require('../uiDispatcher.js')
+var session = require('../session.js')
 
-var chats = Immutable.Map();
+var chats = Immutable.Map()
 
 function addIMFromServer (message) {
-  var messageBlock = message.MessageBlock.data[0];
-  var dialog = messageBlock.Dialog.value;
+  var messageBlock = message.MessageBlock.data[0]
+  var dialog = messageBlock.Dialog.value
 
   if (dialog === 41 || dialog === 42) { // filter start/end typing
-    return;
+    return
   }
 
-  var toAgentID = messageBlock.ToAgentID.value;
-  var fromId = message.AgentData.data[0].AgentID.value;
+  var toAgentID = messageBlock.ToAgentID.value
+  var fromId = message.AgentData.data[0].AgentID.value
 
   var msg = Immutable.Map({
     sessionID: message.AgentData.data[0].SessionID.value,
@@ -39,9 +39,9 @@ function addIMFromServer (message) {
     message: fromCharArrayToString(messageBlock.Message.value),
     binaryBucket: messageBlock.BinaryBucket.value,
     time: new Date()
-  });
+  })
 
-  addToChats(fromId, toAgentID, msg);
+  addToChats(fromId, toAgentID, msg)
 }
 
 function addIMFromViewer (message) {
@@ -61,47 +61,47 @@ function addIMFromViewer (message) {
     message: message.Message,
     binaryBucket: message.BinaryBucket,
     time: new Date()
-  });
+  })
 
-  addToChats(message.AgentID, message.ToAgentID, msg);
+  addToChats(message.AgentID, message.ToAgentID, msg)
 }
 
 function addToChats (fromId, toAgentID, msg) {
   // if it is send by this user the conversation will be of the toAgentId
-  var conv = (session.getAgentId() === fromId) ? toAgentID : fromId;
+  var conv = (session.getAgentId() === fromId) ? toAgentID : fromId
 
-  var convStore;
+  var convStore
   if (chats.has(conv)) {
-    convStore = chats.get(conv).push(msg);
+    convStore = chats.get(conv).push(msg)
   } else {
-    convStore = Immutable.List([msg]);
+    convStore = Immutable.List([msg])
   }
 
-  chats = chats.set(conv, convStore);
+  chats = chats.set(conv, convStore)
 }
 
-var IMStore = new Store(Dispatcher);
+var IMStore = new Store(Dispatcher)
 IMStore.__onDispatch = function (payload) {
   switch (payload.actionType) {
     case 'ImprovedInstantMessage':
-      addIMFromServer(payload);
-      this.__emitChange();
-      break;
+      addIMFromServer(payload)
+      this.__emitChange()
+      break
     case 'SelfSendImprovedInstantMessage':
-      addIMFromViewer(payload);
-      this.__emitChange();
-      break;
+      addIMFromViewer(payload)
+      this.__emitChange()
+      break
     default:
-      break;
+      break
   }
-};
+}
 IMStore.getChat = function () {
-  return chats;
-};
-
-function fromCharArrayToString (buffer) {
-  var str = buffer.toString();
-  return str.substring(0, str.length - 1);
+  return chats
 }
 
-module.exports = IMStore;
+function fromCharArrayToString (buffer) {
+  var str = buffer.toString()
+  return str.substring(0, str.length - 1)
+}
+
+module.exports = IMStore
