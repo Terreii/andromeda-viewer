@@ -48,11 +48,11 @@ var ChatDialog = React.createClass({
       var fromId = self.props.isIM ? msg.get('fromId') : msg.get('sourceID')
       var name = nameStore.getNameOf(fromId).toString()
       return (
-      <div className={style.message}>
-        <span className='time'>{leadingZero(time.getHours())}: {leadingZero(time.getMinutes())}: {leadingZero(time.getSeconds())}</span>
-        <span className={style.avatar}>{name}</span>
-        <span className='messageText'>{msg.get('message')}</span>
-      </div>
+        <div className={style.message}>
+          <span className='time'>{leadingZero(time.getHours())}: {leadingZero(time.getMinutes())}: {leadingZero(time.getSeconds())}</span>
+          <span className={style.avatar}>{name}</span>
+          <span className='messageText'>{msg.get('message')}</span>
+        </div>
       )
     })
 
@@ -60,26 +60,26 @@ var ChatDialog = React.createClass({
       ((this.props.isIM) ? 'Instant Message' : 'to local chat')
 
     return (
-    <div className={style.ChatDialog}>
-      <div className={style.messageOutput}>
-        {messages}
+      <div className={style.ChatDialog}>
+        <div className={style.messageOutput}>
+          {messages}
+        </div>
+        <div className={style.ChatTextSend}>
+          <input
+            type='text'
+            className={style.textBox}
+            name='chatInput'
+            placeholder={placeholderText}
+            value={this.state.text}
+            onChange={this._onChange}
+            onKeyDown={this._onKeyDown} />
+          <input
+            type='button'
+            className={style.send}
+            value='Send'
+            onClick={this._onClick} />
+        </div>
       </div>
-      <div className={style.ChatTextSend}>
-        <input
-          type='text'
-          className={style.textBox}
-          name='chatInput'
-          placeholder={placeholderText}
-          value={this.state.text}
-          onChange={this._onChange}
-          onKeyDown={this._onKeyDown} />
-        <input
-          type='button'
-          className={style.send}
-          value='Send'
-          onClick={this._onClick} />
-      </div>
-    </div>
     )
   },
 

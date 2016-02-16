@@ -21,13 +21,13 @@ var App = React.createClass({
     var messageOfTheDayText = messageOfTheDay.substr(0, messageOfTheDayIndex)
 
     return (<div className={style.main}>
-              <div id='menuBar' className={style.menuBar}>
-                <span>Hello {name.getName()}</span>
-                <span>Message of the day: {messageOfTheDayText} <a href={messageOfTheDayLink} target='blank' className={style.daylyMessageLink}>{messageOfTheDayLink}</a></span>
-                <a href='#' className={style.logout} onClick={session.logout}>logout</a>
-              </div>
-              <ChatBox />
-            </div>)
+      <div id='menuBar' className={style.menuBar}>
+        <span>Hello {name.getName()}</span>
+        <span>Message of the day: {messageOfTheDayText} <a href={messageOfTheDayLink} target='blank' className={style.daylyMessageLink}>{messageOfTheDayLink}</a></span>
+        <a href='#' className={style.logout} onClick={session.logout}>logout</a>
+      </div>
+      <ChatBox />
+    </div>)
   }
 })
 App.getStores = function getStores () {

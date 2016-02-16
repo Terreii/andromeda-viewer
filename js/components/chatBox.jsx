@@ -63,38 +63,38 @@ var ChatBox = React.createClass({
         name = key
       }
       return <Tab>
-               {name}
-             </Tab>
+        {name}
+      </Tab>
     })
     var panels = imsNames.map(function (key) {
       var messages = self.state.IMs.get(key)
       var id = messages.get(0).get('id')
       return (
-      <TabPanel>
-        <ChatDialog data={messages} isIM='true' sendTo={function (text) {
-          chatMessageActions.sendInstantMessage(text, key, id)
-        }} />
-      </TabPanel>
+        <TabPanel>
+          <ChatDialog data={messages} isIM='true' sendTo={function (text) {
+            chatMessageActions.sendInstantMessage(text, key, id)
+          }} />
+        </TabPanel>
       )
     })
 
     return (
-    <div className='ChatBox'>
-      <Tabs>
-        <TabList>
-          <Tab>
-            Local
-          </Tab>
-          {ims}
-        </TabList>
-        <TabPanel>
-          <ChatDialog data={this.state.localChat} sendTo={function (text) {
-            chatMessageActions.sendLocalChatMessage(text, 1, 0)
-          }} />
-        </TabPanel>
-        {panels}
-      </Tabs>
-    </div>
+      <div className='ChatBox'>
+        <Tabs>
+          <TabList>
+            <Tab>
+              Local
+            </Tab>
+            {ims}
+          </TabList>
+          <TabPanel>
+            <ChatDialog data={this.state.localChat} sendTo={function (text) {
+              chatMessageActions.sendLocalChatMessage(text, 1, 0)
+            }} />
+          </TabPanel>
+          {panels}
+        </Tabs>
+      </div>
     )
   }
 })
