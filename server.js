@@ -130,7 +130,7 @@ function Bridge (wsConnection) {
     // add port
     buffy.writeUInt16LE(rinfo.port, 4)
 
-    self.websocket.send(buffy, { binary: true, mask: true })
+    self.websocket.send(buffy, { binary: true })
   })
   this.udp.on('close', function (message) {
     if (self.websocket) {
