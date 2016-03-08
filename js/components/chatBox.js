@@ -13,11 +13,11 @@ var Tabs = ReactTabs.Tabs
 var TabList = ReactTabs.TabList
 var TabPanel = ReactTabs.TabPanel
 
-var localChatStore = require('../stores/localChatStore.js')
-var IMStore = require('../stores/IMStore.js')
-var nameStore = require('../stores/nameStore.js')
-var ChatDialog = require('./chatDialog.jsx')
-var chatMessageActions = require('../actions/chatMessageActions.js')
+var localChatStore = require('../stores/localChatStore')
+var IMStore = require('../stores/IMStore')
+var nameStore = require('../stores/nameStore')
+var ChatDialog = require('./chatDialog')
+var chatMessageActions = require('../actions/chatMessageActions')
 
 function getChat () {
   return {

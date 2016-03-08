@@ -7,7 +7,7 @@ var describe = mocha.describe
 var it = mocha.it
 var assert = require('assert')
 
-require('../server.js')
+require('../server')
 
 describe('server.js', function () {
   this.slow(3000)

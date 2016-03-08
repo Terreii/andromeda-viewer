@@ -4,9 +4,9 @@
  * Sends a message to the server.
  */
 
-var Dispatcher = require('../uiDispatcher.js')
+var Dispatcher = require('../uiDispatcher')
 
-var session = require('../session.js')
+var session = require('../session')
 
 module.exports = {
   sendLocalChatMessage: function (text, type, channel) {
