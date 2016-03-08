@@ -10,7 +10,7 @@ var nameStore = require('../stores/nameStore.js')
 
 var session = require('../session.js')
 var ChatBox = require('./chatBox.jsx')
-var style = require('../../style/menuBar.css')
+var style = require('./main.css')
 
 var App = React.createClass({
   render: function appRender () {

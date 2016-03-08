@@ -8,7 +8,7 @@ var React = require('react')
 var Immutable = require('immutable')
 
 var nameStore = require('../stores/nameStore.js')
-var style = require('../../style/chatDialog.css')
+var style = require('./chatDialog.css')
 
 // Adds to all Numbers a leading zero if it has only one digit
 function leadingZero (num) {

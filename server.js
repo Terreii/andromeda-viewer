@@ -35,7 +35,7 @@ app.get('/', function (req, res) {
 })
 
 app.get('/login.css', function (req, res) {
-  res.sendFile('login.css', {root: process.cwd() + '/style'})
+  res.sendFile('login.css', {root: process.cwd()})
 })
 
 // Processes the login request.
