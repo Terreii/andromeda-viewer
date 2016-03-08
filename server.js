@@ -29,14 +29,8 @@ expressWs(app) // Adding ws to express
 // Returns all files in builds when they are requested
 app.use(express.static('builds'))
 
-// reads and returns index.html for / and style/login.css for /login.css
-app.get('/', function (req, res) {
-  res.sendFile('index.html', {root: process.cwd()})
-})
-
-app.get('/login.css', function (req, res) {
-  res.sendFile('login.css', {root: process.cwd()})
-})
+// reads and returns index.html and login.css in public/
+app.use(express.static('public'))
 
 // Processes the login request.
 // It gets a JSON Post and makes a XML-RPC to the login-server
