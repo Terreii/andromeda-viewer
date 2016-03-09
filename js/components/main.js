@@ -4,13 +4,13 @@ var React = require('react')
 var ReactDom = require('react-dom')
 var Container = require('flux/utils').Container
 
-var IMStore = require('../stores/IMStore.js')
-var localChatStore = require('../stores/localChatStore.js')
-var nameStore = require('../stores/nameStore.js')
+var IMStore = require('../stores/IMStore')
+var localChatStore = require('../stores/localChatStore')
+var nameStore = require('../stores/nameStore')
 
-var session = require('../session.js')
-var ChatBox = require('./chatBox.jsx')
-var style = require('../../style/menuBar.css')
+var session = require('../session')
+var ChatBox = require('./chatBox')
+var style = require('./main.css')
 
 var App = React.createClass({
   render: function appRender () {

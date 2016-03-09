@@ -5,9 +5,9 @@
  *
  */
 
-var viewerInfo = require('./js/viewerInfo.js')
-var AvatarName = require('./js/avatarName.js')
-var session = require('./js/session.js')
+var viewerInfo = require('./js/viewerInfo')
+var AvatarName = require('./js/avatarName')
+var session = require('./js/session')
 
 function displayLoginError (message) {
   var messageDisplay = document.getElementById('loginErrorMessage')
@@ -45,7 +45,7 @@ button.addEventListener('click', function (event) {
       displayLoginError(err.message)
     } else {
       // start everything
-      var display = require('./js/components/main.jsx')
+      var display = require('./js/components/main')
       display()
     }
   })

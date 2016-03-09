@@ -4,8 +4,8 @@ var crypto = require('crypto')
 
 var viewerInfo = require('./viewerInfo')
 var Circuit = require('./circuit')
-var simActionsForUI = require('./actions/simAction.js')
-var AvatarName = require('./avatarName.js')
+var simActionsForUI = require('./actions/simAction')
+var AvatarName = require('./avatarName')
 
 // true if there is a running session
 var isLoggedIn = false
