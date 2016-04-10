@@ -1,9 +1,13 @@
 'use strict'
 
+var path = require('path')
+
+var cwd = process.cwd()
+
 module.exports = {
-  entry: './main.js',
+  entry: path.join(cwd, 'main.js'),
   output: {
-    filename: 'builds/bundle.js'
+    filename: path.join(cwd, 'builds', 'bundle.js')
   },
   module: {
     loaders: [
@@ -22,6 +26,10 @@ module.exports = {
         query: {
           presets: ['es2015', 'react']
         }
+      },
+      {
+        test: /master_message_template\.msg/,
+        loader: path.join(cwd, 'tools', 'createMessageTemplate.js')
       }
     ]
   }

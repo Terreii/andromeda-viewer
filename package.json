@@ -4,8 +4,8 @@
   "description": "Small web-client for connecting to the virtual world of Second Life.",
   "main": "server.js",
   "scripts": {
-    "build": "node ./tools/createMessageTemplate.js && NODE_ENV=production webpack --optimize-minimize --progress --colors",
-    "watch": "node ./tools/createMessageTemplate.js && webpack -d --progress --colors --watch",
+    "build": "NODE_ENV=production webpack --optimize-minimize --progress --colors",
+    "watch": "webpack -d --progress --colors --watch",
     "help": "markdown-chalk",
     "pretest": "npm run build",
     "test": "standard && mocha"
