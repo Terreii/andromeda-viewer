@@ -6,7 +6,7 @@ var assert = require('assert')
 
 var uuid = require('uuid')
 
-var messages = require('../js/networkMessages')
+var messages = require('../builds/testBundle')
 
 describe('networkMessages', function () {
   describe('types', function () {

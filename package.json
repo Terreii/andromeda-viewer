@@ -7,8 +7,9 @@
     "build": "NODE_ENV=production webpack --optimize-minimize --progress --colors",
     "watch": "webpack -d --progress --colors --watch",
     "help": "markdown-chalk",
-    "pretest": "npm run build",
-    "test": "standard && mocha"
+    "pretest": "webpack --config test.config.js",
+    "test": "standard && mocha",
+    "posttest": "rm builds/testBundle.js"
   },
   "repository": {
     "type": "git",
