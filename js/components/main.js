@@ -4,7 +4,7 @@ var React = require('react')
 var ReactDom = require('react-dom')
 var Container = require('flux/utils').Container
 
-var friendsStore = require('./stores/friendsStore')
+var friendsStore = require('../stores/friendsStore')
 var IMStore = require('../stores/IMStore')
 var localChatStore = require('../stores/localChatStore')
 var nameStore = require('../stores/nameStore')
@@ -24,7 +24,14 @@ var App = React.createClass({
     return (<div className={style.main}>
       <div id='menuBar' className={style.menuBar}>
         <span>Hello {name.getName()}</span>
-        <span>Message of the day: {messageOfTheDayText} <a href={messageOfTheDayLink} target='blank' className={style.daylyMessageLink}>{messageOfTheDayLink}</a></span>
+        <span>Message of the day: {messageOfTheDayText}
+          <a
+            href={messageOfTheDayLink}
+            target='_blank'
+            className={style.daylyMessageLink}>
+            {messageOfTheDayLink}
+          </a>
+        </span>
         <a href='#' className={style.logout} onClick={session.logout}>logout</a>
       </div>
       <ChatBox />

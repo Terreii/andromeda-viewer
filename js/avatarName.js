@@ -7,7 +7,7 @@
 // first.last and first last will become {first: 'first', last: 'last'}
 
 function cleanName (name) {
-  return name.trim().replace(/"/g, '')
+  return name.trim().replace(/"/g, '').replace('\0', '')
 }
 
 function AvatarName (name) {

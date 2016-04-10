@@ -49,6 +49,16 @@ function addNameFromLocalChat (msg) {
   return false
 }
 
+function addNameFromUUIDName (msg) {
+  const didChangeArray = msg.UUIDNameBlock.data.map((nameBlock) => {
+    const firstName = nameBlock.FirstName.value.toString()
+    const lastName = nameBlock.LastName.value.toString()
+    const name = firstName + ' ' + lastName
+    return addName(nameBlock.ID.value, name)
+  })
+  return didChangeArray.some((did) => did) // Did some name change?
+}
+
 var nameStore = new Store(Dispatcher)
 nameStore.__onDispatch = function (payload) {
   var didChange = false
@@ -59,13 +69,16 @@ nameStore.__onDispatch = function (payload) {
     case 'ImprovedInstantMessage':
       didChange = addNameFromIM(payload)
       break
+    case 'UUIDNameReply':
+      didChange = addNameFromUUIDName(payload)
+      break
   }
   if (didChange) {
     this.__emitChange()
   }
 }
 nameStore.hasNameOf = function (uuid) {
-  return typeof names[uuid] === 'string'
+  return names[uuid] != null
 }
 // Gets the name of an Avatar/Agent
 // id there is no name for that ID it will return an empty string

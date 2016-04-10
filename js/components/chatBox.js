@@ -16,7 +16,10 @@ var TabPanel = ReactTabs.TabPanel
 var localChatStore = require('../stores/localChatStore')
 var IMStore = require('../stores/IMStore')
 var nameStore = require('../stores/nameStore')
+
 var ChatDialog = require('./chatDialog')
+var FriendsList = require('./friendsList')
+
 var chatMessageActions = require('../actions/chatMessageActions')
 
 function getChat () {
@@ -82,10 +85,9 @@ var ChatBox = React.createClass({
       <div className='ChatBox'>
         <Tabs>
           <TabList>
-            <Tab>
-              Local
-            </Tab>
+            <Tab>Local</Tab>
             {ims}
+            <Tab>+</Tab>
           </TabList>
           <TabPanel>
             <ChatDialog data={this.state.localChat} sendTo={function (text) {
@@ -93,6 +95,7 @@ var ChatBox = React.createClass({
             }} />
           </TabPanel>
           {panels}
+          <TabPanel><FriendsList/></TabPanel>
         </Tabs>
       </div>
     )
