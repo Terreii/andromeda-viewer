@@ -1,8 +1,7 @@
 'use strict'
 
-var fs = require('fs')
-
 // parse the message_template.msg and creates the templates for the messages
+// It is implemented as a loader for Webpack
 // http://secondlife.com/app/message_template/master_message_template.msg
 // results in:
 // [
@@ -30,15 +29,12 @@ var fs = require('fs')
 //   }
 // ]
 
-fs.readFile(process.cwd() + '/tools/master_message_template.msg',
-  {encoding: 'utf8'},
-  parseMessageTemplate)
+module.exports = function (content) {
+  this.cacheable()
+  return 'module.exports = ' + parseMessageTemplate(content)
+}
 
-function parseMessageTemplate (err, data) {
-  if (err) {
-    console.error(err)
-    return
-  }
+function parseMessageTemplate (data) {
   var allMessages = data.split('\n').map(function (line) {
     // remove the commens
     return line.replace(/\/\/.*$/, '').replace(/^\s+$/g, '')
@@ -109,8 +105,5 @@ function parseMessageTemplate (err, data) {
     }
   })
 
-  var dataJson = JSON.stringify(allMessages)
-
-  fs.writeFileSync(process.cwd() + '/builds/messageTemplate.json', dataJson,
-    'utf8')
+  return JSON.stringify(allMessages)
 }
