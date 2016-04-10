@@ -4,8 +4,10 @@ var crypto = require('crypto')
 
 var viewerInfo = require('./viewerInfo')
 var Circuit = require('./circuit')
-var simActionsForUI = require('./actions/simAction')
 var AvatarName = require('./avatarName')
+
+var simActionsForUI = require('./actions/simAction')
+var FriendsAction = require('./actions/friends')
 
 // true if there is a running session
 var isLoggedIn = false
@@ -42,7 +44,9 @@ function login (firstName, lastName, password, callback) {
     version: viewerInfo.version,
     platform: viewerInfo.platform,
     // mac will be added on the server side
-    options: [],
+    options: [
+      'buddy-list'
+    ],
     agree_to_tos: 'true',
     read_critical: 'true'
   }
@@ -64,6 +68,7 @@ function login (firstName, lastName, password, callback) {
       sessionInfo = response
       connectToSim(sessionInfo.sim_ip, sessionInfo.sim_port,
         sessionInfo.circuit_code, callback)
+      FriendsAction.initFriends(sessionInfo['buddy-list'])
     } else {
       // error
       callback(response)

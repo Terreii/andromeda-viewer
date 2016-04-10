@@ -43,12 +43,12 @@ var ChatDialog = React.createClass({
 
   render: function () {
     var self = this
-    var messages = this.props.data.map(function (msg) {
+    var messages = this.props.data.map((msg, index) => {
       var time = msg.get('time')
       var fromId = self.props.isIM ? msg.get('fromId') : msg.get('sourceID')
       var name = nameStore.getNameOf(fromId).toString()
       return (
-        <div className={style.message}>
+        <div className={style.message} key={'message' + fromId + '_' + index}>
           <span className='time'>{leadingZero(time.getHours())}: {leadingZero(time.getMinutes())}: {leadingZero(time.getSeconds())}</span>
           <span className={style.avatar}>{name}</span>
           <span className='messageText'>{msg.get('message')}</span>

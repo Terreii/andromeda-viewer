@@ -4,6 +4,7 @@ var React = require('react')
 var ReactDom = require('react-dom')
 var Container = require('flux/utils').Container
 
+var friendsStore = require('./stores/friendsStore')
 var IMStore = require('../stores/IMStore')
 var localChatStore = require('../stores/localChatStore')
 var nameStore = require('../stores/nameStore')
@@ -32,6 +33,7 @@ var App = React.createClass({
 })
 App.getStores = function getStores () {
   return [
+    friendsStore,
     IMStore,
     localChatStore,
     nameStore
@@ -39,6 +41,7 @@ App.getStores = function getStores () {
 }
 App.calculateState = function calculateState () {
   return {
+    friends: friendsStore.getState(),
     chatIM: IMStore.getChat(),
     localChat: localChatStore.getMessages(),
     names: nameStore.getNames()
