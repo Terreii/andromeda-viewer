@@ -20,11 +20,13 @@ document.title = viewerInfo.name
 document.getElementById('loginViewerName').textContent = viewerInfo.name
 
 var button = document.getElementById('loginButton')
+var nameInput = document.getElementById('loginName')
+var pwInput = document.getElementById('loginPassword')
 
 // Login
-button.addEventListener('click', function (event) {
-  var loginName = document.getElementById('loginName').value
-  var password = document.getElementById('loginPassword').value
+function login (event) {
+  var loginName = nameInput.value
+  var password = pwInput.value
 
   if (loginName.length === 0 || password.length === 0) {
     displayLoginError('Please insert a name and a password')
@@ -44,11 +46,26 @@ button.addEventListener('click', function (event) {
       button.value = 'Login'
       displayLoginError(err.message)
     } else {
+      // cleanup
+      button.removeEventListener('click', login)
+      nameInput.removeEventListener('keyup', detectReturn)
+      pwInput.removeEventListener('keyup', detectReturn)
+
       // start everything
       var display = require('./js/components/main')
       display()
     }
   })
-})
+}
+
+function detectReturn (event) { // detects if return was pressed (keyCode 13)
+  if (event.type === 'keyup' && (event.which === 13 || event.keyCode === 13)) {
+    login(event)
+  }
+}
+
+button.addEventListener('click', login)
+nameInput.addEventListener('keyup', detectReturn)
+pwInput.addEventListener('keyup', detectReturn)
 
 button.disabled = false
