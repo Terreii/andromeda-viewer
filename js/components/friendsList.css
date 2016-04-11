@@ -1,0 +1,24 @@
+/*
+ * Friends List styles
+ */
+
+.Outer {
+  padding: 1em;
+}
+
+.Title {
+  font-size: 120%;
+  border-bottom: 1px solid grey;
+}
+
+.List {
+  list-style: none;
+  padding-left: 1em;
+}
+
+.ListItem {
+  display: flex;
+  flex-direction: row;
+}
+
+.RightsCheckbox {}

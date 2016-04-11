@@ -18,8 +18,8 @@ class TodoStore extends ReduceStore {
     switch (payload.actionType) {
       case 'friendsInit':
         return payload.friends.reduce((state, friend) => {
-          const rightsGiven = friend['buddy_rights_given']
-          const rightsHas = friend['rights_has']
+          const rightsGiven = friend['buddy_rights_given'] // from me to friend
+          const rightsHas = friend['rights_has'] // Friend has given me rights
           const parseRights = (rights) => {
             var canModifyObjects = false
             if (rights >= 4) {
