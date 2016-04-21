@@ -51,6 +51,7 @@ class FriendsList extends React.Component {
             title={titles[key][prop]}
             data-friend-id={id}
             data-right-name={prop}
+            key={`friend-${id}-${key}-${prop}`}
           />)
           rights.push(ele)
         })

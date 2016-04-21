@@ -85,17 +85,17 @@ var ChatBox = React.createClass({
       <div className='ChatBox'>
         <Tabs>
           <TabList>
+            <Tab>Friends</Tab>
             <Tab>Local</Tab>
             {ims}
-            <Tab>+</Tab>
           </TabList>
+          <TabPanel><FriendsList/></TabPanel>
           <TabPanel>
             <ChatDialog data={this.state.localChat} sendTo={function (text) {
               chatMessageActions.sendLocalChatMessage(text, 1, 0)
             }} />
           </TabPanel>
           {panels}
-          <TabPanel><FriendsList/></TabPanel>
         </Tabs>
       </div>
     )
