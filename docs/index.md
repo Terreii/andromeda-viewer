@@ -8,7 +8,7 @@ id: home
 
 The Andromeda-Viewer is a small text-based chat-client for [Second-Life](https://secondlife.com) ™.
 
-##It is not ready the be used!
+## It is not ready the be used!
 
 You can contribute under the [GitHub repository](https://github.com/Terreii/andromeda-viewer)
 
