@@ -1,7 +1,7 @@
 'use strict'
 
-var Dispatcher = require('flux').Dispatcher
+import {Dispatcher} from 'flux'
 
-var instance = new Dispatcher()
+const instance = new Dispatcher()
 
-module.exports = instance
+export default instance

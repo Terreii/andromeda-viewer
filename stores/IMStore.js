@@ -7,7 +7,7 @@
 var Store = require('flux/utils').Store
 var Immutable = require('immutable')
 
-var Dispatcher = require('../network/uiDispatcher')
+import Dispatcher from '../network/uiDispatcher'
 var session = require('../session')
 
 var chats = Immutable.Map()

@@ -1,13 +1,12 @@
 'use strict'
 
-var describe = require('mocha').describe
-var it = require('mocha').it
-var assert = require('assert')
+import {describe, it} from 'mocha'
+import assert from 'assert'
 
-var AvatarName = require('../avatarName')
+import AvatarName from '../avatarName'
 
-describe('avatarName', function () {
-  it('should parse a given name', function () {
+describe('avatarName', () => {
+  it('should parse a given name', () => {
     assert.deepEqual({
       first: 'First',
       last: 'Last'
@@ -35,26 +34,26 @@ describe('avatarName', function () {
 
   it('should give only the first name by the method getName() if the ' +
   'last name is "Resident"',
-    function () {
+    () => {
       assert.equal('Tester', new AvatarName('Tester.Resident').getName())
       assert.equal('hal2000', new AvatarName('hal2000').getName())
     })
 
-  it('should give the full name with the method getFullName()', function () {
+  it('should give the full name with the method getFullName()', () => {
     assert.equal('Tester Resident', new AvatarName('Tester').getFullName())
     assert.equal('Tester Linden',
       new AvatarName('Tester.Linden').getFullName())
   })
 
-  it('should have a toString method that behaves like getName', function () {
+  it('should have a toString method that behaves like getName', () => {
     assert.equal('Tester', new AvatarName('Tester.Resident').toString())
     assert.equal('hal2000', new AvatarName('hal2000').toString())
   })
 
-  it('should be compareable with the compare method', function () {
-    var first = new AvatarName('test')
-    var second = new AvatarName({first: 'test', last: 'Linden'})
-    var third = new AvatarName('test Resident')
+  it('should be compareable with the compare method', () => {
+    const first = new AvatarName('test')
+    const second = new AvatarName({first: 'test', last: 'Linden'})
+    const third = new AvatarName('test Resident')
 
     assert.equal(false, first.compare(second))
     assert.equal(true, first.compare(third))

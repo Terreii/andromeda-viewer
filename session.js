@@ -2,10 +2,10 @@
 
 var crypto = require('crypto')
 
-var viewerInfo = require('./viewerInfo')
+import {viewerName, viewerVersion, viewerPlatform} from './viewerInfo'
 var Circuit = require('./network/circuit')
-var simActionsForUI = require('./actions/simAction')
-var AvatarName = require('./avatarName')
+import simActionsForUI from './actions/simAction'
+import AvatarName from './avatarName'
 
 // true if there is a running session
 var isLoggedIn = false
@@ -38,9 +38,9 @@ function login (firstName, lastName, password, callback) {
     last: lastName,
     passwd: passwdFinal,
     start: 'last',
-    channel: viewerInfo.name,
-    version: viewerInfo.version,
-    platform: viewerInfo.platform,
+    channel: viewerName,
+    version: viewerVersion,
+    platform: viewerPlatform,
     // mac will be added on the server side
     options: [],
     agree_to_tos: 'true',

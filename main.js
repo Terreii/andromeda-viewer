@@ -5,8 +5,8 @@
  *
  */
 
-var viewerInfo = require('./viewerInfo')
-var AvatarName = require('./avatarName')
+import {viewerName} from './viewerInfo'
+import AvatarName from './avatarName'
 var session = require('./session')
 
 function displayLoginError (message) {
@@ -16,8 +16,8 @@ function displayLoginError (message) {
 }
 
 // Show the name of the Viewer
-document.title = viewerInfo.name
-document.getElementById('loginViewerName').textContent = viewerInfo.name
+document.title = viewerName
+document.getElementById('loginViewerName').textContent = viewerName
 
 var button = document.getElementById('loginButton')
 var nameInput = document.getElementById('loginName')
