@@ -6,18 +6,16 @@
  * will later also host all Instant Messages
  */
 
-var React = require('react')
-var ReactTabs = require('react-tabs')
-var Tab = ReactTabs.Tab
-var Tabs = ReactTabs.Tabs
-var TabList = ReactTabs.TabList
-var TabPanel = ReactTabs.TabPanel
+import React from 'react'
+import {Tab, Tabs, TabList, TabPanel} from 'react-tabs'
 
 var localChatStore = require('../stores/localChatStore')
 var IMStore = require('../stores/IMStore')
 var nameStore = require('../stores/nameStore')
 var ChatDialog = require('./chatDialog')
-var chatMessageActions = require('../actions/chatMessageActions')
+import {
+  sendLocalChatMessage, sendInstantMessage
+} from '../actions/chatMessageActions'
 
 function getChat () {
   return {
@@ -72,7 +70,7 @@ var ChatBox = React.createClass({
       return (
         <TabPanel>
           <ChatDialog data={messages} isIM='true' sendTo={function (text) {
-            chatMessageActions.sendInstantMessage(text, key, id)
+            sendInstantMessage(text, key, id)
           }} />
         </TabPanel>
       )
@@ -89,7 +87,7 @@ var ChatBox = React.createClass({
           </TabList>
           <TabPanel>
             <ChatDialog data={this.state.localChat} sendTo={function (text) {
-              chatMessageActions.sendLocalChatMessage(text, 1, 0)
+              sendLocalChatMessage(text, 1, 0)
             }} />
           </TabPanel>
           {panels}
