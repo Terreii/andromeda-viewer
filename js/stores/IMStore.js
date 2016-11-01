@@ -101,7 +101,10 @@ IMStore.getChat = function () {
 
 function fromCharArrayToString (buffer) {
   var str = buffer.toString()
-  return str.substring(0, str.length - 1)
+  if (str.charAt(str.length - 1) === '\n') {
+    return str.substring(0, str.length - 1)
+  }
+  return str
 }
 
 module.exports = IMStore
