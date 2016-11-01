@@ -12,7 +12,7 @@ import {Tab, Tabs, TabList, TabPanel} from 'react-tabs'
 import localChatStore from '../stores/localChatStore'
 import IMStore from '../stores/IMStore'
 import nameStore from '../stores/nameStore'
-var ChatDialog = require('./chatDialog')
+import ChatDialog from './chatDialog'
 import {
   sendLocalChatMessage, sendInstantMessage
 } from '../actions/chatMessageActions'
@@ -24,52 +24,43 @@ function getChat () {
   }
 }
 
-var ChatBox = React.createClass({
-  displayName: 'ChatBox',
+export default class ChatBox extends React.Component {
+  constructor () {
+    super()
+    this.state = getChat()
+  }
 
-  getInitialState: function () {
-    return getChat()
-  },
-
-  componentDidMount: function () {
-    var removeToken = [
-      localChatStore.addListener(this._onChange),
-      IMStore.addListener(this._onChange),
-      nameStore.addListener(this._onChange)
+  componentDidMount () {
+    const removeToken = [
+      localChatStore.addListener(this._onChange.bind(this)),
+      IMStore.addListener(this._onChange.bind(this)),
+      nameStore.addListener(this._onChange.bind(this))
     ]
     this.__removeToken = removeToken
-  },
+  }
 
-  componentWillUnmount: function () {
-    this.__removeToken.forEach(function (token) {
-      token.remove()
-    })
-  },
+  componentWillUnmount () {
+    this.__removeToken.forEach(token => token.remove())
+  }
 
-  _onChange: function () {
+  _onChange () {
     this.setState(getChat())
-  },
+  }
 
-  render: function () {
-    var self = this
-    var imsNames = this.state.IMs.keySeq().toJSON()
-    var ims = imsNames.map(function (key) {
-      var name
-      if (nameStore.hasNameOf(key)) {
-        name = nameStore.getNameOf(key).getName()
-      } else {
-        name = key
-      }
-      return <Tab>
-        {name}
-      </Tab>
+  render () {
+    const imsNames = this.state.IMs.keySeq().toJSON()
+    const ims = imsNames.map(key => {
+      const name = nameStore.hasNameOf(key)
+        ? nameStore.getNameOf(key).getName()
+        : key
+      return <Tab>{name}</Tab>
     })
-    var panels = imsNames.map(function (key) {
-      var messages = self.state.IMs.get(key)
-      var id = messages.get(0).get('id')
+    const panels = imsNames.map(key => {
+      const messages = this.state.IMs.get(key)
+      const id = messages.get(0).get('id')
       return (
         <TabPanel>
-          <ChatDialog data={messages} isIM='true' sendTo={function (text) {
+          <ChatDialog data={messages} isIM='true' sendTo={text => {
             sendInstantMessage(text, key, id)
           }} />
         </TabPanel>
@@ -86,7 +77,7 @@ var ChatBox = React.createClass({
             {ims}
           </TabList>
           <TabPanel>
-            <ChatDialog data={this.state.localChat} sendTo={function (text) {
+            <ChatDialog data={this.state.localChat} sendTo={text => {
               sendLocalChatMessage(text, 1, 0)
             }} />
           </TabPanel>
@@ -95,6 +86,5 @@ var ChatBox = React.createClass({
       </div>
     )
   }
-})
-
-module.exports = ChatBox
+}
+ChatBox.displayName = 'ChatBox'
