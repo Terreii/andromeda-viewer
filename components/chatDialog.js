@@ -7,7 +7,7 @@
 var React = require('react')
 var Immutable = require('immutable')
 
-var nameStore = require('../stores/nameStore')
+import nameStore from '../stores/nameStore'
 var style = require('./chatDialog.css')
 
 // Adds to all Numbers a leading zero if it has only one digit

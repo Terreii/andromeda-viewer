@@ -4,9 +4,9 @@ var React = require('react')
 var ReactDom = require('react-dom')
 var Container = require('flux/utils').Container
 
-var IMStore = require('../stores/IMStore')
-var localChatStore = require('../stores/localChatStore')
-var nameStore = require('../stores/nameStore')
+import IMStore from '../stores/IMStore'
+import localChatStore from '../stores/localChatStore'
+import nameStore from '../stores/nameStore'
 
 var session = require('../session')
 var ChatBox = require('./chatBox')

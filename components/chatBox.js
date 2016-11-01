@@ -9,9 +9,9 @@
 import React from 'react'
 import {Tab, Tabs, TabList, TabPanel} from 'react-tabs'
 
-var localChatStore = require('../stores/localChatStore')
-var IMStore = require('../stores/IMStore')
-var nameStore = require('../stores/nameStore')
+import localChatStore from '../stores/localChatStore'
+import IMStore from '../stores/IMStore'
+import nameStore from '../stores/nameStore'
 var ChatDialog = require('./chatDialog')
 import {
   sendLocalChatMessage, sendInstantMessage
