@@ -7,7 +7,7 @@
 var Store = require('flux/utils').Store
 var Immutable = require('immutable')
 
-var Dispatcher = require('../uiDispatcher')
+var Dispatcher = require('../network/uiDispatcher')
 
 // This stores data
 var chat = Immutable.List([])
@@ -37,14 +37,14 @@ function addToChatFromServer (chatData) {
   var sourceT = sourceTypes[Number(chatData.SourceType.value) || 0]
   var chatT = chatTypes[Number(chatData.ChatType.value) || 0]
   var msg = {
-    fromName: chatData.FromName.value.toString('utf8'),
+    fromName: fromCharArrayToString(chatData.FromName.value.toString('utf8')),
     sourceID: chatData.SourceID.value,
     ownerID: chatData.OwnerID.value,
     sourceType: sourceT,
     chatType: chatT,
     audible: chatData.Audible.value,
     position: chatData.Position.value,
-    message: chatData.Message.value.toString('utf8'),
+    message: fromCharArrayToString(chatData.Message.value.toString('utf8')),
     time: new Date()
   }
   chat = chat.push(Immutable.Map(msg))
@@ -63,6 +63,14 @@ localChatStore.__onDispatch = function (payload) {
 }
 localChatStore.getMessages = function () {
   return chat
+}
+
+function fromCharArrayToString (buffer) {
+  var str = buffer.toString()
+  if (str.charAt(str.length - 1) === '\n') {
+    return str.substring(0, str.length - 1)
+  }
+  return str
 }
 
 module.exports = localChatStore

@@ -3,7 +3,7 @@
 var crypto = require('crypto')
 
 var viewerInfo = require('./viewerInfo')
-var Circuit = require('./circuit')
+var Circuit = require('./network/circuit')
 var simActionsForUI = require('./actions/simAction')
 var AvatarName = require('./avatarName')
 
@@ -93,13 +93,13 @@ function logout () {
 }
 
 // Login to a sim. Is called on the login process and sim-change
-function connectToSim (ip, port, circuit_code, callback) {
+function connectToSim (ip, port, circuitCode, callback) {
   callback(undefined, sessionInfo)
-  activeCircuit = new Circuit(ip, port, circuit_code)
+  activeCircuit = new Circuit(ip, port, circuitCode)
   activeCircuit.send('UseCircuitCode', {
     CircuitCode: [
       {
-        Code: circuit_code,
+        Code: circuitCode,
         SessionID: sessionInfo.session_id,
         ID: sessionInfo.agent_id
       }
@@ -111,7 +111,7 @@ function connectToSim (ip, port, circuit_code, callback) {
       {
         AgentID: sessionInfo.agent_id,
         SessionID: sessionInfo.session_id,
-        CircuitCode: circuit_code
+        CircuitCode: circuitCode
       }
     ]
   })

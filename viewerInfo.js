@@ -1,6 +1,6 @@
 'use strict'
 
-var packageJSON = require('../package.json')
+var packageJSON = require('./package.json')
 
 var platform
 if (typeof window !== 'undefined') {

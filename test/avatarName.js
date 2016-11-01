@@ -4,7 +4,7 @@ var describe = require('mocha').describe
 var it = require('mocha').it
 var assert = require('assert')
 
-var AvatarName = require('../js/avatarName')
+var AvatarName = require('../avatarName')
 
 describe('avatarName', function () {
   it('should parse a given name', function () {

@@ -69,7 +69,7 @@ function Circuit (hostIP, hostPort, circuitCode) {
     var msgBody = msg.slice(bodyStart)
 
     if (isZeroEncoded) {
-      msgBody = zero_decode(msgBody)
+      msgBody = zeroDecode(msgBody)
     }
 
     var parsedBody = networkMessages.parseBody(msgBody)
@@ -127,7 +127,7 @@ Circuit.prototype.send = function (messageType, data) {
 
   if (body.needsZeroencode) {
     header.writeUInt8(header.readUInt8(0) + 128, 0) // LL_ZERO_CODE_FLAG 0x80
-    body.buffer = zero_encode(body.buffer)
+    body.buffer = zeroEncode(body.buffer)
   }
 
   var acksBuffer
@@ -156,17 +156,17 @@ Circuit.prototype.send = function (messageType, data) {
 
 // 0's in packet body are run length encoded, such that series of 1 to 255 zero
 // bytes are encoded to take 2 bytes.
-function zero_encode (inputbuf) {
+function zeroEncode (inputbuf) {
   var data = []
   var zero = false
-  var zero_count = 0
+  var zeroCount = 0
 
   for (var i = 0; i < inputbuf.length; i++) {
     var byte = inputbuf.readUInt8(i)
     if (byte !== 0) {
-      if (zero_count !== 0) {
-        data.push(zero_count)
-        zero_count = 0
+      if (zeroCount !== 0) {
+        data.push(zeroCount)
+        zeroCount = 0
         zero = false
       }
       data.push(byte)
@@ -175,36 +175,36 @@ function zero_encode (inputbuf) {
         data.push(byte)
         zero = true
       }
-      zero_count++
+      zeroCount++
     }
   }
-  if (zero_count !== 0) {
-    data.push(zero_count)
+  if (zeroCount !== 0) {
+    data.push(zeroCount)
   }
   return new Buffer(data)
 }
 
 // decodes zeroencoded bodies
-function zero_decode (inputbuf) {
+function zeroDecode (inputbuf) {
   var data = []
-  var in_zero = false
+  var inZero = false
 
   for (var i = 0; i < inputbuf.length; i++) {
     var byte = inputbuf.readUInt8(i)
     if (byte !== 0) {
-      if (in_zero === true) {
-        var zero_count = byte - 1
-        while (zero_count > 0) {
+      if (inZero === true) {
+        var zeroCount = byte - 1
+        while (zeroCount > 0) {
           data.push(0)
-          zero_count--
+          zeroCount--
         }
-        in_zero = false
+        inZero = false
       } else {
         data.push(byte)
       }
     } else {
       data.push(byte)
-      in_zero = true
+      inZero = true
     }
   }
   return new Buffer(data)
