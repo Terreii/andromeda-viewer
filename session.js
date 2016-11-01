@@ -3,7 +3,7 @@
 var crypto = require('crypto')
 
 import {viewerName, viewerVersion, viewerPlatform} from './viewerInfo'
-var Circuit = require('./network/circuit')
+import Circuit from './network/circuit'
 import simActionsForUI from './actions/simAction'
 import AvatarName from './avatarName'
 

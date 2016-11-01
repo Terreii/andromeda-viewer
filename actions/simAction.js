@@ -2,7 +2,7 @@
 
 import Dispatcher from '../network/uiDispatcher'
 
-var toSendTypes = [ // add here Message-Types that will be processed in the UI
+const toSendTypes = [ // add here Message-Types that will be processed in the UI
   'ChatFromSimulator',
   'ImprovedInstantMessage'
 ]
