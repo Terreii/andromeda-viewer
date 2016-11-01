@@ -8,7 +8,7 @@ import {Store} from 'flux/utils'
 import Immutable from 'immutable'
 
 import Dispatcher from '../network/uiDispatcher'
-import session from '../session'
+import {getAgentId} from '../session'
 
 let chats = Immutable.Map()
 
@@ -68,7 +68,7 @@ function addIMFromViewer (message) {
 
 function addToChats (fromId, toAgentID, msg) {
   // if it is send by this user the conversation will be of the toAgentId
-  const conv = (session.getAgentId() === fromId) ? toAgentID : fromId
+  const conv = (getAgentId() === fromId) ? toAgentID : fromId
 
   const convStore = chats.has(conv)
     ? chats.get(conv).push(msg)

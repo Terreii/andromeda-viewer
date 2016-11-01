@@ -1,6 +1,6 @@
 'use strict'
 
-var crypto = require('crypto')
+import crypto from 'crypto'
 
 import {viewerName, viewerVersion, viewerPlatform} from './viewerInfo'
 import Circuit from './network/circuit'
@@ -8,32 +8,32 @@ import simActionsForUI from './actions/simAction'
 import AvatarName from './avatarName'
 
 // true if there is a running session
-var isLoggedIn = false
+let _isLoggedIn = false
 
 // Stores the result of the xmlrpc login & tracks the changes
-var sessionInfo = {}
+let sessionInfo = {}
 
-var regionInfo = {}
-var regionID
+let regionInfo = {}
+let regionID
 
-var position = {
+const position = {
   position: [],
   lookAt: []
 }
 
-var activeCircuit
+let activeCircuit
 
 // Logon the user. It will send a XMLHttpRequest to the server.
-function login (firstName, lastName, password, callback) {
-  if (isLoggedIn) {
+export function login (firstName, lastName, password, callback) {
+  if (isLoggedIn()) {
     throw new Error('There is already an avatar logged in!')
   }
 
-  var hash = crypto.createHash('md5')
+  const hash = crypto.createHash('md5')
   hash.update(password, 'ascii')
-  var passwdFinal = '$1$' + hash.digest('hex')
+  const passwdFinal = '$1$' + hash.digest('hex')
 
-  var loginData = {
+  const loginData = {
     first: firstName,
     last: lastName,
     passwd: passwdFinal,
@@ -47,20 +47,17 @@ function login (firstName, lastName, password, callback) {
     read_critical: 'true'
   }
 
-  var xhr = new window.XMLHttpRequest()
+  const xhr = new window.XMLHttpRequest()
   xhr.open('POST', 'login')
   xhr.setRequestHeader('Content-Type', 'application/json')
   xhr.responseType = 'json'
-  xhr.onload = function () {
-    var response
-    if (typeof this.response === 'string') { // IE doesn't support json response
-      response = JSON.parse(this.response)
-    } else {
-      response = this.response
-    }
+  xhr.onload = (event) => {
+    const response = typeof event.target.response === 'string'
+      ? JSON.parse(event.target.response)
+      : event.target.response
 
-    isLoggedIn = response.login === 'true'
-    if (isLoggedIn) {
+    _isLoggedIn = response.login === 'true'
+    if (isLoggedIn()) {
       sessionInfo = response
       connectToSim(sessionInfo.sim_ip, sessionInfo.sim_port,
         sessionInfo.circuit_code, callback)
@@ -73,8 +70,8 @@ function login (firstName, lastName, password, callback) {
 }
 
 // Placeholder for the logout process
-function logout () {
-  if (!isLoggedIn) {
+export function logout () {
+  if (!isLoggedIn()) {
     throw new Error("You aren't logged in!")
   }
   console.error("I'm sorry " + sessionInfo.firstName +
@@ -209,64 +206,76 @@ function RegionInfo (info) {
   regionInfo.HardMaxObjects = regionInfo2.HardMaxObjects
 }
 
-module.exports = {
-  login: login,
-  logout: logout,
-  get isLoggedIn () {
-    return isLoggedIn
-  },
-  getActiveCircuit: function () {
-    return activeCircuit || {}
-  },
-  getInfo: function (infoName) {
-    return sessionInfo[infoName]
-  },
-  getInfoNames: function () {
-    var list = []
-    for (var name in sessionInfo) {
-      if (sessionInfo.hasOwnProperty(name)) {
-        list.push(name)
-      }
+export function isLoggedIn () {
+  return _isLoggedIn
+}
+
+export function getActiveCircuit () {
+  return activeCircuit || {}
+}
+
+export function getInfo (infoName) {
+  return sessionInfo[infoName]
+}
+
+export function getInfoNames () {
+  const list = []
+  for (var name in sessionInfo) {
+    if (sessionInfo.hasOwnProperty(name)) {
+      list.push(name)
     }
-    return list
-  },
-  getAvatarName: function () {
-    return new AvatarName(sessionInfo.first_name, sessionInfo.last_name)
-  },
-  getSimIp: function () {
-    return sessionInfo.sim_ip
-  },
-  getSimPort: function () {
-    return sessionInfo.sim_port
-  },
-  getMessageOfTheDay: function () {
-    return sessionInfo.message
-  },
-  getCircuitCode: function () {
-    return sessionInfo.circuit_code
-  },
-  getAgentId: function () {
-    return sessionInfo.agent_id
-  },
-  getInventoryHost: function () {
-    return sessionInfo.inventory_host
-  },
-  getSeedCapability: function () {
-    return sessionInfo.seed_capability
-  },
-  getAgentAccess: function () {
-    return sessionInfo.agent_access
-  },
-  getSessionId: function () {
-    return sessionInfo.session_id
-  },
-  getParentEstateID: function () {
-    return regionInfo.ParentEstateID.value
-  },
-  getRegionID: function () {
-    return regionID
-  },
-  getPosition: function () {
-    return position.position.value
   }
+  return list
+}
+
+export function getAvatarName () {
+  return new AvatarName(sessionInfo.first_name, sessionInfo.last_name)
+}
+
+export function getSimIp () {
+  return sessionInfo.sim_ip
+}
+
+export function getSimPort () {
+  return sessionInfo.sim_port
+}
+
+export function getMessageOfTheDay () {
+  return sessionInfo.message
+}
+
+export function getCircuitCode () {
+  return sessionInfo.circuit_code
+}
+
+export function getAgentId () {
+  return sessionInfo.agent_id
+}
+
+export function getInventoryHost () {
+  return sessionInfo.inventory_host
+}
+
+export function getSeedCapability () {
+  return sessionInfo.seed_capability
+}
+
+export function getAgentAccess () {
+  return sessionInfo.agent_access
+}
+
+export function getSessionId () {
+  return sessionInfo.session_id
+}
+
+export function getParentEstateID () {
+  return regionInfo.ParentEstateID.value
+}
+
+export function getRegionID () {
+  return regionID
+}
+
+export function getPosition () {
+  return position.position.value
 }

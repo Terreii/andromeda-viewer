@@ -8,14 +8,14 @@ import IMStore from '../stores/IMStore'
 import localChatStore from '../stores/localChatStore'
 import nameStore from '../stores/nameStore'
 
-import session from '../session'
+import {getAvatarName, getMessageOfTheDay, logout} from '../session'
 import ChatBox from './chatBox'
 import style from './main.css'
 
 class App extends React.Component {
   render () {
-    const name = session.getAvatarName()
-    const messageOfTheDay = session.getMessageOfTheDay()
+    const name = getAvatarName()
+    const messageOfTheDay = getMessageOfTheDay()
     const messageOfTheDayIndex = messageOfTheDay.search('http')
     const messageOfTheDayLink = messageOfTheDay.substr(messageOfTheDayIndex)
     const messageOfTheDayText = messageOfTheDay.substr(0, messageOfTheDayIndex)
@@ -34,7 +34,7 @@ class App extends React.Component {
             {messageOfTheDayLink}
           </a>
         </span>
-        <a href='#' className={style.logout} onClick={session.logout}>logout</a>
+        <a href='#' className={style.logout} onClick={logout}>logout</a>
       </div>
       <ChatBox />
     </div>)
@@ -57,7 +57,7 @@ App.calculateState = function calculateState () {
 
 const AppContainer = Container.create(App)
 
-module.exports = function login () {
+export default function login () {
   const renderDiv = document.querySelector('#login')
   renderDiv.id = 'app'
 

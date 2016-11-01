@@ -5,16 +5,24 @@
  */
 
 import Dispatcher from '../network/uiDispatcher'
-import session from '../session'
+import {
+  getAgentId,
+  getActiveCircuit,
+  getSessionId,
+  getParentEstateID,
+  getRegionID,
+  getPosition,
+  getAvatarName
+} from '../session'
 
 export function sendLocalChatMessage (text, type, channel) {
   // Sends messages from the localchat
   // No UI update, because the server/sim will send it
-  session.getActiveCircuit().send('ChatFromViewer', {
+  getActiveCircuit().send('ChatFromViewer', {
     AgentData: [
       {
-        AgentID: session.getAgentId(),
-        SessionID: session.getSessionId()
+        AgentID: getAgentId(),
+        SessionID: getSessionId()
       }
     ],
     ChatData: [
@@ -29,25 +37,25 @@ export function sendLocalChatMessage (text, type, channel) {
 
 export function sendInstantMessage (text, to, id) {
   try {
-    session.getActiveCircuit().send('ImprovedInstantMessage', {
+    getActiveCircuit().send('ImprovedInstantMessage', {
       AgentData: [
         {
-          AgentID: session.getAgentId(),
-          SessionID: session.getSessionId()
+          AgentID: getAgentId(),
+          SessionID: getSessionId()
         }
       ],
       MessageBlock: [
         {
           FromGroup: false,
           ToAgentID: to,
-          ParentEstateID: session.getParentEstateID(),
-          RegionID: session.getRegionID(),
-          Position: session.getPosition(),
+          ParentEstateID: getParentEstateID(),
+          RegionID: getRegionID(),
+          Position: getPosition(),
           Offline: 0,
           Dialog: 0,
           ID: id,
           Timestamp: Math.floor(Date.now() / 1000),
-          FromAgentName: session.getAvatarName().getFullName(),
+          FromAgentName: getAvatarName().getFullName(),
           Message: text,
           BinaryBucket: new Buffer([0])
         }
@@ -55,18 +63,18 @@ export function sendInstantMessage (text, to, id) {
     })
     Dispatcher.dispatch({
       actionType: 'SelfSendImprovedInstantMessage',
-      AgentID: session.getAgentId(),
-      SessionID: session.getSessionId(),
+      AgentID: getAgentId(),
+      SessionID: getSessionId(),
       FromGroup: false,
       ToAgentID: to,
-      ParentEstateID: session.getParentEstateID(),
-      RegionID: session.getRegionID(),
-      Position: session.getPosition(),
+      ParentEstateID: getParentEstateID(),
+      RegionID: getRegionID(),
+      Position: getPosition(),
       Offline: 0,
       Dialog: 0,
       ID: id,
       Timestamp: Math.floor(Date.now() / 1000),
-      FromAgentName: session.getAvatarName().getFullName(),
+      FromAgentName: getAvatarName().getFullName(),
       Message: text,
       BinaryBucket: new Buffer([0])
     })

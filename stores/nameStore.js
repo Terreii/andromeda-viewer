@@ -7,13 +7,13 @@
 import {Store} from 'flux/utils'
 
 import Dispatcher from '../network/uiDispatcher'
-import session from '../session'
+import {getAgentId, getAvatarName} from '../session'
 import AvatarName from '../avatarName'
 
 let names = {}
 
 setTimeout(function () {
-  names[session.getAgentId()] = session.getAvatarName()
+  names[getAgentId()] = getAvatarName()
 }, 50)
 
 // Only adds a Name to names if it is new or did change
