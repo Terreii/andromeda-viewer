@@ -277,7 +277,7 @@ describe('networkMessages', function () {
       ]
       var buffer = new Buffer(ipAddress)
       // IP RegExp
-      var reg = new RegExp('^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.)' +
+      var reg = new RegExp('^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).)' +
         '{3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$')
 
       it('should parse a valid ip-address', function () {

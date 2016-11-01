@@ -51,5 +51,5 @@ module.exports = function () {
   var renderDiv = document.querySelector('#login')
   renderDiv.id = 'app'
 
-  ReactDom.render(<AppContainer/>, renderDiv)
+  ReactDom.render(<AppContainer />, renderDiv)
 }
