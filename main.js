@@ -5,8 +5,8 @@
  *
  */
 
-var viewerInfo = require('./js/viewerInfo')
-var AvatarName = require('./js/avatarName')
+var viewerInfo = require('./viewerInfo')
+var AvatarName = require('./avatarName')
 var session = require('./session')
 
 function displayLoginError (message) {

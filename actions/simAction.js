@@ -1,6 +1,6 @@
 'use strict'
 
-var Dispatcher = require('../js/uiDispatcher')
+var Dispatcher = require('../network/uiDispatcher')
 
 var toSendTypes = [ // add here Message-Types that will be processed in the UI
   'ChatFromSimulator',

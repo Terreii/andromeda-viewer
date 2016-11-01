@@ -4,7 +4,7 @@
  * Sends a message to the server.
  */
 
-var Dispatcher = require('../js/uiDispatcher')
+var Dispatcher = require('../network/uiDispatcher')
 
 var session = require('../session')
 

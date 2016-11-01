@@ -7,7 +7,7 @@
 var Store = require('flux/utils').Store
 var Immutable = require('immutable')
 
-var Dispatcher = require('../js/uiDispatcher')
+var Dispatcher = require('../network/uiDispatcher')
 
 // This stores data
 var chat = Immutable.List([])
