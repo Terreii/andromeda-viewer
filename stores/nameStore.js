@@ -6,9 +6,9 @@
 
 var Store = require('flux/utils').Store
 
-var Dispatcher = require('../uiDispatcher')
+var Dispatcher = require('../js/uiDispatcher')
 var session = require('../session')
-var AvatarName = require('../avatarName')
+var AvatarName = require('../js/avatarName')
 
 var names = {}
 

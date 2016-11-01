@@ -7,7 +7,7 @@
 
 var viewerInfo = require('./js/viewerInfo')
 var AvatarName = require('./js/avatarName')
-var session = require('./js/session')
+var session = require('./session')
 
 function displayLoginError (message) {
   var messageDisplay = document.getElementById('loginErrorMessage')
@@ -52,7 +52,7 @@ function login (event) {
       pwInput.removeEventListener('keyup', detectReturn)
 
       // start everything
-      var display = require('./js/components/main')
+      var display = require('./components/main')
       display()
     }
   })
