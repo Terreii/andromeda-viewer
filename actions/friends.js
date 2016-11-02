@@ -1,6 +1,6 @@
 'use strict'
 
-const Dispatcher = require('../uiDispatcher')
+import Dispatcher from '../network/uiDispatcher'
 
 var UUIDNameIds = []
 var didRequestIds = {} // Stores the time of the last request for a ID

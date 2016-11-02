@@ -7,7 +7,7 @@
 const ReduceStore = require('flux/utils').ReduceStore
 const Immutable = require('immutable')
 
-const Dispatcher = require('../uiDispatcher')
+import Dispatcher from '../network/uiDispatcher'
 
 class TodoStore extends ReduceStore {
   getInitialState () {

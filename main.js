@@ -5,9 +5,10 @@
  *
  */
 
-var viewerInfo = require('./js/viewerInfo')
-var AvatarName = require('./js/avatarName')
-var session = require('./js/session')
+import {viewerName} from './viewerInfo'
+import AvatarName from './avatarName'
+import {login} from './session'
+import display from './components/main'
 
 function displayLoginError (message) {
   var messageDisplay = document.getElementById('loginErrorMessage')
@@ -16,17 +17,17 @@ function displayLoginError (message) {
 }
 
 // Show the name of the Viewer
-document.title = viewerInfo.name
-document.getElementById('loginViewerName').textContent = viewerInfo.name
+document.title = viewerName
+document.getElementById('loginViewerName').textContent = viewerName
 
-var button = document.getElementById('loginButton')
-var nameInput = document.getElementById('loginName')
-var pwInput = document.getElementById('loginPassword')
+const button = document.getElementById('loginButton')
+const nameInput = document.getElementById('loginName')
+const pwInput = document.getElementById('loginPassword')
 
 // Login
-function login (event) {
-  var loginName = nameInput.value
-  var password = pwInput.value
+function onLogin (event) {
+  const loginName = nameInput.value
+  const password = pwInput.value
 
   if (loginName.length === 0 || password.length === 0) {
     displayLoginError('Please insert a name and a password')
@@ -36,9 +37,9 @@ function login (event) {
   button.disabled = true
   button.value = 'Connecting ...'
 
-  var userName = new AvatarName(loginName)
+  const userName = new AvatarName(loginName)
 
-  session.login(userName.first, userName.last, password, function (err, sinfo) {
+  login(userName.first, userName.last, password, (err, sinfo) => {
     if (err) {
       // Displays the error message from the server
       console.error(err)
@@ -47,12 +48,11 @@ function login (event) {
       displayLoginError(err.message)
     } else {
       // cleanup
-      button.removeEventListener('click', login)
+      button.removeEventListener('click', onLogin)
       nameInput.removeEventListener('keyup', detectReturn)
       pwInput.removeEventListener('keyup', detectReturn)
 
       // start everything
-      var display = require('./js/components/main')
       display()
     }
   })
@@ -60,11 +60,11 @@ function login (event) {
 
 function detectReturn (event) { // detects if return was pressed (keyCode 13)
   if (event.type === 'keyup' && (event.which === 13 || event.keyCode === 13)) {
-    login(event)
+    onLogin(event)
   }
 }
 
-button.addEventListener('click', login)
+button.addEventListener('click', onLogin)
 nameInput.addEventListener('keyup', detectReturn)
 pwInput.addEventListener('keyup', detectReturn)
 

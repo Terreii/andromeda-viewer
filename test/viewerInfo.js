@@ -1,17 +1,16 @@
 'use strict'
 
-var describe = require('mocha').describe
-var it = require('mocha').it
-var assert = require('assert')
+import {describe, it} from 'mocha'
+import assert from 'assert'
 
-var viewerInfo = require('../js/viewerInfo')
+import {viewerName, viewerPlatform} from '../viewerInfo'
 
-describe('viewerInfo', function () {
+describe('viewerInfo', () => {
   it('should have the viewer name', function () {
-    assert.equal('andromeda-viewer', viewerInfo.name)
+    assert.equal('andromeda-viewer', viewerName)
   })
 
-  it('should have the platform', function () {
-    assert.equal(true, /^(Mac|Win|Lin)$/.test(viewerInfo.platform))
+  it('should have the platform', () => {
+    assert.equal(true, /^(Mac|Win|Lin)$/.test(viewerPlatform))
   })
 })
