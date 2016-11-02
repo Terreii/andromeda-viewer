@@ -1,12 +1,12 @@
 'use strict'
 
-const React = require('react')
+import React from 'react'
 
-const nameStore = require('../stores/nameStore')
-const friendsStore = require('../stores/friendsStore')
-const friendsAction = require('../actions/friends')
+import nameStore from '../stores/nameStore'
+import friendsStore from '../stores/friendsStore'
+import {getName} from '../actions/friends'
 
-const style = require('./FriendsList.css')
+import style from './FriendsList.css'
 
 /*
  * A List of Friends
@@ -33,12 +33,12 @@ class FriendsList extends React.Component {
       const hasName = nameStore.hasNameOf(id)
       const name = hasName ? nameStore.getNameOf(id).getName() : id
       if (!hasName) {
-        friendsAction.getName(id)
+        getName(id)
       }
-      var rights = []
-      ;['rightsGiven', 'rightsHas'].forEach((key) => {
+      const rights = []
+      ;['rightsGiven', 'rightsHas'].forEach(key => {
         const rightsMap = friend.get(key)
-        ;['canSeeOnline', 'canSeeOnMap', 'canModifyObjects'].forEach((prop) => {
+        ;['canSeeOnline', 'canSeeOnMap', 'canModifyObjects'].forEach(prop => {
           if (key === 'rightsHas' && prop === 'canSeeOnline') {
             return // Indicator that you can see friends online state isn't
             // there in the official viewer
@@ -46,7 +46,8 @@ class FriendsList extends React.Component {
           const ele = (<input
             className={style.RightsCheckbox}
             type='checkbox'
-            disabled={key === 'rightsHas'} // the rights friend has given me
+            readOnly // TODO: how to change rights
+            disabled={true || key === 'rightsHas'} // the rights friend has given me
             checked={rightsMap.get(prop)}
             title={titles[key][prop]}
             data-friend-id={id}

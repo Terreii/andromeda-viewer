@@ -7,7 +7,7 @@ import Circuit from './network/circuit'
 import AvatarName from './avatarName'
 
 import simActionsForUI from './actions/simAction'
-var FriendsAction = require('./actions/friends')
+import {initFriends} from './actions/friends'
 
 // true if there is a running session
 let _isLoggedIn = false
@@ -65,7 +65,7 @@ export function login (firstName, lastName, password, callback) {
       sessionInfo = response
       connectToSim(sessionInfo.sim_ip, sessionInfo.sim_port,
         sessionInfo.circuit_code, callback)
-      FriendsAction.initFriends(sessionInfo['buddy-list'])
+      initFriends(sessionInfo['buddy-list'])
     } else {
       // error
       callback(response)

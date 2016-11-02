@@ -4,8 +4,8 @@
  * Stores all friends and their rights
  */
 
-const ReduceStore = require('flux/utils').ReduceStore
-const Immutable = require('immutable')
+import {ReduceStore} from 'flux/utils'
+import Immutable from 'immutable'
 
 import Dispatcher from '../network/uiDispatcher'
 
@@ -21,17 +21,17 @@ class TodoStore extends ReduceStore {
           const rightsGiven = friend['buddy_rights_given'] // from me to friend
           const rightsHas = friend['rights_has'] // Friend has given me rights
           const parseRights = (rights) => {
-            var canModifyObjects = false
+            let canModifyObjects = false
             if (rights >= 4) {
               rights -= 4
               canModifyObjects = true
             }
-            var canSeeOnMap = false
+            let canSeeOnMap = false
             if (rights >= 2) {
               rights -= 2
               canSeeOnMap = true
             }
-            var canSeeOnline = false
+            let canSeeOnline = false
             if (rights >= 1) {
               rights -= 1
               canSeeOnline = true
@@ -57,4 +57,4 @@ class TodoStore extends ReduceStore {
   }
 }
 
-module.exports = new TodoStore(Dispatcher)
+export default new TodoStore(Dispatcher)

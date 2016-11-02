@@ -1,14 +1,15 @@
 'use strict'
 
 import Dispatcher from '../network/uiDispatcher'
+import {getActiveCircuit} from '../session'
 
-var UUIDNameIds = []
-var didRequestIds = {} // Stores the time of the last request for a ID
+let UUIDNameIds = []
+let didRequestIds = {} // Stores the time of the last request for a ID
 function sendUUIDNameRequest () {
   if (UUIDNameIds.length === 0) {
     return
   }
-  require('../session').getActiveCircuit().send('UUIDNameRequest', {
+  getActiveCircuit().send('UUIDNameRequest', {
     UUIDNameBlock: UUIDNameIds.map((id) => {
       didRequestIds[id] = Date.now()
       return {
@@ -19,22 +20,23 @@ function sendUUIDNameRequest () {
   UUIDNameIds = []
 }
 
-module.exports = {
-  initFriends: (friendsList) => {
-    Dispatcher.dispatch({
-      actionType: 'friendsInit',
-      friends: friendsList
-    })
-  },
-  getName: (id) => {
-    const timeLimit = Date.now() - 4000
-    // If the id is not already in the next request
-    if (UUIDNameIds.length === 0 || UUIDNameIds.every((idInRequest) => {
-      return id !== idInRequest
+export function initFriends (friendsList) {
+  Dispatcher.dispatch({
+    actionType: 'friendsInit',
+    friends: friendsList
+  })
+}
+
+export function getName (id) {
+  const timeLimit = Date.now() - 4000
+  // If the id is not already in the next request
+  if (
+    UUIDNameIds.length === 0 ||
     // and wasen't requested in the last 4 seconds
-    }) && (didRequestIds[id] == null || didRequestIds[id] < timeLimit)) {
-      UUIDNameIds.push(id)
-    }
-    setTimeout(sendUUIDNameRequest, 1000)
+    UUIDNameIds.every((idInRequest) => id !== idInRequest) &&
+    (didRequestIds[id] == null || didRequestIds[id] < timeLimit)
+  ) {
+    UUIDNameIds.push(id)
   }
+  setTimeout(sendUUIDNameRequest, 1000)
 }
