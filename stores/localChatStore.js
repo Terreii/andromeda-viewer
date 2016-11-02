@@ -8,6 +8,8 @@ import {Store} from 'flux/utils'
 import Immutable from 'immutable'
 
 import Dispatcher from '../network/uiDispatcher'
+import {getLocalChat, updateLocalChat} from './database'
+import {getAvatarName} from '../session'
 
 // This stores data
 let chat = Immutable.List([])
@@ -47,8 +49,15 @@ function addToChatFromServer (chatData) {
     message: fromCharArrayToString(chatData.Message.value.toString('utf8')),
     time: new Date()
   }
+  updateLocalChat(getAvatarName().toString(), msg)
   chat = chat.push(Immutable.Map(msg))
 }
+
+function addLoadedChatHistory (chatData, msg) {
+  return chatData.push(Immutable.Map(msg))
+}
+
+let didInit = false
 
 // Filter the data
 class LocalChatStore extends Store {
@@ -62,12 +71,36 @@ class LocalChatStore extends Store {
         addToChatFromServer(payload.ChatData.data[0])
         this.__emitChange()
         break
-
+      case 'localChatLoaded':
+        chat = payload.messages
+          .reduce(addLoadedChatHistory, chat)
+          .sort((a, b) => {
+            return a.get('time').getTime() - b.get('time').getTime()
+          })
+        this.__emitChange()
     }
   }
 
   getMessages () {
     return chat
+  }
+
+  init () {
+    if (didInit) {
+      return
+    } else {
+      didInit = true
+    }
+    getLocalChat(getAvatarName().toString()).then(response => {
+      return response.rows.map(row => Object.assign({}, row.doc, {
+        time: new Date(row.doc.time)
+      }))
+    }).then(rows => {
+      Dispatcher.dispatch({
+        actionType: 'localChatLoaded',
+        messages: rows
+      })
+    }).catch(err => console.error('error: ', err))
   }
 }
 export default new LocalChatStore()

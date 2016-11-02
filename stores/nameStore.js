@@ -49,6 +49,15 @@ function addNameFromLocalChat (msg) {
   return false
 }
 
+function addNameFromLocalChatHistory (didChange, msg) {
+  if (msg.sourceType === 'agent') {
+    const id = msg.sourceID
+    const name = msg.fromName
+    return addName(id, name)
+  }
+  return false
+}
+
 class NameStore extends Store {
   constructor () {
     super(Dispatcher)
@@ -62,6 +71,9 @@ class NameStore extends Store {
         break
       case 'ImprovedInstantMessage':
         didChange = addNameFromIM(payload)
+        break
+      case 'localChatLoaded':
+        didChange = payload.messages.reduce(addNameFromLocalChatHistory, false)
         break
     }
     if (didChange) {

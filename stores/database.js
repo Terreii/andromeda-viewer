@@ -34,3 +34,30 @@ export function addAccount (name, loginURL) {
     return true
   })
 }
+
+export function getLocalChat (accountName) {
+  const id = accountName.toString() + '_localChat'
+  return db.allDocs({
+    startkey: id + '_9',
+    endkey: id,
+    limit: 100,
+    descending: true,
+    include_docs: true
+  }).catch(err => {
+    if (err.name === 'not_found') {
+      return []
+    } else {
+      throw err
+    }
+  })
+}
+
+export function updateLocalChat (accountName, message) {
+  const id = accountName.toString().trim() + '_localChat_' + new Date().toJSON()
+  const doc = Object.assign({
+    _id: id
+  }, message, {
+    time: message.time.toJSON()
+  })
+  return db.put(doc)
+}

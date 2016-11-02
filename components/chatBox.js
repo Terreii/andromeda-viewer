@@ -28,6 +28,7 @@ export default class ChatBox extends React.Component {
   constructor () {
     super()
     this.state = getChat()
+    localChatStore.init()
   }
 
   componentDidMount () {
