@@ -8,6 +8,7 @@
 import {viewerName} from './viewerInfo'
 import AvatarName from './avatarName'
 import {login} from './session'
+import {getAccounts, addAccount} from './stores/database'
 import display from './components/main'
 
 function displayLoginError (message) {
@@ -52,6 +53,8 @@ function onLogin (event) {
       nameInput.removeEventListener('keyup', detectReturn)
       pwInput.removeEventListener('keyup', detectReturn)
 
+      addAccount(userName.getName(), '')
+
       // start everything
       display()
     }
@@ -69,3 +72,15 @@ nameInput.addEventListener('keyup', detectReturn)
 pwInput.addEventListener('keyup', detectReturn)
 
 button.disabled = false
+
+// Adds all Accounts to the accountNames-datalist
+getAccounts().then(accounts => {
+  const loginDiv = document.getElementById('accountNames')
+  accounts.accounts.forEach(account => {
+    const option = document.createElement('option')
+    option.value = account.name
+    loginDiv.appendChild(option)
+  })
+}).catch(err => {
+  console.error(err)
+})

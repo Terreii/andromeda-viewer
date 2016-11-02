@@ -8,12 +8,24 @@
   </head>
   <body>
     <div id="login">
+      <datalist id="accountNames"></datalist>
       <h1>Login to <span id="loginViewerName">viewer Name</span></h1>
       <div>
-        <input type="text" id="loginName" placeholder="Avatar Name" autocomplete="username"/>
+        <input
+          type="text"
+          id="loginName"
+          placeholder="Avatar Name"
+          autocomplete="username"
+          list="accountNames"
+          />
       </div>
       <div>
-        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password"/>
+        <input
+          type="password"
+          id="loginPassword"
+          placeholder="Password"
+          autocomplete="current-password"
+          />
       </div>
       <div>
         <input type="button" id="loginButton" value="Login" disabled/>

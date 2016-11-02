@@ -39,6 +39,7 @@
     "json-loader": "^0.5.4",
     "markdown-chalk": "^1.4.0",
     "mocha": "^3.1.2",
+    "pouchdb": "^6.0.7",
     "react": "^15.0.0",
     "react-dom": "^15.0.0",
     "react-tabs": "^0.8.0",
