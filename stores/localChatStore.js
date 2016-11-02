@@ -4,21 +4,21 @@
  * Stores all LocalChat-Messanges
  */
 
-var Store = require('flux/utils').Store
-var Immutable = require('immutable')
+import {Store} from 'flux/utils'
+import Immutable from 'immutable'
 
-var Dispatcher = require('../network/uiDispatcher')
+import Dispatcher from '../network/uiDispatcher'
 
 // This stores data
-var chat = Immutable.List([])
+let chat = Immutable.List([])
 
-var sourceTypes = [
+const sourceTypes = [
   'system',
   'agent',
   'object'
 ]
 
-var chatTypes = [
+const chatTypes = [
   'whisper',
   'normal',
   'shout',
@@ -34,9 +34,9 @@ function addToChatFromServer (chatData) {
   if (chatData.ChatType.value === 4 || chatData.ChatType.value === 5) {
     return // Start/stop typing
   }
-  var sourceT = sourceTypes[Number(chatData.SourceType.value) || 0]
-  var chatT = chatTypes[Number(chatData.ChatType.value) || 0]
-  var msg = {
+  const sourceT = sourceTypes[Number(chatData.SourceType.value) || 0]
+  const chatT = chatTypes[Number(chatData.ChatType.value) || 0]
+  const msg = {
     fromName: fromCharArrayToString(chatData.FromName.value.toString('utf8')),
     sourceID: chatData.SourceID.value,
     ownerID: chatData.OwnerID.value,
@@ -51,26 +51,31 @@ function addToChatFromServer (chatData) {
 }
 
 // Filter the data
-var localChatStore = new Store(Dispatcher)
-localChatStore.__onDispatch = function (payload) {
-  switch (payload.actionType) {
-    case 'ChatFromSimulator':
-      addToChatFromServer(payload.ChatData.data[0])
-      this.__emitChange()
-      break
+class LocalChatStore extends Store {
+  constructor () {
+    super(Dispatcher)
+  }
 
+  __onDispatch (payload) {
+    switch (payload.actionType) {
+      case 'ChatFromSimulator':
+        addToChatFromServer(payload.ChatData.data[0])
+        this.__emitChange()
+        break
+
+    }
+  }
+
+  getMessages () {
+    return chat
   }
 }
-localChatStore.getMessages = function () {
-  return chat
-}
+export default new LocalChatStore()
 
 function fromCharArrayToString (buffer) {
   var str = buffer.toString()
-  if (str.charAt(str.length - 1) === '\n') {
+  if (str.charCodeAt(str.length - 1) === 0) {
     return str.substring(0, str.length - 1)
   }
   return str
 }
-
-module.exports = localChatStore

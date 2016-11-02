@@ -1,31 +1,22 @@
 'use strict'
 
-var packageJSON = require('./package.json')
+import packageJSON from './package.json'
 
-var platform
-if (typeof window !== 'undefined') {
-  switch (window.navigator.platform) {
-    case 'MacIntel':
-      platform = 'Mac'
-      break
-    case 'Win32':
-      platform = 'Win'
-      break
-    default:
-      platform = 'Lin'
-  }
-} else { // for testing
-  platform = 'Lin'
-}
+export const viewerName = packageJSON.name
 
-module.exports = {
-  get name () {
-    return packageJSON.name
-  },
-  get version () {
-    return packageJSON.version + '.0'
-  },
-  get platform () {
-    return platform
+export const viewerVersion = packageJSON.version + '.0'
+
+export const viewerPlatform = (() => {
+  if (typeof window !== 'undefined') {
+    switch (window.navigator.platform) {
+      case 'MacIntel':
+        return 'Mac'
+      case 'Win32':
+        return 'Win'
+      default:
+        return 'Lin'
+    }
+  } else { // for testing
+    return 'Lin'
   }
-}
+})()

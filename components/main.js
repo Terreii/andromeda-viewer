@@ -1,35 +1,45 @@
 'use strict'
 
-var React = require('react')
-var ReactDom = require('react-dom')
-var Container = require('flux/utils').Container
+import React from 'react'
+import ReactDom from 'react-dom'
+import {Container} from 'flux/utils'
 
-var IMStore = require('../stores/IMStore')
-var localChatStore = require('../stores/localChatStore')
-var nameStore = require('../stores/nameStore')
+import IMStore from '../stores/IMStore'
+import localChatStore from '../stores/localChatStore'
+import nameStore from '../stores/nameStore'
 
-var session = require('../session')
-var ChatBox = require('./chatBox')
-var style = require('./main.css')
+import {getAvatarName, getMessageOfTheDay, logout} from '../session'
+import ChatBox from './chatBox'
+import style from './main.css'
 
-var App = React.createClass({
-  render: function appRender () {
-    var name = session.getAvatarName()
-    var messageOfTheDay = session.getMessageOfTheDay()
-    var messageOfTheDayIndex = messageOfTheDay.search('http')
-    var messageOfTheDayLink = messageOfTheDay.substr(messageOfTheDayIndex)
-    var messageOfTheDayText = messageOfTheDay.substr(0, messageOfTheDayIndex)
+class App extends React.Component {
+  render () {
+    const name = getAvatarName()
+    const messageOfTheDay = getMessageOfTheDay()
+    const messageOfTheDayIndex = messageOfTheDay.search('http')
+    const messageOfTheDayLink = messageOfTheDay.substr(messageOfTheDayIndex)
+    const messageOfTheDayText = messageOfTheDay.substr(0, messageOfTheDayIndex)
 
     return (<div className={style.main}>
       <div id='menuBar' className={style.menuBar}>
         <span>Hello {name.getName()}</span>
-        <span>Message of the day: {messageOfTheDayText} <a href={messageOfTheDayLink} target='blank' className={style.daylyMessageLink}>{messageOfTheDayLink}</a></span>
-        <a href='#' className={style.logout} onClick={session.logout}>logout</a>
+        <span>
+          Message of the day:
+          {messageOfTheDayText}
+          <a
+            href={messageOfTheDayLink}
+            target='_blank'
+            className={style.daylyMessageLink}
+            >
+            {messageOfTheDayLink}
+          </a>
+        </span>
+        <a href='#' className={style.logout} onClick={logout}>logout</a>
       </div>
       <ChatBox />
     </div>)
   }
-})
+}
 App.getStores = function getStores () {
   return [
     IMStore,
@@ -45,10 +55,10 @@ App.calculateState = function calculateState () {
   }
 }
 
-var AppContainer = Container.create(App)
+const AppContainer = Container.create(App)
 
-module.exports = function () {
-  var renderDiv = document.querySelector('#login')
+export default function login () {
+  const renderDiv = document.querySelector('#login')
   renderDiv.id = 'app'
 
   ReactDom.render(<AppContainer />, renderDiv)

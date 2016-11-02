@@ -4,11 +4,11 @@
  * Displays a single conversation/dialog. Also the input
  */
 
-var React = require('react')
-var Immutable = require('immutable')
+import React from 'react'
+import Immutable from 'immutable'
 
-var nameStore = require('../stores/nameStore')
-var style = require('./chatDialog.css')
+import nameStore from '../stores/nameStore'
+import style from './chatDialog.css'
 
 // Adds to all Numbers a leading zero if it has only one digit
 function leadingZero (num) {
@@ -19,45 +19,36 @@ function leadingZero (num) {
   return numStr
 }
 
-var ChatDialog = React.createClass({
-  displayName: 'ChatDialog',
-
-  // https://facebook.github.io/react/docs/reusable-components.html
-  propTypes: {
-    data: React.PropTypes.instanceOf(Immutable.List).isRequired,
-    sendTo: React.PropTypes.func.isRequired,
-    isIM: React.PropTypes.bool
-  },
-
-  getDefaultProps: function () {
-    return {
-      isIM: false
-    }
-  },
-
-  getInitialState: function () {
-    return {
+export default class ChatDialog extends React.Component {
+  constructor () {
+    super()
+    this.state = {
       text: ''
     }
-  },
+  }
 
-  render: function () {
-    var self = this
-    var messages = this.props.data.map(function (msg) {
-      var time = msg.get('time')
-      var fromId = self.props.isIM ? msg.get('fromId') : msg.get('sourceID')
-      var name = nameStore.getNameOf(fromId).toString()
+  render () {
+    const messages = this.props.data.map(msg => {
+      const time = msg.get('time')
+      const fromId = this.props.isIM ? msg.get('fromId') : msg.get('sourceID')
+      const name = nameStore.getNameOf(fromId).toString()
       return (
-        <div className={style.message}>
-          <span className='time'>{leadingZero(time.getHours())}: {leadingZero(time.getMinutes())}: {leadingZero(time.getSeconds())}</span>
+        <div className={style.message} key={time.getTime()}>
+          <span className='time'>
+            {leadingZero(time.getHours())}
+            :
+            {leadingZero(time.getMinutes())}
+            :
+            {leadingZero(time.getSeconds())}
+          </span>
           <span className={style.avatar}>{name}</span>
           <span className='messageText'>{msg.get('message')}</span>
         </div>
       )
     })
 
-    var placeholderText = 'Send ' +
-      ((this.props.isIM) ? 'Instant Message' : 'to local chat')
+    const placeholderText = 'Send ' +
+      (this.props.isIM ? 'Instant Message' : 'to local chat')
 
     return (
       <div className={style.ChatDialog}>
@@ -71,28 +62,28 @@ var ChatDialog = React.createClass({
             name='chatInput'
             placeholder={placeholderText}
             value={this.state.text}
-            onChange={this._onChange}
-            onKeyDown={this._onKeyDown} />
+            onChange={this._onChange.bind(this)}
+            onKeyDown={this._onKeyDown.bind(this)} />
           <input
             type='button'
             className={style.send}
             value='Send'
-            onClick={this._onClick} />
+            onClick={this._onClick.bind(this)} />
         </div>
       </div>
     )
-  },
+  }
 
-  _onChange: function (event, value) {
+  _onChange (event, value) {
     this.setState({
       text: event.target.value
     })
-  },
+  }
 
-  _onKeyDown: function (event) {
+  _onKeyDown (event) {
     if (event.keyCode === 13) {
       event.preventDefault()
-      var text = this.state.text.trim()
+      const text = this.state.text.trim()
       if (text) {
         this.props.sendTo(text)
       }
@@ -100,11 +91,11 @@ var ChatDialog = React.createClass({
         text: ''
       })
     }
-  },
+  }
 
-  _onClick: function (event) {
+  _onClick (event) {
     event.preventDefault()
-    var text = this.state.text.trim()
+    const text = this.state.text.trim()
     if (text) {
       this.props.sendTo(text)
     }
@@ -112,6 +103,15 @@ var ChatDialog = React.createClass({
       text: ''
     })
   }
-})
-
-module.exports = ChatDialog
+}
+ChatDialog.displayName = 'ChatDialog'
+// https://facebook.github.io/react/docs/typechecking-with-proptypes.html
+ChatDialog.propTypes = {
+  data: React.PropTypes.instanceOf(Immutable.List).isRequired,
+  sendTo: React.PropTypes.func.isRequired,
+  isIM: React.PropTypes.bool
+}
+ChatDialog.defaultProps = {
+  isIM: false,
+  data: []
+}

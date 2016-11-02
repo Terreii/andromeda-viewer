@@ -8,7 +8,7 @@
     "watch": "webpack -d --progress --colors --watch",
     "help": "markdown-chalk",
     "pretest": "webpack --config test.config.js",
-    "test": "standard && mocha",
+    "test": "standard && mocha --compilers js:babel-core/register",
     "posttest": "rm builds/testBundle.js"
   },
   "repository": {

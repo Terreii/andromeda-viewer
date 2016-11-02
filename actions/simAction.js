@@ -1,20 +1,19 @@
 'use strict'
 
-var Dispatcher = require('../network/uiDispatcher')
+import Dispatcher from '../network/uiDispatcher'
 
-var toSendTypes = [ // add here Message-Types that will be processed in the UI
+const toSendTypes = [ // add here Message-Types that will be processed in the UI
   'ChatFromSimulator',
   'ImprovedInstantMessage'
 ]
 
 // Gets all messages from the SIM and filters them for the UI
 
-module.exports = function (msg) {
-  var msgIsForUI = toSendTypes.some(function (type) {
-    return type === msg.body.name
-  })
+export default function simActionFilter (msg) {
+  const name = msg.body.name
+  const msgIsForUI = toSendTypes.some(type => type === name)
   if (msgIsForUI) {
-    var toSendMsg = Object.create(msg.body)
+    let toSendMsg = Object.create(msg.body)
     toSendMsg.actionType = msg.body.name
     Dispatcher.dispatch(toSendMsg)
   }
