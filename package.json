@@ -22,7 +22,7 @@
   },
   "license": "MIT",
   "engines": {
-    "node": ">=4.2.4"
+    "node": ">=6.9.0"
   },
   "bugs": {
     "url": "https://github.com/Terreii/andromeda-viewer/issues"
