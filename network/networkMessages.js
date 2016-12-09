@@ -385,15 +385,29 @@ LLQuaternion.createBuffer = function createBufferLLQuaternion (value) {
 class LLUUID extends MessageDataType {
   constructor (buffer, offset = 0, name) {
     super()
+    const numbers = buffer.slice(offset, offset + 16).toJSON().data
     this.name = name
-    this.value = uuid.unparse(buffer, offset)
+    this.value = uuid({random: numbers})
     this.size = 16
     this.type = 'LLUUID'
   }
 }
 LLUUID.createBuffer = function createBufferLLUUID (value) {
-  const buffy = new Buffer(16)
-  uuid.parse(value, buffy, 0)
+  const parts = []
+  if (typeof value === 'string') {
+    const uuidString = value.replace(/-/gi, '')
+    for (var i = 0; i < 16; ++i) {
+      const index = i * 2
+      const chars = uuidString.charAt(index) + uuidString.charAt(index + 1)
+      const part = parseInt(chars, 16)
+      parts.push(part)
+    }
+  } else if (!value.length || value.length < 16) {
+    throw new Error('UUID value must be a String or Array like object' +
+      ' with a length of 16')
+  }
+  const buffy = Buffer.alloc(16)
+  uuid({random: parts}, buffy)
   return buffy
 }
 

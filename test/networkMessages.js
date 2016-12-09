@@ -236,9 +236,8 @@ describe('networkMessages', () => {
     describe('LLUUID', () => {
       it('should store a valid UUID', () => {
         const buffer = new Buffer(16)
-        uuid.v1({}, buffer)
-        const idString = uuid.unparse(buffer)
-        assert.equal(idString, new messages.types.LLUUID(buffer, 0).value)
+        uuid.v4(null, buffer)
+        const idString = new messages.types.LLUUID(buffer, 0).value
         assert.deepEqual(buffer, messages.types.LLUUID.createBuffer(idString))
       })
     })
