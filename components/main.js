@@ -2,12 +2,11 @@
 
 import React from 'react'
 import ReactDom from 'react-dom'
-import {Container} from 'flux/utils'
+import { Container } from 'flux/utils'
 
-import IMStore from '../stores/IMStore'
 import nameStore from '../stores/nameStore'
 
-import {getAvatarName, getMessageOfTheDay, logout} from '../session'
+import { getAvatarName, getMessageOfTheDay, logout } from '../session'
 import ChatBox from './chatBox'
 import style from './main.css'
 
@@ -41,13 +40,11 @@ class App extends React.Component {
 }
 App.getStores = function getStores () {
   return [
-    IMStore,
     nameStore
   ]
 }
 App.calculateState = function calculateState () {
   return {
-    chatIM: IMStore.getState(),
     names: nameStore.getState()
   }
 }

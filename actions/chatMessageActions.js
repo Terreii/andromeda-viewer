@@ -4,7 +4,7 @@
  * Sends a message to the server.
  */
 
-import Dispatcher from '../network/uiDispatcher'
+import State from '../stores/state'
 import {
   getAgentId,
   getActiveCircuit,
@@ -61,7 +61,7 @@ export function sendInstantMessage (text, to, id) {
         }
       ]
     })
-    Dispatcher.dispatch({
+    State.dispatch({
       type: 'SelfSendImprovedInstantMessage',
       AgentID: getAgentId(),
       SessionID: getSessionId(),

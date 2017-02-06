@@ -10,29 +10,20 @@ import React from 'react'
 import {Tab, Tabs, TabList, TabPanel} from 'react-tabs'
 
 import State from '../stores/state'
-import IMStore from '../stores/IMStore'
 import nameStore from '../stores/nameStore'
 import ChatDialog from './chatDialog'
 import {
   sendLocalChatMessage, sendInstantMessage
 } from '../actions/chatMessageActions'
 
-function getChat () {
-  return {
-    localChat: State.getState().localChat,
-    IMs: IMStore.getState()
-  }
-}
-
 export default class ChatBox extends React.Component {
   constructor () {
     super()
-    this.state = getChat()
+    this.state = State.getState()
   }
 
   componentDidMount () {
     const removeToken = [
-      IMStore.addListener(this._onChange.bind(this)),
       nameStore.addListener(this._onChange.bind(this))
     ]
     this.__removeToken = removeToken
@@ -45,7 +36,7 @@ export default class ChatBox extends React.Component {
   }
 
   _onChange () {
-    this.setState(getChat())
+    this.setState(State.getState())
   }
 
   render () {
