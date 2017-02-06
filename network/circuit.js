@@ -44,7 +44,7 @@ export default class Circuit extends events.EventEmitter {
   }
 
   _onMessage (message) {
-    const msg = new Buffer(message.data)
+    const msg = Buffer.from(message.data)
 
     const ip = msg.readUInt8(0) + '.' +
       msg.readUInt8(1) + '.' +
@@ -108,7 +108,7 @@ export default class Circuit extends events.EventEmitter {
     const body = createBody(messageType, data)
 
     // http://wiki.secondlife.com/wiki/Packet_Layout
-    const header = new Buffer(6)
+    const header = Buffer.alloc(6)
     header.writeUInt8(0, 0) // Buffer doesn't start with 0s
     header.writeUInt32BE(this.sequenceNumber, 1)
     this.sequenceNumber++
@@ -130,10 +130,10 @@ export default class Circuit extends events.EventEmitter {
       acksBuffer = createAcksBuffer(this.acks)
       this.acks = []
     } else {
-      acksBuffer = new Buffer(0)
+      acksBuffer = Buffer.alloc(0)
     }
 
-    const ipPort = new Buffer(6)
+    const ipPort = Buffer.alloc(6)
     for (var i = 0; i < 4; i++) {
       ipPort.writeUInt8(this.ipArray[i], i)
     }
@@ -193,7 +193,7 @@ function zeroEncode (inputbuf) {
   if (zeroCount !== 0) {
     data.push(zeroCount)
   }
-  return new Buffer(data)
+  return Buffer.from(data)
 }
 
 // decodes zeroencoded bodies
@@ -219,12 +219,12 @@ function zeroDecode (inputbuf) {
       inZero = true
     }
   }
-  return new Buffer(data)
+  return Buffer.from(data)
 }
 
 // Adds the Acks
 function createAcksBuffer (acks) {
-  const acksBuffer = new Buffer(acks.length * 4 + 1)
+  const acksBuffer = Buffer.alloc(acks.length * 4 + 1)
   acks.forEach((ack, i) => {
     ack = +ack // to Number
     if (Number.isNaN(ack)) {

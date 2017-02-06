@@ -96,15 +96,15 @@ describe('networkMessages', () => {
     })
 
     describe('Numbers', () => {
-      const posBuffer = new Buffer([1, 2, 3, 4, 5, 6, 7, 8])
-      const negBuffer = new Buffer([-1, -2, -3, -4, -5, -6, -7, -8])
+      const posBuffer = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8])
+      const negBuffer = Buffer.from([-1, -2, -3, -4, -5, -6, -7, -8])
       it('U8 should have the unsigned value of the given position', () => {
         const offset = Math.floor(Math.random() * 8)
         assert.equal(posBuffer.readUInt8(offset),
           new messages.types.U8(posBuffer, offset).value)
         assert.equal(negBuffer.readUInt8(offset),
           new messages.types.U8(negBuffer, offset).value)
-        assert.deepEqual(new Buffer([3]), messages.types.U8.createBuffer(3))
+        assert.deepEqual(Buffer.from([3]), messages.types.U8.createBuffer(3))
       })
 
       it('U16 should have the unsigned value of the given position', () => {
@@ -113,7 +113,7 @@ describe('networkMessages', () => {
           new messages.types.U16(posBuffer, offset).value)
         assert.equal(negBuffer.readUInt16LE(offset),
           new messages.types.U16(negBuffer, offset).value)
-        var buffy = new Buffer([3, 0])
+        var buffy = Buffer.from([3, 0])
         assert.deepEqual(buffy, messages.types.U16.createBuffer(3))
       })
 
@@ -123,7 +123,7 @@ describe('networkMessages', () => {
           new messages.types.U32(posBuffer, offset).value)
         assert.equal(negBuffer.readUInt32LE(offset),
           new messages.types.U32(negBuffer, offset).value)
-        var buffy = new Buffer([3, 0, 0, 0])
+        var buffy = Buffer.from([3, 0, 0, 0])
         assert.deepEqual(buffy, messages.types.U32.createBuffer(3))
       })
 
@@ -133,7 +133,7 @@ describe('networkMessages', () => {
           new messages.types.S8(posBuffer, offset).value)
         assert.equal(negBuffer.readInt8(offset),
           new messages.types.S8(negBuffer, offset).value)
-        assert.deepEqual(new Buffer([-3]), messages.types.S8.createBuffer(-3))
+        assert.deepEqual(Buffer.from([-3]), messages.types.S8.createBuffer(-3))
       })
 
       it('S16 should have the signed value of the given position', () => {
@@ -142,7 +142,7 @@ describe('networkMessages', () => {
           new messages.types.S16(posBuffer, offset).value)
         assert.equal(negBuffer.readInt16LE(offset),
           new messages.types.S16(negBuffer, offset).value)
-        const buffy = new Buffer([-3, 255])
+        const buffy = Buffer.from([-3, 255])
         assert.deepEqual(buffy, messages.types.S16.createBuffer(-3))
       })
 
@@ -152,12 +152,12 @@ describe('networkMessages', () => {
           new messages.types.S32(posBuffer, offset).value)
         assert.equal(negBuffer.readInt32LE(offset),
           new messages.types.S32(negBuffer, offset).value)
-        const buffy = new Buffer([-3, 255, 255, 255])
+        const buffy = Buffer.from([-3, 255, 255, 255])
         assert.deepEqual(buffy, messages.types.S32.createBuffer(-3))
       })
 
       it('F32 should have the value of the given position', () => {
-        const buffer = new Buffer(8)
+        const buffer = Buffer.alloc(8)
         const value = Math.random()
         buffer.writeFloatLE(value, 4)
         assert.equal(buffer.readFloatLE(4),
@@ -167,7 +167,7 @@ describe('networkMessages', () => {
       })
 
       it('F64 should have the value of the given position', () => {
-        const buffer = new Buffer(8)
+        const buffer = Buffer.alloc(8)
         const value = Math.random()
         buffer.writeDoubleLE(value, 0)
         assert.equal(buffer.readDoubleLE(0),
@@ -178,7 +178,7 @@ describe('networkMessages', () => {
 
     describe('Vectors', () => {
       it('LLVector3 should store a array of 3 floats', () => {
-        const buffer = new Buffer(4 * 4)
+        const buffer = Buffer.alloc(4 * 4)
         ;[1.1, 2.2, 3.3, 4.4].forEach((num, i) => {
           buffer.writeFloatLE(num, i * 4)
         })
@@ -192,7 +192,7 @@ describe('networkMessages', () => {
       })
 
       it('LLVector3d should store a array of 3 floats', () => {
-        const buffer = new Buffer(4 * 8)
+        const buffer = Buffer.alloc(4 * 8)
         const array = [1.1, 2.2, 3.3, 4.4]
         array.forEach((num, i) => buffer.writeDoubleLE(num, i * 8))
         assert.deepEqual([
@@ -205,7 +205,7 @@ describe('networkMessages', () => {
       })
 
       it('LLVector4 should store a array of 3 floats', () => {
-        const buffer = new Buffer(5 * 4)
+        const buffer = Buffer.alloc(5 * 4)
         const array = [1.1, 2.2, 3.3, 4.4, 5.5]
         array.forEach((num, i) => buffer.writeFloatLE(num, i * 4))
         assert.deepEqual([
@@ -219,7 +219,7 @@ describe('networkMessages', () => {
       })
 
       it('LLQuaternion should store a array of 3 floats', () => {
-        const buffer = new Buffer(4 * 4)
+        const buffer = Buffer.alloc(4 * 4)
         ;[1.1, 2.2, 3.3, 4.4].forEach((num, i) => {
           buffer.writeFloatLE(num, i * 4)
         })
@@ -235,17 +235,16 @@ describe('networkMessages', () => {
 
     describe('LLUUID', () => {
       it('should store a valid UUID', () => {
-        const buffer = new Buffer(16)
-        uuid.v1({}, buffer)
-        const idString = uuid.unparse(buffer)
-        assert.equal(idString, new messages.types.LLUUID(buffer, 0).value)
+        const buffer = Buffer.alloc(16)
+        uuid.v4(null, buffer)
+        const idString = new messages.types.LLUUID(buffer, 0).value
         assert.deepEqual(buffer, messages.types.LLUUID.createBuffer(idString))
       })
     })
 
     describe('BOOL', () => {
       it('should store either a true or a false', () => {
-        const buffer = new Buffer([0, 1])
+        const buffer = Buffer.from([0, 1])
         assert.equal(buffer.readUInt8(0) !== 0,
           new messages.types.BOOL(buffer, 0).value)
         assert.equal(buffer.readUInt8(1) !== 0,
@@ -266,7 +265,7 @@ describe('networkMessages', () => {
         Math.floor(Math.random() * 255),
         Math.floor(Math.random() * 255)
       ]
-      const buffer = new Buffer(ipAddress)
+      const buffer = Buffer.from(ipAddress)
       // IP RegExp
       const reg = new RegExp('^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).)' +
         '{3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$')
@@ -280,11 +279,11 @@ describe('networkMessages', () => {
           new messages.types.IPPORT(buffer, 4).value)
       })
       it('should create valid buffers', () => {
-        const addr = new Buffer([1, 2, 3, 4])
+        const addr = Buffer.from([1, 2, 3, 4])
         assert.deepEqual(addr, messages.types.IPADDR.createBuffer('1.2.3.4'))
         assert.deepEqual(addr,
           messages.types.IPADDR.createBuffer([1, 2, 3, 4]))
-        const port = new Buffer([136, 19])
+        const port = Buffer.from([136, 19])
         assert.deepEqual(port, messages.types.IPPORT.createBuffer(5000))
       })
     })
@@ -292,7 +291,7 @@ describe('networkMessages', () => {
 
   describe('Messages', () => {
     describe('parseBody', () => {
-      const buffer = new Buffer(4 + 4 * (1 + 4 * 3) + 1)
+      const buffer = Buffer.alloc(4 + 4 * (1 + 4 * 3) + 1)
       buffer.writeUInt8(255, 0)
       buffer.writeUInt8(255, 1)
       buffer.writeUInt16BE(1, 2)
