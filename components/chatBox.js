@@ -9,7 +9,7 @@
 import React from 'react'
 import {Tab, Tabs, TabList, TabPanel} from 'react-tabs'
 
-import localChatStore from '../stores/localChatStore'
+import State from '../stores/state'
 import IMStore from '../stores/IMStore'
 import nameStore from '../stores/nameStore'
 import ChatDialog from './chatDialog'
@@ -19,7 +19,7 @@ import {
 
 function getChat () {
   return {
-    localChat: localChatStore.getState(),
+    localChat: State.getState().localChat,
     IMs: IMStore.getState()
   }
 }
@@ -32,15 +32,16 @@ export default class ChatBox extends React.Component {
 
   componentDidMount () {
     const removeToken = [
-      localChatStore.addListener(this._onChange.bind(this)),
       IMStore.addListener(this._onChange.bind(this)),
       nameStore.addListener(this._onChange.bind(this))
     ]
     this.__removeToken = removeToken
+    this.__unsubscribe = State.subscribe(this._onChange.bind(this))
   }
 
   componentWillUnmount () {
     this.__removeToken.forEach(token => token.remove())
+    this.__unsubscribe()
   }
 
   _onChange () {

@@ -5,7 +5,6 @@ import ReactDom from 'react-dom'
 import {Container} from 'flux/utils'
 
 import IMStore from '../stores/IMStore'
-import localChatStore from '../stores/localChatStore'
 import nameStore from '../stores/nameStore'
 
 import {getAvatarName, getMessageOfTheDay, logout} from '../session'
@@ -43,14 +42,12 @@ class App extends React.Component {
 App.getStores = function getStores () {
   return [
     IMStore,
-    localChatStore,
     nameStore
   ]
 }
 App.calculateState = function calculateState () {
   return {
     chatIM: IMStore.getState(),
-    localChat: localChatStore.getState(),
     names: nameStore.getState()
   }
 }
