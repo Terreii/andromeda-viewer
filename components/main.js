@@ -51,7 +51,7 @@ App.calculateState = function calculateState () {
   return {
     chatIM: IMStore.getState(),
     localChat: localChatStore.getState(),
-    names: nameStore.getNames()
+    names: nameStore.getState()
   }
 }
 
