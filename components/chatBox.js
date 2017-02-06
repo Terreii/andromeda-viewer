@@ -20,7 +20,7 @@ import {
 function getChat () {
   return {
     localChat: localChatStore.getState(),
-    IMs: IMStore.getChat()
+    IMs: IMStore.getState()
   }
 }
 
@@ -53,14 +53,14 @@ export default class ChatBox extends React.Component {
       const name = nameStore.hasNameOf(key)
         ? nameStore.getNameOf(key).getName()
         : key
-      return <Tab>{name}</Tab>
+      return <Tab key={key}>{name}</Tab>
     })
     const panels = imsNames.map(key => {
       const messages = this.state.IMs.get(key)
       const id = messages.get(0).get('id')
       return (
-        <TabPanel>
-          <ChatDialog data={messages} isIM='true' sendTo={text => {
+        <TabPanel key={key}>
+          <ChatDialog data={messages} isIM sendTo={text => {
             sendInstantMessage(text, key, id)
           }} />
         </TabPanel>

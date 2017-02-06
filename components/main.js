@@ -49,7 +49,7 @@ App.getStores = function getStores () {
 }
 App.calculateState = function calculateState () {
   return {
-    chatIM: IMStore.getChat(),
+    chatIM: IMStore.getState(),
     localChat: localChatStore.getState(),
     names: nameStore.getNames()
   }

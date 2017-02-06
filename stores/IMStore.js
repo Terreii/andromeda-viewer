@@ -4,15 +4,13 @@
  * Stores all IM-Chats and IM-Messanges
  */
 
-import {Store} from 'flux/utils'
+import {ReduceStore} from 'flux/utils'
 import Immutable from 'immutable'
 
 import Dispatcher from '../network/uiDispatcher'
 import {getAgentId} from '../session'
 
-let chats = Immutable.Map()
-
-function addIMFromServer (message) {
+function addIMFromServer (state, message) {
   const messageBlock = message.MessageBlock.data[0]
   const dialog = messageBlock.Dialog.value
 
@@ -41,10 +39,10 @@ function addIMFromServer (message) {
     time: new Date()
   })
 
-  addToChats(fromId, toAgentID, msg)
+  return addToChats(state, fromId, toAgentID, msg)
 }
 
-function addIMFromViewer (message) {
+function addIMFromViewer (state, message) {
   const msg = Immutable.Map({
     sessionID: message.SessionID,
     fromId: message.AgentID,
@@ -63,10 +61,10 @@ function addIMFromViewer (message) {
     time: new Date()
   })
 
-  addToChats(message.AgentID, message.ToAgentID, msg)
+  return addToChats(state, message.AgentID, message.ToAgentID, msg)
 }
 
-function addToChats (fromId, toAgentID, msg) {
+function addToChats (chats, fromId, toAgentID, msg) {
   // if it is send by this user the conversation will be of the toAgentId
   const conv = (getAgentId() === fromId) ? toAgentID : fromId
 
@@ -74,35 +72,27 @@ function addToChats (fromId, toAgentID, msg) {
     ? chats.get(conv).push(msg)
     : Immutable.List([msg])
 
-  chats = chats.set(conv, convStore)
+  return chats.set(conv, convStore)
 }
 
-class IMStore extends Store {
-  constructor () {
-    super(Dispatcher)
+class IMStore extends ReduceStore {
+  getInitialState () {
+    return Immutable.Map()
   }
 
-  __onDispatch (payload) {
-    switch (payload.type) {
+  reduce (state, action) {
+    switch (action.type) {
       case 'ImprovedInstantMessage':
-        addIMFromServer(payload)
-        this.__emitChange()
-        break
+        return addIMFromServer(state, action)
       case 'SelfSendImprovedInstantMessage':
-        addIMFromViewer(payload)
-        this.__emitChange()
-        break
+        return addIMFromViewer(state, action)
       default:
-        break
+        return state
     }
   }
-
-  getChat () {
-    return chats
-  }
 }
 
-export default new IMStore()
+export default new IMStore(Dispatcher)
 
 function fromCharArrayToString (buffer) {
   var str = buffer.toString()
