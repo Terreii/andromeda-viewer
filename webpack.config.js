@@ -7,7 +7,8 @@ var cwd = process.cwd()
 module.exports = {
   entry: path.join(cwd, 'main.js'),
   output: {
-    filename: path.join(cwd, 'builds', 'bundle.js')
+    filename: 'bundle.js',
+    path: path.join(cwd, 'builds')
   },
   module: {
     rules: [
