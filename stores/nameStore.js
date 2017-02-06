@@ -56,7 +56,7 @@ class NameStore extends Store {
 
   __onDispatch (payload) {
     let didChange = false
-    switch (payload.actionType) {
+    switch (payload.type) {
       case 'ChatFromSimulator':
         didChange = addNameFromLocalChat(payload.ChatData.data[0])
         break

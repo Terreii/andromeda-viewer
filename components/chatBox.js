@@ -19,7 +19,7 @@ import {
 
 function getChat () {
   return {
-    localChat: localChatStore.getMessages(),
+    localChat: localChatStore.getState(),
     IMs: IMStore.getChat()
   }
 }

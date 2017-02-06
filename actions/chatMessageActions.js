@@ -62,7 +62,7 @@ export function sendInstantMessage (text, to, id) {
       ]
     })
     Dispatcher.dispatch({
-      actionType: 'SelfSendImprovedInstantMessage',
+      type: 'SelfSendImprovedInstantMessage',
       AgentID: getAgentId(),
       SessionID: getSessionId(),
       FromGroup: false,

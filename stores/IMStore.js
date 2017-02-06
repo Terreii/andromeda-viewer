@@ -83,7 +83,7 @@ class IMStore extends Store {
   }
 
   __onDispatch (payload) {
-    switch (payload.actionType) {
+    switch (payload.type) {
       case 'ImprovedInstantMessage':
         addIMFromServer(payload)
         this.__emitChange()

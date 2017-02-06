@@ -11,10 +11,9 @@ const toSendTypes = [ // add here Message-Types that will be processed in the UI
 
 export default function simActionFilter (msg) {
   const name = msg.body.name
-  const msgIsForUI = toSendTypes.some(type => type === name)
-  if (msgIsForUI) {
+  if (toSendTypes.includes(name)) {
     let toSendMsg = Object.create(msg.body)
-    toSendMsg.actionType = msg.body.name
+    toSendMsg.type = name
     Dispatcher.dispatch(toSendMsg)
   }
 }

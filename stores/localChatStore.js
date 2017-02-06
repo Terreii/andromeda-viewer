@@ -4,13 +4,10 @@
  * Stores all LocalChat-Messanges
  */
 
-import {Store} from 'flux/utils'
+import {ReduceStore} from 'flux/utils'
 import Immutable from 'immutable'
 
 import Dispatcher from '../network/uiDispatcher'
-
-// This stores data
-let chat = Immutable.List([])
 
 const sourceTypes = [
   'system',
@@ -30,7 +27,7 @@ const chatTypes = [
 ]
 
 // Add the messanges from the server/sim
-function addToChatFromServer (chatData) {
+function addToChatFromServer (chat, chatData) {
   if (chatData.ChatType.value === 4 || chatData.ChatType.value === 5) {
     return // Start/stop typing
   }
@@ -47,30 +44,25 @@ function addToChatFromServer (chatData) {
     message: fromCharArrayToString(chatData.Message.value.toString('utf8')),
     time: new Date()
   }
-  chat = chat.push(Immutable.Map(msg))
+  return chat.push(Immutable.Map(msg))
 }
 
 // Filter the data
-class LocalChatStore extends Store {
-  constructor () {
-    super(Dispatcher)
+class LocalChatStore extends ReduceStore {
+  getInitialState () {
+    return Immutable.List([])
   }
 
-  __onDispatch (payload) {
-    switch (payload.actionType) {
+  reduce (state, action) {
+    switch (action.type) {
       case 'ChatFromSimulator':
-        addToChatFromServer(payload.ChatData.data[0])
-        this.__emitChange()
-        break
-
+        return addToChatFromServer(state, action.ChatData.data[0])
+      default:
+        return state
     }
   }
-
-  getMessages () {
-    return chat
-  }
 }
-export default new LocalChatStore()
+export default new LocalChatStore(Dispatcher)
 
 function fromCharArrayToString (buffer) {
   var str = buffer.toString()
