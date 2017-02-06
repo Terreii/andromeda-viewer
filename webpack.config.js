@@ -10,20 +10,26 @@ module.exports = {
     filename: path.join(cwd, 'builds', 'bundle.js')
   },
   module: {
-    loaders: [
-      {
-        test: /\.json$/,
-        loader: 'json'
-      },
+    rules: [
       {
         test: /\.css$/,
-        loader: 'style!css?modules'
+        use: [
+          {
+            loader: 'style-loader'
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              modules: true
+            }
+          }
+        ]
       },
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: 'babel',
-        query: {
+        loader: 'babel-loader',
+        options: {
           presets: [
             'latest',
             'react'
