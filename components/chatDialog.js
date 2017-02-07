@@ -7,7 +7,7 @@
 import React from 'react'
 import Immutable from 'immutable'
 
-import nameStore from '../stores/nameStore'
+import State from '../stores/state'
 import style from './chatDialog.css'
 
 // Adds to all Numbers a leading zero if it has only one digit
@@ -28,10 +28,11 @@ export default class ChatDialog extends React.Component {
   }
 
   render () {
+    const names = State.getState().names
     const messages = this.props.data.map(msg => {
       const time = msg.get('time')
       const fromId = this.props.isIM ? msg.get('fromId') : msg.get('sourceID')
-      const name = nameStore.getNameOf(fromId).toString()
+      const name = names.get(fromId).toString()
       return (
         <div className={style.message} key={time.getTime()}>
           <span className='time'>

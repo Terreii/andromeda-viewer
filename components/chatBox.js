@@ -10,7 +10,6 @@ import React from 'react'
 import {Tab, Tabs, TabList, TabPanel} from 'react-tabs'
 
 import State from '../stores/state'
-import nameStore from '../stores/nameStore'
 import ChatDialog from './chatDialog'
 import {
   sendLocalChatMessage, sendInstantMessage
@@ -23,15 +22,10 @@ export default class ChatBox extends React.Component {
   }
 
   componentDidMount () {
-    const removeToken = [
-      nameStore.addListener(this._onChange.bind(this))
-    ]
-    this.__removeToken = removeToken
     this.__unsubscribe = State.subscribe(this._onChange.bind(this))
   }
 
   componentWillUnmount () {
-    this.__removeToken.forEach(token => token.remove())
     this.__unsubscribe()
   }
 
@@ -42,8 +36,8 @@ export default class ChatBox extends React.Component {
   render () {
     const imsNames = this.state.IMs.keySeq().toJSON()
     const ims = imsNames.map(key => {
-      const name = nameStore.hasNameOf(key)
-        ? nameStore.getNameOf(key).getName()
+      const name = this.state.names.has(key)
+        ? this.state.names.get(key).getName()
         : key
       return <Tab key={key}>{name}</Tab>
     })

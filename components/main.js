@@ -2,9 +2,6 @@
 
 import React from 'react'
 import ReactDom from 'react-dom'
-import { Container } from 'flux/utils'
-
-import nameStore from '../stores/nameStore'
 
 import { getAvatarName, getMessageOfTheDay, logout } from '../session'
 import ChatBox from './chatBox'
@@ -38,22 +35,10 @@ class App extends React.Component {
     </div>)
   }
 }
-App.getStores = function getStores () {
-  return [
-    nameStore
-  ]
-}
-App.calculateState = function calculateState () {
-  return {
-    names: nameStore.getState()
-  }
-}
-
-const AppContainer = Container.create(App)
 
 export default function login () {
   const renderDiv = document.querySelector('#login')
   renderDiv.id = 'app'
 
-  ReactDom.render(<AppContainer />, renderDiv)
+  ReactDom.render(<App />, renderDiv)
 }

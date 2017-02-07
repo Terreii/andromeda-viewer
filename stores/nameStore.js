@@ -4,10 +4,8 @@
  * Stores the names of avatars
  */
 
-import {ReduceStore} from 'flux/utils'
 import Immutable from 'immutable'
 
-import Dispatcher from '../network/uiDispatcher'
 import AvatarName from '../avatarName'
 
 // Only adds a Name to names if it is new or did change
@@ -24,63 +22,55 @@ function addName (state, uuid, nameString) {
 
 // Adds the names of the sending Avatar/Agent from IMs
 function addNameFromIM (state, msg) {
-  if (msg.MessageBlock.data[0].Dialog.value === 9) {
-    return
+  if (msg.dialog === 9) {
+    return state
   }
-  const id = msg.AgentData.data[0].AgentID.value
-  const name = msg.MessageBlock.data[0].FromAgentName.value
+  const id = msg.fromId
+  const name = msg.fromAgentName
   return addName(state, id, name)
 }
 
 // Adds the names of the sending Avatar/Agent from the local Chat
 function addNameFromLocalChat (state, msg) {
-  if (msg.SourceType.value === 1) {
-    const id = msg.SourceID.value
-    const name = msg.FromName.value
+  if (msg.sourceType === 1) {
+    const id = msg.sourceID
+    const name = msg.fromName
     return addName(state, id, name)
   }
   return state
 }
 
-class NameStore extends ReduceStore {
-  getInitialState () {
-    return Immutable.Map()
-  }
-
-  reduce (state, action) {
-    switch (action.type) {
-      case 'ChatFromSimulator':
-        return addNameFromLocalChat(state, action.ChatData.data[0])
-      case 'ImprovedInstantMessage':
-        return addNameFromIM(state, action)
-      case 'selfNameUpdate':
-        return addName(state, action.uuid, action.name.getFullName())
-      default:
-        return state
-    }
-  }
-
-  hasNameOf (uuid) {
-    return this.getState().has(uuid)
-  }
-
-  // Gets the name of an Avatar/Agent
-  // id there is no name for that ID it will return an empty string
-  getNameOf (uuid) {
-    const names = this.getState()
-    if (names.has(uuid)) {
-      return names.get(uuid)
-    } else {
-      return ''
-    }
-  }
-
-  getNames () {
-    return this.getState().valueSeq().map(name => name.getFullName()).toJS()
+export function nameStoreReduce (state = Immutable.Map(), action) {
+  switch (action.type) {
+    case 'ChatFromSimulator':
+      return addNameFromLocalChat(state, action.msg)
+    case 'ImprovedInstantMessage':
+      return addNameFromIM(state, action.msg)
+    case 'selfNameUpdate':
+      return addName(state, action.uuid, action.name.getFullName())
+    default:
+      return state
   }
 }
 
-export default new NameStore(Dispatcher)
+export function hasNameOf (state, uuid) {
+  return state.getState().has(uuid)
+}
+
+// Gets the name of an Avatar/Agent
+// id there is no name for that ID it will return an empty string
+export function getNameOf (state, uuid) {
+  const names = state.getState()
+  if (names.has(uuid)) {
+    return names.get(uuid)
+  } else {
+    return ''
+  }
+}
+
+export function getNames (state) {
+  return state.getState().valueSeq().map(name => name.getFullName()).toJS()
+}
 
 function fromCharArrayToString (buffer) {
   var str = buffer.toString()
