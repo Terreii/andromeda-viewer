@@ -9,12 +9,9 @@ import Immutable from 'immutable'
 import AvatarName from '../avatarName'
 
 // Only adds a Name to names if it is new or did change
-function addName (state, uuid, nameString) {
-  if (nameString instanceof Uint8Array || nameString instanceof Buffer) {
-    nameString = fromCharArrayToString(nameString)
-  }
-  if (!state.has(uuid) || !state.get(uuid).compare(nameString)) {
-    return state.set(uuid, new AvatarName(nameString))
+function addName (state, uuid, name) {
+  if (!state.has(uuid) || !state.get(uuid).compare(name)) {
+    return state.set(uuid, new AvatarName(name))
   } else {
     return state
   }
@@ -70,9 +67,4 @@ export function getNameOf (state, uuid) {
 
 export function getNames (state) {
   return state.getState().valueSeq().map(name => name.getFullName()).toJS()
-}
-
-function fromCharArrayToString (buffer) {
-  var str = buffer.toString()
-  return str.substring(0, str.length - 1)
 }

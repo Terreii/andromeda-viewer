@@ -27,6 +27,7 @@ function parseIM (message) {
 
   const toAgentID = messageBlock.ToAgentID.value
   const fromId = message.AgentData.data[0].AgentID.value
+  const time = messageBlock.Timestamp.value
 
   const IMmsg = {
     sessionID: message.AgentData.data[0].SessionID.value,
@@ -39,11 +40,10 @@ function parseIM (message) {
     offline: messageBlock.Offline.value,
     dialog: messageBlock.Dialog.value,
     id: messageBlock.ID.value,
-    timestamp: messageBlock.Timestamp.value,
     fromAgentName: nullBufferToString(messageBlock.FromAgentName.value),
     message: nullBufferToString(messageBlock.Message.value),
     binaryBucket: messageBlock.BinaryBucket.value,
-    time: new Date()
+    time: time !== 0 ? new Date(time) : new Date()
   }
   return IMmsg
 }
