@@ -48,7 +48,7 @@ export default class ChatBox extends React.Component {
         <TabPanel key={key}>
           <ChatDialog data={messages} isIM sendTo={text => {
             sendInstantMessage(text, key, id)
-          }} />
+          }} names={this.state.names} />
         </TabPanel>
       )
     })
@@ -65,7 +65,7 @@ export default class ChatBox extends React.Component {
           <TabPanel>
             <ChatDialog data={this.state.localChat} sendTo={text => {
               sendLocalChatMessage(text, 1, 0)
-            }} />
+            }} names={this.state.names} />
           </TabPanel>
           {panels}
         </Tabs>

@@ -1,12 +1,6 @@
 'use strict'
 
-import Dispatcher from '../network/uiDispatcher'
 import State from '../stores/state'
-
-const toSendTypes = [ // add here Message-Types that will be processed in the UI
-  'ChatFromSimulator',
-  'ImprovedInstantMessage'
-]
 
 function nullBufferToString (buffy) {
   return buffy.toString('utf8').replace(/\0/gi, '')
@@ -56,12 +50,6 @@ function parseIM (message) {
 
 // Gets all messages from the SIM and filters them for the UI
 export default function simActionFilter (msg) {
-  const name = msg.body.name
-  if (toSendTypes.includes(name)) {
-    let toSendMsg = Object.create(msg.body)
-    toSendMsg.type = name
-    Dispatcher.dispatch(toSendMsg)
-  }
   switch (msg.body.name) {
     case 'ChatFromSimulator':
       dispatch(msg, parseChatFromSimulator)

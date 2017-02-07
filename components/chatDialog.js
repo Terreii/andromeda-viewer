@@ -7,7 +7,6 @@
 import React from 'react'
 import Immutable from 'immutable'
 
-import State from '../stores/state'
 import style from './chatDialog.css'
 
 // Adds to all Numbers a leading zero if it has only one digit
@@ -28,11 +27,10 @@ export default class ChatDialog extends React.Component {
   }
 
   render () {
-    const names = State.getState().names
     const messages = this.props.data.map(msg => {
       const time = msg.get('time')
       const fromId = this.props.isIM ? msg.get('fromId') : msg.get('sourceID')
-      const name = names.get(fromId).toString()
+      const name = this.props.names.get(fromId).toString()
       return (
         <div className={style.message} key={time.getTime()}>
           <span className='time'>
@@ -109,6 +107,7 @@ ChatDialog.displayName = 'ChatDialog'
 // https://facebook.github.io/react/docs/typechecking-with-proptypes.html
 ChatDialog.propTypes = {
   data: React.PropTypes.instanceOf(Immutable.List).isRequired,
+  names: React.PropTypes.instanceOf(Immutable.Map).isRequired,
   sendTo: React.PropTypes.func.isRequired,
   isIM: React.PropTypes.bool
 }
