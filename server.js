@@ -37,17 +37,33 @@ app.use(express.static('public'))
 app.post('/login', bodyParser.json(), function processLogin (req, res) {
   var reqData = req.body
 
-  var xmlrpcClient = xmlrpc.createSecureClient({
-    host: 'login.agni.lindenlab.com',
-    port: 443,
-    path: '/cgi-bin/login.cgi'
-  })
+  var loginURL
+  if (reqData.grid && typeof reqData.grid.url === 'string') {
+    loginURL = global.url.parse(reqData.grid.url)
+  } else {
+    loginURL = {
+      host: 'login.agni.lindenlab.com',
+      port: 443,
+      path: '/cgi-bin/login.cgi'
+    }
+  }
+  if (!loginURL || loginURL.host == null) {
+    res.status(400)
+    return
+  }
+  var xmlrpcClient = xmlrpc.createSecureClient(loginURL)
 
   reqData.mac = macaddress // adding the needed mac-address
 
   var method = 'login_to_simulator'
+  var dataToSend = Object.keys(reqData).reduce((data, key) => {
+    if (key !== 'grid') {
+      data[key] = reqData[key]
+    }
+    return data
+  }, {})
 
-  xmlrpcClient.methodCall(method, [reqData], function (err, data) {
+  xmlrpcClient.methodCall(method, [dataToSend], function (err, data) {
     if (err) {
       res.status(400)
       res.json(err)

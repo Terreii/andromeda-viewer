@@ -25,7 +25,7 @@ const position = {
 let activeCircuit
 
 // Logon the user. It will send a XMLHttpRequest to the server.
-export function login (firstName, lastName, password, callback) {
+export function login (firstName, lastName, password, grid, callback) {
   if (isLoggedIn()) {
     throw new Error('There is already an avatar logged in!')
   }
@@ -35,6 +35,7 @@ export function login (firstName, lastName, password, callback) {
   const passwdFinal = '$1$' + hash.digest('hex')
 
   const loginData = {
+    grid,
     first: firstName,
     last: lastName,
     passwd: passwdFinal,

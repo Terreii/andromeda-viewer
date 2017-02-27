@@ -23,11 +23,32 @@ document.getElementById('loginViewerName').textContent = viewerName
 const button = document.getElementById('loginButton')
 const nameInput = document.getElementById('loginName')
 const pwInput = document.getElementById('loginPassword')
+const gridSelection = document.getElementById('gridSelection')
+const newGridInput = document.getElementById('newGridInput')
 
 // Login
 function onLogin (event) {
   const loginName = nameInput.value
   const password = pwInput.value
+  let gridName
+  let gridLoginURL
+  switch (gridSelection.value) {
+    case 'second-life':
+      gridName = 'Second Life'
+      gridLoginURL = 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
+      break
+    case 'newGridByInput':
+      gridName = document.getElementById('newGridName').value
+      gridLoginURL = document.getElementById('newGridUrl').value
+      if (gridName.length === 0 || gridLoginURL.length === 0) {
+        displayLoginError('Please add a name and login URL for a openSIM Grid.')
+        return
+      }
+      break
+    default:
+      window.alert('Add storing openSIM Grids.\nCan\'t login!')
+      return
+  }
 
   if (loginName.length === 0 || password.length === 0) {
     displayLoginError('Please insert a name and a password')
@@ -38,8 +59,12 @@ function onLogin (event) {
   button.value = 'Connecting ...'
 
   const userName = new AvatarName(loginName)
+  const grid = {
+    name: gridName,
+    url: gridLoginURL
+  }
 
-  login(userName.first, userName.last, password, (err, sinfo) => {
+  login(userName.first, userName.last, password, grid, (err, sinfo) => {
     if (err) {
       // Displays the error message from the server
       console.error(err)
@@ -64,8 +89,16 @@ function detectReturn (event) { // detects if return was pressed (keyCode 13)
   }
 }
 
+function setNewGridInputVisibility (event) {
+  newGridInput.style.display = gridSelection.value === 'newGridByInput'
+    ? 'block'
+    : ''
+}
+setNewGridInputVisibility()
+
 button.addEventListener('click', onLogin)
 nameInput.addEventListener('keyup', detectReturn)
 pwInput.addEventListener('keyup', detectReturn)
+gridSelection.addEventListener('change', setNewGridInputVisibility)
 
 button.disabled = false
