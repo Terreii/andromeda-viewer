@@ -19,11 +19,17 @@ Contact me at any time.
 ### How to get started
 You need to have [node.js](https://nodejs.org/) version 4.2.4 or higher installed.
 
-For how to use npm, please read the [npm-documentation](https://docs.npmjs.com/).
+To start open a terminal window (cmd on windows) in your working copy of this project. And run the command "_npm install_". This will install all dependencies.
 
-Everything needed for this project should be a npm dependency. All can be installed by running _npm install_
+After that run "_npm run build_" to make it ready for use.
 
-The npm script for this project are:
+Then run "_npm start_" to start the server. Now you can use the viewer. If you want to start developing you should run in a new terminal window "_npm run watch_". It will build the viewer every time you make a change.
+
+For more information how to use npm, please read the [npm-documentation](https://docs.npmjs.com/).
+
+Everything needed for this project should be a npm dependency. So that all can be installed by running _npm install_
+
+### npm scripts for this project
 
 > npm run help
 
