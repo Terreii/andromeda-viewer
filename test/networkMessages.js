@@ -291,7 +291,7 @@ describe('networkMessages', () => {
 
   describe('Messages', () => {
     describe('parseBody', () => {
-      const buffer = Buffer.alloc(4 + 4 * (1 + 4 * 3) + 1)
+      const buffer = Buffer.alloc(4 + (4 * (1 + (4 * 3))) + 1)
       buffer.writeUInt8(255, 0)
       buffer.writeUInt8(255, 1)
       buffer.writeUInt16BE(1, 2)
@@ -381,7 +381,7 @@ describe('networkMessages', () => {
       })
       it('should store in NeighborBlock the correct values', done => {
         for (let i = 0; i < 12; i++) {
-          assert.equal(i, buffer.readUInt32LE(8 + i * 4))
+          assert.equal(i, buffer.readUInt32LE(8 + (i * 4)))
         }
         done()
       })
