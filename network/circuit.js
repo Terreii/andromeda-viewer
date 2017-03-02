@@ -16,7 +16,6 @@ export default class Circuit extends events.EventEmitter {
   constructor (hostIP, hostPort, circuitCode) {
     super()
     this.ip = hostIP
-    this.ipArray = this.ip.split('.').map(part => Number(part))
     this.port = hostPort
     this.circuitCode = circuitCode
     // sequenceNumber is the id of a packet. It will be increased for every packed
@@ -25,7 +24,7 @@ export default class Circuit extends events.EventEmitter {
 
     this.websocketIsOpen = false
     this.websocket = new window.WebSocket( // http -> ws  &  https -> wss
-      window.location.origin.replace(/^http/, 'ws')
+      `${window.location.origin.replace(/^http/, 'ws')}/${this.ip}/${this.port}`
     )
     this.websocket.binaryType = 'arraybuffer'
     this.websocket.onopen = this._onOpen.bind(this)
@@ -37,23 +36,15 @@ export default class Circuit extends events.EventEmitter {
 
   _onOpen () {
     this.websocketIsOpen = true
-    this.cachedMessages.forEach(buffer => {
-      this.websocket.send(buffer)
-    })
+    this.cachedMessages.forEach(buffer => this.websocket.send(buffer))
     this.cachedMessages = []
   }
 
   _onMessage (message) {
     const msg = Buffer.from(message.data)
 
-    const ip = msg.readUInt8(0) + '.' +
-      msg.readUInt8(1) + '.' +
-      msg.readUInt8(2) + '.' +
-      msg.readUInt8(3)
-    const port = msg.readUInt16LE(4)
-
     // extract the flags
-    let flags = msg.readUInt8(6)
+    let flags = msg.readUInt8(0)
     const flagCheck = function (bit) {
       const is = flags >= bit
       if (is) {
@@ -66,10 +57,10 @@ export default class Circuit extends events.EventEmitter {
     const isResent = flagCheck(32)
     const hasAck = flagCheck(16)
 
-    const senderSequenceNumber = msg.readUInt32BE(7)
+    const senderSequenceNumber = msg.readUInt32BE(1)
     this.senderSequenceNumber = senderSequenceNumber
 
-    const bodyStart = msg.readUInt8(11) + 12
+    const bodyStart = msg.readUInt8(5) + 6
 
     const msgBody = msg.slice(bodyStart)
 
@@ -91,8 +82,8 @@ export default class Circuit extends events.EventEmitter {
       body: parsedBody,
       hasAck: hasAck,
       acks: acks,
-      ip: ip,
-      port: port
+      ip: this.ip,
+      port: this.port
     }
     this.emit(parsedBody.name, toEmitObj)
     this.emit('packetReceived', toEmitObj) // for debugging
@@ -133,13 +124,7 @@ export default class Circuit extends events.EventEmitter {
       acksBuffer = Buffer.alloc(0)
     }
 
-    const ipPort = Buffer.alloc(6)
-    for (var i = 0; i < 4; i++) {
-      ipPort.writeUInt8(this.ipArray[i], i)
-    }
-    ipPort.writeUInt16LE(this.port, 4)
-
-    const packet = Buffer.concat([ipPort, header, body.buffer, acksBuffer])
+    const packet = Buffer.concat([header, body.buffer, acksBuffer])
 
     if (this.websocketIsOpen) {
       this.websocket.send(packet.buffer)
