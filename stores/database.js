@@ -35,7 +35,7 @@ export function addAccount (name, loginURL) {
   })
 }
 
-export function getLocalChat (accountName) {
+export function getLocalChatHistory (accountName) {
   const id = accountName.toString() + '_localChat'
   return db.allDocs({
     startkey: id + '_9',
@@ -43,6 +43,10 @@ export function getLocalChat (accountName) {
     limit: 100,
     descending: true,
     include_docs: true
+  }).then(response => {
+    return response.rows.map(row => Object.assign({}, row.doc, {
+      time: new Date(row.doc.time)
+    }))
   }).catch(err => {
     if (err.name === 'not_found') {
       return []
@@ -52,11 +56,10 @@ export function getLocalChat (accountName) {
   })
 }
 
-export function updateLocalChat (accountName, message) {
+export function updateLocalChatHistory (accountName, message) {
   const id = accountName.toString().trim() + '_localChat_' + new Date().toJSON()
-  const doc = Object.assign({
-    _id: id
-  }, message, {
+  const doc = Object.assign({}, message, {
+    _id: id,
     time: message.time.toJSON()
   })
   return db.put(doc)
