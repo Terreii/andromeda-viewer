@@ -4,7 +4,7 @@
  * Sends a message to the server.
  */
 
-import Dispatcher from '../network/uiDispatcher'
+import State from '../stores/state'
 import {
   getAgentId,
   getActiveCircuit,
@@ -37,46 +37,55 @@ export function sendLocalChatMessage (text, type, channel) {
 
 export function sendInstantMessage (text, to, id) {
   try {
+    const agentID = getAgentId()
+    const sessionID = getSessionId()
+    const parentEstateID = getParentEstateID()
+    const regionID = getRegionID()
+    const position = getPosition()
+    const fromAgentName = getAvatarName().getFullName()
+    const binaryBucket = new Buffer([0])
     getActiveCircuit().send('ImprovedInstantMessage', {
       AgentData: [
         {
-          AgentID: getAgentId(),
-          SessionID: getSessionId()
+          AgentID: agentID,
+          SessionID: sessionID
         }
       ],
       MessageBlock: [
         {
           FromGroup: false,
           ToAgentID: to,
-          ParentEstateID: getParentEstateID(),
-          RegionID: getRegionID(),
-          Position: getPosition(),
+          ParentEstateID: parentEstateID,
+          RegionID: regionID,
+          Position: position,
           Offline: 0,
           Dialog: 0,
           ID: id,
           Timestamp: Math.floor(Date.now() / 1000),
-          FromAgentName: getAvatarName().getFullName(),
+          FromAgentName: fromAgentName,
           Message: text,
-          BinaryBucket: new Buffer([0])
+          BinaryBucket: binaryBucket
         }
       ]
     })
-    Dispatcher.dispatch({
-      actionType: 'SelfSendImprovedInstantMessage',
-      AgentID: getAgentId(),
-      SessionID: getSessionId(),
-      FromGroup: false,
-      ToAgentID: to,
-      ParentEstateID: getParentEstateID(),
-      RegionID: getRegionID(),
-      Position: getPosition(),
-      Offline: 0,
-      Dialog: 0,
-      ID: id,
-      Timestamp: Math.floor(Date.now() / 1000),
-      FromAgentName: getAvatarName().getFullName(),
-      Message: text,
-      BinaryBucket: new Buffer([0])
+    State.dispatch({
+      type: 'SelfSendImprovedInstantMessage',
+      msg: {
+        sessionID,
+        fromId: agentID,
+        fromGroup: false,
+        toAgentID: to,
+        parentEstateID,
+        regionID,
+        position,
+        offline: 0,
+        dialog: 0,
+        id,
+        fromAgentName,
+        message: text,
+        binaryBucket,
+        time: new Date()
+      }
     })
   } catch (e) {
     console.error(e)

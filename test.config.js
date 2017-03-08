@@ -10,10 +10,10 @@ var cwd = process.cwd()
 // Will compile files that have transformed dependencies
 
 standardConfig.entry = path.join(cwd, 'network', 'networkMessages.js')
-standardConfig.output = {
-  filename: path.join(cwd, 'builds', 'testBundle.js'),
+standardConfig.output = Object.assign(standardConfig.output, {
+  filename: 'testBundle.js',
   libraryTarget: 'commonjs2'
-}
+})
 standardConfig.target = 'node'
 
 module.exports = standardConfig

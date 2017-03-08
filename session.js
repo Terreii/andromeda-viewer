@@ -6,6 +6,7 @@ import {viewerName, viewerVersion, viewerPlatform} from './viewerInfo'
 import Circuit from './network/circuit'
 import simActionsForUI from './actions/simAction'
 import AvatarName from './avatarName'
+import State from './stores/state'
 
 // true if there is a running session
 let _isLoggedIn = false
@@ -61,6 +62,11 @@ export function login (firstName, lastName, password, callback) {
       sessionInfo = response
       connectToSim(sessionInfo.sim_ip, sessionInfo.sim_port,
         sessionInfo.circuit_code, callback)
+      State.dispatch({
+        type: 'selfNameUpdate',
+        name: getAvatarName(),
+        uuid: getAgentId()
+      })
     } else {
       // error
       callback(response)

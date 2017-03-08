@@ -41,6 +41,10 @@ Builds the viewer. It continues to run and build the viewer when a file changes.
 
 Runs all tests. Please run this before committing!
 
+> npm run fixStyle
+
+Runs standard --fix. It can fix many standard style rules.
+
 > npm start
 
 Starts the server. The viewer can then be used on the local computer.

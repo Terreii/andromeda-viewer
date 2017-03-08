@@ -9,61 +9,46 @@
 import React from 'react'
 import {Tab, Tabs, TabList, TabPanel} from 'react-tabs'
 
-import localChatStore from '../stores/localChatStore'
-import IMStore from '../stores/IMStore'
-import nameStore from '../stores/nameStore'
+import State from '../stores/state'
 import ChatDialog from './chatDialog'
 import {
   sendLocalChatMessage, sendInstantMessage
 } from '../actions/chatMessageActions'
 
-function getChat () {
-  return {
-    localChat: localChatStore.getMessages(),
-    IMs: IMStore.getChat()
-  }
-}
-
 export default class ChatBox extends React.Component {
   constructor () {
     super()
-    this.state = getChat()
-    localChatStore.init()
+    this.state = State.getState()
   }
 
   componentDidMount () {
-    const removeToken = [
-      localChatStore.addListener(this._onChange.bind(this)),
-      IMStore.addListener(this._onChange.bind(this)),
-      nameStore.addListener(this._onChange.bind(this))
-    ]
-    this.__removeToken = removeToken
+    this.__unsubscribe = State.subscribe(this._onChange.bind(this))
   }
 
   componentWillUnmount () {
-    this.__removeToken.forEach(token => token.remove())
+    this.__unsubscribe()
   }
 
   _onChange () {
-    this.setState(getChat())
+    this.setState(State.getState())
   }
 
   render () {
     const imsNames = this.state.IMs.keySeq().toJSON()
     const ims = imsNames.map(key => {
-      const name = nameStore.hasNameOf(key)
-        ? nameStore.getNameOf(key).getName()
+      const name = this.state.names.has(key)
+        ? this.state.names.get(key).getName()
         : key
-      return <Tab>{name}</Tab>
+      return <Tab key={key}>{name}</Tab>
     })
     const panels = imsNames.map(key => {
       const messages = this.state.IMs.get(key)
       const id = messages.get(0).get('id')
       return (
-        <TabPanel>
-          <ChatDialog data={messages} isIM='true' sendTo={text => {
+        <TabPanel key={key}>
+          <ChatDialog data={messages} isIM sendTo={text => {
             sendInstantMessage(text, key, id)
-          }} />
+          }} names={this.state.names} />
         </TabPanel>
       )
     })
@@ -80,7 +65,7 @@ export default class ChatBox extends React.Component {
           <TabPanel>
             <ChatDialog data={this.state.localChat} sendTo={text => {
               sendLocalChatMessage(text, 1, 0)
-            }} />
+            }} names={this.state.names} />
           </TabPanel>
           {panels}
         </Tabs>

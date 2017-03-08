@@ -7,24 +7,34 @@ var cwd = process.cwd()
 module.exports = {
   entry: path.join(cwd, 'main.js'),
   output: {
-    filename: path.join(cwd, 'builds', 'bundle.js')
+    filename: 'bundle.js',
+    path: path.join(cwd, 'builds')
   },
   module: {
-    loaders: [
-      {
-        test: /\.json$/,
-        loader: 'json'
-      },
+    rules: [
       {
         test: /\.css$/,
-        loader: 'style!css?modules'
+        use: [
+          {
+            loader: 'style-loader'
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              modules: true
+            }
+          }
+        ]
       },
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: 'babel',
-        query: {
-          presets: ['es2015', 'react']
+        loader: 'babel-loader',
+        options: {
+          presets: [
+            'latest',
+            'react'
+          ]
         }
       },
       {
