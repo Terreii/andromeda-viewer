@@ -9,7 +9,7 @@
     "help": "markdown-chalk",
     "pretest": "webpack --config test.config.js",
     "test": "standard && mocha --compilers js:babel-core/register",
-    "posttest": "rm builds/testBundle.js",
+    "posttest": "rm public/testBundle.js",
     "fixStyle": "standard --fix",
     "start": "hoodie"
   },
@@ -50,7 +50,6 @@
     "webpack": "^2.2.1"
   },
   "dependencies": {
-    "body-parser": "^1.15.0",
     "hoodie": "^27.2.0",
     "macaddress": "^0.2.8",
     "uuid": "^3.0.1",

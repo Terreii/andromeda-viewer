@@ -5,7 +5,7 @@ import assert from 'assert'
 
 import uuid from 'uuid'
 
-const messages = require('../builds/testBundle')
+const messages = require('../public/testBundle')
 
 describe('networkMessages', () => {
   describe('types', () => {
