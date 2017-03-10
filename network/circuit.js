@@ -24,9 +24,11 @@ export default class Circuit extends events.EventEmitter {
     this.senderSequenceNumber = 0
 
     this.websocketIsOpen = false
-    this.websocket = new window.WebSocket( // http -> ws  &  https -> wss
-      window.location.origin.replace(/^http/, 'ws')
-    )
+    const socketUrl = new window.URL(window.location.href.replace(/#.*$/, ''))
+    // http -> ws  &  https -> wss
+    socketUrl.protocol = socketUrl.protocol.replace(/^http/, 'ws')
+    socketUrl.pathname = '/andromeda-bridge'
+    this.websocket = new window.WebSocket(socketUrl.toString())
     this.websocket.binaryType = 'arraybuffer'
     this.websocket.onopen = this._onOpen.bind(this)
     this.cachedMessages = []

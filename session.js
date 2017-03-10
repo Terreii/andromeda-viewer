@@ -50,10 +50,10 @@ export function login (firstName, lastName, password, callback) {
   }
 
   const xhr = new window.XMLHttpRequest()
-  xhr.open('POST', '/andromedaLogin')
+  xhr.open('POST', '/andromeda-login')
   xhr.setRequestHeader('Content-Type', 'application/json')
   xhr.responseType = 'json'
-  xhr.onload = (event) => {
+  xhr.onload = event => {
     const response = typeof event.target.response === 'string'
       ? JSON.parse(event.target.response)
       : event.target.response
