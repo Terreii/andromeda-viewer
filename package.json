@@ -35,12 +35,11 @@
     "babel-loader": "^6.2.4",
     "babel-preset-latest": "^6.16.0",
     "babel-preset-react": "^6.5.0",
-    "css-loader": "^0.26.0",
+    "css-loader": "^0.27.0",
     "immutable": "^3.7.4",
     "json-loader": "^0.5.4",
     "markdown-chalk": "^1.4.0",
     "mocha": "^3.1.2",
-    "pouchdb": "^6.0.7",
     "react": "^15.0.0",
     "react-dom": "^15.0.0",
     "react-tabs": "^0.8.0",
@@ -50,7 +49,7 @@
     "webpack": "^2.2.1"
   },
   "dependencies": {
-    "hoodie": "^27.2.0",
+    "hoodie": "^28.0.0",
     "macaddress": "^0.2.8",
     "uuid": "^3.0.1",
     "ws": "^2.2.0",

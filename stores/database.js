@@ -1,20 +1,29 @@
 'use strict'
 
-import PouchDB from 'pouchdb'
+const hoodie = window.hoodie
 
-const db = new PouchDB('andromeda-db')
+let isLoggedInToHoodie = false
+
+hoodie.account.get('session').then(session => {
+  if (session) {
+    // user is signed in
+    isLoggedInToHoodie = true
+  } else {
+    // user is signed out
+    isLoggedInToHoodie = false
+  }
+  hoodie.account.on('signin', () => {
+    isLoggedInToHoodie = true
+  })
+  hoodie.account.on('signout', () => {
+    isLoggedInToHoodie = false
+  })
+})
 
 // Get all Accounts. Returns a Promise
 export function getAccounts () {
-  return db.get('accounts').catch(err => {
-    if (err.name === 'not_found') {
-      return {
-        _id: 'accounts',
-        accounts: []
-      }
-    } else {
-      throw err
-    }
+  return Promise.resolve({
+    accounts: []
   })
 }
 
@@ -28,16 +37,17 @@ export function addAccount (name, loginURL) {
       })
     }
     return accounts
-  }).then(accounts => {
-    return db.put(accounts)
   }).then(() => {
     return true
   })
 }
 
 export function getLocalChatHistory (accountName) {
+  if (!isLoggedInToHoodie) {
+    return Promise.resolve([])
+  }
   const id = accountName.toString() + '_localChat'
-  return db.allDocs({
+  return hoodie.store.findAll({
     startkey: id + '_9',
     endkey: id,
     limit: 100,
@@ -62,5 +72,5 @@ export function updateLocalChatHistory (accountName, message) {
     _id: id,
     time: message.time.toJSON()
   })
-  return db.put(doc)
+  hoodie.store.add(doc)
 }

@@ -1,38 +1,75 @@
 <!doctype html>
 <html>
   <head>
-    <meta charset="UTF-8"/>
+    <meta charset="UTF-8" />
     <title>Loading viewer …</title>
-    <link href="login.css" rel="stylesheet"/>
+    <link href="/login.css" rel="stylesheet" />
     <script src="/hoodie/client.js"></script>
     <script src="/app.js" async defer></script>
   </head>
   <body>
     <div id="login">
       <datalist id="accountNames"></datalist>
-      <h1>Login to <span id="loginViewerName">viewer Name</span></h1>
-      <div>
+      <h1>Welcome to <span class="loginViewerName">andromeda-viewer</span></h1>
+      <div class="loginOuterLoginSections">
+        <h3>Login with just your Avatar</h3>
+        <div>
+          <input
+            type="text"
+            id="loginName"
+            placeholder="Avatar Name"
+            autocomplete="username"
+            list="accountNames"
+            />
+        </div>
+        <div>
+          <input
+            type="password"
+            id="loginPassword"
+            placeholder="Password"
+            autocomplete="current-password"
+            />
+        </div>
+        <div>
+          <input type="button" id="loginButton" value="Login anonym" disabled />
+        </div>
+        <div id="loginErrorMessage">
+          Error message
+        </div>
+        <p>This won't save your chat history or accounts.<br />
+          But you can sign up or sign in at any time later.</p>
+      </div>
+      <div id="loginViewerAccountSection" class="loginOuterLoginSections">
+        <h3>
+          Login with an
+          <span class="loginViewerName">andromeda-viewer</span> account
+        </h3>
+        <!-- Start of section that will be displayed of the user is
+          not signed in -->
         <input
           type="text"
-          id="loginName"
-          placeholder="Avatar Name"
+          id="loginToViewerName"
+          placeholder="account name"
           autocomplete="username"
-          list="accountNames"
           />
-      </div>
-      <div>
         <input
           type="password"
-          id="loginPassword"
-          placeholder="Password"
+          id="loginToViewerPassword"
+          placeholder="account password"
           autocomplete="current-password"
           />
-      </div>
-      <div>
-        <input type="button" id="loginButton" value="Login" disabled/>
-      </div>
-      <div id="loginErrorMessage">
-        Error message
+        <div>
+          <input id="startSignUpButton" type="button" value="sign up" />
+          <input id="startSignInButton" type="button" value="sign in" />
+        </div>
+        <!-- end of not signed in section -->
+        <div id="loginViewerAccountInfo">
+          <!-- This will be displayed if the user is signed in -->
+          Hello, <span id="loginViewerAccountInfoName">name</span>!
+          <input id="signOutButton" type="button" value="sign out" />
+        </div>
+        <p>This will allow you to sync your avatars, grids and chat history
+          over different browsers and devices.</p>
       </div>
     </div>
   </body>

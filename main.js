@@ -7,7 +7,7 @@
 
 import {viewerName} from './viewerInfo'
 import AvatarName from './avatarName'
-import {login} from './session'
+import {login, isLoggedIn} from './session'
 import {getAccounts, addAccount} from './stores/database'
 import display from './components/main'
 
@@ -18,12 +18,21 @@ function displayLoginError (message) {
 }
 
 // Show the name of the Viewer
-document.title = viewerName
-document.getElementById('loginViewerName').textContent = viewerName
+;(() => {
+  document.title = viewerName
+  const viewerNameSpans = document.getElementsByClassName('loginViewerName')
+  for (let i = 0; i < viewerNameSpans.length; ++i) {
+    viewerNameSpans[i].textContent = viewerName
+  }
+})()
 
 const button = document.getElementById('loginButton')
 const nameInput = document.getElementById('loginName')
 const pwInput = document.getElementById('loginPassword')
+
+const signUpButton = document.getElementById('startSignUpButton')
+const signInButton = document.getElementById('startSignInButton')
+const signOutButton = document.getElementById('signOutButton')
 
 // Login
 function onLogin (event) {
@@ -53,6 +62,10 @@ function onLogin (event) {
       nameInput.removeEventListener('keyup', detectReturn)
       pwInput.removeEventListener('keyup', detectReturn)
 
+      signInButton.removeEventListener('click', signInButtonPressed)
+      signUpButton.removeEventListener('click', signUpButtonPressed)
+      signOutButton.removeEventListener('click', signOutButtonPressed)
+
       addAccount(userName.getName(), '')
 
       // start everything
@@ -75,6 +88,9 @@ button.disabled = false
 
 // Adds all Accounts to the accountNames-datalist
 getAccounts().then(accounts => {
+  if (isLoggedIn()) {
+    return
+  }
   const loginDiv = document.getElementById('accountNames')
   accounts.accounts.forEach(account => {
     const option = document.createElement('option')
@@ -84,3 +100,72 @@ getAccounts().then(accounts => {
 }).catch(err => {
   console.error(err)
 })
+
+// Hoodie Accont part
+
+window.hoodie.account.get(['session', 'username']).then(properties => {
+  const section = document.getElementById('loginViewerAccountSection')
+  section.style.display = 'flex'
+  if (properties.session) {
+    setAccountLoginSectionDiplay(false, properties.username)
+  } else {
+    setAccountLoginSectionDiplay(true)
+  }
+})
+
+function setAccountLoginSectionDiplay (showLogin, accountName) {
+  const accountInfo = document.getElementById('loginViewerAccountInfo')
+  const viewerAccountNameInput = document.getElementById('loginToViewerName')
+  const viewerAccountPSInput = document.getElementById('loginToViewerPassword')
+  if (showLogin) {
+    accountInfo.style.display = 'none'
+    viewerAccountNameInput.style.display = ''
+    viewerAccountPSInput.style.display = ''
+  } else {
+    accountInfo.style.display = ''
+    viewerAccountNameInput.style.display = 'none'
+    viewerAccountPSInput.style.display = 'none'
+    document.getElementById('loginViewerAccountInfoName')
+      .textContent = accountName
+  }
+}
+
+function loginToViewer (username, password) {
+  return window.hoodie.account.signIn({
+    username,
+    password
+  }).then(accountProperties => {
+    console.log(accountProperties)
+  })
+}
+
+function signUpButtonPressed (event) {
+  const username = document.getElementById('loginToViewerName').value
+  const password = document.getElementById('loginToViewerPassword').value
+  window.hoodie.account.signUp({
+    username,
+    password
+  }).then(accountProperties => {
+    loginToViewer(username, password)
+  }).catch(error => {
+    displayLoginError(error.message)
+  })
+}
+
+function signInButtonPressed (event) {
+  const username = document.getElementById('loginToViewerName').value
+  const password = document.getElementById('loginToViewerPassword').value
+  loginToViewer(username, password).catch(error => {
+    displayLoginError(error.message)
+  })
+}
+
+function signOutButtonPressed (event) {
+  window.hoodie.account.signOut().then(sessionProperties => {
+    setAccountLoginSectionDiplay(true)
+  }).catch(error => console.error(error))
+}
+
+signInButton.addEventListener('click', signInButtonPressed)
+signUpButton.addEventListener('click', signUpButtonPressed)
+signOutButton.addEventListener('click', signOutButtonPressed)
