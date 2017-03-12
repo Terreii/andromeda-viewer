@@ -31,25 +31,15 @@ Everything needed for this project should be a npm dependency. So that all can b
 
 ### npm scripts for this project
 
-> npm run help
+command | what it does
+--------|-------------
+npm run help | Prints out this README.md.
+npm run build | Builds the viewer. The viewer is in a unusable state after cloning.
+npm run watch | Builds the viewer. It continues to run and build the viewer when a file changes. This is the recommended build command while developing!
+npm test | Runs all tests. Please run this before committing!
+npm start | Starts the server. The viewer can then be used on the local computer.
 
-Prints out this README.md.
-
-> npm run build
-
-Builds the viewer. The viewer is in a unusable state after cloning.
-
-> npm run watch
-
-Builds the viewer. It continues to run and build the viewer when a file changes. Best developing experience!
-
-> npm test
-
-Runs all tests. Please run this before committing!
-
-> npm start
-
-Starts the server. The viewer can then be used on the local computer.
+Enter those commands in a terminal (cmd or PowerShell on Windows) and press enter to run them.
 
 ### Getting SL Protocol documentation
 All documentation for the SL-protocol can be found in the [SL-Wiki](http://wiki.secondlife.com/wiki/Protocol)
