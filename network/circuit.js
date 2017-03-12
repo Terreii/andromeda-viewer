@@ -224,7 +224,7 @@ function zeroDecode (inputbuf) {
 
 // Adds the Acks
 function createAcksBuffer (acks) {
-  const acksBuffer = Buffer.alloc(acks.length * 4 + 1)
+  const acksBuffer = Buffer.alloc((acks.length * 4) + 1)
   acks.forEach((ack, i) => {
     ack = +ack // to Number
     if (Number.isNaN(ack)) {
