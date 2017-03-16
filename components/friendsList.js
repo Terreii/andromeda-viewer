@@ -1,10 +1,9 @@
 'use strict'
 
 import React from 'react'
+import Immutable from 'immutable'
 
-import nameStore from '../stores/nameStore'
-import friendsStore from '../stores/friendsStore'
-import {getName} from '../actions/friends'
+import { getName } from '../actions/friends'
 
 import style from './FriendsList.css'
 
@@ -26,12 +25,12 @@ const titles = {
   }
 }
 
-class FriendsList extends React.Component {
+export default class FriendsList extends React.Component {
   render () {
-    const list = friendsStore.getState().map((friend, index) => {
+    const list = this.props.friends.map((friend, index) => {
       const id = friend.get('id')
-      const hasName = nameStore.hasNameOf(id)
-      const name = hasName ? nameStore.getNameOf(id).getName() : id
+      const hasName = this.props.names.has(id)
+      const name = hasName ? this.props.names.get(id).getName() : id
       if (!hasName) {
         getName(id)
       }
@@ -69,4 +68,9 @@ class FriendsList extends React.Component {
   }
 }
 
-module.exports = FriendsList
+FriendsList.displayName = 'FriendsList'
+
+FriendsList.propTypes = {
+  names: React.PropTypes.instanceOf(Immutable.Map).isRequired,
+  friends: React.PropTypes.instanceOf(Immutable.List).isRequired
+}

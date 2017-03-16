@@ -35,6 +35,7 @@ export default class ChatBox extends React.Component {
   }
 
   render () {
+    const namesState = this.state.names
     const imsNames = this.state.IMs.keySeq().toJSON()
     const ims = imsNames.map(key => {
       const name = this.state.names.has(key)
@@ -47,9 +48,9 @@ export default class ChatBox extends React.Component {
       const id = messages.get(0).get('id')
       return (
         <TabPanel key={key}>
-          <ChatDialog data={messages} isIM sendTo={text => {
+          <ChatDialog data={messages} isIM names={namesState} sendTo={text => {
             sendInstantMessage(text, key, id)
-          }} names={this.state.names} />
+          }} />
         </TabPanel>
       )
     })
@@ -62,7 +63,9 @@ export default class ChatBox extends React.Component {
             <Tab>Local</Tab>
             {ims}
           </TabList>
-          <TabPanel><FriendsList /></TabPanel>
+          <TabPanel>
+            <FriendsList names={namesState} friends={this.state.friends} />
+          </TabPanel>
           <TabPanel>
             <ChatDialog data={this.state.localChat} sendTo={text => {
               sendLocalChatMessage(text, 1, 0)

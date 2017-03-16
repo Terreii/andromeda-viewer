@@ -47,7 +47,7 @@ export function nameStoreReduce (state = Immutable.Map(), action) {
       return addNameFromLocalChat(state, action.msg)
     case 'ImprovedInstantMessage':
       return addNameFromIM(state, action.msg)
-    case 'selfNameUpdate':
+    case 'loggedIn':
       return addName(state, action.uuid, action.name.getFullName())
     case 'UUIDNameReply':
       return action.msg.reduce(addNameFromUUIDName, state)

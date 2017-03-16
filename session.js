@@ -8,7 +8,6 @@ import AvatarName from './avatarName'
 import State from './stores/state'
 
 import simActionsForUI from './actions/simAction'
-import {initFriends} from './actions/friends'
 
 // true if there is a running session
 let _isLoggedIn = false
@@ -67,7 +66,7 @@ export function login (firstName, lastName, password, callback) {
       connectToSim(sessionInfo.sim_ip, sessionInfo.sim_port,
         sessionInfo.circuit_code, callback)
       State.dispatch({
-        type: 'selfNameUpdate',
+        type: 'loggedIn',
         name: getAvatarName(),
         uuid: getAgentId(),
         buddyList: sessionInfo['buddy-list']
