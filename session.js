@@ -5,6 +5,7 @@ import crypto from 'crypto'
 import {viewerName, viewerVersion, viewerPlatform} from './viewerInfo'
 import Circuit from './network/circuit'
 import AvatarName from './avatarName'
+import State from './stores/state'
 
 import simActionsForUI from './actions/simAction'
 import {initFriends} from './actions/friends'
@@ -65,7 +66,12 @@ export function login (firstName, lastName, password, callback) {
       sessionInfo = response
       connectToSim(sessionInfo.sim_ip, sessionInfo.sim_port,
         sessionInfo.circuit_code, callback)
-      initFriends(sessionInfo['buddy-list'])
+      State.dispatch({
+        type: 'selfNameUpdate',
+        name: getAvatarName(),
+        uuid: getAgentId(),
+        buddyList: sessionInfo['buddy-list']
+      })
     } else {
       // error
       callback(response)

@@ -2,14 +2,8 @@
 
 import React from 'react'
 import ReactDom from 'react-dom'
-import {Container} from 'flux/utils'
 
-import friendsStore from '../stores/friendsStore'
-import IMStore from '../stores/IMStore'
-import localChatStore from '../stores/localChatStore'
-import nameStore from '../stores/nameStore'
-
-import {getAvatarName, getMessageOfTheDay, logout} from '../session'
+import { getAvatarName, getMessageOfTheDay, logout } from '../session'
 import ChatBox from './chatBox'
 import style from './main.css'
 
@@ -41,28 +35,10 @@ class App extends React.Component {
     </div>)
   }
 }
-App.getStores = function getStores () {
-  return [
-    friendsStore,
-    IMStore,
-    localChatStore,
-    nameStore
-  ]
-}
-App.calculateState = function calculateState () {
-  return {
-    chatIM: IMStore.getChat(),
-    friends: friendsStore.getState(),
-    localChat: localChatStore.getMessages(),
-    names: nameStore.getNames()
-  }
-}
-
-const AppContainer = Container.create(App)
 
 export default function login () {
   const renderDiv = document.querySelector('#login')
   renderDiv.id = 'app'
 
-  ReactDom.render(<AppContainer />, renderDiv)
+  ReactDom.render(<App />, renderDiv)
 }

@@ -17,7 +17,7 @@ export default class AvatarName {
       this.first = cleanName(name.first)
       this.last = cleanName(name.last || 'Resident')
     } else if (typeof name === 'string' && arguments.length === 1) {
-      var seperator = name.match(/[\.\s]/) // either a dot or a space
+      var seperator = name.match(/[.\s]/) // either a dot or a space
       if (seperator) {
         var parts = name.split(seperator[0])
         this.first = cleanName(parts[0])
