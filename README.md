@@ -17,13 +17,27 @@ Please read and review the documentation. You can find it in the **doc-folder**.
 Contact me at any time.
 
 ### How to get started
-You need to have [node.js](https://nodejs.org/) version 4.2.4 or higher installed.
+You need to have **[node.js](https://nodejs.org/) version 6.9.0 or higher** installed. You can check your installed version with `node -v`.
 
-To start open a terminal window (cmd on windows) in your working copy of this project. And run the command "_npm install_". This will install all dependencies.
+To start open a terminal window (cmd on windows) in your working copy of this project. And run the command `npm install`. This will install all dependencies.
 
-After that run "_npm run build_" to make it ready for use.
+After that run `npm run build` to build the client side and make the viewer useable.
 
-Then run "_npm start_" to start the server. Now you can use the viewer. If you want to start developing you should run in a new terminal window "_npm run watch_". It will build the viewer every time you make a change.
+Then run `npm start` to start the server. Now you can use the viewer under http://127.0.0.1:8000/.
+
+```
+git clone https://github.com/Terreii/andromeda-viewer.git
+cd andromeda-viewer
+npm install
+npm run build
+npm start
+```
+
+If you want to start developing you should run in a new terminal window `npm run watch`. It will build the viewer every time you make a change.
+
+```
+npm run watch
+```
 
 For more information how to use npm, please read the [npm-documentation](https://docs.npmjs.com/).
 
