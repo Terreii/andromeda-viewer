@@ -29,13 +29,7 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: 'babel-loader',
-        options: {
-          presets: [
-            'latest',
-            'react'
-          ]
-        }
+        loader: 'babel-loader'
       },
       {
         test: /master_message_template\.msg/,
