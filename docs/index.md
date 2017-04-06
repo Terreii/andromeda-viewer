@@ -1,9 +1,3 @@
----
-layout: page
-title: Andromeda Viewer - Help Page
-id: home
----
-
 # Welcome to Andromeda!
 
 The Andromeda-Viewer is a small text-based chat-client for [Second-Life](https://secondlife.com)™ and [OpenSim](http://opensimulator.org/) based virtual worlds.
