@@ -17,37 +17,44 @@ Please read and review the documentation. You can find it in the **doc-folder**.
 Contact me at any time.
 
 ### How to get started
-You need to have [node.js](https://nodejs.org/) version 4.2.4 or higher installed.
+You need to have **[node.js](https://nodejs.org/) version 6.9.0 or higher** installed. [More on node.js and npm.js](https://docs.npmjs.com/getting-started/what-is-npm) (npm.js comes with node.js). You can check your installed version with the command `node -v`.
 
-For how to use npm, please read the [npm-documentation](https://docs.npmjs.com/).
+To start open a terminal window (cmd or PowerShell on windows) in your working copy of this project. And run the command `npm install`. This will install all dependencies.
 
-Everything needed for this project should be a npm dependency. All can be installed by running _npm install_
+After that run `npm run build` to build the client side and make the viewer useable.
 
-The npm script for this project are:
+Then run `npm start` to start the server. Now you can use the viewer under http://127.0.0.1:8000/.
 
-> npm run help
+```
+git clone https://github.com/Terreii/andromeda-viewer.git
+cd andromeda-viewer
+npm install
+npm run build
+npm start
+```
 
-Prints out this README.md.
+If you want to start developing you should run in a new terminal window `npm run watch`. It will build the viewer every time you make a change.
 
-> npm run build
+```
+npm run watch
+```
 
-Builds the viewer. The viewer is in a unusable state after cloning.
+For more information how to use npm, please read the [npm-documentation](https://docs.npmjs.com/).
 
-> npm run watch
+Everything needed for this project should be a npm dependency. So that all can be installed by running _npm install_
 
-Builds the viewer. It continues to run and build the viewer when a file changes. Best developing experience!
+### npm scripts for this project
 
-> npm test
+command | what it does
+--------|-------------
+npm run help | Prints out this README.md.
+npm run build | Builds the viewer. The viewer is in a unusable state after cloning.
+npm run watch | Builds the viewer. It continues to run and build the viewer when a file changes. This is the recommended build command while developing!
+npm test | Runs all tests. Please run this before committing!
+npm run fixStyle | Runs standard --fix. It can fix many standard style rules.
+npm start | Starts the server. The viewer can then be used on the local computer.
 
-Runs all tests. Please run this before committing!
-
-> npm run fixStyle
-
-Runs standard --fix. It can fix many standard style rules.
-
-> npm start
-
-Starts the server. The viewer can then be used on the local computer.
+Enter those commands in a terminal (cmd or PowerShell on Windows) and press enter to run them.
 
 ### Getting SL Protocol documentation
 All documentation for the SL-protocol can be found in the [SL-Wiki](http://wiki.secondlife.com/wiki/Protocol)
