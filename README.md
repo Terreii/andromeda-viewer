@@ -17,9 +17,9 @@ Please read and review the documentation. You can find it in the **doc-folder**.
 Contact me at any time.
 
 ### How to get started
-You need to have **[node.js](https://nodejs.org/) version 6.9.0 or higher** installed. [More on node.js and npm.js](https://docs.npmjs.com/getting-started/what-is-npm) (npm.js comes with node.js). You can check your installed version with `node -v`.
+You need to have **[node.js](https://nodejs.org/) version 6.9.0 or higher** installed. [More on node.js and npm.js](https://docs.npmjs.com/getting-started/what-is-npm) (npm.js comes with node.js). You can check your installed version with the command `node -v`.
 
-To start open a terminal window (cmd on windows) in your working copy of this project. And run the command `npm install`. This will install all dependencies.
+To start open a terminal window (cmd or PowerShell on windows) in your working copy of this project. And run the command `npm install`. This will install all dependencies.
 
 After that run `npm run build` to build the client side and make the viewer useable.
 
