@@ -117,17 +117,27 @@ function setAccountLoginSectionDiplay (showLogin, accountName) {
   const accountInfo = document.getElementById('loginViewerAccountInfo')
   const viewerAccountNameInput = document.getElementById('loginToViewerName')
   const viewerAccountPSInput = document.getElementById('loginToViewerPassword')
+  const viewerAccountSignDiv = document.getElementById('viewerSignInButtons')
   if (showLogin) {
     accountInfo.style.display = 'none'
     viewerAccountNameInput.style.display = ''
     viewerAccountPSInput.style.display = ''
+    viewerAccountSignDiv.style.display = ''
   } else {
     accountInfo.style.display = ''
     viewerAccountNameInput.style.display = 'none'
     viewerAccountPSInput.style.display = 'none'
+    viewerAccountSignDiv.style.display = 'none'
     document.getElementById('loginViewerAccountInfoName')
       .textContent = accountName
+    displaySavedAccounts()
   }
+}
+
+function displaySavedAccounts () {
+  window.hoodie.store.findAll('accounts/').then(results => {
+    console.log(results)
+  }).catch(err => console.error(err))
 }
 
 function loginToViewer (username, password) {
@@ -135,25 +145,29 @@ function loginToViewer (username, password) {
     username,
     password
   }).then(accountProperties => {
-    console.log(accountProperties)
+    setAccountLoginSectionDiplay(false, accountProperties.username)
   })
 }
 
 function signUpButtonPressed (event) {
-  const username = document.getElementById('loginToViewerName').value
+  const username = document.getElementById('loginToViewerName')
+    .value
+    .toLowerCase()
   const password = document.getElementById('loginToViewerPassword').value
   window.hoodie.account.signUp({
     username,
     password
   }).then(accountProperties => {
-    loginToViewer(username, password)
+    return loginToViewer(username, password)
   }).catch(error => {
     displayLoginError(error.message)
   })
 }
 
 function signInButtonPressed (event) {
-  const username = document.getElementById('loginToViewerName').value
+  const username = document.getElementById('loginToViewerName')
+    .value
+    .toLowerCase()
   const password = document.getElementById('loginToViewerPassword').value
   loginToViewer(username, password).catch(error => {
     displayLoginError(error.message)
