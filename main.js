@@ -5,6 +5,12 @@
  *
  */
 
+import React from 'react'
+import ReactDom from 'react-dom'
+
+import LoginForm from './components/login'
+
+/*
 import {viewerName} from './viewerInfo'
 import AvatarName from './avatarName'
 import {login} from './session'
@@ -69,3 +75,6 @@ nameInput.addEventListener('keyup', detectReturn)
 pwInput.addEventListener('keyup', detectReturn)
 
 button.disabled = false
+*/
+
+ReactDom.render(<LoginForm />, document.getElementById('app'))
