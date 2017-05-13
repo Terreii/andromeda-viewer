@@ -31,7 +31,7 @@
   "homepage": "https://github.com/Terreii/andromeda-viewer",
   "devDependencies": {
     "babel-core": "^6.7.6",
-    "babel-loader": "^6.2.4",
+    "babel-loader": "^7.0.0",
     "babel-preset-latest": "^6.16.0",
     "babel-preset-react": "^6.5.0",
     "css-loader": "^0.27.0",
@@ -43,8 +43,8 @@
     "react-dom": "^15.0.0",
     "react-tabs": "^0.8.0",
     "redux": "^3.6.0",
-    "standard": "^9.0.0",
-    "style-loader": "^0.13.1",
+    "standard": "^10.0.0",
+    "style-loader": "^0.17.0",
     "webpack": "^2.2.1"
   },
   "dependencies": {
