@@ -1,13 +1,12 @@
 'use strict'
 
 import React from 'react'
-import ReactDom from 'react-dom'
 
 import { getAvatarName, getMessageOfTheDay, logout } from '../session'
 import ChatBox from './chatBox'
 import style from './main.css'
 
-class App extends React.Component {
+export default class App extends React.Component {
   render () {
     const name = getAvatarName()
     const messageOfTheDay = getMessageOfTheDay()
@@ -34,11 +33,4 @@ class App extends React.Component {
       <ChatBox />
     </div>)
   }
-}
-
-export default function login () {
-  const renderDiv = document.querySelector('#login')
-  renderDiv.id = 'app'
-
-  ReactDom.render(<App />, renderDiv)
 }

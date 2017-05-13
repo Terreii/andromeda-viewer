@@ -2,10 +2,13 @@
 
 import React from 'react'
 
-import {viewerName} from '../viewerInfo'
+import AvatarName from '../avatarName'
+import { viewerName } from '../viewerInfo'
+import { login } from '../session'
 
 import style from './login.css'
 
+// Show the name of the Viewer
 document.title = viewerName
 
 export default class LoginForm extends React.Component {
@@ -14,11 +17,13 @@ export default class LoginForm extends React.Component {
     this.state = {
       name: '',
       password: '',
-      errorMessage: ''
+      errorMessage: '',
+      isLoggingIn: false
     }
     this._boundNameChange = this._nameChanged.bind(this)
     this._boundPasswordChange = this._passwordChanged.bind(this)
     this._boundLogin = this._login.bind(this)
+    this._boundDetectReturn = this._detectReturn.bind(this)
   }
 
   _nameChanged (event) {
@@ -35,6 +40,14 @@ export default class LoginForm extends React.Component {
     })
   }
 
+  _detectReturn (event) { // detects if return was pressed (keyCode 13)
+    if (event.type === 'keyup' && (
+      event.which === 13 || event.keyCode === 13)
+    ) {
+      this._login(event)
+    }
+  }
+
   _login (event) {
     if (this.state.name.length === 0) {
       this.setState({
@@ -48,7 +61,22 @@ export default class LoginForm extends React.Component {
       })
       return
     }
-    window.alert('login in')
+    const userName = new AvatarName(this.state.name)
+    login(userName.first, userName.last, this.state.password, (err, sinfo) => {
+      if (err) {
+        // Displays the error message from the server
+        console.error(err)
+        this.setState({
+          errorMessage: err.message,
+          isLoggingIn: false
+        })
+      } else {
+        this.props.onLogin(true)
+      }
+    })
+    this.setState({
+      isLoggingIn: true
+    })
   }
 
   render () {
@@ -70,6 +98,7 @@ export default class LoginForm extends React.Component {
           autoComplete='username'
           value={this.state.name}
           onChange={this._boundNameChange}
+          onKeyUp={this._boundDetectReturn}
           />
       </div>
       <div>
@@ -80,10 +109,16 @@ export default class LoginForm extends React.Component {
           autoComplete='current-password'
           value={this.state.password}
           onChange={this._boundPasswordChange}
+          onKeyUp={this._boundDetectReturn}
           />
       </div>
       <div>
-        <input type='button' value='Login' onClick={this._boundLogin} />
+        <input
+          type='button'
+          value={this.state.isLoggingIn ? 'Connecting ...' : 'Login'}
+          onClick={this._boundLogin}
+          disabled={this.state.isLoggingIn}
+          />
       </div>
       <p className={style.Error} style={{display: displayError}}>
         {this.state.errorMessage}
