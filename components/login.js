@@ -18,12 +18,29 @@ export default class LoginForm extends React.Component {
       name: '',
       password: '',
       errorMessage: '',
+      grids: [
+        {
+          name: 'Second Life',
+          url: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
+        },
+        {
+          name: 'Second Life Beta',
+          url: 'https://login.aditi.lindenlab.com/cgi-bin/login.cgi'
+        },
+        {
+          name: 'OS Grid',
+          url: 'http://login.osgrid.org/'
+        }
+      ],
+      gridIndex: 0,
       isLoggingIn: false
     }
     this._boundNameChange = this._nameChanged.bind(this)
     this._boundPasswordChange = this._passwordChanged.bind(this)
     this._boundLogin = this._login.bind(this)
     this._boundDetectReturn = this._detectReturn.bind(this)
+    this._boundGridChange = this._gridChange.bind(this)
+    this._boundAddGrid = this._addGrid.bind(this)
   }
 
   _nameChanged (event) {
@@ -48,6 +65,32 @@ export default class LoginForm extends React.Component {
     }
   }
 
+  _gridChange (event) {
+    const nextIndex = +event.target.value || 0
+    this.setState({
+      gridIndex: nextIndex
+    })
+  }
+
+  _addGrid (event) {
+    const nameInput = document.getElementById('newGridName')
+    const urlInput = document.getElementById('newGridURL')
+    const name = nameInput.value
+    const url = urlInput.value
+    if (name.length === 0 || url.length === 0) return
+    this.setState({
+      grids: this.state.grids.concat([
+        {
+          name,
+          url
+        }
+      ]),
+      gridIndex: this.state.grids.length
+    })
+    nameInput.value = ''
+    urlInput.value = ''
+  }
+
   _login (event) {
     if (this.state.name.length === 0) {
       this.setState({
@@ -61,21 +104,20 @@ export default class LoginForm extends React.Component {
       })
       return
     }
-    const userName = new AvatarName(this.state.name)
-    login(userName.first, userName.last, this.state.password, (err, sinfo) => {
-      if (err) {
-        // Displays the error message from the server
-        console.error(err)
-        this.setState({
-          errorMessage: err.message,
-          isLoggingIn: false
-        })
-      } else {
-        this.props.onLogin(true)
-      }
-    })
     this.setState({
       isLoggingIn: true
+    })
+    const {first, last} = new AvatarName(this.state.name)
+    const grid = this.state.grids[this.state.gridIndex]
+    login(first, last, this.state.password, grid).then(res => {
+      this.props.onLogin(true)
+    }).catch(err => {
+      // Displays the error message from the server
+      console.error(err)
+      this.setState({
+        errorMessage: err.message,
+        isLoggingIn: false
+      })
     })
   }
 
@@ -83,6 +125,9 @@ export default class LoginForm extends React.Component {
     const displayError = this.state.errorMessage.length === 0
       ? 'none'
       : ''
+    const grids = this.state.grids.map((grid, index) => {
+      return <option key={grid.name} value={index}>{grid.name}</option>
+    })
     return <div className={style.Main}>
       <h1>
         {'Login to '}
@@ -113,6 +158,11 @@ export default class LoginForm extends React.Component {
           />
       </div>
       <div>
+        <select value={this.state.gridIndex} onChange={this._boundGridChange}>
+          {grids}
+        </select>
+      </div>
+      <div>
         <input
           type='button'
           value={this.state.isLoggingIn ? 'Connecting ...' : 'Login'}
@@ -123,6 +173,14 @@ export default class LoginForm extends React.Component {
       <p className={style.Error} style={{display: displayError}}>
         {this.state.errorMessage}
       </p>
+      <div>
+        Add Grid:
+        <br />
+        <input id='newGridName' type='text' placeholder='Grid Name' />
+        <input id='newGridURL' type='url' placeholder='Grid Login URL' />
+        <br />
+        <input type='button' value='add' onClick={this._boundAddGrid} />
+      </div>
     </div>
   }
 }

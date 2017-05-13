@@ -1,6 +1,7 @@
 'use strict'
 
 var dgram = require('dgram')
+var url = require('url')
 
 var xmlrpc = require('xmlrpc')
 var express = require('express')
@@ -37,17 +38,35 @@ app.use(express.static('public'))
 app.post('/login', bodyParser.json(), function processLogin (req, res) {
   var reqData = req.body
 
-  var xmlrpcClient = xmlrpc.createSecureClient({
-    host: 'login.agni.lindenlab.com',
-    port: 443,
-    path: '/cgi-bin/login.cgi'
-  })
+  var loginURL
+  if (reqData.grid && typeof reqData.grid.url === 'string') {
+    loginURL = url.parse(reqData.grid.url)
+  } else {
+    loginURL = {
+      host: 'login.agni.lindenlab.com',
+      port: 443,
+      path: '/cgi-bin/login.cgi'
+    }
+  }
+  if (!loginURL || loginURL.host == null) {
+    res.status(400)
+    return
+  }
+  var xmlrpcClient = loginURL.protocol == null || loginURL.protocol === 'https:'
+    ? xmlrpc.createSecureClient(loginURL)
+    : xmlrpc.createClient(loginURL) // osgrid uses http for login ... why??
 
   reqData.mac = macaddress // adding the needed mac-address
 
   var method = 'login_to_simulator'
+  var dataToSend = Object.keys(reqData).reduce((data, key) => {
+    if (key !== 'grid') {
+      data[key] = reqData[key]
+    }
+    return data
+  }, {})
 
-  xmlrpcClient.methodCall(method, [reqData], function (err, data) {
+  xmlrpcClient.methodCall(method, [dataToSend], function (err, data) {
     if (err) {
       res.status(400)
       res.json(err)
@@ -58,9 +77,11 @@ app.post('/login', bodyParser.json(), function processLogin (req, res) {
 })
 
 // Incomming WebSockets are processed here
-app.ws('/', function (ws, req) {
+app.ws('/:ip/:port', function (ws, req) {
   if (websocketOriginIsAllowed(req)) {
-    allBridge.push(new Bridge(ws))
+    var ip = req.params.ip
+    var port = +req.params.port
+    allBridge.push(new Bridge(ws, ip, port))
   }
 })
 
@@ -84,23 +105,19 @@ var allBridge = [] // all Bridges will be stored here.
 // The Bridge stores the websocket to the client and the UDP-socket to the sim
 // the first 6 bytes of a message, between this server and a client, is the
 // IP and Port of the sim
-function Bridge (wsConnection) {
+function Bridge (wsConnection, ip, port) {
   this.websocket = wsConnection
   this.udp = dgram.createSocket('udp4')
   this.udp.bind()
+  this.ip = ip
+  this.port = port
 
   var self = this
 
   // from client to sim
   this.websocket.on('message', function (message) {
     if (message instanceof Buffer) {
-      var ip = message.readUInt8(0) + '.' +
-        message.readUInt8(1) + '.' +
-        message.readUInt8(2) + '.' +
-        message.readUInt8(3)
-
-      var buffy = message.slice(6)
-      self.udp.send(buffy, 0, buffy.length, message.readUInt16LE(4), ip)
+      self.udp.send(message, 0, message.length, self.port, self.ip)
     }
   })
   this.websocket.on('close', function (message) {
@@ -112,19 +129,12 @@ function Bridge (wsConnection) {
 
   // from sim to client
   this.udp.on('message', function (message, rinfo) {
-    var buffy = Buffer.concat([
-      new Buffer(6),
-      message
-    ])
-    // add IP address
-    var ipParts = rinfo.address.split('.')
-    for (var i = 0; i < 4; i++) {
-      buffy.writeUInt8(Number(ipParts[i]), i)
+    if (
+      rinfo.address === self.ip && rinfo.port === self.port &&
+      message instanceof Buffer
+    ) {
+      self.websocket.send(message, { binary: true })
     }
-    // add port
-    buffy.writeUInt16LE(rinfo.port, 4)
-
-    self.websocket.send(buffy, { binary: true })
   })
   this.udp.on('close', function (message) {
     if (self.websocket) {
