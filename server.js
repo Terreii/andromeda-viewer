@@ -52,7 +52,9 @@ app.post('/login', bodyParser.json(), function processLogin (req, res) {
     res.status(400)
     return
   }
-  var xmlrpcClient = xmlrpc.createSecureClient(loginURL)
+  var xmlrpcClient = loginURL.protocol == null || loginURL.protocol === 'https:'
+    ? xmlrpc.createSecureClient(loginURL)
+    : xmlrpc.createClient(loginURL) // osgrid uses http for login ... why??
 
   reqData.mac = macaddress // adding the needed mac-address
 

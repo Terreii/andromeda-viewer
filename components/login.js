@@ -22,6 +22,14 @@ export default class LoginForm extends React.Component {
         {
           name: 'Second Life',
           url: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
+        },
+        {
+          name: 'Second Life Beta',
+          url: 'https://login.aditi.lindenlab.com/cgi-bin/login.cgi'
+        },
+        {
+          name: 'OS Grid',
+          url: 'http://login.osgrid.org/'
         }
       ],
       gridIndex: 0,
