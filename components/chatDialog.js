@@ -30,7 +30,7 @@ export default class ChatDialog extends React.Component {
     const messages = this.props.data.map(msg => {
       const time = msg.get('time')
       const fromId = this.props.isIM ? msg.get('fromId') : msg.get('sourceID')
-      const name = this.props.names.get(fromId).toString()
+      const name = this.props.names.get(fromId) || ''
       return (
         <div className={style.message} key={time.getTime()}>
           <span className='time'>
@@ -40,7 +40,7 @@ export default class ChatDialog extends React.Component {
             :
             {leadingZero(time.getSeconds())}
           </span>
-          <span className={style.avatar}>{name}</span>
+          <span className={style.avatar}>{name.toString()}</span>
           <span className='messageText'>{msg.get('message')}</span>
         </div>
       )

@@ -4,7 +4,7 @@
   "description": "Small web-client for connecting to the virtual world of Second Life.",
   "main": "server.js",
   "scripts": {
-    "build": "NODE_ENV=production webpack --optimize-minimize --progress --colors",
+    "build": "webpack -p --progress --colors",
     "watch": "webpack -d --progress --colors --watch",
     "help": "markdown-chalk",
     "pretest": "webpack --config test.config.js",
@@ -34,7 +34,7 @@
     "babel-loader": "^6.2.4",
     "babel-preset-latest": "^6.16.0",
     "babel-preset-react": "^6.5.0",
-    "css-loader": "^0.26.0",
+    "css-loader": "^0.27.0",
     "immutable": "^3.7.4",
     "json-loader": "^0.5.4",
     "markdown-chalk": "^1.4.0",
