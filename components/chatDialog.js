@@ -5,6 +5,7 @@
  */
 
 import React from 'react'
+import PropTypes from 'prop-types'
 import Immutable from 'immutable'
 
 import style from './chatDialog.css'
@@ -30,7 +31,7 @@ export default class ChatDialog extends React.Component {
     const messages = this.props.data.map(msg => {
       const time = msg.get('time')
       const fromId = this.props.isIM ? msg.get('fromId') : msg.get('sourceID')
-      const name = this.props.names.get(fromId).toString()
+      const name = this.props.names.get(fromId) || ''
       return (
         <div className={style.message} key={time.getTime()}>
           <span className='time'>
@@ -40,7 +41,7 @@ export default class ChatDialog extends React.Component {
             :
             {leadingZero(time.getSeconds())}
           </span>
-          <span className={style.avatar}>{name}</span>
+          <span className={style.avatar}>{name.toString()}</span>
           <span className='messageText'>{msg.get('message')}</span>
         </div>
       )
@@ -106,10 +107,10 @@ export default class ChatDialog extends React.Component {
 ChatDialog.displayName = 'ChatDialog'
 // https://facebook.github.io/react/docs/typechecking-with-proptypes.html
 ChatDialog.propTypes = {
-  data: React.PropTypes.instanceOf(Immutable.List).isRequired,
-  names: React.PropTypes.instanceOf(Immutable.Map).isRequired,
-  sendTo: React.PropTypes.func.isRequired,
-  isIM: React.PropTypes.bool
+  data: PropTypes.instanceOf(Immutable.List).isRequired,
+  names: PropTypes.instanceOf(Immutable.Map).isRequired,
+  sendTo: PropTypes.func.isRequired,
+  isIM: PropTypes.bool
 }
 ChatDialog.defaultProps = {
   isIM: false,

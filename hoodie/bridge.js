@@ -41,7 +41,7 @@ class Bridge {
 
   gridToClient (message, rinfo) {
     const buffy = Buffer.concat([
-      new Buffer(6),
+      Buffer.alloc(6),
       message
     ])
     // add IP address

@@ -39,9 +39,7 @@ export default class Circuit extends events.EventEmitter {
 
   _onOpen () {
     this.websocketIsOpen = true
-    this.cachedMessages.forEach(buffer => {
-      this.websocket.send(buffer)
-    })
+    this.cachedMessages.forEach(buffer => this.websocket.send(buffer))
     this.cachedMessages = []
   }
 
@@ -93,8 +91,8 @@ export default class Circuit extends events.EventEmitter {
       body: parsedBody,
       hasAck: hasAck,
       acks: acks,
-      ip: ip,
-      port: port
+      ip,
+      port
     }
     this.emit(parsedBody.name, toEmitObj)
     this.emit('packetReceived', toEmitObj) // for debugging

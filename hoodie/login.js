@@ -1,5 +1,6 @@
 'use strict'
 
+var url = require('url')
 const xmlrpc = require('xmlrpc')
 
 var macaddress
@@ -20,11 +21,23 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 function processLogin (request, reply) {
   const reqData = request.payload
 
-  const xmlrpcClient = xmlrpc.createSecureClient({
-    host: 'login.agni.lindenlab.com',
-    port: 443,
-    path: '/cgi-bin/login.cgi'
-  })
+  var loginURL
+  if (reqData.grid && typeof reqData.grid.url === 'string') {
+    loginURL = url.parse(reqData.grid.url)
+  } else {
+    loginURL = {
+      host: 'login.agni.lindenlab.com',
+      port: 443,
+      path: '/cgi-bin/login.cgi'
+    }
+  }
+  if (!loginURL || loginURL.host == null) {
+    reply(400)
+    return
+  }
+  var xmlrpcClient = loginURL.protocol == null || loginURL.protocol === 'https:'
+    ? xmlrpc.createSecureClient(loginURL)
+    : xmlrpc.createClient(loginURL) // osgrid uses http for login ... why??
 
   reqData.mac = macaddress // adding the needed mac-address
 

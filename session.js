@@ -2,12 +2,12 @@
 
 import crypto from 'crypto'
 
-import {viewerName, viewerVersion, viewerPlatform} from './viewerInfo'
+import { viewerName, viewerVersion, viewerPlatform } from './viewerInfo'
 import Circuit from './network/circuit'
 import simActionsForUI from './actions/simAction'
 import AvatarName from './avatarName'
 import State from './stores/state'
-import {getLocalChatHistory} from './stores/database'
+import { getLocalChatHistory } from './stores/database'
 
 // true if there is a running session
 let _isLoggedIn = false
@@ -25,10 +25,10 @@ const position = {
 
 let activeCircuit
 
-// Logon the user. It will send a XMLHttpRequest to the server.
-export function login (firstName, lastName, password, callback) {
+// Logon the user. It will post using fetch to the server.
+export function login (firstName, lastName, password, grid) {
   if (isLoggedIn()) {
-    throw new Error('There is already an avatar logged in!')
+    return Promise.reject(new Error('There is already an avatar logged in!'))
   }
 
   const hash = crypto.createHash('md5')
@@ -36,6 +36,7 @@ export function login (firstName, lastName, password, callback) {
   const passwdFinal = '$1$' + hash.digest('hex')
 
   const loginData = {
+    grid,
     first: firstName,
     last: lastName,
     passwd: passwdFinal,
@@ -49,20 +50,16 @@ export function login (firstName, lastName, password, callback) {
     read_critical: 'true'
   }
 
-  const xhr = new window.XMLHttpRequest()
-  xhr.open('POST', '/andromeda-login')
-  xhr.setRequestHeader('Content-Type', 'application/json')
-  xhr.responseType = 'json'
-  xhr.onload = event => {
-    const response = typeof event.target.response === 'string'
-      ? JSON.parse(event.target.response)
-      : event.target.response
-
-    _isLoggedIn = response.login === 'true'
-    if (isLoggedIn()) {
-      sessionInfo = response
-      connectToSim(sessionInfo.sim_ip, sessionInfo.sim_port,
-        sessionInfo.circuit_code, callback)
+  return window.fetch('/andromeda-login', {
+    method: 'POST',
+    body: JSON.stringify(loginData),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).then(response => response.json()).then(body => {
+    if (body.login === 'true') {
+      sessionInfo = body
+      connectToSim(body.sim_ip, body.sim_port, body.circuit_code)
       const avatarName = getAvatarName()
       getLocalChatHistory(avatarName.toString()).then(localChatHistory => {
         State.dispatch({
@@ -72,12 +69,11 @@ export function login (firstName, lastName, password, callback) {
           localChatHistory
         })
       })
+      return body
     } else {
-      // error
-      callback(response)
+      throw body
     }
-  }
-  xhr.send(JSON.stringify(loginData))
+  })
 }
 
 // Placeholder for the logout process
@@ -101,8 +97,7 @@ export function logout () {
 }
 
 // Login to a sim. Is called on the login process and sim-change
-function connectToSim (ip, port, circuitCode, callback) {
-  callback(undefined, sessionInfo)
+function connectToSim (ip, port, circuitCode) {
   activeCircuit = new Circuit(ip, port, circuitCode)
   activeCircuit.send('UseCircuitCode', {
     CircuitCode: [
