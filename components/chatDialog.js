@@ -5,6 +5,7 @@
  */
 
 import React from 'react'
+import PropTypes from 'prop-types'
 import Immutable from 'immutable'
 
 import style from './chatDialog.css'
@@ -106,10 +107,10 @@ export default class ChatDialog extends React.Component {
 ChatDialog.displayName = 'ChatDialog'
 // https://facebook.github.io/react/docs/typechecking-with-proptypes.html
 ChatDialog.propTypes = {
-  data: React.PropTypes.instanceOf(Immutable.List).isRequired,
-  names: React.PropTypes.instanceOf(Immutable.Map).isRequired,
-  sendTo: React.PropTypes.func.isRequired,
-  isIM: React.PropTypes.bool
+  data: PropTypes.instanceOf(Immutable.List).isRequired,
+  names: PropTypes.instanceOf(Immutable.Map).isRequired,
+  sendTo: PropTypes.func.isRequired,
+  isIM: PropTypes.bool
 }
 ChatDialog.defaultProps = {
   isIM: false,
