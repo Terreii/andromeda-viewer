@@ -4,20 +4,28 @@ import React from 'react'
 
 import { logout } from '../session'
 import State from '../stores/state'
+import { didLogIn as viewerAccountLogIn } from '../actions/viewerAccount'
 
-import style from './main.css'
+import style from './topBar.css'
 
 export default class TopBar extends React.Component {
   constructor () {
     super()
     this.state = {
       account: State.getState().account,
-      savedAvatars: []
+      savedAvatars: [],
+      showAccountMenu: false
     }
+    this._boundToggleMenu = this._toggleAccountMenu.bind(this)
   }
 
   componentDidMount () {
     this._unsubscribe = State.subscribe(this._onChange.bind(this))
+    window.hoodie.account.get(['session', 'username']).then(properties => {
+      const isLoggedIn = properties.session != null
+      const action = viewerAccountLogIn(isLoggedIn, properties.username)
+      State.dispatch(action)
+    })
   }
 
   componentWillUnmount () {
@@ -37,8 +45,55 @@ export default class TopBar extends React.Component {
     logout()
   }
 
-  render () {
+  _logoutFromViewer (event) {
+    event.preventDefault()
+    if (State.getState().account.get('loggedIn')) {
+      logout()
+    }
+    window.hoodie.account.signOut().then(result => {
+      const action = viewerAccountLogIn(false)
+      State.dispatch(action)
+    }).catch(err => console.error(err))
+  }
+
+  _toggleAccountMenu (event) {
+    this.setState({
+      showAccountMenu: !this.state.showAccountMenu
+    })
+  }
+
+  renderAccountMenu () {
+    if (!this.state.showAccountMenu) return null
     const isLoggedIn = this.state.account.get('loggedIn')
+    const greeting = isLoggedIn
+      ? `Hello ${this.state.account.get('avatarName')}`
+      : ''
+    const viewerAccountLoggedIn = this.state.account.getIn([
+      'viewerAccount',
+      'loggedIn'
+    ])
+    const viewerAccountText = viewerAccountLoggedIn
+      ? `Hello ${this.state.account.getIn(['viewerAccount', 'username'])}`
+      : 'Login to Andromeda'
+    return <div className={style.AccountMenuBody}>
+      <div>{greeting}</div>
+      <div>
+        {viewerAccountText}
+      </div>
+      <div style={{display: isLoggedIn ? '' : 'none'}}>
+        <a href='#' className={style.logout} onClick={this._logout}>
+          log out
+        </a>
+      </div>
+      <div style={{display: viewerAccountLoggedIn ? '' : 'none'}}>
+        <a href='' className={style.Link} onClick={this._logoutFromViewer}>
+          Log out from Viewer
+        </a>
+      </div>
+    </div>
+  }
+
+  render () {
     const msgOfDay = this.props.messageOfTheDay
       ? <span>
         Message of the day:
@@ -53,16 +108,13 @@ export default class TopBar extends React.Component {
         </a>
       </span>
       : <span>Welcome</span>
-    const logOutButton = isLoggedIn
-      ? <a href='#' className={style.logout} onClick={this._logout}>logout</a>
-      : <span />
-    const greeting = isLoggedIn
-      ? `Hello ${this.state.account.get('avatarName')}`
-      : ''
     return <div className={style.menuBar}>
-      <span>{greeting}</span>
+      <div className={style.AccountMenu} onClick={this._boundToggleMenu}>
+        Account
+        {this.renderAccountMenu()}
+      </div>
       {msgOfDay}
-      {logOutButton}
+      <span />
     </div>
   }
 }

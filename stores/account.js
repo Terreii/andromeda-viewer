@@ -1,23 +1,34 @@
 'use strict'
 
-import { Map } from 'immutable'
+import Immutable from 'immutable'
 
-const defaultData = {
-  avatarName: '',
-  loggedIn: false,
-  sync: false,
-  viewerAccount: {
+function getDefault () {
+  const defaultData = {
+    avatarName: '',
     loggedIn: false,
-    name: ''
+    sync: false,
+    viewerAccount: {
+      loggedIn: false,
+      username: ''
+    }
   }
+  return Immutable.fromJS(defaultData)
 }
 
-export default function accountStore (state = Map(defaultData), action) {
+export default function accountStore (state = getDefault(), action) {
   switch (action.type) {
     case 'didLogin':
-      return (state
-        .set('avatarName', action.name.getName())
-        .set('loggedIn', true))
+      return state.merge({
+        avatarName: action.name.getName(),
+        loggedIn: true
+      })
+    case 'ViewerAccountLogInStatus':
+      return state.mergeDeep({
+        viewerAccount: {
+          loggedIn: action.isLoggedIn,
+          username: action.username
+        }
+      })
     default:
       return state
   }
