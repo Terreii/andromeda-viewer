@@ -43,7 +43,7 @@ export function sendInstantMessage (text, to, id) {
     const regionID = getRegionID()
     const position = getPosition()
     const fromAgentName = getAvatarName().getFullName()
-    const binaryBucket = new Buffer([0])
+    const binaryBucket = Buffer.from([0])
     getActiveCircuit().send('ImprovedInstantMessage', {
       AgentData: [
         {
