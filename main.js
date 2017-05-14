@@ -10,8 +10,9 @@ import ReactDom from 'react-dom'
 
 import ChatBox from './components/chatBox'
 import LoginForm from './components/login'
-import { getAccounts, addAccount } from './stores/database'
-import { getAvatarName, getMessageOfTheDay, logout } from './session'
+import TopBar from './components/topBar'
+// import { getAccounts, addAccount } from './stores/database'
+import { getMessageOfTheDay } from './session'
 
 import style from './components/main.css'
 
@@ -42,32 +43,17 @@ class App extends React.Component {
     })
   }
 
-  renderMain () {
-    const name = getAvatarName()
-    return <div className={style.main}>
-      <div id='menuBar' className={style.menuBar}>
-        <span>Hello {name.getName()}</span>
-        <span>
-          Message of the day:
-          {this.state.messageOfTheDay.text}
-          <a
-            href={this.state.messageOfTheDay.href}
-            target='_blank'
-            className={style.daylyMessageLink}
-            >
-            {this.state.messageOfTheDay.href}
-          </a>
-        </span>
-        <a href='#' className={style.logout} onClick={logout}>logout</a>
-      </div>
-      <ChatBox />
-    </div>
-  }
-
   render () {
-    return this.state.isLoggedIn
-      ? this.renderMain()
+    const mainSection = this.state.isLoggedIn
+      ? <ChatBox />
       : <LoginForm onLogin={this.onLogin.bind(this)} />
+    const msgOfDay = this.state.isLoggedIn
+      ? this.state.messageOfTheDay
+      : null
+    return <div className={style.main}>
+      <TopBar messageOfTheDay={msgOfDay} />
+      {mainSection}
+    </div>
   }
 }
 

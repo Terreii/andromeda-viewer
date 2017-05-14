@@ -10,7 +10,7 @@
 
 import events from 'events'
 
-import {parseBody, createBody} from './networkMessages'
+import { parseBody, createBody } from './networkMessages'
 
 export default class Circuit extends events.EventEmitter {
   constructor (hostIP, hostPort, circuitCode) {
