@@ -9,7 +9,8 @@ function getDefault () {
     sync: false,
     viewerAccount: {
       loggedIn: false,
-      username: ''
+      username: '',
+      signInPopup: ''
     }
   }
   return Immutable.fromJS(defaultData)
@@ -27,6 +28,18 @@ export default function accountStore (state = getDefault(), action) {
         viewerAccount: {
           loggedIn: action.isLoggedIn,
           username: action.username
+        }
+      })
+    case 'ShowSignInPopup':
+      return state.mergeDeep({
+        viewerAccount: {
+          signInPopup: 'signIn'
+        }
+      })
+    case 'ClosePopup':
+      return state.mergeDeep({
+        viewerAccount: {
+          signInPopup: ''
         }
       })
     default:

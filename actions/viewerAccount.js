@@ -8,3 +8,15 @@ export function didLogIn (did, username = '') {
     username: isLoggedIn ? username : ''
   }
 }
+
+export function showSignInPopup () {
+  return {
+    type: 'ShowSignInPopup'
+  }
+}
+
+export function closePopup () {
+  return {
+    type: 'ClosePopup'
+  }
+}
