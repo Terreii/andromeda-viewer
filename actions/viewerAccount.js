@@ -1,6 +1,6 @@
 'use strict'
 
-export function didLogIn (did, username = '') {
+export function didSignIn (did, username = '') {
   const isLoggedIn = Boolean(did)
   return {
     type: 'ViewerAccountLogInStatus',
@@ -9,9 +9,10 @@ export function didLogIn (did, username = '') {
   }
 }
 
-export function showSignInPopup () {
+export function showSignInPopup (popup = 'signIn') {
   return {
-    type: 'ShowSignInPopup'
+    type: 'ShowSignInPopup',
+    popup
   }
 }
 

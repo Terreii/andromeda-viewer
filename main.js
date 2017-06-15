@@ -11,7 +11,8 @@ import ReactDom from 'react-dom'
 import ChatBox from './components/chatBox'
 import LoginForm from './components/login'
 import TopBar from './components/topBar'
-import Popup from './components/popup'
+import SignInPopup from './components/signInPopup'
+import SignOutPopup from './components/signOutPopup'
 import { closePopup } from './actions/viewerAccount'
 // import { getAccounts, addAccount } from './stores/database'
 import { getMessageOfTheDay } from './session'
@@ -60,13 +61,14 @@ class App extends React.Component {
   }
 
   getPopup () {
+    const close = () => State.dispatch(closePopup())
     switch (this.state.popup) {
       case 'signIn':
-        return <Popup title='Sign In' onClose={() => State.dispatch(closePopup())}>
-          hello
-        </Popup>
+        return <SignInPopup onCancel={close} />
+      case 'signUp':
+        return <SignInPopup onCancel={close} isSignUp />
       case 'signOut':
-        return <div />
+        return <SignOutPopup onCancel={close} />
       default:
         return null
     }

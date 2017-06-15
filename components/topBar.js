@@ -5,7 +5,7 @@ import React from 'react'
 import { logout } from '../session'
 import State from '../stores/state'
 import {
-  didLogIn as viewerAccountLogIn,
+  didSignIn as viewerAccountLogIn,
   showSignInPopup
 } from '../actions/viewerAccount'
 
@@ -70,6 +70,11 @@ export default class TopBar extends React.Component {
     State.dispatch(showSignInPopup())
   }
 
+  _showSignUpPopup (event) {
+    event.preventDefault()
+    State.dispatch(showSignInPopup('signUp'))
+  }
+
   renderAccountMenu () {
     if (!this.state.showAccountMenu) return null
     const isLoggedIn = this.state.account.get('loggedIn')
@@ -82,11 +87,14 @@ export default class TopBar extends React.Component {
     ])
     const viewerAccountText = viewerAccountLoggedIn
       ? `Hello ${this.state.account.getIn(['viewerAccount', 'username'])}`
-      : <a href='#' onClick={this._showSignInPopup}>Login to Andromeda</a>
+      : <a href='#' onClick={this._showSignInPopup}>Sign into Andromeda</a>
     return <div className={style.AccountMenuBody}>
       <div>{greeting}</div>
       <div>
         {viewerAccountText}
+      </div>
+      <div style={{display: viewerAccountLoggedIn ? 'none' : ''}}>
+        <a href='#' onClick={this._showSignUpPopup}>Sign up to Andromeda</a>
       </div>
       <div style={{display: isLoggedIn ? '' : 'none'}}>
         <a href='#' className={style.logout} onClick={this._logout}>
