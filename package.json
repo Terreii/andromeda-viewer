@@ -44,7 +44,8 @@
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-tabs": "^1.1.0",
-    "redux": "^3.6.0",
+    "redux": "^3.7.0",
+    "redux-thunk": "^2.2.0",
     "standard": "^10.0.0",
     "style-loader": "^0.18.0",
     "webpack": "^2.2.1"
@@ -52,7 +53,7 @@
   "dependencies": {
     "hoodie": "^28.2.0",
     "macaddress": "^0.2.8",
-    "uuid": "^3.0.1",
+    "uuid": "^3.1.0",
     "ws": "^3.0.0",
     "xmlrpc": "^1.3.2"
   },

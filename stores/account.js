@@ -36,6 +36,12 @@ export default function accountStore (state = getDefault(), action) {
           signInPopup: action.popup
         }
       })
+    case 'ShowSignOutPopup':
+      return state.mergeDeep({
+        viewerAccount: {
+          signInPopup: 'signOut'
+        }
+      })
     case 'ClosePopup':
       return state.mergeDeep({
         viewerAccount: {

@@ -46,24 +46,27 @@ export default class SignInPopup extends React.Component {
       <div>
         <div>
           <input
-            type='text'
+            type='email'
             value={this.state.username}
             data-key='username'
+            autoComplete='email'
             onChange={this._boundInputChange}
-            placeholder='username'
+            placeholder='Username / eMail'
             />
           <input
             type='password'
             value={this.state.password}
             data-key='password'
+            autoComplete={this.props.isSignUp ? 'new-password' : 'current-password'}
             onChange={this._boundInputChange}
-            placeholder='password'
+            placeholder='Password'
             />
           <input
             style={{display: this.props.isSignUp ? '' : 'none'}}
             type='password'
             value={this.state.password2}
             data-key='password2'
+            autoComplete='new-password'
             onChange={this._boundInputChange}
             placeholder='repeat password'
             />

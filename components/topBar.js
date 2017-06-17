@@ -4,10 +4,7 @@ import React from 'react'
 
 import { logout } from '../session'
 import State from '../stores/state'
-import {
-  didSignIn as viewerAccountLogIn,
-  showSignInPopup
-} from '../actions/viewerAccount'
+import { showSignOutPopup, showSignInPopup } from '../actions/viewerAccount'
 
 import style from './topBar.css'
 
@@ -24,11 +21,6 @@ export default class TopBar extends React.Component {
 
   componentDidMount () {
     this._unsubscribe = State.subscribe(this._onChange.bind(this))
-    window.hoodie.account.get(['session', 'username']).then(properties => {
-      const isLoggedIn = properties.session != null
-      const action = viewerAccountLogIn(isLoggedIn, properties.username)
-      State.dispatch(action)
-    })
   }
 
   componentWillUnmount () {
@@ -50,13 +42,7 @@ export default class TopBar extends React.Component {
 
   _logoutFromViewer (event) {
     event.preventDefault()
-    if (State.getState().account.get('loggedIn')) {
-      logout()
-    }
-    window.hoodie.account.signOut().then(result => {
-      const action = viewerAccountLogIn(false)
-      State.dispatch(action)
-    }).catch(err => console.error(err))
+    State.dispatch(showSignOutPopup())
   }
 
   _toggleAccountMenu (event) {

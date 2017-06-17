@@ -13,8 +13,7 @@ import LoginForm from './components/login'
 import TopBar from './components/topBar'
 import SignInPopup from './components/signInPopup'
 import SignOutPopup from './components/signOutPopup'
-import { closePopup } from './actions/viewerAccount'
-// import { getAccounts, addAccount } from './stores/database'
+import { closePopup, isSignedIn, signIn, signUp, signOut } from './actions/viewerAccount'
 import { getMessageOfTheDay } from './session'
 import State from './stores/state'
 
@@ -64,11 +63,15 @@ class App extends React.Component {
     const close = () => State.dispatch(closePopup())
     switch (this.state.popup) {
       case 'signIn':
-        return <SignInPopup onCancel={close} />
+        return <SignInPopup onCancel={close} onSend={({username, password}) => {
+          State.dispatch(signIn(username, password))
+        }} />
       case 'signUp':
-        return <SignInPopup onCancel={close} isSignUp />
+        return <SignInPopup onCancel={close} isSignUp onSend={({username, password}) => {
+          State.dispatch(signUp(username, password))
+        }} />
       case 'signOut':
-        return <SignOutPopup onCancel={close} />
+        return <SignOutPopup onCancel={close} onSignOut={() => State.dispatch(signOut())} />
       default:
         return null
     }
@@ -88,5 +91,7 @@ class App extends React.Component {
     </div>
   }
 }
+
+State.dispatch(isSignedIn())
 
 ReactDom.render(<App />, document.getElementById('app'))
