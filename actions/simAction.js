@@ -17,7 +17,7 @@ function parseChatFromSimulator (msg) {
     audible: chatData.Audible.value,
     position: chatData.Position.value,
     message: nullBufferToString(chatData.Message.value),
-    time: new Date()
+    time: Date.now()
   }
   return chatMsg
 }
@@ -43,7 +43,7 @@ function parseIM (message) {
     fromAgentName: nullBufferToString(messageBlock.FromAgentName.value),
     message: nullBufferToString(messageBlock.Message.value),
     binaryBucket: messageBlock.BinaryBucket.value,
-    time: time !== 0 ? new Date(time) : new Date()
+    time: time !== 0 ? time : Date.now()
   }
   return IMmsg
 }
@@ -52,7 +52,7 @@ function parseIM (message) {
 export default function simActionFilter (msg) {
   switch (msg.body.name) {
     case 'ChatFromSimulator':
-      dispatch(msg, parseChatFromSimulator)
+      dispatch(msg, parseChatFromSimulator, 'localchat/' + Date.now())
       break
     case 'ImprovedInstantMessage':
       dispatch(msg, parseIM)
@@ -62,10 +62,24 @@ export default function simActionFilter (msg) {
   }
 }
 
-function dispatch (msg, fn) {
+function dispatch (msg, fn, id) {
   const parsedMsg = fn(msg.body)
-  State.dispatch({
-    type: msg.body.name,
-    msg: parsedMsg
+  State.dispatch((dispatch, getState, hoodie) => {
+    const activeState = getState()
+    if (typeof id === 'string' && activeState.account.getIn(['viewerAccount', 'loggedIn'])) {
+      const avatarName = activeState.account.get('avatarName')
+      parsedMsg._id = avatarName + '/' + id
+      hoodie.store.add(parsedMsg).then(doc => {
+        dispatch({
+          type: msg.body.name,
+          msg: doc
+        })
+      })
+    } else {
+      dispatch({
+        type: msg.body.name,
+        msg: parsedMsg
+      })
+    }
   })
 }

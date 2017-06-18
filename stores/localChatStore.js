@@ -14,7 +14,7 @@ export function localChatStore (state = Immutable.List(), action) {
     case 'didLogin':
       return action.localChatHistory
         .reduce((chatData, msg) => chatData.push(Immutable.Map(msg)), state)
-        .sort((a, b) => a.get('time').getTime() - b.get('time').getTime())
+        .sort((a, b) => a.get('time') - b.get('time'))
     default:
       return state
   }

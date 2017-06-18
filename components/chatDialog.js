@@ -29,7 +29,7 @@ export default class ChatDialog extends React.Component {
 
   render () {
     const messages = this.props.data.map(msg => {
-      const time = msg.get('time')
+      const time = new Date(msg.get('time'))
       const fromId = this.props.isIM ? msg.get('fromId') : msg.get('sourceID')
       const name = this.props.names.get(fromId) || ''
       return (

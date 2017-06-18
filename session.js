@@ -7,7 +7,7 @@ import Circuit from './network/circuit'
 import simActionsForUI from './actions/simAction'
 import AvatarName from './avatarName'
 import State from './stores/state'
-import { getLocalChatHistory } from './stores/database'
+import { getLocalChatHistory } from './actions/chatMessageActions'
 
 // true if there is a running session
 let _isLoggedIn = false
@@ -50,18 +50,26 @@ export function login (firstName, lastName, password, grid) {
     read_critical: 'true'
   }
 
-  return window.fetch('/andromeda-login', {
+  const requestData = {
     method: 'POST',
     body: JSON.stringify(loginData),
     headers: {
       'Content-Type': 'application/json'
     }
-  }).then(response => response.json()).then(body => {
+  }
+
+  return window.fetch('/andromeda-login', requestData).then(response => {
+    if (response.status === 404) { // try again with other path
+      const request = window.fetch('/hoodie/andromeda-viewer/andromeda-login', requestData)
+      return request.then(response => response.json())
+    }
+    return response.json() // if '/andromeda-login' worked
+  }).then(body => {
     if (body.login === 'true') {
       sessionInfo = body
       connectToSim(body.sim_ip, body.sim_port, body.circuit_code)
-      const avatarName = getAvatarName()
-      getLocalChatHistory(avatarName.toString()).then(localChatHistory => {
+      const avatarName = getAvatarName().getFullName()
+      State.dispatch(getLocalChatHistory(avatarName)).then(localChatHistory => {
         _isLoggedIn = true
         State.dispatch({
           type: 'didLogin',

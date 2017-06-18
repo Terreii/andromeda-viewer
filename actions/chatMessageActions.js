@@ -91,3 +91,9 @@ export function sendInstantMessage (text, to, id) {
     console.error(e)
   }
 }
+
+export function getLocalChatHistory (avatarName) {
+  return (dispatch, getState, hoodie) => {
+    return hoodie.store.withIdPrefix(`${avatarName}/localchat/`).findAll()
+  }
+}

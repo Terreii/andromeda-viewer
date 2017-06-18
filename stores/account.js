@@ -20,7 +20,7 @@ export default function accountStore (state = getDefault(), action) {
   switch (action.type) {
     case 'didLogin':
       return state.merge({
-        avatarName: action.name.getName(),
+        avatarName: action.name,
         loggedIn: true
       })
     case 'ViewerAccountLogInStatus':
