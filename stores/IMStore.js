@@ -13,7 +13,7 @@ function addToChats (chats, msg, fromSelf) {
   }
 
   const msgMap = Immutable.Map(msg)
-  const conv = fromSelf ? msg.toAgentID : msg.fromId
+  const conv = fromSelf ? msg.toAgentID : msg.chatUUID
 
   const convStore = chats.has(conv)
     ? chats.get(conv).push(msgMap)

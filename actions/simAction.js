@@ -45,6 +45,8 @@ function parseIM (message) {
     binaryBucket: messageBlock.BinaryBucket.value,
     time: time !== 0 ? time : Date.now()
   }
+  // If it is a group chat, toAgentID is the Group-UUID.
+  IMmsg.chatUUID = IMmsg.fromGroup ? IMmsg.toAgentID : IMmsg.id
   return IMmsg
 }
 
@@ -52,33 +54,38 @@ function parseIM (message) {
 export default function simActionFilter (msg) {
   switch (msg.body.name) {
     case 'ChatFromSimulator':
-      dispatch(msg, parseChatFromSimulator, 'localchat/' + Date.now())
+      dispatchSIMAction(parseChatFromSimulator(msg.body), 'localchat/' + Date.now())
       break
     case 'ImprovedInstantMessage':
-      dispatch(msg, parseIM)
+      const parsedMsg = parseIM(msg.body)
+      const id = `imChats/${parsedMsg.chatUUID}/${parsedMsg.time}`
+      dispatchSIMAction(parsedMsg, id)
       break
     default:
       break
   }
 }
 
-function dispatch (msg, fn, id) {
-  const parsedMsg = fn(msg.body)
+// Dispatches all parsed messages.
+// If they have an ID, they will be saved and synced under the avatar name.
+function dispatchSIMAction (msg, id) {
   State.dispatch((dispatch, getState, hoodie) => {
     const activeState = getState()
     if (typeof id === 'string' && activeState.account.getIn(['viewerAccount', 'loggedIn'])) {
+      // Save messages. They will also be synced!
       const avatarName = activeState.account.get('avatarName')
-      parsedMsg._id = avatarName + '/' + id
-      hoodie.store.add(parsedMsg).then(doc => {
+      msg._id = avatarName + '/' + id
+      hoodie.store.add(msg).then(doc => {
         dispatch({
           type: msg.body.name,
           msg: doc
         })
       })
     } else {
+      // This is the path for every message, that will not be synced and saved.
       dispatch({
         type: msg.body.name,
-        msg: parsedMsg
+        msg
       })
     }
   })

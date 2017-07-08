@@ -7,6 +7,7 @@ function getDefault () {
     avatarName: '',
     loggedIn: false,
     sync: false,
+    agentId: '',
     viewerAccount: {
       loggedIn: false,
       username: '',
@@ -21,7 +22,8 @@ export default function accountStore (state = getDefault(), action) {
     case 'didLogin':
       return state.merge({
         avatarName: action.name,
-        loggedIn: true
+        loggedIn: true,
+        agentId: action.uuid
       })
     case 'ViewerAccountLogInStatus':
       return state.mergeDeep({

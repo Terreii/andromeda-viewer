@@ -56,7 +56,7 @@ function processLogin (request, reply) {
 exports.init = function loginInit (server) {
   server.route({
     method: 'POST',
-    path: '/andromeda-login',
+    path: '/login',
     handler: processLogin
   })
 }

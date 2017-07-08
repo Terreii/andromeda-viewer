@@ -84,7 +84,7 @@ export function sendInstantMessage (text, to, id) {
         fromAgentName,
         message: text,
         binaryBucket,
-        time: new Date()
+        time: Date.now()
       }
     })
   } catch (e) {
