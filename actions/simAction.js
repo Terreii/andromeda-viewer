@@ -54,12 +54,13 @@ function parseIM (message) {
 export default function simActionFilter (msg) {
   switch (msg.body.name) {
     case 'ChatFromSimulator':
-      dispatchSIMAction(parseChatFromSimulator(msg.body), 'localchat/' + Date.now())
+      const parsed = parseChatFromSimulator(msg.body)
+      dispatchSIMAction(msg.body.name, parsed, 'localchat/' + new Date(parsed.time).toJSON())
       break
     case 'ImprovedInstantMessage':
       const parsedMsg = parseIM(msg.body)
-      const id = `imChats/${parsedMsg.chatUUID}/${parsedMsg.time}`
-      dispatchSIMAction(parsedMsg, id)
+      const id = `imChats/${parsedMsg.chatUUID}/${new Date(parsedMsg.time).toJSON()}`
+      dispatchSIMAction(msg.body.name, parsedMsg, id)
       break
     default:
       break
@@ -68,7 +69,7 @@ export default function simActionFilter (msg) {
 
 // Dispatches all parsed messages.
 // If they have an ID, they will be saved and synced under the avatar name.
-function dispatchSIMAction (msg, id) {
+function dispatchSIMAction (name, msg, id) {
   State.dispatch((dispatch, getState, hoodie) => {
     const activeState = getState()
     if (typeof id === 'string' && activeState.account.getIn(['viewerAccount', 'loggedIn'])) {
@@ -77,14 +78,14 @@ function dispatchSIMAction (msg, id) {
       msg._id = avatarName + '/' + id
       hoodie.store.add(msg).then(doc => {
         dispatch({
-          type: msg.body.name,
+          type: name,
           msg: doc
         })
       })
     } else {
       // This is the path for every message, that will not be synced and saved.
       dispatch({
-        type: msg.body.name,
+        type: name,
         msg
       })
     }

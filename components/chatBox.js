@@ -12,7 +12,9 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
 import State from '../stores/state'
 import ChatDialog from './chatDialog'
 import {
-  sendLocalChatMessage, sendInstantMessage
+  sendLocalChatMessage,
+  sendInstantMessage,
+  getIMHistory
 } from '../actions/chatMessageActions'
 
 import tabsStyle from 'react-tabs/style/react-tabs.css'
@@ -51,17 +53,19 @@ export default class ChatBox extends React.Component {
       </Tab>
     })
     const panels = imsNames.map(key => {
-      const messages = this.state.IMs.get(key)
-      const id = messages.get(0).get('id')
+      const chat = this.state.IMs.get(key)
+      const id = chat.getIn(['messages', 0, 'id'])
       return (
         <TabPanel
           key={key}
           className={tabsStyle['react-tabs__tab-panel']}
           selectedClassName={tabsStyle['react-tabs__tab-panel--selected']}
           >
-          <ChatDialog data={messages} isIM sendTo={text => {
+          <ChatDialog data={chat} isIM sendTo={text => {
             sendInstantMessage(text, key, id)
-          }} names={this.state.names} />
+          }} names={this.state.names} loadHistory={chatUUID => {
+            State.dispatch(getIMHistory(chatUUID))
+          }} />
         </TabPanel>
       )
     })

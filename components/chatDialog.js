@@ -12,11 +12,7 @@ import style from './chatDialog.css'
 
 // Adds to all Numbers a leading zero if it has only one digit
 function leadingZero (num) {
-  var numStr = String(num)
-  if (numStr.length === 1) {
-    numStr = '0' + numStr
-  }
-  return numStr
+  return String(num).padStart(2, '0')
 }
 
 export default class ChatDialog extends React.Component {
@@ -27,8 +23,17 @@ export default class ChatDialog extends React.Component {
     }
   }
 
+  componentDidMount () {
+    const isIM = this.props.isIM
+    const data = this.props.data
+    if (isIM && !data.get('didLoadHistory') && !data.get('isLoadingHistory')) {
+      this.props.loadHistory(data.get('chatUUID'))
+    }
+  }
+
   render () {
-    const messages = this.props.data.map(msg => {
+    const msgData = this.props.isIM ? this.props.data.get('messages') : this.props.data
+    const messages = msgData.map(msg => {
       const time = new Date(msg.get('time'))
       const fromId = this.props.isIM ? msg.get('fromId') : msg.get('sourceID')
       const name = this.props.names.get(fromId) || ''
@@ -107,7 +112,10 @@ export default class ChatDialog extends React.Component {
 ChatDialog.displayName = 'ChatDialog'
 // https://facebook.github.io/react/docs/typechecking-with-proptypes.html
 ChatDialog.propTypes = {
-  data: PropTypes.instanceOf(Immutable.List).isRequired,
+  data: PropTypes.oneOfType([
+    PropTypes.instanceOf(Immutable.List),
+    PropTypes.instanceOf(Immutable.Map)
+  ]).isRequired,
   names: PropTypes.instanceOf(Immutable.Map).isRequired,
   sendTo: PropTypes.func.isRequired,
   isIM: PropTypes.bool

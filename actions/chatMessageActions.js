@@ -68,9 +68,14 @@ export function sendInstantMessage (text, to, id) {
         }
       ]
     })
-    State.dispatch({
-      type: 'SelfSendImprovedInstantMessage',
-      msg: {
+    const chatUUID = id
+    const time = new Date()
+    State.dispatch((dispatch, getState, hoodie) => {
+      const activeState = getState()
+      const avatarName = activeState.account.get('avatarName')
+      const msg = {
+        _id: `${avatarName}/imChats/${chatUUID}/${time.toJSON()}`,
+        chatUUID,
         sessionID,
         fromId: agentID,
         fromGroup: false,
@@ -84,7 +89,18 @@ export function sendInstantMessage (text, to, id) {
         fromAgentName,
         message: text,
         binaryBucket,
-        time: Date.now()
+        time: time.getTime()
+      }
+      const actionData = {
+        type: 'SelfSendImprovedInstantMessage',
+        msg
+      }
+      if (activeState.account.getIn(['viewerAccount', 'loggedIn'])) {
+        hoodie.store.add(msg).then(doc => {
+          dispatch(actionData)
+        })
+      } else {
+        dispatch(actionData)
       }
     })
   } catch (e) {
@@ -95,5 +111,27 @@ export function sendInstantMessage (text, to, id) {
 export function getLocalChatHistory (avatarName) {
   return (dispatch, getState, hoodie) => {
     return hoodie.store.withIdPrefix(`${avatarName}/localchat/`).findAll()
+  }
+}
+
+export function getIMHistory (chatUUID) {
+  return (dispatch, getState, hoodie) => {
+    dispatch({
+      type: 'IMHistoryStartLoading',
+      chatUUID
+    })
+    const avatarName = getState().account.get('avatarName')
+    hoodie.store.withIdPrefix(`${avatarName}/imChats/${chatUUID}`).findAll().catch(err => {
+      if (err.status === 404) {
+        return []
+      }
+      throw err
+    }).then(docs => {
+      dispatch({
+        type: 'IMHistoryLoaded',
+        chatUUID,
+        messages: docs
+      })
+    })
   }
 }
