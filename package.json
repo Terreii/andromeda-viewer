@@ -10,6 +10,7 @@
     "pretest": "webpack --config test.config.js",
     "test": "standard && mocha --compilers js:babel-core/register",
     "posttest": "rm builds/testBundle.js",
+    "update-coc": "weallbehave -o . && git add CODE_OF_CONDUCT.md && git commit -m 'docs(coc): updated CODE_OF_CONDUCT.md'",
     "fixStyle": "standard --fix"
   },
   "repository": {
@@ -46,6 +47,7 @@
     "redux": "^3.6.0",
     "standard": "^10.0.0",
     "style-loader": "^0.17.0",
+    "weallbehave": "^1.2.0",
     "webpack": "^2.2.1"
   },
   "dependencies": {
