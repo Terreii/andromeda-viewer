@@ -11,6 +11,8 @@
     "test": "standard && mocha --compilers js:babel-core/register",
     "posttest": "rm public/testBundle.js",
     "fixStyle": "standard --fix",
+    "update-coc": "weallbehave -o . && git add CODE_OF_CONDUCT.md && git commit -m 'docs(coc): updated CODE_OF_CONDUCT.md'",
+    "update-contrib": "weallcontribute -o . && git add CONTRIBUTING.md && git commit -m 'docs(contributing): updated CONTRIBUTING.md'",
     "startDev": "hoodie --inMemory",
     "start": "hoodie"
   },
@@ -49,6 +51,8 @@
     "redux-thunk": "^2.2.0",
     "standard": "^10.0.3",
     "style-loader": "^0.18.0",
+    "weallbehave": "^1.2.0",
+    "weallcontribute": "^1.0.8",
     "webpack": "^2.7.0"
   },
   "dependencies": {
