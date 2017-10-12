@@ -13,23 +13,24 @@ function addToChats (chats, msg, fromSelf) {
   }
 
   const msgMap = Immutable.Map(msg)
-  const conv = fromSelf ? msg.toAgentID : msg.chatUUID
+  const chatUUID = msg.chatUUID
 
   let convStore
-  if (chats.has(conv)) {
-    convStore = chats.get(conv)
-    const messages = convStore.get('messages').push(msgMap)
-    convStore = convStore.set('messages', messages)
+  if (chats.has(chatUUID)) {
+    const oldConvStore = chats.get(chatUUID)
+    const messages = oldConvStore.get('messages').push(msgMap)
+    convStore = oldConvStore.set('messages', messages)
   } else {
     convStore = Immutable.Map({
-      chatUUID: conv,
+      chatUUID,
+      withId: fromSelf ? msg.toAgentID : msg.fromId,
       didLoadHistory: false,
       isLoadingHistory: false,
       messages: Immutable.List([msgMap])
     })
   }
 
-  return chats.set(conv, convStore)
+  return chats.set(chatUUID, convStore)
 }
 
 function setHistory (state, action) {

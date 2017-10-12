@@ -43,7 +43,8 @@ export function sendInstantMessage (text, to, id) {
     const regionID = getRegionID()
     const position = getPosition()
     const fromAgentName = getAvatarName().getFullName()
-    const binaryBucket = Buffer.from([0])
+    const binaryBucket = Buffer.from([])
+    const time = new Date()
     getActiveCircuit().send('ImprovedInstantMessage', {
       AgentData: [
         {
@@ -61,21 +62,19 @@ export function sendInstantMessage (text, to, id) {
           Offline: 0,
           Dialog: 0,
           ID: id,
-          Timestamp: Math.floor(Date.now() / 1000),
+          Timestamp: Math.floor(time.getTime() / 1000),
           FromAgentName: fromAgentName,
           Message: text,
           BinaryBucket: binaryBucket
         }
       ]
     })
-    const chatUUID = id
-    const time = new Date()
     State.dispatch((dispatch, getState, hoodie) => {
       const activeState = getState()
       const avatarName = activeState.account.get('avatarName')
       const msg = {
-        _id: `${avatarName}/imChats/${chatUUID}/${time.toJSON()}`,
-        chatUUID,
+        _id: `${avatarName}/imChats/${id}/${time.toJSON()}`,
+        chatUUID: id,
         sessionID,
         fromId: agentID,
         fromGroup: false,
