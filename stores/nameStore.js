@@ -46,6 +46,11 @@ export function nameStoreReduce (state = Immutable.Map(), action) {
     case 'didLogin':
       const selfName = addName(state, action.uuid, action.name)
       return action.localChatHistory.reduce(addNameFromLocalChat, selfName)
+    case 'IMChatInfosLoaded':
+      return state.merge(action.chats.reduce((all, chat) => {
+        all[chat.target] = new AvatarName(chat.name)
+        return all
+      }, {}))
     default:
       return state
   }

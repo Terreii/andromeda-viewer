@@ -7,7 +7,7 @@ import Circuit from './network/circuit'
 import simActionsForUI from './actions/simAction'
 import AvatarName from './avatarName'
 import State from './stores/state'
-import { getLocalChatHistory } from './actions/chatMessageActions'
+import { getLocalChatHistory, loadIMChats } from './actions/chatMessageActions'
 
 // true if there is a running session
 let _isLoggedIn = false
@@ -69,6 +69,7 @@ export function login (firstName, lastName, password, grid) {
           uuid: getAgentId(),
           localChatHistory
         })
+        State.dispatch(loadIMChats())
       })
       return body
     } else {

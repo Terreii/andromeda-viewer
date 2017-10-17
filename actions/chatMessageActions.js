@@ -113,6 +113,66 @@ export function getLocalChatHistory (avatarName) {
   }
 }
 
+// Get the chatType stored in an IMChat Info from the dialog value in IMs.
+export function getIMChatTypeOfDialog (dialog) {
+  switch (dialog) {
+    case 0:
+      return 'personal'
+    default:
+      return undefined
+  }
+}
+
+// Starts a new IMChat. It also saves it into Hoodie.
+export function createNewIMChat (dialog, chatUUID, target, name) {
+  const type = getIMChatTypeOfDialog(dialog)
+  if (type == null) return () => {}
+  return (dispatch, getState, hoodie) => {
+    const activeState = getState()
+    const hasChat = activeState.IMs.has(chatUUID)
+    // Stop if the chat already exists.
+    if (hasChat && activeState.IMs.getIn([chatUUID, 'active'])) return
+
+    dispatch({
+      type: 'CreateNewIMChat',
+      chatType: type,
+      chatUUID,
+      target,
+      name
+    })
+
+    // If the user is logged in with a viewer-account, then save the IMChat.
+    if (hasChat || !activeState.account.getIn(['viewerAccount', 'loggedIn'])) return
+    const avatarName = activeState.account.get('avatarName')
+    const doc = {
+      _id: `${avatarName}/imChatsInfos/${chatUUID}`,
+      chatType: type,
+      chatUUID,
+      target,
+      name
+    }
+    hoodie.store.updateOrAdd(doc)
+  }
+}
+
+// Loads IM Chat Infos.
+export function loadIMChats () {
+  return (dispatch, getState, hoodie) => {
+    const activeState = getState()
+    // Only load the history if the user is logged into a viewer-account.
+    if (!activeState.account.getIn(['viewerAccount', 'loggedIn'])) return
+
+    const avatarName = activeState.account.get('avatarName')
+    hoodie.store.withIdPrefix(`${avatarName}/imChatsInfos/`).findAll().then(result => {
+      dispatch({
+        type: 'IMChatInfosLoaded',
+        chats: result
+      })
+    })
+  }
+}
+
+// Loads messages of an IM Chat.
 export function getIMHistory (chatUUID) {
   return (dispatch, getState, hoodie) => {
     dispatch({

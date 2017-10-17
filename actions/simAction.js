@@ -1,6 +1,7 @@
 'use strict'
 
 import State from '../stores/state'
+import { createNewIMChat } from './chatMessageActions'
 
 function nullBufferToString (buffy) {
   return buffy.toString('utf8').replace(/\0/gi, '')
@@ -59,6 +60,10 @@ export default function simActionFilter (msg) {
       break
     case 'ImprovedInstantMessage':
       const parsedMsg = parseIM(msg.body)
+      // Start a new IMChat.
+      State.dispatch(createNewIMChat(
+        parsedMsg.dialog, parsedMsg.chatUUID, parsedMsg.fromId, parsedMsg.fromAgentName
+      ))
       const id = `imChats/${parsedMsg.chatUUID}/${new Date(parsedMsg.time).toJSON()}`
       dispatchSIMAction(msg.body.name, parsedMsg, id)
       break
