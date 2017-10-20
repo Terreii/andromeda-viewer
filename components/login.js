@@ -17,21 +17,8 @@ export default class LoginForm extends React.Component {
     this.state = {
       name: '',
       password: '',
+      save: false,
       errorMessage: '',
-      grids: [
-        {
-          name: 'Second Life',
-          url: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
-        },
-        {
-          name: 'Second Life Beta',
-          url: 'https://login.aditi.lindenlab.com/cgi-bin/login.cgi'
-        },
-        {
-          name: 'OS Grid',
-          url: 'http://login.osgrid.org/'
-        }
-      ],
       gridIndex: 0,
       isLoggingIn: false
     }
@@ -78,15 +65,7 @@ export default class LoginForm extends React.Component {
     const name = nameInput.value
     const url = urlInput.value
     if (name.length === 0 || url.length === 0) return
-    this.setState({
-      grids: this.state.grids.concat([
-        {
-          name,
-          url
-        }
-      ]),
-      gridIndex: this.state.grids.length
-    })
+    this.props.saveGrid(name, url)
     nameInput.value = ''
     urlInput.value = ''
   }
@@ -108,9 +87,13 @@ export default class LoginForm extends React.Component {
       isLoggingIn: true
     })
     const {first, last} = new AvatarName(this.state.name)
-    const grid = this.state.grids[this.state.gridIndex]
+    const grid = this.props.grids.get(this.state.gridIndex).toJSON()
     login(first, last, this.state.password, grid).then(res => {
       this.props.onLogin(true)
+    }).then(() => {
+      if (this.state.save && this.props.isSignedIn) {
+        this.props.saveAvatar(new AvatarName(first, last), grid)
+      }
     }).catch(err => {
       // Displays the error message from the server
       console.error(err)
@@ -121,12 +104,21 @@ export default class LoginForm extends React.Component {
     })
   }
 
+  renderAvatarLogin (avatar) {
+    return <div key={avatar.get('_id')}>
+      <h3>{avatar.get('name')}</h3>
+      <input type='password' id={'password' + avatar.name} placeholder='password' />
+      <button onClick={event => console.log(event)}>Login</button>
+    </div>
+  }
+
   render () {
     const displayError = this.state.errorMessage.length === 0
       ? 'none'
       : ''
-    const grids = this.state.grids.map((grid, index) => {
-      return <option key={grid.name} value={index}>{grid.name}</option>
+    const grids = this.props.grids.map((grid, index) => {
+      const name = grid.get('name')
+      return <option key={name} value={index}>{name}</option>
     })
     return <div className={style.Main}>
       <h1>
@@ -164,11 +156,25 @@ export default class LoginForm extends React.Component {
       </div>
       <div>
         <input
+          id='saveAvatar'
+          type='checkbox'
+          checked={this.state.save}
+          onChange={event => this.setState({
+            save: event.target.checked
+          })}
+          />
+        <label htmlFor='saveAvatar'>Save</label>
+      </div>
+      <div>
+        <input
           type='button'
           value={this.state.isLoggingIn ? 'Connecting ...' : 'Login'}
           onClick={this._boundLogin}
           disabled={this.state.isLoggingIn}
           />
+      </div>
+      <div style={{display: 'flex', flexDirection: 'row'}}>
+        {this.props.avatars != null ? this.props.avatars.map(this.renderAvatarLogin.bind(this)) : null}
       </div>
       <p className={style.Error} style={{display: displayError}}>
         {this.state.errorMessage}
