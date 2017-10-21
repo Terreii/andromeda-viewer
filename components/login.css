@@ -31,3 +31,19 @@
   display: none;
   padding-top: 0.3em;
 }
+
+.SavedAvatars {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.SavedAvatarLogin {
+  display: flex;
+  flex-direction: column;
+  padding: .5em;
+  padding-top: 0px;
+  margin: .3em;
+  border: 1px solid rgb(90, 95, 105);
+  border-radius: .3em;
+}
