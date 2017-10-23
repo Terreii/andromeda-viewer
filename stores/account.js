@@ -74,18 +74,38 @@ export default function accountStore (state = getDefault(), action) {
     case 'AvatarsLoaded':
       const savedAvatars = Immutable.fromJS(action.avatars)
       return state.set('savedAvatars', savedAvatars)
-    case 'GridAdded':
-      const grids = state.get('savedGrids').push(Immutable.Map({
-        name: action.name,
-        loginURL: action.loginURL
+    case 'SavedAvatarUpdated':
+      return state.set('savedAvatars', state.get('savedAvatars').map(avatar => {
+        return avatar.get('_id') === action.avatar._id ? Immutable.fromJS(action.avatar) : avatar
       }))
+    case 'SavedAvatarRemoved':
+      return state.set('savedAvatars', state.get('savedAvatars').filter(avatar => {
+        return avatar.get('_id') !== action.avatar._id
+      }))
+    case 'GridAdded':
+      const grids = state.get('savedGrids').push(Immutable.Map(action.grid))
       return state.set('savedGrids', grids)
     case 'GridsLoaded':
-      const loadedGrids = action.grids.map(grid => Immutable.Map({
-        name: grid.name,
-        loginURL: grid.loginURL
-      }))
+      const loadedGrids = Immutable.fromJS(action.grids)
       return state.set('savedGrids', state.get('savedGrids').concat(loadedGrids))
+    case 'SavedGridDidChanged':
+      return state.set('savedGrids', state.get('savedGrids').map(grid => {
+        if (grid.has('_id')) { // If grid has an id
+          return grid.get('_id') === action.grid._id
+            ? Immutable.fromJS(action.grid)
+            : grid
+        } else {
+          return grid.get('name') === action.grid.name
+            ? Immutable.fromJS(action.grid)
+            : grid
+        }
+      }))
+    case 'SavedGridRemoved':
+      return state.set('savedGrids', state.get('savedGrids').filter(grid => {
+        return grid.has('_id')
+          ? grid.get('_id') !== action.grid._id // grid has an id
+          : grid.get('name') !== action.grid.name
+      }))
     default:
       return state
   }

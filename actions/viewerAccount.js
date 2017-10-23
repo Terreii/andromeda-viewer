@@ -52,11 +52,6 @@ export function saveAvatar (name, grid) {
       _id: 'avatars/' + avatarIdentifier,
       name: name.getFullName(),
       grid: grid.name
-    }).then(doc => {
-      dispatch({
-        type: 'AvatarSaved',
-        avatar: doc
-      })
     })
   }
 }
@@ -67,12 +62,40 @@ export function loadSavedAvatars () {
       return Promise.reject(new Error('Not signed in to Viewer!'))
     }
 
-    return hoodie.store.withIdPrefix('avatars/').findAll().then(avatars => {
+    const avatarsStore = hoodie.store.withIdPrefix('avatars/')
+
+    avatarsStore.on('change', (eventName, doc) => {
+      dispatch(avatarsDidChange(eventName, doc))
+    })
+
+    return avatarsStore.findAll().then(avatars => {
       dispatch({
         type: 'AvatarsLoaded',
         avatars
       })
     })
+  }
+}
+
+function avatarsDidChange (type, doc) {
+  switch (type) {
+    case 'add':
+      return {
+        type: 'AvatarSaved',
+        avatar: doc
+      }
+    case 'update':
+      return {
+        type: 'SavedAvatarUpdated',
+        avatar: doc
+      }
+    case 'remove':
+      return {
+        type: 'SavedAvatarRemoved',
+        avatar: doc
+      }
+    default:
+      return () => {} // Do nothing
   }
 }
 
@@ -94,12 +117,6 @@ export function saveGrid (name, loginURL) {
       _id: 'grids/' + name,
       name,
       loginURL
-    }).then(doc => {
-      dispatch({
-        type: 'GridAdded',
-        name,
-        loginURL
-      })
     })
   }
 }
@@ -110,12 +127,40 @@ export function loadSavedGrids () {
       return Promise.reject(new Error('Not signed in to Viewer!'))
     }
 
-    return hoodie.store.withIdPrefix('grids/').findAll().then(grids => {
+    const gridsStore = hoodie.store.withIdPrefix('grids/')
+
+    gridsStore.on('change', (change, doc) => {
+      dispatch(gridsDidChange(change, doc))
+    })
+
+    return gridsStore.findAll().then(grids => {
       dispatch({
         type: 'GridsLoaded',
         grids
       })
     })
+  }
+}
+
+function gridsDidChange (type, grid) {
+  switch (type) {
+    case 'add':
+      return {
+        type: 'GridAdded',
+        grid
+      }
+    case 'update':
+      return {
+        type: 'SavedGridDidChanged',
+        grid
+      }
+    case 'remove':
+      return {
+        type: 'SavedGridRemoved',
+        grid
+      }
+    default:
+      return () => {} // Do nothing
   }
 }
 
