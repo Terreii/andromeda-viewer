@@ -61,11 +61,13 @@ export function login (firstName, lastName, password, grid) {
       sessionInfo = body
       connectToSim(body.sim_ip, body.sim_port, body.circuit_code)
       const avatarName = getAvatarName().getFullName()
-      State.dispatch(getLocalChatHistory(avatarName)).then(localChatHistory => {
+      const avatarIdentifier = `${avatarName}@${grid.name}`
+      State.dispatch(getLocalChatHistory(avatarIdentifier)).then(localChatHistory => {
         _isLoggedIn = true
         State.dispatch({
           type: 'didLogin',
           name: avatarName,
+          grid,
           uuid: getAgentId(),
           localChatHistory
         })

@@ -9,6 +9,7 @@ export default class SignInPopup extends React.Component {
     super()
     this.state = {
       username: '',
+      usernameValid: false,
       password: '',
       password2: ''
     }
@@ -20,6 +21,7 @@ export default class SignInPopup extends React.Component {
     const key = event.target.dataset.key
     const value = event.target.value
     this.setState({
+      usernameValid: key === 'username' ? event.target.validity.valid : this.state.usernameValid,
       [key]: value
     })
   }
@@ -27,7 +29,7 @@ export default class SignInPopup extends React.Component {
   _send (event) {
     const username = this.state.username
     const password = this.state.password
-    if (username.length === 0 || password.length === 0) {
+    if (username.length === 0 || password.length === 0 || !this.state.usernameValid) {
       return
     }
     if (this.props.isSignUp && password !== this.state.password2) {

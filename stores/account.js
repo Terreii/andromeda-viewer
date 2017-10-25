@@ -6,6 +6,7 @@ function getDefault () {
   const defaultData = {
     avatarName: '',
     loggedIn: false,
+    avatarIdentifier: '',
     sync: false,
     agentId: '',
     viewerAccount: {
@@ -38,6 +39,7 @@ export default function accountStore (state = getDefault(), action) {
       return state.merge({
         avatarName: action.name,
         loggedIn: true,
+        avatarIdentifier: `${action.name}@${action.grid.name}`,
         agentId: action.uuid
       })
     case 'ViewerAccountLogInStatus':

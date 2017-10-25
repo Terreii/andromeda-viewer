@@ -107,9 +107,9 @@ export function sendInstantMessage (text, to, id) {
   }
 }
 
-export function getLocalChatHistory (avatarName) {
+export function getLocalChatHistory (avatarIdentifier) {
   return (dispatch, getState, hoodie) => {
-    return hoodie.store.withIdPrefix(`${avatarName}/localchat/`).findAll()
+    return hoodie.store.withIdPrefix(`${avatarIdentifier}/localchat/`).findAll()
   }
 }
 
@@ -143,9 +143,9 @@ export function createNewIMChat (dialog, chatUUID, target, name) {
 
     // If the user is logged in with a viewer-account, then save the IMChat.
     if (hasChat || !activeState.account.getIn(['viewerAccount', 'loggedIn'])) return
-    const avatarName = activeState.account.get('avatarName')
+    const avatarIdentifier = activeState.account.get('avatarIdentifier')
     const doc = {
-      _id: `${avatarName}/imChatsInfos/${chatUUID}`,
+      _id: `${avatarIdentifier}/imChatsInfos/${chatUUID}`,
       chatType: type,
       chatUUID,
       target,
@@ -162,8 +162,8 @@ export function loadIMChats () {
     // Only load the history if the user is logged into a viewer-account.
     if (!activeState.account.getIn(['viewerAccount', 'loggedIn'])) return
 
-    const avatarName = activeState.account.get('avatarName')
-    hoodie.store.withIdPrefix(`${avatarName}/imChatsInfos/`).findAll().then(result => {
+    const avatarIdentifier = activeState.account.get('avatarIdentifier')
+    hoodie.store.withIdPrefix(`${avatarIdentifier}/imChatsInfos/`).findAll().then(result => {
       dispatch({
         type: 'IMChatInfosLoaded',
         chats: result
@@ -179,8 +179,8 @@ export function getIMHistory (chatUUID) {
       type: 'IMHistoryStartLoading',
       chatUUID
     })
-    const avatarName = getState().account.get('avatarName')
-    hoodie.store.withIdPrefix(`${avatarName}/imChats/${chatUUID}`).findAll().catch(err => {
+    const avatarIdentifier = getState().account.get('avatarIdentifier')
+    hoodie.store.withIdPrefix(`${avatarIdentifier}/imChats/${chatUUID}`).findAll().catch(err => {
       if (err.status === 404) {
         return []
       }

@@ -79,8 +79,8 @@ function dispatchSIMAction (name, msg, id) {
     const activeState = getState()
     if (typeof id === 'string' && activeState.account.getIn(['viewerAccount', 'loggedIn'])) {
       // Save messages. They will also be synced!
-      const avatarName = activeState.account.get('avatarName')
-      msg._id = avatarName + '/' + id
+      const avatarIdentifier = activeState.account.get('avatarIdentifier')
+      msg._id = avatarIdentifier + '/' + id
       hoodie.store.add(msg).then(doc => {
         dispatch({
           type: name,

@@ -34,8 +34,8 @@ export function saveAvatar (name, grid) {
   return (dispatch, getState, hoodie) => {
     if (!getState().account.getIn(['viewerAccount', 'loggedIn'])) return
 
-    const avatarIdentifier = `${name.getFullName()}@${grid.name}`
-    if (getState().account.get('avatars').some(avatar => {
+    const avatarIdentifier = `${name.getFullName()}@${grid.get('name')}`
+    if (getState().account.get('savedAvatars').some(avatar => {
       return avatar.get('_id').endsWith(avatarIdentifier)
     })) {
       dispatch({
