@@ -10,12 +10,13 @@
 
 import events from 'events'
 
-import {parseBody, createBody} from './networkMessages'
+import { parseBody, createBody } from './networkMessages'
 
 export default class Circuit extends events.EventEmitter {
   constructor (hostIP, hostPort, circuitCode) {
     super()
     this.ip = hostIP
+    this.ipArray = this.ip.split('.').map(part => Number(part))
     this.port = hostPort
     this.circuitCode = circuitCode
     // sequenceNumber is the id of a packet. It will be increased for every packed
@@ -23,9 +24,11 @@ export default class Circuit extends events.EventEmitter {
     this.senderSequenceNumber = 0
 
     this.websocketIsOpen = false
-    this.websocket = new window.WebSocket( // http -> ws  &  https -> wss
-      `${window.location.origin.replace(/^http/, 'ws')}/${this.ip}/${this.port}`
-    )
+    const socketUrl = new window.URL(window.location.href.replace(/#.*$/, ''))
+    // http -> ws  &  https -> wss
+    socketUrl.protocol = socketUrl.protocol.replace(/^http/, 'ws')
+    socketUrl.pathname = '/andromeda-bridge'
+    this.websocket = new window.WebSocket(socketUrl.toString())
     this.websocket.binaryType = 'arraybuffer'
     this.websocket.onopen = this._onOpen.bind(this)
     this.cachedMessages = []
@@ -43,8 +46,14 @@ export default class Circuit extends events.EventEmitter {
   _onMessage (message) {
     const msg = Buffer.from(message.data)
 
+    const ip = msg.readUInt8(0) + '.' +
+      msg.readUInt8(1) + '.' +
+      msg.readUInt8(2) + '.' +
+      msg.readUInt8(3)
+    const port = msg.readUInt16LE(4)
+
     // extract the flags
-    let flags = msg.readUInt8(0)
+    let flags = msg.readUInt8(6)
     const flagCheck = function (bit) {
       const is = flags >= bit
       if (is) {
@@ -57,10 +66,10 @@ export default class Circuit extends events.EventEmitter {
     const isResent = flagCheck(32)
     const hasAck = flagCheck(16)
 
-    const senderSequenceNumber = msg.readUInt32BE(1)
+    const senderSequenceNumber = msg.readUInt32BE(7)
     this.senderSequenceNumber = senderSequenceNumber
 
-    const bodyStart = msg.readUInt8(5) + 6
+    const bodyStart = msg.readUInt8(11) + 12
 
     const msgBody = msg.slice(bodyStart)
 
@@ -82,8 +91,8 @@ export default class Circuit extends events.EventEmitter {
       body: parsedBody,
       hasAck: hasAck,
       acks: acks,
-      ip: this.ip,
-      port: this.port
+      ip,
+      port
     }
     this.emit(parsedBody.name, toEmitObj)
     this.emit('packetReceived', toEmitObj) // for debugging
@@ -124,7 +133,13 @@ export default class Circuit extends events.EventEmitter {
       acksBuffer = Buffer.alloc(0)
     }
 
-    const packet = Buffer.concat([header, body.buffer, acksBuffer])
+    const ipPort = Buffer.alloc(6)
+    for (var i = 0; i < 4; i++) {
+      ipPort.writeUInt8(this.ipArray[i], i)
+    }
+    ipPort.writeUInt16LE(this.port, 4)
+
+    const packet = Buffer.concat([ipPort, header, body.buffer, acksBuffer])
 
     if (this.websocketIsOpen) {
       this.websocket.send(packet.buffer)

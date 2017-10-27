@@ -1,6 +1,7 @@
 'use strict'
 
 import State from '../stores/state'
+import { createNewIMChat } from './chatMessageActions'
 
 function nullBufferToString (buffy) {
   return buffy.toString('utf8').replace(/\0/gi, '')
@@ -17,7 +18,7 @@ function parseChatFromSimulator (msg) {
     audible: chatData.Audible.value,
     position: chatData.Position.value,
     message: nullBufferToString(chatData.Message.value),
-    time: new Date()
+    time: Date.now()
   }
   return chatMsg
 }
@@ -43,8 +44,10 @@ function parseIM (message) {
     fromAgentName: nullBufferToString(messageBlock.FromAgentName.value),
     message: nullBufferToString(messageBlock.Message.value),
     binaryBucket: messageBlock.BinaryBucket.value,
-    time: time !== 0 ? new Date(time) : new Date()
+    time: time !== 0 ? time : Date.now()
   }
+  // If it is a group chat, toAgentID is the Group-UUID.
+  IMmsg.chatUUID = IMmsg.fromGroup ? IMmsg.toAgentID : IMmsg.id
   return IMmsg
 }
 
@@ -52,20 +55,44 @@ function parseIM (message) {
 export default function simActionFilter (msg) {
   switch (msg.body.name) {
     case 'ChatFromSimulator':
-      dispatch(msg, parseChatFromSimulator)
+      const parsed = parseChatFromSimulator(msg.body)
+      dispatchSIMAction(msg.body.name, parsed, 'localchat/' + new Date(parsed.time).toJSON())
       break
     case 'ImprovedInstantMessage':
-      dispatch(msg, parseIM)
+      const parsedMsg = parseIM(msg.body)
+      // Start a new IMChat.
+      State.dispatch(createNewIMChat(
+        parsedMsg.dialog, parsedMsg.chatUUID, parsedMsg.fromId, parsedMsg.fromAgentName
+      ))
+      const id = `imChats/${parsedMsg.chatUUID}/${new Date(parsedMsg.time).toJSON()}`
+      dispatchSIMAction(msg.body.name, parsedMsg, id)
       break
     default:
       break
   }
 }
 
-function dispatch (msg, fn) {
-  const parsedMsg = fn(msg.body)
-  State.dispatch({
-    type: msg.body.name,
-    msg: parsedMsg
+// Dispatches all parsed messages.
+// If they have an ID, they will be saved and synced under the avatar name.
+function dispatchSIMAction (name, msg, id) {
+  State.dispatch((dispatch, getState, hoodie) => {
+    const activeState = getState()
+    if (typeof id === 'string' && activeState.account.getIn(['viewerAccount', 'loggedIn'])) {
+      // Save messages. They will also be synced!
+      const avatarIdentifier = activeState.account.get('avatarIdentifier')
+      msg._id = avatarIdentifier + '/' + id
+      hoodie.store.add(msg).then(doc => {
+        dispatch({
+          type: name,
+          msg: doc
+        })
+      })
+    } else {
+      // This is the path for every message, that will not be synced and saved.
+      dispatch({
+        type: name,
+        msg
+      })
+    }
   })
 }

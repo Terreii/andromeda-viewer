@@ -10,7 +10,22 @@ import ReactDom from 'react-dom'
 
 import ChatBox from './components/chatBox'
 import LoginForm from './components/login'
-import { getAvatarName, getMessageOfTheDay, logout } from './session'
+import TopBar from './components/topBar'
+import SignInPopup from './components/signInPopup'
+import SignOutPopup from './components/signOutPopup'
+import {
+  closePopup,
+  isSignedIn,
+  signIn,
+  signUp,
+  signOut,
+  saveAvatar,
+  loadSavedAvatars,
+  saveGrid,
+  loadSavedGrids
+} from './actions/viewerAccount'
+import { getMessageOfTheDay } from './session'
+import State from './stores/state'
 
 import style from './components/main.css'
 
@@ -18,12 +33,47 @@ class App extends React.Component {
   constructor () {
     super()
     this.state = {
-      isLoggedIn: false,
+      isLoggedIn: false, // Into Avatar
+      isSignedIn: false, // To Viewer-account
+      avatars: null,
+      grids: [],
+      popup: '',
       messageOfTheDay: {
         href: '',
         text: ''
       }
     }
+  }
+
+  componentDidMount () {
+    this._unsubscribe = State.subscribe(this._onChange.bind(this))
+    State.dispatch(isSignedIn()).then(isSignedIn => {
+      if (isSignedIn) {
+        this._loadAvatars()
+      } else {
+        console.log('Is not signed in.')
+      }
+    })
+    this._onChange()
+  }
+
+  _loadAvatars () {
+    State.dispatch(loadSavedGrids())
+      .then(() => State.dispatch(loadSavedAvatars()))
+  }
+
+  _onChange () {
+    const activeState = State.getState()
+    const popup = activeState.account.getIn(['viewerAccount', 'signInPopup'])
+    const avatars = activeState.account.get('savedAvatars')
+    const grids = activeState.account.get('savedGrids')
+    const isSignedIn = activeState.account.getIn(['viewerAccount', 'loggedIn'])
+    this.setState({
+      avatars,
+      grids,
+      isSignedIn,
+      popup
+    })
   }
 
   onLogin (did) {
@@ -41,32 +91,44 @@ class App extends React.Component {
     })
   }
 
-  renderMain () {
-    const name = getAvatarName()
-    return <div className={style.main}>
-      <div id='menuBar' className={style.menuBar}>
-        <span>Hello {name.getName()}</span>
-        <span>
-          Message of the day:
-          {this.state.messageOfTheDay.text}
-          <a
-            href={this.state.messageOfTheDay.href}
-            target='_blank'
-            className={style.daylyMessageLink}
-            >
-            {this.state.messageOfTheDay.href}
-          </a>
-        </span>
-        <a href='#' className={style.logout} onClick={logout}>logout</a>
-      </div>
-      <ChatBox />
-    </div>
+  getPopup () {
+    const close = () => State.dispatch(closePopup())
+    switch (this.state.popup) {
+      case 'signIn':
+        return <SignInPopup onCancel={close} onSend={({username, password}) => {
+          State.dispatch(signIn(username, password))
+            .then(this._loadAvatars.bind(this))
+        }} />
+      case 'signUp':
+        return <SignInPopup onCancel={close} isSignUp onSend={({username, password}) => {
+          State.dispatch(signUp(username, password))
+        }} />
+      case 'signOut':
+        return <SignOutPopup onCancel={close} onSignOut={() => State.dispatch(signOut())} />
+      default:
+        return null
+    }
   }
 
   render () {
-    return this.state.isLoggedIn
-      ? this.renderMain()
-      : <LoginForm onLogin={this.onLogin.bind(this)} />
+    const mainSection = this.state.isLoggedIn
+      ? <ChatBox />
+      : <LoginForm
+        onLogin={this.onLogin.bind(this)}
+        isSignedIn={this.state.isSignedIn}
+        avatars={this.state.avatars}
+        grids={this.state.grids}
+        saveAvatar={(name, grid) => State.dispatch(saveAvatar(name, grid))}
+        saveGrid={(name, url) => State.dispatch(saveGrid(name, url))}
+        />
+    const msgOfDay = this.state.isLoggedIn
+      ? this.state.messageOfTheDay
+      : null
+    return <div className={style.main}>
+      <TopBar messageOfTheDay={msgOfDay} />
+      {mainSection}
+      {this.getPopup()}
+    </div>
   }
 }
 
