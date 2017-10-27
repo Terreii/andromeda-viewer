@@ -18,6 +18,8 @@ You can view the documentation here. It exists correctly only to help developmen
 
 - You will get a understanding of the UI in its [documentation](./ui.html)!
 
+- For the data layout in hoodie visit the [synchronizing documentation](./synchronizing.html)!
+
 ## How to get started
 
 If you would like to use the viewer or help developing it, you need to run it yourself.
