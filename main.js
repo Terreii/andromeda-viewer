@@ -7,6 +7,7 @@
 
 import React from 'react'
 import ReactDom from 'react-dom'
+import styled from 'styled-components'
 
 import ChatBox from './components/chatBox'
 import LoginForm from './components/login'
@@ -27,7 +28,17 @@ import {
 import { getMessageOfTheDay } from './session'
 import State from './stores/state'
 
-import style from './components/main.css'
+const AppContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
+  padding: 0px;
+  margin: 0px;
+`
 
 class App extends React.Component {
   constructor () {
@@ -124,11 +135,11 @@ class App extends React.Component {
     const msgOfDay = this.state.isLoggedIn
       ? this.state.messageOfTheDay
       : null
-    return <div className={style.main}>
+    return <AppContainer>
       <TopBar messageOfTheDay={msgOfDay} />
       {mainSection}
       {this.getPopup()}
-    </div>
+    </AppContainer>
   }
 }
 
