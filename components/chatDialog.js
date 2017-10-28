@@ -7,8 +7,45 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Immutable from 'immutable'
+import styled from 'styled-components'
 
-import style from './chatDialog.css'
+const Main = styled.div`
+  margin: 0.3em;
+  display: flex;
+  flex-direction: column;
+`
+
+const MessageList = styled.div`
+  flex: 1 1 100%;
+`
+
+const Message = styled.div`
+  & > span {
+    padding-right: 0.3em;
+    font-size: 120%;
+  }
+`
+
+const AvatarName = styled.span`
+  :after {
+    content: ":";
+  }
+`
+
+const ChatTextSend = styled.div`
+  margin: .4em;
+  display: flex;
+  flex-direction: row;
+`
+
+const SendButton = styled.button`
+  flex: 1 0 auto;
+`
+
+const TextBox = styled.input`
+  flex: 4 0 auto;
+  margin-right: 0.5em;
+`
 
 // Adds to all Numbers a leading zero if it has only one digit
 function leadingZero (num) {
@@ -38,7 +75,7 @@ export default class ChatDialog extends React.Component {
       const fromId = this.props.isIM ? msg.get('fromId') : msg.get('sourceID')
       const name = this.props.names.get(fromId) || ''
       return (
-        <div className={style.message} key={time.getTime()}>
+        <Message key={time.getTime()}>
           <span className='time'>
             {leadingZero(time.getHours())}
             :
@@ -46,37 +83,32 @@ export default class ChatDialog extends React.Component {
             :
             {leadingZero(time.getSeconds())}
           </span>
-          <span className={style.avatar}>{name.toString()}</span>
+          <AvatarName>{name.toString()}</AvatarName>
           <span className='messageText'>{msg.get('message')}</span>
-        </div>
+        </Message>
       )
     })
 
     const placeholderText = 'Send ' +
       (this.props.isIM ? 'Instant Message' : 'to local chat')
 
-    return (
-      <div className={style.ChatDialog}>
-        <div className={style.messageOutput}>
-          {messages}
-        </div>
-        <div className={style.ChatTextSend}>
-          <input
-            type='text'
-            className={style.textBox}
-            name='chatInput'
-            placeholder={placeholderText}
-            value={this.state.text}
-            onChange={this._onChange.bind(this)}
-            onKeyDown={this._onKeyDown.bind(this)} />
-          <input
-            type='button'
-            className={style.send}
-            value='Send'
-            onClick={this._onClick.bind(this)} />
-        </div>
-      </div>
-    )
+    return <Main>
+      <MessageList>
+        {messages}
+      </MessageList>
+      <ChatTextSend>
+        <TextBox
+          type='text'
+          name='chatInput'
+          placeholder={placeholderText}
+          value={this.state.text}
+          onChange={this._onChange.bind(this)}
+          onKeyDown={this._onKeyDown.bind(this)} />
+        <SendButton onClick={this._onClick.bind(this)}>
+          send
+        </SendButton>
+      </ChatTextSend>
+    </Main>
   }
 
   _onChange (event, value) {
@@ -109,6 +141,7 @@ export default class ChatDialog extends React.Component {
     })
   }
 }
+
 ChatDialog.displayName = 'ChatDialog'
 // https://facebook.github.io/react/docs/typechecking-with-proptypes.html
 ChatDialog.propTypes = {
