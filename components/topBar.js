@@ -1,12 +1,54 @@
 'use strict'
 
 import React from 'react'
+import styled from 'styled-components'
 
 import { logout } from '../session'
 import State from '../stores/state'
 import { showSignOutPopup, showSignInPopup } from '../actions/viewerAccount'
 
-import style from './topBar.css'
+const MenuBar = styled.div`
+  top: 0em;
+  left: 0em;
+  width: 100vw;
+  background-color: rgb(77, 80, 85);
+  color: rgb(211, 211, 211);
+  padding-top: .5em;
+  padding-bottom: .5em;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  & > * {
+    margin: .4em;
+  }
+`
+
+const Link = styled.a`
+  color: white;
+`
+
+const LogoutButton = Link.extend`
+  :after {
+    content: " >>";
+  }
+`
+
+const AccountMenu = styled.div`
+  display: block;
+  height: inherit;
+  position: relative;
+  cursor: pointer;
+  color: white;
+`
+
+const AccountMenuBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 2.05em;
+  background-color: rgb(77, 80, 85);
+  padding: .6em;
+`
 
 export default class TopBar extends React.Component {
   constructor () {
@@ -74,7 +116,7 @@ export default class TopBar extends React.Component {
     const viewerAccountText = viewerAccountLoggedIn
       ? `Hello ${this.state.account.getIn(['viewerAccount', 'username'])}`
       : <a href='#' onClick={this._showSignInPopup}>Sign into Andromeda</a>
-    return <div className={style.AccountMenuBody}>
+    return <AccountMenuBody>
       <div>{greeting}</div>
       <div>
         {viewerAccountText}
@@ -83,16 +125,16 @@ export default class TopBar extends React.Component {
         <a href='#' onClick={this._showSignUpPopup}>Sign up to Andromeda</a>
       </div>
       <div style={{display: isLoggedIn ? '' : 'none'}}>
-        <a href='#' className={style.logout} onClick={this._logout}>
+        <LogoutButton href='#' onClick={this._logout}>
           log out
-        </a>
+        </LogoutButton>
       </div>
       <div style={{display: viewerAccountLoggedIn ? '' : 'none'}}>
-        <a href='' className={style.Link} onClick={this._logoutFromViewer}>
+        <Link href='' onClick={this._logoutFromViewer}>
           Log out from Viewer
-        </a>
+        </Link>
       </div>
-    </div>
+    </AccountMenuBody>
   }
 
   render () {
@@ -100,23 +142,22 @@ export default class TopBar extends React.Component {
       ? <span>
         Message of the day:
         {this.props.messageOfTheDay.text}
-        <a
+        <Link
           href={this.props.messageOfTheDay.href}
           target='_blank'
-          className={style.daylyMessageLink}
           rel='noopener noreferrer'
           >
           {this.props.messageOfTheDay.href}
-        </a>
+        </Link>
       </span>
       : <span>Welcome</span>
-    return <div className={style.menuBar}>
-      <div className={style.AccountMenu} onClick={this._boundToggleMenu}>
+    return <MenuBar>
+      <AccountMenu onClick={this._boundToggleMenu}>
         Account
         {this.renderAccountMenu()}
-      </div>
+      </AccountMenu>
       {msgOfDay}
       <span />
-    </div>
+    </MenuBar>
   }
 }
