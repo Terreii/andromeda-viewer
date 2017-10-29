@@ -41,7 +41,7 @@ function parseFriendsList (state, friend) {
 
 export default function friendsStore (state = Immutable.List(), action) {
   switch (action.type) {
-    case 'loggedIn':
+    case 'didLogin':
       return action.buddyList.reduce(parseFriendsList, state)
     default:
       return state

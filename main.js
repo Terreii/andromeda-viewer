@@ -5,67 +5,131 @@
  *
  */
 
-import {viewerName} from './viewerInfo'
-import AvatarName from './avatarName'
-import {login} from './session'
-import display from './components/main'
+import React from 'react'
+import ReactDom from 'react-dom'
 
-function displayLoginError (message) {
-  var messageDisplay = document.getElementById('loginErrorMessage')
-  messageDisplay.textContent = message.toString()
-  messageDisplay.style.display = 'block'
-}
+import ChatBox from './components/chatBox'
+import LoginForm from './components/login'
+import TopBar from './components/topBar'
+import SignInPopup from './components/signInPopup'
+import SignOutPopup from './components/signOutPopup'
+import {
+  closePopup,
+  isSignedIn,
+  signIn,
+  signUp,
+  signOut,
+  saveAvatar,
+  loadSavedAvatars,
+  saveGrid,
+  loadSavedGrids
+} from './actions/viewerAccount'
+import { getMessageOfTheDay } from './session'
+import State from './stores/state'
 
-// Show the name of the Viewer
-document.title = viewerName
-document.getElementById('loginViewerName').textContent = viewerName
+import style from './components/main.css'
 
-const button = document.getElementById('loginButton')
-const nameInput = document.getElementById('loginName')
-const pwInput = document.getElementById('loginPassword')
-
-// Login
-function onLogin (event) {
-  const loginName = nameInput.value
-  const password = pwInput.value
-
-  if (loginName.length === 0 || password.length === 0) {
-    displayLoginError('Please insert a name and a password')
-    return
-  }
-
-  button.disabled = true
-  button.value = 'Connecting ...'
-
-  const userName = new AvatarName(loginName)
-
-  login(userName.first, userName.last, password, (err, sinfo) => {
-    if (err) {
-      // Displays the error message from the server
-      console.error(err)
-      button.disabled = false
-      button.value = 'Login'
-      displayLoginError(err.message)
-    } else {
-      // cleanup
-      button.removeEventListener('click', onLogin)
-      nameInput.removeEventListener('keyup', detectReturn)
-      pwInput.removeEventListener('keyup', detectReturn)
-
-      // start everything
-      display()
+class App extends React.Component {
+  constructor () {
+    super()
+    this.state = {
+      isLoggedIn: false, // Into Avatar
+      isSignedIn: false, // To Viewer-account
+      avatars: null,
+      grids: [],
+      popup: '',
+      messageOfTheDay: {
+        href: '',
+        text: ''
+      }
     }
-  })
-}
+  }
 
-function detectReturn (event) { // detects if return was pressed (keyCode 13)
-  if (event.type === 'keyup' && (event.which === 13 || event.keyCode === 13)) {
-    onLogin(event)
+  componentDidMount () {
+    this._unsubscribe = State.subscribe(this._onChange.bind(this))
+    State.dispatch(isSignedIn()).then(isSignedIn => {
+      if (isSignedIn) {
+        this._loadAvatars()
+      } else {
+        console.log('Is not signed in.')
+      }
+    })
+    this._onChange()
+  }
+
+  _loadAvatars () {
+    State.dispatch(loadSavedGrids())
+      .then(() => State.dispatch(loadSavedAvatars()))
+  }
+
+  _onChange () {
+    const activeState = State.getState()
+    const popup = activeState.account.getIn(['viewerAccount', 'signInPopup'])
+    const avatars = activeState.account.get('savedAvatars')
+    const grids = activeState.account.get('savedGrids')
+    const isSignedIn = activeState.account.getIn(['viewerAccount', 'loggedIn'])
+    this.setState({
+      avatars,
+      grids,
+      isSignedIn,
+      popup
+    })
+  }
+
+  onLogin (did) {
+    if (!did) return
+    const messageOfTheDay = getMessageOfTheDay()
+    const index = messageOfTheDay.search('http')
+    const msgOfDayHref = messageOfTheDay.substr(index)
+    const msgOfDayText = messageOfTheDay.substr(0, index)
+    this.setState({
+      isLoggedIn: did,
+      messageOfTheDay: {
+        href: msgOfDayHref,
+        text: msgOfDayText
+      }
+    })
+  }
+
+  getPopup () {
+    const close = () => State.dispatch(closePopup())
+    switch (this.state.popup) {
+      case 'signIn':
+        return <SignInPopup onCancel={close} onSend={({username, password}) => {
+          State.dispatch(signIn(username, password))
+            .then(this._loadAvatars.bind(this))
+        }} />
+      case 'signUp':
+        return <SignInPopup onCancel={close} isSignUp onSend={({username, password}) => {
+          State.dispatch(signUp(username, password))
+        }} />
+      case 'signOut':
+        return <SignOutPopup onCancel={close} onSignOut={() => State.dispatch(signOut())} />
+      default:
+        return null
+    }
+  }
+
+  render () {
+    const mainSection = this.state.isLoggedIn
+      ? <ChatBox />
+      : <LoginForm
+        onLogin={this.onLogin.bind(this)}
+        isSignedIn={this.state.isSignedIn}
+        avatars={this.state.avatars}
+        grids={this.state.grids}
+        saveAvatar={(name, grid) => State.dispatch(saveAvatar(name, grid))}
+        saveGrid={(name, url) => State.dispatch(saveGrid(name, url))}
+        />
+    const msgOfDay = this.state.isLoggedIn
+      ? this.state.messageOfTheDay
+      : null
+    return <div className={style.main}>
+      <TopBar messageOfTheDay={msgOfDay} />
+      {mainSection}
+      {this.getPopup()}
+    </div>
   }
 }
 
-button.addEventListener('click', onLogin)
-nameInput.addEventListener('keyup', detectReturn)
-pwInput.addEventListener('keyup', detectReturn)
-
-button.disabled = false
+ReactDom.render(<App />, document.getElementById('app'))

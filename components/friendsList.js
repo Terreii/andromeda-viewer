@@ -1,6 +1,7 @@
 'use strict'
 
 import React from 'react'
+import PropTypes from 'prop-types'
 import Immutable from 'immutable'
 
 import { getName } from '../actions/friends'
@@ -71,6 +72,6 @@ export default class FriendsList extends React.Component {
 FriendsList.displayName = 'FriendsList'
 
 FriendsList.propTypes = {
-  names: React.PropTypes.instanceOf(Immutable.Map).isRequired,
-  friends: React.PropTypes.instanceOf(Immutable.List).isRequired
+  names: PropTypes.instanceOf(Immutable.Map).isRequired,
+  friends: PropTypes.instanceOf(Immutable.List).isRequired
 }

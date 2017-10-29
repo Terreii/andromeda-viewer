@@ -5,17 +5,14 @@
  */
 
 import React from 'react'
+import PropTypes from 'prop-types'
 import Immutable from 'immutable'
 
 import style from './chatDialog.css'
 
 // Adds to all Numbers a leading zero if it has only one digit
 function leadingZero (num) {
-  var numStr = String(num)
-  if (numStr.length === 1) {
-    numStr = '0' + numStr
-  }
-  return numStr
+  return String(num).padStart(2, '0')
 }
 
 export default class ChatDialog extends React.Component {
@@ -26,11 +23,20 @@ export default class ChatDialog extends React.Component {
     }
   }
 
+  componentDidMount () {
+    const isIM = this.props.isIM
+    const data = this.props.data
+    if (isIM && !data.get('didLoadHistory') && !data.get('isLoadingHistory')) {
+      this.props.loadHistory(data.get('chatUUID'))
+    }
+  }
+
   render () {
-    const messages = this.props.data.map(msg => {
-      const time = msg.get('time')
+    const msgData = this.props.isIM ? this.props.data.get('messages') : this.props.data
+    const messages = msgData.map(msg => {
+      const time = new Date(msg.get('time'))
       const fromId = this.props.isIM ? msg.get('fromId') : msg.get('sourceID')
-      const name = this.props.names.get(fromId).toString()
+      const name = this.props.names.get(fromId) || ''
       return (
         <div className={style.message} key={`message_${fromId}_${time}`}>
           <span className='time'>
@@ -40,7 +46,7 @@ export default class ChatDialog extends React.Component {
             :
             {leadingZero(time.getSeconds())}
           </span>
-          <span className={style.avatar}>{name}</span>
+          <span className={style.avatar}>{name.toString()}</span>
           <span className='messageText'>{msg.get('message')}</span>
         </div>
       )
@@ -106,10 +112,13 @@ export default class ChatDialog extends React.Component {
 ChatDialog.displayName = 'ChatDialog'
 // https://facebook.github.io/react/docs/typechecking-with-proptypes.html
 ChatDialog.propTypes = {
-  data: React.PropTypes.instanceOf(Immutable.List).isRequired,
-  names: React.PropTypes.instanceOf(Immutable.Map).isRequired,
-  sendTo: React.PropTypes.func.isRequired,
-  isIM: React.PropTypes.bool
+  data: PropTypes.oneOfType([
+    PropTypes.instanceOf(Immutable.List),
+    PropTypes.instanceOf(Immutable.Map)
+  ]).isRequired,
+  names: PropTypes.instanceOf(Immutable.Map).isRequired,
+  sendTo: PropTypes.func.isRequired,
+  isIM: PropTypes.bool
 }
 ChatDialog.defaultProps = {
   isIM: false,

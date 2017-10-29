@@ -10,7 +10,7 @@
 
 import events from 'events'
 
-import {parseBody, createBody} from './networkMessages'
+import { parseBody, createBody } from './networkMessages'
 
 export default class Circuit extends events.EventEmitter {
   constructor (hostIP, hostPort, circuitCode) {
@@ -24,9 +24,11 @@ export default class Circuit extends events.EventEmitter {
     this.senderSequenceNumber = 0
 
     this.websocketIsOpen = false
-    this.websocket = new window.WebSocket( // http -> ws  &  https -> wss
-      window.location.origin.replace(/^http/, 'ws')
-    )
+    const socketUrl = new window.URL(window.location.href.replace(/#.*$/, ''))
+    // http -> ws  &  https -> wss
+    socketUrl.protocol = socketUrl.protocol.replace(/^http/, 'ws')
+    socketUrl.pathname = '/andromeda-bridge'
+    this.websocket = new window.WebSocket(socketUrl.toString())
     this.websocket.binaryType = 'arraybuffer'
     this.websocket.onopen = this._onOpen.bind(this)
     this.cachedMessages = []
@@ -37,9 +39,7 @@ export default class Circuit extends events.EventEmitter {
 
   _onOpen () {
     this.websocketIsOpen = true
-    this.cachedMessages.forEach(buffer => {
-      this.websocket.send(buffer)
-    })
+    this.cachedMessages.forEach(buffer => this.websocket.send(buffer))
     this.cachedMessages = []
   }
 
@@ -91,8 +91,8 @@ export default class Circuit extends events.EventEmitter {
       body: parsedBody,
       hasAck: hasAck,
       acks: acks,
-      ip: ip,
-      port: port
+      ip,
+      port
     }
     this.emit(parsedBody.name, toEmitObj)
     this.emit('packetReceived', toEmitObj) // for debugging

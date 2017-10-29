@@ -1,1 +1,0 @@
-This folder will contain all .js and .json files that will be created by the 'npm run build' command.

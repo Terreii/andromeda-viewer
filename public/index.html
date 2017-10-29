@@ -1,26 +1,18 @@
 <!doctype html>
 <html>
   <head>
-    <meta charset="UTF-8"/>
+    <meta charset="UTF-8" />
     <title>Loading viewer …</title>
-    <link href="login.css" rel="stylesheet"/>
-    <script src="bundle.js" async defer></script>
+    <style>
+      body {
+        background-color: rgb(228, 228, 228);
+      }
+    </style>
+    <script src="/app.js" async defer></script>
   </head>
   <body>
-    <div id="login">
-      <h1>Login to <span id="loginViewerName">viewer Name</span></h1>
-      <div>
-        <input type="text" id="loginName" placeholder="Avatar Name" autocomplete="username"/>
-      </div>
-      <div>
-        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password"/>
-      </div>
-      <div>
-        <input type="button" id="loginButton" value="Login" disabled/>
-      </div>
-      <div id="loginErrorMessage">
-        Error message
-      </div>
+    <div id="app">
+      <h1 style="text-align: center; color: #999">loading ...</h1>
     </div>
   </body>
 </html>
