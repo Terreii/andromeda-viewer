@@ -9,7 +9,6 @@ import State from './stores/state'
 
 import { getLocalChatHistory, loadIMChats } from './actions/chatMessageActions'
 import { fetchSeedCapabilities } from './actions/llsd'
-
 import simActionsForUI from './actions/simAction'
 
 // true if there is a running session
