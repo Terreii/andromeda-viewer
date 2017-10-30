@@ -6,7 +6,9 @@ import { viewerName, viewerVersion, viewerPlatform } from './viewerInfo'
 import Circuit from './network/circuit'
 import AvatarName from './avatarName'
 import State from './stores/state'
+
 import { getLocalChatHistory, loadIMChats } from './actions/chatMessageActions'
+import { fetchSeedCapabilities } from './actions/llsd'
 
 import simActionsForUI from './actions/simAction'
 
@@ -77,6 +79,8 @@ export function login (firstName, lastName, password, grid) {
         })
         State.dispatch(loadIMChats())
       })
+      fetchSeedCapabilities(body['seed_capability'])
+        .then(capabilities => console.log(capabilities))
       return body
     } else {
       throw body
