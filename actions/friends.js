@@ -22,7 +22,7 @@ function sendUUIDNameRequest () {
 export function getName (id) {
   const timeLimit = Date.now() - 4000
   // If the id is not already in the next request
-  // and wasen't requested in the last 4 seconds
+  // and wasn't requested in the last 4 seconds
   const wasRequested = UUIDNameIds.every(idInRequest => id !== idInRequest) &&
     (didRequestIds[id] == null || didRequestIds[id] < timeLimit)
   if (UUIDNameIds.length === 0 || wasRequested) {

@@ -1,6 +1,6 @@
 'use strict'
 
-var url = require('url')
+const url = require('url')
 const xmlrpc = require('xmlrpc')
 
 var macaddress
