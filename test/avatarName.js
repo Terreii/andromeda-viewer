@@ -9,26 +9,44 @@ describe('avatarName', () => {
   it('should parse a given name', () => {
     assert.deepEqual({
       first: 'First',
-      last: 'Last'
+      last: 'Last',
+      displayName: '',
+      didLoadDisplayName: false,
+      isLoadingDisplayName: false
     }, new AvatarName('First.Last'))
     assert.deepEqual({
       first: 'Tester',
-      last: 'Linden'
+      last: 'Linden',
+      displayName: '',
+      didLoadDisplayName: false,
+      isLoadingDisplayName: false
     }, new AvatarName('Tester Linden'))
     assert.deepEqual({
       first: 'Tester',
-      last: 'Resident'
+      last: 'Resident',
+      displayName: '',
+      didLoadDisplayName: false,
+      isLoadingDisplayName: false
     }, new AvatarName('Tester'))
     assert.deepEqual({
       first: 'Tester',
-      last: 'Resident'
+      last: 'Resident',
+      displayName: '',
+      didLoadDisplayName: false,
+      isLoadingDisplayName: false
     }, new AvatarName({first: 'Tester'}))
     assert.deepEqual({
       first: 'Tester',
-      last: 'Linden'
+      last: 'Linden',
+      displayName: '',
+      didLoadDisplayName: false,
+      isLoadingDisplayName: false
     }, new AvatarName({
       first: 'Tester',
-      last: 'Linden'
+      last: 'Linden',
+      displayName: '',
+      didLoadDisplayName: false,
+      isLoadingDisplayName: false
     }))
   })
 
@@ -63,5 +81,36 @@ describe('avatarName', () => {
       first: 'test',
       last: 'Resident'
     }, true))
+  })
+
+  it('should copy itself', () => {
+    const old = new AvatarName('test')
+    const isLoading = old.withIsLoadingSetTo(true)
+    const displayName = isLoading.withDisplayNameSetTo('Hello')
+
+    assert.notEqual(old, isLoading)
+    assert.notEqual(isLoading, displayName)
+  })
+
+  it('should update its display name', () => {
+    const old = new AvatarName('test')
+    const isLoading = old.withIsLoadingSetTo(true)
+    const displayName = isLoading.withDisplayNameSetTo('Hello')
+
+    assert.deepEqual(isLoading, {
+      first: 'test',
+      last: 'Resident',
+      displayName: '',
+      didLoadDisplayName: false,
+      isLoadingDisplayName: true
+    })
+
+    assert.deepEqual(displayName, {
+      first: 'test',
+      last: 'Resident',
+      displayName: 'Hello',
+      didLoadDisplayName: true,
+      isLoadingDisplayName: false
+    })
   })
 })
