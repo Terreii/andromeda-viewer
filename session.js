@@ -10,6 +10,7 @@ import State from './stores/state'
 import { getLocalChatHistory, loadIMChats } from './actions/chatMessageActions'
 import { fetchSeedCapabilities } from './actions/llsd'
 import simActionsForUI from './actions/simAction'
+import { getAllFriendsDisplayNames } from './actions/friendsActions'
 
 // true if there is a running session
 let _isLoggedIn = false
@@ -79,6 +80,7 @@ export function login (firstName, lastName, password, grid) {
         State.dispatch(loadIMChats())
       })
       State.dispatch(fetchSeedCapabilities(body['seed_capability']))
+        .then(() => State.dispatch(getAllFriendsDisplayNames()))
       return body
     } else {
       throw body

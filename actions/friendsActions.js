@@ -1,6 +1,7 @@
 'use strict'
 
 import { getActiveCircuit } from '../session'
+import { fetchLLSD } from './llsd'
 
 let UUIDNameIds = []
 let didRequestIds = {} // Stores the time of the last request for a ID
@@ -29,4 +30,34 @@ export function getName (id) {
     UUIDNameIds.push(id)
   }
   setTimeout(sendUUIDNameRequest, 1000)
+}
+
+export function getAllFriendsDisplayNames () {
+  return (dispatch, getState) => {
+    const state = getState()
+
+    const names = state.names.get('names')
+    const friendsIds = state.friends
+      .map(friend => friend.get('id'))
+      .push(state.account.get('agentId')) // Add self
+      .filter(id => !names.has(id) || !names.get(id).willHaveDisplayName()) // unknown only
+      .toArray()
+
+    const fetchUrl = new window.URL(state.names.get('getDisplayNamesURL'))
+    friendsIds.forEach(id => fetchUrl.searchParams.append('ids', id))
+
+    dispatch({
+      type: 'DisplayNamesStartLoading',
+      ids: friendsIds
+    })
+
+    fetchLLSD('GET', fetchUrl.href).then(result => {
+      dispatch({
+        type: 'DisplayNamesLoaded',
+        agents: result.agents,
+        badIDs: result['bad_ids'],
+        badNames: result['bad_usernames']
+      })
+    })
+  }
 }

@@ -13,7 +13,14 @@ function cleanName (name) {
 
 export default class AvatarName {
   constructor (name) {
-    if (typeof name === 'object' && typeof name.first === 'string') {
+    if (name instanceof AvatarName) {
+      this.first = name.first
+      this.last = name.last
+      this.displayName = name.displayName
+      this.didLoadDisplayName = name.didLoadDisplayName
+      this.isLoadingDisplayName = name.isLoadingDisplayName
+      return
+    } else if (typeof name === 'object' && typeof name.first === 'string') {
       this.first = cleanName(name.first)
       this.last = cleanName(name.last || 'Resident')
     } else if (typeof name === 'string' && arguments.length === 1) {
@@ -30,6 +37,9 @@ export default class AvatarName {
       this.first = cleanName(name)
       this.last = cleanName(arguments[1])
     }
+    this.displayName = ''
+    this.didLoadDisplayName = false
+    this.isLoadingDisplayName = false
   }
 
   getFullName () {
@@ -44,8 +54,16 @@ export default class AvatarName {
     }
   }
 
+  getDisplayName () {
+    if (this.didLoadDisplayName) {
+      return `${this.displayName} (${this.getName()})`
+    } else {
+      return this.getName()
+    }
+  }
+
   toString () {
-    return this.getName()
+    return this.getDisplayName()
   }
 
   compare (other, strict) {
@@ -57,5 +75,23 @@ export default class AvatarName {
       return false
     }
     return other.first === this.first && other.last === this.last
+  }
+
+  willHaveDisplayName () {
+    return this.didLoadDisplayName || this.isLoadingDisplayName || this.displayName.length > 0
+  }
+
+  withIsLoadingSetTo (isLoading) {
+    const next = new AvatarName(this)
+    next.isLoadingDisplayName = isLoading
+    return next
+  }
+
+  withDisplayNameSetTo (displayName) {
+    const next = new AvatarName(this)
+    next.isLoadingDisplayName = false
+    next.didLoadDisplayName = true
+    next.displayName = displayName
+    return next
   }
 }

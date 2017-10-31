@@ -30,7 +30,7 @@ export default function FriendsList (props) {
   const list = props.friends.map((friend, index) => {
     const id = friend.get('id')
     const hasName = props.names.has(id)
-    const name = hasName ? props.names.get(id).getName() : id
+    const name = hasName ? props.names.get(id).getDisplayName() : id
     if (!hasName) {
       getName(id)
     }
