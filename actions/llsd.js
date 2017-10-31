@@ -8,25 +8,30 @@ function parseLLSD (response) {
 
 export function fetchLLSD (url, data) {
   const headers = new window.Headers()
-  headers.append('Content-Type', LLSD.MIMETYPE_JSON)
-  headers.append('X-Fetch-Url', url)
+  headers.append('content-type', 'text/plain')
+  headers.append('x-andromeda-fetch-url', url)
+  headers.append('x-andromeda-fetch-method', 'POST')
+  headers.append('x-andromeda-fetch-type', LLSD.MIMETYPE_XML)
   const result = window.fetch('/hoodie/andromeda-viewer/proxy', {
     method: 'POST',
     headers,
-    body: JSON.stringify({
-      method: 'POST',
-      type: LLSD.MIMETYPE_XML,
-      body: `<?xml version="1.0" encoding="UTF-8"?>\n${LLSD.formatXML(data)}\n`
-    })
+    body: `<?xml version="1.0" encoding="UTF-8"?>\n${LLSD.formatXML(data)}\n`
   })
     .then(response => parseLLSD(response))
   return result
 }
 
 export function fetchSeedCapabilities (url) {
-  return fetchLLSD(url, [
-    'GetDisplayNames'
-  ]).then(caps => {
-    return caps
-  }, error => console.error(error))
+  return dispatch => {
+    fetchLLSD(url, [
+      'GetDisplayNames'
+    ])
+      .then(capabilities => {
+        dispatch({
+          type: 'SeedCapabilitiesLoaded',
+          capabilities
+        })
+      })
+      .catch(error => console.error(error))
+  }
 }

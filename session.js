@@ -78,8 +78,7 @@ export function login (firstName, lastName, password, grid) {
         })
         State.dispatch(loadIMChats())
       })
-      fetchSeedCapabilities(body['seed_capability'])
-        .then(capabilities => console.log(capabilities))
+      State.dispatch(fetchSeedCapabilities(body['seed_capability']))
       return body
     } else {
       throw body

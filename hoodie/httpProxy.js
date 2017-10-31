@@ -4,20 +4,20 @@ const fetch = require('node-fetch')
 
 function proxy (request, reply) {
   const fetchOptions = {
-    method: request.payload.method,
+    method: request.headers['x-andromeda-fetch-method'] || 'GET',
     headers: {
-      'content-type': request.payload.type,
+      'content-type': request.headers['x-andromeda-fetch-type'],
       'user-agent': request.headers['user-agent'],
       origin: request.headers.origin,
       'accept-encoding': request.headers['accept-encoding'],
       'accept-language': request.headers['accept-language']
     },
-    body: request.payload.body
+    body: request.payload
   }
 
-  fetch(request.headers['x-fetch-url'], fetchOptions).then(fetchResult => {
-    fetchResult.text().then(body => {
-      const response = reply(body)
+  fetch(request.headers['x-andromeda-fetch-url'], fetchOptions).then(fetchResult => {
+    fetchResult.buffer().then(buffy => {
+      const response = reply(buffy)
       ;[
         'content-type',
         'x-ll-request-id'
