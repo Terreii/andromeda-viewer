@@ -41,7 +41,7 @@ function addNameFromUUIDName (state, {firstName, lastName, id}) {
   return addName(state, id, firstName + ' ' + lastName)
 }
 
-export function nameStoreReduce (state = Immutable.Map(), action) {
+function namesReducer (state = Immutable.Map(), action) {
   switch (action.type) {
     case 'ChatFromSimulator':
       return addNameFromLocalChat(state, action.msg)
@@ -62,21 +62,18 @@ export function nameStoreReduce (state = Immutable.Map(), action) {
   }
 }
 
-export function hasNameOf (state, uuid) {
-  return state.getState().has(uuid)
-}
-
-// Gets the name of an Avatar/Agent
-// id there is no name for that ID it will return an empty string
-export function getNameOf (state, uuid) {
-  const names = state.getState()
-  if (names.has(uuid)) {
-    return names.get(uuid)
-  } else {
-    return ''
+export function nameStoreReduce (state = Immutable.Map(), action) {
+  switch (action.type) {
+    case '@@INIT':
+    case 'ChatFromSimulator':
+    case 'ImprovedInstantMessage':
+    case 'didLogin':
+    case 'UUIDNameReply':
+    case 'IMChatInfosLoaded':
+      return state.set('names', namesReducer(state.get('names'), action))
+    case 'SeedCapabilitiesLoaded':
+      return state.set('getDisplayNamesURL', action.capabilities.GetDisplayNames)
+    default:
+      return state
   }
-}
-
-export function getNames (state) {
-  return state.getState().valueSeq().map(name => name.getFullName()).toJS()
 }

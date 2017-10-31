@@ -39,11 +39,12 @@ export default class ChatBox extends React.Component {
   }
 
   render () {
+    const names = this.state.names.get('names')
     const imsIds = this.state.IMs.keySeq().toJSON()
     const ims = imsIds.map(id => {
       const withId = this.state.IMs.getIn([id, 'withId'])
-      const name = this.state.names.has(withId)
-        ? this.state.names.get(withId).getName()
+      const name = names.has(withId)
+        ? names.get(withId).getName()
         : withId
       return <Tab
         key={id}
@@ -67,7 +68,7 @@ export default class ChatBox extends React.Component {
             data={chat}
             isIM
             sendTo={text => sendInstantMessage(text, target, id)}
-            names={this.state.names}
+            names={names}
             loadHistory={chatUUID => State.dispatch(getIMHistory(chatUUID))}
             />
         </TabPanel>
@@ -98,15 +99,15 @@ export default class ChatBox extends React.Component {
             className={tabsStyle['react-tabs__tab-panel']}
             selectedClassName={tabsStyle['react-tabs__tab-panel--selected']}
             >
-            <FriendsList names={this.state.names} friends={this.state.friends} />
+            <FriendsList names={names} friends={this.state.friends} />
           </TabPanel>
           <TabPanel
             className={tabsStyle['react-tabs__tab-panel']}
             selectedClassName={tabsStyle['react-tabs__tab-panel--selected']}
             >
-            <ChatDialog data={this.state.localChat} sendTo={text => {
+            <ChatDialog data={this.state.localChat} names={names} sendTo={text => {
               sendLocalChatMessage(text, 1, 0)
-            }} names={this.state.names} />
+            }} />
           </TabPanel>
           {panels}
         </Tabs>
