@@ -4,8 +4,6 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Immutable from 'immutable'
 
-import { getName } from '../actions/friendsActions'
-
 import style from './FriendsList.css'
 
 /*
@@ -31,9 +29,6 @@ export default function FriendsList (props) {
     const id = friend.get('id')
     const hasName = props.names.has(id)
     const name = hasName ? props.names.get(id).getDisplayName() : id
-    if (!hasName) {
-      getName(id)
-    }
 
     const rights = []
     ;['rightsGiven', 'rightsHas'].forEach(key => {

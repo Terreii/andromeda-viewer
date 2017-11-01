@@ -32,6 +32,50 @@ export function getName (id) {
   setTimeout(sendUUIDNameRequest, 1000)
 }
 
+function loadDisplayNames (idsArray) {
+  const ids = idsArray.map(id => id.toString())
+  return (dispatch, getState) => {
+    if (ids.length === 0) return
+
+    const fetchUrlString = getState().names.get('getDisplayNamesURL')
+    if (fetchUrlString == null) return // Not jet loaded
+    const fetchUrl = new window.URL(fetchUrlString)
+    ids.forEach(id => fetchUrl.searchParams.append('ids', id))
+
+    dispatch({
+      type: 'DisplayNamesStartLoading',
+      ids
+    })
+
+    fetchLLSD('GET', fetchUrl.href).then(result => {
+      const badIDs = result['bad_ids'] || []
+      badIDs.forEach(id => getName(id.toString())) // Try again
+
+      dispatch({
+        type: 'DisplayNamesLoaded',
+        agents: result.agents,
+        badIDs,
+        badNames: result['bad_usernames'] || []
+      })
+    })
+  }
+}
+
+export function getDisplayName (id) {
+  return (dispatch, getState) => {
+    const state = getState()
+
+    const names = state.names.get('names')
+    const idString = id.toString()
+    if (names.has(idString) && names.get(idString).willHaveDisplayName()) return
+
+    const toLoad = names.filter(name => !name.willHaveDisplayName()).keySeq().toArray()
+    if (toLoad.length > 0) {
+      dispatch(loadDisplayNames(toLoad))
+    }
+  }
+}
+
 export function getAllFriendsDisplayNames () {
   return (dispatch, getState) => {
     const state = getState()
@@ -43,21 +87,6 @@ export function getAllFriendsDisplayNames () {
       .filter(id => !names.has(id) || !names.get(id).willHaveDisplayName()) // unknown only
       .toArray()
 
-    const fetchUrl = new window.URL(state.names.get('getDisplayNamesURL'))
-    friendsIds.forEach(id => fetchUrl.searchParams.append('ids', id))
-
-    dispatch({
-      type: 'DisplayNamesStartLoading',
-      ids: friendsIds
-    })
-
-    fetchLLSD('GET', fetchUrl.href).then(result => {
-      dispatch({
-        type: 'DisplayNamesLoaded',
-        agents: result.agents,
-        badIDs: result['bad_ids'],
-        badNames: result['bad_usernames']
-      })
-    })
+    dispatch(loadDisplayNames(friendsIds))
   }
 }
