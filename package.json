@@ -25,7 +25,7 @@
     "email": "christopher.astfalk@icloud.com",
     "url": "http://christopher-astfalk.de/"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "engines": {
     "node": ">=6.9.0"
   },
