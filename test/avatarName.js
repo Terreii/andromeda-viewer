@@ -54,7 +54,7 @@ describe('avatarName', () => {
   'last name is "Resident"',
     () => {
       assert.equal('Tester', new AvatarName('Tester.Resident').getName())
-      assert.equal('hal2000', new AvatarName('hal2000').getName())
+      assert.equal('Hal2000', new AvatarName('hal2000').getName())
     })
 
   it('should give the full name with the method getFullName()', () => {
@@ -65,22 +65,40 @@ describe('avatarName', () => {
 
   it('should have a toString method that behaves like getName', () => {
     assert.equal('Tester', new AvatarName('Tester.Resident').toString())
-    assert.equal('hal2000', new AvatarName('hal2000').toString())
+    assert.equal('Hal2000', new AvatarName('hal2000').toString())
   })
 
-  it('should be compareable with the compare method', () => {
+  it('should be comparable with the compare method', () => {
     const first = new AvatarName('test')
     const second = new AvatarName({first: 'test', last: 'Linden'})
     const third = new AvatarName('test Resident')
 
     assert.equal(false, first.compare(second))
     assert.equal(true, first.compare(third))
-    assert.equal(true, second.compare('test Linden'))
+    assert.equal(true, second.compare('Test Linden'))
     assert.equal(true, first.compare(third, true))
     assert.equal(false, first.compare({
-      first: 'test',
+      first: 'Test',
       last: 'Resident'
     }, true))
+  })
+
+  it('should format names', () => {
+    assert.deepEqual({
+      first: 'Tester',
+      last: 'Linden',
+      displayName: '',
+      didLoadDisplayName: false,
+      isLoadingDisplayName: false
+    }, new AvatarName('tester linden'))
+
+    assert.deepEqual({
+      first: 'Tester',
+      last: 'Linden',
+      displayName: '',
+      didLoadDisplayName: false,
+      isLoadingDisplayName: false
+    }, new AvatarName('teSteR lInDeN'))
   })
 
   it('should copy itself', () => {
@@ -98,7 +116,7 @@ describe('avatarName', () => {
     const displayName = isLoading.withDisplayNameSetTo('Hello')
 
     assert.deepEqual(isLoading, {
-      first: 'test',
+      first: 'Test',
       last: 'Resident',
       displayName: '',
       didLoadDisplayName: false,
@@ -106,7 +124,7 @@ describe('avatarName', () => {
     })
 
     assert.deepEqual(displayName, {
-      first: 'test',
+      first: 'Test',
       last: 'Resident',
       displayName: 'Hello',
       didLoadDisplayName: true,
