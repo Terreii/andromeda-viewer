@@ -15,6 +15,7 @@ import FriendsList from './friendsList'
 import {
   sendLocalChatMessage,
   sendInstantMessage,
+  startNewIMChat,
   getIMHistory
 } from '../actions/chatMessageActions'
 
@@ -99,7 +100,11 @@ export default class ChatBox extends React.Component {
             className={tabsStyle['react-tabs__tab-panel']}
             selectedClassName={tabsStyle['react-tabs__tab-panel--selected']}
             >
-            <FriendsList names={names} friends={this.state.friends} />
+            <FriendsList
+              names={names}
+              friends={this.state.friends}
+              startNewIMChat={(dialog, id, name) => State.dispatch(startNewIMChat(dialog, id, name))}
+              />
           </TabPanel>
           <TabPanel
             className={tabsStyle['react-tabs__tab-panel']}

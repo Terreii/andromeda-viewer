@@ -55,6 +55,13 @@ export default function FriendsList (props) {
 
     return (<li className={style.ListItem} key={'friendListIndex' + index}>
       <div>{name}</div>
+      <a href='#startChat' onClick={event => {
+        event.preventDefault()
+        props.startNewIMChat(0, id, name)
+          .then(chatUUID => console.log(chatUUID)) // TODO: switch to tap
+      }}>
+        <img src='/chat_bubble.svg' height='20' width='20' alt={`Start new chat with ${name}`} />
+      </a>
       {rights}
     </li>)
   })
