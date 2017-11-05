@@ -8,7 +8,10 @@
 
 function cleanName (name) {
   // deletes characters that will be in names but shouldn't
-  return name.trim().replace(/["\0]/gi, '')
+  const trimmed = name.trim().replace(/["\0]/gi, '')
+  const upperCased = trimmed.charAt(0).toUpperCase() + // name -> Name
+    trimmed.substring(1).toLowerCase()
+  return upperCased
 }
 
 export default class AvatarName {
