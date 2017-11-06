@@ -1,6 +1,6 @@
 'use strict'
 
-import { getActiveCircuit } from '../session'
+import { getActiveCircuit, getAgentId, getSessionId } from '../session'
 import { fetchLLSD } from './llsd'
 
 let UUIDNameIds = []
@@ -88,5 +88,41 @@ export function getAllFriendsDisplayNames () {
       .toArray()
 
     dispatch(loadDisplayNames(friendsIds))
+  }
+}
+
+// Server answers with a ChangeUserRights Packet
+export function updateRights (friendUUID, changedRights) {
+  const id = friendUUID.toString()
+  return (dispatch, getState) => {
+    // Get friend
+    const friend = getState().friends.find(friend => friend.get('id') === id)
+    if (friend == null) return
+
+    const getRight = name => changedRights[name] == null
+      ? friend.getIn(['rightsGiven', name])
+      : changedRights[name]
+
+    // Get and combine rights
+    const canSeeOnline = getRight('canSeeOnline')
+    const canSeeOnMap = getRight('canSeeOnMap')
+    const canModifyObjects = getRight('canModifyObjects')
+
+    const rightsInt = (canSeeOnline << 0) | (canSeeOnMap << 1) | (canModifyObjects << 2)
+
+    getActiveCircuit().send('GrantUserRights', {
+      AgentData: [
+        {
+          AgentID: getAgentId(),
+          SessionID: getSessionId()
+        }
+      ],
+      Rights: [
+        {
+          AgentRelated: id,
+          RelatedRights: rightsInt
+        }
+      ]
+    })
   }
 }

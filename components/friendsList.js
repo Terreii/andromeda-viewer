@@ -24,7 +24,23 @@ const titles = {
   }
 }
 
+function getRightsCallback (updateRights) {
+  return event => {
+    if (event.target.disabled) return
+
+    const dataset = event.target.dataset
+    const friendId = dataset.friendId
+    const rightName = dataset.rightName
+
+    updateRights(friendId, {
+      [rightName]: event.target.checked
+    })
+  }
+}
+
 export default function FriendsList (props) {
+  const rightsCallback = getRightsCallback(props.updateRights)
+
   const list = props.friends.map((friend, index) => {
     const id = friend.get('id')
     const hasName = props.names.has(id)
@@ -41,13 +57,13 @@ export default function FriendsList (props) {
 
         const ele = (<input
           type='checkbox'
-          readOnly // TODO: how to change rights
-          disabled={true || key === 'rightsHas'} // the rights friend has given me
+          disabled={key === 'rightsHas'} // on the rights friend has given me
           checked={rightsMap.get(prop)}
           title={titles[key][prop]}
           data-friend-id={id}
           data-right-name={prop}
           key={`friend-${id}-${key}-${prop}`}
+          onChange={rightsCallback}
         />)
         rights.push(ele)
       })

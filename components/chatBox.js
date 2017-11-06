@@ -12,12 +12,14 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
 import State from '../stores/state'
 import ChatDialog from './chatDialog'
 import FriendsList from './friendsList'
+
 import {
   sendLocalChatMessage,
   sendInstantMessage,
   startNewIMChat,
   getIMHistory
 } from '../actions/chatMessageActions'
+import { updateRights } from '../actions/friendsActions'
 
 import tabsStyle from 'react-tabs/style/react-tabs.css'
 
@@ -103,7 +105,10 @@ export default class ChatBox extends React.Component {
             <FriendsList
               names={names}
               friends={this.state.friends}
-              startNewIMChat={(dialog, id, name) => State.dispatch(startNewIMChat(dialog, id, name))}
+              startNewIMChat={
+                (dialog, id, name) => State.dispatch(startNewIMChat(dialog, id, name))
+              }
+              updateRights={(id, rights) => State.dispatch(updateRights(id, rights))}
               />
           </TabPanel>
           <TabPanel

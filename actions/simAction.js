@@ -64,13 +64,29 @@ function parseUUIDNameReply (message) {
   })
 }
 
+function parseUserRights (message) {
+  const rights = message.Rights.data.map(user => {
+    return {
+      agentId: user.AgentRelated.value,
+      rights: user.RelatedRights.value
+    }
+  })
+  return {
+    ownId: State.getState().account.get('agentId'),
+    fromId: message.AgentData.data[0].AgentID.value,
+    userRights: rights
+  }
+}
+
 // Gets all messages from the SIM and filters them for the UI
 export default function simActionFilter (msg) {
-  switch (msg.body.name) {
+  const name = msg.body.name
+  switch (name) {
     case 'ChatFromSimulator':
       const parsed = parseChatFromSimulator(msg.body)
-      dispatchSIMAction(msg.body.name, parsed, 'localchat/' + new Date(parsed.time).toJSON())
+      dispatchSIMAction(name, parsed, 'localchat/' + new Date(parsed.time).toJSON())
       break
+
     case 'ImprovedInstantMessage':
       const parsedMsg = parseIM(msg.body)
       // Start a new IMChat.
@@ -78,11 +94,17 @@ export default function simActionFilter (msg) {
         parsedMsg.dialog, parsedMsg.chatUUID, parsedMsg.fromId, parsedMsg.fromAgentName
       ))
       const id = `imChats/${parsedMsg.chatUUID}/${new Date(parsedMsg.time).toJSON()}`
-      dispatchSIMAction(msg.body.name, parsedMsg, id)
+      dispatchSIMAction(name, parsedMsg, id)
       break
+
     case 'UUIDNameReply':
-      dispatchSIMAction(msg.body.name, parseUUIDNameReply(msg.body))
+      dispatchSIMAction(name, parseUUIDNameReply(msg.body))
       break
+
+    case 'ChangeUserRights':
+      dispatchSIMAction(name, parseUserRights(msg.body))
+      break
+
     default:
       break
   }
