@@ -3,13 +3,48 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Immutable from 'immutable'
-
-import style from './FriendsList.css'
+import styled from 'styled-components'
 
 /*
  * A List of Friends
  * Does start a new IM-Chat
  */
+
+const Outer = styled.div`
+  padding: 1em;
+`
+
+const ListTitle = styled.div`
+  font-size: 120%;
+  border-bottom: 1px solid grey;
+`
+
+const List = styled.ul`
+  list-style: none;
+  padding-left: 1em;
+  max-width: 15cm;
+  margin-left: auto;
+  margin-right: auto;
+`
+
+const ListItem = styled.li`
+  display: flex;
+  flex-direction: row;
+
+  &::nth-child(odd) {
+    background-color: rgb(173, 173, 173);
+  }
+`
+
+const NameCell = styled.div`
+  flex: auto;
+`
+
+const ListItemInput = styled.input`
+  flex: 20px 0 0;
+`
+
+const ListItemLink = ListItemInput.withComponent('a')
 
 const titles = {
   rightsGiven: {
@@ -36,9 +71,8 @@ function FriendRow ({friend, name, onRightsChanged, startNewIMChat}) {
         // there in the official viewer
       }
 
-      const ele = <input
+      const ele = <ListItemInput
         key={`friend-${id}-${key}-${rightName}`}
-        className={style.ListItemElement}
         type='checkbox'
         disabled={key === 'rightsHas'} // on the rights friend has given me
         checked={rightsMap.get(rightName)}
@@ -54,17 +88,19 @@ function FriendRow ({friend, name, onRightsChanged, startNewIMChat}) {
     })
   })
 
-  return <li className={style.ListItem}>
-    <div className={style.Name}>{name}</div>
-    <a className={style.ListItemElement} href='#startChat' onClick={event => {
-      event.preventDefault()
-      startNewIMChat(0, id, name)
-        .then(chatUUID => console.log(chatUUID)) // TODO: switch to tap
-    }}>
+  return <ListItem>
+    <NameCell>{name}</NameCell>
+    <ListItemLink
+      href='#startChat'
+      onClick={event => {
+        event.preventDefault()
+        startNewIMChat(0, id, name)
+          .then(chatUUID => console.log(chatUUID)) // TODO: switch to tap
+      }}>
       <img src='/chat_bubble.svg' height='20' width='20' alt={`Start new chat with ${name}`} />
-    </a>
+    </ListItemLink>
     {rights}
-  </li>
+  </ListItem>
 }
 
 export default function FriendsList ({friends, names, updateRights, startNewIMChat}) {
@@ -80,10 +116,10 @@ export default function FriendsList ({friends, names, updateRights, startNewIMCh
       />
   })
 
-  return (<div className={style.Outer}>
-    <div className={style.Title}>Friends</div>
-    <ul className={style.List}>{list}</ul>
-  </div>)
+  return <Outer>
+    <ListTitle>Friends</ListTitle>
+    <List>{list}</List>
+  </Outer>
 }
 
 FriendsList.displayName = 'FriendsList'
