@@ -14,6 +14,9 @@
 .List {
   list-style: none;
   padding-left: 1em;
+  max-width: 15cm;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .ListItem {
@@ -23,4 +26,12 @@
 
 .ListItem::nth-child(odd) {
   background-color: rgb(173, 173, 173);
+}
+
+.Name {
+  flex: auto;
+}
+
+.ListItemElement {
+  flex: 20px 0 0;
 }

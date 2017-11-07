@@ -24,62 +24,60 @@ const titles = {
   }
 }
 
-function getRightsCallback (updateRights) {
-  return event => {
-    if (event.target.disabled) return
+function FriendRow ({friend, name, onRightsChanged, startNewIMChat}) {
+  const id = friend.get('id')
 
-    const dataset = event.target.dataset
-    const friendId = dataset.friendId
-    const rightName = dataset.rightName
+  const rights = []
+  ;['rightsGiven', 'rightsHas'].forEach(key => {
+    const rightsMap = friend.get(key)
+    ;['canSeeOnline', 'canSeeOnMap', 'canModifyObjects'].forEach(rightName => {
+      if (key === 'rightsHas' && rightName === 'canSeeOnline') {
+        return // Indicator that you can see friends online state isn't
+        // there in the official viewer
+      }
 
-    updateRights(friendId, {
-      [rightName]: event.target.checked
+      const ele = <input
+        key={`friend-${id}-${key}-${rightName}`}
+        className={style.ListItemElement}
+        type='checkbox'
+        disabled={key === 'rightsHas'} // on the rights friend has given me
+        checked={rightsMap.get(rightName)}
+        title={titles[key][rightName]}
+        onChange={event => {
+          if (event.target.disabled) return
+          onRightsChanged(id, {
+            [rightName]: event.target.checked
+          })
+        }}
+      />
+      rights.push(ele)
     })
-  }
+  })
+
+  return <li className={style.ListItem}>
+    <div className={style.Name}>{name}</div>
+    <a className={style.ListItemElement} href='#startChat' onClick={event => {
+      event.preventDefault()
+      startNewIMChat(0, id, name)
+        .then(chatUUID => console.log(chatUUID)) // TODO: switch to tap
+    }}>
+      <img src='/chat_bubble.svg' height='20' width='20' alt={`Start new chat with ${name}`} />
+    </a>
+    {rights}
+  </li>
 }
 
-export default function FriendsList (props) {
-  const rightsCallback = getRightsCallback(props.updateRights)
-
-  const list = props.friends.map((friend, index) => {
+export default function FriendsList ({friends, names, updateRights, startNewIMChat}) {
+  const list = friends.map(friend => {
     const id = friend.get('id')
-    const hasName = props.names.has(id)
-    const name = hasName ? props.names.get(id).getDisplayName() : id
-
-    const rights = []
-    ;['rightsGiven', 'rightsHas'].forEach(key => {
-      const rightsMap = friend.get(key)
-      ;['canSeeOnline', 'canSeeOnMap', 'canModifyObjects'].forEach(prop => {
-        if (key === 'rightsHas' && prop === 'canSeeOnline') {
-          return // Indicator that you can see friends online state isn't
-          // there in the official viewer
-        }
-
-        const ele = (<input
-          type='checkbox'
-          disabled={key === 'rightsHas'} // on the rights friend has given me
-          checked={rightsMap.get(prop)}
-          title={titles[key][prop]}
-          data-friend-id={id}
-          data-right-name={prop}
-          key={`friend-${id}-${key}-${prop}`}
-          onChange={rightsCallback}
-        />)
-        rights.push(ele)
-      })
-    })
-
-    return (<li className={style.ListItem} key={'friendListIndex' + index}>
-      <div>{name}</div>
-      <a href='#startChat' onClick={event => {
-        event.preventDefault()
-        props.startNewIMChat(0, id, name)
-          .then(chatUUID => console.log(chatUUID)) // TODO: switch to tap
-      }}>
-        <img src='/chat_bubble.svg' height='20' width='20' alt={`Start new chat with ${name}`} />
-      </a>
-      {rights}
-    </li>)
+    const name = names.has(id) ? names.get(id).getDisplayName() : id
+    return <FriendRow
+      key={id}
+      friend={friend}
+      name={name}
+      onRightsChanged={updateRights}
+      startNewIMChat={startNewIMChat}
+      />
   })
 
   return (<div className={style.Outer}>
