@@ -7,7 +7,9 @@
  */
 
 import React from 'react'
-import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
+import Tabs, { TabPane } from 'rc-tabs'
+import TabContent from 'rc-tabs/lib/TabContent'
+import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar'
 
 import State from '../stores/state'
 import ChatDialog from './chatDialog'
@@ -21,7 +23,7 @@ import {
 } from '../actions/chatMessageActions'
 import { updateRights } from '../actions/friendsActions'
 
-import 'react-tabs/style/react-tabs.css'
+import 'rc-tabs/assets/index.css'
 
 export default class ChatBox extends React.Component {
   constructor () {
@@ -44,85 +46,53 @@ export default class ChatBox extends React.Component {
   render () {
     const names = this.state.names.get('names')
     const imsIds = this.state.IMs.keySeq().toJSON()
-    const ims = imsIds.map(id => {
-      const withId = this.state.IMs.getIn([id, 'withId'])
-      const name = names.has(withId)
-        ? names.get(withId).getName()
-        : withId
-      return <Tab
-        key={id}
-        className='react-tabs__tab'
-        selectedClassName='react-tabs__tab--selected'
-        disabledClassName='react-tabs__tab--disabled'
-        >
-        {name}
-      </Tab>
-    })
+
     const panels = imsIds.map(id => {
       const chat = this.state.IMs.get(id)
       const target = chat.get('withId')
-      return (
-        <TabPanel
-          key={id}
-          className='react-tabs__tab-panel'
-          selectedClassName='react-tabs__tab-panel--selected'
-          >
-          <ChatDialog
-            data={chat}
-            isIM
-            sendTo={text => sendInstantMessage(text, target, id)}
-            names={names}
-            loadHistory={chatUUID => State.dispatch(getIMHistory(chatUUID))}
-            />
-        </TabPanel>
-      )
+      const name = names.has(target)
+        ? names.get(target).getName()
+        : target
+
+      return <TabPane tab={name} key={id}>
+        <ChatDialog
+          data={chat}
+          isIM
+          sendTo={text => sendInstantMessage(text, target, id)}
+          names={names}
+          loadHistory={chatUUID => State.dispatch(getIMHistory(chatUUID))}
+          />
+      </TabPane>
     })
 
-    return (
-      <div className='ChatBox'>
-        <Tabs>
-          <TabList className='react-tabs__tab-list'>
-            <Tab
-              className='react-tabs__tab'
-              selectedClassName='react-tabs__tab--selected'
-              disabledClassName='react-tabs__tab--disabled'
-              >
-              Friends
-            </Tab>
-            <Tab
-              className='react-tabs__tab'
-              selectedClassName='react-tabs__tab--selected'
-              disabledClassName='react-tabs__tab--disabled'
-              >
-              Local
-            </Tab>
-            {ims}
-          </TabList>
-          <TabPanel
-            className='react-tabs__tab-panel'
-            selectedClassName='react-tabs__tab-panel--selected'
-            >
-            <FriendsList
-              names={names}
-              friends={this.state.friends}
-              startNewIMChat={
-                (dialog, id, name) => State.dispatch(startNewIMChat(dialog, id, name))
-              }
-              updateRights={(id, rights) => State.dispatch(updateRights(id, rights))}
-              />
-          </TabPanel>
-          <TabPanel
-            className='react-tabs__tab-panel'
-            selectedClassName='react-tabs__tab-panel--selected'
-            >
-            <ChatDialog data={this.state.localChat} names={names} sendTo={text => {
-              sendLocalChatMessage(text, 1, 0)
-            }} />
-          </TabPanel>
-          {panels}
-        </Tabs>
-      </div>
-    )
+    return <Tabs
+      defaultActiveKey='local'
+      renderTabBar={() => <ScrollableInkTabBar />}
+      renderTabContent={() => <TabContent />}
+      >
+      <TabPane tab='Friends' key='friends'>
+        <FriendsList
+          names={names}
+          friends={this.state.friends}
+          startNewIMChat={
+            (dialog, id, name) => State.dispatch(startNewIMChat(dialog, id, name))
+          }
+          updateRights={(id, rights) => State.dispatch(updateRights(id, rights))}
+          />
+      </TabPane>
+
+      <TabPane tab='Local' key='local'>
+        <ChatDialog
+          data={this.state.localChat}
+          names={names}
+          sendTo={text => {
+            sendLocalChatMessage(text, 1, 0)
+          }}
+          />
+      </TabPane>
+
+      {panels}
+    </Tabs>
   }
 }
 ChatBox.displayName = 'ChatBox'
