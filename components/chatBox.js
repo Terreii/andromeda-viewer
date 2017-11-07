@@ -21,7 +21,7 @@ import {
 } from '../actions/chatMessageActions'
 import { updateRights } from '../actions/friendsActions'
 
-import tabsStyle from 'react-tabs/style/react-tabs.css'
+import 'react-tabs/style/react-tabs.css'
 
 export default class ChatBox extends React.Component {
   constructor () {
@@ -51,9 +51,9 @@ export default class ChatBox extends React.Component {
         : withId
       return <Tab
         key={id}
-        className={tabsStyle['react-tabs__tab']}
-        selectedClassName={tabsStyle['react-tabs__tab--selected']}
-        disabledClassName={tabsStyle['react-tabs__tab--disabled']}
+        className='react-tabs__tab'
+        selectedClassName='react-tabs__tab--selected'
+        disabledClassName='react-tabs__tab--disabled'
         >
         {name}
       </Tab>
@@ -64,8 +64,8 @@ export default class ChatBox extends React.Component {
       return (
         <TabPanel
           key={id}
-          className={tabsStyle['react-tabs__tab-panel']}
-          selectedClassName={tabsStyle['react-tabs__tab-panel--selected']}
+          className='react-tabs__tab-panel'
+          selectedClassName='react-tabs__tab-panel--selected'
           >
           <ChatDialog
             data={chat}
@@ -81,26 +81,26 @@ export default class ChatBox extends React.Component {
     return (
       <div className='ChatBox'>
         <Tabs>
-          <TabList className={tabsStyle['react-tabs__tab-list']}>
+          <TabList className='react-tabs__tab-list'>
             <Tab
-              className={tabsStyle['react-tabs__tab']}
-              selectedClassName={tabsStyle['react-tabs__tab--selected']}
-              disabledClassName={tabsStyle['react-tabs__tab--disabled']}
+              className='react-tabs__tab'
+              selectedClassName='react-tabs__tab--selected'
+              disabledClassName='react-tabs__tab--disabled'
               >
               Friends
             </Tab>
             <Tab
-              className={tabsStyle['react-tabs__tab']}
-              selectedClassName={tabsStyle['react-tabs__tab--selected']}
-              disabledClassName={tabsStyle['react-tabs__tab--disabled']}
+              className='react-tabs__tab'
+              selectedClassName='react-tabs__tab--selected'
+              disabledClassName='react-tabs__tab--disabled'
               >
               Local
             </Tab>
             {ims}
           </TabList>
           <TabPanel
-            className={tabsStyle['react-tabs__tab-panel']}
-            selectedClassName={tabsStyle['react-tabs__tab-panel--selected']}
+            className='react-tabs__tab-panel'
+            selectedClassName='react-tabs__tab-panel--selected'
             >
             <FriendsList
               names={names}
@@ -112,8 +112,8 @@ export default class ChatBox extends React.Component {
               />
           </TabPanel>
           <TabPanel
-            className={tabsStyle['react-tabs__tab-panel']}
-            selectedClassName={tabsStyle['react-tabs__tab-panel--selected']}
+            className='react-tabs__tab-panel'
+            selectedClassName='react-tabs__tab-panel--selected'
             >
             <ChatDialog data={this.state.localChat} names={names} sendTo={text => {
               sendLocalChatMessage(text, 1, 0)
