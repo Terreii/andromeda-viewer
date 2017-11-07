@@ -4,10 +4,13 @@ import crypto from 'crypto'
 
 import { viewerName, viewerVersion, viewerPlatform } from './viewerInfo'
 import Circuit from './network/circuit'
-import simActionsForUI from './actions/simAction'
 import AvatarName from './avatarName'
 import State from './stores/state'
+
 import { getLocalChatHistory, loadIMChats } from './actions/chatMessageActions'
+import { fetchSeedCapabilities } from './actions/llsd'
+import simActionsForUI from './actions/simAction'
+import { getAllFriendsDisplayNames } from './actions/friendsActions'
 
 // true if there is a running session
 let _isLoggedIn = false
@@ -45,7 +48,9 @@ export function login (firstName, lastName, password, grid) {
     version: viewerVersion,
     platform: viewerPlatform,
     // mac will be added on the server side
-    options: [],
+    options: [
+      'buddy-list'
+    ],
     agree_to_tos: 'true',
     read_critical: 'true'
   }
@@ -69,10 +74,13 @@ export function login (firstName, lastName, password, grid) {
           name: avatarName,
           grid,
           uuid: getAgentId(),
+          buddyList: sessionInfo['buddy-list'],
           localChatHistory
         })
         State.dispatch(loadIMChats())
       })
+      State.dispatch(fetchSeedCapabilities(body['seed_capability']))
+        .then(() => State.dispatch(getAllFriendsDisplayNames()))
       return body
     } else {
       throw body
