@@ -1,12 +1,53 @@
 'use strict'
 
 import React from 'react'
+import styled from 'styled-components'
 
 import AvatarName from '../avatarName'
 import { viewerName } from '../viewerInfo'
 import { login } from '../session'
 
-import style from './login.css'
+const Main = styled.div`
+  background-color: rgb(77, 80, 85);
+  color: rgb(255, 255, 255);
+  border-radius: 1em;
+  padding: 0.8em;
+  max-width: 30em;
+  margin-top: 2em;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+`
+
+const ViewerNameCapitalizer = styled.span`
+  text-transform: capitalize;
+`
+
+const ErrorOut = styled.p`
+  background-color: rgb(255, 0, 0);
+  border-radius: 0.3em;
+  margin-top: 0.3em;
+  padding: 0.3em;
+  display: ${props => props.show ? '' : 'none'};
+`
+
+const SavedAvatarsList = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+`
+
+const SavedAvatarLogin = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: .5em;
+  padding-top: 0px;
+  margin: .3em;
+  border: 1px solid rgb(90, 95, 105);
+  border-radius: .3em;
+`
 
 // Show the name of the Viewer
 document.title = viewerName
@@ -139,7 +180,7 @@ export default class LoginForm extends React.Component {
       const name = avatar.get('name')
       const passwordId = 'password' + name
       const displayName = new AvatarName(name).getName()
-      return <div key={avatar.get('_id')} className={style.SavedAvatarLogin}>
+      return <SavedAvatarLogin key={avatar.get('_id')}>
         <h3>{displayName}</h3>
         <input type='password' id={passwordId} placeholder='password' />
         <div>
@@ -150,24 +191,21 @@ export default class LoginForm extends React.Component {
             Login
           </button>
         </div>
-      </div>
+      </SavedAvatarLogin>
     })
   }
 
   render () {
-    const displayError = this.state.errorMessage.length === 0
-      ? 'none'
-      : ''
     const grids = this.props.grids.map((grid, index) => {
       const name = grid.get('name')
       return <option key={name} value={index}>{name}</option>
     })
-    return <div className={style.Main}>
+    return <Main>
       <h1>
         {'Login to '}
-        <span className={style.ViewerName}>
+        <ViewerNameCapitalizer>
           {viewerName}
-        </span>
+        </ViewerNameCapitalizer>
       </h1>
       <div>
         <input
@@ -215,12 +253,12 @@ export default class LoginForm extends React.Component {
           disabled={this.state.isLoggingIn}
           />
       </div>
-      <div className={style.SavedAvatars}>
+      <SavedAvatarsList>
         {this.renderAvatarLogin()}
-      </div>
-      <p className={style.Error} style={{display: displayError}}>
+      </SavedAvatarsList>
+      <ErrorOut show={this.state.errorMessage.length !== 0}>
         {this.state.errorMessage}
-      </p>
+      </ErrorOut>
       <div>
         Add Grid:
         <br />
@@ -229,6 +267,6 @@ export default class LoginForm extends React.Component {
         <br />
         <input type='button' value='add' onClick={this._boundAddGrid} />
       </div>
-    </div>
+    </Main>
   }
 }
