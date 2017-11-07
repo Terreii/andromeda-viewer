@@ -11,11 +11,15 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
 
 import State from '../stores/state'
 import ChatDialog from './chatDialog'
+import FriendsList from './friendsList'
+
 import {
   sendLocalChatMessage,
   sendInstantMessage,
+  startNewIMChat,
   getIMHistory
 } from '../actions/chatMessageActions'
+import { updateRights } from '../actions/friendsActions'
 
 import tabsStyle from 'react-tabs/style/react-tabs.css'
 
@@ -38,11 +42,12 @@ export default class ChatBox extends React.Component {
   }
 
   render () {
+    const names = this.state.names.get('names')
     const imsIds = this.state.IMs.keySeq().toJSON()
     const ims = imsIds.map(id => {
       const withId = this.state.IMs.getIn([id, 'withId'])
-      const name = this.state.names.has(withId)
-        ? this.state.names.get(withId).getName()
+      const name = names.has(withId)
+        ? names.get(withId).getName()
         : withId
       return <Tab
         key={id}
@@ -66,7 +71,7 @@ export default class ChatBox extends React.Component {
             data={chat}
             isIM
             sendTo={text => sendInstantMessage(text, target, id)}
-            names={this.state.names}
+            names={names}
             loadHistory={chatUUID => State.dispatch(getIMHistory(chatUUID))}
             />
         </TabPanel>
@@ -82,6 +87,13 @@ export default class ChatBox extends React.Component {
               selectedClassName={tabsStyle['react-tabs__tab--selected']}
               disabledClassName={tabsStyle['react-tabs__tab--disabled']}
               >
+              Friends
+            </Tab>
+            <Tab
+              className={tabsStyle['react-tabs__tab']}
+              selectedClassName={tabsStyle['react-tabs__tab--selected']}
+              disabledClassName={tabsStyle['react-tabs__tab--disabled']}
+              >
               Local
             </Tab>
             {ims}
@@ -90,9 +102,22 @@ export default class ChatBox extends React.Component {
             className={tabsStyle['react-tabs__tab-panel']}
             selectedClassName={tabsStyle['react-tabs__tab-panel--selected']}
             >
-            <ChatDialog data={this.state.localChat} sendTo={text => {
+            <FriendsList
+              names={names}
+              friends={this.state.friends}
+              startNewIMChat={
+                (dialog, id, name) => State.dispatch(startNewIMChat(dialog, id, name))
+              }
+              updateRights={(id, rights) => State.dispatch(updateRights(id, rights))}
+              />
+          </TabPanel>
+          <TabPanel
+            className={tabsStyle['react-tabs__tab-panel']}
+            selectedClassName={tabsStyle['react-tabs__tab-panel--selected']}
+            >
+            <ChatDialog data={this.state.localChat} names={names} sendTo={text => {
               sendLocalChatMessage(text, 1, 0)
-            }} names={this.state.names} />
+            }} />
           </TabPanel>
           {panels}
         </Tabs>

@@ -35,13 +35,15 @@ function IMChat (state = Immutable.Map(), action) {
         withId: action.target,
         didLoadHistory: state.get('didLoadHistory') || false,
         isLoadingHistory: state.get('isLoadingHistory') || false,
+        active: true,
         messages: state.has('messages') ? state.get('messages') : Immutable.List()
       })
     case 'ImprovedInstantMessage':
     case 'SelfSendImprovedInstantMessage':
       const msg = Immutable.Map(action.msg)
-      const messages = state.get('messages').push(msg)
-      return state.set('messages', messages)
+      const messages = state.has('messages') ? state.get('messages') : Immutable.List()
+      const nextMessages = messages.push(msg)
+      return state.set('messages', nextMessages)
     default:
       return state
   }
@@ -63,7 +65,7 @@ export default function IMStore (state = Immutable.Map(), action) {
     case 'SelfSendImprovedInstantMessage':
       // filter start/end typing
       if (action.msg.dialog === 41 || action.msg.dialog === 42) return state
-      return state.set(action.chatUUID, IMChat(state.get(action.chatUUID), action))
+      return state.set(action.msg.chatUUID, IMChat(state.get(action.msg.chatUUID), action))
     case 'IMHistoryStartLoading':
       return state.setIn([action.chatUUID, 'isLoadingHistory'], true)
     case 'IMHistoryLoaded':

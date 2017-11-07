@@ -123,6 +123,59 @@ export function getIMChatTypeOfDialog (dialog) {
   }
 }
 
+// UUID make structure: 00000000-0000-4000-x000-000000000000
+// all are hexadecimal numbers.
+// 4 is always 4 and x is between 8 and b.
+function uuidXOR (idIn1, idIn2) {
+  const id1 = idIn1.toString().replace(/-/gi, '')
+  const id2 = idIn2.toString().replace(/-/gi, '')
+
+  let out = ''
+  for (let i = 0; i < 16; ++i) {
+    const index = i * 2
+    const byte1 = parseInt(id1[index] + id1[index + 1], 16)
+    const byte2 = parseInt(id2[index] + id2[index + 1], 16)
+
+    let xorByte = byte1 ^ byte2
+    if (i === 6) { // Makes the 4 in the UUID
+      xorByte = (0b00001111 & xorByte) | (4 << 4)
+    } else if (i === 8) { // Makes the y in the UUID. It is between 8 and b
+      xorByte = (8 << 4) + (0b00111111 & xorByte)
+    }
+
+    if (i === 4 || i === 6 || i === 8 || i === 10) {
+      out += '-'
+    }
+    out += xorByte.toString(16).padStart(2, '0')
+  }
+  return out
+}
+
+// Create a new chatUUID from type, target-UUID & agentUUID
+function calcChatUUID (type, targetId, agentId) {
+  if (type === 'personal') {
+    return uuidXOR(agentId, targetId)
+  } else {
+    throw new Error(`Chat type '${type}' not jet supported!`)
+  }
+}
+
+// Start a new IM Chat from the UI.
+export function startNewIMChat (dialog, targetId, name) {
+  return (dispatch, getState, hoodie) => {
+    try {
+      const chatType = getIMChatTypeOfDialog(dialog)
+      const chatUUID = calcChatUUID(chatType, targetId, getState().account.get('agentId'))
+
+      dispatch(createNewIMChat(dialog, chatUUID, targetId, name))
+
+      return Promise.resolve(chatUUID)
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+}
+
 // Starts a new IMChat. It also saves it into Hoodie.
 export function createNewIMChat (dialog, chatUUID, target, name) {
   const type = getIMChatTypeOfDialog(dialog)

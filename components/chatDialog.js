@@ -38,7 +38,7 @@ export default class ChatDialog extends React.Component {
       const fromId = this.props.isIM ? msg.get('fromId') : msg.get('sourceID')
       const name = this.props.names.get(fromId) || ''
       return (
-        <div className={style.message} key={time.getTime()}>
+        <div className={style.message} key={`message_${fromId}_${time}`}>
           <span className='time'>
             {leadingZero(time.getHours())}
             :
