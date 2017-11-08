@@ -1,5 +1,3 @@
-'use strict'
-
 import { name, version } from '../package.json'
 
 export const viewerName = name

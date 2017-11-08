@@ -1,5 +1,3 @@
-'use strict'
-
 /*
  * Entrypoint into the app on the client side
  *

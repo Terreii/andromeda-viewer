@@ -1,5 +1,3 @@
-'use strict'
-
 /*
  * Stores all LocalChat-Messanges
  */

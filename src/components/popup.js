@@ -1,5 +1,3 @@
-'use strict'
-
 import React from 'react'
 import styled from 'styled-components'
 
@@ -46,7 +44,7 @@ export default function Popup (props) {
   return <Background>
     <Border>
       <Header>
-        <a href='#' onClick={event => {
+        <a href='#close_popup' onClick={event => {
           event.preventDefault()
           props.onClose()
         }}>

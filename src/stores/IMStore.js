@@ -1,5 +1,3 @@
-'use strict'
-
 /*
  * Stores all IM-Chats and IM-Messanges
  */

@@ -1,5 +1,3 @@
-'use strict'
-
 /*
  * Stores all friends and their rights
  */
@@ -7,9 +5,9 @@
 import Immutable from 'immutable'
 
 function parseRights (rights) {
-  const canModifyObjects = (rights & 1 << 2) !== 0
-  const canSeeOnMap = (rights & 1 << 1) !== 0
-  const canSeeOnline = (rights & 1 << 0) !== 0
+  const canModifyObjects = (rights & (1 << 2)) !== 0
+  const canSeeOnMap = (rights & (1 << 1)) !== 0
+  const canSeeOnline = (rights & (1 << 0)) !== 0
   return Immutable.Map({
     canSeeOnline: canSeeOnline,
     canSeeOnMap: canSeeOnMap,

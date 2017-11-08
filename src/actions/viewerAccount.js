@@ -1,5 +1,3 @@
-'use strict'
-
 import { logout } from '../session'
 
 export function didSignIn (did, username = '') {

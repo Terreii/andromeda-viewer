@@ -1,5 +1,3 @@
-'use strict'
-
 /*
  * Sends a message to the server.
  */

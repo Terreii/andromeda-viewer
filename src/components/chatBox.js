@@ -1,5 +1,3 @@
-'use strict'
-
 /*
  * Displays all Chats (localchat and IMs)
  *

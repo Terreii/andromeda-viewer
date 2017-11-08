@@ -1,5 +1,3 @@
-'use strict'
-
 import crypto from 'crypto'
 
 import { viewerName, viewerVersion, viewerPlatform } from './viewerInfo'

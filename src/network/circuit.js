@@ -1,5 +1,3 @@
-'use strict'
-
 /*
  * The circuit is the connection to the sim server
  *

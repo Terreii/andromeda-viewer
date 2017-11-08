@@ -1,5 +1,3 @@
-'use strict'
-
 // parses an avatar name
 // Searches for a dot or white space that separates the first and last names
 // if neither is given, then 'resident' will be used for the last name

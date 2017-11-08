@@ -1,5 +1,3 @@
-'use strict'
-
 import { getActiveCircuit, getAgentId, getSessionId } from '../session'
 import { fetchLLSD } from './llsd'
 

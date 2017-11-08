@@ -1,5 +1,3 @@
-'use strict'
-
 import State from '../stores/state'
 import { createNewIMChat } from './chatMessageActions'
 

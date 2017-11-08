@@ -47,8 +47,6 @@ var LL_LEGACY // Set to true to enable notation formatting
 var LLSD, URI, UUID, Binary;
 
 (function () {
-  'use strict'
-
     //
     // var u = new URI("http://www.example.com");
     // u.toString() // -> "http://www.example.com"
@@ -295,7 +293,7 @@ var LLSD, URI, UUID, Binary;
 
                 cp2 = s.charCodeAt(i)
                 if (cp2 >= 0xDC00 && cp2 <= 0xDFFF) {
-                  cp = ((cp & 0x03FF) << 10 | (cp2 & 0x03FF)) + 0x10000
+                  cp = (((cp & 0x03FF) << 10) | (cp2 & 0x03FF)) + 0x10000
                 } else {
                   throw new RangeError('Badly formed UTF-16 surrogate pair')
                 }
@@ -754,6 +752,9 @@ var LLSD, URI, UUID, Binary;
             }
             xml.push('</map>')
             break
+
+          default:
+            break
         }
       }
 
@@ -1029,6 +1030,9 @@ var LLSD, URI, UUID, Binary;
             }
             writeOctet(LLSD.OCTET_MAP_CLOSE)
             break
+
+          default:
+            break
         }
       }
 
@@ -1210,6 +1214,9 @@ var LLSD, URI, UUID, Binary;
               }
               out.push('}')
               break
+
+            default:
+              break
           }
         }
 
@@ -1353,6 +1360,8 @@ var LLSD, URI, UUID, Binary;
           } catch (e) {
           }
           break
+
+        default: break
       }
       return new UUID()
     }
@@ -1366,6 +1375,8 @@ var LLSD, URI, UUID, Binary;
           } catch (e) {
           }
           break
+
+        default: break
       }
       return new Date(0)
     }
@@ -1379,6 +1390,8 @@ var LLSD, URI, UUID, Binary;
           } catch (e) {
           }
           break
+
+        default: break
       }
       return new URI()
     }
@@ -1392,6 +1405,8 @@ var LLSD, URI, UUID, Binary;
           } catch (e) {
           }
           break
+
+        default: break
       }
       return new Binary()
     }

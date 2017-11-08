@@ -1,5 +1,3 @@
-'use strict'
-
 import React from 'react'
 import styled from 'styled-components'
 
@@ -115,14 +113,14 @@ export default class TopBar extends React.Component {
     ])
     const viewerAccountText = viewerAccountLoggedIn
       ? `Hello ${this.state.account.getIn(['viewerAccount', 'username'])}`
-      : <a href='#' onClick={this._showSignInPopup}>Sign into Andromeda</a>
+      : <a href='#signin' onClick={this._showSignInPopup}>Sign into Andromeda</a>
     return <AccountMenuBody>
       <div>{greeting}</div>
       <div>
         {viewerAccountText}
       </div>
       <div style={{display: viewerAccountLoggedIn ? 'none' : ''}}>
-        <a href='#' onClick={this._showSignUpPopup}>Sign up to Andromeda</a>
+        <a href='#signup' onClick={this._showSignUpPopup}>Sign up to Andromeda</a>
       </div>
       <div style={{display: isLoggedIn ? '' : 'none'}}>
         <LogoutButton href='#' onClick={this._logout}>

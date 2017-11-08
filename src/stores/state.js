@@ -1,5 +1,3 @@
-'use strict'
-
 import Hoodie from '@hoodie/client'
 import PouchDB from 'pouchdb'
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux'

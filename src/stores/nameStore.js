@@ -1,5 +1,3 @@
-'use strict'
-
 /*
  * Stores the names of avatars
  */

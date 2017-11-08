@@ -1,5 +1,3 @@
-'use strict'
-
 import Immutable from 'immutable'
 
 function getDefault () {

@@ -1,5 +1,3 @@
-'use strict'
-
 import uuid from 'uuid'
 
 import messageTemplate from './messages.json'
@@ -722,7 +720,11 @@ export class ReceivedMessage extends MessageProto {
         default:
           quantity = 0
       }
+      const thisBlockData = []
       for (let i = 0; i < quantity; ++i) {
+        thisBlockData.push(i)
+      }
+      thisBlock.data = thisBlockData.map(i => {
         const data = {}
         data.all = blockTemplate.variables.map(variableTempl => {
           // parse the variables
@@ -744,8 +746,8 @@ export class ReceivedMessage extends MessageProto {
           data[variableTempl.name] = value
           return value
         })
-        thisBlock.data.push(data)
-      }
+        return data
+      })
       return thisBlock
     })
     this.blocks = blocks

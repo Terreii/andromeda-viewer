@@ -1,5 +1,3 @@
-'use strict'
-
 /*
  * Displays a single conversation/dialog. Also the input
  */
