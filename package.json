@@ -4,15 +4,18 @@
   "description": "Small web-client for connecting to the virtual world of Second Life.",
   "main": "main.js",
   "scripts": {
+    "prebuild": "npm run build-messages",
     "build": "react-scripts build",
+    "prewatch": "npm run build-messages",
     "watch": "react-scripts start",
     "help": "markdown-chalk",
     "test": "standard && react-scripts test --env=jsdom",
     "fixStyle": "standard --fix",
+    "build-messages": "node ./tools/createMessageTemplate",
     "update-coc": "weallbehave -o . && git add CODE_OF_CONDUCT.md && git commit -m 'docs(coc): updated CODE_OF_CONDUCT.md'",
     "update-contrib": "weallcontribute -o . && git add CONTRIBUTING.md && git commit -m 'docs(contributing): updated CONTRIBUTING.md'",
-    "startDev": "concurrently \"hoodie --inMemory\" \"npm run watch\"",
-    "start": "hoodie"
+    "startDev": "concurrently \"hoodie --inMemory --public build\" \"npm run watch\"",
+    "start": "hoodie --public build"
   },
   "repository": {
     "type": "git",

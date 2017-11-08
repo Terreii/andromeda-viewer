@@ -2,7 +2,7 @@
 
 import uuid from 'uuid'
 
-import messageTemplate from '../tools/master_message_template.msg'
+import messageTemplate from './messages.json'
 
 // This module implements the packages
 // http://wiki.secondlife.com/wiki/Message

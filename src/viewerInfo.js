@@ -1,10 +1,10 @@
 'use strict'
 
-import packageJSON from './package.json'
+import { name, version } from '../package.json'
 
-export const viewerName = packageJSON.name
+export const viewerName = name
 
-export const viewerVersion = packageJSON.version + '.0'
+export const viewerVersion = version + '.0'
 
 export const viewerPlatform = (() => {
   if (typeof window !== 'undefined') {
