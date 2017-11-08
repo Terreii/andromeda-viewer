@@ -4,16 +4,14 @@
   "description": "Small web-client for connecting to the virtual world of Second Life.",
   "main": "main.js",
   "scripts": {
-    "build": "webpack -p --progress --colors",
-    "watch": "webpack -d --progress --colors --watch",
+    "build": "react-scripts build",
+    "watch": "react-scripts start",
     "help": "markdown-chalk",
-    "pretest": "webpack --config test.config.js",
-    "test": "standard && mocha --compilers js:babel-core/register",
-    "posttest": "rm public/testBundle.js",
+    "test": "standard && react-scripts test --env=jsdom",
     "fixStyle": "standard --fix",
     "update-coc": "weallbehave -o . && git add CODE_OF_CONDUCT.md && git commit -m 'docs(coc): updated CODE_OF_CONDUCT.md'",
     "update-contrib": "weallcontribute -o . && git add CONTRIBUTING.md && git commit -m 'docs(contributing): updated CONTRIBUTING.md'",
-    "startDev": "hoodie --inMemory",
+    "startDev": "concurrently \"hoodie --inMemory\" \"npm run watch\"",
     "start": "hoodie"
   },
   "repository": {
@@ -35,6 +33,7 @@
   "homepage": "https://github.com/Terreii/andromeda-viewer",
   "devDependencies": {
     "@hoodie/client": "^10.1.1",
+    "concurrently": "^3.5.0",
     "immutable": "^3.8.2",
     "markdown-chalk": "^1.4.0",
     "mocha": "^3.5.3",

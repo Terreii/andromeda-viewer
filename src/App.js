@@ -6,7 +6,6 @@
  */
 
 import React from 'react'
-import ReactDom from 'react-dom'
 import styled from 'styled-components'
 
 import ChatBox from './components/chatBox'
@@ -40,7 +39,7 @@ const AppContainer = styled.div`
   margin: 0px;
 `
 
-class App extends React.Component {
+export default class App extends React.Component {
   constructor () {
     super()
     this.state = {
@@ -142,5 +141,3 @@ class App extends React.Component {
     </AppContainer>
   }
 }
-
-ReactDom.render(<App />, document.getElementById('app'))
