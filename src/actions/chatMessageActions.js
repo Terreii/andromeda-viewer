@@ -2,7 +2,7 @@
  * Sends a message to the server.
  */
 
-import State from '../stores/state'
+import State from '../store/state'
 import {
   getAgentId,
   getActiveCircuit,

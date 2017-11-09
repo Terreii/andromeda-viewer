@@ -33,11 +33,8 @@ export default class SignInPopup extends React.Component {
     if (this.props.isSignUp && password !== this.state.password2) {
       return
     }
-    this.props.onSend({
-      username,
-      password,
-      type: this.props.isSignUp ? 'signUp' : 'signIn'
-    })
+    const type = this.props.isSignUp ? 'signUp' : 'signIn'
+    this.props.onSend(username, password, type)
   }
 
   render () {

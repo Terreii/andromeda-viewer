@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 import { logout } from '../session'
-import State from '../stores/state'
+import State from '../store/state'
 import { showSignOutPopup, showSignInPopup } from '../actions/viewerAccount'
 
 const MenuBar = styled.div`

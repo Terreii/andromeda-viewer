@@ -9,7 +9,7 @@ import Tabs, { TabPane } from 'rc-tabs'
 import TabContent from 'rc-tabs/lib/TabContent'
 import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar'
 
-import State from '../stores/state'
+import State from '../store/state'
 import ChatDialog from './chatDialog'
 import FriendsList from './friendsList'
 

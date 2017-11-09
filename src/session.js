@@ -3,7 +3,7 @@ import crypto from 'crypto'
 import { viewerName, viewerVersion, viewerPlatform } from './viewerInfo'
 import Circuit from './network/circuit'
 import AvatarName from './avatarName'
-import State from './stores/state'
+import State from './store/state'
 
 import { getLocalChatHistory, loadIMChats } from './actions/chatMessageActions'
 import { fetchSeedCapabilities } from './actions/llsd'

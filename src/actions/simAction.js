@@ -1,4 +1,4 @@
-import State from '../stores/state'
+import State from '../store/state'
 import { createNewIMChat } from './chatMessageActions'
 
 function nullBufferToString (buffy) {

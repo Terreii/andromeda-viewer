@@ -1,9 +1,10 @@
 /*
- * Entrypoint into the app on the client side
+ * Entry-point into the app on the client side
  *
  */
 
 import React from 'react'
+import { connect } from 'react-redux'
 import styled from 'styled-components'
 
 import ChatBox from './components/chatBox'
@@ -11,6 +12,7 @@ import LoginForm from './components/login'
 import TopBar from './components/topBar'
 import SignInPopup from './components/signInPopup'
 import SignOutPopup from './components/signOutPopup'
+
 import {
   closePopup,
   isSignedIn,
@@ -22,6 +24,7 @@ import {
   saveGrid,
   loadSavedGrids
 } from './actions/viewerAccount'
+
 import { getMessageOfTheDay } from './session'
 import State from './store/state'
 
@@ -37,15 +40,11 @@ const AppContainer = styled.div`
   margin: 0px;
 `
 
-export default class App extends React.Component {
+class App extends React.Component {
   constructor () {
     super()
     this.state = {
       isLoggedIn: false, // Into Avatar
-      isSignedIn: false, // To Viewer-account
-      avatars: null,
-      grids: [],
-      popup: '',
       messageOfTheDay: {
         href: '',
         text: ''
@@ -55,7 +54,7 @@ export default class App extends React.Component {
 
   componentDidMount () {
     this._unsubscribe = State.subscribe(this._onChange.bind(this))
-    State.dispatch(isSignedIn()).then(isSignedIn => {
+    this.props.getIsSignedIn().then(isSignedIn => {
       if (isSignedIn) {
         this._loadAvatars()
       } else {
@@ -66,8 +65,8 @@ export default class App extends React.Component {
   }
 
   _loadAvatars () {
-    State.dispatch(loadSavedGrids())
-      .then(() => State.dispatch(loadSavedAvatars()))
+    this.props.loadSavedGrids()
+      .then(() => this.props.loadSavedAvatars())
   }
 
   _onChange () {
@@ -100,19 +99,17 @@ export default class App extends React.Component {
   }
 
   getPopup () {
-    const close = () => State.dispatch(closePopup())
-    switch (this.state.popup) {
+    const close = this.props.closePopup
+    switch (this.props.popup) {
       case 'signIn':
-        return <SignInPopup onCancel={close} onSend={({username, password}) => {
-          State.dispatch(signIn(username, password))
+        return <SignInPopup onCancel={close} onSend={(username, password) => {
+          this.props.signIn(username, password)
             .then(this._loadAvatars.bind(this))
         }} />
       case 'signUp':
-        return <SignInPopup onCancel={close} isSignUp onSend={({username, password}) => {
-          State.dispatch(signUp(username, password))
-        }} />
+        return <SignInPopup onCancel={close} isSignUp onSend={this.props.signUp} />
       case 'signOut':
-        return <SignOutPopup onCancel={close} onSignOut={() => State.dispatch(signOut())} />
+        return <SignOutPopup onCancel={close} onSignOut={this.props.signOut} />
       default:
         return null
     }
@@ -123,11 +120,11 @@ export default class App extends React.Component {
       ? <ChatBox />
       : <LoginForm
         onLogin={this.onLogin.bind(this)}
-        isSignedIn={this.state.isSignedIn}
-        avatars={this.state.avatars}
-        grids={this.state.grids}
-        saveAvatar={(name, grid) => State.dispatch(saveAvatar(name, grid))}
-        saveGrid={(name, url) => State.dispatch(saveGrid(name, url))}
+        isSignedIn={this.props.isSignedIn}
+        avatars={this.props.avatars}
+        grids={this.props.grids}
+        saveAvatar={this.props.saveAvatar}
+        saveGrid={this.props.saveGrid}
         />
     const msgOfDay = this.state.isLoggedIn
       ? this.state.messageOfTheDay
@@ -139,3 +136,30 @@ export default class App extends React.Component {
     </AppContainer>
   }
 }
+
+const mapStateToProps = state => {
+  const popup = state.account.getIn(['viewerAccount', 'signInPopup'])
+  const avatars = state.account.get('savedAvatars')
+  const grids = state.account.get('savedGrids')
+  const isSignedIn = state.account.getIn(['viewerAccount', 'loggedIn'])
+  return {
+    avatars,
+    grids,
+    isSignedIn,
+    popup
+  }
+}
+
+const mapDispatchToProps = {
+  closePopup,
+  getIsSignedIn: isSignedIn,
+  signIn,
+  signUp,
+  signOut,
+  saveAvatar,
+  loadSavedAvatars,
+  saveGrid,
+  loadSavedGrids
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App)
