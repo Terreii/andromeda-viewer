@@ -62,6 +62,10 @@ Enter those commands in a terminal (cmd or PowerShell on Windows) and press ente
 ### Getting SL Protocol documentation
 All documentation for the SL-protocol can be found in the [SL-Wiki](http://wiki.secondlife.com/wiki/Protocol)
 
+### Known Issues
+
+If testing fails to start. You might need to install [Facebooks Watchman](https://facebook.github.io/watchman/). [More here]https://github.com/Terreii/andromeda-viewer/blob/latest/README-create-react-app.md).
+
 ## Disclaimer
 [Second Life(TM)](https://secondlife.com) is a product by [Linden Lab](http://www.lindenlab.com/). Linden Lab is not involved with this project!
 
