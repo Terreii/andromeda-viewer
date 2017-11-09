@@ -9,6 +9,7 @@
     "prewatch": "npm run build-messages",
     "watch": "react-scripts start",
     "help": "markdown-chalk",
+    "pretest": "npm run build-messages",
     "test": "standard && react-scripts test --env=jsdom",
     "fixStyle": "standard --fix",
     "build-messages": "node ./tools/createMessageTemplate",
@@ -34,12 +35,12 @@
     "url": "https://github.com/Terreii/andromeda-viewer/issues"
   },
   "homepage": "https://github.com/Terreii/andromeda-viewer",
+  "proxy": "http://localhost:8080",
   "devDependencies": {
     "@hoodie/client": "^10.1.1",
     "concurrently": "^3.5.0",
     "immutable": "^3.8.2",
     "markdown-chalk": "^1.4.0",
-    "mocha": "^3.5.3",
     "pouchdb": "^6.3.4",
     "prop-types": "^15.6.0",
     "rc-tabs": "^9.1.10",
