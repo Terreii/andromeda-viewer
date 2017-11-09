@@ -3,11 +3,11 @@ import PouchDB from 'pouchdb'
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
 import thunkMiddleware from 'redux-thunk'
 
-import account from './account'
-import { localChatStore } from './localChatStore'
-import IMStore from './IMStore'
-import { nameStoreReduce } from './nameStore'
-import friendsStore from './friendsStore'
+import account from '../reducers/account'
+import { localChatStore } from '../reducers/localChatReducer'
+import IMStore from '../reducers/IMReducer'
+import { nameStoreReduce } from '../reducers/nameReducer'
+import friendsStore from '../reducers/friendsReducer'
 
 const rootReducer = combineReducers({
   account,
