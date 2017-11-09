@@ -39,6 +39,8 @@ If you want to start developing you should run in a new terminal window `npm run
 npm run watch
 ```
 
+You can also only use `npm run startDev` to start the server and run the continuously build process!
+
 For more information how to use npm, please read the [npm-documentation](https://docs.npmjs.com/).
 
 Everything needed for this project should be a npm dependency. So that all can be installed by running _npm install_
@@ -52,12 +54,17 @@ npm run build | Builds the viewer. The viewer is in a unusable state after cloni
 npm run watch | Builds the viewer. It continues to run and build the viewer when a file changes. This is the recommended build command while developing!
 npm test | Runs all tests. Please run this before committing!
 npm run fixStyle | Runs standard --fix. It can fix many standard style rules.
+npm run startDev | combined `npm start` and `npm run watch`.
 npm start | Starts the server. The viewer can then be used on the local computer.
 
 Enter those commands in a terminal (cmd or PowerShell on Windows) and press enter to run them.
 
 ### Getting SL Protocol documentation
 All documentation for the SL-protocol can be found in the [SL-Wiki](http://wiki.secondlife.com/wiki/Protocol)
+
+### Known Issues
+
+If testing fails to start. You might need to install [Facebooks Watchman](https://facebook.github.io/watchman/). [More here]https://github.com/Terreii/andromeda-viewer/blob/latest/README-create-react-app.md).
 
 ## Disclaimer
 [Second Life(TM)](https://secondlife.com) is a product by [Linden Lab](http://www.lindenlab.com/). Linden Lab is not involved with this project!

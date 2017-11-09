@@ -1,5 +1,8 @@
 'use strict'
 
+const fs = require('fs')
+const path = require('path')
+
 // parse the message_template.msg and creates the templates for the messages
 // It is implemented as a loader for Webpack
 // http://secondlife.com/app/message_template/master_message_template.msg
@@ -29,10 +32,12 @@
 //   }
 // ]
 
-module.exports = function (content) {
-  this.cacheable()
-  return 'module.exports = ' + parseMessageTemplate(content)
-}
+const templatePath = path.resolve('tools', 'master_message_template.msg')
+const messageTemplateData = fs.readFileSync(templatePath, 'utf8')
+
+const parsedTemplateString = parseMessageTemplate(messageTemplateData)
+const outPath = path.resolve('src', 'network', 'messages.json')
+fs.writeFileSync(outPath, parsedTemplateString, 'utf8')
 
 function parseMessageTemplate (data) {
   const allMessages = data.split('\n').map(line => {

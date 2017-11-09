@@ -4,17 +4,19 @@
   "description": "Small web-client for connecting to the virtual world of Second Life.",
   "main": "main.js",
   "scripts": {
-    "build": "webpack -p --progress --colors",
-    "watch": "webpack -d --progress --colors --watch",
+    "prebuild": "npm run build-messages",
+    "build": "react-scripts build",
+    "prewatch": "npm run build-messages",
+    "watch": "react-scripts start",
     "help": "markdown-chalk",
-    "pretest": "webpack --config test.config.js",
-    "test": "standard && mocha --compilers js:babel-core/register",
-    "posttest": "rm public/testBundle.js",
+    "pretest": "npm run build-messages",
+    "test": "standard && react-scripts test --env=jsdom",
     "fixStyle": "standard --fix",
+    "build-messages": "node ./tools/createMessageTemplate",
     "update-coc": "weallbehave -o . && git add CODE_OF_CONDUCT.md && git commit -m 'docs(coc): updated CODE_OF_CONDUCT.md'",
     "update-contrib": "weallcontribute -o . && git add CONTRIBUTING.md && git commit -m 'docs(contributing): updated CONTRIBUTING.md'",
-    "startDev": "hoodie --inMemory",
-    "start": "hoodie"
+    "startDev": "concurrently \"hoodie --inMemory --public build\" \"npm run watch\"",
+    "start": "hoodie --public build"
   },
   "repository": {
     "type": "git",
@@ -27,36 +29,30 @@
   },
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=6.9.0"
+    "node": ">=8.9.0"
   },
   "bugs": {
     "url": "https://github.com/Terreii/andromeda-viewer/issues"
   },
   "homepage": "https://github.com/Terreii/andromeda-viewer",
+  "proxy": "http://localhost:8080",
   "devDependencies": {
     "@hoodie/client": "^10.1.1",
-    "babel-core": "^6.26.0",
-    "babel-loader": "^7.1.2",
-    "babel-preset-latest": "^6.16.0",
-    "babel-preset-react": "^6.5.0",
-    "css-loader": "^0.28.7",
+    "concurrently": "^3.5.0",
     "immutable": "^3.8.2",
-    "json-loader": "^0.5.7",
     "markdown-chalk": "^1.4.0",
-    "mocha": "^3.5.3",
     "pouchdb": "^6.3.4",
     "prop-types": "^15.6.0",
     "rc-tabs": "^9.1.10",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
+    "react-scripts": "1.0.17",
     "redux": "^3.7.2",
     "redux-thunk": "^2.2.0",
     "standard": "^10.0.3",
-    "style-loader": "^0.18.0",
     "styled-components": "^2.2.2",
     "weallbehave": "^1.2.0",
-    "weallcontribute": "^1.0.8",
-    "webpack": "^2.7.0"
+    "weallcontribute": "^1.0.8"
   },
   "dependencies": {
     "hoodie": "^28.2.2",
@@ -65,11 +61,5 @@
     "uuid": "^3.1.0",
     "ws": "^3.2.0",
     "xmlrpc": "^1.3.2"
-  },
-  "babel": {
-    "presets": [
-      "latest",
-      "react"
-    ]
   }
 }
