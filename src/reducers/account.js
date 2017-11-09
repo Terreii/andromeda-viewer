@@ -31,7 +31,7 @@ function getDefault () {
   return Immutable.fromJS(defaultData)
 }
 
-export default function accountStore (state = getDefault(), action) {
+export default function accountReducer (state = getDefault(), action) {
   switch (action.type) {
     case 'didLogin':
       return state.merge({

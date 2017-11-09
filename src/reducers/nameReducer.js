@@ -1,5 +1,5 @@
 /*
- * Stores the names of avatars
+ * Reduces the names of avatars
  */
 
 import Immutable from 'immutable'
@@ -82,7 +82,7 @@ function namesReducer (state = Immutable.Map(), action) {
   }
 }
 
-export function nameStoreReduce (state = Immutable.Map(), action) {
+export default function namesCoreReducer (state = Immutable.Map(), action) {
   switch (action.type) {
     case '@@INIT':
     case 'ChatFromSimulator':

@@ -1,21 +1,9 @@
 import Hoodie from '@hoodie/client'
 import PouchDB from 'pouchdb'
-import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
+import { createStore, applyMiddleware, compose } from 'redux'
 import thunkMiddleware from 'redux-thunk'
 
-import account from '../reducers/account'
-import { localChatStore } from '../reducers/localChatReducer'
-import IMStore from '../reducers/IMReducer'
-import { nameStoreReduce } from '../reducers/nameReducer'
-import friendsStore from '../reducers/friendsReducer'
-
-const rootReducer = combineReducers({
-  account,
-  localChat: localChatStore,
-  IMs: IMStore,
-  names: nameStoreReduce,
-  friends: friendsStore
-})
+import rootReducer from '../reducers'
 
 const hoodie = new Hoodie({
   url: '',

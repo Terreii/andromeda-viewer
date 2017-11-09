@@ -23,7 +23,7 @@ import {
   loadSavedGrids
 } from './actions/viewerAccount'
 import { getMessageOfTheDay } from './session'
-import State from './stores/state'
+import State from './store/state'
 
 const AppContainer = styled.div`
   display: flex;

@@ -1,5 +1,5 @@
 /*
- * Stores all IM-Chats and IM-Messanges
+ * Reduces all IM-Chats and IM-Messanges
  */
 
 import Immutable from 'immutable'
@@ -47,7 +47,7 @@ function IMChat (state = Immutable.Map(), action) {
   }
 }
 
-export default function IMStore (state = Immutable.Map(), action) {
+export default function IMReducer (state = Immutable.Map(), action) {
   switch (action.type) {
     case 'CreateNewIMChat':
       return state.set(action.chatUUID, IMChat(state.get(action.chatUUID), action))
