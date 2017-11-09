@@ -1,6 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
 
+import closeIcon from '../icons/icon_close.svg'
+
 const Background = styled.div`
   position: absolute;
   top: 0px;
@@ -48,7 +50,7 @@ export default function Popup (props) {
           event.preventDefault()
           props.onClose()
         }}>
-          <img src='/icon_close.svg' alt='close popup' height='32' width='32' />
+          <img src={closeIcon} alt='close popup' height='32' width='32' />
         </a>
         <PopupTitle>{props.title}</PopupTitle>
       </Header>

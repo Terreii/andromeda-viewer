@@ -3,6 +3,8 @@ import PropTypes from 'prop-types'
 import Immutable from 'immutable'
 import styled from 'styled-components'
 
+import chatBubble from '../icons/chat_bubble.svg'
+
 /*
  * A List of Friends
  * Does start a new IM-Chat
@@ -95,7 +97,7 @@ function FriendRow ({friend, name, onRightsChanged, startNewIMChat}) {
         startNewIMChat(0, id, name)
           .then(chatUUID => console.log(chatUUID)) // TODO: switch to tap
       }}>
-      <img src='/chat_bubble.svg' height='20' width='20' alt={`Start new chat with ${name}`} />
+      <img src={chatBubble} height='20' width='20' alt={`Start new chat with ${name}`} />
     </ListItemLink>
     {rights}
   </ListItem>
