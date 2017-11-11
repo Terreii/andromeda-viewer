@@ -17,6 +17,7 @@ export default function SessionReducer (state = Map({loggedIn: false}), action) 
           case 'seedCapability':
           case 'firstName':
           case 'lastName':
+          case 'lookAt':
             return info
 
           case 'message':
@@ -36,7 +37,33 @@ export default function SessionReducer (state = Map({loggedIn: false}), action) 
         }
       }, {})
       sessionInfo.loggedIn = true
+      sessionInfo.position = Map({
+        position: [],
+        lookAt: JSON.parse(action.sessionInfo.look_at.replace(/r/gi, ''))
+      })
+      sessionInfo.regionInfo = Map()
       return state.merge(sessionInfo)
+
+    case 'AgentMovementComplete':
+      return state.mergeDeep({
+        position: {
+          position: action.msg.position,
+          lookAt: action.msg.lookAt
+        }
+      })
+
+    case 'RegionInfo':
+      return state.mergeDeep({
+        regionInfo: Object.assign({}, action.msg.regionInfo, action.msg.regionInfo2)
+      })
+
+    case 'RegionHandshake':
+      return state.mergeDeep({
+        regionInfo: {
+          regionID: action.regionID,
+          flags: action.flags
+        }
+      })
 
     default:
       return state

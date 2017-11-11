@@ -118,6 +118,7 @@ export default class App extends React.Component {
     const mainSection = this.state.isLoggedIn
       ? <ChatBox />
       : <LoginForm
+        login={action => State.dispatch(action)}
         onLogin={this.onLogin.bind(this)}
         isSignedIn={this.state.isSignedIn}
         avatars={this.state.avatars}

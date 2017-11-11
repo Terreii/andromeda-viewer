@@ -1,4 +1,4 @@
-import { logout } from '../session'
+// Everything for the viewer account
 
 export function didSignIn (did, username = '') {
   const isLoggedIn = Boolean(did)
@@ -198,7 +198,7 @@ export function signOut () {
   return (dispatch, getState, {hoodie}) => {
     dispatch(closePopup())
     if (getState().account.get('loggedIn')) {
-      logout()
+      // logout() TODO: log out if sign out
     }
     return hoodie.account.signOut().then(sessionProperties => {
       dispatch(didSignIn(false))

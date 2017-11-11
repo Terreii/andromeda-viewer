@@ -3,11 +3,6 @@
  */
 
 import State from '../stores/state'
-import {
-  getParentEstateID,
-  getRegionID,
-  getPosition
-} from '../session'
 
 export function sendLocalChatMessage (text, type, channel) {
   // Sends messages from the localchat
@@ -40,9 +35,9 @@ export function sendInstantMessage (text, to, id) {
 
       const agentID = session.get('agentId')
       const sessionID = session.get('sessionId')
-      const parentEstateID = getParentEstateID()
-      const regionID = getRegionID()
-      const position = getPosition()
+      const parentEstateID = session.getIn(['regionInfo', 'ParentEstateID'])
+      const regionID = session.getIn(['regionInfo', 'regionID'])
+      const position = session.getIn(['position', 'position'])
       const fromAgentName = activeState.names.getIn(['names', agentID]).getFullName()
       const binaryBucket = Buffer.from([])
       const time = new Date()

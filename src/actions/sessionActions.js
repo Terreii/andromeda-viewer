@@ -5,6 +5,7 @@ import AvatarName from '../avatarName'
 import Circuit from '../network/circuit'
 
 import { getLocalChatHistory, loadIMChats } from './chatMessageActions'
+import { getAllFriendsDisplayNames } from './friendsActions'
 import { fetchSeedCapabilities } from './llsd'
 import simActions from './simAction'
 
@@ -66,9 +67,31 @@ export function login (firstName, lastName, password, grid) {
 
     dispatch(loadIMChats())
     dispatch(fetchSeedCapabilities(body['seed_capability']))
+      .then(() => dispatch(getAllFriendsDisplayNames()))
 
     return body
   }
+}
+
+// Placeholder for the logout process
+export function logout () {
+  return (dispatch, getState, {circuit}) => {
+    const session = getState().session
+    if (!session.get('loggedIn')) {
+      throw new Error("You aren't logged in!")
+    }
+    console.error(`I'm sorry Dave, I'm afraid I can't do that.`)
+
+    circuit.send('LogoutRequest', {
+      AgentData: [
+        {
+          AgentID: session.get('agentId'),
+          SessionID: session.get('sessionId')
+        }
+      ]
+    })
+  }
+  // TODO wait for the LogoutReply
 }
 
 // Login to a sim. Is called on the login process and sim-change
