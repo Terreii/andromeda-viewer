@@ -164,6 +164,13 @@ export function startNewIMChat (dialog, targetId, name) {
     try {
       const chatType = getIMChatTypeOfDialog(dialog)
       const chatUUID = calcChatUUID(chatType, targetId, getState().account.get('agentId'))
+      if (chatType === 'personal') {
+        try {
+          name = getState().names.getIn(['names', targetId.toString()]).getName()
+        } catch (error) {
+          console.error(error)
+        }
+      }
 
       dispatch(createNewIMChat(dialog, chatUUID, targetId, name))
 

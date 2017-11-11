@@ -8,10 +8,9 @@ import AvatarName from '../avatarName'
 
 // Only adds a Name to names if it is new or did change
 function addName (state, uuid, name) {
-  if (!state.has(uuid) ||
-    !(state.get(uuid).compare(name) && state.get(uuid).willHaveDisplayName())
-  ) {
-    return state.set(uuid, new AvatarName(name))
+  const updated = new AvatarName(name)
+  if (!state.has(uuid) || !state.get(uuid).compare(updated)) {
+    return state.set(uuid, updated)
   } else {
     return state
   }
@@ -37,16 +36,14 @@ function addNameFromLocalChat (state, msg) {
   return state
 }
 
-function addNameFromUUIDName (state, {firstName, lastName, id}) {
-  return addName(state, id, firstName + ' ' + lastName)
-}
-
 function namesReducer (state = Immutable.Map(), action) {
   switch (action.type) {
     case 'ChatFromSimulator':
+      if (state.has(action.msg.sourceID)) return state
       return addNameFromLocalChat(state, action.msg)
 
     case 'ImprovedInstantMessage':
+      if (state.has(action.msg.fromId)) return state
       return addNameFromIM(state, action.msg)
 
     case 'didLogin':
@@ -54,7 +51,9 @@ function namesReducer (state = Immutable.Map(), action) {
       return action.localChatHistory.reduce(addNameFromLocalChat, selfName)
 
     case 'UUIDNameReply':
-      return action.msg.reduce(addNameFromUUIDName, state)
+      return action.msg.reduce((state, {firstName, lastName, id}) => {
+        return addName(state, id, firstName + ' ' + lastName)
+      }, state)
 
     case 'IMChatInfosLoaded':
       return state.merge(action.chats.reduce((all, chat) => {
@@ -73,7 +72,9 @@ function namesReducer (state = Immutable.Map(), action) {
       return action.agents.reduce((names, agent) => {
         const id = agent.id.toString()
         const old = names.has(id) ? names.get(id) : new AvatarName(agent.username)
-        const next = old.withDisplayNameSetTo(agent['display_name'])
+        const next = old.withDisplayNameSetTo(agent.display_name)
+        next.first = agent.legacy_first_name
+        next.last = agent.legacy_last_name
         return names.set(id, next)
       }, state)
 

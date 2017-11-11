@@ -68,14 +68,13 @@ export default class AvatarName {
   }
 
   compare (other, strict) {
-    if (typeof other === 'string') {
-      other = other.trim()
-      return other === this.getName() || other === this.getFullName()
-    }
     if (strict && !(other instanceof AvatarName)) {
       return false
     }
-    return other.first === this.first && other.last === this.last
+
+    const otherName = typeof other === 'string' ? new AvatarName(other) : other
+
+    return otherName.first === this.first && otherName.last === this.last
   }
 
   willHaveDisplayName () {
