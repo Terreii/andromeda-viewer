@@ -95,6 +95,17 @@ export default class Circuit extends events.EventEmitter {
       ip,
       port
     }
+
+    if (parsedBody.name === 'StartPingCheck') {
+      this.send('CompletePingCheck', {
+        PingID: [
+          {
+            PingID: parsedBody.PingID.data[0].PingID.value
+          }
+        ]
+      })
+      return
+    }
     this.emit(parsedBody.name, toEmitObj)
     this.emit('packetReceived', toEmitObj) // for debugging
   }

@@ -3,7 +3,7 @@ import styled from 'styled-components'
 
 import AvatarName from '../avatarName'
 import { viewerName } from '../viewerInfo'
-import { login } from '../session'
+import { login } from '../actions/sessionActions'
 
 const Main = styled.div`
   background-color: rgb(77, 80, 85);
@@ -167,7 +167,7 @@ export default class LoginForm extends React.Component {
       name: grid.get('name'),
       url: grid.get('loginURL')
     }
-    return login(firstName, lastName, password, gridData).then(res => {
+    return this.props.login(login(firstName, lastName, password, gridData)).then(res => {
       this.props.onLogin(true)
     })
   }

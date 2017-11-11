@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import { logout } from '../session'
+import { logout } from '../actions/sessionActions'
 import State from '../stores/state'
 import { showSignOutPopup, showSignInPopup } from '../actions/viewerAccount'
 
@@ -77,7 +77,7 @@ export default class TopBar extends React.Component {
 
   _logout (event) {
     event.preventDefault()
-    logout()
+    State.dispatch(logout())
   }
 
   _logoutFromViewer (event) {

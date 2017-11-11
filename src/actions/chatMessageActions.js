@@ -3,72 +3,70 @@
  */
 
 import State from '../stores/state'
-import {
-  getAgentId,
-  getActiveCircuit,
-  getSessionId,
-  getParentEstateID,
-  getRegionID,
-  getPosition,
-  getAvatarName
-} from '../session'
 
 export function sendLocalChatMessage (text, type, channel) {
   // Sends messages from the localchat
   // No UI update, because the server/sim will send it
-  getActiveCircuit().send('ChatFromViewer', {
-    AgentData: [
-      {
-        AgentID: getAgentId(),
-        SessionID: getSessionId()
-      }
-    ],
-    ChatData: [
-      {
-        Message: text,
-        Type: type,
-        Channel: channel
-      }
-    ]
-  })
+  return (dispatch, getState, {circuit}) => {
+    const session = getState().session
+    circuit.send('ChatFromViewer', {
+      AgentData: [
+        {
+          AgentID: session.get('agentId'),
+          SessionID: session.get('sessionId')
+        }
+      ],
+      ChatData: [
+        {
+          Message: text,
+          Type: type,
+          Channel: channel
+        }
+      ]
+    })
+  }
 }
 
 export function sendInstantMessage (text, to, id) {
   try {
-    const agentID = getAgentId()
-    const sessionID = getSessionId()
-    const parentEstateID = getParentEstateID()
-    const regionID = getRegionID()
-    const position = getPosition()
-    const fromAgentName = getAvatarName().getFullName()
-    const binaryBucket = Buffer.from([])
-    const time = new Date()
-    getActiveCircuit().send('ImprovedInstantMessage', {
-      AgentData: [
-        {
-          AgentID: agentID,
-          SessionID: sessionID
-        }
-      ],
-      MessageBlock: [
-        {
-          FromGroup: false,
-          ToAgentID: to,
-          ParentEstateID: parentEstateID,
-          RegionID: regionID,
-          Position: position,
-          Offline: 0,
-          Dialog: 0,
-          ID: id,
-          Timestamp: Math.floor(time.getTime() / 1000),
-          FromAgentName: fromAgentName,
-          Message: text,
-          BinaryBucket: binaryBucket
-        }
-      ]
-    })
-    State.dispatch((dispatch, getState, hoodie) => {
+    State.dispatch((dispatch, getState, {hoodie, circuit}) => {
       const activeState = getState()
+      const session = activeState.session
+
+      const agentID = session.get('agentId')
+      const sessionID = session.get('sessionId')
+      const parentEstateID = session.getIn(['regionInfo', 'ParentEstateID'])
+      const regionID = session.getIn(['regionInfo', 'regionID'])
+      const position = session.getIn(['position', 'position'])
+      const fromAgentName = activeState.names.getIn(['names', agentID]).getFullName()
+      const binaryBucket = Buffer.from([])
+      const time = new Date()
+
+      circuit.send('ImprovedInstantMessage', {
+        AgentData: [
+          {
+            AgentID: agentID,
+            SessionID: sessionID
+          }
+        ],
+        MessageBlock: [
+          {
+            FromGroup: false,
+            ToAgentID: to,
+            ParentEstateID: parentEstateID,
+            RegionID: regionID,
+            Position: position,
+            Offline: 0,
+            Dialog: 0,
+            ID: id,
+            Timestamp: Math.floor(time.getTime() / 1000),
+            FromAgentName: fromAgentName,
+            Message: text,
+            BinaryBucket: binaryBucket
+          }
+        ]
+      })
+
       const avatarName = activeState.account.get('avatarName')
       const msg = {
         _id: `${avatarName}/imChats/${id}/${time.toJSON()}`,
@@ -106,7 +104,7 @@ export function sendInstantMessage (text, to, id) {
 }
 
 export function getLocalChatHistory (avatarIdentifier) {
-  return (dispatch, getState, hoodie) => {
+  return (dispatch, getState, {hoodie}) => {
     return hoodie.store.withIdPrefix(`${avatarIdentifier}/localchat/`).findAll()
   }
 }
@@ -160,7 +158,7 @@ function calcChatUUID (type, targetId, agentId) {
 
 // Start a new IM Chat from the UI.
 export function startNewIMChat (dialog, targetId, name) {
-  return (dispatch, getState, hoodie) => {
+  return (dispatch, getState, {hoodie}) => {
     try {
       const chatType = getIMChatTypeOfDialog(dialog)
       const chatUUID = calcChatUUID(chatType, targetId, getState().account.get('agentId'))
@@ -178,7 +176,7 @@ export function startNewIMChat (dialog, targetId, name) {
 export function createNewIMChat (dialog, chatUUID, target, name) {
   const type = getIMChatTypeOfDialog(dialog)
   if (type == null) return () => {}
-  return (dispatch, getState, hoodie) => {
+  return (dispatch, getState, {hoodie}) => {
     const activeState = getState()
     const hasChat = activeState.IMs.has(chatUUID)
     // Stop if the chat already exists.
@@ -208,7 +206,7 @@ export function createNewIMChat (dialog, chatUUID, target, name) {
 
 // Loads IM Chat Infos.
 export function loadIMChats () {
-  return (dispatch, getState, hoodie) => {
+  return (dispatch, getState, {hoodie}) => {
     const activeState = getState()
     // Only load the history if the user is logged into a viewer-account.
     if (!activeState.account.getIn(['viewerAccount', 'loggedIn'])) return
@@ -225,7 +223,7 @@ export function loadIMChats () {
 
 // Loads messages of an IM Chat.
 export function getIMHistory (chatUUID) {
-  return (dispatch, getState, hoodie) => {
+  return (dispatch, getState, {hoodie}) => {
     dispatch({
       type: 'IMHistoryStartLoading',
       chatUUID

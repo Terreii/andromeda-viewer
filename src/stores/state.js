@@ -8,13 +8,15 @@ import { localChatStore } from './localChatStore'
 import IMStore from './IMStore'
 import { nameStoreReduce } from './nameStore'
 import friendsStore from './friendsStore'
+import sessionReducer from './sessionStore'
 
 const rootReducer = combineReducers({
   account,
   localChat: localChatStore,
   IMs: IMStore,
   names: nameStoreReduce,
-  friends: friendsStore
+  friends: friendsStore,
+  session: sessionReducer
 })
 
 const hoodie = new Hoodie({
@@ -29,5 +31,8 @@ const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 
 // Create Redux-Store with Hoodie
 export default createStore(rootReducer, composeEnhancers(applyMiddleware(
-  thunkMiddleware.withExtraArgument(hoodie)
+  thunkMiddleware.withExtraArgument({
+    hoodie,
+    circuit: null // will be set on login
+  })
 )))
