@@ -18,6 +18,19 @@ export default function SessionReducer (state = Map({loggedIn: false}), action) 
           case 'firstName':
           case 'lastName':
             return info
+
+          case 'message':
+            const messageOfTheDay = action.sessionInfo.message
+            const index = messageOfTheDay.search('http')
+            const msgOfDayHref = messageOfTheDay.substr(index)
+            const msgOfDayText = messageOfTheDay.substr(0, index)
+            info.message = Map({
+              href: msgOfDayHref,
+              text: msgOfDayText
+            })
+            console.log(info)
+            return info
+
           default:
             info[keyFixed] = action.sessionInfo[key]
             return info

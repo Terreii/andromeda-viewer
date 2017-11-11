@@ -65,22 +65,24 @@ export function login (firstName, lastName, password, grid) {
       connectToSim(body.sim_ip, body.sim_port, body.circuit_code)
       const avatarName = getAvatarName().getFullName()
       const avatarIdentifier = `${avatarName}@${grid.name}`
-      State.dispatch(getLocalChatHistory(avatarIdentifier)).then(localChatHistory => {
-        _isLoggedIn = true
-        State.dispatch({
-          type: 'didLogin',
-          name: avatarName,
-          grid,
-          uuid: getAgentId(),
-          buddyList: sessionInfo['buddy-list'],
-          sessionInfo,
-          localChatHistory
+      const onFinish = State.dispatch(getLocalChatHistory(avatarIdentifier))
+        .then(localChatHistory => {
+          _isLoggedIn = true
+          State.dispatch({
+            type: 'didLogin',
+            name: avatarName,
+            grid,
+            uuid: getAgentId(),
+            buddyList: sessionInfo['buddy-list'],
+            sessionInfo: body,
+            localChatHistory
+          })
+          State.dispatch(loadIMChats())
         })
-        State.dispatch(loadIMChats())
-      })
+        .then(() => body)
       State.dispatch(fetchSeedCapabilities(body['seed_capability']))
         .then(() => State.dispatch(getAllFriendsDisplayNames()))
-      return body
+      return onFinish
     } else {
       throw body
     }

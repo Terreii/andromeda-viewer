@@ -1,4 +1,4 @@
-import { getActiveCircuit, getAgentId, getSessionId } from '../session'
+import { getActiveCircuit } from '../session'
 import { fetchLLSD } from './llsd'
 
 let UUIDNameIds = []
@@ -108,11 +108,12 @@ export function updateRights (friendUUID, changedRights) {
 
     const rightsInt = (canSeeOnline << 0) | (canSeeOnMap << 1) | (canModifyObjects << 2)
 
+    const session = getState().session
     getActiveCircuit().send('GrantUserRights', {
       AgentData: [
         {
-          AgentID: getAgentId(),
-          SessionID: getSessionId()
+          AgentID: session.get('agentId'),
+          SessionID: session.get('sessionId')
         }
       ],
       Rights: [
