@@ -28,7 +28,6 @@ export default function SessionReducer (state = Map({loggedIn: false}), action) 
               href: msgOfDayHref,
               text: msgOfDayText
             })
-            console.log(info)
             return info
 
           default:

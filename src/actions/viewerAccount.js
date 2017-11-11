@@ -29,7 +29,7 @@ export function closePopup () {
 }
 
 export function saveAvatar (name, grid) {
-  return (dispatch, getState, hoodie) => {
+  return (dispatch, getState, {hoodie}) => {
     if (!getState().account.getIn(['viewerAccount', 'loggedIn'])) return
 
     const avatarIdentifier = `${name.getFullName()}@${grid.get('name')}`
@@ -55,7 +55,7 @@ export function saveAvatar (name, grid) {
 }
 
 export function loadSavedAvatars () {
-  return (dispatch, getState, hoodie) => {
+  return (dispatch, getState, {hoodie}) => {
     if (!getState().account.getIn(['viewerAccount', 'loggedIn'])) {
       return Promise.reject(new Error('Not signed in to Viewer!'))
     }
@@ -99,7 +99,7 @@ function avatarsDidChange (type, doc) {
 
 export function saveGrid (name, loginURL) {
   name = name.trim()
-  return (dispatch, getState, hoodie) => {
+  return (dispatch, getState, {hoodie}) => {
     if (getState().account.get('savedGrids').some(value => value.get('name') === name)) return
 
     if (!getState().account.getIn(['viewerAccount', 'loggedIn'])) {
@@ -120,7 +120,7 @@ export function saveGrid (name, loginURL) {
 }
 
 export function loadSavedGrids () {
-  return (dispatch, getState, hoodie) => {
+  return (dispatch, getState, {hoodie}) => {
     if (!getState().account.getIn(['viewerAccount', 'loggedIn'])) {
       return Promise.reject(new Error('Not signed in to Viewer!'))
     }
@@ -163,7 +163,7 @@ function gridsDidChange (type, grid) {
 }
 
 export function isSignedIn () {
-  return (dispatch, getState, hoodie) => {
+  return (dispatch, getState, {hoodie}) => {
     return hoodie.account.get(['session', 'username']).then(properties => {
       const isLoggedIn = properties.session != null
       const action = didSignIn(isLoggedIn, properties != null ? properties.username : undefined)
@@ -174,7 +174,7 @@ export function isSignedIn () {
 }
 
 export function signIn (username, password) {
-  return (dispatch, getState, hoodie) => {
+  return (dispatch, getState, {hoodie}) => {
     dispatch(closePopup())
     return hoodie.account.signIn({username, password}).then(accountProperties => {
       dispatch(didSignIn(true, accountProperties.username))
@@ -186,7 +186,7 @@ export function signIn (username, password) {
 }
 
 export function signUp (username, password) {
-  return (dispatch, getState, hoodie) => {
+  return (dispatch, getState, {hoodie}) => {
     dispatch(closePopup())
     return hoodie.account.signUp({username, password}).then(accountProperties => {
       dispatch(signIn(username, password))
@@ -195,7 +195,7 @@ export function signUp (username, password) {
 }
 
 export function signOut () {
-  return (dispatch, getState, hoodie) => {
+  return (dispatch, getState, {hoodie}) => {
     dispatch(closePopup())
     if (getState().account.get('loggedIn')) {
       logout()

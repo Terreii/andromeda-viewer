@@ -1,33 +1,17 @@
-import { getActiveCircuit } from '../session'
 import { fetchLLSD } from './llsd'
 
-let UUIDNameIds = []
-let didRequestIds = {} // Stores the time of the last request for a ID
-function sendUUIDNameRequest () {
-  if (UUIDNameIds.length === 0) {
-    return
-  }
-  getActiveCircuit().send('UUIDNameRequest', {
-    UUIDNameBlock: UUIDNameIds.map((id) => {
-      didRequestIds[id] = Date.now()
-      return {
-        ID: id
-      }
-    })
-  })
-  UUIDNameIds = []
-}
+function sendUUIDNameRequest (ids) {
+  return (dispatch, getState, {circuit}) => {
+    if (ids.length === 0) return
 
-export function getName (id) {
-  const timeLimit = Date.now() - 4000
-  // If the id is not already in the next request
-  // and wasn't requested in the last 4 seconds
-  const wasRequested = UUIDNameIds.every(idInRequest => id !== idInRequest) &&
-    (didRequestIds[id] == null || didRequestIds[id] < timeLimit)
-  if (UUIDNameIds.length === 0 || wasRequested) {
-    UUIDNameIds.push(id)
+    circuit.send('UUIDNameRequest', {
+      UUIDNameBlock: ids.map(id => {
+        return {
+          ID: id.toString()
+        }
+      })
+    })
   }
-  setTimeout(sendUUIDNameRequest, 1000)
 }
 
 function loadDisplayNames (idsArray) {
@@ -47,7 +31,7 @@ function loadDisplayNames (idsArray) {
 
     fetchLLSD('GET', fetchUrl.href).then(result => {
       const badIDs = result['bad_ids'] || []
-      badIDs.forEach(id => getName(id.toString())) // Try again
+      dispatch(sendUUIDNameRequest(badIDs)) // Try again
 
       dispatch({
         type: 'DisplayNamesLoaded',
@@ -92,7 +76,7 @@ export function getAllFriendsDisplayNames () {
 // Server answers with a ChangeUserRights Packet
 export function updateRights (friendUUID, changedRights) {
   const id = friendUUID.toString()
-  return (dispatch, getState) => {
+  return (dispatch, getState, {circuit}) => {
     // Get friend
     const friend = getState().friends.find(friend => friend.get('id') === id)
     if (friend == null) return
@@ -109,7 +93,7 @@ export function updateRights (friendUUID, changedRights) {
     const rightsInt = (canSeeOnline << 0) | (canSeeOnMap << 1) | (canModifyObjects << 2)
 
     const session = getState().session
-    getActiveCircuit().send('GrantUserRights', {
+    circuit.send('GrantUserRights', {
       AgentData: [
         {
           AgentID: session.get('agentId'),

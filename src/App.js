@@ -86,7 +86,6 @@ export default class App extends React.Component {
   onLogin (did) {
     if (!did) return
     const messageOfTheDay = State.getState().session.get('message')
-    console.log(messageOfTheDay)
     this.setState({
       isLoggedIn: did,
       messageOfTheDay: {

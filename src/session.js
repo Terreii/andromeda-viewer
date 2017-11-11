@@ -1,14 +1,9 @@
-import crypto from 'crypto'
-
-import { viewerName, viewerVersion, viewerPlatform } from './viewerInfo'
 import Circuit from './network/circuit'
 import AvatarName from './avatarName'
 import State from './stores/state'
 
-import { getLocalChatHistory, loadIMChats } from './actions/chatMessageActions'
-import { fetchSeedCapabilities } from './actions/llsd'
+import { login as newLogin } from './actions/sessionActions'
 import simActionsForUI from './actions/simAction'
-import { getAllFriendsDisplayNames } from './actions/friendsActions'
 
 // true if there is a running session
 let _isLoggedIn = false
@@ -28,65 +23,7 @@ let activeCircuit
 
 // Logon the user. It will post using fetch to the server.
 export function login (firstName, lastName, password, grid) {
-  if (isLoggedIn()) {
-    return Promise.reject(new Error('There is already an avatar logged in!'))
-  }
-
-  const hash = crypto.createHash('md5')
-  hash.update(password, 'ascii')
-  const passwdFinal = '$1$' + hash.digest('hex')
-
-  const loginData = {
-    grid,
-    first: firstName,
-    last: lastName,
-    passwd: passwdFinal,
-    start: 'last',
-    channel: viewerName,
-    version: viewerVersion,
-    platform: viewerPlatform,
-    // mac will be added on the server side
-    options: [
-      'buddy-list'
-    ],
-    agree_to_tos: 'true',
-    read_critical: 'true'
-  }
-
-  return window.fetch('/hoodie/andromeda-viewer/login', {
-    method: 'POST',
-    body: JSON.stringify(loginData),
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }).then(response => response.json()).then(body => {
-    if (body.login === 'true') {
-      sessionInfo = body
-      connectToSim(body.sim_ip, body.sim_port, body.circuit_code)
-      const avatarName = getAvatarName().getFullName()
-      const avatarIdentifier = `${avatarName}@${grid.name}`
-      const onFinish = State.dispatch(getLocalChatHistory(avatarIdentifier))
-        .then(localChatHistory => {
-          _isLoggedIn = true
-          State.dispatch({
-            type: 'didLogin',
-            name: avatarName,
-            grid,
-            uuid: getAgentId(),
-            buddyList: sessionInfo['buddy-list'],
-            sessionInfo: body,
-            localChatHistory
-          })
-          State.dispatch(loadIMChats())
-        })
-        .then(() => body)
-      State.dispatch(fetchSeedCapabilities(body['seed_capability']))
-        .then(() => State.dispatch(getAllFriendsDisplayNames()))
-      return onFinish
-    } else {
-      throw body
-    }
-  })
+  return State.dispatch(newLogin(firstName, lastName, password, grid))
 }
 
 // Placeholder for the logout process
