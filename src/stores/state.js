@@ -8,13 +8,15 @@ import { localChatStore } from './localChatStore'
 import IMStore from './IMStore'
 import { nameStoreReduce } from './nameStore'
 import friendsStore from './friendsStore'
+import sessionReducer from './sessionStore'
 
 const rootReducer = combineReducers({
   account,
   localChat: localChatStore,
   IMs: IMStore,
   names: nameStoreReduce,
-  friends: friendsStore
+  friends: friendsStore,
+  session: sessionReducer
 })
 
 const hoodie = new Hoodie({

@@ -73,6 +73,7 @@ export function login (firstName, lastName, password, grid) {
           grid,
           uuid: getAgentId(),
           buddyList: sessionInfo['buddy-list'],
+          sessionInfo,
           localChatHistory
         })
         State.dispatch(loadIMChats())
