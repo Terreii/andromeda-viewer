@@ -83,9 +83,7 @@ export default class ChatBox extends React.Component {
         <ChatDialog
           data={this.state.localChat}
           names={names}
-          sendTo={text => {
-            sendLocalChatMessage(text, 1, 0)
-          }}
+          sendTo={text => State.dispatch(sendLocalChatMessage(text, 1, 0))}
           />
       </TabPane>
 

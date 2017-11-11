@@ -4,71 +4,75 @@
 
 import State from '../stores/state'
 import {
-  getAgentId,
   getActiveCircuit,
-  getSessionId,
   getParentEstateID,
   getRegionID,
-  getPosition,
-  getAvatarName
+  getPosition
 } from '../session'
 
 export function sendLocalChatMessage (text, type, channel) {
   // Sends messages from the localchat
   // No UI update, because the server/sim will send it
-  getActiveCircuit().send('ChatFromViewer', {
-    AgentData: [
-      {
-        AgentID: getAgentId(),
-        SessionID: getSessionId()
-      }
-    ],
-    ChatData: [
-      {
-        Message: text,
-        Type: type,
-        Channel: channel
-      }
-    ]
-  })
+  return (dispatch, getState) => {
+    const session = getState().session
+    getActiveCircuit().send('ChatFromViewer', {
+      AgentData: [
+        {
+          AgentID: session.get('agentId'),
+          SessionID: session.get('sessionId')
+        }
+      ],
+      ChatData: [
+        {
+          Message: text,
+          Type: type,
+          Channel: channel
+        }
+      ]
+    })
+  }
 }
 
 export function sendInstantMessage (text, to, id) {
   try {
-    const agentID = getAgentId()
-    const sessionID = getSessionId()
-    const parentEstateID = getParentEstateID()
-    const regionID = getRegionID()
-    const position = getPosition()
-    const fromAgentName = getAvatarName().getFullName()
-    const binaryBucket = Buffer.from([])
-    const time = new Date()
-    getActiveCircuit().send('ImprovedInstantMessage', {
-      AgentData: [
-        {
-          AgentID: agentID,
-          SessionID: sessionID
-        }
-      ],
-      MessageBlock: [
-        {
-          FromGroup: false,
-          ToAgentID: to,
-          ParentEstateID: parentEstateID,
-          RegionID: regionID,
-          Position: position,
-          Offline: 0,
-          Dialog: 0,
-          ID: id,
-          Timestamp: Math.floor(time.getTime() / 1000),
-          FromAgentName: fromAgentName,
-          Message: text,
-          BinaryBucket: binaryBucket
-        }
-      ]
-    })
     State.dispatch((dispatch, getState, hoodie) => {
       const activeState = getState()
+      const session = activeState.session
+
+      const agentID = session.get('agentId')
+      const sessionID = session.get('sessionId')
+      const parentEstateID = getParentEstateID()
+      const regionID = getRegionID()
+      const position = getPosition()
+      const fromAgentName = activeState.names.getIn(['names', agentID]).getFullName()
+      const binaryBucket = Buffer.from([])
+      const time = new Date()
+
+      getActiveCircuit().send('ImprovedInstantMessage', {
+        AgentData: [
+          {
+            AgentID: agentID,
+            SessionID: sessionID
+          }
+        ],
+        MessageBlock: [
+          {
+            FromGroup: false,
+            ToAgentID: to,
+            ParentEstateID: parentEstateID,
+            RegionID: regionID,
+            Position: position,
+            Offline: 0,
+            Dialog: 0,
+            ID: id,
+            Timestamp: Math.floor(time.getTime() / 1000),
+            FromAgentName: fromAgentName,
+            Message: text,
+            BinaryBucket: binaryBucket
+          }
+        ]
+      })
+
       const avatarName = activeState.account.get('avatarName')
       const msg = {
         _id: `${avatarName}/imChats/${id}/${time.toJSON()}`,
