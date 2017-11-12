@@ -60,7 +60,7 @@ class TopBar extends React.Component {
 
   _logout (event) {
     event.preventDefault()
-    State.dispatch(logout())
+    this.props.logout()
   }
 
   _logoutFromViewer (event) {
@@ -167,6 +167,7 @@ const mapStateToProps = state => {
 }
 
 const mapDispatchToProps = {
+  logout,
   showSignOutPopup,
   showSignInPopup
 }
