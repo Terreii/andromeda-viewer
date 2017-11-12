@@ -24,8 +24,6 @@ import {
   saveGrid,
   loadSavedGrids
 } from './actions/viewerAccount'
-
-import { getMessageOfTheDay } from './session'
 import State from './store/state'
 
 const AppContainer = styled.div`
@@ -85,15 +83,12 @@ class App extends React.Component {
 
   onLogin (did) {
     if (!did) return
-    const messageOfTheDay = getMessageOfTheDay()
-    const index = messageOfTheDay.search('http')
-    const msgOfDayHref = messageOfTheDay.substr(index)
-    const msgOfDayText = messageOfTheDay.substr(0, index)
+    const messageOfTheDay = State.getState().session.get('message')
     this.setState({
       isLoggedIn: did,
       messageOfTheDay: {
-        href: msgOfDayHref,
-        text: msgOfDayText
+        href: messageOfTheDay.get('href'),
+        text: messageOfTheDay.get('text')
       }
     })
   }
@@ -119,6 +114,7 @@ class App extends React.Component {
     const mainSection = this.state.isLoggedIn
       ? <ChatBox />
       : <LoginForm
+        login={action => State.dispatch(action)}
         onLogin={this.onLogin.bind(this)}
         isSignedIn={this.props.isSignedIn}
         avatars={this.props.avatars}

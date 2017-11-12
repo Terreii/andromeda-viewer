@@ -76,6 +76,18 @@ function parseUserRights (message) {
   }
 }
 
+function parseRegionInfo (info) {
+  const getValues = obj => Object.keys(obj).reduce((all, key) => {
+    all[key] = obj[key].value
+    return all
+  }, {})
+
+  return {
+    regionInfo: getValues(info.body.RegionInfo.data[0]),
+    regionInfo2: getValues(info.body.RegionInfo2.data[0])
+  }
+}
+
 // Gets all messages from the SIM and filters them for the UI
 export default function simActionFilter (msg) {
   const name = msg.body.name
@@ -103,6 +115,21 @@ export default function simActionFilter (msg) {
       dispatchSIMAction(name, parseUserRights(msg.body))
       break
 
+    case 'AgentMovementComplete':
+      dispatchSIMAction(name, {
+        position: msg.body.Data.data[0].Position.value,
+        lookAt: msg.body.Data.data[0].LookAt.value
+      })
+      break
+
+    case 'RegionInfo':
+      dispatchSIMAction(name, parseRegionInfo(msg))
+      break
+
+    case 'RegionHandshake':
+      State.dispatch(sendRegionHandshakeReply(msg))
+      break
+
     default:
       break
   }
@@ -111,7 +138,7 @@ export default function simActionFilter (msg) {
 // Dispatches all parsed messages.
 // If they have an ID, they will be saved and synced under the avatar name.
 function dispatchSIMAction (name, msg, id) {
-  State.dispatch((dispatch, getState, hoodie) => {
+  State.dispatch((dispatch, getState, {hoodie}) => {
     const activeState = getState()
     if (typeof id === 'string' && activeState.account.getIn(['viewerAccount', 'loggedIn'])) {
       // Save messages. They will also be synced!
@@ -131,4 +158,33 @@ function dispatchSIMAction (name, msg, id) {
       })
     }
   })
+}
+
+function sendRegionHandshakeReply (RegionHandshake) {
+  return (dispatch, getState, {circuit}) => {
+    const regionID = RegionHandshake.body.RegionInfo2.data[0].RegionID.value
+    const flags = RegionHandshake.body.RegionInfo.data[0].RegionFlags.value
+
+    const session = getState().session
+
+    circuit.send('RegionHandshakeReply', {
+      AgentData: [
+        {
+          AgentID: session.get('agentId'),
+          SessionID: session.get('sessionId')
+        }
+      ],
+      RegionInfo: [
+        {
+          Flags: flags
+        }
+      ]
+    })
+
+    dispatch({
+      type: 'RegionHandshake',
+      regionID,
+      flags
+    })
+  }
 }

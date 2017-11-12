@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
 
-import { logout } from '../session'
+import { logout } from '../actions/sessionActions'
 import { showSignOutPopup, showSignInPopup } from '../actions/viewerAccount'
 
 const MenuBar = styled.div`
@@ -60,7 +60,7 @@ class TopBar extends React.Component {
 
   _logout (event) {
     event.preventDefault()
-    logout()
+    State.dispatch(logout())
   }
 
   _logoutFromViewer (event) {

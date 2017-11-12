@@ -17,5 +17,8 @@ const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 
 // Create Redux-Store with Hoodie
 export default createStore(rootReducer, composeEnhancers(applyMiddleware(
-  thunkMiddleware.withExtraArgument(hoodie)
+  thunkMiddleware.withExtraArgument({
+    hoodie,
+    circuit: null // will be set on login
+  })
 )))
