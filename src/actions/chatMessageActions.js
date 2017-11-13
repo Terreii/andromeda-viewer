@@ -2,8 +2,6 @@
  * Sends a message to the server.
  */
 
-import State from '../store/state'
-
 export function sendLocalChatMessage (text, type, channel) {
   // Sends messages from the localchat
   // No UI update, because the server/sim will send it
@@ -28,8 +26,8 @@ export function sendLocalChatMessage (text, type, channel) {
 }
 
 export function sendInstantMessage (text, to, id) {
-  try {
-    State.dispatch((dispatch, getState, {hoodie, circuit}) => {
+  return (dispatch, getState, {hoodie, circuit}) => {
+    try {
       const activeState = getState()
       const session = activeState.session
 
@@ -97,9 +95,9 @@ export function sendInstantMessage (text, to, id) {
       } else {
         dispatch(actionData)
       }
-    })
-  } catch (e) {
-    console.error(e)
+    } catch (e) {
+      console.error(e)
+    }
   }
 }
 

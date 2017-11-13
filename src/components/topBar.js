@@ -139,13 +139,13 @@ class TopBar extends React.Component {
     const msgOfDay = this.props.messageOfTheDay
       ? <span>
         Message of the day:
-        {this.props.messageOfTheDay.text}
+        {this.props.messageOfTheDay.get('text')}
         <Link
-          href={this.props.messageOfTheDay.href}
+          href={this.props.messageOfTheDay.get('href')}
           target='_blank'
           rel='noopener noreferrer'
           >
-          {this.props.messageOfTheDay.href}
+          {this.props.messageOfTheDay.get('href')}
         </Link>
       </span>
       : <span>Welcome</span>

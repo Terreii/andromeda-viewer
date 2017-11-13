@@ -38,7 +38,7 @@ function ChatBox (props) {
       <ChatDialog
         data={chat}
         isIM
-        sendTo={text => sendInstantMessage(text, target, id)}
+        sendTo={text => this.props.sendInstantMessage(text, target, id)}
         names={names}
         loadHistory={props.getIMHistory}
         />

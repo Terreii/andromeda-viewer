@@ -7,11 +7,11 @@ import React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
 
-import ChatBox from './components/chatBox'
-import LoginForm from './components/login'
-import TopBar from './components/topBar'
-import SignInPopup from './components/signInPopup'
-import SignOutPopup from './components/signOutPopup'
+import ChatBox from '../components/chatBox'
+import LoginForm from '../components/login'
+import TopBar from '../components/topBar'
+import SignInPopup from '../components/signInPopup'
+import SignOutPopup from '../components/signOutPopup'
 
 import {
   closePopup,
@@ -23,8 +23,8 @@ import {
   loadSavedAvatars,
   saveGrid,
   loadSavedGrids
-} from './actions/viewerAccount'
-import State from './store/state'
+} from '../actions/viewerAccount'
+import { login } from '../actions/sessionActions'
 
 const AppContainer = styled.div`
   display: flex;
@@ -39,19 +39,7 @@ const AppContainer = styled.div`
 `
 
 class App extends React.Component {
-  constructor () {
-    super()
-    this.state = {
-      isLoggedIn: false, // Into Avatar
-      messageOfTheDay: {
-        href: '',
-        text: ''
-      }
-    }
-  }
-
   componentDidMount () {
-    this._unsubscribe = State.subscribe(this._onChange.bind(this))
     this.props.getIsSignedIn().then(isSignedIn => {
       if (isSignedIn) {
         this._loadAvatars()
@@ -59,7 +47,6 @@ class App extends React.Component {
         console.log('Is not signed in.')
       }
     })
-    this._onChange()
   }
 
   _loadAvatars () {
@@ -67,66 +54,43 @@ class App extends React.Component {
       .then(() => this.props.loadSavedAvatars())
   }
 
-  _onChange () {
-    const activeState = State.getState()
-    const popup = activeState.account.getIn(['viewerAccount', 'signInPopup'])
-    const avatars = activeState.account.get('savedAvatars')
-    const grids = activeState.account.get('savedGrids')
-    const isSignedIn = activeState.account.getIn(['viewerAccount', 'loggedIn'])
-    this.setState({
-      avatars,
-      grids,
-      isSignedIn,
-      popup
-    })
-  }
-
-  onLogin (did) {
-    if (!did) return
-    const messageOfTheDay = State.getState().session.get('message')
-    this.setState({
-      isLoggedIn: did,
-      messageOfTheDay: {
-        href: messageOfTheDay.get('href'),
-        text: messageOfTheDay.get('text')
-      }
-    })
-  }
-
   getPopup () {
     const close = this.props.closePopup
     switch (this.props.popup) {
       case 'signIn':
-        return <SignInPopup onCancel={close} onSend={(username, password) => {
-          this.props.signIn(username, password)
-            .then(this._loadAvatars.bind(this))
-        }} />
+        return <SignInPopup
+          onCancel={close}
+          onSend={(username, password) => {
+            this.props.signIn(username, password)
+              .then(this._loadAvatars.bind(this))
+          }}
+          />
+
       case 'signUp':
         return <SignInPopup onCancel={close} isSignUp onSend={this.props.signUp} />
+
       case 'signOut':
         return <SignOutPopup onCancel={close} onSignOut={this.props.signOut} />
+
       default:
         return null
     }
   }
 
   render () {
-    const mainSection = this.state.isLoggedIn
+    const isLoggedIn = this.props.isLoggedIn
+    const mainSection = isLoggedIn
       ? <ChatBox />
       : <LoginForm
-        login={action => State.dispatch(action)}
-        onLogin={this.onLogin.bind(this)}
+        login={this.props.login}
         isSignedIn={this.props.isSignedIn}
         avatars={this.props.avatars}
         grids={this.props.grids}
         saveAvatar={this.props.saveAvatar}
         saveGrid={this.props.saveGrid}
         />
-    const msgOfDay = this.state.isLoggedIn
-      ? this.state.messageOfTheDay
-      : null
     return <AppContainer>
-      <TopBar messageOfTheDay={msgOfDay} />
+      <TopBar messageOfTheDay={isLoggedIn ? this.props.messageOfTheDay : null} />
       {mainSection}
       {this.getPopup()}
     </AppContainer>
@@ -138,24 +102,29 @@ const mapStateToProps = state => {
   const avatars = state.account.get('savedAvatars')
   const grids = state.account.get('savedGrids')
   const isSignedIn = state.account.getIn(['viewerAccount', 'loggedIn'])
+  const isLoggedIn = state.session.get('loggedIn')
+  const messageOfTheDay = state.session.get('message')
   return {
     avatars,
     grids,
-    isSignedIn,
-    popup
+    isLoggedIn, // Avatar session
+    isSignedIn, // Viewer account
+    popup,
+    messageOfTheDay
   }
 }
 
 const mapDispatchToProps = {
   closePopup,
   getIsSignedIn: isSignedIn,
-  signIn,
+  signIn, // For viewer-account (to sync)
   signUp,
   signOut,
   saveAvatar,
   loadSavedAvatars,
   saveGrid,
-  loadSavedGrids
+  loadSavedGrids,
+  login // For Avatar
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(App)
