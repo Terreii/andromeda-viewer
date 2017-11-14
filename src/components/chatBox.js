@@ -38,7 +38,7 @@ function ChatBox (props) {
       <ChatDialog
         data={chat}
         isIM
-        sendTo={text => this.props.sendInstantMessage(text, target, id)}
+        sendTo={text => props.sendInstantMessage(text, target, id)}
         names={names}
         loadHistory={props.getIMHistory}
         />
@@ -82,10 +82,7 @@ const mapStateToProps = state => {
 }
 
 const mapDispatchToProps = {
-  sendLocalChatMessage: text => {
-    sendLocalChatMessage(text, 1, 0)
-    return () => {} // workaround
-  },
+  sendLocalChatMessage: text => sendLocalChatMessage(text, 1, 0),
   sendInstantMessage,
   startNewIMChat,
   getIMHistory,

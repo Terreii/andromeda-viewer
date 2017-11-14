@@ -7,7 +7,7 @@ import Circuit from '../network/circuit'
 import { getLocalChatHistory, loadIMChats } from './chatMessageActions'
 import { getAllFriendsDisplayNames } from './friendsActions'
 import { fetchSeedCapabilities } from './llsd'
-import simActions from './simAction'
+import initSimActions from './simAction'
 
 // Actions for the session of an avatar
 
@@ -50,6 +50,7 @@ export function login (firstName, lastName, password, grid) {
 
     // Set the active circuit
     extra.circuit = connectToSim(body)
+    dispatch(initSimActions()) // Connect message parsing with circuit.
 
     const avatarName = new AvatarName({first: body.first_name, last: body.last_name})
     const avatarIdentifier = `${avatarName.getFullName()}@${grid.name}`
@@ -145,8 +146,6 @@ function connectToSim (sessionInfo) {
       }
     ]
   })
-
-  activeCircuit.on('packetReceived', simActions)
 
   setTimeout(function () {
     activeCircuit.send('RequestRegionInfo', {
