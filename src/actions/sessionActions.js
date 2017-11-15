@@ -59,6 +59,7 @@ export function login (firstName, lastName, password, grid) {
     dispatch({
       type: 'didLogin',
       name: avatarName,
+      avatarIdentifier,
       grid,
       uuid: body.agent_id,
       buddyList: body['buddy-list'],
