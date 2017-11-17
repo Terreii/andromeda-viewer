@@ -1,11 +1,12 @@
 import React from 'react'
+import { connect } from 'react-redux'
 import styled from 'styled-components'
 
 import { logout } from '../actions/sessionActions'
-import State from '../stores/state'
 import { showSignOutPopup, showSignInPopup } from '../actions/viewerAccount'
 
 const MenuBar = styled.div`
+  z-index: 100;
   top: 0em;
   left: 0em;
   width: 100vw;
@@ -48,87 +49,86 @@ const AccountMenuBody = styled.div`
   padding: .6em;
 `
 
-export default class TopBar extends React.Component {
+class TopBar extends React.Component {
   constructor () {
     super()
     this.state = {
-      account: State.getState().account,
-      savedAvatars: [],
       showAccountMenu: false
     }
     this._boundToggleMenu = this._toggleAccountMenu.bind(this)
   }
 
-  componentDidMount () {
-    this._unsubscribe = State.subscribe(this._onChange.bind(this))
-  }
-
-  componentWillUnmount () {
-    this._unsubscribe()
-  }
-
-  _onChange () {
-    const account = State.getState().account
-    if (account === this.state.account) return
-    this.setState({
-      account
-    })
-  }
-
   _logout (event) {
     event.preventDefault()
-    State.dispatch(logout())
+    this.props.logout()
   }
 
   _logoutFromViewer (event) {
     event.preventDefault()
-    State.dispatch(showSignOutPopup())
+    this.props.showSignOutPopup()
   }
 
   _toggleAccountMenu (event) {
+    if (this.state.showAccountMenu) return
+
+    setTimeout(() => window.addEventListener('click', event => {
+      this.setState({
+        showAccountMenu: false
+      })
+    }, {
+      once: true
+    }), 10)
     this.setState({
-      showAccountMenu: !this.state.showAccountMenu
+      showAccountMenu: true
     })
   }
 
   _showSignInPopup (event) {
     event.preventDefault()
-    State.dispatch(showSignInPopup())
+    this.props.showSignInPopup()
   }
 
   _showSignUpPopup (event) {
     event.preventDefault()
-    State.dispatch(showSignInPopup('signUp'))
+    this.props.showSignInPopup('signUp')
   }
 
   renderAccountMenu () {
     if (!this.state.showAccountMenu) return null
-    const isLoggedIn = this.state.account.get('loggedIn')
+    const isLoggedIn = this.props.account.get('loggedIn')
+
     const greeting = isLoggedIn
-      ? `Hello ${this.state.account.get('avatarName')}`
+      ? `Hello ${this.props.account.get('avatarName')}`
       : ''
-    const viewerAccountLoggedIn = this.state.account.getIn([
+
+    const viewerAccountLoggedIn = this.props.account.getIn([
       'viewerAccount',
       'loggedIn'
     ])
+
     const viewerAccountText = viewerAccountLoggedIn
-      ? `Hello ${this.state.account.getIn(['viewerAccount', 'username'])}`
-      : <a href='#signin' onClick={this._showSignInPopup}>Sign into Andromeda</a>
+      ? `Hello ${this.props.account.getIn(['viewerAccount', 'username'])}`
+      : <a href='#signin' onClick={this._showSignInPopup.bind(this)}>Sign into Andromeda</a>
+
     return <AccountMenuBody>
       <div>{greeting}</div>
+
       <div>
         {viewerAccountText}
       </div>
+
       <div style={{display: viewerAccountLoggedIn ? 'none' : ''}}>
-        <a href='#signup' onClick={this._showSignUpPopup}>Sign up to Andromeda</a>
+        <a href='#signup' onClick={this._showSignUpPopup.bind(this)}>Sign up to Andromeda</a>
       </div>
+
       <div style={{display: isLoggedIn ? '' : 'none'}}>
         <LogoutButton href='#' onClick={this._logout}>
           log out
         </LogoutButton>
       </div>
+
       <div style={{display: viewerAccountLoggedIn ? '' : 'none'}}>
-        <Link href='' onClick={this._logoutFromViewer}>
+        <Link href='' onClick={this._logoutFromViewer.bind(this)}>
           Log out from Viewer
         </Link>
       </div>
@@ -139,13 +139,13 @@ export default class TopBar extends React.Component {
     const msgOfDay = this.props.messageOfTheDay
       ? <span>
         Message of the day:
-        {this.props.messageOfTheDay.text}
+        {this.props.messageOfTheDay.get('text')}
         <Link
-          href={this.props.messageOfTheDay.href}
+          href={this.props.messageOfTheDay.get('href')}
           target='_blank'
           rel='noopener noreferrer'
           >
-          {this.props.messageOfTheDay.href}
+          {this.props.messageOfTheDay.get('href')}
         </Link>
       </span>
       : <span>Welcome</span>
@@ -159,3 +159,17 @@ export default class TopBar extends React.Component {
     </MenuBar>
   }
 }
+
+const mapStateToProps = state => {
+  return {
+    account: state.account
+  }
+}
+
+const mapDispatchToProps = {
+  logout,
+  showSignOutPopup,
+  showSignInPopup
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(TopBar)

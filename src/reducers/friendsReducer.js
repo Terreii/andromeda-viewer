@@ -1,5 +1,5 @@
 /*
- * Stores all friends and their rights
+ * Reduces all friends and their rights
  */
 
 import Immutable from 'immutable'
@@ -27,7 +27,7 @@ function parseFriendsList (state, friend) {
   return state.push(Immutable.Map(data))
 }
 
-export default function friendsStore (state = Immutable.List(), action) {
+export default function friendsReducer (state = Immutable.List(), action) {
   switch (action.type) {
     case 'didLogin':
       return action.buddyList.reduce(parseFriendsList, state)

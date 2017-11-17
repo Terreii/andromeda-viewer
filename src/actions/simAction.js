@@ -1,4 +1,3 @@
-import State from '../stores/state'
 import { createNewIMChat } from './chatMessageActions'
 
 function nullBufferToString (buffy) {
@@ -62,7 +61,7 @@ function parseUUIDNameReply (message) {
   })
 }
 
-function parseUserRights (message) {
+function parseUserRights (message, getState) {
   const rights = message.Rights.data.map(user => {
     return {
       agentId: user.AgentRelated.value,
@@ -70,7 +69,7 @@ function parseUserRights (message) {
     }
   })
   return {
-    ownId: State.getState().account.get('agentId'),
+    ownId: getState().account.get('agentId'),
     fromId: message.AgentData.data[0].AgentID.value,
     userRights: rights
   }
@@ -89,46 +88,43 @@ function parseRegionInfo (info) {
 }
 
 // Gets all messages from the SIM and filters them for the UI
-export default function simActionFilter (msg) {
+function simActionFilter (msg) {
   const name = msg.body.name
   switch (name) {
     case 'ChatFromSimulator':
       const parsed = parseChatFromSimulator(msg.body)
-      dispatchSIMAction(name, parsed, 'localchat/' + new Date(parsed.time).toJSON())
-      break
+      return dispatchSIMAction(name, parsed, 'localchat/' + new Date(parsed.time).toJSON())
 
     case 'ImprovedInstantMessage':
       const parsedMsg = parseIM(msg.body)
-      // Start a new IMChat.
-      State.dispatch(createNewIMChat(
-        parsedMsg.dialog, parsedMsg.chatUUID, parsedMsg.fromId, parsedMsg.fromAgentName
-      ))
-      const id = `imChats/${parsedMsg.chatUUID}/${new Date(parsedMsg.time).toJSON()}`
-      dispatchSIMAction(name, parsedMsg, id)
-      break
+        // Start a new IMChat.
+      return dispatch => {
+        dispatch(createNewIMChat(
+          parsedMsg.dialog, parsedMsg.chatUUID, parsedMsg.fromId, parsedMsg.fromAgentName
+        ))
+        const id = `imChats/${parsedMsg.chatUUID}/${new Date(parsedMsg.time).toJSON()}`
+        dispatch(dispatchSIMAction(name, parsedMsg, id))
+      }
 
     case 'UUIDNameReply':
-      dispatchSIMAction(name, parseUUIDNameReply(msg.body))
-      break
+      return dispatchSIMAction(name, parseUUIDNameReply(msg.body))
 
     case 'ChangeUserRights':
-      dispatchSIMAction(name, parseUserRights(msg.body))
-      break
+      return (dispatch, getState) => {
+        dispatch(dispatchSIMAction(name, parseUserRights(msg.body, getState)))
+      }
 
     case 'AgentMovementComplete':
-      dispatchSIMAction(name, {
+      return dispatchSIMAction(name, {
         position: msg.body.Data.data[0].Position.value,
         lookAt: msg.body.Data.data[0].LookAt.value
       })
-      break
 
     case 'RegionInfo':
-      dispatchSIMAction(name, parseRegionInfo(msg))
-      break
+      return dispatchSIMAction(name, parseRegionInfo(msg))
 
     case 'RegionHandshake':
-      State.dispatch(sendRegionHandshakeReply(msg))
-      break
+      return sendRegionHandshakeReply(msg)
 
     default:
       break
@@ -138,7 +134,7 @@ export default function simActionFilter (msg) {
 // Dispatches all parsed messages.
 // If they have an ID, they will be saved and synced under the avatar name.
 function dispatchSIMAction (name, msg, id) {
-  State.dispatch((dispatch, getState, {hoodie}) => {
+  return (dispatch, getState, {hoodie}) => {
     const activeState = getState()
     if (typeof id === 'string' && activeState.account.getIn(['viewerAccount', 'loggedIn'])) {
       // Save messages. They will also be synced!
@@ -157,7 +153,7 @@ function dispatchSIMAction (name, msg, id) {
         msg
       })
     }
-  })
+  }
 }
 
 function sendRegionHandshakeReply (RegionHandshake) {
@@ -186,5 +182,14 @@ function sendRegionHandshakeReply (RegionHandshake) {
       regionID,
       flags
     })
+  }
+}
+
+export default function createCallback (dispatch) {
+  return msg => {
+    const action = simActionFilter(msg)
+    if (action != null) { // If the packet is parsed, an action will be dispatched.
+      dispatch(action)
+    }
   }
 }

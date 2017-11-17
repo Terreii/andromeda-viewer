@@ -66,7 +66,7 @@ global.test('should have a toString method that behaves like getFullName', () =>
 global.test('should be comparable with the compare method', () => {
   const first = new AvatarName('test')
   const second = new AvatarName({first: 'test', last: 'Linden'})
-  const third = new AvatarName('test Resident')
+  const third = new AvatarName('tEst Resident')
 
   global.expect(first.compare(second)).toBe(false)
   global.expect(second.compare(third)).toBe(false)

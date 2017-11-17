@@ -43,8 +43,9 @@
     "pouchdb": "^6.3.4",
     "prop-types": "^15.6.0",
     "rc-tabs": "^9.1.10",
-    "react": "^16.0.0",
-    "react-dom": "^16.0.0",
+    "react": "^16.1.1",
+    "react-dom": "^16.1.1",
+    "react-redux": "^5.0.6",
     "react-scripts": "1.0.17",
     "redux": "^3.7.2",
     "redux-thunk": "^2.2.0",
@@ -58,7 +59,7 @@
     "macaddress": "^0.2.8",
     "node-fetch": "^1.7.3",
     "uuid": "^3.1.0",
-    "ws": "^3.2.0",
+    "ws": "^3.3.1",
     "xmlrpc": "^1.3.2"
   }
 }
