@@ -7,7 +7,7 @@ import Circuit from '../network/circuit'
 import { getLocalChatHistory, loadIMChats } from './chatMessageActions'
 import { getAllFriendsDisplayNames } from './friendsActions'
 import { fetchSeedCapabilities } from './llsd'
-import initSimActions from './simAction'
+import connectCircuit from './connectCircuit'
 
 // Actions for the session of an avatar
 
@@ -50,7 +50,7 @@ export function login (firstName, lastName, password, grid) {
 
     // Set the active circuit
     extra.circuit = connectToSim(body)
-    dispatch(initSimActions()) // Connect message parsing with circuit.
+    dispatch(connectCircuit()) // Connect message parsing with circuit.
 
     const avatarName = new AvatarName({first: body.first_name, last: body.last_name})
     const avatarIdentifier = `${avatarName.getFullName()}@${grid.name}`

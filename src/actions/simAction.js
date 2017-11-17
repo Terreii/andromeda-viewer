@@ -185,14 +185,11 @@ function sendRegionHandshakeReply (RegionHandshake) {
   }
 }
 
-// Starts listening to packets on the circuit and dispatch an parsed action.
-export default function init () {
-  return (dispatch, getState, {circuit}) => {
-    circuit.on('packetReceived', msg => {
-      const action = simActionFilter(msg)
-      if (action != null) { // If the packet is parsed, an action will be dispatched.
-        dispatch(action)
-      }
-    })
+export default function createCallback (dispatch) {
+  return msg => {
+    const action = simActionFilter(msg)
+    if (action != null) { // If the packet is parsed, an action will be dispatched.
+      dispatch(action)
+    }
   }
 }
