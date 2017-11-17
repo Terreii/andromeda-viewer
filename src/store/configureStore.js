@@ -10,24 +10,25 @@ const hoodie = new Hoodie({
   PouchDB
 })
 
-// For development
-// use with https://github.com/zalmoxisus/redux-devtools-extension
-window.devHoodie = hoodie
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
-
 // Create Redux-Store with Hoodie
 const configureStore = preloadedState => {
+  const middleware = applyMiddleware(
+    thunkMiddleware.withExtraArgument({
+      hoodie,
+      circuit: null // will be set on login
+    })
+  )
+
+  // For development
+  // use with https://github.com/zalmoxisus/redux-devtools-extension
+  const enhancers = process.env.NODE_ENV !== 'production'
+    ? (window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose)(middleware)
+    : middleware
+
   const store = createStore(
     rootReducer,
     preloadedState,
-    composeEnhancers(
-      applyMiddleware(
-        thunkMiddleware.withExtraArgument({
-          hoodie,
-          circuit: null // will be set on login
-        })
-      )
-    )
+    enhancers
   )
 
   if (process.env.NODE_ENV !== 'production') {
@@ -37,6 +38,7 @@ const configureStore = preloadedState => {
         store.replaceReducer(rootReducer)
       })
     }
+    window.devHoodie = hoodie
   }
 
   return store
