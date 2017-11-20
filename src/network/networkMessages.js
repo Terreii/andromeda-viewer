@@ -778,8 +778,31 @@ export class ReceivedMessage extends MessageProto {
   getStringValue (blockName, blockOrValue, varName) {
     const value = this.getValue(blockName, blockOrValue, varName)
 
+    return this._parseValueAsString(value)
+  }
+
+  _parseValueAsString (value) {
     return Buffer.isBuffer(value)
       ? value.toString('utf8').replace(/\0/gi, '')
       : value.toString()
+  }
+
+  // Maps over every instance of a block.
+  // expects the block name and a function.
+  // The function receives a getValue function and the index.
+  // The getValue function expects the name of a variable
+  //     and as an optional second argument a Boolean if the value should be a String.
+  mapBlock (blockName, fn) {
+    return this[blockName].data.map((blockInstance, index) => {
+      const getter = (valueName, asString = false) => {
+        const value = blockInstance[valueName].value
+
+        return asString
+          ? this._parseValueAsString(value)
+          : value
+      }
+
+      return fn(getter, index)
+    })
   }
 }

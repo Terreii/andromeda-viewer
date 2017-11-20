@@ -1,76 +1,67 @@
 import { createNewIMChat } from './chatMessageActions'
 
-function nullBufferToString (buffy) {
-  return buffy.toString('utf8').replace(/\0/gi, '')
-}
-
 function parseChatFromSimulator (msg) {
-  const chatData = msg.ChatData.data[0]
   const chatMsg = {
-    fromName: nullBufferToString(chatData.FromName.value),
-    sourceID: chatData.SourceID.value,
-    ownerID: chatData.OwnerID.value,
-    sourceType: chatData.SourceType.value,
-    chatType: chatData.ChatType.value,
-    audible: chatData.Audible.value,
-    position: chatData.Position.value,
-    message: nullBufferToString(chatData.Message.value),
+    fromName: msg.getStringValue('ChatData', 'FromName'),
+    sourceID: msg.getValue('ChatData', 'SourceID'),
+    ownerID: msg.getValue('ChatData', 'OwnerID'),
+    sourceType: msg.getValue('ChatData', 'SourceType'),
+    chatType: msg.getValue('ChatData', 'ChatType'),
+    audible: msg.getValue('ChatData', 'Audible'),
+    position: msg.getValue('ChatData', 'Position'),
+    message: msg.getStringValue('ChatData', 'Message'),
     time: Date.now()
   }
   return chatMsg
 }
 
 function parseIM (message) {
-  const messageBlock = message.MessageBlock.data[0]
-
-  const toAgentID = messageBlock.ToAgentID.value
-  const fromId = message.AgentData.data[0].AgentID.value
-  const time = messageBlock.Timestamp.value
+  const toAgentID = message.getValue('MessageBlock', 'ToAgentID')
+  const fromId = message.getValue('AgentData', 'AgentID')
+  const time = message.getValue('MessageBlock', 'Timestamp')
 
   const IMmsg = {
-    sessionID: message.AgentData.data[0].SessionID.value,
-    fromId: fromId,
-    fromGroup: messageBlock.FromGroup.value,
-    toAgentID: toAgentID,
-    parentEstateID: messageBlock.ParentEstateID.value,
-    regionID: messageBlock.RegionID.value,
-    position: messageBlock.Position.value,
-    offline: messageBlock.Offline.value,
-    dialog: messageBlock.Dialog.value,
-    id: messageBlock.ID.value,
-    fromAgentName: nullBufferToString(messageBlock.FromAgentName.value),
-    message: nullBufferToString(messageBlock.Message.value),
-    binaryBucket: messageBlock.BinaryBucket.value,
+    sessionID: message.getValue('AgentData', 'SessionID'),
+    fromId,
+    fromGroup: message.getValue('MessageBlock', 'FromGroup'),
+    toAgentID,
+    parentEstateID: message.getValue('MessageBlock', 'ParentEstateID'),
+    regionID: message.getValue('MessageBlock', 'RegionID'),
+    position: message.getValue('MessageBlock', 'Position'),
+    offline: message.getValue('MessageBlock', 'Offline'),
+    dialog: message.getValue('MessageBlock', 'Dialog'),
+    id: message.getValue('MessageBlock', 'ID'),
+    fromAgentName: message.getStringValue('MessageBlock', 'FromAgentName'),
+    message: message.getStringValue('MessageBlock', 'Message'),
+    binaryBucket: message.getValue('MessageBlock', 'BinaryBucket'),
     time: time !== 0 ? time : Date.now()
   }
+
   // If it is a group chat, toAgentID is the Group-UUID.
   IMmsg.chatUUID = IMmsg.fromGroup ? IMmsg.toAgentID : IMmsg.id
   return IMmsg
 }
 
 function parseUUIDNameReply (message) {
-  return message.UUIDNameBlock.data.map(nameBlock => {
-    const firstName = nullBufferToString(nameBlock.FirstName.value)
-    const lastName = nullBufferToString(nameBlock.LastName.value)
-    const id = nameBlock.ID.value
+  return message.mapBlock('UUIDNameBlock', getValue => {
     return {
-      firstName,
-      lastName,
-      id
+      firstName: getValue('FirstName', true),
+      lastName: getValue('LastName', true),
+      id: getValue('ID')
     }
   })
 }
 
 function parseUserRights (message, getState) {
-  const rights = message.Rights.data.map(user => {
+  const rights = message.mapBlock('Rights', getValue => {
     return {
-      agentId: user.AgentRelated.value,
-      rights: user.RelatedRights.value
+      agentId: getValue('AgentRelated'),
+      rights: getValue('RelatedRights')
     }
   })
   return {
     ownId: getState().account.get('agentId'),
-    fromId: message.AgentData.data[0].AgentID.value,
+    fromId: message.getValue('AgentData', 'AgentID'),
     userRights: rights
   }
 }
@@ -116,8 +107,8 @@ function simActionFilter (msg) {
 
     case 'AgentMovementComplete':
       return dispatchSIMAction(name, {
-        position: msg.body.Data.data[0].Position.value,
-        lookAt: msg.body.Data.data[0].LookAt.value
+        position: msg.body.getValue('Data', 'Position'),
+        lookAt: msg.body.getValue('Data', 'LookAt')
       })
 
     case 'RegionInfo':
@@ -158,8 +149,8 @@ function dispatchSIMAction (name, msg, id) {
 
 function sendRegionHandshakeReply (RegionHandshake) {
   return (dispatch, getState, {circuit}) => {
-    const regionID = RegionHandshake.body.RegionInfo2.data[0].RegionID.value
-    const flags = RegionHandshake.body.RegionInfo.data[0].RegionFlags.value
+    const regionID = RegionHandshake.body.getValue('RegionInfo2', 'RegionID')
+    const flags = RegionHandshake.body.getValue('RegionInfo', 'RegionFlags')
 
     const session = getState().session
 

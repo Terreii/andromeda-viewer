@@ -359,6 +359,19 @@ global.describe('Messages', () => {
       expect(testMessage.getStringValue('NeighborBlock', 2, 'Test2')).toBe('0')
       expect(testMessage.getStringValue('NeighborBlock', 3, 'Test0')).toBe('0')
     })
+
+    test('should map over block instances', () => {
+      const data = testMessage.mapBlock('NeighborBlock', (getValue, index) => {
+        return `${index} Test0 ${getValue('Test0')}`
+      })
+      expect(data).toEqual([
+        '0 Test0 0',
+        '1 Test0 0',
+        '2 Test0 0',
+        '3 Test0 0'
+      ])
+      expect(data).toHaveLength(4)
+    })
   })
 
   global.describe('createBody', () => {
