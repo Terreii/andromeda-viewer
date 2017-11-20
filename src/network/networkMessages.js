@@ -754,4 +754,32 @@ export class ReceivedMessage extends MessageProto {
     this.size = offset // ??? or something other
     this.buffer = buffer.slice(0, offset)
   }
+
+  // Return the value of a variable in an block
+  // msg.getValue(blockName, [blockIndex,] variableName)
+  // blockIndex defaults to 0
+  getValue (blockName, blockOrValue, varName) {
+    let blockNumber = 0
+    let variableName
+
+    if (varName == null) {
+      variableName = blockOrValue
+    } else {
+      blockNumber = +blockOrValue
+      variableName = varName
+    }
+
+    return this[blockName].data[blockNumber][variableName].value
+  }
+
+  // Transforms the value of a variable into a string.
+  // If the value is a Buffer (Fixed, Variable1 or Variable2)
+  // then it will be parsed as a UTF-8 String.
+  getStringValue (blockName, blockOrValue, varName) {
+    const value = this.getValue(blockName, blockOrValue, varName)
+
+    return Buffer.isBuffer(value)
+      ? value.toString('utf8').replace(/\0/gi, '')
+      : value.toString()
+  }
 }

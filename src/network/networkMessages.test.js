@@ -1,3 +1,5 @@
+/* eslint-env jest */
+
 'use strict'
 
 import uuid from 'uuid'
@@ -334,15 +336,28 @@ global.describe('Messages', () => {
       global.expect(testMessage.TestBlock1.data[0].Test1 instanceof U32).toBe(true)
     })
 
-    global.test('should have 3 U32 in 4 Arrays in NeighborBlock', () => {
+    test('should have 3 U32 in 4 Arrays in NeighborBlock', () => {
       const block2 = testMessage.NeighborBlock
-      global.expect(block2.data.length).toBe(4)
-      global.expect(typeof block2.data[0].Test0).toBe('object')
-      global.expect(typeof block2.data[0].Test1).toBe('object')
-      global.expect(typeof block2.data[0].Test2).toBe('object')
-      global.expect(block2.data[0].all.length).toBe(3)
-      global.expect(block2.data[0].Test1.name).toBe('Test1')
-      global.expect(block2.data[0].Test1 instanceof U32).toBe(true)
+      expect(block2.data.length).toBe(4)
+      expect(typeof block2.data[0].Test0).toBe('object')
+      expect(typeof block2.data[0].Test1).toBe('object')
+      expect(typeof block2.data[0].Test2).toBe('object')
+      expect(block2.data[0].all.length).toBe(3)
+      expect(block2.data[0].Test1.name).toBe('Test1')
+      expect(block2.data[0].Test1 instanceof U32).toBe(true)
+
+      expect(testMessage.getValue('NeighborBlock', 0, 'Test0')).toBe(0)
+      expect(testMessage.getValue('NeighborBlock', 1, 'Test0')).toBe(0)
+      expect(testMessage.getValue('NeighborBlock', 2, 'Test0')).toBe(0)
+      expect(testMessage.getValue('NeighborBlock', 3, 'Test0')).toBe(0)
+    })
+
+    test('should return Strings for values', () => {
+      expect(testMessage.getStringValue('TestBlock1', 'Test1')).toBe('0')
+      expect(testMessage.getStringValue('NeighborBlock', 0, 'Test0')).toBe('0')
+      expect(testMessage.getStringValue('NeighborBlock', 1, 'Test1')).toBe('0')
+      expect(testMessage.getStringValue('NeighborBlock', 2, 'Test2')).toBe('0')
+      expect(testMessage.getStringValue('NeighborBlock', 3, 'Test0')).toBe('0')
     })
   })
 

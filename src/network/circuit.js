@@ -54,18 +54,11 @@ export default class Circuit extends events.EventEmitter {
     const port = msg.readUInt16LE(4)
 
     // extract the flags
-    let flags = msg.readUInt8(6)
-    const flagCheck = function (bit) {
-      const is = flags >= bit
-      if (is) {
-        flags -= bit
-      }
-      return is
-    }
-    const isZeroEncoded = flagCheck(128)
-    const isReliable = flagCheck(64)
-    const isResent = flagCheck(32)
-    const hasAck = flagCheck(16)
+    const flags = msg.readUInt8(6)
+    const isZeroEncoded = (flags & 0b10000000) > 0 // 128
+    const isReliable = (flags & 0b01000000) > 0 // 64
+    const isResent = (flags & 0b00100000) > 0 // 32
+    const hasAck = (flags & 0b00010000) > 0 // 16
 
     const senderSequenceNumber = msg.readUInt32BE(7)
     this.senderSequenceNumber = senderSequenceNumber
