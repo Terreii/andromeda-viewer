@@ -2,7 +2,9 @@
 
 'use strict'
 
-import * as messages from './networkMessages'
+import uuid from 'uuid'
+
+import { parseBody, createBody, ReceivedMessage } from './networkMessages'
 import { U32 } from './types'
 
 describe('parseBody', () => {
@@ -11,11 +13,10 @@ describe('parseBody', () => {
   buffer.writeUInt8(255, 1)
   buffer.writeUInt16BE(1, 2)
 
-  const testMessage = messages.parseBody(buffer)
+  const testMessage = parseBody(buffer)
 
   test('should return the TestMessage', () => {
-    expect(testMessage instanceof messages.MessageProto).toBe(true)
-    expect(testMessage instanceof messages.ReceivedMessage).toBe(true)
+    expect(testMessage instanceof ReceivedMessage).toBe(true)
   })
 
   test('should have Blocks: TestBlock1 and NeighborBlock', () => {
@@ -127,7 +128,7 @@ describe('createBody', () => {
           }
         ]
       }
-      const obj = messages.createBody('TestMessage', testMessage)
+      const obj = createBody('TestMessage', testMessage)
 
       expect(obj.needsZeroencode).toBe(true)
       expect(obj.couldBeTrusted).toBe(false)
@@ -153,5 +154,166 @@ describe('createBody', () => {
       expect(buffer.readUInt32LE(8 + (i * 4))).toBe(i)
     }
     done()
+  })
+})
+
+describe('parseBody should work with buffer from createBody', () => {
+  const aUUID = uuid.v4()
+
+  test('TestMessage', () => {
+    const buffy = createBody('TestMessage', {
+      TestBlock1: [
+        {
+          Test1: 1337
+        }
+      ],
+      NeighborBlock: [
+        {
+          Test0: 0,
+          Test1: 1,
+          Test2: 2
+        },
+        {
+          Test0: 3,
+          Test1: 4,
+          Test2: 5
+        },
+        {
+          Test0: 6,
+          Test1: 7,
+          Test2: 8
+        },
+        {
+          Test0: 9,
+          Test1: 10,
+          Test2: 11
+        }
+      ]
+    })
+    const parsedMessage = parseBody(buffy.buffer)
+
+    expect(parsedMessage.name).toBe('TestMessage')
+    expect(parsedMessage.getValue('TestBlock1', 'Test1')).toBe(1337)
+    expect(parsedMessage.getValue('NeighborBlock', 3, 'Test2')).toBe(11)
+  })
+
+  test('NeighborList', () => {
+    const buffy = createBody('NeighborList', {
+      NeighborBlock: [
+        {
+          IP: '127.0.0.1',
+          Port: 666,
+          PublicIP: '0.0.0.1',
+          PublicPort: 1337,
+          RegionID: aUUID,
+          Name: 'Hello Sim!',
+          SimAccess: 13
+        },
+        {
+          IP: '127.0.0.1',
+          Port: 666,
+          PublicIP: '0.0.0.1',
+          PublicPort: 1337,
+          RegionID: aUUID,
+          Name: 'Hello Sim!',
+          SimAccess: 13
+        },
+        {
+          IP: '127.0.0.1',
+          Port: 666,
+          PublicIP: '0.0.0.1',
+          PublicPort: 1337,
+          RegionID: aUUID,
+          Name: 'Hello Sim!',
+          SimAccess: 13
+        },
+        {
+          IP: '127.0.0.1',
+          Port: 666,
+          PublicIP: '0.0.0.1',
+          PublicPort: 1337,
+          RegionID: aUUID,
+          Name: 'Hello Sim!',
+          SimAccess: 13
+        }
+      ]
+    })
+    const parsedMessage = parseBody(buffy.buffer)
+
+    expect(parsedMessage.name).toBe('NeighborList')
+    expect(parsedMessage.getValues('NeighborBlock', 0, [
+      'IP',
+      'Port',
+      'RegionID',
+      'SimAccess'
+    ])).toEqual({
+      IP: '127.0.0.1',
+      Port: 666,
+      RegionID: aUUID,
+      SimAccess: 13
+    })
+    expect(parsedMessage.getStringValue('NeighborBlock', 'Name')).toBe('Hello Sim!')
+  })
+
+  test('ImprovedInstantMessage', () => {
+    const now = Date.now()
+    const buffy = createBody('ImprovedInstantMessage', {
+      AgentData: [
+        {
+          AgentID: aUUID,
+          SessionID: aUUID
+        }
+      ],
+      MessageBlock: [
+        {
+          FromGroup: false,
+          ToAgentID: aUUID,
+          ParentEstateID: 123456,
+          RegionID: aUUID,
+          Position: [1, 2.5, 5.25],
+          Offline: 1,
+          Dialog: 0,
+          ID: aUUID,
+          Timestamp: now,
+          FromAgentName: 'Testy MacTestface',
+          Message: 'Hello to my World of tests!',
+          BinaryBucket: []
+        }
+      ]
+    })
+    const parsedMessage = parseBody(buffy.buffer)
+
+    expect(parsedMessage.name).toBe('ImprovedInstantMessage')
+    expect(parsedMessage.getValues('AgentData', ['AgentID', 'SessionID'])).toEqual({
+      AgentID: aUUID,
+      SessionID: aUUID
+    })
+    expect(parsedMessage.getStringValues('MessageBlock', ['FromAgentName', 'Message'])).toEqual({
+      FromAgentName: 'Testy MacTestface',
+      Message: 'Hello to my World of tests!'
+    })
+    expect(parsedMessage.getValues('MessageBlock', [
+      'FromGroup',
+      'ToAgentID',
+      'ParentEstateID',
+      'RegionID',
+      'Position',
+      'Offline',
+      'Dialog',
+      'ID',
+      'Timestamp',
+      'BinaryBucket'
+    ])).toEqual({
+      FromGroup: false,
+      ToAgentID: aUUID,
+      ParentEstateID: 123456,
+      RegionID: aUUID,
+      Position: [1, 2.5, 5.25],
+      Offline: 1,
+      Dialog: 0,
+      ID: aUUID,
+      Timestamp: now,
+      BinaryBucket: []
+    })
   })
 })

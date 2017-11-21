@@ -156,21 +156,6 @@ export function parseBody (packetBody) {
   return body
 }
 
-export class MessageProto {
-  constructor () {
-    this.size = 0
-    this.name = 'Proto'
-    this.frequency = 'Low'
-    this.size = 0
-    this.number = 0
-    this.trusted = false
-    this.zerocoded = false
-    this.isOld = NaN
-    this.body = []
-    this.buffer = Buffer.alloc(0)
-  }
-}
-
 // Class for all Buffer -> Message action (on socket in)
 //
 // {
@@ -197,9 +182,8 @@ export class MessageProto {
 //     }
 //   ]
 // }
-export class ReceivedMessage extends MessageProto {
+export class ReceivedMessage {
   constructor (template, buffer) {
-    super()
     if (typeof template === 'string') {
       template = messagesByName[template]
     }
