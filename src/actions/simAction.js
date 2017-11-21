@@ -67,14 +67,9 @@ function parseUserRights (message, getState) {
 }
 
 function parseRegionInfo (info) {
-  const getValues = obj => Object.keys(obj).reduce((all, key) => {
-    all[key] = obj[key].value
-    return all
-  }, {})
-
   return {
-    regionInfo: getValues(info.body.RegionInfo.data[0]),
-    regionInfo2: getValues(info.body.RegionInfo2.data[0])
+    regionInfo: info.body.getValues('RegionInfo', 0, []),
+    regionInfo2: info.body.getValues('RegionInfo2', 0, [])
   }
 }
 

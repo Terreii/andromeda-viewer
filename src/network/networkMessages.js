@@ -297,6 +297,45 @@ export class ReceivedMessage extends MessageProto {
     return this._parseValueAsString(value)
   }
 
+  // Return the value of multiple variables in an block
+  // msg.getValue(blockName, [blockIndex,] variableNames)
+  // blockIndex defaults to 0
+  getValues (blockName, blockOrValues, varNames) {
+    let blockNumber = 0
+    let variableNames
+
+    if (varNames == null) {
+      variableNames = blockOrValues
+    } else {
+      blockNumber = +blockOrValues
+      variableNames = varNames
+    }
+    if (!Array.isArray(variableNames)) throw new TypeError('names of variables must be an Array!')
+
+    const blockInstance = this[blockName].data[blockNumber]
+    if (variableNames.length === 0) {
+      variableNames = Object.keys(blockInstance)
+    }
+
+    return variableNames.reduce((result, name) => {
+      result[name] = blockInstance[name].value
+      return result
+    }, {})
+  }
+
+  // Returns multiple values as a object.
+  // Transforms the value of a variable into a string.
+  // If the value is a Buffer (Fixed, Variable1 or Variable2)
+  // then it will be parsed as a UTF-8 String.
+  getStringValues (blockName, blockOrValues, varNames) {
+    const values = this.getValues(blockName, blockOrValues, varNames)
+
+    return Object.keys(values).reduce((result, key) => {
+      result[key] = this._parseValueAsString(values[key])
+      return result
+    }, {})
+  }
+
   _parseValueAsString (value) {
     return Buffer.isBuffer(value)
       ? value.toString('utf8').replace(/\0/gi, '')
