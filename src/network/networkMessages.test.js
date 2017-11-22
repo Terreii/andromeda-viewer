@@ -256,7 +256,7 @@ describe('parseBody should work with buffer from createBody', () => {
   })
 
   test('ImprovedInstantMessage', () => {
-    const now = Date.now()
+    const now = Math.floor(Date.now() / 1000)
     const buffy = createBody('ImprovedInstantMessage', {
       AgentData: [
         {
@@ -313,7 +313,7 @@ describe('parseBody should work with buffer from createBody', () => {
       Dialog: 0,
       ID: aUUID,
       Timestamp: now,
-      BinaryBucket: []
+      BinaryBucket: Buffer.from([])
     })
   })
 })
