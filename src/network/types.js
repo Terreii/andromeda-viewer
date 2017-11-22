@@ -1,5 +1,3 @@
-import uuid from 'uuid'
-
 export class MessageDataType {
   constructor () {
     this.value = null
@@ -378,9 +376,19 @@ LLQuaternion.createBuffer = function createBufferLLQuaternion (value) {
 export class LLUUID extends MessageDataType {
   constructor (buffer, offset = 0, name) {
     super()
-    const numbers = buffer.slice(offset, offset + 16).toJSON().data
+    const startPart2 = offset + 4
+    const startPart3 = offset + 6
+    const startPart4 = offset + 8
+    const startPart5 = offset + 10
+    const uuidString = [
+      buffer.slice(offset, startPart2),
+      buffer.slice(startPart2, startPart3),
+      buffer.slice(startPart3, startPart4),
+      buffer.slice(startPart4, startPart5),
+      buffer.slice(startPart5, offset + 16)
+    ].map(buffy => buffy.toString('hex')).join('-')
     this.name = name
-    this.value = uuid({random: numbers})
+    this.value = uuidString
     this.size = 16
     this.type = 'LLUUID'
   }
