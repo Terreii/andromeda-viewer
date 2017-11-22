@@ -175,6 +175,66 @@ export function parseBody (packetBody) {
   return body
 }
 
+// Parses a block (and all instances of it) out of buffer
+// Offset is an Object with a value key. This holds the offset in the buffer.
+function parseBlock (blockTemplate, buffer, offset) {
+  const thisBlock = {
+    name: blockTemplate.name,
+    data: []
+  }
+
+  let quantity = 0
+  switch (blockTemplate.quantity) {
+    case 'Single':
+      quantity = 1
+      break
+    case 'Multiple':
+      quantity = blockTemplate.times
+      break
+    case 'Variable':
+      quantity = buffer.readUInt8(offset)
+      offset.value += 1
+      break
+    default:
+      quantity = 0
+  }
+
+  for (let i = 0; i < quantity; i += 1) {
+    const data = {}
+
+    data.all = blockTemplate.variables.map(variableTemplate => {
+      const value = parseVariable(variableTemplate, buffer, offset)
+      data[variableTemplate.name] = value
+    })
+
+    thisBlock.data.push(data)
+  }
+
+  return thisBlock
+}
+
+// parse the variables of a block out of buffer.
+// offset is an Object that holds the offset in the buffer in the key value.
+function parseVariable (variableTemplate, buffer, offset) {
+  let varType = variableTemplate.type
+  if (varType === 'Variable') {
+    varType = 'Variable' + variableTemplate.times
+  }
+  const Type = types[varType]
+  const value = new Type(buffer, offset.value, variableTemplate.name,
+    variableTemplate.times)
+
+  offset.value += value.size
+  if (Type === types.Variable1) {
+    offset.value += 1
+  }
+  if (Type === types.Variable2) {
+    offset.value += 2
+  }
+
+  return value
+}
+
 // Class for all Buffer -> Message action (on socket in)
 //
 // {
@@ -207,6 +267,7 @@ export class ReceivedMessage {
       template = messagesByName[template]
     }
     this.name = template.name
+    this.type = 'UDP' + template.name // for directly dispatching to redux
     this.frequency = template.frequency
     this.number = template.number
     this.trusted = template.trusted
@@ -214,64 +275,18 @@ export class ReceivedMessage {
     this.zerocoded = template.zerocoded
     this.isOld = template.isOld
 
-    const self = this
     // parse the blocks
-    let offset = 0
+    const offset = {
+      value: 0
+    }
+
     const blocks = template.body.map(blockTemplate => {
-      const thisBlock = {
-        name: blockTemplate.name,
-        data: []
-      }
+      const block = parseBlock(blockTemplate, buffer, offset)
       // that the block is accessible through the name
-      self[thisBlock.name] = thisBlock
-      let quantity = 0
-      switch (blockTemplate.quantity) {
-        case 'Single':
-          quantity = 1
-          break
-        case 'Multiple':
-          quantity = blockTemplate.times
-          break
-        case 'Variable':
-          quantity = buffer.readUInt8(offset)
-          offset++
-          break
-        default:
-          quantity = 0
-      }
-      const thisBlockData = []
-      for (let i = 0; i < quantity; ++i) {
-        thisBlockData.push(i)
-      }
-      thisBlock.data = thisBlockData.map(i => {
-        const data = {}
-        data.all = blockTemplate.variables.map(variableTempl => {
-          // parse the variables
-          let varType = variableTempl.type
-          if (varType === 'Variable') {
-            varType = 'Variable' + variableTempl.times
-          }
-          const Type = types[varType]
-          const value = new Type(buffer, offset, variableTempl.name,
-            variableTempl.times)
-          offset += value.size
-          if (Type === types.Variable1) {
-            offset += 1
-          }
-          if (Type === types.Variable2) {
-            offset += 2
-          }
-          // that the variable is accessible through the name
-          data[variableTempl.name] = value
-          return value
-        })
-        return data
-      })
-      return thisBlock
+      this[blockTemplate.name] = block
     })
     this.blocks = blocks
-    this.size = offset // ??? or something other
-    this.buffer = buffer.slice(0, offset)
+    this.size = offset.value // ??? or something other
   }
 
   // Return the value of a variable in an block
