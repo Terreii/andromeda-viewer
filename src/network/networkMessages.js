@@ -74,36 +74,7 @@ export function createBody (type, data) {
   // for every block in the template it creates a buffer
   const body = template.body.map(blockTemplate => {
     const dataBlock = data[blockTemplate.name]
-    if (!Array.isArray(dataBlock)) {
-      throw new TypeError(blockTemplate.name +
-        ' is not defined in the message data')
-    }
-    if ((blockTemplate.quantity === 'Single' && dataBlock.length !== 1) ||
-      (blockTemplate.quantity === 'Multiple' &&
-      dataBlock.length !== blockTemplate.times)) {
-      throw new TypeError('Quantity mismatch')
-    }
-
-    const body = []
-    if (blockTemplate.quantity === 'Variable') {
-      body.push(Buffer.from([dataBlock.length]))
-    }
-
-    dataBlock.forEach(block => { // same block times the quantity
-      const bufferArr = blockTemplate.variables.map(varTemplate => {
-        const varType = types[varTemplate.type]
-        const value = block[varTemplate.name]
-        try {
-          return varType.createBuffer(value, varTemplate.times)
-        } catch (e) {
-          console.error(e, varTemplate, value)
-          throw e
-        }
-      })
-
-      body.push(Buffer.concat(bufferArr))
-    })
-    return Buffer.concat(body)
+    return createBlockBuffer(blockTemplate, dataBlock)
   })
 
   // combine all buffers into one array
@@ -114,6 +85,54 @@ export function createBody (type, data) {
     couldBeTrusted: template.trusted,
     buffer: Buffer.concat(allBuffers)
   }
+}
+
+// Maps all instances of a block into a buffer.
+function createBlockBuffer (blockTemplate, blocks = []) {
+  if (blocks instanceof Object && !Array.isArray(blocks)) {
+    blocks = [blocks]
+  }
+
+  const body = []
+  let times = 0
+
+  switch (blockTemplate.quantity) {
+    case 'Single':
+      times = 1
+      break
+    case 'Multiple':
+      times = blockTemplate.times
+      break
+    case 'Variable':
+      times = Math.min(blocks.length, 255)
+      body.push(Buffer.from([times])) // add byte that tells how often this block exists
+      break
+    default:
+      throw new TypeError('Unknown Quantity!')
+  }
+
+  // same block times the quantity
+  for (let index = 0; index < times; index += 1) {
+    const blockInstance = blocks[index]
+    const bufferArr = singleBlockToBuffer(blockTemplate.variables, blockInstance)
+    body.push(Buffer.concat(bufferArr))
+  }
+  return Buffer.concat(body)
+}
+
+// Maps all variables of a block instance into an array of buffers
+function singleBlockToBuffer (variables, block = {}) {
+  const bufferArr = variables.map(varTemplate => {
+    const varType = types[varTemplate.type]
+    const value = block[varTemplate.name]
+    try {
+      return varType.createBuffer(value, varTemplate.times)
+    } catch (e) {
+      console.error(e, varTemplate, value)
+      throw e
+    }
+  })
+  return bufferArr
 }
 
 // buffer -> Message

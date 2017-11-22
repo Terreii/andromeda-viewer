@@ -34,7 +34,7 @@ export class Fixed extends MessageDataType {
     this.type = 'Fixed'
   }
 }
-Fixed.createBuffer = function createBufferFixed (value, length) {
+Fixed.createBuffer = function createBufferFixed (value = [], length) {
   const buffy = Buffer.alloc(length)
   if (typeof value === 'string') {
     buffy.write(value.substr(0, length))
@@ -57,7 +57,7 @@ export class Variable1 extends MessageDataType {
     this.type = 'Variable1'
   }
 }
-Variable1.createBuffer = function createBufferVariable1 (value) {
+Variable1.createBuffer = function createBufferVariable1 (value = []) {
   if (typeof value.length === 'undefined' || value.length > 255) {
     throw new TypeError('value must not be bigger than 255 bytes!')
   }
@@ -92,7 +92,7 @@ export class Variable2 extends MessageDataType {
     this.type = 'Variable2'
   }
 }
-Variable2.createBuffer = function createBufferVariable2 (value) {
+Variable2.createBuffer = function createBufferVariable2 (value = []) {
   if (typeof value.length === 'undefined' || value.length > 65535) {
     throw new TypeError('value must not be bigger than 65535 bytes!')
   }
@@ -135,7 +135,7 @@ export class U8 extends NumberType {
     this.type = 'U8'
   }
 }
-U8.createBuffer = function createBufferU8 (value) {
+U8.createBuffer = function createBufferU8 (value = 0) {
   return Buffer.from([+value])
 }
 
@@ -148,7 +148,7 @@ export class U16 extends NumberType {
     this.type = 'U16'
   }
 }
-U16.createBuffer = function createBufferU16 (value) {
+U16.createBuffer = function createBufferU16 (value = 0) {
   const buffy = Buffer.alloc(2)
   buffy.writeInt16LE(+value, 0)
   return buffy
@@ -163,7 +163,7 @@ export class U32 extends NumberType {
     this.type = 'U32'
   }
 }
-U32.createBuffer = function createBufferU32 (value) {
+U32.createBuffer = function createBufferU32 (value = 0) {
   const buffy = Buffer.alloc(4)
   buffy.writeUInt32LE(+value, 0)
   return buffy
@@ -182,7 +182,7 @@ export class U64 extends NumberType {
     this.type = 'U64'
   }
 }
-U64.createBuffer = function createBufferU64 (value) {
+U64.createBuffer = function createBufferU64 (value = 0) {
   const buffy = Buffer.alloc(8)
   buffy.writeUInt32LE(value[0], 0)
   buffy.writeUInt32LE(value[1], 4)
@@ -198,7 +198,7 @@ export class S8 extends NumberType {
     this.type = 'S8'
   }
 }
-S8.createBuffer = function createBufferS8 (value) {
+S8.createBuffer = function createBufferS8 (value = 0) {
   const buffy = Buffer.alloc(1)
   buffy.writeInt8(+value, 0)
   return buffy
@@ -213,7 +213,7 @@ export class S16 extends NumberType {
     this.type = 'S16'
   }
 }
-S16.createBuffer = function createBufferS16 (value) {
+S16.createBuffer = function createBufferS16 (value = 0) {
   const buffy = Buffer.alloc(2)
   buffy.writeInt16LE(+value, 0)
   return buffy
@@ -228,7 +228,7 @@ export class S32 extends NumberType {
     this.type = 'S32'
   }
 }
-S32.createBuffer = function createBufferS32 (value) {
+S32.createBuffer = function createBufferS32 (value = 0) {
   const buffy = Buffer.alloc(4)
   buffy.writeInt32LE(+value, 0)
   return buffy
@@ -247,7 +247,7 @@ export class S64 extends NumberType {
     this.type = 'S64'
   }
 }
-S64.createBuffer = function createBufferS64 (value) {
+S64.createBuffer = function createBufferS64 (value = 0) {
   const buffy = Buffer.alloc(8)
   buffy.writeInt32LE(value[1], 0)
   buffy.writeUInt32LE(value[0], 4)
@@ -263,7 +263,7 @@ export class F32 extends NumberType {
     this.type = 'F32'
   }
 }
-F32.createBuffer = function createBufferF32 (value) {
+F32.createBuffer = function createBufferF32 (value = 0) {
   const buffy = Buffer.alloc(4)
   buffy.writeFloatLE(+value, 0)
   return buffy
@@ -278,7 +278,7 @@ export class F64 extends NumberType {
     this.type = 'F64'
   }
 }
-F64.createBuffer = function createBufferF64 (value) {
+F64.createBuffer = function createBufferF64 (value = 0) {
   const buffy = Buffer.alloc(8)
   buffy.writeDoubleLE(+value, 0)
   return buffy
@@ -299,7 +299,7 @@ export class LLVector3 extends MessageDataType {
     this.type = 'LLVector3'
   }
 }
-LLVector3.createBuffer = function createBufferLLVector3 (value) {
+LLVector3.createBuffer = function createBufferLLVector3 (value = []) {
   const buffy = Buffer.alloc(12)
   for (let i = 0; i < 3; ++i) {
     buffy.writeFloatLE(value[i] || 0, i * 4)
@@ -320,7 +320,7 @@ export class LLVector3d extends MessageDataType {
     this.type = 'LLVector3d'
   }
 }
-LLVector3d.createBuffer = function createBufferLLVector3d (value) {
+LLVector3d.createBuffer = function createBufferLLVector3d (value = []) {
   const buffy = Buffer.alloc(24)
   for (let i = 0; i < 3; ++i) {
     buffy.writeDoubleLE(value[i] || 0, i * 8)
@@ -342,7 +342,7 @@ export class LLVector4 extends MessageDataType {
     this.type = 'LLVector4'
   }
 }
-LLVector4.createBuffer = function createBufferLLVector4 (value) {
+LLVector4.createBuffer = function createBufferLLVector4 (value = []) {
   const buffy = Buffer.alloc(16)
   for (let i = 0; i < 4; ++i) {
     buffy.writeFloatLE(value[i] || 0, i * 4)
@@ -363,7 +363,7 @@ export class LLQuaternion extends MessageDataType {
     this.type = 'LLQuaternion'
   }
 }
-LLQuaternion.createBuffer = function createBufferLLQuaternion (value) {
+LLQuaternion.createBuffer = function createBufferLLQuaternion (value = []) {
   const buffy = Buffer.alloc(12)
   for (let i = 0; i < 3; ++i) {
     buffy.writeFloatLE(value[i] || 0, i * 4)
@@ -393,7 +393,7 @@ export class LLUUID extends MessageDataType {
     this.type = 'LLUUID'
   }
 }
-LLUUID.createBuffer = function createBufferLLUUID (value) {
+LLUUID.createBuffer = function createBufferLLUUID (value = '00000000-0000-0000-0000-000000000000') {
   let parts = []
   if (typeof value === 'string') {
     const uuidString = value.replace(/-/gi, '')
@@ -422,7 +422,7 @@ export class BOOL extends MessageDataType {
     this.type = 'BOOL'
   }
 }
-BOOL.createBuffer = function createBufferBOOL (value) {
+BOOL.createBuffer = function createBufferBOOL (value = false) {
   const buffy = Buffer.alloc(1)
   buffy.writeUInt8(value ? 1 : 0, 0)
   return buffy
@@ -441,7 +441,7 @@ export class IPADDR extends MessageDataType {
     this.type = 'IPADDR'
   }
 }
-IPADDR.createBuffer = function createBufferIPADDR (value) {
+IPADDR.createBuffer = function createBufferIPADDR (value = [0, 0, 0, 0]) {
   const buffy = Buffer.alloc(4)
   const parts = typeof value === 'string' ? value.split('.') : value
   if (Array.isArray(parts)) {
@@ -461,7 +461,7 @@ export class IPPORT extends MessageDataType {
     this.type = 'IPPORT'
   }
 }
-IPPORT.createBuffer = function createBufferIPPORT (value) {
+IPPORT.createBuffer = function createBufferIPPORT (value = 0) {
   const buffy = Buffer.alloc(2)
   buffy.writeUInt16LE(+value, 0)
   return buffy
