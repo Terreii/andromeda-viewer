@@ -5,7 +5,6 @@
 import uuid from 'uuid'
 
 import { parseBody, createBody, ReceivedMessage } from './networkMessages'
-import { U32 } from './types'
 
 describe('parseBody', () => {
   const buffer = Buffer.alloc(4 + (4 * (1 + (4 * 3))) + 1)
@@ -19,36 +18,30 @@ describe('parseBody', () => {
     expect(testMessage instanceof ReceivedMessage).toBe(true)
   })
 
-  test('should have Blocks: TestBlock1 and NeighborBlock', () => {
-    expect(typeof testMessage.TestBlock1).toBe('object')
-    expect(testMessage.TestBlock1.name).toBe('TestBlock1')
-    expect(typeof testMessage.NeighborBlock).toBe('object')
-    expect(testMessage.NeighborBlock.name).toBe('NeighborBlock')
-    expect(Array.isArray(testMessage.blocks)).toBe(true)
-    expect(testMessage.blocks.length).toBe(2)
-  })
-
   test('should have one U32 in an array in the TestBlock1', () => {
-    expect(testMessage.TestBlock1.data.length).toBe(1)
-    expect(testMessage.TestBlock1.data[0].Test1.name).toBe('Test1')
-    expect(testMessage.TestBlock1.data[0].Test1.type).toBe('U32')
-    expect(testMessage.TestBlock1.data[0].Test1 instanceof U32).toBe(true)
+    expect(testMessage.getNumberOfBlockInstances('TestBlock1')).toBe(1)
+
+    expect(testMessage.getValue('TestBlock1', 0, 'Test1')).toBe(0)
   })
 
   test('should have 3 U32 in 4 Arrays in NeighborBlock', () => {
-    const block2 = testMessage.NeighborBlock
-    expect(block2.data.length).toBe(4)
-    expect(typeof block2.data[0].Test0).toBe('object')
-    expect(typeof block2.data[0].Test1).toBe('object')
-    expect(typeof block2.data[0].Test2).toBe('object')
-    expect(block2.data[0].all.length).toBe(3)
-    expect(block2.data[0].Test1.name).toBe('Test1')
-    expect(block2.data[0].Test1 instanceof U32).toBe(true)
+    expect(testMessage.getNumberOfBlockInstances('NeighborBlock')).toBe(4)
 
-    expect(testMessage.getValue('NeighborBlock', 0, 'Test0')).toBe(0)
-    expect(testMessage.getValue('NeighborBlock', 1, 'Test0')).toBe(0)
-    expect(testMessage.getValue('NeighborBlock', 2, 'Test0')).toBe(0)
-    expect(testMessage.getValue('NeighborBlock', 3, 'Test0')).toBe(0)
+    const values = [
+      'Test0',
+      'Test1',
+      'Test2'
+    ]
+    const shouldValues = {
+      Test0: 0,
+      Test1: 0,
+      Test2: 0
+    }
+
+    expect(testMessage.getValues('NeighborBlock', 0, values)).toEqual(shouldValues)
+    expect(testMessage.getValues('NeighborBlock', 1, values)).toEqual(shouldValues)
+    expect(testMessage.getValues('NeighborBlock', 2, values)).toEqual(shouldValues)
+    expect(testMessage.getValues('NeighborBlock', 3, values)).toEqual(shouldValues)
   })
 
   test('should return Strings for values', () => {

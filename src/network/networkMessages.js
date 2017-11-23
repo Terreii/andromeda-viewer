@@ -205,6 +205,7 @@ function parseBlock (blockTemplate, buffer, offset) {
     data.all = blockTemplate.variables.map(variableTemplate => {
       const value = parseVariable(variableTemplate, buffer, offset)
       data[variableTemplate.name] = value
+      return value
     })
 
     thisBlock.data.push(data)
@@ -284,6 +285,7 @@ export class ReceivedMessage {
       const block = parseBlock(blockTemplate, buffer, offset)
       // that the block is accessible through the name
       this[blockTemplate.name] = block
+      return block
     })
     this.blocks = blocks
     this.size = offset.value // ??? or something other
@@ -358,6 +360,11 @@ export class ReceivedMessage {
     return Buffer.isBuffer(value)
       ? value.toString('utf8').replace(/\0/gi, '')
       : value.toString()
+  }
+
+  // How many instances of a block are there?
+  getNumberOfBlockInstances (blockName) {
+    return this[blockName].data.length
   }
 
   // Maps over every instance of a block.
