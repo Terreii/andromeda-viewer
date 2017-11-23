@@ -178,10 +178,7 @@ export function parseBody (packetBody) {
 // Parses a block (and all instances of it) out of buffer
 // Offset is an Object with a value key. This holds the offset in the buffer.
 function parseBlock (blockTemplate, buffer, offset) {
-  const thisBlock = {
-    name: blockTemplate.name,
-    data: []
-  }
+  const thisBlock = []
 
   let quantity = 0
   switch (blockTemplate.quantity) {
@@ -192,7 +189,7 @@ function parseBlock (blockTemplate, buffer, offset) {
       quantity = blockTemplate.times
       break
     case 'Variable':
-      quantity = buffer.readUInt8(offset)
+      quantity = buffer.readUInt8(offset.value)
       offset.value += 1
       break
     default:
@@ -200,15 +197,13 @@ function parseBlock (blockTemplate, buffer, offset) {
   }
 
   for (let i = 0; i < quantity; i += 1) {
-    const data = {}
-
-    data.all = blockTemplate.variables.map(variableTemplate => {
+    const blockInstance = blockTemplate.variables.reduce((data, variableTemplate) => {
       const value = parseVariable(variableTemplate, buffer, offset)
       data[variableTemplate.name] = value
-      return value
-    })
+      return data
+    }, {})
 
-    thisBlock.data.push(data)
+    thisBlock.push(blockInstance)
   }
 
   return thisBlock
@@ -222,16 +217,7 @@ function parseVariable (variableTemplate, buffer, offset) {
     varType = 'Variable' + variableTemplate.times
   }
   const Type = types[varType]
-  const value = new Type(buffer, offset.value, variableTemplate.name,
-    variableTemplate.times)
-
-  offset.value += value.size
-  if (Type === types.Variable1) {
-    offset.value += 1
-  }
-  if (Type === types.Variable2) {
-    offset.value += 2
-  }
+  const value = Type.parseBuffer(buffer, offset, variableTemplate.times)
 
   return value
 }
@@ -246,19 +232,10 @@ function parseVariable (variableTemplate, buffer, offset) {
 //   zerocoded: Boolean,
 //   isOld: undefined|String,
 //   size: Number,
-//   buffer: Buffer, // only of the message body
-//   body: [
-//     { // block
-//       name: String,
-//       data: [ // times the quantity of the block
-//         {
-//           nameOfTheVariable: { // MessageDataType
-//             name: String,
-//             value: valueOfTheVariable
-//           },
-//           all: [] // all variables
-//         }
-//       ]
+//   {BlockName}: [ // block; times the quantity of the block
+//     {
+//       // MessageDataType
+//       {nameOfTheVariable}: value
 //     }
 //   ]
 // }
@@ -305,7 +282,7 @@ export class ReceivedMessage {
       variableName = varName
     }
 
-    return this[blockName].data[blockNumber][variableName].value
+    return this[blockName][blockNumber][variableName]
   }
 
   // Transforms the value of a variable into a string.
@@ -332,13 +309,13 @@ export class ReceivedMessage {
     }
     if (!Array.isArray(variableNames)) throw new TypeError('names of variables must be an Array!')
 
-    const blockInstance = this[blockName].data[blockNumber]
+    const blockInstance = this[blockName][blockNumber]
     if (variableNames.length === 0) {
       variableNames = Object.keys(blockInstance)
     }
 
     return variableNames.reduce((result, name) => {
-      result[name] = blockInstance[name].value
+      result[name] = blockInstance[name]
       return result
     }, {})
   }
@@ -364,7 +341,7 @@ export class ReceivedMessage {
 
   // How many instances of a block are there?
   getNumberOfBlockInstances (blockName) {
-    return this[blockName].data.length
+    return this[blockName].length
   }
 
   // Maps over every instance of a block.
@@ -373,9 +350,9 @@ export class ReceivedMessage {
   // The getValue function expects the name of a variable
   //     and as an optional second argument a Boolean if the value should be a String.
   mapBlock (blockName, fn) {
-    return this[blockName].data.map((blockInstance, index) => {
+    return this[blockName].map((blockInstance, index) => {
       const getter = (valueName, asString = false) => {
-        const value = blockInstance[valueName].value
+        const value = blockInstance[valueName]
 
         return asString
           ? this._parseValueAsString(value)
