@@ -93,7 +93,7 @@ export default class Circuit extends events.EventEmitter {
       this.send('CompletePingCheck', {
         PingID: [
           {
-            PingID: parsedBody.PingID.data[0].PingID.value
+            PingID: parsedBody.getValue('PingID', 0, 'PingID')
           }
         ]
       })
