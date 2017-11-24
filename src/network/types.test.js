@@ -3,7 +3,6 @@
 'use strict'
 
 import uuid from 'uuid'
-// import Buffer from 'Buffer'
 
 import {
   NullType,
