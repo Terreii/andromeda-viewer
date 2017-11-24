@@ -137,7 +137,9 @@ function singleBlockToBuffer (variables, block = {}) {
 
 // buffer -> Message
 // Starts with the packet body http://wiki.secondlife.com/wiki/Packet_Layout
-export function parseBody (packetBody) {
+export function parseBody (
+  packetBody, ip = '0.0.0.0', port = 0, isResend = false, isReliable = false
+) {
   // browserify changes the Buffer to a Uint8Array
   if (!(packetBody instanceof Buffer || packetBody instanceof Uint8Array)) {
     throw new TypeError('packetBody needs a Buffer!')
@@ -169,8 +171,14 @@ export function parseBody (packetBody) {
     throw new Error('no message of this type')
   }
 
-  const body = new ReceivedMessage(messagesByFrequency[frequency][num],
-    packetBody.slice(offset))
+  const body = new ReceivedMessage(
+    messagesByFrequency[frequency][num],
+    packetBody.slice(offset),
+    ip,
+    port,
+    isResend,
+    isReliable
+  )
 
   return body
 }
@@ -240,18 +248,21 @@ function parseVariable (variableTemplate, buffer, offset) {
 //   ]
 // }
 export class ReceivedMessage {
-  constructor (template, buffer) {
+  constructor (template, buffer, ip = '0.0.0.0', port = 0, isResend = false, isReliable = false) {
     if (typeof template === 'string') {
       template = messagesByName[template]
     }
     this.name = template.name
     this.type = 'UDP' + template.name // for directly dispatching to redux
-    this.frequency = template.frequency
-    this.number = template.number
     this.trusted = template.trusted
+    this.isReliable = isReliable
+    this.isResend = isResend
     // no need for decoding, was done in circuit
-    this.zerocoded = template.zerocoded
     this.isOld = template.isOld
+    this.from = {
+      ip,
+      port
+    }
 
     // parse the blocks
     const offset = {
@@ -266,6 +277,14 @@ export class ReceivedMessage {
     })
     this.blocks = blocks
     this.size = offset.value // ??? or something other
+  }
+
+  get frequency () {
+    return messagesByName[this.name].frequency
+  }
+
+  get number () {
+    return messagesByName[this.name].number
   }
 
   // Return the value of a variable in an block

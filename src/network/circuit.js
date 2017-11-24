@@ -57,7 +57,7 @@ export default class Circuit extends events.EventEmitter {
     const flags = msg.readUInt8(6)
     const isZeroEncoded = (flags & 0b10000000) > 0 // 128
     const isReliable = (flags & 0b01000000) > 0 // 64
-    const isResent = (flags & 0b00100000) > 0 // 32
+    const isResend = (flags & 0b00100000) > 0 // 32
     const hasAck = (flags & 0b00010000) > 0 // 16
 
     const senderSequenceNumber = msg.readUInt32BE(7)
@@ -69,24 +69,14 @@ export default class Circuit extends events.EventEmitter {
 
     const decodedBody = isZeroEncoded ? zeroDecode(msgBody) : msgBody
 
-    const parsedBody = parseBody(decodedBody)
+    const parsedBody = parseBody(decodedBody, ip, port, isResend, isReliable)
 
     const acks = hasAck ? extractAcks(msg) : []
+    // TODO: remove acks
 
     if (isReliable) {
       this.acks.push(senderSequenceNumber)
       this._sendAcks(this)
-    }
-
-    const toEmitObj = {
-      isZeroEncoded: isZeroEncoded,
-      isReliable: isReliable,
-      isResent: isResent,
-      body: parsedBody,
-      hasAck: hasAck,
-      acks: acks,
-      ip,
-      port
     }
 
     if (parsedBody.name === 'StartPingCheck') {
@@ -99,8 +89,8 @@ export default class Circuit extends events.EventEmitter {
       })
       return
     }
-    this.emit(parsedBody.name, toEmitObj)
-    this.emit('packetReceived', toEmitObj) // for debugging
+    this.emit(parsedBody.name, parsedBody)
+    this.emit('packetReceived', parsedBody) // for debugging
   }
 
   // Send a Packet.

@@ -12,10 +12,22 @@ describe('parseBody', () => {
   buffer.writeUInt8(255, 1)
   buffer.writeUInt16BE(1, 2)
 
-  const testMessage = parseBody(buffer)
+  const testMessage = parseBody(buffer, '127.0.0.1', 8080, true, true)
 
   test('should return the TestMessage', () => {
     expect(testMessage instanceof ReceivedMessage).toBe(true)
+    expect(testMessage.frequency).toBe('Low')
+    expect(testMessage.number).toBe(1)
+    expect(testMessage.name).toBe('TestMessage')
+  })
+
+  test('should include info of sender and package', () => {
+    expect(testMessage.isReliable).toBe(true)
+    expect(testMessage.isResend).toBe(true)
+    expect(testMessage.from).toEqual({
+      ip: '127.0.0.1',
+      port: 8080
+    })
   })
 
   test('should have one U32 in an array in the TestBlock1', () => {

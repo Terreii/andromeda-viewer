@@ -66,23 +66,23 @@ function parseUserRights (message, getState) {
   }
 }
 
-function parseRegionInfo (info) {
+function parseRegionInfo (message) {
   return {
-    regionInfo: info.body.getValues('RegionInfo', 0, []),
-    regionInfo2: info.body.getValues('RegionInfo2', 0, [])
+    regionInfo: message.getValues('RegionInfo', 0, []),
+    regionInfo2: message.getValues('RegionInfo2', 0, [])
   }
 }
 
 // Gets all messages from the SIM and filters them for the UI
 function simActionFilter (msg) {
-  const name = msg.body.name
+  const name = msg.name
   switch (name) {
     case 'ChatFromSimulator':
-      const parsed = parseChatFromSimulator(msg.body)
+      const parsed = parseChatFromSimulator(msg)
       return dispatchSIMAction(name, parsed, 'localchat/' + new Date(parsed.time).toJSON())
 
     case 'ImprovedInstantMessage':
-      const parsedMsg = parseIM(msg.body)
+      const parsedMsg = parseIM(msg)
         // Start a new IMChat.
       return dispatch => {
         dispatch(createNewIMChat(
@@ -93,17 +93,17 @@ function simActionFilter (msg) {
       }
 
     case 'UUIDNameReply':
-      return dispatchSIMAction(name, parseUUIDNameReply(msg.body))
+      return dispatchSIMAction(name, parseUUIDNameReply(msg))
 
     case 'ChangeUserRights':
       return (dispatch, getState) => {
-        dispatch(dispatchSIMAction(name, parseUserRights(msg.body, getState)))
+        dispatch(dispatchSIMAction(name, parseUserRights(msg, getState)))
       }
 
     case 'AgentMovementComplete':
       return dispatchSIMAction(name, {
-        position: msg.body.getValue('Data', 'Position'),
-        lookAt: msg.body.getValue('Data', 'LookAt')
+        position: msg.getValue('Data', 'Position'),
+        lookAt: msg.getValue('Data', 'LookAt')
       })
 
     case 'RegionInfo':
@@ -144,8 +144,8 @@ function dispatchSIMAction (name, msg, id) {
 
 function sendRegionHandshakeReply (RegionHandshake) {
   return (dispatch, getState, {circuit}) => {
-    const regionID = RegionHandshake.body.getValue('RegionInfo2', 'RegionID')
-    const flags = RegionHandshake.body.getValue('RegionInfo', 'RegionFlags')
+    const regionID = RegionHandshake.getValue('RegionInfo2', 'RegionID')
+    const flags = RegionHandshake.getValue('RegionInfo', 'RegionFlags')
 
     const session = getState().session
 
