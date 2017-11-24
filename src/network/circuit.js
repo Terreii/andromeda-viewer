@@ -36,6 +36,8 @@ export default class Circuit extends events.EventEmitter {
     this.websocket.onmessage = this._onMessage.bind(this)
 
     this.acks = []
+
+    setTimeout(() => this._sendAcks(), 100)
   }
 
   _onOpen () {
@@ -81,8 +83,11 @@ export default class Circuit extends events.EventEmitter {
     const acks = hasAck ? extractAcks(msg) : []
 
     if (isReliable) {
-      this.acks.push(senderSequenceNumber)
-      this._sendAcks(this)
+      this.acks.push({
+        didSendAcksMsg: false, // was send with a 'PacketAck' message
+        onMessageSendCount: 0, // was send on another message
+        sequenceNumber: senderSequenceNumber
+      })
     }
 
     const toEmitObj = {
@@ -114,7 +119,7 @@ export default class Circuit extends events.EventEmitter {
   // Uses networkMessages to construct the body
   // messageType must be a string matching one of the names of message templates
   // http://secondlife.com/app/message_template/master_message_template.msg
-  send (messageType, data) {
+  send (messageType, data, reliable = false) {
     // if no message with the type of messageType exist, than createBody will
     // throw an error
     const body = createBody(messageType, data)
@@ -137,12 +142,16 @@ export default class Circuit extends events.EventEmitter {
     }
 
     let acksBuffer
-    if (this.acks.length > 0) {
+    if (this.acks.length > 0 && messageType !== 'PacketAck') {
       header.writeUInt8(header.readUInt8(0) + 16, 0) // LL_ACK_FLAG 0x10
-      acksBuffer = createAcksBuffer(this.acks)
-      this.acks = []
+      acksBuffer = this._createAcksBuffer()
     } else {
       acksBuffer = Buffer.alloc(0)
+    }
+
+    if (reliable) {
+      header.writeUInt8(header.readUInt8(0) + 64, 0)
+      // TODO: Add acks and body storing for outgoing messages.
     }
 
     const ipPort = Buffer.alloc(6)
@@ -160,21 +169,77 @@ export default class Circuit extends events.EventEmitter {
     }
   }
 
-  // Sends all acks after 250ms
+  // Get acks that still needs to be send for given send method.
+  // forAcksMessage true if it is for a 'PacketAck' message.
+  _getSimAcks (forAcksMessage) {
+    if (this.acks.length === 0) return []
+
+    return this.acks.filter(ack => {
+      return forAcksMessage ? !ack.didSendAcksMsg : ack.onMessageSendCount < 2
+    }).map(ack => ack.sequenceNumber)
+  }
+
+  // Mark acks as send and filters out acks that are send enough.
+  // forAcksMessage true if it is for a 'PacketAck' message.
+  _setSimAcksToSend (forAcksMessage) {
+    const newAcks = []
+    for (let i = 0, max = this.acks.length; i < max; i += 1) {
+      const ack = this.acks[i]
+
+      if (forAcksMessage) { // ack was send with PacketAck message
+        ack.didSendAcksMsg = true
+      } else { // ack was send on a Package
+        ack.onMessageSendCount += 1
+      }
+
+      // add acks that need to be send.
+      if (!ack.didSendAcksMsg || ack.onMessageSendCount < 2) {
+        newAcks.push(ack)
+      }
+    }
+    this.acks = newAcks
+  }
+
+  // Adds the Acks
+  _createAcksBuffer () {
+    const acks = this._getSimAcks(false)
+    if (acks.length === 0) return Buffer.from([0])
+
+    const acksBuffer = Buffer.alloc((acks.length * 4) + 1)
+
+    acks.forEach((ack, i) => {
+      ack = +ack // to Number
+      if (Number.isNaN(ack)) {
+        ack = 0
+      }
+      acksBuffer.writeUInt32LE(ack, i * 4)
+    })
+
+    acksBuffer.writeUInt8(acks.length, acksBuffer.length - 1)
+    this._setSimAcksToSend(false)
+
+    return acksBuffer
+  }
+
+  // Sends all acks after 200ms
   _sendAcks () {
-    setTimeout(() => {
+    setInterval(() => {
       if (this.acks.length > 0) {
+        const acks = this._getSimAcks(true)
+        if (acks.length === 0) return
+
         const data = {
-          Packets: this.acks.map(ack => {
+          Packets: acks.map(ack => {
             return {
               ID: ack
             }
           })
         }
-        this.acks = []
-        this.send('PacketAck', data)
+
+        this._setSimAcksToSend(true)
+        this.send('PacketAck', data, true)
       }
-    }, 250)
+    }, 200)
   }
 }
 
@@ -232,20 +297,6 @@ function zeroDecode (inputbuf) {
     }
   }
   return Buffer.from(data)
-}
-
-// Adds the Acks
-function createAcksBuffer (acks) {
-  const acksBuffer = Buffer.alloc((acks.length * 4) + 1)
-  acks.forEach((ack, i) => {
-    ack = +ack // to Number
-    if (Number.isNaN(ack)) {
-      ack = 0
-    }
-    acksBuffer.writeUInt32LE(ack, i * 4)
-  })
-  acksBuffer.writeUInt8(acks.length, acksBuffer.length - 1)
-  return acksBuffer
 }
 
 // Extracts the Acks
