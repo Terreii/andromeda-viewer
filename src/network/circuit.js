@@ -35,7 +35,8 @@ export default class Circuit extends events.EventEmitter {
     this.cachedMessages = []
     this.websocket.onmessage = this._onMessage.bind(this)
 
-    this.acks = []
+    this.simAcks = []
+    this.viewerAcks = []
 
     setTimeout(() => this._sendAcks(), 100)
   }
@@ -83,7 +84,7 @@ export default class Circuit extends events.EventEmitter {
     const acks = hasAck ? extractAcks(msg) : []
 
     if (isReliable) {
-      this.acks.push({
+      this.simAcks.push({
         didSendAcksMsg: false, // was send with a 'PacketAck' message
         onMessageSendCount: 0, // was send on another message
         sequenceNumber: senderSequenceNumber
@@ -101,6 +102,10 @@ export default class Circuit extends events.EventEmitter {
       port
     }
 
+    if (acks.length > 0) {
+      this._filterViewerAcks(acks)
+    }
+
     if (parsedBody.name === 'StartPingCheck') {
       this.send('CompletePingCheck', {
         PingID: [
@@ -110,7 +115,11 @@ export default class Circuit extends events.EventEmitter {
         ]
       })
       return
+    } else if (parsedBody.name === 'PacketAck') {
+      this._filterViewerAcks(parseBody.Packets.data.map(data => data.ID.value))
+      return
     }
+
     this.emit(parsedBody.name, toEmitObj)
     this.emit('packetReceived', toEmitObj) // for debugging
   }
@@ -124,35 +133,11 @@ export default class Circuit extends events.EventEmitter {
     // throw an error
     const body = createBody(messageType, data)
 
-    // http://wiki.secondlife.com/wiki/Packet_Layout
-    const header = Buffer.alloc(6)
-    header.writeUInt8(0, 0) // Buffer doesn't start with 0s
-    header.writeUInt32BE(this.sequenceNumber, 1)
-    this.sequenceNumber++
-    if (this.sequenceNumber > 4294967295) {
-      this.sequenceNumber = 0
-    }
-    header.writeUInt8(0, 5)
+    const acksBuffer = this.simAcks.length > 0 && messageType !== 'PacketAck'
+      ? this._createAcksBuffer()
+      : Buffer.alloc(0)
 
-    // Set header byte 0 flags
-
-    if (body.needsZeroencode) {
-      header.writeUInt8(header.readUInt8(0) + 128, 0) // LL_ZERO_CODE_FLAG 0x80
-      body.buffer = zeroEncode(body.buffer)
-    }
-
-    let acksBuffer
-    if (this.acks.length > 0 && messageType !== 'PacketAck') {
-      header.writeUInt8(header.readUInt8(0) + 16, 0) // LL_ACK_FLAG 0x10
-      acksBuffer = this._createAcksBuffer()
-    } else {
-      acksBuffer = Buffer.alloc(0)
-    }
-
-    if (reliable) {
-      header.writeUInt8(header.readUInt8(0) + 64, 0)
-      // TODO: Add acks and body storing for outgoing messages.
-    }
+    const bodyBuffer = body.needsZeroEncode ? zeroEncode(body.buffer) : body.buffer
 
     const ipPort = Buffer.alloc(6)
     for (var i = 0; i < 4; i++) {
@@ -160,21 +145,60 @@ export default class Circuit extends events.EventEmitter {
     }
     ipPort.writeUInt16LE(this.port, 4)
 
-    const packet = Buffer.concat([ipPort, header, body.buffer, acksBuffer])
+    this._combineAndSend(ipPort, bodyBuffer, acksBuffer, reliable, body.needsZeroEncode, 0)
+  }
+
+  _combineAndSend (target, body, acks, reliable, zeroEncoded, resentCount) {
+    // http://wiki.secondlife.com/wiki/Packet_Layout
+
+    // Set header byte 0 flags
+    const flags = [
+      zeroEncoded,
+      reliable,
+      resentCount > 0,
+      acks.byteLength > 0,
+      false,
+      false,
+      false,
+      false
+    ].reduce((flags, flag) => (flags << 1) | (flag << 0))
+
+    const header = Buffer.from([flags, 0, 0, 0, 0, 0])
+
+    const sequenceNumber = this.sequenceNumber
+    header.writeUInt32BE(sequenceNumber, 1)
+    this.sequenceNumber++
+    if (this.sequenceNumber > 4294967295) {
+      this.sequenceNumber = 0
+    }
+
+    const packet = Buffer.concat([target, header, body, acks])
 
     if (this.websocketIsOpen) {
       this.websocket.send(packet.buffer)
     } else {
       this.cachedMessages.push(packet)
     }
+
+    if (reliable && resentCount < 4) {
+      this.viewerAcks.push({
+        sequenceNumber,
+        target,
+        body,
+        acks,
+        zeroEncoded,
+        resentCount,
+        time: Date.now()
+      })
+    }
   }
 
   // Get acks that still needs to be send for given send method.
   // forAcksMessage true if it is for a 'PacketAck' message.
   _getSimAcks (forAcksMessage) {
-    if (this.acks.length === 0) return []
+    if (this.simAcks.length === 0) return []
 
-    return this.acks.filter(ack => {
+    return this.simAcks.filter(ack => {
       return forAcksMessage ? !ack.didSendAcksMsg : ack.onMessageSendCount < 2
     }).map(ack => ack.sequenceNumber)
   }
@@ -183,8 +207,8 @@ export default class Circuit extends events.EventEmitter {
   // forAcksMessage true if it is for a 'PacketAck' message.
   _setSimAcksToSend (forAcksMessage) {
     const newAcks = []
-    for (let i = 0, max = this.acks.length; i < max; i += 1) {
-      const ack = this.acks[i]
+    for (let i = 0, max = this.simAcks.length; i < max; i += 1) {
+      const ack = this.simAcks[i]
 
       if (forAcksMessage) { // ack was send with PacketAck message
         ack.didSendAcksMsg = true
@@ -197,7 +221,7 @@ export default class Circuit extends events.EventEmitter {
         newAcks.push(ack)
       }
     }
-    this.acks = newAcks
+    this.simAcks = newAcks
   }
 
   // Adds the Acks
@@ -224,7 +248,7 @@ export default class Circuit extends events.EventEmitter {
   // Sends all acks after 200ms
   _sendAcks () {
     setInterval(() => {
-      if (this.acks.length > 0) {
+      if (this.simAcks.length > 0) {
         const acks = this._getSimAcks(true)
         if (acks.length === 0) return
 
@@ -240,6 +264,11 @@ export default class Circuit extends events.EventEmitter {
         this.send('PacketAck', data, true)
       }
     }, 200)
+  }
+
+  _filterViewerAcks (acks) {
+    if (acks.length === 0) return
+    this.viewerAcks = this.viewerAcks.filter(viewerAck => !acks.includes(viewerAck.sequenceNumber))
   }
 }
 

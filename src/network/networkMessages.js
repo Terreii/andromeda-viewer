@@ -594,7 +594,7 @@ export function createBody (type, data) {
   const allBuffers = [head, ...body]
 
   return {
-    needsZeroencode: template.zerocoded,
+    needsZeroEncode: template.zerocoded,
     couldBeTrusted: template.trusted,
     buffer: Buffer.concat(allBuffers)
   }
