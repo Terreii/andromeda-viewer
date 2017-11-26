@@ -274,55 +274,50 @@ export default class Circuit extends events.EventEmitter {
 
 // 0's in packet body are run length encoded, such that series of 1 to 255 zero
 // bytes are encoded to take 2 bytes.
-function zeroEncode (inputbuf) {
+function zeroEncode (inputBuffer) {
   const data = []
-  let zero = false
-  let zeroCount = 0
+  let zeroCount = 0 // how many zeros are encoded before this byte
 
-  for (let i = 0; i < inputbuf.length; i++) {
-    const byte = inputbuf.readUInt8(i)
-    if (byte !== 0) {
-      if (zeroCount !== 0) {
+  for (const byte of inputBuffer) {
+    if (byte === 0) {
+      if (zeroCount === 0) {
+        data.push(byte)
+      }
+      zeroCount += 1
+    } else {
+      if (zeroCount > 0) {
         data.push(zeroCount)
         zeroCount = 0
-        zero = false
       }
       data.push(byte)
-    } else {
-      if (zero === false) {
-        data.push(byte)
-        zero = true
-      }
-      zeroCount++
     }
   }
+
   if (zeroCount !== 0) {
     data.push(zeroCount)
   }
   return Buffer.from(data)
 }
 
-// decodes zeroencoded bodies
-function zeroDecode (inputbuf) {
+// decodes zeroEncoded bodies
+function zeroDecode (inputBuffer) {
   const data = []
   let inZero = false
 
-  for (let i = 0; i < inputbuf.length; i++) {
-    const byte = inputbuf.readUInt8(i)
-    if (byte !== 0) {
-      if (inZero === true) {
-        let zeroCount = byte - 1
-        while (zeroCount > 0) {
-          data.push(0)
-          zeroCount--
-        }
-        inZero = false
-      } else {
-        data.push(byte)
+  for (const byte of inputBuffer) {
+    if (byte === 0) {
+      inZero = true
+      continue
+    }
+    if (inZero) {
+      let zeroCount = byte
+      while (zeroCount > 0) {
+        data.push(0)
+        zeroCount -= 1
       }
+      inZero = false
     } else {
       data.push(byte)
-      inZero = true
     }
   }
   return Buffer.from(data)
