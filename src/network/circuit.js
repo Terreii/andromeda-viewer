@@ -329,7 +329,7 @@ function zeroDecode (inputbuf) {
 }
 
 // Extracts the Acks
-// for what acks are used is unknown to me
+// Acks are the sequence number. They are used to indicate that a package was received.
 function extractAcks (msg) {
   let offset = msg.length - 1 // in the last byte is the number of acks stored
   const acks = []
@@ -338,6 +338,5 @@ function extractAcks (msg) {
     offset -= 4
     acks.push(msg.readUInt32LE(offset))
   }
-  acks.reverse()
   return acks
 }
