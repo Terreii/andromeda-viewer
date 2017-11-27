@@ -92,7 +92,7 @@ export function logout () {
           SessionID: session.get('sessionId')
         }
       ]
-    })
+    }, true)
   }
   // TODO wait for the LogoutReply
 }
@@ -111,7 +111,7 @@ function connectToSim (sessionInfo, circuit) {
         ID: sessionInfo.agent_id
       }
     ]
-  })
+  }, true)
 
   activeCircuit.send('CompleteAgentMovement', {
     AgentData: [
@@ -121,7 +121,7 @@ function connectToSim (sessionInfo, circuit) {
         CircuitCode: circuitCode
       }
     ]
-  })
+  }, true)
 
   activeCircuit.send('AgentUpdate', {
     AgentData: [
@@ -140,7 +140,7 @@ function connectToSim (sessionInfo, circuit) {
         Flags: 0
       }
     ]
-  })
+  }, true)
 
   activeCircuit.send('UUIDNameRequest', {
     UUIDNameBlock: [
@@ -148,7 +148,7 @@ function connectToSim (sessionInfo, circuit) {
         ID: sessionInfo.agent_id
       }
     ]
-  })
+  }, true)
 
   setTimeout(function () {
     activeCircuit.send('RequestRegionInfo', {
@@ -158,7 +158,7 @@ function connectToSim (sessionInfo, circuit) {
           SessionID: sessionInfo.session_id
         }
       ]
-    })
+    }, true)
   }, 100)
 
   return activeCircuit

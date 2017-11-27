@@ -10,7 +10,7 @@ function sendUUIDNameRequest (ids) {
           ID: id.toString()
         }
       })
-    })
+    }, true)
   }
 }
 
@@ -106,6 +106,6 @@ export function updateRights (friendUUID, changedRights) {
           RelatedRights: rightsInt
         }
       ]
-    })
+    }, true)
   }
 }
