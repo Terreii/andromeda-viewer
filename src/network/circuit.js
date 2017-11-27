@@ -38,7 +38,7 @@ export default class Circuit extends events.EventEmitter {
     this.simAcks = []
     this.viewerAcks = []
 
-    setTimeout(() => this._sendAcks(), 100)
+    setTimeout(() => this._startAcksProcess(), 100)
   }
 
   _onOpen () {
@@ -116,7 +116,7 @@ export default class Circuit extends events.EventEmitter {
       })
       return
     } else if (parsedBody.name === 'PacketAck') {
-      this._filterViewerAcks(parseBody.Packets.data.map(data => data.ID.value))
+      this._filterViewerAcks(parsedBody.Packets.data.map(data => data.ID.value))
       return
     }
 
@@ -245,30 +245,53 @@ export default class Circuit extends events.EventEmitter {
     return acksBuffer
   }
 
-  // Sends all acks after 200ms
-  _sendAcks () {
+  // resend packages and send ack-message every 200ms
+  _startAcksProcess () {
     setInterval(() => {
       if (this.simAcks.length > 0) {
-        const acks = this._getSimAcks(true)
-        if (acks.length === 0) return
-
-        const data = {
-          Packets: acks.map(ack => {
-            return {
-              ID: ack
-            }
-          })
-        }
-
-        this._setSimAcksToSend(true)
-        this.send('PacketAck', data, true)
+        this._sendAcks()
+      }
+      if (this.viewerAcks.length > 0) {
+        this._resendPackages()
       }
     }, 200)
   }
 
+  // Sends all acks after 200ms
+  _sendAcks () {
+    const acks = this._getSimAcks(true)
+    if (acks.length === 0) return
+
+    const data = {
+      Packets: acks.map(ack => {
+        return {
+          ID: ack
+        }
+      })
+    }
+
+    this._setSimAcksToSend(true)
+    this.send('PacketAck', data, true)
+  }
+
+  // Filter received acks out from the viewerAcks array
   _filterViewerAcks (acks) {
     if (acks.length === 0) return
     this.viewerAcks = this.viewerAcks.filter(viewerAck => !acks.includes(viewerAck.sequenceNumber))
+  }
+
+  // Resend packages if they have bin send more than 500ms ago, and haven't been filtered out.
+  _resendPackages () {
+    const now = Date.now() - 500 // 500ms
+    const toSendPackages = this.viewerAcks.filter(ack => ack.time < now)
+    if (toSendPackages.length === 0) return
+
+    this._filterViewerAcks(toSendPackages.map(ack => ack.sequenceNumber))
+
+    toSendPackages.forEach(ack => {
+      const count = ack.resentCount + 1
+      this._combineAndSend(ack.target, ack.body, ack.acks, true, ack.zeroEncoded, count)
+    })
   }
 }
 
