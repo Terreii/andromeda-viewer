@@ -66,8 +66,7 @@
     "parser": "babel-eslint",
     "env": [
       "jest",
-      "es6",
-      "browser"
-   ]
+      "es6"
+    ]
   }
 }
