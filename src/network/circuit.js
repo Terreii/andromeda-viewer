@@ -175,7 +175,7 @@ export default class Circuit extends events.EventEmitter {
     const packet = Buffer.concat([target, header, body, acks])
 
     if (this.websocketIsOpen) {
-      this.websocket.send(packet.buffer)
+      this.websocket.send(packet)
     } else {
       this.cachedMessages.push(packet)
     }
