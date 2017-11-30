@@ -21,7 +21,7 @@ export function sendLocalChatMessage (text, type, channel) {
           Channel: channel
         }
       ]
-    })
+    }, true)
   }
 }
 
@@ -63,7 +63,7 @@ export function sendInstantMessage (text, to, id) {
             BinaryBucket: binaryBucket
           }
         ]
-      })
+      }, true)
 
       const avatarName = activeState.account.get('avatarName')
       const msg = {

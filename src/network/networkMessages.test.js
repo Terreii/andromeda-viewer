@@ -381,7 +381,7 @@ global.describe('Messages', () => {
         }
         const obj = messages.createBody('TestMessage', testMessage)
 
-        global.expect(obj.needsZeroencode).toBe(true)
+        global.expect(obj.needsZeroEncode).toBe(true)
         global.expect(obj.couldBeTrusted).toBe(false)
         global.expect(Buffer.isBuffer(obj.buffer)).toBe(true)
         buffer = obj.buffer
