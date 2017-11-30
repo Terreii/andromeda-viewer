@@ -57,13 +57,18 @@ function createTestMessage (reliable, resend, hasAcks) {
       }
     ]
   })
+  const headBuffer = createTestHeader(reliable, resend, hasAcks)
+  const messageBuffer = Buffer.concat([headBuffer, body.buffer])
+
+  return messageBuffer
+}
+
+function createTestHeader (reliable, resend, hasAcks) {
   const flags = (reliable ? 64 : 0) + (resend ? 32 : 0) + (hasAcks ? 16 : 0)
   const headBuffer = Buffer.from([127, 0, 0, 1, 33, 0, flags, 0, 0, 0, 0, 0])
   headBuffer.writeUInt32BE(sequenceNumberForTests, 7)
   sequenceNumberForTests += 1
-  const messageBuffer = Buffer.concat([headBuffer, body.buffer])
-
-  return messageBuffer
+  return headBuffer
 }
 
 const circuit = new Circuit('127.0.0.1', 8080, 123456)
@@ -188,5 +193,42 @@ test('circuit should resend a package after 500ms', done => {
     expect(last.readUInt8(6) | 32).toBeTruthy()
 
     done()
-  }, 900)
+  }, 400)
+})
+
+describe('circuit should remove acks that the server has send back', () => {
+  test('with the PacketAck', () => {
+    const acksBody = createBody('PacketAck', {
+      Packets: circuit.viewerAcks.map(ack => ({ID: ack.sequenceNumber}))
+    })
+    const header = createTestHeader(false, false, false)
+    const message = Buffer.concat([header, acksBody.buffer])
+    circuit.websocket.onmessage({data: message})
+
+    expect(circuit.viewerAcks.length).toBe(0)
+  })
+
+  test('with acks at the end of a packet', () => {
+    // create an ack
+    circuit.send('OpenCircuit', {
+      CircuitInfo: [
+        {
+          IP: '0.0.0.0',
+          Port: 13
+        }
+      ]
+    }, true)
+    expect(circuit.viewerAcks.length).toBe(1)
+
+    // test at the end of packet
+    const messagePart1 = createTestMessage(false, false, true)
+
+    // create Ack at end
+    const acks = Buffer.from([0, 0, 0, 0, 1])
+    acks.writeUInt32LE(circuit.viewerAcks[0].sequenceNumber, 0)
+    const message2 = Buffer.concat([messagePart1, acks])
+    circuit.websocket.onmessage({data: message2})
+
+    expect(circuit.viewerAcks.length).toBe(0)
+  })
 })
