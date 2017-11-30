@@ -2,7 +2,6 @@ import crypto from 'crypto'
 
 import { viewerName, viewerVersion, viewerPlatform } from '../viewerInfo'
 import AvatarName from '../avatarName'
-import Circuit from '../network/circuit'
 
 import { getLocalChatHistory, loadIMChats } from './chatMessageActions'
 import { getAllFriendsDisplayNames } from './friendsActions'
@@ -37,6 +36,8 @@ export function login (firstName, lastName, password, grid) {
       read_critical: 'true'
     }
 
+    const circuit = import('../network/circuit')
+
     const response = await window.fetch('/hoodie/andromeda-viewer/login', {
       method: 'POST',
       body: JSON.stringify(loginData),
@@ -49,7 +50,7 @@ export function login (firstName, lastName, password, grid) {
     if (body.login !== 'true') throw body
 
     // Set the active circuit
-    extra.circuit = connectToSim(body)
+    extra.circuit = connectToSim(body, await circuit)
     dispatch(connectCircuit()) // Connect message parsing with circuit.
 
     const avatarName = new AvatarName({first: body.first_name, last: body.last_name})
@@ -91,13 +92,14 @@ export function logout () {
           SessionID: session.get('sessionId')
         }
       ]
-    })
+    }, true)
   }
   // TODO wait for the LogoutReply
 }
 
 // Login to a sim. Is called on the login process and sim-change
-function connectToSim (sessionInfo) {
+function connectToSim (sessionInfo, circuit) {
+  const Circuit = circuit.default
   const circuitCode = sessionInfo.circuit_code
   const activeCircuit = new Circuit(sessionInfo.sim_ip, sessionInfo.sim_port, circuitCode)
 
@@ -109,7 +111,7 @@ function connectToSim (sessionInfo) {
         ID: sessionInfo.agent_id
       }
     ]
-  })
+  }, true)
 
   activeCircuit.send('CompleteAgentMovement', {
     AgentData: [
@@ -119,7 +121,7 @@ function connectToSim (sessionInfo) {
         CircuitCode: circuitCode
       }
     ]
-  })
+  }, true)
 
   activeCircuit.send('AgentUpdate', {
     AgentData: [
@@ -138,7 +140,7 @@ function connectToSim (sessionInfo) {
         Flags: 0
       }
     ]
-  })
+  }, true)
 
   activeCircuit.send('UUIDNameRequest', {
     UUIDNameBlock: [
@@ -146,7 +148,7 @@ function connectToSim (sessionInfo) {
         ID: sessionInfo.agent_id
       }
     ]
-  })
+  }, true)
 
   setTimeout(function () {
     activeCircuit.send('RequestRegionInfo', {
@@ -156,7 +158,7 @@ function connectToSim (sessionInfo) {
           SessionID: sessionInfo.session_id
         }
       ]
-    })
+    }, true)
   }, 100)
 
   return activeCircuit

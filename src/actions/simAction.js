@@ -161,7 +161,7 @@ function sendRegionHandshakeReply (RegionHandshake) {
           Flags: flags
         }
       ]
-    })
+    }, true)
 
     dispatch({
       type: 'RegionHandshake',

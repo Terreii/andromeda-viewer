@@ -135,7 +135,7 @@ describe('createBody', () => {
       }
       const obj = createBody('TestMessage', testMessage)
 
-      expect(obj.needsZeroencode).toBe(true)
+      expect(obj.needsZeroEncode).toBe(true)
       expect(obj.couldBeTrusted).toBe(false)
       expect(Buffer.isBuffer(obj.buffer)).toBe(true)
       buffer = obj.buffer
