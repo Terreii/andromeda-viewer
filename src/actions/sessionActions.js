@@ -83,7 +83,6 @@ export function logout () {
     if (!session.get('loggedIn')) {
       throw new Error("You aren't logged in!")
     }
-    console.error(`I'm sorry Dave, I'm afraid I can't do that.`)
 
     circuit.send('LogoutRequest', {
       AgentData: [
@@ -93,8 +92,22 @@ export function logout () {
         }
       ]
     }, true)
+
+    dispatch({
+      type: 'StartLogout'
+    })
+
+    circuit.once('LogoutReply', msg => {
+      dispatch({
+        type: 'DidLogout'
+      })
+
+      circuit.close()
+
+      // TODO: remove this and reset state
+      setTimeout(() => window.location.reload(), 2000)
+    })
   }
-  // TODO wait for the LogoutReply
 }
 
 // Login to a sim. Is called on the login process and sim-change

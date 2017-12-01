@@ -56,6 +56,10 @@ class TopBar extends React.Component {
       showAccountMenu: false
     }
     this._boundToggleMenu = this._toggleAccountMenu.bind(this)
+    this._boundLogout = this._logout.bind(this)
+    this._boundSignOut = this._logoutFromViewer.bind(this)
+    this._boundSignIn = this._showSignInPopup.bind(this)
+    this._boundSignUp = this._showSignUpPopup.bind(this)
   }
 
   _logout (event) {
@@ -108,7 +112,7 @@ class TopBar extends React.Component {
 
     const viewerAccountText = viewerAccountLoggedIn
       ? `Hello ${this.props.account.getIn(['viewerAccount', 'username'])}`
-      : <a href='#signin' onClick={this._showSignInPopup.bind(this)}>Sign into Andromeda</a>
+      : <a href='#signin' onClick={this._boundSignIn}>Sign into Andromeda</a>
 
     return <AccountMenuBody>
       <div>{greeting}</div>
@@ -118,17 +122,17 @@ class TopBar extends React.Component {
       </div>
 
       <div style={{display: viewerAccountLoggedIn ? 'none' : ''}}>
-        <a href='#signup' onClick={this._showSignUpPopup.bind(this)}>Sign up to Andromeda</a>
+        <a href='#signup' onClick={this._boundSignUp}>Sign up to Andromeda</a>
       </div>
 
       <div style={{display: isLoggedIn ? '' : 'none'}}>
-        <LogoutButton href='#' onClick={this._logout}>
+        <LogoutButton href='#' onClick={this._boundLogout}>
           log out
         </LogoutButton>
       </div>
 
       <div style={{display: viewerAccountLoggedIn ? '' : 'none'}}>
-        <Link href='' onClick={this._logoutFromViewer.bind(this)}>
+        <Link href='' onClick={this._boundSignOut}>
           Log out from Viewer
         </Link>
       </div>

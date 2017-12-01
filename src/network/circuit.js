@@ -47,6 +47,10 @@ export default class Circuit extends events.EventEmitter {
     this.cachedMessages = []
   }
 
+  close () {
+    this.websocket.close()
+  }
+
   _onMessage (message) {
     const msg = Buffer.from(message.data)
 
