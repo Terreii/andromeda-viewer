@@ -120,6 +120,7 @@ export default function accountReducer (state = getDefault(), action) {
       }))
 
     case 'DidLogout':
+    case 'UserWasKicked':
       return state.merge({
         avatarName: '',
         loggedIn: false,

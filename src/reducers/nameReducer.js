@@ -99,6 +99,7 @@ export default function namesCoreReducer (state = Immutable.Map(), action) {
       return state.set('getDisplayNamesURL', action.capabilities.GetDisplayNames)
 
     case 'DidLogout':
+    case 'UserWasKicked':
       return Immutable.Map({
         names: namesReducer(undefined, action)
       })

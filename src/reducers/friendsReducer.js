@@ -58,6 +58,7 @@ export default function friendsReducer (state = Immutable.List(), action) {
       })
 
     case 'DidLogout':
+    case 'UserWasKicked':
       return Immutable.List()
 
     default:

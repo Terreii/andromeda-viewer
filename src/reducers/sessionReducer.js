@@ -1,6 +1,6 @@
 import {Map} from 'immutable'
 
-export default function SessionReducer (state = Map({loggedIn: false}), action) {
+export default function SessionReducer (state = Map({loggedIn: false, error: null}), action) {
   switch (action.type) {
     case 'didLogin':
       const sessionInfo = Object.keys(action.sessionInfo).reduce((info, key) => {
@@ -66,8 +66,10 @@ export default function SessionReducer (state = Map({loggedIn: false}), action) 
       })
 
     case 'DidLogout':
+    case 'UserWasKicked':
       return Map({
-        loggedIn: false
+        loggedIn: false,
+        error: action.type === 'UserWasKicked' ? action.reason : null
       })
 
     default:

@@ -74,6 +74,7 @@ export default function IMReducer (state = Immutable.Map(), action) {
       return state.set(action.chatUUID, setHistory(state.get(action.chatUUID), action))
 
     case 'DidLogout':
+    case 'UserWasKicked':
       return Immutable.Map()
 
     default:

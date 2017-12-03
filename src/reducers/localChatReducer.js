@@ -16,6 +16,7 @@ export default function localChatReducer (state = Immutable.List(), action) {
         .sort((a, b) => a.get('time') - b.get('time'))
 
     case 'DidLogout':
+    case 'UserWasKicked':
       return Immutable.List()
 
     default:
