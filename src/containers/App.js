@@ -10,6 +10,7 @@ import styled from 'styled-components'
 import ChatBox from '../components/chatBox'
 import LoginForm from '../components/login'
 import TopBar from '../components/topBar'
+import Popup from '../components/popup'
 import SignInPopup from '../components/signInPopup'
 import SignOutPopup from '../components/signOutPopup'
 
@@ -55,8 +56,10 @@ class App extends React.Component {
   }
 
   getPopup () {
+    const popup = this.props.popup
+    if (popup == null || popup.length === 0) return null
     const close = this.props.closePopup
-    switch (this.props.popup) {
+    switch (popup) {
       case 'signIn':
         return <SignInPopup
           onCancel={close}
@@ -73,7 +76,9 @@ class App extends React.Component {
         return <SignOutPopup onCancel={close} onSignOut={this.props.signOut} />
 
       default:
-        return null
+        return <Popup title={'Error'} onClose={close}>
+          {popup}
+        </Popup>
     }
   }
 
@@ -98,7 +103,8 @@ class App extends React.Component {
 }
 
 const mapStateToProps = state => {
-  const popup = state.account.getIn(['viewerAccount', 'signInPopup'])
+  const popup = state.account.getIn(['viewerAccount', 'signInPopup']) ||
+    state.session.get('error')
   const avatars = state.account.get('savedAvatars')
   const grids = state.account.get('savedGrids')
   const isSignedIn = state.account.getIn(['viewerAccount', 'loggedIn'])

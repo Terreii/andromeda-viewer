@@ -72,6 +72,9 @@ export default function SessionReducer (state = Map({loggedIn: false, error: nul
         error: action.type === 'UserWasKicked' ? action.reason : null
       })
 
+    case 'ClosePopup':
+      return state.set('error', null)
+
     default:
       return state
   }
