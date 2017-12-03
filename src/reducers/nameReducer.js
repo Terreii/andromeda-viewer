@@ -98,6 +98,11 @@ export default function namesCoreReducer (state = Immutable.Map(), action) {
     case 'SeedCapabilitiesLoaded':
       return state.set('getDisplayNamesURL', action.capabilities.GetDisplayNames)
 
+    case 'DidLogout':
+      return Immutable.Map({
+        names: namesReducer(undefined, action)
+      })
+
     default:
       return state
   }

@@ -65,6 +65,11 @@ export default function SessionReducer (state = Map({loggedIn: false}), action) 
         }
       })
 
+    case 'DidLogout':
+      return Map({
+        loggedIn: false
+      })
+
     default:
       return state
   }

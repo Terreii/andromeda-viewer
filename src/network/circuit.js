@@ -49,6 +49,7 @@ export default class Circuit extends events.EventEmitter {
 
   close () {
     this.websocket.close()
+    this.removeAllListeners()
   }
 
   _onMessage (message) {

@@ -119,6 +119,15 @@ export default function accountReducer (state = getDefault(), action) {
           : grid.get('name') !== action.grid.name
       }))
 
+    case 'DidLogout':
+      return state.merge({
+        avatarName: '',
+        loggedIn: false,
+        avatarIdentifier: '',
+        sync: false,
+        agentId: ''
+      })
+
     default:
       return state
   }

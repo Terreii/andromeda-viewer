@@ -103,9 +103,6 @@ export function logout () {
       })
 
       circuit.close()
-
-      // TODO: remove this and reset state
-      setTimeout(() => window.location.reload(), 2000)
     })
   }
 }
