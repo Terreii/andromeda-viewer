@@ -119,8 +119,9 @@ export function getIMChatTypeOfDialog (dialog) {
 
 // UUID make structure: 00000000-0000-4000-x000-000000000000
 // all are hexadecimal numbers.
-// 4 is always 4 and x is between 8 and b.
-function uuidXOR (idIn1, idIn2) {
+// 4 is always 4 and x is between 8 and b, but only if correct == true
+// XOR of IM-chats isn't a correct UUID.
+function uuidXOR (idIn1, idIn2, correct = false) {
   const id1 = idIn1.toString().replace(/-/gi, '')
   const id2 = idIn2.toString().replace(/-/gi, '')
 
@@ -131,9 +132,9 @@ function uuidXOR (idIn1, idIn2) {
     const byte2 = parseInt(id2[index] + id2[index + 1], 16)
 
     let xorByte = byte1 ^ byte2
-    if (i === 6) { // Makes the 4 in the UUID
+    if (correct && i === 6) { // Makes the 4 in the UUID
       xorByte = (0b00001111 & xorByte) | (4 << 4)
-    } else if (i === 8) { // Makes the y in the UUID. It is between 8 and b
+    } else if (correct && i === 8) { // Makes the y in the UUID. It is between 8 and b
       xorByte = (8 << 4) + (0b00111111 & xorByte)
     }
 
