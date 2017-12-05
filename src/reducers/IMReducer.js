@@ -51,6 +51,7 @@ export default function IMReducer (state = Immutable.Map(), action) {
   switch (action.type) {
     case 'CreateNewIMChat':
       return state.set(action.chatUUID, IMChat(state.get(action.chatUUID), action))
+
     case 'IMChatInfosLoaded':
       return action.chats.reduce((lastState, chat) => {
         const innerAction = Object.assign({}, chat, {
@@ -59,15 +60,23 @@ export default function IMReducer (state = Immutable.Map(), action) {
         const updatedChat = IMChat(state.get(action.chatUUID), innerAction)
         return lastState.set(chat.chatUUID, updatedChat)
       }, state)
+
     case 'ImprovedInstantMessage':
     case 'SelfSendImprovedInstantMessage':
       // filter start/end typing
       if (action.msg.dialog === 41 || action.msg.dialog === 42) return state
       return state.set(action.msg.chatUUID, IMChat(state.get(action.msg.chatUUID), action))
+
     case 'IMHistoryStartLoading':
       return state.setIn([action.chatUUID, 'isLoadingHistory'], true)
+
     case 'IMHistoryLoaded':
       return state.set(action.chatUUID, setHistory(state.get(action.chatUUID), action))
+
+    case 'DidLogout':
+    case 'UserWasKicked':
+      return Immutable.Map()
+
     default:
       return state
   }

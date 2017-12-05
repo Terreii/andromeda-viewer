@@ -72,6 +72,8 @@ export function login (firstName, lastName, password, grid) {
     dispatch(fetchSeedCapabilities(body['seed_capability']))
       .then(() => dispatch(getAllFriendsDisplayNames()))
 
+    extra.circuit.on('KickUser', msg => dispatch(getKicked(msg)))
+
     return body
   }
 }
@@ -83,7 +85,6 @@ export function logout () {
     if (!session.get('loggedIn')) {
       throw new Error("You aren't logged in!")
     }
-    console.error(`I'm sorry Dave, I'm afraid I can't do that.`)
 
     circuit.send('LogoutRequest', {
       AgentData: [
@@ -93,8 +94,19 @@ export function logout () {
         }
       ]
     }, true)
+
+    dispatch({
+      type: 'StartLogout'
+    })
+
+    circuit.once('LogoutReply', msg => {
+      dispatch({
+        type: 'DidLogout'
+      })
+
+      circuit.close()
+    })
   }
-  // TODO wait for the LogoutReply
 }
 
 // Login to a sim. Is called on the login process and sim-change
@@ -162,4 +174,22 @@ function connectToSim (sessionInfo, circuit) {
   }, 100)
 
   return activeCircuit
+}
+
+function getKicked (msg) {
+  return (dispatch, getState, {circuit}) => {
+    const session = getState().session
+    const agentId = session.get('agentId')
+    const sessionId = session.get('sessionId')
+    const msgAgentId = msg.getValue('UserInfo', 0, 'AgentID')
+    const msgSessionId = msg.getValue('UserInfo', 0, 'SessionID')
+
+    if (agentId === msgAgentId && sessionId === msgSessionId) {
+      circuit.close()
+      dispatch({
+        type: 'UserWasKicked',
+        reason: msg.getStringValue('UserInfo', 0, 'Reason')
+      })
+    }
+  }
 }
