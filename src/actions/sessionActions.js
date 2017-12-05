@@ -72,7 +72,7 @@ export function login (firstName, lastName, password, grid) {
     dispatch(fetchSeedCapabilities(body['seed_capability']))
       .then(() => dispatch(getAllFriendsDisplayNames()))
 
-    extra.circuit.on('KickUser', msg => dispatch(getKicked(msg.body)))
+    extra.circuit.on('KickUser', msg => dispatch(getKicked(msg)))
 
     return body
   }
@@ -181,14 +181,14 @@ function getKicked (msg) {
     const session = getState().session
     const agentId = session.get('agentId')
     const sessionId = session.get('sessionId')
-    const msgAgentId = msg.UserInfo.data[0].AgentID.value
-    const msgSessionId = msg.UserInfo.data[0].SessionID.value
+    const msgAgentId = msg.getValue('UserInfo', 0, 'AgentID')
+    const msgSessionId = msg.getValue('UserInfo', 0, 'SessionID')
 
     if (agentId === msgAgentId && sessionId === msgSessionId) {
       circuit.close()
       dispatch({
         type: 'UserWasKicked',
-        reason: msg.UserInfo.data[0].Reason.value.toString('utf8').replace(/\0/gi, '')
+        reason: msg.getStringValue('UserInfo', 0, 'Reason')
       })
     }
   }
