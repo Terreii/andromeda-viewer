@@ -37,7 +37,7 @@
   "proxy": "http://localhost:8080",
   "devDependencies": {
     "@hoodie/client": "^10.1.1",
-    "concurrently": "^3.5.0",
+    "concurrently": "^3.5.1",
     "immutable": "^3.8.2",
     "markdown-chalk": "^1.4.0",
     "pouchdb": "^6.3.4",
@@ -59,7 +59,7 @@
     "macaddress": "^0.2.8",
     "node-fetch": "^1.7.3",
     "uuid": "^3.1.0",
-    "ws": "^3.3.1",
+    "ws": "^3.3.2",
     "xmlrpc": "^1.3.2"
   },
   "standard": {

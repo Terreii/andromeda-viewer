@@ -62,18 +62,11 @@ export default class Circuit extends events.EventEmitter {
     const port = msg.readUInt16LE(4)
 
     // extract the flags
-    let flags = msg.readUInt8(6)
-    const flagCheck = function (bit) {
-      const is = flags >= bit
-      if (is) {
-        flags -= bit
-      }
-      return is
-    }
-    const isZeroEncoded = flagCheck(128)
-    const isReliable = flagCheck(64)
-    const isResent = flagCheck(32)
-    const hasAck = flagCheck(16)
+    const flags = msg.readUInt8(6)
+    const isZeroEncoded = (flags & 0b10000000) > 0 // 128
+    const isReliable = (flags & 0b01000000) > 0 // 64
+    const isResend = (flags & 0b00100000) > 0 // 32
+    const hasAck = (flags & 0b00010000) > 0 // 16
 
     const senderSequenceNumber = msg.readUInt32BE(7)
     this.senderSequenceNumber = senderSequenceNumber
@@ -84,9 +77,7 @@ export default class Circuit extends events.EventEmitter {
 
     const decodedBody = isZeroEncoded ? zeroDecode(msgBody) : msgBody
 
-    const parsedBody = parseBody(decodedBody)
-
-    const acks = hasAck ? extractAcks(msg) : []
+    const parsedBody = parseBody(decodedBody, ip, port, isResend, isReliable)
 
     if (isReliable) {
       this.simAcks.push({
@@ -96,37 +87,25 @@ export default class Circuit extends events.EventEmitter {
       })
     }
 
-    const toEmitObj = {
-      isZeroEncoded: isZeroEncoded,
-      isReliable: isReliable,
-      isResent: isResent,
-      body: parsedBody,
-      hasAck: hasAck,
-      acks: acks,
-      ip,
-      port
-    }
-
+    const acks = hasAck ? extractAcks(msg) : []
     if (acks.length > 0) {
       this._filterViewerAcks(acks)
     }
-
     if (parsedBody.name === 'StartPingCheck') {
       this.send('CompletePingCheck', {
         PingID: [
           {
-            PingID: parsedBody.PingID.data[0].PingID.value
+            PingID: parsedBody.getValue('PingID', 0, 'PingID')
           }
         ]
       })
       return
     } else if (parsedBody.name === 'PacketAck') {
-      this._filterViewerAcks(parsedBody.Packets.data.map(data => data.ID.value))
+      this._filterViewerAcks(parsedBody.mapBlock('Packets', getValue => getValue('ID')))
       return
     }
-
-    this.emit(parsedBody.name, toEmitObj)
-    this.emit('packetReceived', toEmitObj) // for debugging
+    this.emit(parsedBody.name, parsedBody)
+    this.emit('packetReceived', parsedBody)
   }
 
   // Send a Packet.

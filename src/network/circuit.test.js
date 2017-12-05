@@ -119,7 +119,7 @@ test('parse a received package', () => {
 
   const received = []
   circuit.on('packetReceived', message => {
-    expect(message.body).toBeTruthy()
+    expect(message).toBeTruthy()
     received.push(message)
   })
 
@@ -180,7 +180,7 @@ test('circuit should send after 200ms a PacketAck', done => {
       : parsedAckMessageB
 
     expect(parsedAckMessage).toBeTruthy()
-    expect(parsedAckMessage.Packets.data[0].ID.value).toBe(0)
+    expect(parsedAckMessage.getValue('Packets', 0, 'ID')).toBe(0)
 
     done()
   }, 250)
