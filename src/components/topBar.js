@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import styled from 'styled-components'
+import styled, {injectGlobal} from 'styled-components'
+import Menu from 'react-burger-menu/lib/menus/slide'
 
 import { logout } from '../actions/sessionActions'
 import { showSignOutPopup, showSignInPopup } from '../actions/viewerAccount'
@@ -18,7 +19,8 @@ const MenuBar = styled.div`
   flex-direction: row;
   justify-content: space-between;
   & > * {
-    margin: .4em;
+    margin-top: .4em;
+    margin-bottom: .4em;
   }
 `
 
@@ -32,23 +34,63 @@ const LogoutButton = Link.extend`
   }
 `
 
-const MenuText = Link.withComponent(styled.span)
+const MenuText = Link.withComponent('span')
 
-const AccountMenu = styled.div`
-  display: block;
-  height: inherit;
-  position: relative;
-  cursor: pointer;
-  color: white;
-`
+injectGlobal`
+  .bm-burger-button {
+    position: fixed;
+    width: 36px;
+    height: 30px;
+    left: 9px;
+    top: 9px;
+  }
 
-const AccountMenuBody = styled.div`
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  top: 2.05em;
-  background-color: rgb(77, 80, 85);
-  padding: .6em;
+  .bm-overlay {
+    top: 0px;
+  }
+
+  .bm-burger-bars {
+    background: rgb(211, 211, 211);
+  }
+
+  .bm-morph-shape {
+    fill: #373a47;
+  }
+
+  .bm-menu-wrap {
+    top: 0em;
+  }
+
+  .bm-menu {
+    background: #373a47;
+
+    a, span {
+      color: #b8b7ad;
+
+      &:hover,
+      &:focus {
+        color: #c94e50;
+      }
+    }
+  }
+
+  .bm-item-list a, .bm-item-list span {
+    padding: 0.8em;
+    font-weight: 700;
+
+    span {
+      margin-left: 10px;
+    }
+  }
+
+  .bm-cross {
+    background: #bdc3c7;
+  }
+
+  .bm-menu {
+    padding: 2.5em 1.5em 0;
+    font-size: 1.15em;
+  }
 `
 
 class TopBar extends React.Component {
@@ -100,7 +142,6 @@ class TopBar extends React.Component {
   }
 
   renderAccountMenu () {
-    if (!this.state.showAccountMenu) return null
     const isLoggedIn = this.props.account.get('loggedIn')
 
     const greeting = isLoggedIn
@@ -120,12 +161,13 @@ class TopBar extends React.Component {
         Sign into Andromeda
       </Link>
 
-    return <AccountMenuBody>
-      <div>{greeting}</div>
+    return <Menu>
+      <MenuText>{greeting}</MenuText>
 
       {viewerAccountText}
 
       <Link
+        className='menu-item'
         style={{display: viewerAccountLoggedIn ? 'none' : ''}}
         href='#signup'
         onClick={this._boundSignUp}
@@ -134,6 +176,7 @@ class TopBar extends React.Component {
       </Link>
 
       <LogoutButton
+        className='menu-item'
         style={{display: isLoggedIn ? '' : 'none'}}
         href='#'
         onClick={this._boundLogout}
@@ -142,13 +185,14 @@ class TopBar extends React.Component {
       </LogoutButton>
 
       <Link
+        className='menu-item'
         style={{display: viewerAccountLoggedIn ? '' : 'none'}}
         href=''
         onClick={this._boundSignOut}
         >
         Log out from Viewer
       </Link>
-    </AccountMenuBody>
+    </Menu>
   }
 
   render () {
@@ -166,10 +210,7 @@ class TopBar extends React.Component {
       </span>
       : <span>Welcome</span>
     return <MenuBar>
-      <AccountMenu onClick={this._boundToggleMenu}>
-        Account
-        {this.renderAccountMenu()}
-      </AccountMenu>
+      {this.renderAccountMenu()}
       {msgOfDay}
       <span />
     </MenuBar>
