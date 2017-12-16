@@ -56,9 +56,13 @@ export function saveAvatar (name, grid) {
 
 export function loadSavedAvatars () {
   return (dispatch, getState, {hoodie}) => {
-    if (!getState().account.getIn(['viewerAccount', 'loggedIn'])) {
+    const account = getState().account
+
+    if (!account.getIn(['viewerAccount', 'loggedIn'])) {
       return Promise.reject(new Error('Not signed in to Viewer!'))
     }
+
+    if (account.get('savedAvatarsLoaded')) return Promise.resolve()
 
     const avatarsStore = hoodie.store.withIdPrefix('avatars/')
 
@@ -121,9 +125,13 @@ export function saveGrid (name, loginURL) {
 
 export function loadSavedGrids () {
   return (dispatch, getState, {hoodie}) => {
-    if (!getState().account.getIn(['viewerAccount', 'loggedIn'])) {
+    const account = getState().account
+
+    if (!account.getIn(['viewerAccount', 'loggedIn'])) {
       return Promise.reject(new Error('Not signed in to Viewer!'))
     }
+
+    if (account.get('savedGridsLoaded')) return Promise.resolve()
 
     const gridsStore = hoodie.store.withIdPrefix('grids/')
 
