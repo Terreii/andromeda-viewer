@@ -50,9 +50,9 @@ class App extends React.Component {
     })
   }
 
-  _loadAvatars () {
-    this.props.loadSavedGrids()
-      .then(() => this.props.loadSavedAvatars())
+  async _loadAvatars () {
+    await this.props.loadSavedGrids()
+    await this.props.loadSavedAvatars()
   }
 
   getPopup () {
