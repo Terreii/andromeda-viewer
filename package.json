@@ -50,12 +50,12 @@
     "redux": "^3.7.2",
     "redux-thunk": "^2.2.0",
     "standard": "^10.0.3",
-    "styled-components": "^2.2.4",
+    "styled-components": "^2.3.0",
     "weallbehave": "^1.2.0",
     "weallcontribute": "^1.0.8"
   },
   "dependencies": {
-    "hoodie": "^28.2.2",
+    "hoodie": "^28.2.4",
     "macaddress": "^0.2.8",
     "node-fetch": "^1.7.3",
     "uuid": "^3.1.0",
