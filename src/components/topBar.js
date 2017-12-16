@@ -32,6 +32,8 @@ const LogoutButton = Link.extend`
   }
 `
 
+const MenuText = Link.withComponent(styled.span)
+
 const AccountMenu = styled.div`
   display: block;
   height: inherit;
@@ -111,31 +113,41 @@ class TopBar extends React.Component {
     ])
 
     const viewerAccountText = viewerAccountLoggedIn
-      ? `Hello ${this.props.account.getIn(['viewerAccount', 'username'])}`
-      : <a href='#signin' onClick={this._boundSignIn}>Sign into Andromeda</a>
+      ? <MenuText>
+        {`Hello ${this.props.account.getIn(['viewerAccount', 'username'])}`}
+      </MenuText>
+      : <Link href='#signin' onClick={this._boundSignIn}>
+        Sign into Andromeda
+      </Link>
 
     return <AccountMenuBody>
       <div>{greeting}</div>
 
-      <div>
-        {viewerAccountText}
-      </div>
+      {viewerAccountText}
 
-      <div style={{display: viewerAccountLoggedIn ? 'none' : ''}}>
-        <a href='#signup' onClick={this._boundSignUp}>Sign up to Andromeda</a>
-      </div>
+      <Link
+        style={{display: viewerAccountLoggedIn ? 'none' : ''}}
+        href='#signup'
+        onClick={this._boundSignUp}
+        >
+        Sign up to Andromeda
+      </Link>
 
-      <div style={{display: isLoggedIn ? '' : 'none'}}>
-        <LogoutButton href='#' onClick={this._boundLogout}>
-          log out
-        </LogoutButton>
-      </div>
+      <LogoutButton
+        style={{display: isLoggedIn ? '' : 'none'}}
+        href='#'
+        onClick={this._boundLogout}
+        >
+        log out
+      </LogoutButton>
 
-      <div style={{display: viewerAccountLoggedIn ? '' : 'none'}}>
-        <Link href='' onClick={this._boundSignOut}>
-          Log out from Viewer
-        </Link>
-      </div>
+      <Link
+        style={{display: viewerAccountLoggedIn ? '' : 'none'}}
+        href=''
+        onClick={this._boundSignOut}
+        >
+        Log out from Viewer
+      </Link>
     </AccountMenuBody>
   }
 
