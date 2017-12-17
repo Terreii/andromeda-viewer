@@ -13,6 +13,7 @@ function getDefault () {
       signInPopup: ''
     },
     savedAvatars: [],
+    savedAvatarsLoaded: false,
     savedGrids: [
       {
         name: 'Second Life',
@@ -26,7 +27,8 @@ function getDefault () {
         name: 'OS Grid',
         loginURL: 'http://login.osgrid.org/'
       }
-    ]
+    ],
+    savedGridsLoaded: false
   }
   return Immutable.fromJS(defaultData)
 }
@@ -79,7 +81,10 @@ export default function accountReducer (state = getDefault(), action) {
 
     case 'AvatarsLoaded':
       const savedAvatars = Immutable.fromJS(action.avatars)
-      return state.set('savedAvatars', savedAvatars)
+      return state.merge({
+        savedAvatars,
+        savedAvatarsLoaded: true
+      })
 
     case 'SavedAvatarUpdated':
       return state.set('savedAvatars', state.get('savedAvatars').map(avatar => {
@@ -97,7 +102,10 @@ export default function accountReducer (state = getDefault(), action) {
 
     case 'GridsLoaded':
       const loadedGrids = Immutable.fromJS(action.grids)
-      return state.set('savedGrids', state.get('savedGrids').concat(loadedGrids))
+      return state.merge({
+        savedGrids: state.get('savedGrids').concat(loadedGrids),
+        savedGridsLoaded: true
+      })
 
     case 'SavedGridDidChanged':
       return state.set('savedGrids', state.get('savedGrids').map(grid => {

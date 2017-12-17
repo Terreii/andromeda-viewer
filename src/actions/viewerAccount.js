@@ -55,10 +55,14 @@ export function saveAvatar (name, grid) {
 }
 
 export function loadSavedAvatars () {
-  return (dispatch, getState, {hoodie}) => {
-    if (!getState().account.getIn(['viewerAccount', 'loggedIn'])) {
-      return Promise.reject(new Error('Not signed in to Viewer!'))
+  return async (dispatch, getState, {hoodie}) => {
+    const account = getState().account
+
+    if (!account.getIn(['viewerAccount', 'loggedIn'])) {
+      throw new Error('Not signed in to Viewer!')
     }
+
+    if (account.get('savedAvatarsLoaded')) return
 
     const avatarsStore = hoodie.store.withIdPrefix('avatars/')
 
@@ -66,11 +70,10 @@ export function loadSavedAvatars () {
       dispatch(avatarsDidChange(eventName, doc))
     })
 
-    return avatarsStore.findAll().then(avatars => {
-      dispatch({
-        type: 'AvatarsLoaded',
-        avatars
-      })
+    const avatars = await avatarsStore.findAll()
+    dispatch({
+      type: 'AvatarsLoaded',
+      avatars
     })
   }
 }
@@ -120,10 +123,14 @@ export function saveGrid (name, loginURL) {
 }
 
 export function loadSavedGrids () {
-  return (dispatch, getState, {hoodie}) => {
-    if (!getState().account.getIn(['viewerAccount', 'loggedIn'])) {
-      return Promise.reject(new Error('Not signed in to Viewer!'))
+  return async (dispatch, getState, {hoodie}) => {
+    const account = getState().account
+
+    if (!account.getIn(['viewerAccount', 'loggedIn'])) {
+      throw new Error('Not signed in to Viewer!')
     }
+
+    if (account.get('savedGridsLoaded')) return
 
     const gridsStore = hoodie.store.withIdPrefix('grids/')
 
@@ -131,11 +138,10 @@ export function loadSavedGrids () {
       dispatch(gridsDidChange(change, doc))
     })
 
-    return gridsStore.findAll().then(grids => {
-      dispatch({
-        type: 'GridsLoaded',
-        grids
-      })
+    const grids = await gridsStore.findAll()
+    dispatch({
+      type: 'GridsLoaded',
+      grids
     })
   }
 }
@@ -163,34 +169,33 @@ function gridsDidChange (type, grid) {
 }
 
 export function isSignedIn () {
-  return (dispatch, getState, {hoodie}) => {
-    return hoodie.account.get(['session', 'username']).then(properties => {
-      const isLoggedIn = properties.session != null
-      const action = didSignIn(isLoggedIn, properties != null ? properties.username : undefined)
-      dispatch(action)
-      return isLoggedIn
-    })
+  return async (dispatch, getState, {hoodie}) => {
+    const properties = await hoodie.account.get(['session', 'username'])
+    const isLoggedIn = properties.session != null
+    const action = didSignIn(isLoggedIn, properties != null ? properties.username : undefined)
+    dispatch(action)
+    return isLoggedIn
   }
 }
 
 export function signIn (username, password) {
-  return (dispatch, getState, {hoodie}) => {
+  return async (dispatch, getState, {hoodie}) => {
     dispatch(closePopup())
-    return hoodie.account.signIn({username, password}).then(accountProperties => {
+    try {
+      const accountProperties = await hoodie.account.signIn({username, password})
       dispatch(didSignIn(true, accountProperties.username))
-    }).catch(err => {
+    } catch (err) {
       dispatch(didSignIn(false))
       console.error(err)
-    })
+    }
   }
 }
 
 export function signUp (username, password) {
-  return (dispatch, getState, {hoodie}) => {
+  return async (dispatch, getState, {hoodie}) => {
     dispatch(closePopup())
-    return hoodie.account.signUp({username, password}).then(accountProperties => {
-      dispatch(signIn(username, password))
-    })
+    await hoodie.account.signUp({username, password})
+    dispatch(signIn(username, password))
   }
 }
 
