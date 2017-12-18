@@ -1,4 +1,5 @@
-import { combineReducers } from 'redux'
+import {combineReducers} from 'redux'
+import {reducer as burgerMenu} from 'redux-burger-menu'
 
 import account from './account'
 import friendsReducer from './friendsReducer'
@@ -9,6 +10,7 @@ import sessionReducer from './sessionReducer'
 
 const rootReducer = combineReducers({
   account,
+  burgerMenu,
   friends: friendsReducer,
   IMs: IMReducer,
   localChat: localChatReducer,

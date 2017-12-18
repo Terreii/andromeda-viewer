@@ -2,9 +2,15 @@ import React from 'react'
 import { connect } from 'react-redux'
 import styled, {injectGlobal} from 'styled-components'
 import Menu from 'react-burger-menu/lib/menus/slide'
+import {
+  decorator as reduxBurgerMenu,
+  action as toggleMenu
+} from 'redux-burger-menu'
 
 import { logout } from '../actions/sessionActions'
 import { showSignOutPopup, showSignInPopup } from '../actions/viewerAccount'
+
+const SlideMenu = reduxBurgerMenu(Menu)
 
 const MenuBar = styled.div`
   z-index: 100;
@@ -75,7 +81,7 @@ injectGlobal`
   }
 
   .bm-item-list a, .bm-item-list span {
-    padding: 0.8em;
+    padding: 0.8em 0em 0.8em 0em;
     font-weight: 700;
 
     span {
@@ -99,11 +105,22 @@ class TopBar extends React.Component {
     this.state = {
       showAccountMenu: false
     }
-    this._boundToggleMenu = this._toggleAccountMenu.bind(this)
     this._boundLogout = this._logout.bind(this)
     this._boundSignOut = this._logoutFromViewer.bind(this)
     this._boundSignIn = this._showSignInPopup.bind(this)
     this._boundSignUp = this._showSignUpPopup.bind(this)
+  }
+
+  _showSignInPopup (event) {
+    event.preventDefault()
+    this.props.toggleMenu(false)
+    this.props.showSignInPopup()
+  }
+
+  _showSignUpPopup (event) {
+    event.preventDefault()
+    this.props.toggleMenu(false)
+    this.props.showSignInPopup('signUp')
   }
 
   _logout (event) {
@@ -113,32 +130,8 @@ class TopBar extends React.Component {
 
   _logoutFromViewer (event) {
     event.preventDefault()
+    this.props.toggleMenu(false)
     this.props.showSignOutPopup()
-  }
-
-  _toggleAccountMenu (event) {
-    if (this.state.showAccountMenu) return
-
-    setTimeout(() => window.addEventListener('click', event => {
-      this.setState({
-        showAccountMenu: false
-      })
-    }, {
-      once: true
-    }), 10)
-    this.setState({
-      showAccountMenu: true
-    })
-  }
-
-  _showSignInPopup (event) {
-    event.preventDefault()
-    this.props.showSignInPopup()
-  }
-
-  _showSignUpPopup (event) {
-    event.preventDefault()
-    this.props.showSignInPopup('signUp')
   }
 
   renderAccountMenu () {
@@ -161,7 +154,7 @@ class TopBar extends React.Component {
         Sign into Andromeda
       </Link>
 
-    return <Menu>
+    return <SlideMenu>
       <MenuText>{greeting}</MenuText>
 
       {viewerAccountText}
@@ -192,7 +185,7 @@ class TopBar extends React.Component {
         >
         Log out from Viewer
       </Link>
-    </Menu>
+    </SlideMenu>
   }
 
   render () {
@@ -226,7 +219,8 @@ const mapStateToProps = state => {
 const mapDispatchToProps = {
   logout,
   showSignOutPopup,
-  showSignInPopup
+  showSignInPopup,
+  toggleMenu
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(TopBar)
