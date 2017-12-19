@@ -9,10 +9,11 @@ import styled from 'styled-components'
 
 import ChatBox from '../components/chatBox'
 import LoginForm from '../components/login'
-import TopBar from '../components/topBar'
 import Popup from '../components/popup'
 import SignInPopup from '../components/signInPopup'
 import SignOutPopup from '../components/signOutPopup'
+
+import TopMenuBar from './topMenuBar'
 
 import {
   closePopup,
@@ -95,7 +96,7 @@ class App extends React.Component {
         saveGrid={this.props.saveGrid}
         />
     return <AppContainer>
-      <TopBar messageOfTheDay={isLoggedIn ? this.props.messageOfTheDay : null} />
+      <TopMenuBar messageOfTheDay={isLoggedIn ? this.props.messageOfTheDay : null} />
       {mainSection}
       {this.getPopup()}
     </AppContainer>
