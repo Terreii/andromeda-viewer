@@ -29,13 +29,13 @@ export default function TopBar ({messageOfTheDay, account, signIn, signUp, signO
   const msgOfDay = messageOfTheDay
     ? <span>
       Message of the day:
-      {this.props.messageOfTheDay.get('text')}
+      {messageOfTheDay.get('text')}
       <Link
-        href={this.props.messageOfTheDay.get('href')}
+        href={messageOfTheDay.get('href')}
         target='_blank'
         rel='noopener noreferrer'
         >
-        {this.props.messageOfTheDay.get('href')}
+        {messageOfTheDay.get('href')}
       </Link>
     </span>
     : <span>Welcome</span>
