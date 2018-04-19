@@ -2,7 +2,6 @@ import {createNewIMChat} from './chatMessageActions'
 import {
   getValueOf,
   getStringValueOf,
-  getValuesOf,
   mapBlockOf
 } from '../network/msgGetters'
 
@@ -48,16 +47,6 @@ function parseIM (message) {
   return IMmsg
 }
 
-function parseUUIDNameReply (message) {
-  return mapBlockOf(message, 'UUIDNameBlock', getValue => {
-    return {
-      firstName: getValue('FirstName', true),
-      lastName: getValue('LastName', true),
-      id: getValue('ID')
-    }
-  })
-}
-
 function parseUserRights (message, getState) {
   const rights = mapBlockOf(message, 'Rights', getValue => {
     return {
@@ -66,22 +55,17 @@ function parseUserRights (message, getState) {
     }
   })
   return {
+    type: 'ChangeUserRights',
     ownId: getState().account.get('agentId'),
     fromId: getValueOf(message, 'AgentData', 'AgentID'),
     userRights: rights
   }
 }
 
-function parseRegionInfo (message) {
-  return {
-    regionInfo: getValuesOf(message, 'RegionInfo', 0, []),
-    regionInfo2: getValuesOf(message, 'RegionInfo2', 0, [])
-  }
-}
-
-// Gets all messages from the SIM and filters them for the UI
+// Gets all messages from the SIM and filters them, and if needed: calls their own actions.
 function simActionFilter (msg) {
   const name = msg.name
+
   switch (name) {
     case 'ChatFromSimulator':
       const parsed = parseChatFromSimulator(msg)
@@ -98,25 +82,19 @@ function simActionFilter (msg) {
         dispatch(dispatchSIMAction(name, parsedMsg, id))
       }
 
-    case 'UUIDNameReply':
-      return dispatchSIMAction(name, parseUUIDNameReply(msg))
-
     case 'ChangeUserRights':
       return (dispatch, getState) => {
-        dispatch(dispatchSIMAction(name, parseUserRights(msg, getState)))
+        dispatch(parseUserRights(msg, getState))
       }
-
-    case 'AgentMovementComplete':
-      return dispatchSIMAction(name, {
-        position: getValueOf(msg, 'Data', 'Position'),
-        lookAt: getValueOf(msg, 'Data', 'LookAt')
-      })
-
-    case 'RegionInfo':
-      return dispatchSIMAction(name, parseRegionInfo(msg))
 
     case 'RegionHandshake':
       return sendRegionHandshakeReply(msg)
+
+    // For all messages that will and can be directly dispatched
+    case 'AgentMovementComplete':
+    case 'RegionInfo':
+    case 'UUIDNameReply':
+      return msg
 
     default:
       break
