@@ -1,9 +1,7 @@
 import React from 'react'
-import { connect } from 'react-redux'
 import styled from 'styled-components'
 
-import { logout } from '../actions/sessionActions'
-import { showSignOutPopup, showSignInPopup } from '../actions/viewerAccount'
+import BurgerMenu from './burgerMenu'
 
 const MenuBar = styled.div`
   z-index: 100;
@@ -18,7 +16,8 @@ const MenuBar = styled.div`
   flex-direction: row;
   justify-content: space-between;
   & > * {
-    margin: .4em;
+    margin-top: .4em;
+    margin-bottom: .4em;
   }
 `
 
@@ -26,154 +25,29 @@ const Link = styled.a`
   color: white;
 `
 
-const LogoutButton = Link.extend`
-  :after {
-    content: " >>";
-  }
-`
-
-const AccountMenu = styled.div`
-  display: block;
-  height: inherit;
-  position: relative;
-  cursor: pointer;
-  color: white;
-`
-
-const AccountMenuBody = styled.div`
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  top: 2.05em;
-  background-color: rgb(77, 80, 85);
-  padding: .6em;
-`
-
-class TopBar extends React.Component {
-  constructor () {
-    super()
-    this.state = {
-      showAccountMenu: false
-    }
-    this._boundToggleMenu = this._toggleAccountMenu.bind(this)
-    this._boundLogout = this._logout.bind(this)
-    this._boundSignOut = this._logoutFromViewer.bind(this)
-    this._boundSignIn = this._showSignInPopup.bind(this)
-    this._boundSignUp = this._showSignUpPopup.bind(this)
-  }
-
-  _logout (event) {
-    event.preventDefault()
-    this.props.logout()
-  }
-
-  _logoutFromViewer (event) {
-    event.preventDefault()
-    this.props.showSignOutPopup()
-  }
-
-  _toggleAccountMenu (event) {
-    if (this.state.showAccountMenu) return
-
-    setTimeout(() => window.addEventListener('click', event => {
-      this.setState({
-        showAccountMenu: false
-      })
-    }, {
-      once: true
-    }), 10)
-    this.setState({
-      showAccountMenu: true
-    })
-  }
-
-  _showSignInPopup (event) {
-    event.preventDefault()
-    this.props.showSignInPopup()
-  }
-
-  _showSignUpPopup (event) {
-    event.preventDefault()
-    this.props.showSignInPopup('signUp')
-  }
-
-  renderAccountMenu () {
-    if (!this.state.showAccountMenu) return null
-    const isLoggedIn = this.props.account.get('loggedIn')
-
-    const greeting = isLoggedIn
-      ? `Hello ${this.props.account.get('avatarName')}`
-      : ''
-
-    const viewerAccountLoggedIn = this.props.account.getIn([
-      'viewerAccount',
-      'loggedIn'
-    ])
-
-    const viewerAccountText = viewerAccountLoggedIn
-      ? `Hello ${this.props.account.getIn(['viewerAccount', 'username'])}`
-      : <a href='#signin' onClick={this._boundSignIn}>Sign into Andromeda</a>
-
-    return <AccountMenuBody>
-      <div>{greeting}</div>
-
-      <div>
-        {viewerAccountText}
-      </div>
-
-      <div style={{display: viewerAccountLoggedIn ? 'none' : ''}}>
-        <a href='#signup' onClick={this._boundSignUp}>Sign up to Andromeda</a>
-      </div>
-
-      <div style={{display: isLoggedIn ? '' : 'none'}}>
-        <LogoutButton href='#' onClick={this._boundLogout}>
-          log out
-        </LogoutButton>
-      </div>
-
-      <div style={{display: viewerAccountLoggedIn ? '' : 'none'}}>
-        <Link href='' onClick={this._boundSignOut}>
-          Log out from Viewer
-        </Link>
-      </div>
-    </AccountMenuBody>
-  }
-
-  render () {
-    const msgOfDay = this.props.messageOfTheDay
-      ? <span>
-        Message of the day:
-        {this.props.messageOfTheDay.get('text')}
-        <Link
-          href={this.props.messageOfTheDay.get('href')}
-          target='_blank'
-          rel='noopener noreferrer'
-          >
-          {this.props.messageOfTheDay.get('href')}
-        </Link>
-      </span>
-      : <span>Welcome</span>
-    return <MenuBar>
-      <AccountMenu onClick={this._boundToggleMenu}>
-        Account
-        {this.renderAccountMenu()}
-      </AccountMenu>
-      {msgOfDay}
-      <span />
-    </MenuBar>
-  }
+export default function TopBar ({messageOfTheDay, account, signIn, signUp, signOut, logout}) {
+  const msgOfDay = messageOfTheDay
+    ? <span>
+      Message of the day:
+      {messageOfTheDay.get('text')}
+      <Link
+        href={messageOfTheDay.get('href')}
+        target='_blank'
+        rel='noopener noreferrer'
+        >
+        {messageOfTheDay.get('href')}
+      </Link>
+    </span>
+    : <span>Welcome</span>
+  return <MenuBar>
+    <BurgerMenu
+      account={account}
+      signIn={signIn}
+      signUp={signUp}
+      signOut={signOut}
+      logout={logout}
+      />
+    {msgOfDay}
+    <span />
+  </MenuBar>
 }
-
-const mapStateToProps = state => {
-  return {
-    account: state.account
-  }
-}
-
-const mapDispatchToProps = {
-  logout,
-  showSignOutPopup,
-  showSignInPopup
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(TopBar)
