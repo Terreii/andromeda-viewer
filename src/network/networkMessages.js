@@ -257,6 +257,10 @@ export class ReceivedMessage {
     this.trusted = template.trusted
     this.isReliable = isReliable
     this.isResend = isResend
+
+    this.frequency = template.frequency
+    this.number = template.number
+
     // no need for decoding, was done in circuit
     this.isOld = template.isOld
     this.from = {
@@ -279,6 +283,7 @@ export class ReceivedMessage {
     this.size = offset.value // ??? or something other
   }
 
+  /*
   get frequency () {
     return messagesByName[this.name].frequency
   }
@@ -286,6 +291,7 @@ export class ReceivedMessage {
   get number () {
     return messagesByName[this.name].number
   }
+  */
 
   // Return the value of a variable in an block
   // msg.getValue(blockName, [blockIndex,] variableName)
