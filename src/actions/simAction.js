@@ -1,39 +1,45 @@
-import { createNewIMChat } from './chatMessageActions'
+import {createNewIMChat} from './chatMessageActions'
+import {
+  getValueOf,
+  getStringValueOf,
+  getValuesOf,
+  mapBlockOf
+} from '../network/msgGetters'
 
 function parseChatFromSimulator (msg) {
   const chatMsg = {
-    fromName: msg.getStringValue('ChatData', 'FromName'),
-    sourceID: msg.getValue('ChatData', 'SourceID'),
-    ownerID: msg.getValue('ChatData', 'OwnerID'),
-    sourceType: msg.getValue('ChatData', 'SourceType'),
-    chatType: msg.getValue('ChatData', 'ChatType'),
-    audible: msg.getValue('ChatData', 'Audible'),
-    position: msg.getValue('ChatData', 'Position'),
-    message: msg.getStringValue('ChatData', 'Message'),
+    fromName: getStringValueOf(msg, 'ChatData', 'FromName'),
+    sourceID: getValueOf(msg, 'ChatData', 'SourceID'),
+    ownerID: getValueOf(msg, 'ChatData', 'OwnerID'),
+    sourceType: getValueOf(msg, 'ChatData', 'SourceType'),
+    chatType: getValueOf(msg, 'ChatData', 'ChatType'),
+    audible: getValueOf(msg, 'ChatData', 'Audible'),
+    position: getValueOf(msg, 'ChatData', 'Position'),
+    message: getStringValueOf(msg, 'ChatData', 'Message'),
     time: Date.now()
   }
   return chatMsg
 }
 
 function parseIM (message) {
-  const toAgentID = message.getValue('MessageBlock', 'ToAgentID')
-  const fromId = message.getValue('AgentData', 'AgentID')
-  const time = message.getValue('MessageBlock', 'Timestamp')
+  const toAgentID = getValueOf(message, 'MessageBlock', 'ToAgentID')
+  const fromId = getValueOf(message, 'AgentData', 'AgentID')
+  const time = getValueOf(message, 'MessageBlock', 'Timestamp')
 
   const IMmsg = {
-    sessionID: message.getValue('AgentData', 'SessionID'),
+    sessionID: getValueOf(message, 'AgentData', 'SessionID'),
     fromId,
-    fromGroup: message.getValue('MessageBlock', 'FromGroup'),
+    fromGroup: getValueOf(message, 'MessageBlock', 'FromGroup'),
     toAgentID,
-    parentEstateID: message.getValue('MessageBlock', 'ParentEstateID'),
-    regionID: message.getValue('MessageBlock', 'RegionID'),
-    position: message.getValue('MessageBlock', 'Position'),
-    offline: message.getValue('MessageBlock', 'Offline'),
-    dialog: message.getValue('MessageBlock', 'Dialog'),
-    id: message.getValue('MessageBlock', 'ID'),
-    fromAgentName: message.getStringValue('MessageBlock', 'FromAgentName'),
-    message: message.getStringValue('MessageBlock', 'Message'),
-    binaryBucket: message.getValue('MessageBlock', 'BinaryBucket'),
+    parentEstateID: getValueOf(message, 'MessageBlock', 'ParentEstateID'),
+    regionID: getValueOf(message, 'MessageBlock', 'RegionID'),
+    position: getValueOf(message, 'MessageBlock', 'Position'),
+    offline: getValueOf(message, 'MessageBlock', 'Offline'),
+    dialog: getValueOf(message, 'MessageBlock', 'Dialog'),
+    id: getValueOf(message, 'MessageBlock', 'ID'),
+    fromAgentName: getStringValueOf(message, 'MessageBlock', 'FromAgentName'),
+    message: getStringValueOf(message, 'MessageBlock', 'Message'),
+    binaryBucket: getValueOf(message, 'MessageBlock', 'BinaryBucket'),
     time: time !== 0 ? time : Date.now()
   }
 
@@ -43,7 +49,7 @@ function parseIM (message) {
 }
 
 function parseUUIDNameReply (message) {
-  return message.mapBlock('UUIDNameBlock', getValue => {
+  return mapBlockOf(message, 'UUIDNameBlock', getValue => {
     return {
       firstName: getValue('FirstName', true),
       lastName: getValue('LastName', true),
@@ -53,7 +59,7 @@ function parseUUIDNameReply (message) {
 }
 
 function parseUserRights (message, getState) {
-  const rights = message.mapBlock('Rights', getValue => {
+  const rights = mapBlockOf(message, 'Rights', getValue => {
     return {
       agentId: getValue('AgentRelated'),
       rights: getValue('RelatedRights')
@@ -61,15 +67,15 @@ function parseUserRights (message, getState) {
   })
   return {
     ownId: getState().account.get('agentId'),
-    fromId: message.getValue('AgentData', 'AgentID'),
+    fromId: getValueOf(message, 'AgentData', 'AgentID'),
     userRights: rights
   }
 }
 
 function parseRegionInfo (message) {
   return {
-    regionInfo: message.getValues('RegionInfo', 0, []),
-    regionInfo2: message.getValues('RegionInfo2', 0, [])
+    regionInfo: getValuesOf(message, 'RegionInfo', 0, []),
+    regionInfo2: getValuesOf(message, 'RegionInfo2', 0, [])
   }
 }
 
@@ -102,8 +108,8 @@ function simActionFilter (msg) {
 
     case 'AgentMovementComplete':
       return dispatchSIMAction(name, {
-        position: msg.getValue('Data', 'Position'),
-        lookAt: msg.getValue('Data', 'LookAt')
+        position: getValueOf(msg, 'Data', 'Position'),
+        lookAt: getValueOf(msg, 'Data', 'LookAt')
       })
 
     case 'RegionInfo':
@@ -144,8 +150,8 @@ function dispatchSIMAction (name, msg, id) {
 
 function sendRegionHandshakeReply (RegionHandshake) {
   return (dispatch, getState, {circuit}) => {
-    const regionID = RegionHandshake.getValue('RegionInfo2', 'RegionID')
-    const flags = RegionHandshake.getValue('RegionInfo', 'RegionFlags')
+    const regionID = getValueOf(RegionHandshake, 'RegionInfo2', 'RegionID')
+    const flags = getValueOf(RegionHandshake, 'RegionInfo', 'RegionFlags')
 
     const session = getState().session
 
