@@ -171,7 +171,7 @@ export function parseBody (
     throw new Error('no message of this type')
   }
 
-  const body = new ReceivedMessage(
+  const body = createReceivedMessage(
     messagesByFrequency[frequency][num],
     packetBody.slice(offset),
     ip,
@@ -230,13 +230,15 @@ function parseVariable (variableTemplate, buffer, offset) {
   return value
 }
 
-// Class for all Buffer -> Message action (on socket in)
+// function for all Buffer -> Message action (on socket in)
 //
 // {
 //   name: String,
 //   frequency: 'High'|'Medium'|'Low'|'Fixed',
 //   number: Number,
 //   trusted: Boolean,
+//   isReliable: Boolean,
+//   isResend: Boolean,
 //   zerocoded: Boolean,
 //   isOld: undefined|String,
 //   size: Number,
@@ -247,144 +249,46 @@ function parseVariable (variableTemplate, buffer, offset) {
 //     }
 //   ]
 // }
-export class ReceivedMessage {
-  constructor (template, buffer, ip = '0.0.0.0', port = 0, isResend = false, isReliable = false) {
-    if (typeof template === 'string') {
-      template = messagesByName[template]
-    }
-    this.name = template.name
-    this.type = 'UDP' + template.name // for directly dispatching to redux
-    this.trusted = template.trusted
-    this.isReliable = isReliable
-    this.isResend = isResend
+function createReceivedMessage (
+  template, buffer, ip = '0.0.0.0', port = 0, isResend = false, isReliable = false
+) {
+  if (typeof template === 'string') {
+    template = messagesByName[template]
+  }
 
-    this.frequency = template.frequency
-    this.number = template.number
+  const msg = {
+    name: template.name,
+    type: 'UDP' + template.name, // for directly dispatching to redux
+    trusted: template.trusted,
+    isReliable,
+    isResend,
 
-    // no need for decoding, was done in circuit
-    this.isOld = template.isOld
-    this.from = {
+    frequency: template.frequency,
+    number: template.number,
+    isOld: template.isOld,
+
+    from: {
       ip,
       port
-    }
+    },
 
-    // parse the blocks
-    const offset = {
-      value: 0
-    }
-
-    const blocks = template.body.map(blockTemplate => {
-      const block = parseBlock(blockTemplate, buffer, offset)
-      // that the block is accessible through the name
-      this[blockTemplate.name] = block
-      return block
-    })
-    this.blocks = blocks
-    this.size = offset.value // ??? or something other
+    blocks: {},
+    size: 0
   }
 
-  /*
-  get frequency () {
-    return messagesByName[this.name].frequency
+  // parse the blocks
+  const offset = {
+    value: 0
   }
 
-  get number () {
-    return messagesByName[this.name].number
-  }
-  */
+  const blocks = template.body.map(blockTemplate => {
+    const block = parseBlock(blockTemplate, buffer, offset)
+    msg[blockTemplate.name] = block
+    return block
+  })
 
-  // Return the value of a variable in an block
-  // msg.getValue(blockName, [blockIndex,] variableName)
-  // blockIndex defaults to 0
-  getValue (blockName, blockOrValue, varName) {
-    let blockNumber = 0
-    let variableName
+  msg.blocks = blocks
+  msg.size = offset.value // ??? or something other
 
-    if (varName == null) {
-      variableName = blockOrValue
-    } else {
-      blockNumber = +blockOrValue
-      variableName = varName
-    }
-
-    return this[blockName][blockNumber][variableName]
-  }
-
-  // Transforms the value of a variable into a string.
-  // If the value is a Buffer (Fixed, Variable1 or Variable2)
-  // then it will be parsed as a UTF-8 String.
-  getStringValue (blockName, blockOrValue, varName) {
-    const value = this.getValue(blockName, blockOrValue, varName)
-
-    return this._parseValueAsString(value)
-  }
-
-  // Return the value of multiple variables in an block
-  // msg.getValue(blockName, [blockIndex,] variableNames)
-  // blockIndex defaults to 0
-  getValues (blockName, blockOrValues, varNames) {
-    let blockNumber = 0
-    let variableNames
-
-    if (varNames == null) {
-      variableNames = blockOrValues
-    } else {
-      blockNumber = +blockOrValues
-      variableNames = varNames
-    }
-    if (!Array.isArray(variableNames)) throw new TypeError('names of variables must be an Array!')
-
-    const blockInstance = this[blockName][blockNumber]
-    if (variableNames.length === 0) {
-      variableNames = Object.keys(blockInstance)
-    }
-
-    return variableNames.reduce((result, name) => {
-      result[name] = blockInstance[name]
-      return result
-    }, {})
-  }
-
-  // Returns multiple values as a object.
-  // Transforms the value of a variable into a string.
-  // If the value is a Buffer (Fixed, Variable1 or Variable2)
-  // then it will be parsed as a UTF-8 String.
-  getStringValues (blockName, blockOrValues, varNames) {
-    const values = this.getValues(blockName, blockOrValues, varNames)
-
-    return Object.keys(values).reduce((result, key) => {
-      result[key] = this._parseValueAsString(values[key])
-      return result
-    }, {})
-  }
-
-  _parseValueAsString (value) {
-    return Buffer.isBuffer(value)
-      ? value.toString('utf8').replace(/\0/gi, '')
-      : value.toString()
-  }
-
-  // How many instances of a block are there?
-  getNumberOfBlockInstances (blockName) {
-    return this[blockName].length
-  }
-
-  // Maps over every instance of a block.
-  // expects the block name and a function.
-  // The function receives a getValue function and the index.
-  // The getValue function expects the name of a variable
-  //     and as an optional second argument a Boolean if the value should be a String.
-  mapBlock (blockName, fn) {
-    return this[blockName].map((blockInstance, index) => {
-      const getter = (valueName, asString = false) => {
-        const value = blockInstance[valueName]
-
-        return asString
-          ? this._parseValueAsString(value)
-          : value
-      }
-
-      return fn(getter, index)
-    })
-  }
+  return msg
 }
