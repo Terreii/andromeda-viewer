@@ -3,6 +3,7 @@
 import Circuit from './circuit'
 
 import {createBody, parseBody} from './networkMessages'
+import {getValueOf} from './msgGetters'
 
 // Utility for testing
 window.WebSocket = class WebSocket {
@@ -180,7 +181,7 @@ test('circuit should send after 200ms a PacketAck', done => {
       : parsedAckMessageB
 
     expect(parsedAckMessage).toBeTruthy()
-    expect(parsedAckMessage.getValue('Packets', 0, 'ID')).toBe(0)
+    expect(getValueOf(parsedAckMessage, 'Packets', 0, 'ID')).toBe(0)
 
     done()
   }, 250)
