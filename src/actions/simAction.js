@@ -1,28 +1,9 @@
 import {receiveChatFromSimulator, receiveIM} from './chatMessageActions'
 import {getValueOf, mapBlockOf} from '../network/msgGetters'
 
-function parseUserRights (message) {
-  return (dispatch, getState) => {
-    const rights = mapBlockOf(message, 'Rights', getValue => {
-      return {
-        agentId: getValue('AgentRelated'),
-        rights: getValue('RelatedRights')
-      }
-    })
-    dispatch({
-      type: 'ChangeUserRights',
-      ownId: getState().account.get('agentId'),
-      fromId: getValueOf(message, 'AgentData', 'AgentID'),
-      userRights: rights
-    })
-  }
-}
-
 // Gets all messages from the SIM and filters them, and if needed: calls their own actions.
 function simActionFilter (msg) {
-  const name = msg.name
-
-  switch (name) {
+  switch (msg.name) {
     case 'ChatFromSimulator':
       return receiveChatFromSimulator(msg)
 
@@ -53,6 +34,23 @@ function simActionFilter (msg) {
 // Set it in development to true to dispatch all network messages.
 if (process.env.NODE_ENV !== 'production') {
   window.debugDispatchAllMsg = window.debugDispatchAllMsg || false
+}
+
+function parseUserRights (message) {
+  return (dispatch, getState) => {
+    const rights = mapBlockOf(message, 'Rights', getValue => {
+      return {
+        agentId: getValue('AgentRelated'),
+        rights: getValue('RelatedRights')
+      }
+    })
+    dispatch({
+      type: 'ChangeUserRights',
+      ownId: getState().account.get('agentId'),
+      fromId: getValueOf(message, 'AgentData', 'AgentID'),
+      userRights: rights
+    })
+  }
 }
 
 function sendRegionHandshakeReply (RegionHandshake) {

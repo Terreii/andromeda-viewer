@@ -1,8 +1,14 @@
 /*
- * Sends a message to the server.
+ * Every local chat and IM related action
  */
 
 import {getValueOf, getStringValueOf} from '../network/msgGetters'
+
+/*
+ *
+ *  Sending Messages
+ *
+ */
 
 export function sendLocalChatMessage (text, type, channel) {
   // Sends messages from the localchat
@@ -28,7 +34,7 @@ export function sendLocalChatMessage (text, type, channel) {
 }
 
 export function sendInstantMessage (text, to, id) {
-  return (dispatch, getState, {hoodie, circuit}) => {
+  return async (dispatch, getState, {hoodie, circuit}) => {
     try {
       const activeState = getState()
       const session = activeState.session
@@ -90,18 +96,22 @@ export function sendInstantMessage (text, to, id) {
         type: 'SelfSendImprovedInstantMessage',
         msg
       }
-      if (activeState.account.getIn(['viewerAccount', 'loggedIn'])) {
-        hoodie.store.add(msg).then(doc => {
-          dispatch(actionData)
-        })
-      } else {
-        dispatch(actionData)
+
+      if (shouldSaveChat(activeState)) {
+        await hoodie.store.add(msg)
       }
+      dispatch(actionData)
     } catch (e) {
       console.error(e)
     }
   }
 }
+
+/*
+ *
+ *  Receiving messages
+ *
+ */
 
 export function receiveChatFromSimulator (msg) {
   const chatMsg = {
@@ -161,9 +171,7 @@ function dispatchChatAction (name, msg, id) {
   return async (dispatch, getState, {hoodie}) => {
     const activeState = getState()
 
-    if (
-      activeState.account.getIn(['viewerAccount', 'loggedIn']) && activeState.account.get('sync')
-    ) {
+    if (shouldSaveChat(activeState)) {
       // Save messages. They will also be synced!
       msg._id = activeState.account.get('avatarIdentifier') + '/' + id
 
@@ -182,57 +190,15 @@ function dispatchChatAction (name, msg, id) {
   }
 }
 
+/*
+ *
+ * Start a new (IM) Chat and load the history
+ *
+ */
+
 export function getLocalChatHistory (avatarIdentifier) {
   return (dispatch, getState, {hoodie}) => {
     return hoodie.store.withIdPrefix(`${avatarIdentifier}/localchat/`).findAll()
-  }
-}
-
-// Get the chatType stored in an IMChat Info from the dialog value in IMs.
-export function getIMChatTypeOfDialog (dialog) {
-  switch (dialog) {
-    case 0:
-      return 'personal'
-    default:
-      return undefined
-  }
-}
-
-// UUID make structure: 00000000-0000-4000-x000-000000000000
-// all are hexadecimal numbers.
-// 4 is always 4 and x is between 8 and b, but only if correct == true
-// XOR of IM-chats isn't a correct UUID.
-function uuidXOR (idIn1, idIn2, correct = false) {
-  const id1 = idIn1.toString().replace(/-/gi, '')
-  const id2 = idIn2.toString().replace(/-/gi, '')
-
-  let out = ''
-  for (let i = 0; i < 16; ++i) {
-    const index = i * 2
-    const byte1 = parseInt(id1[index] + id1[index + 1], 16)
-    const byte2 = parseInt(id2[index] + id2[index + 1], 16)
-
-    let xorByte = byte1 ^ byte2
-    if (correct && i === 6) { // Makes the 4 in the UUID
-      xorByte = (0b00001111 & xorByte) | (4 << 4)
-    } else if (correct && i === 8) { // Makes the y in the UUID. It is between 8 and b
-      xorByte = (8 << 4) + (0b00111111 & xorByte)
-    }
-
-    if (i === 4 || i === 6 || i === 8 || i === 10) {
-      out += '-'
-    }
-    out += xorByte.toString(16).padStart(2, '0')
-  }
-  return out
-}
-
-// Create a new chatUUID from type, target-UUID & agentUUID
-function calcChatUUID (type, targetId, agentId) {
-  if (type === 'personal') {
-    return uuidXOR(agentId, targetId)
-  } else {
-    throw new Error(`Chat type '${type}' not jet supported!`)
   }
 }
 
@@ -276,7 +242,7 @@ function createNewIMChat (dialog, chatUUID, target, name) {
     })
 
     // If the user is logged in with a viewer-account, then save the IMChat.
-    if (hasChat || !activeState.account.getIn(['viewerAccount', 'loggedIn'])) return
+    if (hasChat || !shouldSaveChat(activeState)) return
     const avatarIdentifier = activeState.account.get('avatarIdentifier')
     const doc = {
       _id: `${avatarIdentifier}/imChatsInfos/${chatUUID}`,
@@ -326,5 +292,65 @@ export function getIMHistory (chatUUID) {
         messages: docs
       })
     })
+  }
+}
+
+/*
+ *
+ * Helper functions
+ *
+ */
+
+// checks if the chat history should be saved and synced
+function shouldSaveChat (activeState) {
+  return activeState.account.getIn(['viewerAccount', 'loggedIn']) &&
+    activeState.account.get('sync')
+}
+
+// UUID make structure: 00000000-0000-4000-x000-000000000000
+// all are hexadecimal numbers.
+// 4 is always 4 and x is between 8 and b, but only if correct == true
+// XOR of IM-chats isn't a correct UUID.
+function uuidXOR (idIn1, idIn2, correct = false) {
+  const id1 = idIn1.toString().replace(/-/gi, '')
+  const id2 = idIn2.toString().replace(/-/gi, '')
+
+  let out = ''
+  for (let i = 0; i < 16; ++i) {
+    const index = i * 2
+    const byte1 = parseInt(id1[index] + id1[index + 1], 16)
+    const byte2 = parseInt(id2[index] + id2[index + 1], 16)
+
+    let xorByte = byte1 ^ byte2
+    if (correct && i === 6) { // Makes the 4 in the UUID
+      xorByte = (0b00001111 & xorByte) | (4 << 4)
+    } else if (correct && i === 8) { // Makes the x in the UUID. It is between 8 and b
+      xorByte = (8 << 4) + (0b00111111 & xorByte)
+    }
+
+    if (i === 4 || i === 6 || i === 8 || i === 10) {
+      out += '-'
+    }
+    out += xorByte.toString(16).padStart(2, '0')
+  }
+  return out
+}
+
+// Create a new chatUUID from type, target-UUID & agentUUID
+function calcChatUUID (type, targetId, agentId) {
+  if (type === 'personal') {
+    return uuidXOR(agentId, targetId)
+  } else {
+    throw new Error(`Chat type '${type}' not jet supported!`)
+  }
+}
+
+// Get the chatType stored in an IMChat Info from the dialog value in IMs.
+export function getIMChatTypeOfDialog (dialog) {
+  switch (dialog) {
+    case 0:
+      return 'personal'
+    default:
+      return undefined
   }
 }
