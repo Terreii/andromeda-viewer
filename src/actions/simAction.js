@@ -51,8 +51,17 @@ function simActionFilter (msg) {
       return msg
 
     default:
+      if (process.env.NODE_ENV !== 'production' && window.debugDispatchAllMsg) {
+        return msg
+      }
       break
   }
+}
+
+// A global variable for development.
+// Set it in development to true to dispatch all network messages.
+if (process.env.NODE_ENV !== 'production') {
+  window.debugDispatchAllMsg = window.debugDispatchAllMsg || false
 }
 
 // Dispatches chat (and IM) messages.
