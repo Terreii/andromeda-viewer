@@ -2,6 +2,8 @@
  * Sends a message to the server.
  */
 
+import {getValueOf, getStringValueOf} from '../network/msgGetters'
+
 export function sendLocalChatMessage (text, type, channel) {
   // Sends messages from the localchat
   // No UI update, because the server/sim will send it
@@ -99,6 +101,48 @@ export function sendInstantMessage (text, to, id) {
       console.error(e)
     }
   }
+}
+
+export function parseChatFromSimulator (msg) {
+  const chatMsg = {
+    fromName: getStringValueOf(msg, 'ChatData', 'FromName'),
+    sourceID: getValueOf(msg, 'ChatData', 'SourceID'),
+    ownerID: getValueOf(msg, 'ChatData', 'OwnerID'),
+    sourceType: getValueOf(msg, 'ChatData', 'SourceType'),
+    chatType: getValueOf(msg, 'ChatData', 'ChatType'),
+    audible: getValueOf(msg, 'ChatData', 'Audible'),
+    position: getValueOf(msg, 'ChatData', 'Position'),
+    message: getStringValueOf(msg, 'ChatData', 'Message'),
+    time: Date.now()
+  }
+  return chatMsg
+}
+
+export function parseIM (message) {
+  const toAgentID = getValueOf(message, 'MessageBlock', 'ToAgentID')
+  const fromId = getValueOf(message, 'AgentData', 'AgentID')
+  const time = getValueOf(message, 'MessageBlock', 'Timestamp')
+
+  const IMmsg = {
+    sessionID: getValueOf(message, 'AgentData', 'SessionID'),
+    fromId,
+    fromGroup: getValueOf(message, 'MessageBlock', 'FromGroup'),
+    toAgentID,
+    parentEstateID: getValueOf(message, 'MessageBlock', 'ParentEstateID'),
+    regionID: getValueOf(message, 'MessageBlock', 'RegionID'),
+    position: getValueOf(message, 'MessageBlock', 'Position'),
+    offline: getValueOf(message, 'MessageBlock', 'Offline'),
+    dialog: getValueOf(message, 'MessageBlock', 'Dialog'),
+    id: getValueOf(message, 'MessageBlock', 'ID'),
+    fromAgentName: getStringValueOf(message, 'MessageBlock', 'FromAgentName'),
+    message: getStringValueOf(message, 'MessageBlock', 'Message'),
+    binaryBucket: getValueOf(message, 'MessageBlock', 'BinaryBucket'),
+    time: time !== 0 ? time : Date.now()
+  }
+
+  // If it is a group chat, toAgentID is the Group-UUID.
+  IMmsg.chatUUID = IMmsg.fromGroup ? IMmsg.toAgentID : IMmsg.id
+  return IMmsg
 }
 
 export function getLocalChatHistory (avatarIdentifier) {
