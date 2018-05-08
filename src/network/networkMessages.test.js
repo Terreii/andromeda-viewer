@@ -4,7 +4,15 @@
 
 import uuid from 'uuid'
 
-import { parseBody, createBody, ReceivedMessage } from './networkMessages'
+import {parseBody, createBody} from './networkMessages'
+import {
+  getValueOf,
+  getStringValueOf,
+  getValuesOf,
+  getStringValuesOf,
+  getNumberOfBlockInstancesOf,
+  mapBlockOf
+} from './msgGetters'
 
 describe('parseBody', () => {
   const buffer = Buffer.alloc(4 + (4 * (1 + (4 * 3))) + 1)
@@ -15,7 +23,7 @@ describe('parseBody', () => {
   const testMessage = parseBody(buffer, '127.0.0.1', 8080, true, true)
 
   test('should return the TestMessage', () => {
-    expect(testMessage instanceof ReceivedMessage).toBe(true)
+    expect(testMessage.constructor === Object).toBe(true)
     expect(testMessage.frequency).toBe('Low')
     expect(testMessage.number).toBe(1)
     expect(testMessage.name).toBe('TestMessage')
@@ -31,13 +39,13 @@ describe('parseBody', () => {
   })
 
   test('should have one U32 in an array in the TestBlock1', () => {
-    expect(testMessage.getNumberOfBlockInstances('TestBlock1')).toBe(1)
+    expect(getNumberOfBlockInstancesOf(testMessage, 'TestBlock1')).toBe(1)
 
-    expect(testMessage.getValue('TestBlock1', 0, 'Test1')).toBe(0)
+    expect(getValueOf(testMessage, 'TestBlock1', 0, 'Test1')).toBe(0)
   })
 
   test('should have 3 U32 in 4 Arrays in NeighborBlock', () => {
-    expect(testMessage.getNumberOfBlockInstances('NeighborBlock')).toBe(4)
+    expect(getNumberOfBlockInstancesOf(testMessage, 'NeighborBlock')).toBe(4)
 
     const values = [
       'Test0',
@@ -50,22 +58,22 @@ describe('parseBody', () => {
       Test2: 0
     }
 
-    expect(testMessage.getValues('NeighborBlock', 0, values)).toEqual(shouldValues)
-    expect(testMessage.getValues('NeighborBlock', 1, values)).toEqual(shouldValues)
-    expect(testMessage.getValues('NeighborBlock', 2, values)).toEqual(shouldValues)
-    expect(testMessage.getValues('NeighborBlock', 3, values)).toEqual(shouldValues)
+    expect(getValuesOf(testMessage, 'NeighborBlock', 0, values)).toEqual(shouldValues)
+    expect(getValuesOf(testMessage, 'NeighborBlock', 1, values)).toEqual(shouldValues)
+    expect(getValuesOf(testMessage, 'NeighborBlock', 2, values)).toEqual(shouldValues)
+    expect(getValuesOf(testMessage, 'NeighborBlock', 3, values)).toEqual(shouldValues)
   })
 
   test('should return Strings for values', () => {
-    expect(testMessage.getStringValue('TestBlock1', 'Test1')).toBe('0')
-    expect(testMessage.getStringValue('NeighborBlock', 0, 'Test0')).toBe('0')
-    expect(testMessage.getStringValue('NeighborBlock', 1, 'Test1')).toBe('0')
-    expect(testMessage.getStringValue('NeighborBlock', 2, 'Test2')).toBe('0')
-    expect(testMessage.getStringValue('NeighborBlock', 3, 'Test0')).toBe('0')
+    expect(getStringValueOf(testMessage, 'TestBlock1', 'Test1')).toBe('0')
+    expect(getStringValueOf(testMessage, 'NeighborBlock', 0, 'Test0')).toBe('0')
+    expect(getStringValueOf(testMessage, 'NeighborBlock', 1, 'Test1')).toBe('0')
+    expect(getStringValueOf(testMessage, 'NeighborBlock', 2, 'Test2')).toBe('0')
+    expect(getStringValueOf(testMessage, 'NeighborBlock', 3, 'Test0')).toBe('0')
   })
 
   test('should map over block instances', () => {
-    const data = testMessage.mapBlock('NeighborBlock', (getValue, index) => {
+    const data = mapBlockOf(testMessage, 'NeighborBlock', (getValue, index) => {
       return `${index} Test0 ${getValue('Test0')}`
     })
     expect(data).toEqual([
@@ -78,9 +86,9 @@ describe('parseBody', () => {
   })
 
   test('should get multiple values', () => {
-    const data = testMessage.getValues('NeighborBlock', 1, ['Test0', 'Test1', 'Test2'])
-    const dataStr = testMessage.getStringValues('NeighborBlock', ['Test0', 'Test1', 'Test2'])
-    const data2 = testMessage.getValues('NeighborBlock', [])
+    const data = getValuesOf(testMessage, 'NeighborBlock', 1, ['Test0', 'Test1', 'Test2'])
+    const dataStr = getStringValuesOf(testMessage, 'NeighborBlock', ['Test0', 'Test1', 'Test2'])
+    const data2 = getValuesOf(testMessage, 'NeighborBlock', [])
 
     expect(data).toEqual({
       'Test0': 0,
@@ -198,8 +206,8 @@ describe('parseBody should work with buffer from createBody', () => {
     const parsedMessage = parseBody(buffy.buffer)
 
     expect(parsedMessage.name).toBe('TestMessage')
-    expect(parsedMessage.getValue('TestBlock1', 'Test1')).toBe(1337)
-    expect(parsedMessage.getValue('NeighborBlock', 3, 'Test2')).toBe(11)
+    expect(getValueOf(parsedMessage, 'TestBlock1', 'Test1')).toBe(1337)
+    expect(getValueOf(parsedMessage, 'NeighborBlock', 3, 'Test2')).toBe(11)
   })
 
   test('NeighborList', () => {
@@ -246,7 +254,7 @@ describe('parseBody should work with buffer from createBody', () => {
     const parsedMessage = parseBody(buffy.buffer)
 
     expect(parsedMessage.name).toBe('NeighborList')
-    expect(parsedMessage.getValues('NeighborBlock', 0, [
+    expect(getValuesOf(parsedMessage, 'NeighborBlock', 0, [
       'IP',
       'Port',
       'RegionID',
@@ -257,7 +265,7 @@ describe('parseBody should work with buffer from createBody', () => {
       RegionID: aUUID,
       SimAccess: 13
     })
-    expect(parsedMessage.getStringValue('NeighborBlock', 'Name')).toBe('Hello Sim!')
+    expect(getStringValueOf(parsedMessage, 'NeighborBlock', 'Name')).toBe('Hello Sim!')
   })
 
   test('ImprovedInstantMessage', () => {
@@ -289,15 +297,15 @@ describe('parseBody should work with buffer from createBody', () => {
     const parsedMessage = parseBody(buffy.buffer)
 
     expect(parsedMessage.name).toBe('ImprovedInstantMessage')
-    expect(parsedMessage.getValues('AgentData', ['AgentID', 'SessionID'])).toEqual({
+    expect(getValuesOf(parsedMessage, 'AgentData', ['AgentID', 'SessionID'])).toEqual({
       AgentID: aUUID,
       SessionID: aUUID
     })
-    expect(parsedMessage.getStringValues('MessageBlock', ['FromAgentName', 'Message'])).toEqual({
+    expect(getStringValuesOf(parsedMessage, 'MessageBlock', ['FromAgentName', 'Message'])).toEqual({
       FromAgentName: 'Testy MacTestface',
       Message: 'Hello to my World of tests!'
     })
-    expect(parsedMessage.getValues('MessageBlock', [
+    expect(getValuesOf(parsedMessage, 'MessageBlock', [
       'FromGroup',
       'ToAgentID',
       'ParentEstateID',

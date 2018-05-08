@@ -1,5 +1,7 @@
 import {Map} from 'immutable'
 
+import {getValueOf, getValuesOf} from '../network/msgGetters'
+
 export default function SessionReducer (state = Map({loggedIn: false, error: null}), action) {
   switch (action.type) {
     case 'didLogin':
@@ -47,14 +49,18 @@ export default function SessionReducer (state = Map({loggedIn: false, error: nul
     case 'AgentMovementComplete':
       return state.mergeDeep({
         position: {
-          position: action.msg.position,
-          lookAt: action.msg.lookAt
+          position: getValueOf(action, 'Data', 'Position'),
+          lookAt: getValueOf(action, 'Data', 'LookAt')
         }
       })
 
     case 'RegionInfo':
       return state.mergeDeep({
-        regionInfo: Object.assign({}, action.msg.regionInfo, action.msg.regionInfo2)
+        regionInfo: Object.assign(
+          {},
+          getValuesOf(action, 'RegionInfo', 0, []),
+          getValuesOf(action, 'RegionInfo2', 0, [])
+        )
       })
 
     case 'RegionHandshake':

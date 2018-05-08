@@ -72,6 +72,9 @@ export default function accountReducer (state = getDefault(), action) {
         }
       })
 
+    case 'SavingAvatar':
+      return state.set('sync', true)
+
     case 'AvatarSaved':
       return state.set('savedAvatars',
         state.get('savedAvatars').push(

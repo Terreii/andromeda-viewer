@@ -1,6 +1,6 @@
 import createCallback from './simAction'
 
-// Starts listening to packets on the circuit and dispatch an parsed action.
+// Starts listening to packets on the circuit and dispatch a parsed action.
 export default function init () {
   return (dispatch, getState, {circuit}) => {
     let callback = createCallback(dispatch)
