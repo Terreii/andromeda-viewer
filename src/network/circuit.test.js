@@ -233,3 +233,83 @@ describe('circuit should remove acks that the server has send back', () => {
     expect(circuit.viewerAcks.length).toBe(0)
   })
 })
+
+describe('sending only 255 or less acks at the end of a package', () => {
+  let sendAcks = []
+
+  test('circuit only sends less then 256 Acks', () => {
+    for (let i = 0; i < 300; ++i) {
+      const msg = createTestMessage(true, false, false)
+      circuit.websocket.onmessage({data: msg})
+    }
+
+    circuit.send('OpenCircuit', {
+      CircuitInfo: [
+        {
+          IP: '0.0.0.0',
+          Port: 13
+        }
+      ]
+    }, true)
+
+    const last = circuit.websocket.getSendMessages()
+
+    expect(last.readUInt8(last.length - 1)).toBe(255)
+
+    for (let offset = last.length - 1, count = last.readUInt8(offset); count > 0; count--) {
+      offset -= 4
+      sendAcks.push(last.readUInt32LE(offset))
+    }
+    sendAcks.sort()
+
+    const correctAcks = sendAcks.every((value, index, all) => index === 0
+      ? true
+      : all[index - 1] + 1 === value
+    )
+    expect(correctAcks).toBe(true)
+  })
+
+  describe('send not-jet-send and the oldest acks by the next package', () => {
+    let newAcks = []
+
+    test('send max possible acks', () => {
+      circuit.send('OpenCircuit', {
+        CircuitInfo: [
+          {
+            IP: '0.0.0.0',
+            Port: 13
+          }
+        ]
+      }, true)
+
+      const last = circuit.websocket.getSendMessages()
+
+      for (let offset = last.length - 1, count = last.readUInt8(offset); count > 0; count--) {
+        offset -= 4
+        newAcks.push(last.readUInt32LE(offset))
+      }
+
+      expect(last.readUInt8(last.length - 1)).toBe(255)
+    })
+
+    test('not jet send acks are send first', () => {
+      const notJetSend = newAcks.filter(ack => !sendAcks.includes(ack)).sort()
+      expect(notJetSend.length).toBe(45)
+
+      const correctAcks = notJetSend.every((value, index, all) => index === 0
+        ? true
+        : all[index - 1] + 1 === value
+      )
+      expect(correctAcks).toBe(true)
+    })
+
+    test('old Acks are the oldest', () => {
+      const oldestAcks = newAcks.filter(ack => sendAcks.includes(ack)).sort()
+      expect(oldestAcks.length).toBe(210)
+
+      oldestAcks.forEach((ack, index) => {
+        expect(ack).toBe(sendAcks[index])
+      })
+    })
+  })
+})
