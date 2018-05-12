@@ -37,6 +37,7 @@ export default class Circuit extends events.EventEmitter {
     this.websocket.onmessage = this._onMessage.bind(this)
 
     this.simAcks = []
+    this.lastSendSimAck = -1
     this.viewerAcks = []
 
     setTimeout(() => this._startAcksProcess(), 100)
@@ -183,21 +184,42 @@ export default class Circuit extends events.EventEmitter {
   _getSimAcks (forAcksMessage) {
     if (this.simAcks.length === 0) return []
 
-    return this.simAcks.filter(ack => {
+    const acksToSend = this.simAcks.filter(ack => {
       return forAcksMessage ? !ack.didSendAcksMsg : ack.onMessageSendCount < 2
     }).map(ack => ack.sequenceNumber)
+
+    if (forAcksMessage || acksToSend.length <= 255) {
+      return acksToSend
+    }
+
+    // If there are more Acks then possible to send in one package
+    const acksOnEnd = []
+    const lastIndex = this.simAcks.findIndex(ack => ack.sequenceNumber === this.lastSendSimAck)
+
+    let index = lastIndex + 1
+    while (acksOnEnd.length < 255 && index !== lastIndex) {
+      const ack = this.simAcks[index]
+      if (ack.onMessageSendCount < 2) {
+        acksOnEnd.push(ack.sequenceNumber)
+      }
+
+      index += 1
+      if (index >= this.simAcks.length) {
+        index = 0
+      }
+    }
+    this.lastSendSimAck = acksOnEnd[acksOnEnd.length - 1]
+    return acksOnEnd
   }
 
   // Mark acks as send and filters out acks that are send enough.
   // forAcksMessage true if it is for a 'PacketAck' message.
-  _setSimAcksToSend (forAcksMessage) {
+  _setSimAcksToSend (forAcksMessage, acksSendWithPacket) {
     const newAcks = []
-    for (let i = 0, max = this.simAcks.length; i < max; i += 1) {
-      const ack = this.simAcks[i]
-
+    for (const ack of this.simAcks) {
       if (forAcksMessage) { // ack was send with PacketAck message
         ack.didSendAcksMsg = true
-      } else { // ack was send on a Package
+      } else if (acksSendWithPacket.includes(ack.sequenceNumber)) { // ack was send on a Package
         ack.onMessageSendCount += 1
       }
 
@@ -225,7 +247,7 @@ export default class Circuit extends events.EventEmitter {
     })
 
     acksBuffer.writeUInt8(acks.length, acksBuffer.length - 1)
-    this._setSimAcksToSend(false)
+    this._setSimAcksToSend(false, acks)
 
     return acksBuffer
   }
