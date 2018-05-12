@@ -139,7 +139,14 @@ test('save sender sequence number of reliable packages as ack', () => {
   websocket.onmessage({data: message1})
   websocket.onmessage({data: message2})
 
-  expect(circuit.simAcks.length).toBe(2)
+  expect(circuit.simAcks).toEqual({
+    [sequenceNumberForTests - 2]: 0,
+    [sequenceNumberForTests - 1]: 0
+  })
+  expect(circuit.simAcksOnPacket.toArray()).toEqual([
+    sequenceNumberForTests - 2,
+    sequenceNumberForTests - 1
+  ])
   expect(circuit.senderSequenceNumber).toBe(sequenceNumberForTests - 1)
 })
 
@@ -156,7 +163,11 @@ test('send ack at end of package', () => {
   const last = sendMessages[sendMessages.length - 1]
 
   // Check if there are the correct number of acks
-  expect(circuit.simAcks.length).toBe(2)
+  expect(circuit.simAcks).toEqual({
+    [sequenceNumberForTests - 2]: 0,
+    [sequenceNumberForTests - 1]: 0
+  })
+  expect(circuit.simAcksOnPacket.isEmpty()).toBe(true)
   expect(last.byteLength).toBe(23)
   expect((last.readUInt8(6) | 0x10) > 0).toBe(true)
 
@@ -239,6 +250,8 @@ describe('sending only 255 or less acks at the end of a package', () => {
 
   test('circuit only sends less then 256 Acks', () => {
     circuit.simAcks = []
+    circuit.simAcksOnPacket.clear()
+
     for (let i = 0; i < 300; ++i) {
       const msg = createTestMessage(true, false, false)
       circuit.websocket.onmessage({data: msg})
@@ -290,10 +303,10 @@ describe('sending only 255 or less acks at the end of a package', () => {
         newAcks.push(last.readUInt32LE(offset))
       }
 
-      expect(last.readUInt8(last.length - 1)).toBe(255)
+      expect(last.readUInt8(last.length - 1)).toBe(45)
     })
 
-    test('not jet send acks are send first', () => {
+    test('not jet send acks are send', () => {
       const notJetSend = newAcks.filter(ack => !sendAcks.includes(ack)).sort((a, b) => a - b)
       expect(notJetSend.length).toBe(45)
 
@@ -304,13 +317,30 @@ describe('sending only 255 or less acks at the end of a package', () => {
       expect(correctAcks).toBe(true)
     })
 
-    test('old Acks are the oldest', () => {
+    test('no old Acks are send', () => {
       const oldestAcks = newAcks.filter(ack => sendAcks.includes(ack)).sort((a, b) => a - b)
-      expect(oldestAcks.length).toBe(210)
-
-      oldestAcks.forEach((ack, index) => {
-        expect(ack).toBe(sendAcks[index])
-      })
+      expect(oldestAcks.length).toBe(0)
     })
   })
+})
+
+test('Acks are send 2 times with the PacketAck message', done => {
+  const check = expected => {
+    for (const sequenceNumber in circuit.simAcks) {
+      const sendCount = circuit.simAcks[sequenceNumber]
+      expect(sendCount).toBe(expected)
+    }
+  }
+
+  check(0)
+
+  setTimeout(() => {
+    check(1)
+
+    setTimeout(() => {
+      expect(Object.keys(circuit.simAcks).length).toBe(0)
+
+      done()
+    }, 100)
+  }, 150)
 })
