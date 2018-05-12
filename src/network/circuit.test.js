@@ -180,7 +180,7 @@ test('send ack at end of package', () => {
   ])
 })
 
-test('circuit should send after 200ms a PacketAck', done => {
+test('circuit should send after 100ms a PacketAck', done => {
   setTimeout(() => {
     // could be CompletePingCheck
     const ackMessage1 = circuit.websocket.sendMessages[circuit.websocket.sendMessages.length - 2]
@@ -195,7 +195,7 @@ test('circuit should send after 200ms a PacketAck', done => {
     expect(getValueOf(parsedAckMessage, 'Packets', 0, 'ID')).toBe(0)
 
     done()
-  }, 250)
+  }, 150)
 })
 
 test('circuit should resend a package after 500ms', done => {
