@@ -16,6 +16,9 @@ window.WebSocket = class WebSocket {
   send (buffer) {
     this.sendMessages.push(buffer)
     expect(buffer).toBeTruthy()
+    if (typeof this.onTestMessage === 'function') {
+      this.onTestMessage(buffer)
+    }
   }
 
   onopen () {}
@@ -334,13 +337,42 @@ test('Acks are send 2 times with the PacketAck message', done => {
 
   check(0)
 
-  setTimeout(() => {
-    check(1)
+  const messages = []
+  circuit.websocket.onTestMessage = buffer => {
+    const msg = parseBody(buffer.slice(12))
+    if (msg.name === 'PacketAck') {
+      messages.push(msg)
 
-    setTimeout(() => {
+      if (messages.length === 1) {
+        check(1)
+      }
+    }
+  }
+
+  setTimeout(() => {
+    try {
+      circuit.websocket.onTestMessage = undefined
+
+      expect(messages.length).toBe(2)
       expect(Object.keys(circuit.simAcks).length).toBe(0)
 
-      done()
-    }, 100)
-  }, 150)
+      expect(messages[0].Packets.length).toBe(255)
+      expect(messages[1].Packets.length).toBe(255)
+    } catch (err) {
+      expect(err).toBeUndefined()
+    }
+
+    done()
+  }, 200)
+})
+
+test('circuit closes', () => {
+  let websocketClosed = false
+  circuit.websocket.close = () => {
+    websocketClosed = true
+  }
+
+  circuit.close()
+
+  expect(websocketClosed).toBeTruthy()
 })

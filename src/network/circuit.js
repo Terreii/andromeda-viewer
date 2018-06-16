@@ -100,13 +100,15 @@ export default class Circuit extends events.EventEmitter {
           }
         ]
       })
-      return
+    } else if (parsedBody.name === 'CompletePingCheck') {
+      // TODO: use the ping time
     } else if (parsedBody.name === 'PacketAck') {
       this._filterViewerAcks(mapBlockOf(parsedBody, 'Packets', getValue => getValue('ID')))
-      return
+    } else {
+      // For every message that is not a circuit control message
+      this.emit(parsedBody.name, parsedBody)
+      this.emit('packetReceived', parsedBody)
     }
-    this.emit(parsedBody.name, parsedBody)
-    this.emit('packetReceived', parsedBody)
   }
 
   // Send a Packet.
@@ -206,12 +208,23 @@ export default class Circuit extends events.EventEmitter {
 
   // resend packages and send ack-message every 200ms
   _startAcksProcess () {
+    let pingId = 0
     this.acksProcessInterval = setInterval(() => {
       this._sendAcks()
 
       if (this.viewerAcks.length > 0) {
         this._resendPackages()
       }
+
+      this.send('StartPingCheck', {
+        PingID: [
+          {
+            PingID: pingId,
+            OldestUnacked: this.simAcksOnPacket.isEmpty() ? 0 : this.simAcksOnPacket.peekFront()
+          }
+        ]
+      })
+      pingId = pingId === 255 ? 0 : pingId + 1
     }, 100)
   }
 
