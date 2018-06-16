@@ -183,32 +183,44 @@ test('send ack at end of package', () => {
   ])
 })
 
-test('circuit should send after 100ms a PacketAck', done => {
-  setTimeout(() => {
-    // could be CompletePingCheck
-    const ackMessage1 = circuit.websocket.sendMessages[circuit.websocket.sendMessages.length - 2]
-    const ackMessage2 = circuit.websocket.sendMessages[circuit.websocket.sendMessages.length - 1]
-    const parsedAckMessageA = parseBody(ackMessage1.slice(12))
-    const parsedAckMessageB = parseBody(ackMessage2.slice(12))
-    const parsedAckMessage = parsedAckMessageA.name === 'PacketAck'
-      ? parsedAckMessageA
-      : parsedAckMessageB
+test('circuit should send after 100ms a PacketAck', () => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      // could be CompletePingCheck
+      const ackMessage1 = circuit.websocket.sendMessages[circuit.websocket.sendMessages.length - 2]
+      const ackMessage2 = circuit.websocket.sendMessages[circuit.websocket.sendMessages.length - 1]
+      const parsedAckMessageA = parseBody(ackMessage1.slice(12))
+      const parsedAckMessageB = parseBody(ackMessage2.slice(12))
+      const parsedAckMessage = parsedAckMessageA.name === 'PacketAck'
+        ? parsedAckMessageA
+        : parsedAckMessageB
 
-    expect(parsedAckMessage).toBeTruthy()
-    expect(getValueOf(parsedAckMessage, 'Packets', 0, 'ID')).toBe(0)
+      try {
+        expect(parsedAckMessage).toBeTruthy()
+        expect(getValueOf(parsedAckMessage, 'Packets', 0, 'ID')).toBe(0)
 
-    done()
-  }, 150)
+        resolve()
+      } catch (err) {
+        reject(err)
+      }
+    }, 150)
+  })
 })
 
-test('circuit should resend a package after 500ms', done => {
-  setTimeout(() => {
-    const last = circuit.websocket.getSendMessages()
+test('circuit should resend a package after 500ms', () => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const last = circuit.websocket.getSendMessages()
 
-    expect(last.readUInt8(6) | 32).toBeTruthy()
+      try {
+        expect(last.readUInt8(6) | 32).toBeTruthy()
 
-    done()
-  }, 400)
+        resolve()
+      } catch (err) {
+        reject(err)
+      }
+    }, 400)
+  })
 })
 
 describe('circuit should remove acks that the server has send back', () => {
@@ -327,7 +339,7 @@ describe('sending only 255 or less acks at the end of a package', () => {
   })
 })
 
-test('Acks are send 2 times with the PacketAck message', done => {
+test('Acks are send 2 times with the PacketAck message', () => {
   const check = expected => {
     for (const sequenceNumber in circuit.simAcks) {
       const sendCount = circuit.simAcks[sequenceNumber]
@@ -349,21 +361,23 @@ test('Acks are send 2 times with the PacketAck message', done => {
     }
   }
 
-  setTimeout(() => {
-    try {
-      circuit.websocket.onTestMessage = undefined
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      try {
+        circuit.websocket.onTestMessage = undefined
 
-      expect(messages.length).toBe(2)
-      expect(Object.keys(circuit.simAcks).length).toBe(0)
+        expect(messages.length).toBe(2)
+        expect(Object.keys(circuit.simAcks).length).toBe(0)
 
-      expect(messages[0].Packets.length).toBe(255)
-      expect(messages[1].Packets.length).toBe(255)
-    } catch (err) {
-      expect(err).toBeUndefined()
-    }
+        expect(messages[0].Packets.length).toBe(255)
+        expect(messages[1].Packets.length).toBe(255)
 
-    done()
-  }, 200)
+        resolve()
+      } catch (err) {
+        reject(err)
+      }
+    }, 200)
+  })
 })
 
 test('circuit closes', () => {
