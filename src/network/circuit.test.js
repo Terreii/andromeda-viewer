@@ -203,7 +203,7 @@ test('circuit should send after 100ms a PacketAck', () => {
       } catch (err) {
         reject(err)
       }
-    }, 150)
+    }, 100)
   })
 })
 
