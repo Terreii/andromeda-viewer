@@ -37,7 +37,7 @@ export default class Circuit extends events.EventEmitter {
     this.cachedMessages = []
     this.websocket.onmessage = this._onMessage.bind(this)
 
-    this.simAcks = {}
+    this.simAcks = new Map()
     this.simAcksOnPacket = new Deque()
     this.viewerAcks = []
 
@@ -84,7 +84,7 @@ export default class Circuit extends events.EventEmitter {
     const parsedBody = parseBody(decodedBody, ip, port, isResend, isReliable)
 
     if (isReliable) {
-      this.simAcks[senderSequenceNumber] = 0 // was send with a 'PacketAck' message
+      this.simAcks.set(senderSequenceNumber, 0) // was send with a 'PacketAck' message
       this.simAcksOnPacket.push(senderSequenceNumber) // was send on another message
     }
 
@@ -231,16 +231,15 @@ export default class Circuit extends events.EventEmitter {
   // Sends all acks after 100ms
   _sendAcks () {
     const acks = []
-    for (const sequenceNumber in this.simAcks) { // iterate over the keys
+    for (const [sequenceNumber, timesSend] of this.simAcks) {
       acks.push({
         ID: sequenceNumber
       })
 
-      const timesSend = this.simAcks[sequenceNumber] + 1
-      if (timesSend < 2) {
-        this.simAcks[sequenceNumber] = timesSend
+      if (timesSend === 0) {
+        this.simAcks.set(sequenceNumber, timesSend + 1)
       } else {
-        delete this.simAcks[sequenceNumber]
+        this.simAcks.delete(sequenceNumber)
       }
     }
 

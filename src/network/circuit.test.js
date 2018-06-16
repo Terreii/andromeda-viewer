@@ -142,10 +142,10 @@ test('save sender sequence number of reliable packages as ack', () => {
   websocket.onmessage({data: message1})
   websocket.onmessage({data: message2})
 
-  expect(circuit.simAcks).toEqual({
-    [sequenceNumberForTests - 2]: 0,
-    [sequenceNumberForTests - 1]: 0
-  })
+  expect(circuit.simAcks).toEqual(new Map([
+    [sequenceNumberForTests - 2, 0],
+    [sequenceNumberForTests - 1, 0]
+  ]))
   expect(circuit.simAcksOnPacket.toArray()).toEqual([
     sequenceNumberForTests - 2,
     sequenceNumberForTests - 1
@@ -166,10 +166,10 @@ test('send ack at end of package', () => {
   const last = sendMessages[sendMessages.length - 1]
 
   // Check if there are the correct number of acks
-  expect(circuit.simAcks).toEqual({
-    [sequenceNumberForTests - 2]: 0,
-    [sequenceNumberForTests - 1]: 0
-  })
+  expect(circuit.simAcks).toEqual(new Map([
+    [sequenceNumberForTests - 2, 0],
+    [sequenceNumberForTests - 1, 0]
+  ]))
   expect(circuit.simAcksOnPacket.isEmpty()).toBe(true)
   expect(last.byteLength).toBe(23)
   expect((last.readUInt8(6) | 0x10) > 0).toBe(true)
@@ -252,7 +252,7 @@ describe('sending only 255 or less acks at the end of a package', () => {
   let sendAcks = []
 
   test('circuit only sends less then 256 Acks', () => {
-    circuit.simAcks = []
+    circuit.simAcks.clear()
     circuit.simAcksOnPacket.clear()
 
     for (let i = 0; i < 300; ++i) {
