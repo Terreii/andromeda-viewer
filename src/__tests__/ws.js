@@ -1,5 +1,6 @@
-import WebSocket from 'ws'
 import http from 'http'
+
+import WebSocket from 'ws'
 
 test('it should have a Server', () => {
   expect(typeof WebSocket.Server).toBe('function')
@@ -29,17 +30,20 @@ describe('communication', () => {
     expect(error).not.toBeTruthy()
   })
 
-  let port = 0
+  let address = null
   let serverSocket = null
   let client = null
 
   test('it should start listen', () => {
     return new Promise((resolve, reject) => {
       server.listen(() => {
-        port = server.address().port
+        const addr = server.address()
+        address = addr.family === 'IPv6'
+          ? `[${addr.address}]:${addr.port}`
+          : `${addr.address}:${addr.port}`
 
         try {
-          expect(port).not.toBe(0)
+          expect(address).toBeTruthy()
           resolve()
         } catch (err) {
           reject(err)
@@ -65,7 +69,7 @@ describe('communication', () => {
       })
 
       try {
-        client = new WebSocket(`ws://[::]:${port}/andromeda-bridge`)
+        client = new WebSocket(`ws://${address}/andromeda-bridge`)
       } catch (err) {
         reject(err)
       }
