@@ -8,7 +8,8 @@
 
 import events from 'events'
 
-import { parseBody, createBody } from './networkMessages'
+import {parseBody, createBody} from './networkMessages'
+import {getValueOf, mapBlockOf} from './msgGetters'
 
 export default class Circuit extends events.EventEmitter {
   constructor (hostIP, hostPort, circuitCode) {
@@ -95,13 +96,13 @@ export default class Circuit extends events.EventEmitter {
       this.send('CompletePingCheck', {
         PingID: [
           {
-            PingID: parsedBody.getValue('PingID', 0, 'PingID')
+            PingID: getValueOf(parsedBody, 'PingID', 0, 'PingID')
           }
         ]
       })
       return
     } else if (parsedBody.name === 'PacketAck') {
-      this._filterViewerAcks(parsedBody.mapBlock('Packets', getValue => getValue('ID')))
+      this._filterViewerAcks(mapBlockOf(parsedBody, 'Packets', getValue => getValue('ID')))
       return
     }
     this.emit(parsedBody.name, parsedBody)

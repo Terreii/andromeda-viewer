@@ -5,6 +5,7 @@
 import Immutable from 'immutable'
 
 import AvatarName from '../avatarName'
+import {mapBlockOf} from '../network/msgGetters'
 
 // Only adds a Name to names if it is new or did change
 function addName (state, uuid, name) {
@@ -51,7 +52,13 @@ function namesReducer (state = Immutable.Map(), action) {
       return action.localChatHistory.reduce(addNameFromLocalChat, selfName)
 
     case 'UUIDNameReply':
-      return action.msg.reduce((state, {firstName, lastName, id}) => {
+      return mapBlockOf(action, 'UUIDNameBlock', getValue => {
+        return {
+          firstName: getValue('FirstName', true),
+          lastName: getValue('LastName', true),
+          id: getValue('ID')
+        }
+      }).reduce((state, {firstName, lastName, id}) => {
         return addName(state, id, firstName + ' ' + lastName)
       }, state)
 
