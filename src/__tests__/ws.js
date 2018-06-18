@@ -36,11 +36,9 @@ describe('communication', () => {
 
   test('it should start listen', () => {
     return new Promise((resolve, reject) => {
-      server.listen(() => {
+      server.listen(0, '127.0.0.1', () => {
         const addr = server.address()
-        address = addr.family === 'IPv6'
-          ? `[${addr.address}]:${addr.port}`
-          : `${addr.address}:${addr.port}`
+        address = `${addr.address}:${addr.port}`
 
         try {
           expect(address).toBeTruthy()
