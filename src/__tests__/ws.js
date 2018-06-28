@@ -30,18 +30,17 @@ describe('communication', () => {
     expect(error).not.toBeTruthy()
   })
 
-  let address = null
+  let port = 0
   let serverSocket = null
   let client = null
 
   test('it should start listen', () => {
     return new Promise((resolve, reject) => {
       server.listen(0, '127.0.0.1', () => {
-        const addr = server.address()
-        address = `${addr.address}:${addr.port}`
+        port = server.address().port
 
         try {
-          expect(address).toBeTruthy()
+          expect(port).not.toBe(0)
           resolve()
         } catch (err) {
           reject(err)
@@ -67,7 +66,7 @@ describe('communication', () => {
       })
 
       try {
-        client = new WebSocket(`ws://${address}/andromeda-bridge`)
+        client = new WebSocket(`ws://127.0.0.1:${port}/andromeda-bridge`)
       } catch (err) {
         reject(err)
       }
