@@ -49,7 +49,7 @@ export default class SignInPopup extends React.Component {
             autoComplete='email'
             onChange={this._boundInputChange}
             placeholder='Username / eMail'
-            />
+          />
           <input
             type='password'
             value={this.state.password}
@@ -57,7 +57,7 @@ export default class SignInPopup extends React.Component {
             autoComplete={this.props.isSignUp ? 'new-password' : 'current-password'}
             onChange={this._boundInputChange}
             placeholder='Password'
-            />
+          />
           <input
             style={{display: this.props.isSignUp ? '' : 'none'}}
             type='password'
@@ -66,7 +66,7 @@ export default class SignInPopup extends React.Component {
             autoComplete='new-password'
             onChange={this._boundInputChange}
             placeholder='repeat password'
-            />
+          />
         </div>
         <div>
           <button onClick={this.props.onCancel}>cancel</button>

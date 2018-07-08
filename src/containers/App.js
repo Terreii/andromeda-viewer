@@ -68,7 +68,7 @@ class App extends React.Component {
             this.props.signIn(username, password)
               .then(this._loadAvatars.bind(this))
           }}
-          />
+        />
 
       case 'signUp':
         return <SignInPopup onCancel={close} isSignUp onSend={this.props.signUp} />
@@ -94,7 +94,7 @@ class App extends React.Component {
         grids={this.props.grids}
         saveAvatar={this.props.saveAvatar}
         saveGrid={this.props.saveGrid}
-        />
+      />
     return <AppContainer>
       <TopMenuBar messageOfTheDay={isLoggedIn ? this.props.messageOfTheDay : null} />
       {mainSection}

@@ -46,12 +46,14 @@ global.test('should parse a given name', () => {
   })
 })
 
-global.test('should give only the first name by the method getName() if the ' +
+global.test(
+  'should give only the first name by the method getName() if the ' +
 'last name is "Resident"',
   () => {
     global.expect(new AvatarName('Tester.Resident').getName()).toBe('Tester')
     global.expect(new AvatarName('hal2000').getName()).toBe('Hal2000')
-  })
+  }
+)
 
 global.test('should give the full name with the method getFullName()', () => {
   global.expect(new AvatarName('Tester').getFullName()).toBe('Tester Resident')

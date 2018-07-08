@@ -211,7 +211,7 @@ export default class LoginForm extends React.Component {
           value={this.state.name}
           onChange={this._boundNameChange}
           onKeyUp={this._boundDetectReturn}
-          />
+        />
       </div>
       <div>
         <input
@@ -222,7 +222,7 @@ export default class LoginForm extends React.Component {
           value={this.state.password}
           onChange={this._boundPasswordChange}
           onKeyUp={this._boundDetectReturn}
-          />
+        />
       </div>
       <div>
         <select value={this.state.gridIndex} onChange={this._boundGridChange}>
@@ -237,7 +237,7 @@ export default class LoginForm extends React.Component {
           onChange={event => this.setState({
             save: event.target.checked
           })}
-          />
+        />
         <label htmlFor='saveAvatar'>Save</label>
       </div>
       <div>
@@ -246,7 +246,7 @@ export default class LoginForm extends React.Component {
           value={this.state.isLoggingIn ? 'Connecting ...' : 'Login'}
           onClick={this._boundLoginAnonymously}
           disabled={this.state.isLoggingIn}
-          />
+        />
       </div>
       <SavedAvatarsList>
         {this.renderAvatarLogin()}

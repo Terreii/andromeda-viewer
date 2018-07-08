@@ -105,7 +105,7 @@ export default function BurgerMenu ({account, signIn, signUp, logout, signOut}) 
       style={{display: viewerLoggedIn ? 'none' : ''}}
       href='#signup'
       onClick={signUp}
-      >
+    >
       Sign up to Andromeda
     </Link>
 
@@ -114,7 +114,7 @@ export default function BurgerMenu ({account, signIn, signUp, logout, signOut}) 
       style={{display: avatarLoggedIn ? '' : 'none'}}
       href='#'
       onClick={logout}
-      >
+    >
       log out
     </LogoutButton>
 
@@ -123,7 +123,7 @@ export default function BurgerMenu ({account, signIn, signUp, logout, signOut}) 
       style={{display: viewerLoggedIn ? '' : 'none'}}
       href=''
       onClick={signOut}
-      >
+    >
       Log out from Viewer
     </Link>
   </SlideMenu>
