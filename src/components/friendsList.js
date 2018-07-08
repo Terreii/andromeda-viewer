@@ -113,7 +113,7 @@ export default function FriendsList ({friends, names, updateRights, startNewIMCh
       name={name}
       onRightsChanged={updateRights}
       startNewIMChat={startNewIMChat}
-      />
+    />
   })
 
   return <Outer>

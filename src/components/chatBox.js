@@ -41,7 +41,7 @@ function ChatBox (props) {
         sendTo={text => props.sendInstantMessage(text, target, id)}
         names={names}
         loadHistory={props.getIMHistory}
-        />
+      />
     </TabPane>
   })
 
@@ -49,14 +49,14 @@ function ChatBox (props) {
     defaultActiveKey='local'
     renderTabBar={() => <ScrollableInkTabBar />}
     renderTabContent={() => <TabContent />}
-    >
+  >
     <TabPane tab='Friends' key='friends'>
       <FriendsList
         names={names}
         friends={props.friends}
         startNewIMChat={props.startNewIMChat}
         updateRights={props.updateRights}
-        />
+      />
     </TabPane>
 
     <TabPane tab='Local' key='local'>
@@ -64,7 +64,7 @@ function ChatBox (props) {
         data={props.localChat}
         names={names}
         sendTo={props.sendLocalChatMessage}
-        />
+      />
     </TabPane>
 
     {panels}

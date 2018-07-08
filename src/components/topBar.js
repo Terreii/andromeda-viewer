@@ -34,7 +34,7 @@ export default function TopBar ({messageOfTheDay, account, signIn, signUp, signO
         href={messageOfTheDay.get('href')}
         target='_blank'
         rel='noopener noreferrer'
-        >
+      >
         {messageOfTheDay.get('href')}
       </Link>
     </span>
@@ -46,7 +46,7 @@ export default function TopBar ({messageOfTheDay, account, signIn, signUp, signO
       signUp={signUp}
       signOut={signOut}
       logout={logout}
-      />
+    />
     {msgOfDay}
     <span />
   </MenuBar>
