@@ -1,7 +1,8 @@
 'use strict'
 
-const fetch = require('node-fetch')
 const http = require('http')
+
+const fetch = require('node-fetch')
 
 let serverIsRunning = false
 let port = 0

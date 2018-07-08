@@ -1,7 +1,8 @@
 'use strict'
 
-const macaddress = require('macaddress')
 const os = require('os')
+
+const macaddress = require('macaddress')
 
 test('it should have a method for returning one mac-address', () => {
   expect(typeof macaddress.one).toBe('function')
