@@ -51,7 +51,7 @@
     "redux": "^4.0.0",
     "redux-burger-menu": "^0.2.5",
     "redux-thunk": "^2.3.0",
-    "standard": "^10.0.3",
+    "standard": "^11.0.1",
     "styled-components": "^2.4.1",
     "weallbehave": "^1.2.0",
     "weallcontribute": "^1.0.8"

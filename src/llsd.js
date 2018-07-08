@@ -27,31 +27,31 @@ $/LicenseInfo$
 
 var ArrayBuffer, Uint8Array, DataView // typedarray.js
 
- //
- // LLSD Type          ECMAScript Type
- // ------------------ ---------------
- // Undefined          null
- // Boolean            Boolean
- // Integer            Number
- // Real               Number
- // UUID               UUID
- // String             String
- // Date               Date
- // URI                URI
- // Binary             Binary
- // Map                Object
- // Array              Array
- //
+//
+// LLSD Type          ECMAScript Type
+// ------------------ ---------------
+// Undefined          null
+// Boolean            Boolean
+// Integer            Number
+// Real               Number
+// UUID               UUID
+// String             String
+// Date               Date
+// URI                URI
+// Binary             Binary
+// Map                Object
+// Array              Array
+//
 
 var LL_LEGACY // Set to true to enable notation formatting
 var LLSD, URI, UUID, Binary;
 
 (function () {
-    //
-    // var u = new URI("http://www.example.com");
-    // u.toString() // -> "http://www.example.com"
-    // u.toJSON()   // -> "http://www.example.com"
-    //
+//
+// var u = new URI("http://www.example.com");
+// u.toString() // -> "http://www.example.com"
+// u.toJSON()   // -> "http://www.example.com"
+//
   if (!URI) {
     URI = function (val) {
       if (typeof val === 'undefined') {
@@ -72,14 +72,14 @@ var LLSD, URI, UUID, Binary;
     }
   }
 
-    //
-    // var u = new UUID(); // 00000000-0000-0000-0000-000000000000
-    // var u = new UUID([ 0x00, 0x01, 0x02 ... 0x0f ]);
-    // var u = new UUID("12345678-1234-1234-1234-123456789abc");
-    // u.toString() // UUID string
-    // u.toJSON()   // UUID string
-    // u.getOctets() // [ 0x00, 0x01, 0x02 ... 0x0f ]
-    //
+  //
+  // var u = new UUID(); // 00000000-0000-0000-0000-000000000000
+  // var u = new UUID([ 0x00, 0x01, 0x02 ... 0x0f ]);
+  // var u = new UUID("12345678-1234-1234-1234-123456789abc");
+  // u.toString() // UUID string
+  // u.toJSON()   // UUID string
+  // u.getOctets() // [ 0x00, 0x01, 0x02 ... 0x0f ]
+  //
   if (!UUID) {
     UUID = function (val) {
       function hex2 (b) { return ('00' + b.toString(16)).slice(-2) }
@@ -122,11 +122,11 @@ var LLSD, URI, UUID, Binary;
     }
   }
 
-    // Browser compatibility shims
+  // Browser compatibility shims
   var B64_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
   if (!window.atob) {
     window.atob = function (a) {
-            /* jslint plusplus: false, bitwise: false */
+      /* jslint plusplus: false, bitwise: false */
       var pos = 0
       var len = a.length
       var octets = []
@@ -148,7 +148,7 @@ var LLSD, URI, UUID, Binary;
           throw new Error('INVALID_CHARACTER_ERR')
         }
 
-                // 11111122 22223333 33444444
+        //         11111122 22223333 33444444
         o1 = (e1 << 2) | (e2 >> 4)
         o2 = ((e2 & 0xf) << 4) | (e3 >> 2)
         o3 = ((e3 & 0x3) << 6) | e4
@@ -163,7 +163,7 @@ var LLSD, URI, UUID, Binary;
   }
   if (!window.btoa) {
     window.btoa = function (b) {
-            /* jslint plusplus: false, bitwise: false */
+      /* jslint plusplus: false, bitwise: false */
       var pos = 0
       var len = b.length
       var out = []
@@ -179,7 +179,7 @@ var LLSD, URI, UUID, Binary;
         o2 = b.charCodeAt(pos++)
         o3 = b.charCodeAt(pos++)
 
-                // 111111 112222 222233 333333
+        // 111111 112222 222233 333333
         e1 = o1 >> 2
         e2 = ((o1 & 0x3) << 4) | (o2 >> 4)
         e3 = ((o2 & 0xf) << 2) | (o3 >> 6)
@@ -188,35 +188,35 @@ var LLSD, URI, UUID, Binary;
         if (pos === len + 2) { e3 = 64; e4 = 64 } else if (pos === len + 1) { e4 = 64 }
 
         out.push(B64_ALPHABET.charAt(e1),
-                         B64_ALPHABET.charAt(e2),
-                         B64_ALPHABET.charAt(e3),
-                         B64_ALPHABET.charAt(e4))
+          B64_ALPHABET.charAt(e2),
+          B64_ALPHABET.charAt(e3),
+          B64_ALPHABET.charAt(e4))
       }
 
       return out.join('')
     }
   }
 
-    //
-    // var b = new Binary(); // length 0
-    // var b = new Binary( octets ); // Array of numbers
-    // var b = new Binary( binary ); // Clone constructor
-    // var b = new Binary( string, encoding );
-    //
-    // b.toString() // string line "[Binary <length>]"
-    // b.toString( encoding ) // encoding of octets
-    // b.toJSON()   // base64 encoding of octets
-    // b.toArray() // Array of octets (a copy)
-    //
-    // Supported encodings are "UTF-8", "BASE64", "BASE16", "BINARY"
-    // Unsupported encodings or invalid data will throw
-    // a RangeError.
-    //
-    // *TODO: Track updates to CommonJS proposals for Binary data API
-    //
+  //
+  // var b = new Binary(); // length 0
+  // var b = new Binary( octets ); // Array of numbers
+  // var b = new Binary( binary ); // Clone constructor
+  // var b = new Binary( string, encoding );
+  //
+  // b.toString() // string line "[Binary <length>]"
+  // b.toString( encoding ) // encoding of octets
+  // b.toJSON()   // base64 encoding of octets
+  // b.toArray() // Array of octets (a copy)
+  //
+  // Supported encodings are "UTF-8", "BASE64", "BASE16", "BINARY"
+  // Unsupported encodings or invalid data will throw
+  // a RangeError.
+  //
+  // *TODO: Track updates to CommonJS proposals for Binary data API
+  //
   if (!Binary) {
     (function () {
-            // Convert binary string (each octet stored as character 0x00-0xff) to array of numbers
+      // Convert binary string (each octet stored as character 0x00-0xff) to array of numbers
       function binstrToArray (s) {
         var a = []
         var len = s.length
@@ -232,7 +232,7 @@ var LLSD, URI, UUID, Binary;
         return a
       }
 
-            // Convert array of numbers to binary string (each octet stored as character 0x00-0xff)
+      // Convert array of numbers to binary string (each octet stored as character 0x00-0xff)
       function arrayToBinstr (a) {
         var s = []
         var len = a.length
@@ -256,7 +256,7 @@ var LLSD, URI, UUID, Binary;
 
         'UTF-8': {
           encode: function (s) {
-                        /* jslint bitwise: false */
+            /* jslint bitwise: false */
             var o = []
             var len
             var i
@@ -286,7 +286,7 @@ var LLSD, URI, UUID, Binary;
             for (i = 0; i < len; i += 1) {
               cp = s.charCodeAt(i)
 
-                            // Look for surrogate pairs
+              // Look for surrogate pairs
               if (cp >= 0xD800 && cp <= 0xDBFF) {
                 i += 1
                 if (i >= len) { throw new RangeError('Badly formed UTF-16 surrogate pair') }
@@ -307,7 +307,7 @@ var LLSD, URI, UUID, Binary;
           },
 
           decode: function (a) {
-                        /* jslint bitwise: false, plusplus: false */
+            /* jslint bitwise: false, plusplus: false */
             var s = []
             var offset = 0
             var len = a.length
@@ -334,11 +334,11 @@ var LLSD, URI, UUID, Binary;
                 throw new RangeError('Invalid UTF-8 lead byte')
               }
 
-                            // Surrogate-pair encode
+              // Surrogate-pair encode
               if (cp >= 0x10000) {
                 cp -= 0x10000
                 s.push(String.fromCharCode(0xD800 + ((cp >> 10) & 0x3FF)),
-                                       String.fromCharCode(0xDC00 + (cp & 0x3FF)))
+                  String.fromCharCode(0xDC00 + (cp & 0x3FF)))
               } else {
                 s.push(String.fromCharCode(cp))
               }
@@ -349,8 +349,8 @@ var LLSD, URI, UUID, Binary;
         },
 
         'BASE64': {
-                    // NOTE: encode/decode sense is reversed relative to normal usage;
-                    // a base64 encoder typically encodes binary to a string.
+          // NOTE: encode/decode sense is reversed relative to normal usage;
+          // a base64 encoder typically encodes binary to a string.
           encode: function (s) { // string -> binary
             s = s.replace(/\s+/g, '') // remove whitespace
 
@@ -407,11 +407,11 @@ var LLSD, URI, UUID, Binary;
       }
 
       Binary = function () {
-                /* jslint bitwise: false */
+      /* jslint bitwise: false */
 
         var array, binary, string, encoding
 
-                // new Binary()
+        // new Binary()
         if (arguments.length === 0) {
           this.octets = []
         } else if (arguments.length >= 1 && // new Binary( array )
@@ -434,8 +434,8 @@ var LLSD, URI, UUID, Binary;
         }
       }
 
-            // toString()
-            // toString( encoding )
+      // toString()
+      // toString( encoding )
       Binary.prototype.toString = function (encoding) {
         if (arguments.length === 0) {
           return '[Binary ' + this.octets.length + ']'
@@ -445,67 +445,67 @@ var LLSD, URI, UUID, Binary;
         }
       }
 
-            // toJSON()
+      // toJSON()
       Binary.prototype.toJSON = function () {
-                // return this.octets;
-                // per mailing list proposal, serialize as base64 instead
-                // to take advantage of string<->binary conversions
-                // *TODO: Update when Type System draft is updated
-                // *TODO: Consider moving this to JSON.stringify() call
+        // return this.octets;
+        // per mailing list proposal, serialize as base64 instead
+        // to take advantage of string<->binary conversions
+        // *TODO: Update when Type System draft is updated
+        // *TODO: Consider moving this to JSON.stringify() call
         return this.toString('BASE64')
       }
 
-            // toArray()
+      // toArray()
       Binary.prototype.toArray = function () {
         return this.octets.slice() // Make a copy
       }
     }())
   }
 
-    //
-    // LLSD.parse( content_type, string )
-    // LLSD.parseBinary( Binary )
-    // LLSD.parseXML( string )
-    // LLSD.parseJSON( string )
-    // LLSD.parseNotation( string ) // (if LL_LEGACY set)
-    //
-    // LLSD.format( content_type, data )
-    // LLSD.formatBinary( data ) // Binary
-    // LLSD.formatXML( data ) // string
-    // LLSD.formatJSON( data ) // string
-    // LLSD.formatNotation( data ) // (if LL_LEGACY set)
-    //
-    // LLSD.asUndefined( value )
-    // LLSD.asBoolean( value )
-    // LLSD.asInteger( value )
-    // LLSD.asReal( value )
-    // LLSD.asString( value )
-    // LLSD.asUUID( value )
-    // LLSD.asDate( value )
-    // LLSD.asURI( value )
-    // LLSD.asBinary( value )
-    //
-    // Helpers:
-    //
-    // LLSD.parseISODate(str) // returns date or throws if invalid
-    // LLSD.MAX_INTEGER // maximum 32-bit two's complement value
-    // LLSD.MIN_INTEGER // minimum 32-bit two's complement value
-    // LLSD.isNegativeZero(n) // true if n is negative zero
-    // LLSD.isInt32(n) // true if n can be represented as an LLSD integer
-    // LLSD.type(v) // one of 'undefined', 'string', 'boolean', 'integer',
-    //                        'real', 'date', 'uri', 'uuid', 'binary',
-    //                        'array', 'map'
-    // LLSD.parseFloat(str) // following Appendix A of spec
-    // LLSD.formatFloat(val) // following Appendix A of spec
-    //
+  //
+  // LLSD.parse( content_type, string )
+  // LLSD.parseBinary( Binary )
+  // LLSD.parseXML( string )
+  // LLSD.parseJSON( string )
+  // LLSD.parseNotation( string ) // (if LL_LEGACY set)
+  //
+  // LLSD.format( content_type, data )
+  // LLSD.formatBinary( data ) // Binary
+  // LLSD.formatXML( data ) // string
+  // LLSD.formatJSON( data ) // string
+  // LLSD.formatNotation( data ) // (if LL_LEGACY set)
+  //
+  // LLSD.asUndefined( value )
+  // LLSD.asBoolean( value )
+  // LLSD.asInteger( value )
+  // LLSD.asReal( value )
+  // LLSD.asString( value )
+  // LLSD.asUUID( value )
+  // LLSD.asDate( value )
+  // LLSD.asURI( value )
+  // LLSD.asBinary( value )
+  //
+  // Helpers:
+  //
+  // LLSD.parseISODate(str) // returns date or throws if invalid
+  // LLSD.MAX_INTEGER // maximum 32-bit two's complement value
+  // LLSD.MIN_INTEGER // minimum 32-bit two's complement value
+  // LLSD.isNegativeZero(n) // true if n is negative zero
+  // LLSD.isInt32(n) // true if n can be represented as an LLSD integer
+  // LLSD.type(v) // one of 'undefined', 'string', 'boolean', 'integer',
+  //                        'real', 'date', 'uri', 'uuid', 'binary',
+  //                        'array', 'map'
+  // LLSD.parseFloat(str) // following Appendix A of spec
+  // LLSD.formatFloat(val) // following Appendix A of spec
+  //
 
   if (!LLSD) {
     LLSD = {}
 
-        // Parse ISO 8601 dates into ECMAScript Date objects
-        //
-        // Matches "YY-MM-DDThh:mm:ssZ" or "YY-MM-DDThh:mm:ss.fffZ".
-        // Throws an error if the string doesn't match.
+    // Parse ISO 8601 dates into ECMAScript Date objects
+    //
+    // Matches "YY-MM-DDThh:mm:ssZ" or "YY-MM-DDThh:mm:ss.fffZ".
+    // Throws an error if the string doesn't match.
     LLSD.parseISODate = function (str) {
       var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(str)
       if (m) {
@@ -523,7 +523,7 @@ var LLSD, URI, UUID, Binary;
     }
 
     LLSD.isInt32 = function (a) {
-            /* jslint bitwise: false */
+      /* jslint bitwise: false */
       return (a >> 0) === a
     }
 
@@ -538,15 +538,15 @@ var LLSD, URI, UUID, Binary;
         case 'NaNS': return NaN
         case 'NaNQ': return NaN
         default:
-                    // *TODO: Update when the incorrect ABNF in Appendix A ABNF is corrected
-                    // if (/^(([1-9][0-9]*(\.[0-9]*)?)|(0\.0*[1-9][0-9]*))E(0|-?[1-9][0-9]*)$/.test(str)) {
+          // *TODO: Update when the incorrect ABNF in Appendix A ABNF is corrected
+          // if (/^(([1-9][0-9]*(\.[0-9]*)?)|(0\.0*[1-9][0-9]*))E(0|-?[1-9][0-9]*)$/.test(str)) {
           if (/^[-+]?([0-9]*\.?[0-9]+)([eE][-+]?[0-9]+)?$/.test(str)) {
             return parseFloat(str)
           }
           break
       }
 
-            // otherwise no return value (undefined)
+      // otherwise no return value (undefined)
     }
 
     LLSD.formatFloat = function (f) {
@@ -556,9 +556,9 @@ var LLSD, URI, UUID, Binary;
         return '+Infinity'
       } else if (f === -Infinity) {
         return '-Infinity'
-            // else if (f === 0 && 1 / f === Infinity) {
-            //    return '+Zero'; // *TODO: Per spec, but is this desired?
-            // }
+      // else if (f === 0 && 1 / f === Infinity) {
+      //    return '+Zero'; // *TODO: Per spec, but is this desired?
+      // }
       } else if (LLSD.isNegativeZero(f)) {
         return '-Zero' // return '-0.0'; // *TODO: Per spec, '-Zero', but is this desired?
       } else {
@@ -566,10 +566,10 @@ var LLSD, URI, UUID, Binary;
       }
     }
 
-        // Return the LLSD type for a value; one of:
-        //     'undefined', 'string', 'boolean', 'integer', 'real',
-        //     'date', 'uri', 'uuid', 'binary', 'array', 'map'
-        //
+    // Return the LLSD type for a value; one of:
+    //     'undefined', 'string', 'boolean', 'integer', 'real',
+    //     'date', 'uri', 'uuid', 'binary', 'array', 'map'
+    //
     LLSD.type = function (value) {
       switch (typeof value) {
         case 'boolean':
@@ -598,15 +598,15 @@ var LLSD, URI, UUID, Binary;
       }
     }
 
-        /// /////////////////////////////////////////////////////////
-        //
-        // Parsers/Formatters
-        //
-        /// /////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////
+    //
+    // Parsers/Formatters
+    //
+    /// /////////////////////////////////////////////////////////
 
-        // Parses an XML serialization of LLSD into the corresponding
-        // ECMAScript object data structure.
-        //
+    // Parses an XML serialization of LLSD into the corresponding
+    // ECMAScript object data structure.
+    //
     LLSD.parseXML = function (xmltext) {
       var xmldoc
 
@@ -644,19 +644,19 @@ var LLSD, URI, UUID, Binary;
           case 'integer': return LLSD.asInteger(nodeText(elem))
           case 'real': return LLSD.asReal(nodeText(elem))
           case 'uuid':
-                        // return new UUID(nodeText(elem)); // If invalid should raise error
+            // return new UUID(nodeText(elem)); // If invalid should raise error
             return LLSD.asUUID(nodeText(elem)) // If invalid should yield default
           case 'string': return nodeText(elem)
           case 'date':
-                        // return LLSD.parseISODate(text); // If invalid should raise error
+            // return LLSD.parseISODate(text); // If invalid should raise error
             return LLSD.asDate(nodeText(elem)) // If invalid should yield default
           case 'uri':
-                        // return new URI(nodeText(elem)); // If invalid should raise error
+            // return new URI(nodeText(elem)); // If invalid should raise error
             return LLSD.asURI(nodeText(elem)) // If invalid should yield default
           case 'binary':
             encoding = elem.getAttribute('encoding')
             if (encoding && encoding !== 'base64') { throw new Error('Unexpected encoding on <binary>: ' + encoding) }
-                        // return new Binary(nodeText(elem)); // If invalid should raise error
+            // return new Binary(nodeText(elem)); // If invalid should raise error
             return LLSD.asBinary(nodeText(elem)) // If invalid should yield default
           case 'map':
             map = {}
@@ -686,7 +686,7 @@ var LLSD, URI, UUID, Binary;
     }
 
     LLSD.formatXML = function (data) {
-            // *TODO: Cross browser XML DOM generation
+      // *TODO: Cross browser XML DOM generation
 
       var xml = []
 
@@ -780,9 +780,9 @@ var LLSD, URI, UUID, Binary;
     LLSD.OCTET_MAP_KEY = 'k'.charCodeAt(0)
     LLSD.OCTET_MAP_CLOSE = '}'.charCodeAt(0)
 
-        // Parses a Binary serialization of LLSD into the corresponding
-        // ECMAScript object data structure.
-        //
+    // Parses a Binary serialization of LLSD into the corresponding
+    // ECMAScript object data structure.
+    //
     LLSD.parseBinary = function (binary) {
       if (typeof binary === 'string') {
         binary = new Binary(binary, 'BASE64')
@@ -1043,7 +1043,7 @@ var LLSD, URI, UUID, Binary;
 
     if (LL_LEGACY) {
       LLSD.parseNotation = function (string) {
-                // http://wiki.secondlife.com/wiki/LLSD#Notation_Serialization
+        // http://wiki.secondlife.com/wiki/LLSD#Notation_Serialization
 
         function error (errmsg) {
           throw new Error(errmsg)
@@ -1058,7 +1058,7 @@ var LLSD, URI, UUID, Binary;
             string = string.substring(m[0].length)
             return m.length > 1 ? m[1] : m[0]
           }
-                    // return undefined
+          // return undefined
         }
 
         function req (regex, errmsg) {
@@ -1077,7 +1077,7 @@ var LLSD, URI, UUID, Binary;
         var value
 
         function parseValue () {
-                    /* jslint regexp: false */
+          /* jslint regexp: false */
           var res, key
 
           ws()
@@ -1236,7 +1236,7 @@ var LLSD, URI, UUID, Binary;
     LLSD.formatJSON = function (data) {
       if (JSON && JSON.stringify && typeof JSON.stringify === 'function') {
         return JSON.stringify(data, function (k, v) {
-                    // JSON does not support +/-Infinity or NaN or distinguish -0; format as strings
+          // JSON does not support +/-Infinity or NaN or distinguish -0; format as strings
           if (typeof v === 'number' && (!isFinite(v) || LLSD.isNegativeZero(v))) {
             return LLSD.formatFloat(v)
           }
@@ -1283,11 +1283,11 @@ var LLSD, URI, UUID, Binary;
       }
     }
 
-        /// /////////////////////////////////////////////////////////
-        //
-        // Conversions
-        //
-        /// /////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////
+    //
+    // Conversions
+    //
+    /// /////////////////////////////////////////////////////////
 
     LLSD.asUndefined = function (value) {
       return null
