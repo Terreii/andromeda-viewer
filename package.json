@@ -37,6 +37,7 @@
   "proxy": "http://localhost:8080",
   "devDependencies": {
     "@hoodie/client": "^10.1.1",
+    "autoscroll-react": "^3.2.0",
     "concurrently": "^3.5.1",
     "double-ended-queue": "^2.1.0-0",
     "immutable": "^3.8.2",
