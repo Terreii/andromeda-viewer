@@ -177,7 +177,7 @@ test('send ack at end of package', () => {
   // Check if the acks are correct
   const offset = last.length - 1
   expect(last.readUInt8(offset)).toBe(2)
-  expect([last.readUInt32LE(offset - 4), last.readUInt32LE(offset - 8)].sort()).toEqual([
+  expect([last.readUInt32BE(offset - 4), last.readUInt32BE(offset - 8)].sort()).toEqual([
     sequenceNumberForTests - 2,
     sequenceNumberForTests - 1
   ])
@@ -252,7 +252,7 @@ describe('circuit should remove acks that the server has send back', () => {
 
     // create Ack at end
     const acks = Buffer.from([0, 0, 0, 0, 1])
-    acks.writeUInt32LE(circuit.viewerAcks[0].sequenceNumber, 0)
+    acks.writeUInt32BE(circuit.viewerAcks[0].sequenceNumber, 0)
     const message2 = Buffer.concat([messagePart1, acks])
     circuit.websocket.onmessage({data: message2})
 
@@ -287,7 +287,7 @@ describe('sending only 255 or less acks at the end of a package', () => {
 
     for (let offset = last.length - 1, count = last.readUInt8(offset); count > 0; count--) {
       offset -= 4
-      sendAcks.push(last.readUInt32LE(offset))
+      sendAcks.push(last.readUInt32BE(offset))
     }
     sendAcks.sort((a, b) => a - b)
 
@@ -315,7 +315,7 @@ describe('sending only 255 or less acks at the end of a package', () => {
 
       for (let offset = last.length - 1, count = last.readUInt8(offset); count > 0; count--) {
         offset -= 4
-        newAcks.push(last.readUInt32LE(offset))
+        newAcks.push(last.readUInt32BE(offset))
       }
 
       expect(last.readUInt8(last.length - 1)).toBe(45)
