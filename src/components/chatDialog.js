@@ -6,31 +6,13 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Immutable from 'immutable'
 import styled from 'styled-components'
-import autoscroll from 'autoscroll-react'
+
+import ChatMessagesList from './chatMessagesList'
 
 const Main = styled.div`
   margin: 0.3em;
   display: flex;
   flex-direction: column;
-`
-
-const MessageList = styled.div`
-  flex: 1 1 100%;
-  overflow-y: scroll;
-  max-height: calc(100vh - 8em);
-`
-
-const Message = styled.div`
-  & > span {
-    padding-right: 0.3em;
-    font-size: 120%;
-  }
-`
-
-const AvatarName = styled.span`
-  :after {
-    content: ":";
-  }
 `
 
 const ChatTextSend = styled.div`
@@ -47,22 +29,6 @@ const TextBox = styled.input`
   flex: 4 0 auto;
   margin-right: 0.5em;
 `
-
-// Adds to all Numbers a leading zero if it has only one digit
-function leadingZero (num) {
-  return String(num).padStart(2, '0')
-}
-
-class ChatList extends React.Component {
-  render () {
-    const { messages, ...props } = this.props
-    return <MessageList {...props}>
-      {messages}
-    </MessageList>
-  }
-}
-
-const AutoScrollChatList = autoscroll(ChatList)
 
 export default class ChatDialog extends React.Component {
   constructor () {
@@ -81,31 +47,17 @@ export default class ChatDialog extends React.Component {
   }
 
   render () {
-    const msgData = this.props.isIM ? this.props.data.get('messages') : this.props.data
-    const messages = msgData.map(msg => {
-      const time = new Date(msg.get('time'))
-      const fromId = this.props.isIM ? msg.get('fromId') : msg.get('sourceID')
-      const name = this.props.names.get(fromId) || ''
-      return (
-        <Message key={time.getTime()}>
-          <span className='time'>
-            {leadingZero(time.getHours())}
-            :
-            {leadingZero(time.getMinutes())}
-            :
-            {leadingZero(time.getSeconds())}
-          </span>
-          <AvatarName>{name.toString()}</AvatarName>
-          <span className='messageText'>{msg.get('message')}</span>
-        </Message>
-      )
-    })
+    const messages = this.props.isIM ? this.props.data.get('messages') : this.props.data
 
     const placeholderText = 'Send ' +
       (this.props.isIM ? 'Instant Message' : 'to local chat')
 
     return <Main>
-      <AutoScrollChatList messages={messages} />
+      <ChatMessagesList
+        messages={messages}
+        isIM={this.props.isIM}
+        names={this.props.names}
+      />
       <ChatTextSend>
         <TextBox
           type='text'
