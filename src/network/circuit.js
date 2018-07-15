@@ -198,7 +198,7 @@ export default class Circuit extends events.EventEmitter {
       if (Number.isNaN(ack)) {
         ack = 0
       }
-      acksBuffer.writeUInt32LE(ack, index * 4)
+      acksBuffer.writeUInt32BE(ack, index * 4)
     })
 
     acksBuffer.writeUInt8(acks.length, acksBuffer.length - 1)
@@ -333,7 +333,7 @@ function extractAcks (msg) {
   // it reads the acks backwards
   for (let count = msg.readUInt8(offset); count > 0; count--) {
     offset -= 4
-    acks.push(msg.readUInt32LE(offset))
+    acks.push(msg.readUInt32BE(offset))
   }
   return acks
 }
