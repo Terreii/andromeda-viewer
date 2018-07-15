@@ -38,6 +38,7 @@
   "devDependencies": {
     "@hoodie/client": "^10.1.1",
     "concurrently": "^3.5.1",
+    "double-ended-queue": "^2.1.0-0",
     "immutable": "^3.8.2",
     "markdown-chalk": "^1.4.0",
     "pouchdb": "^6.3.4",
