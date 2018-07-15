@@ -6,6 +6,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Immutable from 'immutable'
 import styled from 'styled-components'
+import autoscroll from 'autoscroll-react'
 
 const Main = styled.div`
   margin: 0.3em;
@@ -52,6 +53,17 @@ function leadingZero (num) {
   return String(num).padStart(2, '0')
 }
 
+class ChatList extends React.Component {
+  render () {
+    const { messages, ...props } = this.props
+    return <MessageList {...props}>
+      {messages}
+    </MessageList>
+  }
+}
+
+const AutoScrollChatList = autoscroll(ChatList)
+
 export default class ChatDialog extends React.Component {
   constructor () {
     super()
@@ -93,9 +105,7 @@ export default class ChatDialog extends React.Component {
       (this.props.isIM ? 'Instant Message' : 'to local chat')
 
     return <Main>
-      <MessageList>
-        {messages}
-      </MessageList>
+      <AutoScrollChatList messages={messages} />
       <ChatTextSend>
         <TextBox
           type='text'
