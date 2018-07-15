@@ -231,6 +231,7 @@ export default class Circuit extends events.EventEmitter {
   // Sends all acks after 100ms
   _sendAcks () {
     const acks = []
+    const toDelete = []
     for (const [sequenceNumber, timesSend] of this.simAcks) {
       acks.push({
         ID: sequenceNumber
@@ -239,9 +240,13 @@ export default class Circuit extends events.EventEmitter {
       if (timesSend === 0) {
         this.simAcks.set(sequenceNumber, timesSend + 1)
       } else {
-        this.simAcks.delete(sequenceNumber)
+        toDelete.push(sequenceNumber)
       }
     }
+
+    toDelete.forEach(sequenceNumber => {
+      this.simAcks.delete(sequenceNumber)
+    })
 
     this.send('PacketAck', {
       Packets: acks
