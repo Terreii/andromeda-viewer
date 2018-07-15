@@ -7,6 +7,7 @@
  */
 
 import events from 'events'
+import Deque from 'double-ended-queue'
 
 import {parseBody, createBody} from './networkMessages'
 import {getValueOf, mapBlockOf} from './msgGetters'
@@ -36,7 +37,8 @@ export default class Circuit extends events.EventEmitter {
     this.cachedMessages = []
     this.websocket.onmessage = this._onMessage.bind(this)
 
-    this.simAcks = []
+    this.simAcks = new Map()
+    this.simAcksOnPacket = new Deque()
     this.viewerAcks = []
 
     setTimeout(() => this._startAcksProcess(), 100)
@@ -51,6 +53,7 @@ export default class Circuit extends events.EventEmitter {
   close () {
     this.websocket.close()
     this.removeAllListeners()
+    clearInterval(this.acksProcessInterval)
   }
 
   _onMessage (message) {
@@ -81,11 +84,8 @@ export default class Circuit extends events.EventEmitter {
     const parsedBody = parseBody(decodedBody, ip, port, isResend, isReliable)
 
     if (isReliable) {
-      this.simAcks.push({
-        didSendAcksMsg: false, // was send with a 'PacketAck' message
-        onMessageSendCount: 0, // was send on another message
-        sequenceNumber: senderSequenceNumber
-      })
+      this.simAcks.set(senderSequenceNumber, 0) // was send with a 'PacketAck' message
+      this.simAcksOnPacket.push(senderSequenceNumber) // was send on another message
     }
 
     const acks = hasAck ? extractAcks(msg) : []
@@ -100,13 +100,15 @@ export default class Circuit extends events.EventEmitter {
           }
         ]
       })
-      return
+    } else if (parsedBody.name === 'CompletePingCheck') {
+      // TODO: use the ping time
     } else if (parsedBody.name === 'PacketAck') {
       this._filterViewerAcks(mapBlockOf(parsedBody, 'Packets', getValue => getValue('ID')))
-      return
+    } else {
+      // For every message that is not a circuit control message
+      this.emit(parsedBody.name, parsedBody)
+      this.emit('packetReceived', parsedBody)
     }
-    this.emit(parsedBody.name, parsedBody)
-    this.emit('packetReceived', parsedBody)
   }
 
   // Send a Packet.
@@ -118,11 +120,11 @@ export default class Circuit extends events.EventEmitter {
     // throw an error
     const body = createBody(messageType, data)
 
-    const acksBuffer = this.simAcks.length > 0 && messageType !== 'PacketAck'
-      ? this._createAcksBuffer()
-      : Buffer.alloc(0)
-
     const bodyBuffer = body.needsZeroEncode ? zeroEncode(body.buffer) : body.buffer
+
+    const acksBuffer = !this.simAcksOnPacket.isEmpty() && messageType !== 'PacketAck'
+      ? this._createAcksBuffer(1200 - bodyBuffer.length) // save space for acks that is left
+      : Buffer.alloc(0)
 
     const ipPort = Buffer.alloc(6)
     for (var i = 0; i < 4; i++) {
@@ -178,85 +180,77 @@ export default class Circuit extends events.EventEmitter {
     }
   }
 
-  // Get acks that still needs to be send for given send method.
-  // forAcksMessage true if it is for a 'PacketAck' message.
-  _getSimAcks (forAcksMessage) {
-    if (this.simAcks.length === 0) return []
-
-    return this.simAcks.filter(ack => {
-      return forAcksMessage ? !ack.didSendAcksMsg : ack.onMessageSendCount < 2
-    }).map(ack => ack.sequenceNumber)
-  }
-
-  // Mark acks as send and filters out acks that are send enough.
-  // forAcksMessage true if it is for a 'PacketAck' message.
-  _setSimAcksToSend (forAcksMessage) {
-    const newAcks = []
-    for (let i = 0, max = this.simAcks.length; i < max; i += 1) {
-      const ack = this.simAcks[i]
-
-      if (forAcksMessage) { // ack was send with PacketAck message
-        ack.didSendAcksMsg = true
-      } else { // ack was send on a Package
-        ack.onMessageSendCount += 1
-      }
-
-      // add acks that need to be send.
-      if (!ack.didSendAcksMsg || ack.onMessageSendCount < 2) {
-        newAcks.push(ack)
-      }
-    }
-    this.simAcks = newAcks
-  }
-
   // Adds the Acks
-  _createAcksBuffer () {
-    const acks = this._getSimAcks(false)
+  _createAcksBuffer (allowedSaveSpace) {
+    const acks = []
+    while (!this.simAcksOnPacket.isEmpty() && acks.length < 255 && 4 + 1 < allowedSaveSpace) {
+      const ack = this.simAcksOnPacket.shift()
+      acks.push(ack)
+      allowedSaveSpace -= 4
+    }
+
     if (acks.length === 0) return Buffer.from([0])
 
     const acksBuffer = Buffer.alloc((acks.length * 4) + 1)
 
-    acks.forEach((ack, i) => {
+    acks.forEach((ack, index) => {
       ack = +ack // to Number
       if (Number.isNaN(ack)) {
         ack = 0
       }
-      acksBuffer.writeUInt32LE(ack, i * 4)
+      acksBuffer.writeUInt32BE(ack, index * 4)
     })
 
     acksBuffer.writeUInt8(acks.length, acksBuffer.length - 1)
-    this._setSimAcksToSend(false)
 
     return acksBuffer
   }
 
   // resend packages and send ack-message every 200ms
   _startAcksProcess () {
-    setInterval(() => {
-      if (this.simAcks.length > 0) {
-        this._sendAcks()
-      }
+    let pingId = 0
+    this.acksProcessInterval = setInterval(() => {
+      this._sendAcks()
+
       if (this.viewerAcks.length > 0) {
         this._resendPackages()
       }
-    }, 200)
+
+      this.send('StartPingCheck', {
+        PingID: [
+          {
+            PingID: pingId,
+            OldestUnacked: this.simAcksOnPacket.isEmpty() ? 0 : this.simAcksOnPacket.peekFront()
+          }
+        ]
+      })
+      pingId = pingId === 255 ? 0 : pingId + 1
+    }, 100)
   }
 
-  // Sends all acks after 200ms
+  // Sends all acks after 100ms
   _sendAcks () {
-    const acks = this._getSimAcks(true)
-    if (acks.length === 0) return
-
-    const data = {
-      Packets: acks.map(ack => {
-        return {
-          ID: ack
-        }
+    const acks = []
+    const toDelete = []
+    for (const [sequenceNumber, timesSend] of this.simAcks) {
+      acks.push({
+        ID: sequenceNumber
       })
+
+      if (timesSend === 0) {
+        this.simAcks.set(sequenceNumber, timesSend + 1)
+      } else {
+        toDelete.push(sequenceNumber)
+      }
     }
 
-    this._setSimAcksToSend(true)
-    this.send('PacketAck', data, true)
+    toDelete.forEach(sequenceNumber => {
+      this.simAcks.delete(sequenceNumber)
+    })
+
+    this.send('PacketAck', {
+      Packets: acks
+    })
   }
 
   // Filter received acks out from the viewerAcks array
@@ -339,7 +333,7 @@ function extractAcks (msg) {
   // it reads the acks backwards
   for (let count = msg.readUInt8(offset); count > 0; count--) {
     offset -= 4
-    acks.push(msg.readUInt32LE(offset))
+    acks.push(msg.readUInt32BE(offset))
   }
   return acks
 }

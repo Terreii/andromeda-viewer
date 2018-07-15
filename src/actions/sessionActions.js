@@ -2,10 +2,11 @@ import crypto from 'crypto'
 
 import { viewerName, viewerVersion, viewerPlatform } from '../viewerInfo'
 import AvatarName from '../avatarName'
+import {getValueOf, getStringValueOf} from '../network/msgGetters'
 
-import { getLocalChatHistory, loadIMChats } from './chatMessageActions'
-import { getAllFriendsDisplayNames } from './friendsActions'
-import { fetchSeedCapabilities } from './llsd'
+import {getLocalChatHistory, loadIMChats} from './chatMessageActions'
+import {getAllFriendsDisplayNames} from './friendsActions'
+import {fetchSeedCapabilities} from './llsd'
 import connectCircuit from './connectCircuit'
 
 // Actions for the session of an avatar
@@ -80,7 +81,8 @@ export function login (firstName, lastName, password, grid) {
 
 // Placeholder for the logout process
 export function logout () {
-  return (dispatch, getState, {circuit}) => {
+  return (dispatch, getState, extra) => {
+    const circuit = extra.circuit
     const session = getState().session
     if (!session.get('loggedIn')) {
       throw new Error("You aren't logged in!")
@@ -105,6 +107,8 @@ export function logout () {
       })
 
       circuit.close()
+      circuit.removeAllListeners()
+      extra.circuit = null
     })
   }
 }
@@ -177,18 +181,22 @@ function connectToSim (sessionInfo, circuit) {
 }
 
 function getKicked (msg) {
-  return (dispatch, getState, {circuit}) => {
+  return (dispatch, getState, extra) => {
+    const circuit = extra.circuit
     const session = getState().session
     const agentId = session.get('agentId')
     const sessionId = session.get('sessionId')
-    const msgAgentId = msg.getValue('UserInfo', 0, 'AgentID')
-    const msgSessionId = msg.getValue('UserInfo', 0, 'SessionID')
+    const msgAgentId = getValueOf(msg, 'UserInfo', 0, 'AgentID')
+    const msgSessionId = getValueOf(msg, 'UserInfo', 0, 'SessionID')
 
     if (agentId === msgAgentId && sessionId === msgSessionId) {
       circuit.close()
+      circuit.removeAllListeners()
+      extra.circuit = null
+
       dispatch({
         type: 'UserWasKicked',
-        reason: msg.getStringValue('UserInfo', 0, 'Reason')
+        reason: getStringValueOf(msg, 'UserInfo', 0, 'Reason')
       })
     }
   }

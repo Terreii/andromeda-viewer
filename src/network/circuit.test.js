@@ -16,6 +16,9 @@ window.WebSocket = class WebSocket {
   send (buffer) {
     this.sendMessages.push(buffer)
     expect(buffer).toBeTruthy()
+    if (typeof this.onTestMessage === 'function') {
+      this.onTestMessage(buffer)
+    }
   }
 
   onopen () {}
@@ -139,7 +142,14 @@ test('save sender sequence number of reliable packages as ack', () => {
   websocket.onmessage({data: message1})
   websocket.onmessage({data: message2})
 
-  expect(circuit.simAcks.length).toBe(2)
+  expect(circuit.simAcks).toEqual(new Map([
+    [sequenceNumberForTests - 2, 0],
+    [sequenceNumberForTests - 1, 0]
+  ]))
+  expect(circuit.simAcksOnPacket.toArray()).toEqual([
+    sequenceNumberForTests - 2,
+    sequenceNumberForTests - 1
+  ])
   expect(circuit.senderSequenceNumber).toBe(sequenceNumberForTests - 1)
 })
 
@@ -156,45 +166,61 @@ test('send ack at end of package', () => {
   const last = sendMessages[sendMessages.length - 1]
 
   // Check if there are the correct number of acks
-  expect(circuit.simAcks.length).toBe(2)
+  expect(circuit.simAcks).toEqual(new Map([
+    [sequenceNumberForTests - 2, 0],
+    [sequenceNumberForTests - 1, 0]
+  ]))
+  expect(circuit.simAcksOnPacket.isEmpty()).toBe(true)
   expect(last.byteLength).toBe(23)
   expect((last.readUInt8(6) | 0x10) > 0).toBe(true)
 
   // Check if the acks are correct
   const offset = last.length - 1
   expect(last.readUInt8(offset)).toBe(2)
-  expect([last.readUInt32LE(offset - 4), last.readUInt32LE(offset - 8)].sort()).toEqual([
+  expect([last.readUInt32BE(offset - 4), last.readUInt32BE(offset - 8)].sort()).toEqual([
     sequenceNumberForTests - 2,
     sequenceNumberForTests - 1
   ])
 })
 
-test('circuit should send after 200ms a PacketAck', done => {
-  setTimeout(() => {
-    // could be CompletePingCheck
-    const ackMessage1 = circuit.websocket.sendMessages[circuit.websocket.sendMessages.length - 2]
-    const ackMessage2 = circuit.websocket.sendMessages[circuit.websocket.sendMessages.length - 1]
-    const parsedAckMessageA = parseBody(ackMessage1.slice(12))
-    const parsedAckMessageB = parseBody(ackMessage2.slice(12))
-    const parsedAckMessage = parsedAckMessageA.name === 'PacketAck'
-      ? parsedAckMessageA
-      : parsedAckMessageB
+test('circuit should send after 100ms a PacketAck', () => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      // could be CompletePingCheck
+      const ackMessage1 = circuit.websocket.sendMessages[circuit.websocket.sendMessages.length - 2]
+      const ackMessage2 = circuit.websocket.sendMessages[circuit.websocket.sendMessages.length - 1]
+      const parsedAckMessageA = parseBody(ackMessage1.slice(12))
+      const parsedAckMessageB = parseBody(ackMessage2.slice(12))
+      const parsedAckMessage = parsedAckMessageA.name === 'PacketAck'
+        ? parsedAckMessageA
+        : parsedAckMessageB
 
-    expect(parsedAckMessage).toBeTruthy()
-    expect(getValueOf(parsedAckMessage, 'Packets', 0, 'ID')).toBe(0)
+      try {
+        expect(parsedAckMessage).toBeTruthy()
+        expect(getValueOf(parsedAckMessage, 'Packets', 0, 'ID')).toBe(0)
 
-    done()
-  }, 250)
+        resolve()
+      } catch (err) {
+        reject(err)
+      }
+    }, 100)
+  })
 })
 
-test('circuit should resend a package after 500ms', done => {
-  setTimeout(() => {
-    const last = circuit.websocket.getSendMessages()
+test('circuit should resend a package after 500ms', () => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const last = circuit.websocket.getSendMessages()
 
-    expect(last.readUInt8(6) | 32).toBeTruthy()
+      try {
+        expect(last.readUInt8(6) | 32).toBeTruthy()
 
-    done()
-  }, 400)
+        resolve()
+      } catch (err) {
+        reject(err)
+      }
+    }, 400)
+  })
 })
 
 describe('circuit should remove acks that the server has send back', () => {
@@ -226,10 +252,141 @@ describe('circuit should remove acks that the server has send back', () => {
 
     // create Ack at end
     const acks = Buffer.from([0, 0, 0, 0, 1])
-    acks.writeUInt32LE(circuit.viewerAcks[0].sequenceNumber, 0)
+    acks.writeUInt32BE(circuit.viewerAcks[0].sequenceNumber, 0)
     const message2 = Buffer.concat([messagePart1, acks])
     circuit.websocket.onmessage({data: message2})
 
     expect(circuit.viewerAcks.length).toBe(0)
   })
+})
+
+describe('sending only 255 or less acks at the end of a package', () => {
+  let sendAcks = []
+
+  test('circuit only sends less then 256 Acks', () => {
+    circuit.simAcks.clear()
+    circuit.simAcksOnPacket.clear()
+
+    for (let i = 0; i < 300; ++i) {
+      const msg = createTestMessage(true, false, false)
+      circuit.websocket.onmessage({data: msg})
+    }
+
+    circuit.send('OpenCircuit', {
+      CircuitInfo: [
+        {
+          IP: '0.0.0.0',
+          Port: 13
+        }
+      ]
+    }, true)
+
+    const last = circuit.websocket.getSendMessages()
+
+    expect(last.readUInt8(last.length - 1)).toBe(255)
+
+    for (let offset = last.length - 1, count = last.readUInt8(offset); count > 0; count--) {
+      offset -= 4
+      sendAcks.push(last.readUInt32BE(offset))
+    }
+    sendAcks.sort((a, b) => a - b)
+
+    const correctAcks = sendAcks.every((value, index, all) => index === 0
+      ? true
+      : all[index - 1] + 1 === value
+    )
+    expect(correctAcks).toBe(true)
+  })
+
+  describe('send not-jet-send and the oldest acks by the next package', () => {
+    let newAcks = []
+
+    test('send max possible acks', () => {
+      circuit.send('OpenCircuit', {
+        CircuitInfo: [
+          {
+            IP: '0.0.0.0',
+            Port: 13
+          }
+        ]
+      }, true)
+
+      const last = circuit.websocket.getSendMessages()
+
+      for (let offset = last.length - 1, count = last.readUInt8(offset); count > 0; count--) {
+        offset -= 4
+        newAcks.push(last.readUInt32BE(offset))
+      }
+
+      expect(last.readUInt8(last.length - 1)).toBe(45)
+    })
+
+    test('not jet send acks are send', () => {
+      const notJetSend = newAcks.filter(ack => !sendAcks.includes(ack)).sort((a, b) => a - b)
+      expect(notJetSend.length).toBe(45)
+
+      const correctAcks = notJetSend.every((value, index, all) => index === 0
+        ? true
+        : all[index - 1] + 1 === value
+      )
+      expect(correctAcks).toBe(true)
+    })
+
+    test('no old Acks are send', () => {
+      const oldestAcks = newAcks.filter(ack => sendAcks.includes(ack)).sort((a, b) => a - b)
+      expect(oldestAcks.length).toBe(0)
+    })
+  })
+})
+
+test('Acks are send 2 times with the PacketAck message', () => {
+  const check = expected => {
+    for (const sequenceNumber in circuit.simAcks) {
+      const sendCount = circuit.simAcks[sequenceNumber]
+      expect(sendCount).toBe(expected)
+    }
+  }
+
+  check(0)
+
+  const messages = []
+  circuit.websocket.onTestMessage = buffer => {
+    const msg = parseBody(buffer.slice(12))
+    if (msg.name === 'PacketAck') {
+      messages.push(msg)
+
+      if (messages.length === 1) {
+        check(1)
+      }
+    }
+  }
+
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      try {
+        circuit.websocket.onTestMessage = undefined
+
+        expect(messages.length).toBe(2)
+        expect(Object.keys(circuit.simAcks).length).toBe(0)
+
+        expect(messages[0].Packets.length).toBe(255)
+        expect(messages[1].Packets.length).toBe(255)
+
+        resolve()
+      } catch (err) {
+        reject(err)
+      }
+    }, 200)
+  })
+})
+
+test('circuit closes', () => {
+  let websocketClosed = false
+  circuit.websocket.close = () => {
+    websocketClosed = true
+  }
+
+  circuit.close()
+
+  expect(websocketClosed).toBeTruthy()
 })

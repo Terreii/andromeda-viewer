@@ -7,27 +7,12 @@ import PropTypes from 'prop-types'
 import Immutable from 'immutable'
 import styled from 'styled-components'
 
+import ChatMessagesList from './chatMessagesList'
+
 const Main = styled.div`
   margin: 0.3em;
   display: flex;
   flex-direction: column;
-`
-
-const MessageList = styled.div`
-  flex: 1 1 100%;
-`
-
-const Message = styled.div`
-  & > span {
-    padding-right: 0.3em;
-    font-size: 120%;
-  }
-`
-
-const AvatarName = styled.span`
-  :after {
-    content: ":";
-  }
 `
 
 const ChatTextSend = styled.div`
@@ -45,17 +30,15 @@ const TextBox = styled.input`
   margin-right: 0.5em;
 `
 
-// Adds to all Numbers a leading zero if it has only one digit
-function leadingZero (num) {
-  return String(num).padStart(2, '0')
-}
-
 export default class ChatDialog extends React.Component {
   constructor () {
     super()
     this.state = {
       text: ''
     }
+    this._boundChange = this._onChange.bind(this)
+    this._boundKeyDown = this._onKeyDown.bind(this)
+    this._boundClickSend = this._send.bind(this)
   }
 
   componentDidMount () {
@@ -67,42 +50,27 @@ export default class ChatDialog extends React.Component {
   }
 
   render () {
-    const msgData = this.props.isIM ? this.props.data.get('messages') : this.props.data
-    const messages = msgData.map(msg => {
-      const time = new Date(msg.get('time'))
-      const fromId = this.props.isIM ? msg.get('fromId') : msg.get('sourceID')
-      const name = this.props.names.get(fromId) || ''
-      return (
-        <Message key={time.getTime()}>
-          <span className='time'>
-            {leadingZero(time.getHours())}
-            :
-            {leadingZero(time.getMinutes())}
-            :
-            {leadingZero(time.getSeconds())}
-          </span>
-          <AvatarName>{name.toString()}</AvatarName>
-          <span className='messageText'>{msg.get('message')}</span>
-        </Message>
-      )
-    })
+    const messages = this.props.isIM ? this.props.data.get('messages') : this.props.data
 
     const placeholderText = 'Send ' +
       (this.props.isIM ? 'Instant Message' : 'to local chat')
 
     return <Main>
-      <MessageList>
-        {messages}
-      </MessageList>
+      <ChatMessagesList
+        messages={messages}
+        isIM={this.props.isIM}
+        names={this.props.names}
+      />
       <ChatTextSend>
         <TextBox
           type='text'
           name='chatInput'
           placeholder={placeholderText}
           value={this.state.text}
-          onChange={this._onChange.bind(this)}
-          onKeyDown={this._onKeyDown.bind(this)} />
-        <SendButton onClick={this._onClick.bind(this)}>
+          onChange={this._boundChange}
+          onKeyDown={this._boundKeyDown}
+        />
+        <SendButton onClick={this._boundClickSend}>
           send
         </SendButton>
       </ChatTextSend>
@@ -117,18 +85,11 @@ export default class ChatDialog extends React.Component {
 
   _onKeyDown (event) {
     if (event.keyCode === 13) {
-      event.preventDefault()
-      const text = this.state.text.trim()
-      if (text) {
-        this.props.sendTo(text)
-      }
-      this.setState({
-        text: ''
-      })
+      this._send(event)
     }
   }
 
-  _onClick (event) {
+  _send (event) {
     event.preventDefault()
     const text = this.state.text.trim()
     if (text) {
