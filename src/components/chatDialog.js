@@ -15,6 +15,8 @@ const Main = styled.div`
 
 const MessageList = styled.div`
   flex: 1 1 100%;
+  overflow-y: scroll;
+  max-height: calc(100vh - 8em);
 `
 
 const Message = styled.div`
