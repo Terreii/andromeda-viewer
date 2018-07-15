@@ -36,6 +36,9 @@ export default class ChatDialog extends React.Component {
     this.state = {
       text: ''
     }
+    this._boundChange = this._onChange.bind(this)
+    this._boundKeyDown = this._onKeyDown.bind(this)
+    this._boundClickSend = this._send.bind(this)
   }
 
   componentDidMount () {
@@ -64,9 +67,10 @@ export default class ChatDialog extends React.Component {
           name='chatInput'
           placeholder={placeholderText}
           value={this.state.text}
-          onChange={this._onChange.bind(this)}
-          onKeyDown={this._onKeyDown.bind(this)} />
-        <SendButton onClick={this._onClick.bind(this)}>
+          onChange={this._boundChange}
+          onKeyDown={this._boundKeyDown}
+        />
+        <SendButton onClick={this._boundClickSend}>
           send
         </SendButton>
       </ChatTextSend>
@@ -81,18 +85,11 @@ export default class ChatDialog extends React.Component {
 
   _onKeyDown (event) {
     if (event.keyCode === 13) {
-      event.preventDefault()
-      const text = this.state.text.trim()
-      if (text) {
-        this.props.sendTo(text)
-      }
-      this.setState({
-        text: ''
-      })
+      this._send(event)
     }
   }
 
-  _onClick (event) {
+  _send (event) {
     event.preventDefault()
     const text = this.state.text.trim()
     if (text) {
