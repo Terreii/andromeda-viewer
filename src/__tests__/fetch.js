@@ -67,6 +67,7 @@ test('it should return the headers', done => {
       .then(response => {
         expect(response.headers.get('x-ll-request-id'))
           .toBe('2cc76764-d9ec-44f0-8b8e-fa1d5c661e1d')
+        expect(response.status).toBe(200)
       })
       .catch(err => {
         expect(err).not.toBeInstanceOf(Error)
