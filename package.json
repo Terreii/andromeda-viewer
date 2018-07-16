@@ -42,7 +42,7 @@
     "double-ended-queue": "^2.1.0-0",
     "immutable": "^3.8.2",
     "markdown-chalk": "^2.0.0",
-    "pouchdb": "^6.4.3",
+    "pouchdb": "^7.0.0",
     "prop-types": "^15.6.2",
     "rc-tabs": "^9.3.0",
     "react": "^16.4.1",
@@ -54,7 +54,7 @@
     "redux-burger-menu": "^0.2.5",
     "redux-thunk": "^2.3.0",
     "standard": "^11.0.1",
-    "styled-components": "^2.4.1",
+    "styled-components": "^3.3.3",
     "weallbehave": "^1.2.0",
     "weallcontribute": "^1.0.8"
   },
