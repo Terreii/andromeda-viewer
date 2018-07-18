@@ -44,7 +44,7 @@
     "markdown-chalk": "^2.0.0",
     "pouchdb": "^7.0.0",
     "prop-types": "^15.6.2",
-    "rc-tabs": "^9.3.0",
+    "rc-tabs": "^9.3.1",
     "react": "^16.4.1",
     "react-burger-menu": "^2.5.2",
     "react-dom": "^16.4.1",
