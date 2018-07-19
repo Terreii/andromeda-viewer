@@ -1,0 +1,39 @@
+import React from 'react'
+import {shallow, mount} from 'enzyme'
+
+import Popup from './popup'
+
+test('renders without crashing', () => {
+  shallow(
+    <Popup
+      title='Welcome'
+      onClose={() => {}}
+    >
+      Hello World!
+    </Popup>
+  )
+})
+
+test('renders welcome message', () => {
+  const aPopup = mount(
+    <Popup
+      title='Welcome'
+      onClose={() => {}}
+    >
+      <span>Hello World!</span>
+    </Popup>
+  )
+
+  expect(aPopup).toContainReact(<img
+    src='icon_close.svg'
+    alt='close popup'
+    height='32'
+    width='32'
+  />)
+
+  const header = aPopup.find('h4')
+  expect(header.text()).toBe('Welcome')
+  expect(header).toHaveStyleRule('margin-left', '1.3em')
+
+  expect(aPopup).toContainReact(<span>Hello World!</span>)
+})
