@@ -12,17 +12,26 @@ function proxy (request, reply) {
       'accept-encoding': request.headers['accept-encoding'],
       'accept-language': request.headers['accept-language']
     },
-    body: request.payload
+    body: null
+  }
+
+  if (fetchOptions.method !== 'GET' && fetchOptions.method !== 'HEAD') {
+    fetchOptions.body = request.payload
   }
 
   fetch(request.headers['x-andromeda-fetch-url'], fetchOptions).then(fetchResult => {
     fetchResult.buffer().then(buffy => {
       const response = reply(buffy)
+      response.statusCode = fetchResult.status
       ;[
         'content-type',
         'x-ll-request-id'
-      ].forEach(key => { response.headers[key] = fetchResult.headers.get(key) })
+      ].forEach(key => {
+        response.headers[key] = fetchResult.headers.get(key)
+      })
     })
+  }).catch(err => {
+    reply(err)
   })
 }
 
