@@ -37,3 +37,28 @@ test('renders welcome message', () => {
 
   expect(aPopup).toContainReact(<span>Hello World!</span>)
 })
+
+test('call the onClose callback', () => {
+  let wasCalled = false
+  let defaultPrevented = false
+
+  const aPopup = shallow(
+    <Popup
+      title='Welcome'
+      onClose={() => {
+        wasCalled = true
+      }}
+    >
+      <span>Hello World!</span>
+    </Popup>
+  )
+
+  aPopup.find('a').simulate('click', {
+    preventDefault: () => {
+      defaultPrevented = true
+    }
+  })
+
+  expect(wasCalled).toBe(true)
+  expect(defaultPrevented).toBe(true)
+})
