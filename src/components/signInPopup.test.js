@@ -1,5 +1,5 @@
 import React from 'react'
-import {shallow} from 'enzyme'
+import {shallow, mount} from 'enzyme'
 
 import SignInPopup from './signInPopup'
 
@@ -53,13 +53,13 @@ test('click actions', () => {
     cancelCallCount += 1
   }
 
-  const signUp = shallow(<SignInPopup
+  const signUp = mount(<SignInPopup
     onCancel={onCancel}
     isSignUp
     onSend={onSend}
   />)
 
-  const signIn = shallow(<SignInPopup
+  const signIn = mount(<SignInPopup
     onCancel={onCancel}
     onSend={onSend}
   />)
@@ -68,6 +68,9 @@ test('click actions', () => {
     const isSignUp = index === 0
 
     popup.find('button').first().simulate('click')
+    popup.find('a[href="#close_popup"]').simulate('click', {
+      preventDefault: () => {}
+    })
 
     popup.find('button').last().simulate('click')
 
@@ -106,6 +109,6 @@ test('click actions', () => {
     popup.find('button').last().simulate('click')
   })
 
-  expect(cancelCallCount).toBe(2)
+  expect(cancelCallCount).toBe(4)
   expect(sendCallCount).toBe(2)
 })
