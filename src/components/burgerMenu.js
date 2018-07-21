@@ -112,7 +112,7 @@ export default function BurgerMenu ({account, signIn, signUp, logout, signOut}) 
     <LogoutButton
       className='menu-item'
       style={{display: avatarLoggedIn ? '' : 'none'}}
-      href='#'
+      href='#logout'
       onClick={logout}
     >
       log out
@@ -121,7 +121,7 @@ export default function BurgerMenu ({account, signIn, signUp, logout, signOut}) 
     <Link
       className='menu-item'
       style={{display: viewerLoggedIn ? '' : 'none'}}
-      href=''
+      href='#signout'
       onClick={signOut}
     >
       Log out from Viewer
