@@ -78,7 +78,7 @@ function FriendRow ({friend, name, onRightsChanged, startNewIMChat}) {
         checked={rightsMap.get(rightName)}
         title={titles[key][rightName]}
         onChange={event => {
-          if (event.target.disabled) return
+          if (event.target.disabled || key === 'rightsHas') return
           onRightsChanged(id, {
             [rightName]: event.target.checked
           })
