@@ -48,7 +48,7 @@ class TopBarContainer extends React.Component {
       signUp={this._boundSignUp}
       signOut={this._boundSignOut}
       logout={this._boundLogout}
-      />
+    />
   }
 }
 
