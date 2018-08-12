@@ -1,7 +1,5 @@
 /*
- * Displays all Chats (localchat and IMs)
- *
- * will later also host all Instant Messages
+ * Displays all Chats (local-chat and IMs)
  */
 
 import React from 'react'
