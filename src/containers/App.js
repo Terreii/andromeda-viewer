@@ -4,10 +4,10 @@
  */
 
 import React from 'react'
-import { connect } from 'react-redux'
+import {connect} from 'react-redux'
 import styled from 'styled-components'
 
-import ChatBox from '../components/chatBox'
+import ChatContainer from './chatContainer'
 import LoginForm from '../components/login'
 import Popup from '../components/popup'
 import SignInPopup from '../components/signInPopup'
@@ -86,7 +86,7 @@ class App extends React.Component {
   render () {
     const isLoggedIn = this.props.isLoggedIn
     const mainSection = isLoggedIn
-      ? <ChatBox />
+      ? <ChatContainer />
       : <LoginForm
         login={this.props.login}
         isSignedIn={this.props.isSignedIn}

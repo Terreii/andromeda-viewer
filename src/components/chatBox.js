@@ -1,29 +1,18 @@
 /*
- * Displays all Chats (localchat and IMs)
- *
- * will later also host all Instant Messages
+ * Displays all Chats (local-chat and IMs)
  */
 
 import React from 'react'
-import { connect } from 'react-redux'
-import Tabs, { TabPane } from 'rc-tabs'
+import Tabs, {TabPane} from 'rc-tabs'
 import TabContent from 'rc-tabs/lib/TabContent'
 import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar'
 
 import ChatDialog from './chatDialog'
 import FriendsList from './friendsList'
 
-import {
-  sendLocalChatMessage,
-  sendInstantMessage,
-  startNewIMChat,
-  getIMHistory
-} from '../actions/chatMessageActions'
-import { updateRights } from '../actions/friendsActions'
-
 import 'rc-tabs/assets/index.css'
 
-function ChatBox (props) {
+export default function ChatBox (props) {
   const names = props.names.get('names')
   const imsIds = props.IMs.keySeq().toJSON()
 
@@ -71,22 +60,3 @@ function ChatBox (props) {
   </Tabs>
 }
 ChatBox.displayName = 'ChatBox'
-
-const mapStateToProps = state => {
-  return {
-    localChat: state.localChat,
-    IMs: state.IMs,
-    names: state.names,
-    friends: state.friends
-  }
-}
-
-const mapDispatchToProps = {
-  sendLocalChatMessage: text => sendLocalChatMessage(text, 1, 0),
-  sendInstantMessage,
-  startNewIMChat,
-  getIMHistory,
-  updateRights
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(ChatBox)
