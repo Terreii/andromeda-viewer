@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 import AvatarName from '../avatarName'
-import { viewerName } from '../viewerInfo'
+import {viewerName} from '../viewerInfo'
 
 const Main = styled.div`
   background-color: rgb(77, 80, 85);
