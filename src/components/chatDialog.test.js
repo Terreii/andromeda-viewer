@@ -31,14 +31,34 @@ test('renders local chat', () => {
 
   const chatData = Immutable.fromJS([])
 
+  const sendData = {
+    text: null,
+    count: 0
+  }
+
   const renderedLocal = mount(<ChatDialog
     names={names}
     data={chatData}
-    sendTo={() => {}}
+    sendTo={text => {
+      sendData.text = text
+      sendData.count += 1
+    }}
   />)
 
-  expect(renderedLocal.find('button').text()).toBe('send')
   expect(renderedLocal.find('input').prop('placeholder')).toBe('Send to local chat')
+
+  const sendButton = renderedLocal.find('button')
+  expect(sendButton.text()).toBe('send')
+
+  renderedLocal.find('input').simulate('change', {
+    target: {
+      value: 'Hello World!'
+    }
+  })
+  sendButton.simulate('click')
+
+  expect(sendData.text).toBe('Hello World!')
+  expect(sendData.count).toBe(1)
 })
 
 test('renders IM chat', () => {
