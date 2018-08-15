@@ -42,6 +42,7 @@
     "double-ended-queue": "^2.1.0-0",
     "enzyme": "^3.4.1",
     "enzyme-adapter-react-16": "^1.2.0",
+    "hoodie-plugin-store-crypto": "^1.0.2",
     "immutable": "^3.8.2",
     "jest-enzyme": "^6.0.3",
     "jest-styled-components": "^6.0.1",
