@@ -53,7 +53,7 @@
     "react-burger-menu": "^2.5.2",
     "react-dom": "^16.4.2",
     "react-redux": "^5.0.7",
-    "react-scripts": "1.1.4",
+    "react-scripts": "1.1.5",
     "react-test-renderer": "^16.4.2",
     "redux": "^4.0.0",
     "redux-burger-menu": "^0.2.5",
