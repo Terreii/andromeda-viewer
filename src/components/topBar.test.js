@@ -30,6 +30,6 @@ test('renders without crashing', () => {
     messageOfTheDay={messageOfTheDay}
   />)
 
-  expect(withMessage.find('span span').first().text())
+  expect(withMessage.find('#messageOfTheDay').text())
     .toBe('Message of the day:Hi there! Please go to: <styled.a />')
 })

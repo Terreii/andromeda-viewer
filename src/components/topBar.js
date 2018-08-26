@@ -27,7 +27,7 @@ const Link = styled.a`
 
 export default function TopBar ({messageOfTheDay, account, signIn, signUp, signOut, logout}) {
   const msgOfDay = messageOfTheDay
-    ? <span>
+    ? <span id='messageOfTheDay'>
       Message of the day:
       {messageOfTheDay.get('text')}
       <Link
