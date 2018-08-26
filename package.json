@@ -14,7 +14,7 @@
     "build-messages": "node ./tools/createMessageTemplate",
     "update-coc": "weallbehave -o . && git add CODE_OF_CONDUCT.md && git commit -m 'docs(coc): updated CODE_OF_CONDUCT.md'",
     "update-contrib": "weallcontribute -o . && git add CONTRIBUTING.md && git commit -m 'docs(contributing): updated CONTRIBUTING.md'",
-    "startDev": "concurrently \"hoodie --inMemory --public build\" \"npm run watch\"",
+    "startDev": "concurrently -n \"hoodie,build\" \"hoodie --inMemory --public build\" \"npm run watch\"",
     "start": "hoodie --public build"
   },
   "repository": {
@@ -38,7 +38,7 @@
   "devDependencies": {
     "@hoodie/client": "^10.1.1",
     "autoscroll-react": "^3.2.0",
-    "concurrently": "^3.6.1",
+    "concurrently": "^4.0.0",
     "double-ended-queue": "^2.1.0-0",
     "enzyme": "^3.4.4",
     "enzyme-adapter-react-16": "^1.2.0",
@@ -53,7 +53,7 @@
     "react-burger-menu": "^2.5.2",
     "react-dom": "^16.4.2",
     "react-redux": "^5.0.7",
-    "react-scripts": "1.1.4",
+    "react-scripts": "1.1.5",
     "react-test-renderer": "^16.4.2",
     "redux": "^4.0.0",
     "redux-burger-menu": "^0.2.5",
