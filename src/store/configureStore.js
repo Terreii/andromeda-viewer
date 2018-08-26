@@ -1,5 +1,6 @@
 import Hoodie from '@hoodie/client'
 import PouchDB from 'pouchdb'
+import setupCryptoStore from 'hoodie-plugin-store-crypto'
 import {createStore, applyMiddleware, compose} from 'redux'
 import thunkMiddleware from 'redux-thunk'
 
@@ -9,6 +10,8 @@ const hoodie = new Hoodie({
   url: '',
   PouchDB
 })
+
+setupCryptoStore(hoodie)
 
 // Create Redux-Store with Hoodie
 const configureStore = preloadedState => {
