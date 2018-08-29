@@ -1,5 +1,5 @@
-import {combineReducers} from 'redux'
-import {reducer as burgerMenu} from 'redux-burger-menu'
+import { combineReducers } from 'redux'
+import { reducer as burgerMenu } from 'redux-burger-menu'
 
 import account from './account'
 import friendsReducer from './friendsReducer'

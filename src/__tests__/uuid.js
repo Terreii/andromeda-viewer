@@ -1,4 +1,4 @@
-import uuid, {v4} from 'uuid'
+import uuid, { v4 } from 'uuid'
 
 test('it should have a v4 function', () => {
   expect(typeof uuid.v4).toBe('function')

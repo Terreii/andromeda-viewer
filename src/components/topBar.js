@@ -25,7 +25,7 @@ const Link = styled.a`
   color: white;
 `
 
-export default function TopBar ({messageOfTheDay, account, signIn, signUp, signOut, logout}) {
+export default function TopBar ({ messageOfTheDay, account, signIn, signUp, signOut, logout }) {
   const msgOfDay = messageOfTheDay
     ? <span id='messageOfTheDay'>
       Message of the day:

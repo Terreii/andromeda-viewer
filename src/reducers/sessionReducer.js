@@ -1,8 +1,8 @@
-import {Map} from 'immutable'
+import { Map } from 'immutable'
 
-import {getValueOf, getValuesOf} from '../network/msgGetters'
+import { getValueOf, getValuesOf } from '../network/msgGetters'
 
-export default function SessionReducer (state = Map({loggedIn: false, error: null}), action) {
+export default function SessionReducer (state = Map({ loggedIn: false, error: null }), action) {
   switch (action.type) {
     case 'didLogin':
       const sessionInfo = Object.keys(action.sessionInfo).reduce((info, key) => {

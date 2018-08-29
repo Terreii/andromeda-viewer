@@ -25,7 +25,7 @@ export const Fixed = new MessageDataType('Fixed', (value = [], length) => {
     }
   }
   return buffy
-}, (buffer, offset = {value: 0}, size) => {
+}, (buffer, offset = { value: 0 }, size) => {
   const start = offset.value
   offset.value += size
   return buffer.slice(start, offset.value)
@@ -52,7 +52,7 @@ export const Variable1 = new MessageDataType('Variable1', (value = []) => {
     }
   }
   return buffy
-}, (buffer, offset = {value: 0}) => {
+}, (buffer, offset = { value: 0 }) => {
   const start = offset.value + 1
   const size = buffer.readUInt8(offset.value)
   offset.value = start + size
@@ -81,7 +81,7 @@ export const Variable2 = new MessageDataType('Variable2', (value = []) => {
     }
   }
   return buffy
-}, (buffer, offset = {value: 0}) => {
+}, (buffer, offset = { value: 0 }) => {
   // On http://wiki.secondlife.com/wiki/Message it says it is big-endian
   // but it is actually a little-endian!
   const size = buffer.readUInt16LE(offset.value)
@@ -96,7 +96,7 @@ export const U8 = new MessageDataType('U8', (value = 0) => {
   const buffy = Buffer.alloc(1)
   buffy.writeUInt8(+value, 0)
   return buffy
-}, (buffer, offset = {value: 0}) => {
+}, (buffer, offset = { value: 0 }) => {
   const value = buffer.readUInt8(offset.value)
   offset.value += 1
   return value
@@ -106,7 +106,7 @@ export const U16 = new MessageDataType('U16', (value = 0) => {
   const buffy = Buffer.alloc(2)
   buffy.writeInt16LE(+value, 0)
   return buffy
-}, (buffer, offset = {value: 0}) => {
+}, (buffer, offset = { value: 0 }) => {
   const value = buffer.readUInt16LE(offset.value)
   offset.value += 2
   return value
@@ -116,7 +116,7 @@ export const U32 = new MessageDataType('U32', (value = 0) => {
   const buffy = Buffer.alloc(4)
   buffy.writeUInt32LE(+value, 0)
   return buffy
-}, (buffer, offset = {value: 0}) => {
+}, (buffer, offset = { value: 0 }) => {
   const value = buffer.readUInt32LE(offset.value)
   offset.value += 4
   return value
@@ -127,7 +127,7 @@ export const U64 = new MessageDataType('U64', (value = 0) => {
   buffy.writeUInt32LE(value[0], 0)
   buffy.writeUInt32LE(value[1], 4)
   return buffy
-}, (buffer, offset = {value: 0}) => {
+}, (buffer, offset = { value: 0 }) => {
   // TODO   -----------------------------------------------------------
   const value = [
     buffer.readUInt32LE(offset.value + 4),
@@ -141,7 +141,7 @@ export const S8 = new MessageDataType('S8', (value = 0) => {
   const buffy = Buffer.alloc(1)
   buffy.writeInt8(+value, 0)
   return buffy
-}, (buffer, offset = {value: 0}) => {
+}, (buffer, offset = { value: 0 }) => {
   const value = buffer.readInt8(offset.value)
   offset.value += 1
   return value
@@ -151,7 +151,7 @@ export const S16 = new MessageDataType('S16', (value = 0) => {
   const buffy = Buffer.alloc(2)
   buffy.writeInt16LE(+value, 0)
   return buffy
-}, (buffer, offset = {value: 0}) => {
+}, (buffer, offset = { value: 0 }) => {
   const value = buffer.readInt16LE(offset.value)
   offset.value += 2
   return value
@@ -161,7 +161,7 @@ export const S32 = new MessageDataType('S32', (value = 0) => {
   const buffy = Buffer.alloc(4)
   buffy.writeInt32LE(+value, 0)
   return buffy
-}, (buffer, offset = {value: 0}) => {
+}, (buffer, offset = { value: 0 }) => {
   const value = buffer.readInt32LE(offset.value)
   offset.value += 4
   return value
@@ -172,7 +172,7 @@ export const S64 = new MessageDataType('S64', (value = 0) => {
   buffy.writeInt32LE(value[1], 0)
   buffy.writeUInt32LE(value[0], 4)
   return buffy
-}, (buffer, offset = {value: 0}) => {
+}, (buffer, offset = { value: 0 }) => {
   // TODO   -----------------------------------------------------------
   const value = [
     buffer.readInt32LE(offset + 4),
@@ -186,7 +186,7 @@ export const F32 = new MessageDataType('F32', (value = 0) => {
   const buffy = Buffer.alloc(4)
   buffy.writeFloatLE(+value, 0)
   return buffy
-}, (buffer, offset = {value: 0}) => {
+}, (buffer, offset = { value: 0 }) => {
   const value = buffer.readFloatLE(offset.value)
   offset.value += 4
   return value
@@ -196,7 +196,7 @@ export const F64 = new MessageDataType('F64', (value = 0) => {
   const buffy = Buffer.alloc(8)
   buffy.writeDoubleLE(+value, 0)
   return buffy
-}, (buffer, offset = {value: 0}) => {
+}, (buffer, offset = { value: 0 }) => {
   const value = buffer.readDoubleLE(offset.value)
   offset.value += 8
   return value
@@ -210,7 +210,7 @@ export const LLVector3 = new MessageDataType('LLVector3', (value = []) => {
     buffy.writeFloatLE(value[i] || 0, i * 4)
   }
   return buffy
-}, (buffer, offset = {value: 0}) => {
+}, (buffer, offset = { value: 0 }) => {
   const value = [
     buffer.readFloatLE(offset.value),
     buffer.readFloatLE(offset.value + 4),
@@ -226,7 +226,7 @@ export const LLVector3d = new MessageDataType('LLVector3d', (value = []) => {
     buffy.writeDoubleLE(value[i] || 0, i * 8)
   }
   return buffy
-}, (buffer, offset = {value: 0}) => {
+}, (buffer, offset = { value: 0 }) => {
   const value = [
     buffer.readDoubleLE(offset.value),
     buffer.readDoubleLE(offset.value + 8),
@@ -242,7 +242,7 @@ export const LLVector4 = new MessageDataType('LLVector4', (value = []) => {
     buffy.writeFloatLE(value[i] || 0, i * 4)
   }
   return buffy
-}, (buffer, offset = {value: 0}) => {
+}, (buffer, offset = { value: 0 }) => {
   const value = [
     buffer.readFloatLE(offset.value),
     buffer.readFloatLE(offset.value + 4),
@@ -259,7 +259,7 @@ export const LLQuaternion = new MessageDataType('LLQuaternion', (value = []) => 
     buffy.writeFloatLE(value[i] || 0, i * 4)
   }
   return buffy
-}, (buffer, offset = {value: 0}) => {
+}, (buffer, offset = { value: 0 }) => {
   const value = [
     buffer.readFloatLE(offset.value),
     buffer.readFloatLE(offset.value + 4),
@@ -292,7 +292,7 @@ export const LLUUID = new MessageDataType(
     const buffy = Buffer.from(parts)
     return buffy
   },
-  (buffer, offset = {value: 0}) => {
+  (buffer, offset = { value: 0 }) => {
     const start = offset.value
     const startPart2 = offset.value + 4
     const startPart3 = offset.value + 6
@@ -314,7 +314,7 @@ export const BOOL = new MessageDataType('BOOL', (value = false) => {
   const buffy = Buffer.alloc(1)
   buffy.writeUInt8(value ? 1 : 0, 0)
   return buffy
-}, (buffer, offset = {value: 0}) => {
+}, (buffer, offset = { value: 0 }) => {
   const value = buffer.readUInt8(offset.value) !== 0
   offset.value += 1
   return value
@@ -329,7 +329,7 @@ export const IPADDR = new MessageDataType('IPADDR', (value = [0, 0, 0, 0]) => {
   } else {
     throw new TypeError('Must be a string or an array!')
   }
-}, (buffer, offset = {value: 0}) => {
+}, (buffer, offset = { value: 0 }) => {
   const start = offset.value
   const first = buffer.readUInt8(start)
   const second = buffer.readUInt8(start + 1)
@@ -343,7 +343,7 @@ export const IPPORT = new MessageDataType('IPPORT', (value = 0) => {
   const buffy = Buffer.alloc(2)
   buffy.writeUInt16LE(+value, 0)
   return buffy
-}, (buffer, offset = {value: 0}) => {
+}, (buffer, offset = { value: 0 }) => {
   const value = buffer.readUInt16LE(offset.value)
   offset.value += 2
   return value

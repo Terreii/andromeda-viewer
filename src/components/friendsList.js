@@ -59,7 +59,7 @@ const titles = {
   }
 }
 
-function FriendRow ({friend, name, onRightsChanged, startNewIMChat}) {
+function FriendRow ({ friend, name, onRightsChanged, startNewIMChat }) {
   const id = friend.get('id')
 
   const rights = []
@@ -103,7 +103,7 @@ function FriendRow ({friend, name, onRightsChanged, startNewIMChat}) {
   </ListItem>
 }
 
-export default function FriendsList ({friends, names, updateRights, startNewIMChat}) {
+export default function FriendsList ({ friends, names, updateRights, startNewIMChat }) {
   const list = friends.map(friend => {
     const id = friend.get('id')
     const name = names.has(id) ? names.get(id).getDisplayName() : id

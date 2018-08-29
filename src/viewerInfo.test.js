@@ -1,6 +1,6 @@
 'use strict'
 
-import {viewerName, viewerPlatform} from './viewerInfo'
+import { viewerName, viewerPlatform } from './viewerInfo'
 
 global.test('should have the viewer name', () => {
   global.expect(viewerName).toBe('andromeda-viewer')

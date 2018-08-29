@@ -2,7 +2,7 @@
  * Every local chat and IM related action
  */
 
-import {getValueOf, getStringValueOf} from '../network/msgGetters'
+import { getValueOf, getStringValueOf } from '../network/msgGetters'
 
 /*
  *
@@ -13,7 +13,7 @@ import {getValueOf, getStringValueOf} from '../network/msgGetters'
 export function sendLocalChatMessage (text, type, channel) {
   // Sends messages from the localchat
   // No UI update, because the server/sim will send it
-  return (dispatch, getState, {circuit}) => {
+  return (dispatch, getState, { circuit }) => {
     const session = getState().session
     circuit.send('ChatFromViewer', {
       AgentData: [
@@ -34,7 +34,7 @@ export function sendLocalChatMessage (text, type, channel) {
 }
 
 export function sendInstantMessage (text, to, id) {
-  return async (dispatch, getState, {hoodie, circuit}) => {
+  return async (dispatch, getState, { hoodie, circuit }) => {
     try {
       const activeState = getState()
       const session = activeState.session
@@ -168,7 +168,7 @@ export function receiveIM (message) {
 // Dispatches chat (and IM) messages.
 // They will be saved and synced under the avatar name.
 function dispatchChatAction (name, msg, id) {
-  return async (dispatch, getState, {hoodie}) => {
+  return async (dispatch, getState, { hoodie }) => {
     const activeState = getState()
 
     if (shouldSaveChat(activeState)) {
@@ -197,14 +197,14 @@ function dispatchChatAction (name, msg, id) {
  */
 
 export function getLocalChatHistory (avatarIdentifier) {
-  return (dispatch, getState, {hoodie}) => {
+  return (dispatch, getState, { hoodie }) => {
     return hoodie.store.withIdPrefix(`${avatarIdentifier}/localchat/`).findAll()
   }
 }
 
 // Start a new IM Chat from the UI.
 export function startNewIMChat (dialog, targetId, name) {
-  return async (dispatch, getState, {hoodie}) => {
+  return async (dispatch, getState, { hoodie }) => {
     const chatType = getIMChatTypeOfDialog(dialog)
     const chatUUID = calcChatUUID(chatType, targetId, getState().account.get('agentId'))
 
@@ -227,7 +227,7 @@ function createNewIMChat (dialog, chatUUID, target, name) {
   const type = getIMChatTypeOfDialog(dialog)
   if (type == null) return () => {}
 
-  return (dispatch, getState, {hoodie}) => {
+  return (dispatch, getState, { hoodie }) => {
     const activeState = getState()
     const hasChat = activeState.IMs.has(chatUUID)
     // Stop if the chat already exists.
@@ -257,7 +257,7 @@ function createNewIMChat (dialog, chatUUID, target, name) {
 
 // Loads IM Chat Infos.
 export function loadIMChats () {
-  return (dispatch, getState, {hoodie}) => {
+  return (dispatch, getState, { hoodie }) => {
     const activeState = getState()
     // Only load the history if the user is logged into a viewer-account.
     if (!activeState.account.getIn(['viewerAccount', 'loggedIn'])) return
@@ -274,7 +274,7 @@ export function loadIMChats () {
 
 // Loads messages of an IM Chat.
 export function getIMHistory (chatUUID) {
-  return (dispatch, getState, {hoodie}) => {
+  return (dispatch, getState, { hoodie }) => {
     dispatch({
       type: 'IMHistoryStartLoading',
       chatUUID

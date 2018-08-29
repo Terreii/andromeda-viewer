@@ -2,8 +2,8 @@
 
 import Circuit from './circuit'
 
-import {createBody, parseBody} from './networkMessages'
-import {getValueOf} from './msgGetters'
+import { createBody, parseBody } from './networkMessages'
+import { getValueOf } from './msgGetters'
 
 // Utility for testing
 window.WebSocket = class WebSocket {
@@ -127,7 +127,7 @@ test('parse a received package', () => {
     received.push(message)
   })
 
-  circuit.websocket.onmessage({data: messageBuffer})
+  circuit.websocket.onmessage({ data: messageBuffer })
 
   expect(received.length).toBe(1)
   expect(circuit.senderSequenceNumber).toBe(0)
@@ -139,8 +139,8 @@ test('save sender sequence number of reliable packages as ack', () => {
   const message2 = createTestMessage(true, false, false)
 
   const websocket = circuit.websocket
-  websocket.onmessage({data: message1})
-  websocket.onmessage({data: message2})
+  websocket.onmessage({ data: message1 })
+  websocket.onmessage({ data: message2 })
 
   expect(circuit.simAcks).toEqual(new Map([
     [sequenceNumberForTests - 2, 0],
@@ -226,11 +226,11 @@ test('circuit should resend a package after 500ms', () => {
 describe('circuit should remove acks that the server has send back', () => {
   test('with the PacketAck', () => {
     const acksBody = createBody('PacketAck', {
-      Packets: circuit.viewerAcks.map(ack => ({ID: ack.sequenceNumber}))
+      Packets: circuit.viewerAcks.map(ack => ({ ID: ack.sequenceNumber }))
     })
     const header = createTestHeader(false, false, false)
     const message = Buffer.concat([header, acksBody.buffer])
-    circuit.websocket.onmessage({data: message})
+    circuit.websocket.onmessage({ data: message })
 
     expect(circuit.viewerAcks.length).toBe(0)
   })
@@ -254,7 +254,7 @@ describe('circuit should remove acks that the server has send back', () => {
     const acks = Buffer.from([0, 0, 0, 0, 1])
     acks.writeUInt32BE(circuit.viewerAcks[0].sequenceNumber, 0)
     const message2 = Buffer.concat([messagePart1, acks])
-    circuit.websocket.onmessage({data: message2})
+    circuit.websocket.onmessage({ data: message2 })
 
     expect(circuit.viewerAcks.length).toBe(0)
   })
@@ -269,7 +269,7 @@ describe('sending only 255 or less acks at the end of a package', () => {
 
     for (let i = 0; i < 300; ++i) {
       const msg = createTestMessage(true, false, false)
-      circuit.websocket.onmessage({data: msg})
+      circuit.websocket.onmessage({ data: msg })
     }
 
     circuit.send('OpenCircuit', {
