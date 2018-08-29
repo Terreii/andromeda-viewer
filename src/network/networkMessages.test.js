@@ -4,7 +4,7 @@
 
 import uuid from 'uuid'
 
-import {parseBody, createBody} from './networkMessages'
+import { parseBody, createBody } from './networkMessages'
 import {
   getValueOf,
   getStringValueOf,

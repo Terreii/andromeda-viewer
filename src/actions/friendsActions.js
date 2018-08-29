@@ -1,7 +1,7 @@
 import { fetchLLSD } from './llsd'
 
 function sendUUIDNameRequest (ids) {
-  return (dispatch, getState, {circuit}) => {
+  return (dispatch, getState, { circuit }) => {
     if (ids.length === 0) return
 
     circuit.send('UUIDNameRequest', {
@@ -76,7 +76,7 @@ export function getAllFriendsDisplayNames () {
 // Server answers with a ChangeUserRights Packet
 export function updateRights (friendUUID, changedRights) {
   const id = friendUUID.toString()
-  return (dispatch, getState, {circuit}) => {
+  return (dispatch, getState, { circuit }) => {
     // Get friend
     const friend = getState().friends.find(friend => friend.get('id') === id)
     if (friend == null) return

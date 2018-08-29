@@ -1,11 +1,11 @@
 import React from 'react'
-import {connect} from 'react-redux'
-import {action as toggleMenu} from 'redux-burger-menu'
+import { connect } from 'react-redux'
+import { action as toggleMenu } from 'redux-burger-menu'
 
 import TopBar from '../components/topBar'
 
-import {logout} from '../actions/sessionActions'
-import {showSignOutPopup, showSignInPopup} from '../actions/viewerAccount'
+import { logout } from '../actions/sessionActions'
+import { showSignOutPopup, showSignInPopup } from '../actions/viewerAccount'
 
 class TopBarContainer extends React.Component {
   constructor () {

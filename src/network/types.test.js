@@ -93,8 +93,8 @@ describe('Variable1', () => {
   test('should throw an error if non array like structures are given to ' +
     'createBuffer', () => {
     try {
-      let test = Variable1.createBuffer({'0': 2})
-      test = Variable1.createBuffer({length: 256})
+      let test = Variable1.createBuffer({ '0': 2 })
+      test = Variable1.createBuffer({ length: 256 })
       expect(test).toBeNull()
     } catch (e) {
       expect(true).toBe(true)
@@ -109,7 +109,7 @@ describe('Variable1', () => {
   test('should parse a string', () => {
     const aString = 'Hello world!'
     const buffer2 = Variable1.createBuffer(aString)
-    const stringVar = Variable1.parseBuffer(buffer2, {value: 0})
+    const stringVar = Variable1.parseBuffer(buffer2, { value: 0 })
 
     expect(stringVar.toString('utf8')).toBe(aString + '\0')
     expect(buffer2.byteLength).toBe(14)
@@ -140,8 +140,8 @@ describe('Variable2', () => {
   test('should throw an error if non array like structures are given to ' +
     'createBuffer', () => {
     try {
-      let test = Variable1.createBuffer({'0': 2})
-      test = Variable1.createBuffer({length: 65536})
+      let test = Variable1.createBuffer({ '0': 2 })
+      test = Variable1.createBuffer({ length: 65536 })
       expect(test).toBeNull()
     } catch (e) {
       expect(true).toBe(true)
@@ -156,7 +156,7 @@ describe('Variable2', () => {
   test('should parse a string', () => {
     const aString = 'Hello world!'
     const buffer2 = Variable2.createBuffer(aString)
-    const stringVar = Variable2.parseBuffer(buffer2, {value: 0})
+    const stringVar = Variable2.parseBuffer(buffer2, { value: 0 })
 
     expect(stringVar.toString('utf8')).toBe(aString + '\0')
     expect(buffer2.byteLength).toBe(15)
@@ -175,12 +175,12 @@ describe('Numbers', () => {
 
     expect(U8.parseBuffer(posBuffer, offsetObj))
       .toBe(posBuffer.readUInt8(offset))
-    expect(U8.parseBuffer(negBuffer, {value: offset}))
+    expect(U8.parseBuffer(negBuffer, { value: offset }))
       .toBe(negBuffer.readUInt8(offset))
     expect(U8.createBuffer(3)).toEqual(Buffer.from([3]))
 
     const buffy = U8.createBuffer(3)
-    expect(U8.parseBuffer(buffy, {value: 0})).toBe(3)
+    expect(U8.parseBuffer(buffy, { value: 0 })).toBe(3)
     expect(buffy.byteLength).toBe(1)
 
     expect(offsetObj).toEqual({
@@ -196,12 +196,12 @@ describe('Numbers', () => {
 
     expect(U16.parseBuffer(posBuffer, offsetObj))
       .toBe(posBuffer.readUInt16LE(offset))
-    expect(U16.parseBuffer(negBuffer, {value: offset}))
+    expect(U16.parseBuffer(negBuffer, { value: offset }))
       .toBe(negBuffer.readUInt16LE(offset))
     expect(U16.createBuffer(3)).toEqual(Buffer.from([3, 0]))
 
     const buffy = U16.createBuffer(3)
-    expect(U16.parseBuffer(buffy, {value: 0})).toBe(3)
+    expect(U16.parseBuffer(buffy, { value: 0 })).toBe(3)
     expect(buffy.byteLength).toBe(2)
 
     expect(offsetObj).toEqual({
@@ -217,13 +217,13 @@ describe('Numbers', () => {
 
     expect(U32.parseBuffer(posBuffer, offsetObj))
       .toBe(posBuffer.readUInt32LE(offset))
-    expect(U32.parseBuffer(negBuffer, {value: offset}))
+    expect(U32.parseBuffer(negBuffer, { value: offset }))
       .toBe(negBuffer.readUInt32LE(offset))
     expect(U32.createBuffer(3))
       .toEqual(Buffer.from([3, 0, 0, 0]))
 
     const buffy = U32.createBuffer(3)
-    expect(U32.parseBuffer(buffy, {value: 0})).toBe(3)
+    expect(U32.parseBuffer(buffy, { value: 0 })).toBe(3)
     expect(buffy.byteLength).toBe(4)
 
     expect(offsetObj).toEqual({
@@ -239,13 +239,13 @@ describe('Numbers', () => {
 
     expect(S8.parseBuffer(posBuffer, offsetObj))
       .toBe(posBuffer.readInt8(offset))
-    expect(S8.parseBuffer(negBuffer, {value: offset}))
+    expect(S8.parseBuffer(negBuffer, { value: offset }))
       .toBe(negBuffer.readInt8(offset))
     expect(S8.createBuffer(-3))
       .toEqual(Buffer.from([-3]))
 
     const buffy = S8.createBuffer(3)
-    expect(S8.parseBuffer(buffy, {value: 0})).toBe(3)
+    expect(S8.parseBuffer(buffy, { value: 0 })).toBe(3)
     expect(buffy.byteLength).toBe(1)
 
     expect(offsetObj).toEqual({
@@ -261,13 +261,13 @@ describe('Numbers', () => {
 
     expect(S16.parseBuffer(posBuffer, offsetObj))
       .toBe(posBuffer.readInt16LE(offset))
-    expect(S16.parseBuffer(negBuffer, {value: offset}))
+    expect(S16.parseBuffer(negBuffer, { value: offset }))
       .toBe(negBuffer.readInt16LE(offset))
     expect(S16.createBuffer(-3))
       .toEqual(Buffer.from([-3, 255]))
 
     const buffy = S16.createBuffer(3)
-    expect(S16.parseBuffer(buffy, {value: 0})).toBe(3)
+    expect(S16.parseBuffer(buffy, { value: 0 })).toBe(3)
     expect(buffy.byteLength).toBe(2)
 
     expect(offsetObj).toEqual({
@@ -283,13 +283,13 @@ describe('Numbers', () => {
 
     expect(S32.parseBuffer(posBuffer, offsetObj))
       .toBe(posBuffer.readInt32LE(offset))
-    expect(S32.parseBuffer(negBuffer, {value: offset}))
+    expect(S32.parseBuffer(negBuffer, { value: offset }))
       .toBe(negBuffer.readInt32LE(offset))
     expect(S32.createBuffer(-3))
       .toEqual(Buffer.from([-3, 255, 255, 255]))
 
     const buffy = S32.createBuffer(3)
-    expect(S32.parseBuffer(buffy, {value: 0})).toBe(3)
+    expect(S32.parseBuffer(buffy, { value: 0 })).toBe(3)
     expect(buffy.byteLength).toBe(4)
 
     expect(offsetObj).toEqual({
@@ -302,7 +302,7 @@ describe('Numbers', () => {
     const value = Math.random()
     buffer.writeFloatLE(value, 4)
 
-    expect(F32.parseBuffer(buffer, {value: 4}))
+    expect(F32.parseBuffer(buffer, { value: 4 }))
       .toBe(buffer.readFloatLE(4))
     expect(F32.createBuffer(value))
       .toEqual(buffer.slice(4))
@@ -323,7 +323,7 @@ describe('Numbers', () => {
     const value = Math.random()
     buffer.writeDoubleLE(value, 0)
 
-    expect(F64.parseBuffer(buffer, {value: 0}))
+    expect(F64.parseBuffer(buffer, { value: 0 }))
       .toBe(buffer.readDoubleLE(0))
     expect(F64.createBuffer(value)).toEqual(buffer)
 
@@ -346,7 +346,7 @@ describe('Vectors', () => {
       buffer.writeFloatLE(num, i * 4)
     })
 
-    expect(LLVector3.parseBuffer(buffer, {value: 4})).toEqual([
+    expect(LLVector3.parseBuffer(buffer, { value: 4 })).toEqual([
       buffer.readFloatLE(4),
       buffer.readFloatLE(8),
       buffer.readFloatLE(12)
@@ -370,7 +370,7 @@ describe('Vectors', () => {
     const array = [1.1, 2.2, 3.3, 4.4]
     array.forEach((num, i) => buffer.writeDoubleLE(num, i * 8))
 
-    expect(LLVector3d.parseBuffer(buffer, {value: 8})).toEqual([
+    expect(LLVector3d.parseBuffer(buffer, { value: 8 })).toEqual([
       buffer.readDoubleLE(8),
       buffer.readDoubleLE(16),
       buffer.readDoubleLE(24)
@@ -394,7 +394,7 @@ describe('Vectors', () => {
     const array = [1.1, 2.2, 3.3, 4.4, 5.5]
     array.forEach((num, i) => buffer.writeFloatLE(num, i * 4))
 
-    expect(LLVector4.parseBuffer(buffer, {value: 4})).toEqual([
+    expect(LLVector4.parseBuffer(buffer, { value: 4 })).toEqual([
       buffer.readFloatLE(4),
       buffer.readFloatLE(8),
       buffer.readFloatLE(12),
@@ -419,7 +419,7 @@ describe('Vectors', () => {
     ;[1.1, 2.2, 3.3, 4.4].forEach((num, i) => {
       buffer.writeFloatLE(num, i * 4)
     })
-    expect(LLQuaternion.parseBuffer(buffer, {value: 4})).toEqual([
+    expect(LLQuaternion.parseBuffer(buffer, { value: 4 })).toEqual([
       buffer.readFloatLE(4),
       buffer.readFloatLE(8),
       buffer.readFloatLE(12)
@@ -443,7 +443,7 @@ describe('LLUUID', () => {
   test('should store a valid UUID', () => {
     const buffer = Buffer.alloc(16)
     uuid.v4(null, buffer)
-    const idString = LLUUID.parseBuffer(buffer, {value: 0})
+    const idString = LLUUID.parseBuffer(buffer, { value: 0 })
     const idString2 = uuid.v4()
     const buffy = LLUUID.createBuffer(idString2)
     const offset = {
@@ -467,7 +467,7 @@ describe('BOOL', () => {
     }
 
     expect(BOOL.parseBuffer(buffer, offset)).toBe(false)
-    expect(BOOL.parseBuffer(buffer, {value: 1})).toBe(true)
+    expect(BOOL.parseBuffer(buffer, { value: 1 })).toBe(true)
     expect(BOOL.createBuffer(true)[0]).toBe(1)
     expect(BOOL.createBuffer(false)[0]).toBe(0)
 
@@ -497,7 +497,7 @@ describe('IPADDR & IPPORT', () => {
     '{3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$')
 
   test('should parse a valid ip-address', () => {
-    expect(reg.test(IPADDR.parseBuffer(buffer, {value: 0})))
+    expect(reg.test(IPADDR.parseBuffer(buffer, { value: 0 })))
       .toBe(true)
 
     const aArray = [127, 0, 0, 1]
@@ -509,7 +509,7 @@ describe('IPADDR & IPPORT', () => {
     }
 
     expect(IPADDR.parseBuffer(buffy, offset)).toEqual(ip)
-    expect(IPADDR.parseBuffer(buffy2, {value: 0})).toEqual(ip)
+    expect(IPADDR.parseBuffer(buffy2, { value: 0 })).toEqual(ip)
     expect(buffy.byteLength).toBe(4)
     expect(buffy2.byteLength).toBe(4)
     expect(offset).toEqual({
@@ -518,7 +518,7 @@ describe('IPADDR & IPPORT', () => {
   })
 
   test('should parse a valid ip-port', () => {
-    expect(IPPORT.parseBuffer(buffer, {value: 4}))
+    expect(IPPORT.parseBuffer(buffer, { value: 4 }))
       .toBe(buffer.readUInt16LE(4))
 
     const port = 666

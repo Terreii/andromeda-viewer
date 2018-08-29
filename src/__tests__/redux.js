@@ -1,4 +1,4 @@
-import {createStore, applyMiddleware, compose} from 'redux'
+import { createStore, applyMiddleware, compose } from 'redux'
 import thunkMiddleware from 'redux-thunk'
 
 test('redux and thunk should have their public functions', () => {
@@ -10,7 +10,7 @@ test('redux and thunk should have their public functions', () => {
 
 describe('basic functionality of redux-store', () => {
   const store = createStore(
-    (state = {text: 'hello'}, action) => action.type === 'UPDATE' ? action.next : state
+    (state = { text: 'hello' }, action) => action.type === 'UPDATE' ? action.next : state
   )
 
   test('the store should have the expected methods', () => {
@@ -21,7 +21,7 @@ describe('basic functionality of redux-store', () => {
   })
 
   test('getState returns the state', () => {
-    expect(store.getState()).toEqual({text: 'hello'})
+    expect(store.getState()).toEqual({ text: 'hello' })
   })
 
   test('dispatch should update the state', () => {
@@ -32,10 +32,10 @@ describe('basic functionality of redux-store', () => {
     }).toThrow()
 
     expect(() => {
-      expect(store.dispatch({wrongKey: 'TEST'}))
+      expect(store.dispatch({ wrongKey: 'TEST' }))
     }).toThrow()
 
-    store.dispatch({type: 'NOT_UPDATE'})
+    store.dispatch({ type: 'NOT_UPDATE' })
     expect(store.getState()).toBe(oldState)
 
     store.dispatch({
@@ -74,7 +74,7 @@ describe('basic functionality of redux-store', () => {
     expect(lastStates[0]).not.toBe(lastStates[1])
     expect(lastStates[1]).not.toBeNull()
 
-    store.dispatch({type: 'NO_UPDATE'})
+    store.dispatch({ type: 'NO_UPDATE' })
     expect(callCount).toBe(2)
     expect(lastStates[0]).toBe(lastStates[1])
 
@@ -94,7 +94,7 @@ describe('basic functionality of redux-store', () => {
   test('replace reducer should replace them', () => {
     let oldState = store.getState()
 
-    store.dispatch({type: 'NO_UPDATE'})
+    store.dispatch({ type: 'NO_UPDATE' })
     expect(store.getState()).toBe(oldState)
 
     store.dispatch({
@@ -110,7 +110,7 @@ describe('basic functionality of redux-store', () => {
     store.replaceReducer((state, action) => action.type === 'NO_UPDATE' ? action.next : state)
     oldState = store.getState()
 
-    store.dispatch({type: 'UPDATE'})
+    store.dispatch({ type: 'UPDATE' })
     expect(store.getState()).toBe(oldState)
 
     store.dispatch({
@@ -129,7 +129,7 @@ describe('middleware adding and thunk', () => {
 
   test('thunk as withExtraArgument', () => {
     expect(thunkMiddleware.withExtraArgument).toBeInstanceOf(Function)
-    expect(thunkMiddleware.withExtraArgument({callCount: 0})).toBeInstanceOf(Function)
+    expect(thunkMiddleware.withExtraArgument({ callCount: 0 })).toBeInstanceOf(Function)
   })
 
   test('adding the middleware', () => {
@@ -142,7 +142,7 @@ describe('middleware adding and thunk', () => {
     )
 
     store = createStore(
-      (state = {text: 'hello'}, action) => action.type === 'UPDATE' ? action.next : state,
+      (state = { text: 'hello' }, action) => action.type === 'UPDATE' ? action.next : state,
       // undefined, // old state
       enhancers
     )

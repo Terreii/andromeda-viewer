@@ -1,7 +1,7 @@
 import React from 'react'
 import Menu from 'react-burger-menu/lib/menus/slide'
-import {decorator as reduxBurgerMenu} from 'redux-burger-menu'
-import styled, {injectGlobal} from 'styled-components'
+import { decorator as reduxBurgerMenu } from 'redux-burger-menu'
+import styled, { injectGlobal } from 'styled-components'
 
 const Link = styled.a`
   color: white;
@@ -78,7 +78,7 @@ injectGlobal`
 
 const SlideMenu = reduxBurgerMenu(Menu)
 
-export default function BurgerMenu ({account, signIn, signUp, logout, signOut}) {
+export default function BurgerMenu ({ account, signIn, signUp, logout, signOut }) {
   const avatarLoggedIn = account.get('loggedIn')
   const avatarName = account.get('avatarName')
   const viewerLoggedIn = account.getIn(['viewerAccount', 'loggedIn'])
@@ -102,7 +102,7 @@ export default function BurgerMenu ({account, signIn, signUp, logout, signOut}) 
 
     <Link
       className='menu-item'
-      style={{display: viewerLoggedIn ? 'none' : ''}}
+      style={{ display: viewerLoggedIn ? 'none' : '' }}
       href='#signup'
       onClick={signUp}
     >
@@ -111,7 +111,7 @@ export default function BurgerMenu ({account, signIn, signUp, logout, signOut}) 
 
     <LogoutButton
       className='menu-item'
-      style={{display: avatarLoggedIn ? '' : 'none'}}
+      style={{ display: avatarLoggedIn ? '' : 'none' }}
       href='#logout'
       onClick={logout}
     >
@@ -120,7 +120,7 @@ export default function BurgerMenu ({account, signIn, signUp, logout, signOut}) 
 
     <Link
       className='menu-item'
-      style={{display: viewerLoggedIn ? '' : 'none'}}
+      style={{ display: viewerLoggedIn ? '' : 'none' }}
       href='#signout'
       onClick={signOut}
     >

@@ -1,4 +1,4 @@
-import {connect} from 'react-redux'
+import { connect } from 'react-redux'
 
 import {
   sendLocalChatMessage,
@@ -6,7 +6,7 @@ import {
   startNewIMChat,
   getIMHistory
 } from '../actions/chatMessageActions'
-import {updateRights} from '../actions/friendsActions'
+import { updateRights } from '../actions/friendsActions'
 
 import ChatBox from '../components/chatBox'
 

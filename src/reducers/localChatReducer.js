@@ -2,7 +2,7 @@
  * Stores all LocalChat-Messages
  */
 
-import {Map, List} from 'immutable'
+import { Map, List } from 'immutable'
 
 // Filter the data
 export default function localChatReducer (state = List(), action) {

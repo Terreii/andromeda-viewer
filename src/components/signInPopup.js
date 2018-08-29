@@ -59,7 +59,7 @@ export default class SignInPopup extends React.Component {
             placeholder='Password'
           />
           <input
-            style={{display: this.props.isSignUp ? '' : 'none'}}
+            style={{ display: this.props.isSignUp ? '' : 'none' }}
             type='password'
             value={this.state.password2}
             data-key='password2'

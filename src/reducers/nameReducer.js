@@ -5,7 +5,7 @@
 import Immutable from 'immutable'
 
 import AvatarName from '../avatarName'
-import {mapBlockOf} from '../network/msgGetters'
+import { mapBlockOf } from '../network/msgGetters'
 
 // Only adds a Name to names if it is new or did change
 function addName (state, uuid, name) {
@@ -58,7 +58,7 @@ function namesReducer (state = Immutable.Map(), action) {
           lastName: getValue('LastName', true),
           id: getValue('ID')
         }
-      }).reduce((state, {firstName, lastName, id}) => {
+      }).reduce((state, { firstName, lastName, id }) => {
         return addName(state, id, firstName + ' ' + lastName)
       }, state)
 
