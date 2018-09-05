@@ -24,9 +24,7 @@ import {
   signUp,
   signOut,
   saveAvatar,
-  loadSavedAvatars,
-  saveGrid,
-  loadSavedGrids
+  saveGrid
 } from '../actions/viewerAccount'
 import { login } from '../actions/sessionActions'
 
@@ -48,33 +46,17 @@ class App extends React.Component {
       if (this.props.isSignedIn) return // component was hot reloaded
     }
 
-    this.props.getIsSignedIn().then(isSignedIn => {
-      if (isSignedIn) {
-        this._loadAvatars()
-      } else {
-        console.log('Is not signed in.')
-      }
-    })
-  }
-
-  async _loadAvatars () {
-    await this.props.loadSavedGrids()
-    await this.props.loadSavedAvatars()
+    this.props.getIsSignedIn()
   }
 
   getPopup () {
     const popup = this.props.popup
     if (popup == null || popup.length === 0) return null
     const close = this.props.closePopup
+
     switch (popup) {
       case 'signIn':
-        return <SignInPopup
-          onCancel={close}
-          onSend={(username, password) => {
-            this.props.signIn(username, password)
-              .then(this._loadAvatars.bind(this))
-          }}
-        />
+        return <SignInPopup onCancel={close} onSend={this.props.signIn} />
 
       case 'signUp':
         return <SignInPopup onCancel={close} isSignUp onSend={this.props.signUp} />
@@ -101,6 +83,7 @@ class App extends React.Component {
         saveAvatar={this.props.saveAvatar}
         saveGrid={this.props.saveGrid}
       />
+
     return <AppContainer>
       <TopMenuBar messageOfTheDay={isLoggedIn ? this.props.messageOfTheDay : null} />
       {mainSection}
@@ -143,9 +126,7 @@ const mapDispatchToProps = {
   signUp,
   signOut,
   saveAvatar,
-  loadSavedAvatars,
   saveGrid,
-  loadSavedGrids,
   login // For Avatar
 }
 

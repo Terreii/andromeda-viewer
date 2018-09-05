@@ -53,6 +53,9 @@ export default function accountReducer (state = getDefault(), action) {
         }
       })
 
+    case 'ViewerAccountSignOut':
+      return getDefault()
+
     case 'ViewerAccountUnlocked':
       return state.merge({
         unlocked: true

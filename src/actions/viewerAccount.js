@@ -56,7 +56,7 @@ export function saveAvatar (name, grid) {
 }
 
 export function loadSavedAvatars () {
-  return async (dispatch, getState, { hoodie }) => {
+  return async (dispatch, getState, extra) => {
     const account = getState().account
 
     if (!account.getIn(['viewerAccount', 'loggedIn'])) {
@@ -65,10 +65,16 @@ export function loadSavedAvatars () {
 
     if (account.get('savedAvatarsLoaded')) return
 
-    const avatarsStore = hoodie.store.withIdPrefix('avatars/')
+    const avatarsStore = extra.hoodie.store.withIdPrefix('avatars/')
 
-    avatarsStore.on('change', (eventName, doc) => {
+    const changeHandler = (eventName, doc) => {
       dispatch(avatarsDidChange(eventName, doc))
+    }
+
+    avatarsStore.on('change', changeHandler)
+    extra.handlers.push({
+      type: 'change',
+      handler: changeHandler
     })
 
     const avatars = await avatarsStore.findAll()
@@ -124,7 +130,7 @@ export function saveGrid (name, loginURL) {
 }
 
 export function loadSavedGrids () {
-  return async (dispatch, getState, { hoodie }) => {
+  return async (dispatch, getState, extra) => {
     const account = getState().account
 
     if (!account.getIn(['viewerAccount', 'loggedIn'])) {
@@ -133,10 +139,16 @@ export function loadSavedGrids () {
 
     if (account.get('savedGridsLoaded')) return
 
-    const gridsStore = hoodie.store.withIdPrefix('grids/')
+    const gridsStore = extra.hoodie.store.withIdPrefix('grids/')
 
-    gridsStore.on('change', (change, doc) => {
+    const changeHandler = (change, doc) => {
       dispatch(gridsDidChange(change, doc))
+    }
+
+    gridsStore.on('change', changeHandler)
+    extra.handlers.push({
+      type: 'change',
+      handler: changeHandler
     })
 
     const grids = await gridsStore.findAll()
@@ -197,6 +209,9 @@ export function unlock (password) {
     dispatch({
       type: 'ViewerAccountUnlocked'
     })
+
+    await dispatch(loadSavedGrids())
+    dispatch(loadSavedAvatars())
   }
 }
 
@@ -208,6 +223,9 @@ export function signIn (username, password) {
       await hoodie.store.sync()
       await hoodie.cryptoStore.setPassword(password)
       dispatch(didSignIn(true, true, accountProperties.username))
+
+      await dispatch(loadSavedGrids())
+      dispatch(loadSavedAvatars())
     } catch (err) {
       dispatch(didSignIn(false))
       console.error(err)
@@ -224,13 +242,22 @@ export function signUp (username, password) {
 }
 
 export function signOut () {
-  return (dispatch, getState, { hoodie }) => {
+  return (dispatch, getState, extra) => {
     dispatch(closePopup())
     if (getState().account.get('loggedIn')) {
       // logout() TODO: log out if sign out
     }
+    const hoodie = extra.hoodie
+
     return hoodie.account.signOut().then(sessionProperties => {
-      dispatch(didSignIn(false, false))
+      extra.handlers.forEach(handler => { // unsubscribe to events from hoodie
+        hoodie.store.off(handler.type, handler.handler)
+      })
+      extra.handlers = []
+
+      dispatch({
+        type: 'ViewerAccountSignOut'
+      })
     }).catch(err => {
       console.error(err)
     })

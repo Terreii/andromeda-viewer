@@ -18,6 +18,7 @@ const configureStore = preloadedState => {
   const middleware = applyMiddleware(
     thunkMiddleware.withExtraArgument({
       hoodie,
+      handlers: [], // will contain handlers, that should stop listening on sign out
       circuit: null // will be set on login
     })
   )
