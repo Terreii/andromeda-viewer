@@ -43,7 +43,7 @@ test('unlock with return key', () => {
     keyCode: 13
   })
   expect(unlockEvents.count).toBe(0) // empty input doesn't unlock
-  expect(rendered.find('span').at(2).text()).toBe('No password was entered jet!')
+  expect(rendered.find('span').at(3).text()).toBe('No password was entered jet!')
 
   pwInput.simulate('change', {
     target: {
@@ -98,7 +98,7 @@ test('unlock with button', () => {
 
   unlockButton.simulate('click')
   expect(unlockEvents.count).toBe(0) // empty input doesn't unlock
-  expect(rendered.find('span').at(2).text()).toBe('No password was entered jet!')
+  expect(rendered.find('span').at(3).text()).toBe('No password was entered jet!')
 
   pwInput.simulate('change', {
     target: {

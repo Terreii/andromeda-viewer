@@ -4,9 +4,18 @@ import PropTypes from 'prop-types'
 
 import Popup from './popup'
 
+import lockIcon from '../icons/black_lock.svg'
+
 const Content = styled.div`
   display: flex;
   flex-direction: column;
+`
+
+const LockItemStyled = styled.img`
+  position: relative;
+  left: -10%;
+  margin: 0px;
+  margin-right: 0.3em;
 `
 
 const ErrorOut = styled.span`
@@ -47,9 +56,17 @@ export default class UnlockDialog extends React.Component {
       errorText: null
     }
 
+    this._inputRef = React.createRef()
+
     this._boundInput = this._onKeyInputPressed.bind(this)
     this._boundUnlock = this._onUnlock.bind(this)
     this._boundChange = this._onChange.bind(this)
+  }
+
+  componentDidMount () {
+    if (this._inputRef.current != null) {
+      this._inputRef.current.focus()
+    }
   }
 
   _onKeyInputPressed (event) {
@@ -93,7 +110,17 @@ export default class UnlockDialog extends React.Component {
   }
 
   render () {
-    return <Popup title={'Unlock'}>
+    const title = <span>
+      <LockItemStyled
+        src={lockIcon}
+        height='18'
+        width='18'
+        alt=''
+      />
+      Unlock
+    </span>
+
+    return <Popup title={title}>
       <Content>
         <span>Please enter your Password to unlock this app!</span>
         <ErrorOut hasError={this.state.errorText != null}>{this.state.errorText}</ErrorOut>
@@ -102,6 +129,7 @@ export default class UnlockDialog extends React.Component {
           <input
             type='password'
             autoComplete='current-password'
+            ref={this._inputRef}
             disabled={this.state.isUnlocking}
             value={this.state.password}
             onChange={this._boundChange}

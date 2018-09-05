@@ -7,7 +7,7 @@ const Link = styled.a`
   color: white;
 `
 
-const LogoutButton = Link.extend`
+const LogoutButton = styled(Link)`
   :after {
     content: " >>";
   }
