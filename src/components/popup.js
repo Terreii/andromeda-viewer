@@ -47,7 +47,7 @@ export default function Popup (props) {
 
   const closeIconInHeader = showCloseIcon
     ? <a
-      style={{display: showCloseIcon ? '' : 'none'}}
+      style={{ display: showCloseIcon ? '' : 'none' }}
       href='#close_popup'
       onClick={event => {
         event.preventDefault()

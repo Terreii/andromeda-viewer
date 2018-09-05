@@ -181,7 +181,7 @@ export function isSignedIn () {
 }
 
 export function unlock (password) {
-  return async (dispatch, getState, {hoodie}) => {
+  return async (dispatch, getState, { hoodie }) => {
     const activeState = getState()
     if (activeState.account.get('unlocked')) {
       return
