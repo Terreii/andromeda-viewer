@@ -2,11 +2,11 @@ import crypto from 'crypto'
 
 import { viewerName, viewerVersion, viewerPlatform } from '../viewerInfo'
 import AvatarName from '../avatarName'
-import {getValueOf, getStringValueOf} from '../network/msgGetters'
+import { getValueOf, getStringValueOf } from '../network/msgGetters'
 
-import {getLocalChatHistory, loadIMChats} from './chatMessageActions'
-import {getAllFriendsDisplayNames} from './friendsActions'
-import {fetchSeedCapabilities} from './llsd'
+import { getLocalChatHistory, loadIMChats } from './chatMessageActions'
+import { getAllFriendsDisplayNames } from './friendsActions'
+import { fetchSeedCapabilities } from './llsd'
 import connectCircuit from './connectCircuit'
 
 // Actions for the session of an avatar
@@ -54,7 +54,7 @@ export function login (firstName, lastName, password, grid) {
     extra.circuit = connectToSim(body, await circuit)
     dispatch(connectCircuit()) // Connect message parsing with circuit.
 
-    const avatarName = new AvatarName({first: body.first_name, last: body.last_name})
+    const avatarName = new AvatarName({ first: body.first_name, last: body.last_name })
     const avatarIdentifier = `${avatarName.getFullName()}@${grid.name}`
     const localChatHistory = await dispatch(getLocalChatHistory(avatarIdentifier))
 

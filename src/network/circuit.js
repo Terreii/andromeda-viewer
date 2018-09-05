@@ -9,8 +9,8 @@
 import events from 'events'
 import Deque from 'double-ended-queue'
 
-import {parseBody, createBody} from './networkMessages'
-import {getValueOf, mapBlockOf} from './msgGetters'
+import { parseBody, createBody } from './networkMessages'
+import { getValueOf, mapBlockOf } from './msgGetters'
 
 export default class Circuit extends events.EventEmitter {
   constructor (hostIP, hostPort, circuitCode) {

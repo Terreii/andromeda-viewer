@@ -28,7 +28,7 @@ function leadingZero (num) {
 
 class ChatList extends React.Component {
   render () {
-    const {messages, isIM, names, ...props} = this.props
+    const { messages, isIM, names, ...props } = this.props
 
     const messagesLines = messages.map(msg => {
       const time = new Date(msg.get('time'))

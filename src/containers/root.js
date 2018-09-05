@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { Provider } from 'react-redux'
 import App from './App'
 
-const Root = ({store}) => {
+const Root = ({ store }) => {
   return <Provider store={store}>
     <App />
   </Provider>

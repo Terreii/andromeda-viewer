@@ -1,5 +1,5 @@
-import {receiveChatFromSimulator, receiveIM} from './chatMessageActions'
-import {getValueOf, mapBlockOf} from '../network/msgGetters'
+import { receiveChatFromSimulator, receiveIM } from './chatMessageActions'
+import { getValueOf, mapBlockOf } from '../network/msgGetters'
 
 // Gets all messages from the SIM and filters them, and if needed: calls their own actions.
 function simActionFilter (msg) {
@@ -54,7 +54,7 @@ function parseUserRights (message) {
 }
 
 function sendRegionHandshakeReply (RegionHandshake) {
-  return (dispatch, getState, {circuit}) => {
+  return (dispatch, getState, { circuit }) => {
     const regionID = getValueOf(RegionHandshake, 'RegionInfo2', 'RegionID')
     const flags = getValueOf(RegionHandshake, 'RegionInfo', 'RegionFlags')
 

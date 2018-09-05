@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 import AvatarName from '../avatarName'
-import {viewerName} from '../viewerInfo'
+import { viewerName } from '../viewerInfo'
 
 const Main = styled.div`
   background-color: rgb(77, 80, 85);
@@ -125,7 +125,7 @@ export default class LoginForm extends React.Component {
     this.setState({
       isLoggingIn: true
     })
-    const {first, last} = new AvatarName(this.state.name)
+    const { first, last } = new AvatarName(this.state.name)
     const grid = this.props.grids.get(this.state.gridIndex)
     if (grid == null) return
 
@@ -147,7 +147,7 @@ export default class LoginForm extends React.Component {
   _loginWithSavedAvatar (avatar, password) {
     if (password.length === 0) return
     const name = avatar.get('name')
-    const {first, last} = new AvatarName(name)
+    const { first, last } = new AvatarName(name)
 
     const gridName = avatar.get('grid')
     const grid = this.props.grids.find(aGrid => aGrid.get('name') === gridName)

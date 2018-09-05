@@ -24,7 +24,7 @@ global.test('should parse a given name', () => {
     didLoadDisplayName: false,
     isLoadingDisplayName: false
   })
-  global.expect(new AvatarName({first: 'Tester'})).toEqual({
+  global.expect(new AvatarName({ first: 'Tester' })).toEqual({
     first: 'Tester',
     last: 'Resident',
     displayName: '',
@@ -67,7 +67,7 @@ global.test('should have a toString method that behaves like getFullName', () =>
 
 global.test('should be comparable with the compare method', () => {
   const first = new AvatarName('test')
-  const second = new AvatarName({first: 'test', last: 'Linden'})
+  const second = new AvatarName({ first: 'test', last: 'Linden' })
   const third = new AvatarName('tEst Resident')
 
   global.expect(first.compare(second)).toBe(false)
