@@ -42,6 +42,7 @@ const configureStore = preloadedState => {
       })
     }
     window.devHoodie = hoodie
+    window.devStore = store
   }
 
   return store

@@ -1,10 +1,11 @@
 // Everything for the viewer account
 
-export function didSignIn (did, username = '') {
+export function didSignIn (did, isUnlocked, username = '') {
   const isLoggedIn = Boolean(did)
   return {
     type: 'ViewerAccountLogInStatus',
     isLoggedIn,
+    isUnlocked,
     username: isLoggedIn ? username : ''
   }
 }
@@ -172,9 +173,30 @@ export function isSignedIn () {
   return async (dispatch, getState, {hoodie}) => {
     const properties = await hoodie.account.get(['session', 'username'])
     const isLoggedIn = properties.session != null
-    const action = didSignIn(isLoggedIn, properties != null ? properties.username : undefined)
+    const username = properties != null ? properties.username : undefined
+    const action = didSignIn(isLoggedIn, null, username)
     dispatch(action)
     return isLoggedIn
+  }
+}
+
+export function unlock (password) {
+  return async (dispatch, getState, {hoodie}) => {
+    const activeState = getState()
+    if (activeState.account.get('unlocked')) {
+      return
+    }
+
+    if (!activeState.account.getIn(['viewerAccount', 'loggedIn'])) {
+      throw new Error('Not signed in!')
+    }
+
+    await hoodie.store.sync()
+    await hoodie.cryptoStore.setPassword(password)
+
+    dispatch({
+      type: 'ViewerAccountUnlocked'
+    })
   }
 }
 
@@ -183,7 +205,9 @@ export function signIn (username, password) {
     dispatch(closePopup())
     try {
       const accountProperties = await hoodie.account.signIn({username, password})
-      dispatch(didSignIn(true, accountProperties.username))
+      await hoodie.store.sync()
+      await hoodie.cryptoStore.setPassword(password)
+      dispatch(didSignIn(true, true, accountProperties.username))
     } catch (err) {
       dispatch(didSignIn(false))
       console.error(err)
@@ -206,7 +230,7 @@ export function signOut () {
       // logout() TODO: log out if sign out
     }
     return hoodie.account.signOut().then(sessionProperties => {
-      dispatch(didSignIn(false))
+      dispatch(didSignIn(false, false))
     }).catch(err => {
       console.error(err)
     })

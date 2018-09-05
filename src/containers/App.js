@@ -12,12 +12,14 @@ import LoginForm from '../components/login'
 import Popup from '../components/popup'
 import SignInPopup from '../components/signInPopup'
 import SignOutPopup from '../components/signOutPopup'
+import UnlockDialog from '../components/unlockDialog'
 
 import TopMenuBar from './topMenuBar'
 
 import {
   closePopup,
   isSignedIn,
+  unlock,
   signIn,
   signUp,
   signOut,
@@ -42,6 +44,10 @@ const AppContainer = styled.div`
 
 class App extends React.Component {
   componentDidMount () {
+    if (process.env.NODE_ENV !== 'production') {
+      if (this.props.isSignedIn) return // component was hot reloaded
+    }
+
     this.props.getIsSignedIn().then(isSignedIn => {
       if (isSignedIn) {
         this._loadAvatars()
@@ -99,6 +105,12 @@ class App extends React.Component {
       <TopMenuBar messageOfTheDay={isLoggedIn ? this.props.messageOfTheDay : null} />
       {mainSection}
       {this.getPopup()}
+      {!this.props.isUnlocked && this.props.isSignedIn
+        ? <UnlockDialog
+          onUnlock={this.props.unlock}
+          onSignOut={this.props.signOut}
+        />
+        : null}
     </AppContainer>
   }
 }
@@ -107,6 +119,7 @@ const mapStateToProps = state => {
   const popup = state.account.getIn(['viewerAccount', 'signInPopup']) ||
     state.session.get('error')
   const avatars = state.account.get('savedAvatars')
+  const isUnlocked = state.account.get('unlocked')
   const grids = state.account.get('savedGrids')
   const isSignedIn = state.account.getIn(['viewerAccount', 'loggedIn'])
   const isLoggedIn = state.session.get('loggedIn')
@@ -114,6 +127,7 @@ const mapStateToProps = state => {
   return {
     avatars,
     grids,
+    isUnlocked,
     isLoggedIn, // Avatar session
     isSignedIn, // Viewer account
     popup,
@@ -124,6 +138,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = {
   closePopup,
   getIsSignedIn: isSignedIn,
+  unlock,
   signIn, // For viewer-account (to sync)
   signUp,
   signOut,

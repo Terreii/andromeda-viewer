@@ -6,6 +6,7 @@ function getDefault () {
     loggedIn: false,
     avatarIdentifier: '',
     sync: false,
+    unlocked: false,
     agentId: '',
     viewerAccount: {
       loggedIn: false,
@@ -45,10 +46,16 @@ export default function accountReducer (state = getDefault(), action) {
 
     case 'ViewerAccountLogInStatus':
       return state.mergeDeep({
+        unlocked: action.isUnlocked == null ? state.get('unlocked') : action.isUnlocked,
         viewerAccount: {
           loggedIn: action.isLoggedIn,
           username: action.username
         }
+      })
+
+    case 'ViewerAccountUnlocked':
+      return state.merge({
+        unlocked: true
       })
 
     case 'ShowSignInPopup':
