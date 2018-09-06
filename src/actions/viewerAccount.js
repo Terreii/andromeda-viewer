@@ -72,9 +72,8 @@ export function loadSavedAvatars () {
     }
 
     avatarsStore.on('change', changeHandler)
-    extra.handlers.push({
-      type: 'change',
-      handler: changeHandler
+    extra.handlersUnsubscribe.push(() => {
+      avatarsStore.off('change', changeHandler)
     })
 
     const avatars = await avatarsStore.findAll()
@@ -146,9 +145,8 @@ export function loadSavedGrids () {
     }
 
     gridsStore.on('change', changeHandler)
-    extra.handlers.push({
-      type: 'change',
-      handler: changeHandler
+    extra.handlersUnsubscribe.push(() => {
+      gridsStore.off('change', changeHandler)
     })
 
     const grids = await gridsStore.findAll()
@@ -250,10 +248,10 @@ export function signOut () {
     const hoodie = extra.hoodie
 
     return hoodie.account.signOut().then(sessionProperties => {
-      extra.handlers.forEach(handler => { // unsubscribe to events from hoodie
-        hoodie.store.off(handler.type, handler.handler)
+      extra.handlersUnsubscribe.forEach(unsubscribe => { // unsubscribe to events from hoodie
+        unsubscribe()
       })
-      extra.handlers = []
+      extra.handlersUnsubscribe = []
 
       dispatch({
         type: 'ViewerAccountSignOut'
