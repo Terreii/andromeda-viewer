@@ -1,23 +1,13 @@
-import Hoodie from '@hoodie/client'
-import PouchDB from 'pouchdb'
-import setupCryptoStore from 'hoodie-plugin-store-crypto'
 import { createStore, applyMiddleware, compose } from 'redux'
 import thunkMiddleware from 'redux-thunk'
 
 import rootReducer from '../reducers'
 
-const hoodie = new Hoodie({
-  url: '',
-  PouchDB
-})
-
-setupCryptoStore(hoodie)
-
 // Create Redux-Store with Hoodie
 const configureStore = preloadedState => {
   const middleware = applyMiddleware(
     thunkMiddleware.withExtraArgument({
-      hoodie,
+      hoodie: window.hoodie,
       handlers: [], // will contain handlers, that should stop listening on sign out
       circuit: null // will be set on login
     })
@@ -42,7 +32,6 @@ const configureStore = preloadedState => {
         store.replaceReducer(rootReducer)
       })
     }
-    window.devHoodie = hoodie
     window.devStore = store
   }
 
