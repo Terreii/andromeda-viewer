@@ -1,5 +1,7 @@
 // Everything for the viewer account
 
+import { v4 } from 'uuid'
+
 export function didSignIn (did, isUnlocked, username = '') {
   const isLoggedIn = Boolean(did)
   return {
@@ -35,12 +37,15 @@ export function saveAvatar (name, grid) {
 
     const avatarIdentifier = `${name.getFullName()}@${grid.get('name')}`
     if (getState().account.get('savedAvatars').some(avatar => {
-      return avatar.get('_id').endsWith(avatarIdentifier)
+      return avatar.get('avatarIdentifier') === avatarIdentifier
     })) {
       dispatch({
         type: 'AvatarNotAdded'
       })
+      return
     }
+
+    const dataSaveId = getState().account.get('avatarDataSaveId')
 
     dispatch({
       type: 'SavingAvatar',
@@ -48,7 +53,9 @@ export function saveAvatar (name, grid) {
     })
 
     hoodie.store.add({
-      _id: 'avatars/' + avatarIdentifier,
+      _id: 'avatars/' + v4(),
+      dataSaveId,
+      avatarIdentifier,
       name: name.getFullName(),
       grid: grid.name
     })
@@ -111,20 +118,21 @@ export function saveGrid (name, loginURL) {
   return (dispatch, getState, { hoodie }) => {
     if (getState().account.get('savedGrids').some(value => value.get('name') === name)) return
 
+    const gridInfo = {
+      _id: 'grids/' + v4(),
+      name,
+      loginURL
+    }
+
     if (!getState().account.getIn(['viewerAccount', 'loggedIn'])) {
       dispatch({
         type: 'GridAdded',
-        name,
-        loginURL
+        grid: gridInfo
       })
       return Promise.resolve()
     }
 
-    hoodie.store.add({
-      _id: 'grids/' + name,
-      name,
-      loginURL
-    })
+    hoodie.store.add(gridInfo)
   }
 }
 

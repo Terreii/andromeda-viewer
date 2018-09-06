@@ -5,6 +5,7 @@ function getDefault () {
     avatarName: '',
     loggedIn: false,
     avatarIdentifier: '',
+    avatarDataSaveId: '',
     sync: false,
     unlocked: false,
     agentId: '',
@@ -41,6 +42,7 @@ export default function accountReducer (state = getDefault(), action) {
         avatarName: action.name,
         loggedIn: true,
         avatarIdentifier: action.avatarIdentifier,
+        avatarDataSaveId: action.dataSaveId,
         agentId: action.uuid
       })
 
@@ -146,6 +148,7 @@ export default function accountReducer (state = getDefault(), action) {
         avatarName: '',
         loggedIn: false,
         avatarIdentifier: '',
+        avatarDataSaveId: '',
         sync: false,
         agentId: ''
       })

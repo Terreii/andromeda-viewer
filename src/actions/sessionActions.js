@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+import { v4 } from 'uuid'
 
 import { viewerName, viewerVersion, viewerPlatform } from '../viewerInfo'
 import AvatarName from '../avatarName'
@@ -56,12 +57,26 @@ export function login (firstName, lastName, password, grid) {
 
     const avatarName = new AvatarName({ first: body.first_name, last: body.last_name })
     const avatarIdentifier = `${avatarName.getFullName()}@${grid.name}`
-    const localChatHistory = await dispatch(getLocalChatHistory(avatarIdentifier))
+
+    const dataSaveId = getState().account.get('savedAvatars').reduce((last, avatar) => {
+      if (last.length > 0) return last
+
+      if (avatar.get('avatarIdentifier') === avatarIdentifier) {
+        return avatar.get('dataSaveId')
+      } else {
+        return last
+      }
+    }, '')
+
+    const localChatHistory = dataSaveId.length > 0
+      ? await dispatch(getLocalChatHistory(dataSaveId))
+      : []
 
     dispatch({
       type: 'didLogin',
       name: avatarName,
       avatarIdentifier,
+      dataSaveId: dataSaveId.length > 0 ? dataSaveId : v4(),
       grid,
       uuid: body.agent_id,
       buddyList: body['buddy-list'],

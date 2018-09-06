@@ -73,9 +73,9 @@ export function sendInstantMessage (text, to, id) {
         ]
       }, true)
 
-      const avatarName = activeState.account.get('avatarName')
+      const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
       const msg = {
-        _id: `${avatarName}/imChats/${id}/${time.toJSON()}`,
+        _id: `${avatarDataSaveId}/imChats/${id}/${time.toJSON()}`,
         chatUUID: id,
         sessionID,
         fromId: agentID,
@@ -166,14 +166,14 @@ export function receiveIM (message) {
 }
 
 // Dispatches chat (and IM) messages.
-// They will be saved and synced under the avatar name.
+// They will be saved and synced under the avatarDataSaveId.
 function dispatchChatAction (name, msg, id) {
   return async (dispatch, getState, { hoodie }) => {
     const activeState = getState()
 
     if (shouldSaveChat(activeState)) {
       // Save messages. They will also be synced!
-      msg._id = activeState.account.get('avatarIdentifier') + '/' + id
+      msg._id = activeState.account.get('avatarDataSaveId') + '/' + id
 
       const doc = await hoodie.store.add(msg)
       dispatch({
@@ -196,9 +196,9 @@ function dispatchChatAction (name, msg, id) {
  *
  */
 
-export function getLocalChatHistory (avatarIdentifier) {
+export function getLocalChatHistory (avatarDataSaveId) {
   return (dispatch, getState, { hoodie }) => {
-    return hoodie.store.withIdPrefix(`${avatarIdentifier}/localchat/`).findAll()
+    return hoodie.store.withIdPrefix(`${avatarDataSaveId}/localchat/`).findAll()
   }
 }
 
@@ -243,9 +243,9 @@ function createNewIMChat (dialog, chatUUID, target, name) {
 
     // If the user is logged in with a viewer-account, then save the IMChat.
     if (hasChat || !shouldSaveChat(activeState)) return
-    const avatarIdentifier = activeState.account.get('avatarIdentifier')
+    const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
     const doc = {
-      _id: `${avatarIdentifier}/imChatsInfos/${chatUUID}`,
+      _id: `${avatarDataSaveId}/imChatsInfos/${chatUUID}`,
       chatType: type,
       chatUUID,
       target,
@@ -262,8 +262,8 @@ export function loadIMChats () {
     // Only load the history if the user is logged into a viewer-account.
     if (!activeState.account.getIn(['viewerAccount', 'loggedIn'])) return
 
-    const avatarIdentifier = activeState.account.get('avatarIdentifier')
-    hoodie.store.withIdPrefix(`${avatarIdentifier}/imChatsInfos/`).findAll().then(result => {
+    const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
+    hoodie.store.withIdPrefix(`${avatarDataSaveId}/imChatsInfos/`).findAll().then(result => {
       dispatch({
         type: 'IMChatInfosLoaded',
         chats: result
@@ -279,8 +279,8 @@ export function getIMHistory (chatUUID) {
       type: 'IMHistoryStartLoading',
       chatUUID
     })
-    const avatarIdentifier = getState().account.get('avatarIdentifier')
-    hoodie.store.withIdPrefix(`${avatarIdentifier}/imChats/${chatUUID}`).findAll().catch(err => {
+    const avatarDataSaveId = getState().account.get('avatarDataSaveId')
+    hoodie.store.withIdPrefix(`${avatarDataSaveId}/imChats/${chatUUID}`).findAll().catch(err => {
       if (err.status === 404) {
         return []
       }
