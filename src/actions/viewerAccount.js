@@ -52,8 +52,7 @@ export function saveAvatar (name, grid) {
       name
     })
 
-    hoodie.store.add({
-      _id: 'avatars/' + v4(),
+    hoodie.cryptoStore.withIdPrefix('avatars/').add({
       dataSaveId,
       avatarIdentifier,
       name: name.getFullName(),
@@ -72,7 +71,7 @@ export function loadSavedAvatars () {
 
     if (account.get('savedAvatarsLoaded')) return
 
-    const avatarsStore = extra.hoodie.store.withIdPrefix('avatars/')
+    const avatarsStore = extra.hoodie.cryptoStore.withIdPrefix('avatars/')
 
     const changeHandler = (eventName, doc) => {
       dispatch(avatarsDidChange(eventName, doc))
@@ -132,7 +131,7 @@ export function saveGrid (name, loginURL) {
       return Promise.resolve()
     }
 
-    hoodie.store.add(gridInfo)
+    hoodie.cryptoStore.add(gridInfo)
   }
 }
 
@@ -146,7 +145,7 @@ export function loadSavedGrids () {
 
     if (account.get('savedGridsLoaded')) return
 
-    const gridsStore = extra.hoodie.store.withIdPrefix('grids/')
+    const gridsStore = extra.hoodie.cryptoStore.withIdPrefix('grids/')
 
     const changeHandler = (change, doc) => {
       dispatch(gridsDidChange(change, doc))

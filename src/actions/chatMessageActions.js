@@ -98,7 +98,7 @@ export function sendInstantMessage (text, to, id) {
       }
 
       if (shouldSaveChat(activeState)) {
-        await hoodie.store.add(msg)
+        await hoodie.cryptoStore.add(msg)
       }
       dispatch(actionData)
     } catch (e) {
@@ -175,7 +175,7 @@ function dispatchChatAction (name, msg, id) {
       // Save messages. They will also be synced!
       msg._id = activeState.account.get('avatarDataSaveId') + '/' + id
 
-      const doc = await hoodie.store.add(msg)
+      const doc = await hoodie.cryptoStore.add(msg)
       dispatch({
         type: name,
         msg: doc
@@ -198,7 +198,7 @@ function dispatchChatAction (name, msg, id) {
 
 export function getLocalChatHistory (avatarDataSaveId) {
   return (dispatch, getState, { hoodie }) => {
-    return hoodie.store.withIdPrefix(`${avatarDataSaveId}/localchat/`).findAll()
+    return hoodie.cryptoStore.withIdPrefix(`${avatarDataSaveId}/localchat/`).findAll()
   }
 }
 
@@ -251,7 +251,7 @@ function createNewIMChat (dialog, chatUUID, target, name) {
       target,
       name
     }
-    return hoodie.store.findOrAdd(doc)
+    return hoodie.cryptoStore.findOrAdd(doc)
   }
 }
 
@@ -263,7 +263,7 @@ export function loadIMChats () {
     if (!activeState.account.getIn(['viewerAccount', 'loggedIn'])) return
 
     const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
-    hoodie.store.withIdPrefix(`${avatarDataSaveId}/imChatsInfos/`).findAll().then(result => {
+    hoodie.cryptoStore.withIdPrefix(`${avatarDataSaveId}/imChatsInfos/`).findAll().then(result => {
       dispatch({
         type: 'IMChatInfosLoaded',
         chats: result
@@ -280,18 +280,19 @@ export function getIMHistory (chatUUID) {
       chatUUID
     })
     const avatarDataSaveId = getState().account.get('avatarDataSaveId')
-    hoodie.store.withIdPrefix(`${avatarDataSaveId}/imChats/${chatUUID}`).findAll().catch(err => {
-      if (err.status === 404) {
-        return []
-      }
-      throw err
-    }).then(docs => {
-      dispatch({
-        type: 'IMHistoryLoaded',
-        chatUUID,
-        messages: docs
+    hoodie.cryptoStore.withIdPrefix(`${avatarDataSaveId}/imChats/${chatUUID}`)
+      .findAll().catch(err => {
+        if (err.status === 404) {
+          return []
+        }
+        throw err
+      }).then(docs => {
+        dispatch({
+          type: 'IMHistoryLoaded',
+          chatUUID,
+          messages: docs
+        })
       })
-    })
   }
 }
 
