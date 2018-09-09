@@ -19,7 +19,7 @@ test('renders different with isSignUp', () => {
   const signIn = shallow(<SignInPopup onCancel={() => {}} onSend={() => {}} />)
 
   expect(signUp.find('Popup').prop('title')).toBe('sign up')
-  expect(signUp.find('input').length).toBe(3)
+  expect(signUp.find('input').length).toBe(5)
 
   expect(signIn.find('Popup').prop('title')).toBe('sign in')
   expect(signIn.find('input[autoComplete="new-password"]').first().prop('style')).toEqual({
@@ -40,10 +40,11 @@ test('click actions', () => {
   let sendCallCount = 0
   let shouldCallSend = false
 
-  const onSend = (username, password, type, ...rest) => {
+  const onSend = (username, password, cryptoPassword, type, ...rest) => {
     expect(shouldCallSend).toBe(true)
     expect(username).toBe('testery.mactestface@example.com')
     expect(password).toBe('secret')
+    expect(cryptoPassword).toBe('encrypted')
     expect(rest.length).toBe(0)
 
     sendCallCount += 1
@@ -89,20 +90,22 @@ test('click actions', () => {
     popup.find('button').last().simulate('click')
 
     const passwordInputs = popup.find('input[type="password"]')
-    const addPassword = (aInput, key) => {
+    const addPassword = (aInput, key, password) => {
       aInput.simulate('change', {
         target: {
-          value: 'secret',
+          value: password,
           dataset: {
             key
           }
         }
       })
     }
-    addPassword(passwordInputs.first(), 'password')
+    addPassword(passwordInputs.first(), 'password', 'secret')
+    addPassword(passwordInputs.at(2), 'cryptoPassword', 'encrypted')
     if (isSignUp) {
       popup.find('button').last().simulate('click')
-      addPassword(passwordInputs.last(), 'password2')
+      addPassword(passwordInputs.at(1), 'password2', 'secret')
+      addPassword(passwordInputs.at(3), 'cryptoPassword2', 'encrypted')
     }
 
     shouldCallSend = true
