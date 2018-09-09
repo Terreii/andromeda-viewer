@@ -197,7 +197,7 @@ export function isSignedIn () {
   }
 }
 
-export function unlock (password) {
+export function unlock (cryptoPassword) {
   return async (dispatch, getState, { hoodie }) => {
     const activeState = getState()
     if (activeState.account.get('unlocked')) {
@@ -209,7 +209,7 @@ export function unlock (password) {
     }
 
     await hoodie.store.sync()
-    await hoodie.cryptoStore.setPassword(password)
+    await hoodie.cryptoStore.setPassword(cryptoPassword)
 
     dispatch({
       type: 'ViewerAccountUnlocked'
@@ -220,13 +220,13 @@ export function unlock (password) {
   }
 }
 
-export function signIn (username, password) {
+export function signIn (username, password, cryptoPassword) {
   return async (dispatch, getState, { hoodie }) => {
     dispatch(closePopup())
     try {
       const accountProperties = await hoodie.account.signIn({ username, password })
       await hoodie.store.sync()
-      await hoodie.cryptoStore.setPassword(password)
+      await hoodie.cryptoStore.setPassword(cryptoPassword)
       dispatch(didSignIn(true, true, accountProperties.username))
 
       await dispatch(loadSavedGrids())
@@ -238,11 +238,11 @@ export function signIn (username, password) {
   }
 }
 
-export function signUp (username, password) {
+export function signUp (username, password, cryptoPassword) {
   return async (dispatch, getState, { hoodie }) => {
     dispatch(closePopup())
     await hoodie.account.signUp({ username, password })
-    dispatch(signIn(username, password))
+    dispatch(signIn(username, password, cryptoPassword))
   }
 }
 

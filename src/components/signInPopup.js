@@ -1,6 +1,12 @@
 import React from 'react'
+import styled from 'styled-components'
 
 import Popup from './popup'
+
+const InputContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+`
 
 export default class SignInPopup extends React.Component {
   constructor () {
@@ -9,7 +15,9 @@ export default class SignInPopup extends React.Component {
       username: '',
       usernameValid: false,
       password: '',
-      password2: ''
+      password2: '',
+      cryptoPassword: '',
+      cryptoPassword2: ''
     }
     this._boundInputChange = this._inputChange.bind(this)
     this._boundSend = this._send.bind(this)
@@ -27,21 +35,25 @@ export default class SignInPopup extends React.Component {
   _send (event) {
     const username = this.state.username
     const password = this.state.password
+    const cryptoPassword = this.state.cryptoPassword
     if (username.length === 0 || password.length === 0 || !this.state.usernameValid) {
       return
     }
-    if (this.props.isSignUp && password !== this.state.password2) {
+    if (this.props.isSignUp && (
+      password !== this.state.password2 ||
+      cryptoPassword !== this.state.cryptoPassword2
+    )) {
       return
     }
     const type = this.props.isSignUp ? 'signUp' : 'signIn'
-    this.props.onSend(username, password, type)
+    this.props.onSend(username, password, cryptoPassword, type)
   }
 
   render () {
     const title = this.props.isSignUp ? 'sign up' : 'sign in'
     return <Popup title={title} onClose={this.props.onCancel}>
       <div>
-        <div>
+        <InputContainer>
           <input
             type='email'
             value={this.state.username}
@@ -67,7 +79,22 @@ export default class SignInPopup extends React.Component {
             onChange={this._boundInputChange}
             placeholder='repeat password'
           />
-        </div>
+          <input
+            type='password'
+            value={this.state.cryptoPassword}
+            data-key='cryptoPassword'
+            onChange={this._boundInputChange}
+            placeholder='set encryption password'
+          />
+          <input
+            style={{ display: this.props.isSignUp ? '' : 'none' }}
+            type='password'
+            value={this.state.cryptoPassword2}
+            data-key='cryptoPassword2'
+            onChange={this._boundInputChange}
+            placeholder='repeat encryption password'
+          />
+        </InputContainer>
         <div>
           <button onClick={this.props.onCancel}>cancel</button>
           <button onClick={this._boundSend}>
