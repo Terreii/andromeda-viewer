@@ -208,7 +208,7 @@ export function unlock (cryptoPassword) {
       throw new Error('Not signed in!')
     }
 
-    await hoodie.store.sync()
+    await hoodie.store.pull('_design/cryptoStore/salt')
     await hoodie.cryptoStore.setPassword(cryptoPassword)
 
     dispatch({
@@ -225,7 +225,7 @@ export function signIn (username, password, cryptoPassword) {
     dispatch(closePopup())
     try {
       const accountProperties = await hoodie.account.signIn({ username, password })
-      await hoodie.store.sync()
+      await hoodie.store.pull('_design/cryptoStore/salt')
       await hoodie.cryptoStore.setPassword(cryptoPassword)
       dispatch(didSignIn(true, true, accountProperties.username))
 
