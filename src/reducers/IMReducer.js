@@ -29,6 +29,7 @@ function IMChat (state = Immutable.Map(), action) {
     case 'IMChatInfosLoaded':
       return state.merge({
         chatUUID: action.chatUUID,
+        saveId: action.saveId,
         type: action.chatType,
         withId: action.target,
         didLoadHistory: state.get('didLoadHistory') || false,

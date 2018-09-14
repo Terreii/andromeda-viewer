@@ -45,7 +45,7 @@ export default class ChatDialog extends React.Component {
     const isIM = this.props.isIM
     const data = this.props.data
     if (isIM && !data.get('didLoadHistory') && !data.get('isLoadingHistory')) {
-      this.props.loadHistory(data.get('chatUUID'))
+      this.props.loadHistory(data.get('chatUUID'), data.get('saveId'))
     }
   }
 

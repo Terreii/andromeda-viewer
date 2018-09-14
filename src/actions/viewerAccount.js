@@ -1,6 +1,6 @@
 // Everything for the viewer account
 
-import { v4 } from 'uuid'
+import { v4 as uuid } from 'uuid'
 
 export function didSignIn (did, isUnlocked, username = '') {
   const isLoggedIn = Boolean(did)
@@ -118,7 +118,7 @@ export function saveGrid (name, loginURL) {
     if (getState().account.get('savedGrids').some(value => value.get('name') === name)) return
 
     const gridInfo = {
-      _id: 'grids/' + v4(),
+      _id: 'grids/' + uuid(),
       name,
       loginURL
     }
