@@ -1,6 +1,9 @@
 'use strict'
 
 const hoodie = {
+  account: {
+    on: function () {}
+  },
   store: {
     find: function () {
       const error = new Error('not found')
