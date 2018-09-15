@@ -70,11 +70,13 @@ test('renders IM chat', () => {
 
   const imData = Immutable.fromJS({
     chatUUID: 'abc',
+    saveId: 'def',
     messages: []
   })
 
   const loadHistoryData = {
     id: null,
+    saveId: null,
     count: 0
   }
 
@@ -91,8 +93,9 @@ test('renders IM chat', () => {
       sendData.text = text
       sendData.count += 1
     }}
-    loadHistory={id => {
+    loadHistory={(id, saveId) => {
       loadHistoryData.id = id
+      loadHistoryData.saveId = saveId
       loadHistoryData.count += 1
     }}
   />)
@@ -112,5 +115,6 @@ test('renders IM chat', () => {
   expect(sendData.count).toBe(1)
 
   expect(loadHistoryData.id).toBe('abc')
+  expect(loadHistoryData.saveId).toBe('def')
   expect(loadHistoryData.count).toBe(1)
 })

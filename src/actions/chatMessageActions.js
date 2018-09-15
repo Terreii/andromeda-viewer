@@ -3,6 +3,7 @@
  */
 
 import { getValueOf, getStringValueOf } from '../network/msgGetters'
+import { v4 as uuid } from 'uuid'
 
 /*
  *
@@ -73,9 +74,10 @@ export function sendInstantMessage (text, to, id) {
         ]
       }, true)
 
-      const avatarName = activeState.account.get('avatarName')
+      const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
+      const chatSaveId = activeState.IMs.getIn([id, 'saveId'])
       const msg = {
-        _id: `${avatarName}/imChats/${id}/${time.toJSON()}`,
+        _id: `${avatarDataSaveId}/imChats/${chatSaveId}/${time.toJSON()}`,
         chatUUID: id,
         sessionID,
         fromId: agentID,
@@ -98,7 +100,7 @@ export function sendInstantMessage (text, to, id) {
       }
 
       if (shouldSaveChat(activeState)) {
-        await hoodie.store.add(msg)
+        await hoodie.cryptoStore.add(msg)
       }
       dispatch(actionData)
     } catch (e) {
@@ -130,7 +132,7 @@ export function receiveChatFromSimulator (msg) {
 }
 
 export function receiveIM (message) {
-  return async dispatch => {
+  return async (dispatch, getState) => {
     const toAgentID = getValueOf(message, 'MessageBlock', 'ToAgentID')
     const fromId = getValueOf(message, 'AgentData', 'AgentID')
     const time = getValueOf(message, 'MessageBlock', 'Timestamp')
@@ -157,25 +159,32 @@ export function receiveIM (message) {
     // If it is a group chat, toAgentID is the Group-UUID.
     IMmsg.chatUUID = IMmsg.fromGroup ? IMmsg.toAgentID : IMmsg.id
 
-    // Start a new IMChat.
-    await dispatch(createNewIMChat(dialog, IMmsg.chatUUID, fromId, fromAgentName))
+    const imChats = getState().IMs
+    const hasThisChat = imChats.has(IMmsg.chatUUID)
 
-    const id = `imChats/${IMmsg.chatUUID}/${new Date(IMmsg.time).toJSON()}`
+    if (!hasThisChat) {
+      // Start a new IMChat.
+      await dispatch(createNewIMChat(dialog, IMmsg.chatUUID, fromId, fromAgentName))
+    }
+
+    const chatSaveId = getState().IMs.getIn([IMmsg.chatUUID, 'saveId'])
+
+    const id = `imChats/${chatSaveId}/${new Date(IMmsg.time).toJSON()}`
     dispatch(dispatchChatAction(message.name, IMmsg, id))
   }
 }
 
 // Dispatches chat (and IM) messages.
-// They will be saved and synced under the avatar name.
+// They will be saved and synced under the avatarDataSaveId.
 function dispatchChatAction (name, msg, id) {
   return async (dispatch, getState, { hoodie }) => {
     const activeState = getState()
 
     if (shouldSaveChat(activeState)) {
       // Save messages. They will also be synced!
-      msg._id = activeState.account.get('avatarIdentifier') + '/' + id
+      msg._id = activeState.account.get('avatarDataSaveId') + '/' + id
 
-      const doc = await hoodie.store.add(msg)
+      const doc = await hoodie.cryptoStore.add(msg)
       dispatch({
         type: name,
         msg: doc
@@ -196,9 +205,9 @@ function dispatchChatAction (name, msg, id) {
  *
  */
 
-export function getLocalChatHistory (avatarIdentifier) {
+export function getLocalChatHistory (avatarDataSaveId) {
   return (dispatch, getState, { hoodie }) => {
-    return hoodie.store.withIdPrefix(`${avatarIdentifier}/localchat/`).findAll()
+    return hoodie.cryptoStore.withIdPrefix(`${avatarDataSaveId}/localchat/`).findAll()
   }
 }
 
@@ -233,25 +242,29 @@ function createNewIMChat (dialog, chatUUID, target, name) {
     // Stop if the chat already exists.
     if (hasChat && activeState.IMs.getIn([chatUUID, 'active'])) return
 
+    const saveId = uuid()
+
     dispatch({
       type: 'CreateNewIMChat',
       chatType: type,
       chatUUID,
+      saveId,
       target,
       name
     })
 
     // If the user is logged in with a viewer-account, then save the IMChat.
     if (hasChat || !shouldSaveChat(activeState)) return
-    const avatarIdentifier = activeState.account.get('avatarIdentifier')
+    const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
     const doc = {
-      _id: `${avatarIdentifier}/imChatsInfos/${chatUUID}`,
+      _id: `${avatarDataSaveId}/imChatsInfos/${saveId}`,
       chatType: type,
       chatUUID,
+      saveId,
       target,
       name
     }
-    return hoodie.store.findOrAdd(doc)
+    return hoodie.cryptoStore.findOrAdd(doc)
   }
 }
 
@@ -262,8 +275,8 @@ export function loadIMChats () {
     // Only load the history if the user is logged into a viewer-account.
     if (!activeState.account.getIn(['viewerAccount', 'loggedIn'])) return
 
-    const avatarIdentifier = activeState.account.get('avatarIdentifier')
-    hoodie.store.withIdPrefix(`${avatarIdentifier}/imChatsInfos/`).findAll().then(result => {
+    const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
+    hoodie.cryptoStore.withIdPrefix(`${avatarDataSaveId}/imChatsInfos/`).findAll().then(result => {
       dispatch({
         type: 'IMChatInfosLoaded',
         chats: result
@@ -273,25 +286,29 @@ export function loadIMChats () {
 }
 
 // Loads messages of an IM Chat.
-export function getIMHistory (chatUUID) {
+export function getIMHistory (chatUUID, chatSaveId) {
   return (dispatch, getState, { hoodie }) => {
     dispatch({
       type: 'IMHistoryStartLoading',
-      chatUUID
+      chatUUID,
+      saveId: chatSaveId
     })
-    const avatarIdentifier = getState().account.get('avatarIdentifier')
-    hoodie.store.withIdPrefix(`${avatarIdentifier}/imChats/${chatUUID}`).findAll().catch(err => {
-      if (err.status === 404) {
-        return []
-      }
-      throw err
-    }).then(docs => {
-      dispatch({
-        type: 'IMHistoryLoaded',
-        chatUUID,
-        messages: docs
+
+    const avatarDataSaveId = getState().account.get('avatarDataSaveId')
+    hoodie.cryptoStore.withIdPrefix(`${avatarDataSaveId}/imChats/${chatSaveId}`)
+      .findAll().catch(err => {
+        if (err.status === 404) {
+          return []
+        }
+        throw err
+      }).then(docs => {
+        dispatch({
+          type: 'IMHistoryLoaded',
+          chatUUID,
+          saveId: chatSaveId,
+          messages: docs
+        })
       })
-    })
   }
 }
 

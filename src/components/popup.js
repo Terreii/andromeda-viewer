@@ -43,15 +43,25 @@ const Content = styled.div`
 `
 
 export default function Popup (props) {
+  const showCloseIcon = typeof props.onClose === 'function'
+
+  const closeIconInHeader = showCloseIcon
+    ? <a
+      style={{ display: showCloseIcon ? '' : 'none' }}
+      href='#close_popup'
+      onClick={event => {
+        event.preventDefault()
+        props.onClose()
+      }}
+    >
+      <img src={closeIcon} alt='close popup' height='32' width='32' />
+    </a>
+    : <span />
+
   return <Background>
     <Border>
       <Header>
-        <a href='#close_popup' onClick={event => {
-          event.preventDefault()
-          props.onClose()
-        }}>
-          <img src={closeIcon} alt='close popup' height='32' width='32' />
-        </a>
+        {closeIconInHeader}
         <PopupTitle>{props.title}</PopupTitle>
       </Header>
       <Content>
