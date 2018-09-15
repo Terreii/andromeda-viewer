@@ -1,5 +1,5 @@
 /*
- * Reduces all IM-Chats and IM-Messanges
+ * Reduces all IM-Chats and IM-Messages
  */
 
 import Immutable from 'immutable'
