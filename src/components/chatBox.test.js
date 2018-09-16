@@ -31,6 +31,7 @@ test('renders without crashing', () => {
   const localChat = Immutable.fromJS([])
 
   shallow(<ChatBox
+    selfName={new AvatarName('self Resident')}
     names={names}
     IMs={im}
     friends={friends}

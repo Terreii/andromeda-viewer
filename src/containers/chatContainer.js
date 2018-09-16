@@ -12,6 +12,7 @@ import ChatBox from '../components/chatBox'
 
 const mapStateToProps = state => {
   return {
+    selfName: state.account.get('avatarName'),
     localChat: state.localChat,
     IMs: state.IMs,
     names: state.names,

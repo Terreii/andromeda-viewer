@@ -6,6 +6,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
+import Helmet from 'react-helmet'
 
 import ChatContainer from './chatContainer'
 import LoginForm from '../components/login/'
@@ -27,6 +28,8 @@ import {
   saveGrid
 } from '../actions/viewerAccount'
 import { login } from '../actions/sessionActions'
+
+import { viewerName } from '../viewerInfo'
 
 const AppContainer = styled.div`
   display: flex;
@@ -85,6 +88,10 @@ class App extends React.Component {
       />
 
     return <AppContainer>
+      <Helmet
+        titleTemplate={`%s - ${viewerName}`}
+        defaultTitle={viewerName}
+      />
       <TopMenuBar messageOfTheDay={isLoggedIn ? this.props.messageOfTheDay : null} />
       {mainSection}
       {this.getPopup()}
