@@ -2,7 +2,7 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import Immutable from 'immutable'
 
-import Login from './login'
+import Login from './index'
 
 test('renders without crashing', () => {
   const grids = Immutable.fromJS([

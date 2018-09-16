@@ -1,8 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import AvatarName from '../avatarName'
-import { viewerName } from '../viewerInfo'
+import AvatarName from '../../avatarName'
+import { viewerName } from '../../viewerInfo'
 
 const Main = styled.div`
   background-color: rgb(77, 80, 85);
@@ -60,6 +60,7 @@ export default class LoginForm extends React.Component {
       gridIndex: 0,
       isLoggingIn: false
     }
+
     this._boundNameChange = this._nameChanged.bind(this)
     this._boundPasswordChange = this._passwordChanged.bind(this)
     this._boundLoginAnonymously = this._loginAnonymously.bind(this)

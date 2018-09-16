@@ -8,7 +8,7 @@ import { connect } from 'react-redux'
 import styled from 'styled-components'
 
 import ChatContainer from './chatContainer'
-import LoginForm from '../components/login'
+import LoginForm from '../components/login/'
 import Popup from '../components/popup'
 import SignInPopup from '../components/signInPopup'
 import SignOutPopup from '../components/signOutPopup'
