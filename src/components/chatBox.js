@@ -6,6 +6,7 @@ import React from 'react'
 import Tabs, { TabPane } from 'rc-tabs'
 import TabContent from 'rc-tabs/lib/TabContent'
 import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar'
+import Helmet from 'react-helmet'
 
 import ChatDialog from './chatDialog'
 import FriendsList from './friendsList'
@@ -34,29 +35,34 @@ export default function ChatBox (props) {
     </TabPane>
   })
 
-  return <Tabs
-    defaultActiveKey='local'
-    renderTabBar={() => <ScrollableInkTabBar />}
-    renderTabContent={() => <TabContent />}
-  >
-    <TabPane tab='Friends' key='friends'>
-      <FriendsList
-        names={names}
-        friends={props.friends}
-        startNewIMChat={props.startNewIMChat}
-        updateRights={props.updateRights}
-      />
-    </TabPane>
+  return <React.Fragment>
+    <Helmet aria-disabled='false'>
+      <title>{props.selfName.getName()}</title>
+    </Helmet>
+    <Tabs
+      defaultActiveKey='local'
+      renderTabBar={() => <ScrollableInkTabBar />}
+      renderTabContent={() => <TabContent />}
+    >
+      <TabPane tab='Friends' key='friends'>
+        <FriendsList
+          names={names}
+          friends={props.friends}
+          startNewIMChat={props.startNewIMChat}
+          updateRights={props.updateRights}
+        />
+      </TabPane>
 
-    <TabPane tab='Local' key='local'>
-      <ChatDialog
-        data={props.localChat}
-        names={names}
-        sendTo={props.sendLocalChatMessage}
-      />
-    </TabPane>
+      <TabPane tab='Local' key='local'>
+        <ChatDialog
+          data={props.localChat}
+          names={names}
+          sendTo={props.sendLocalChatMessage}
+        />
+      </TabPane>
 
-    {panels}
-  </Tabs>
+      {panels}
+    </Tabs>
+  </React.Fragment>
 }
 ChatBox.displayName = 'ChatBox'

@@ -46,9 +46,6 @@ const SavedAvatarLogin = styled.div`
   border-radius: .3em;
 `
 
-// Show the name of the Viewer
-document.title = viewerName
-
 export default class LoginForm extends React.Component {
   constructor () {
     super()
