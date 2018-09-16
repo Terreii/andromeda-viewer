@@ -56,7 +56,7 @@ export function saveAvatar (name, grid) {
       dataSaveId,
       avatarIdentifier,
       name: name.getFullName(),
-      grid: grid.name
+      grid: grid.get('name')
     })
   }
 }

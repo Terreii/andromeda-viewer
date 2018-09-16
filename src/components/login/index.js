@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 
+import AvatarLogin from './avatarLogin'
 import AvatarName from '../../avatarName'
 import { viewerName } from '../../viewerInfo'
 
@@ -36,16 +37,6 @@ const SavedAvatarsList = styled.div`
   justify-content: center;
 `
 
-const SavedAvatarLogin = styled.div`
-  display: flex;
-  flex-direction: column;
-  padding: .5em;
-  padding-top: 0px;
-  margin: .3em;
-  border: 1px solid rgb(90, 95, 105);
-  border-radius: .3em;
-`
-
 // Show the name of the Viewer
 document.title = viewerName
 
@@ -64,6 +55,7 @@ export default class LoginForm extends React.Component {
     this._boundNameChange = this._nameChanged.bind(this)
     this._boundPasswordChange = this._passwordChanged.bind(this)
     this._boundLoginAnonymously = this._loginAnonymously.bind(this)
+    this._boundLoginWithSavedAvatar = this._loginWithSavedAvatar.bind(this)
     this._boundDetectReturn = this._detectReturn.bind(this)
     this._boundGridChange = this._gridChange.bind(this)
     this._boundAddGrid = this._addGrid.bind(this)
@@ -154,9 +146,14 @@ export default class LoginForm extends React.Component {
     const grid = this.props.grids.find(aGrid => aGrid.get('name') === gridName)
     if (grid == null) return
 
+    this.setState({
+      isLoggingIn: name
+    })
+
     this._login(first, last, password, grid).catch(error => {
       console.error(error)
       this.setState({
+        isLoggingIn: false,
         errorMessage: error.message
       })
     })
@@ -168,27 +165,6 @@ export default class LoginForm extends React.Component {
       url: grid.get('loginURL')
     }
     return this.props.login(firstName, lastName, password, gridData)
-  }
-
-  renderAvatarLogin () {
-    if (this.props.avatars == null) return null
-    return this.props.avatars.map(avatar => {
-      const name = avatar.get('name')
-      const passwordId = 'password' + name
-      const displayName = new AvatarName(name).getName()
-      return <SavedAvatarLogin key={avatar.get('_id')}>
-        <h3>{displayName}</h3>
-        <input type='password' id={passwordId} placeholder='password' />
-        <div>
-          <button onClick={event => {
-            const password = document.getElementById(passwordId).value
-            this._loginWithSavedAvatar(avatar, password)
-          }}>
-            Login
-          </button>
-        </div>
-      </SavedAvatarLogin>
-    })
   }
 
   render () {
@@ -250,7 +226,13 @@ export default class LoginForm extends React.Component {
         />
       </div>
       <SavedAvatarsList>
-        {this.renderAvatarLogin()}
+        {this.props.avatars.map(avatar => <AvatarLogin
+          key={avatar.get('_id')}
+          avatar={avatar}
+          grid={this.props.grids.find(grid => grid.get('name') === avatar.get('grid'))}
+          onLogin={this._boundLoginWithSavedAvatar}
+          isLoggingIn={this.state.isLoggingIn === avatar.get('name')}
+        />)}
       </SavedAvatarsList>
       <ErrorOut show={this.state.errorMessage.length !== 0}>
         {this.state.errorMessage}
