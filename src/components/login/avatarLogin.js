@@ -60,7 +60,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn = false, onLogi
   }
 
   const onKeyUp = event => {
-    if (event.keyCode === 13) {
+    if (event.keyCode === event.DOM_VK_RETURN) {
       onClick(event)
     }
   }

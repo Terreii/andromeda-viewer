@@ -63,7 +63,8 @@ test('login works', () => {
 
   const input = rendered.find('input')
   input.simulate('keyUp', {
-    keyCode: 13
+    keyCode: 13,
+    DOM_VK_RETURN: 13
   })
 
   expect(loginInfo.count).toBe(2)
