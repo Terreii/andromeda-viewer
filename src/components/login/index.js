@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 
+import LoginNewAvatar from './newAvatarLogin'
 import AvatarLogin from './avatarLogin'
 import AvatarName from '../../avatarName'
 import { viewerName } from '../../viewerInfo'
@@ -41,50 +42,13 @@ export default class LoginForm extends React.Component {
   constructor () {
     super()
     this.state = {
-      name: '',
-      password: '',
-      save: false,
       errorMessage: '',
-      gridIndex: 0,
       isLoggingIn: false
     }
 
-    this._boundNameChange = this._nameChanged.bind(this)
-    this._boundPasswordChange = this._passwordChanged.bind(this)
     this._boundLoginAnonymously = this._loginAnonymously.bind(this)
     this._boundLoginWithSavedAvatar = this._loginWithSavedAvatar.bind(this)
-    this._boundDetectReturn = this._detectReturn.bind(this)
-    this._boundGridChange = this._gridChange.bind(this)
     this._boundAddGrid = this._addGrid.bind(this)
-  }
-
-  _nameChanged (event) {
-    const name = event.target.value || ''
-    this.setState({
-      name
-    })
-  }
-
-  _passwordChanged (event) {
-    const password = event.target.value || ''
-    this.setState({
-      password
-    })
-  }
-
-  _detectReturn (event) { // detects if return was pressed (keyCode 13)
-    if (event.type === 'keyup' && (
-      event.which === 13 || event.keyCode === 13)
-    ) {
-      this._loginAnonymously(event)
-    }
-  }
-
-  _gridChange (event) {
-    const nextIndex = +event.target.value || 0
-    this.setState({
-      gridIndex: nextIndex
-    })
   }
 
   _addGrid (event) {
@@ -99,28 +63,30 @@ export default class LoginForm extends React.Component {
   }
 
   // Login with new or an anonym avatar.
-  _loginAnonymously (event) {
-    if (this.state.name.length === 0) {
+  _loginAnonymously (name, password, gridName, save) {
+    if (name.length === 0) {
       this.setState({
         errorMessage: 'Please enter a name'
       })
       return
     }
-    if (this.state.password.length === 0) {
+    if (password.length === 0) {
       this.setState({
         errorMessage: 'Please enter a password'
       })
       return
     }
+
     this.setState({
-      isLoggingIn: true
+      isLoggingIn: name
     })
-    const { first, last } = new AvatarName(this.state.name)
-    const grid = this.props.grids.get(this.state.gridIndex)
+
+    const { first, last } = new AvatarName(name)
+    const grid = this.props.grids.find(grid => grid.get('name') === gridName)
     if (grid == null) return
 
-    this._login(first, last, this.state.password, grid).then(() => {
-      if (this.state.save && this.props.isSignedIn) {
+    this._login(first, last, password, grid).then(() => {
+      if (save && this.props.isSignedIn) {
         this.props.saveAvatar(new AvatarName(first, last), grid)
       }
     }).catch(err => {
@@ -165,10 +131,6 @@ export default class LoginForm extends React.Component {
   }
 
   render () {
-    const grids = this.props.grids.map((grid, index) => {
-      const name = grid.get('name')
-      return <option key={name} value={index}>{name}</option>
-    })
     return <Main>
       <h1>
         {'Login to '}
@@ -176,61 +138,24 @@ export default class LoginForm extends React.Component {
           {viewerName}
         </ViewerNameCapitalizer>
       </h1>
-      <div>
-        <input
-          type='text'
-          id='loginName'
-          placeholder='Avatar Name'
-          autoComplete='username'
-          value={this.state.name}
-          onChange={this._boundNameChange}
-          onKeyUp={this._boundDetectReturn}
-        />
-      </div>
-      <div>
-        <input
-          type='password'
-          id='loginPassword'
-          placeholder='Password'
-          autoComplete='current-password'
-          value={this.state.password}
-          onChange={this._boundPasswordChange}
-          onKeyUp={this._boundDetectReturn}
-        />
-      </div>
-      <div>
-        <select value={this.state.gridIndex} onChange={this._boundGridChange}>
-          {grids}
-        </select>
-      </div>
-      <div>
-        <input
-          id='saveAvatar'
-          type='checkbox'
-          checked={this.state.save}
-          onChange={event => this.setState({
-            save: event.target.checked
-          })}
-        />
-        <label htmlFor='saveAvatar'>Save</label>
-      </div>
-      <div>
-        <input
-          type='button'
-          value={this.state.isLoggingIn ? 'Connecting ...' : 'Login'}
-          onClick={this._boundLoginAnonymously}
-          disabled={this.state.isLoggingIn}
-        />
-      </div>
+
+      <LoginNewAvatar
+        grids={this.props.grids}
+        isSignedIn={this.props.isSignedIn}
+        onLogin={this._boundLoginAnonymously}
+        isLoggingIn={this.state.isLoggingIn}
+      />
+
       <SavedAvatarsList>
         {this.props.avatars.map(avatar => <AvatarLogin
           key={avatar.get('_id')}
           avatar={avatar}
           grid={this.props.grids.find(grid => grid.get('name') === avatar.get('grid'))}
           onLogin={this._boundLoginWithSavedAvatar}
-          isLoggingIn={this.state.isLoggingIn === avatar.get('name')}
+          isLoggingIn={this.state.isLoggingIn}
         />)}
       </SavedAvatarsList>
+
       <ErrorOut show={this.state.errorMessage.length !== 0}>
         {this.state.errorMessage}
       </ErrorOut>
