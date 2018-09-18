@@ -1,10 +1,10 @@
 import crypto from 'crypto'
-import { v4 } from 'uuid'
+import { v4 as uuid } from 'uuid'
 
 import { viewerName, viewerVersion, viewerPlatform } from '../viewerInfo'
-import AvatarName from '../avatarName'
 import { getValueOf, getStringValueOf } from '../network/msgGetters'
 
+import { saveAvatar } from './viewerAccount'
 import { getLocalChatHistory, loadIMChats } from './chatMessageActions'
 import { getAllFriendsDisplayNames } from './friendsActions'
 import { fetchSeedCapabilities } from './llsd'
@@ -13,9 +13,19 @@ import connectCircuit from './connectCircuit'
 // Actions for the session of an avatar
 
 // Logon the user. It will post using fetch to the server.
-export function login (firstName, lastName, password, grid) {
+export function login (avatarName, password, grid, save, addAvatar) {
   return async (dispatch, getState, extra) => {
     if (getState().session.get('loggedIn')) throw new Error('There is already an avatar logged in!')
+
+    const avatarIdentifier = `${avatarName.getFullName()}@${grid.name}`
+
+    dispatch({
+      type: 'startLogin',
+      name: avatarName,
+      grid,
+      avatarIdentifier,
+      sync: save
+    })
 
     const hash = crypto.createHash('md5')
     hash.update(password, 'ascii')
@@ -23,8 +33,8 @@ export function login (firstName, lastName, password, grid) {
 
     const loginData = {
       grid,
-      first: firstName,
-      last: lastName,
+      first: avatarName.first,
+      last: avatarName.last,
       passwd: finalPassword,
       start: 'last',
       channel: viewerName,
@@ -49,34 +59,36 @@ export function login (firstName, lastName, password, grid) {
     })
     const body = await response.json()
 
-    if (body.login !== 'true') throw body
+    if (body.login !== 'true') {
+      dispatch({ type: 'loginDidFail' })
+      throw new Error(body.message)
+    }
 
     // Set the active circuit
     extra.circuit = connectToSim(body, await circuit)
     dispatch(connectCircuit()) // Connect message parsing with circuit.
 
-    const avatarName = new AvatarName({ first: body.first_name, last: body.last_name })
-    const avatarIdentifier = `${avatarName.getFullName()}@${grid.name}`
+    const avatarData = save && addAvatar
+      ? await dispatch(saveAvatar(avatarName, grid.name)) // adding new avatars
+      : getState().account.get('savedAvatars').reduce((last, avatar) => { // for saved avatars
+        if (last != null) return last
 
-    const dataSaveId = getState().account.get('savedAvatars').reduce((last, avatar) => {
-      if (last.length > 0) return last
+        if (avatar.get('avatarIdentifier') === avatarIdentifier) {
+          return avatar.toJS()
+        } else {
+          return last
+        }
+      }, null)
 
-      if (avatar.get('avatarIdentifier') === avatarIdentifier) {
-        return avatar.get('dataSaveId')
-      } else {
-        return last
-      }
-    }, '')
-
-    const localChatHistory = dataSaveId.length > 0
-      ? await dispatch(getLocalChatHistory(dataSaveId))
+    const localChatHistory = !addAvatar && save
+      ? await dispatch(getLocalChatHistory(avatarData.dataSaveId))
       : []
 
     dispatch({
       type: 'didLogin',
       name: avatarName,
-      avatarIdentifier,
-      dataSaveId: dataSaveId.length > 0 ? dataSaveId : v4(),
+      avatarIdentifier: avatarData != null ? avatarData.avatarIdentifier : avatarIdentifier,
+      dataSaveId: avatarData != null ? avatarData.dataSaveId : uuid(),
       grid,
       uuid: body.agent_id,
       buddyList: body['buddy-list'],

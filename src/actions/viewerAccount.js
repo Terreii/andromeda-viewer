@@ -33,30 +33,21 @@ export function closePopup () {
 
 export function saveAvatar (name, grid) {
   return (dispatch, getState, { hoodie }) => {
-    if (!getState().account.getIn(['viewerAccount', 'loggedIn'])) return
+    const gridName = typeof grid === 'string' ? grid : grid.get('name')
 
-    const avatarIdentifier = `${name.getFullName()}@${grid.get('name')}`
+    const avatarIdentifier = `${name.getFullName()}@${gridName}`
+
     if (getState().account.get('savedAvatars').some(avatar => {
       return avatar.get('avatarIdentifier') === avatarIdentifier
     })) {
-      dispatch({
-        type: 'AvatarNotAdded'
-      })
-      return
+      return Promise.reject(new Error('Avatar already exist!'))
     }
 
-    const dataSaveId = getState().account.get('avatarDataSaveId')
-
-    dispatch({
-      type: 'SavingAvatar',
-      name
-    })
-
-    hoodie.cryptoStore.withIdPrefix('avatars/').add({
-      dataSaveId,
+    return hoodie.cryptoStore.withIdPrefix('avatars/').add({
+      dataSaveId: uuid(),
       avatarIdentifier,
       name: name.getFullName(),
-      grid: grid.get('name')
+      grid: gridName
     })
   }
 }

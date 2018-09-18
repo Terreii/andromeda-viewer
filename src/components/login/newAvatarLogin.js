@@ -94,7 +94,11 @@ export default class NewAvatarLogin extends React.Component {
   }
 
   componentWillReceiveProps (nextProps) {
-    if (this.props.isSignedIn !== nextProps.isSignedIn) {
+    if (
+      this.props.isSignedIn !== nextProps.isSignedIn &&
+      this.state.name.length === 0 &&
+      this.state.password.length === 0
+    ) {
       this.setState({
         save: nextProps.isSignedIn
       })
@@ -121,7 +125,7 @@ export default class NewAvatarLogin extends React.Component {
     const name = this.state.name
     const password = this.state.password
     const grid = this.state.grid
-    const save = this.state.save
+    const save = this.state.save && this.props.isSignedIn
 
     this.props.onLogin(name, password, grid, save)
   }

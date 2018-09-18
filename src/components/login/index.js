@@ -64,70 +64,60 @@ export default class LoginForm extends React.Component {
 
   // Login with new or an anonym avatar.
   _loginAnonymously (name, password, gridName, save) {
-    if (name.length === 0) {
-      this.setState({
-        errorMessage: 'Please enter a name'
-      })
-      return
-    }
-    if (password.length === 0) {
-      this.setState({
-        errorMessage: 'Please enter a password'
-      })
-      return
-    }
-
-    this.setState({
-      isLoggingIn: name
-    })
-
-    const { first, last } = new AvatarName(name)
-    const grid = this.props.grids.find(grid => grid.get('name') === gridName)
-    if (grid == null) return
-
-    this._login(first, last, password, grid).then(() => {
-      if (save && this.props.isSignedIn) {
-        this.props.saveAvatar(new AvatarName(first, last), grid)
-      }
-    }).catch(err => {
-      // Displays the error message from the server
-      console.error(err)
-      this.setState({
-        errorMessage: err.message,
-        isLoggingIn: false
-      })
-    })
+    this._login(name, password, gridName, save, true)
   }
 
   // Login with an already saved avatar.
   _loginWithSavedAvatar (avatar, password) {
-    if (password.length === 0) return
     const name = avatar.get('name')
-    const { first, last } = new AvatarName(name)
-
     const gridName = avatar.get('grid')
-    const grid = this.props.grids.find(aGrid => aGrid.get('name') === gridName)
-    if (grid == null) return
 
-    this.setState({
-      isLoggingIn: name
-    })
-
-    this._login(first, last, password, grid).catch(error => {
-      console.error(error)
-      this.setState({
-        isLoggingIn: false,
-        errorMessage: error.message
-      })
-    })
+    this._login(name, password, gridName, true)
   }
 
-  _login (firstName, lastName, password, grid) {
-    const gridData = {
-      name: grid.get('name'),
-      url: grid.get('loginURL')
+  async _login (name, password, gridName, save, isNew = false) {
+    try {
+      if (name.length === 0) {
+        this.setState({
+          errorMessage: 'Please enter a name'
+        })
+        return
+      }
+
+      if (password.length === 0) {
+        this.setState({
+          errorMessage: 'Please enter a password'
+        })
+        return
+      }
+
+      const grid = this.props.grids.find(grid => grid.get('name') === gridName)
+      if (grid == null) {
+        this.setState({
+          errorMessage: `Unknown Grid! The Grid ${gridName} isn't in the grid-list!`
+        })
+        return
+      }
+
+      const gridData = {
+        name: grid.get('name'),
+        url: grid.get('loginURL')
+      }
+
+      const avatarName = new AvatarName(name)
+      this.setState({
+        isLoggingIn: name
+      })
+
+      await this.props.login(avatarName, password, gridData, save, isNew)
+    } catch (err) {
+      console.error(err)
+      // Displays the error message from the server
+      this.setState({
+        isLoggingIn: false,
+        errorMessage: err.message
+      })
     }
-    return this.props.login(firstName, lastName, password, gridData)
   }
 
   render () {
