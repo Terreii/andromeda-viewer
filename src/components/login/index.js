@@ -3,6 +3,7 @@ import styled from 'styled-components'
 
 import LoginNewAvatar from './newAvatarLogin'
 import AvatarLogin from './avatarLogin'
+import SignIn from './signIn'
 import AvatarName from '../../avatarName'
 import { viewerName } from '../../viewerInfo'
 
@@ -81,6 +82,8 @@ export default class LoginForm extends React.Component {
   componentWillReceiveProps (nextProps) {
     if (this.props.avatars.size === 0 && nextProps.avatars.size > 0) {
       this._setSelected(nextProps.avatars.getIn([0, 'avatarIdentifier']))
+    } else if (this.props.avatars.size > 0 && nextProps.avatars.size === 0) {
+      this._setSelected('new')
     }
   }
 
@@ -151,6 +154,10 @@ export default class LoginForm extends React.Component {
   }
 
   render () {
+    const signInDialog = this.props.isSignedIn
+      ? null
+      : <SignIn showSignInPopup={this.props.showSignInPopup} />
+
     return <Container>
       <Main>
         <h1>
@@ -169,6 +176,8 @@ export default class LoginForm extends React.Component {
             isSelected={this.state.selected === 'new'}
             onSelect={this._boundSetSelected}
           />
+
+          {signInDialog}
 
           {this.props.avatars.map(avatar => <AvatarLogin
             key={avatar.get('_id')}

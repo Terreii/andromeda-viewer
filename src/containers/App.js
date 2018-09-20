@@ -21,6 +21,7 @@ import {
   closePopup,
   isSignedIn,
   unlock,
+  showSignInPopup,
   signIn,
   signUp,
   signOut
@@ -81,6 +82,7 @@ class App extends React.Component {
         isSignedIn={this.props.isSignedIn}
         avatars={this.props.avatars}
         grids={this.props.grids}
+        showSignInPopup={this.props.showSignInPopup}
       />
 
     return <AppContainer>
@@ -124,6 +126,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = {
   closePopup,
   getIsSignedIn: isSignedIn,
+  showSignInPopup,
   unlock,
   signIn, // For viewer-account (to sync)
   signUp,

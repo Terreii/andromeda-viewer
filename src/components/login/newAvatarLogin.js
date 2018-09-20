@@ -236,7 +236,10 @@ export default class NewAvatarLogin extends React.Component {
       gridIsValid
 
     return <Container>
-      <Title>Add avatar or login anonymously</Title>
+      <Title>
+        {this.props.isSignedIn ? 'Add avatar or' : ''}
+        login anonymously
+      </Title>
 
       <Name>Avatar:</Name>
       <NameInput
