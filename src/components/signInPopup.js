@@ -61,6 +61,7 @@ export default class SignInPopup extends React.Component {
             autoComplete='email'
             onChange={this._boundInputChange}
             placeholder='Username / eMail'
+            autoFocus
           />
           <input
             type='password'

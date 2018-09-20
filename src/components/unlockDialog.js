@@ -56,17 +56,9 @@ export default class UnlockDialog extends React.Component {
       errorText: null
     }
 
-    this._inputRef = React.createRef()
-
     this._boundInput = this._onKeyInputPressed.bind(this)
     this._boundUnlock = this._onUnlock.bind(this)
     this._boundChange = this._onChange.bind(this)
-  }
-
-  componentDidMount () {
-    if (this._inputRef.current != null) {
-      this._inputRef.current.focus()
-    }
   }
 
   _onKeyInputPressed (event) {
@@ -129,7 +121,7 @@ export default class UnlockDialog extends React.Component {
           <input
             type='password'
             autoComplete='current-password'
-            ref={this._inputRef}
+            autoFocus
             disabled={this.state.isUnlocking}
             value={this.state.password}
             onChange={this._boundChange}

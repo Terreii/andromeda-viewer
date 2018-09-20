@@ -74,6 +74,16 @@ export function loadSavedAvatars () {
     })
 
     const avatars = await avatarsStore.findAll()
+
+    avatars.sort((a, b) => {
+      const aDate = a.hoodie.createdAt
+      const bDate = b.hoodie.createdAt
+
+      if (aDate > bDate) return 1
+      if (aDate < bDate) return -1
+      return 0
+    })
+
     dispatch({
       type: 'AvatarsLoaded',
       avatars
