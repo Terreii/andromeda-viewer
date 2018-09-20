@@ -20,6 +20,12 @@ test('renders without crashing', () => {
     avatar={avatar}
     grid={grid}
   />)
+
+  shallow(<AvatarLogin
+    avatar={avatar}
+    grid={grid}
+    isSelected
+  />)
 })
 
 test('login works', () => {
@@ -48,6 +54,7 @@ test('login works', () => {
       loginInfo.avatar = theAvatar
       loginInfo.password = password
     }}
+    isSelected
   />)
 
   const button = rendered.find('button')

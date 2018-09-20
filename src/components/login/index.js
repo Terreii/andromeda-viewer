@@ -25,7 +25,7 @@ const ViewerNameCapitalizer = styled.span`
 `
 
 const ErrorOut = styled.p`
-  background-color: rgb(255, 0, 0);
+  background-color: rgb(215, 0, 0);
   border-radius: 0.3em;
   margin-top: 0.3em;
   padding: 0.3em;
@@ -42,12 +42,32 @@ export default class LoginForm extends React.Component {
   constructor () {
     super()
     this.state = {
+      selected: 'new',
       errorMessage: '',
       isLoggingIn: false
     }
 
+    this._boundSetSelected = this._setSelected.bind(this)
     this._boundLoginAnonymously = this._loginAnonymously.bind(this)
     this._boundLoginWithSavedAvatar = this._loginWithSavedAvatar.bind(this)
+  }
+
+  componentWillMount () {
+    if (this.props.avatars.size > 0) {
+      this._setSelected(this.props.avatars.getIn([0, 'avatarIdentifier']))
+    }
+  }
+
+  componentWillReceiveProps (nextProps) {
+    if (this.props.avatars.size === 0 && nextProps.avatars.size > 0) {
+      this._setSelected(nextProps.avatars.getIn([0, 'avatarIdentifier']))
+    }
+  }
+
+  _setSelected (avatarIdentifier) {
+    this.setState({
+      selected: avatarIdentifier
+    })
   }
 
   // Login with new or an anonym avatar.
@@ -67,14 +87,14 @@ export default class LoginForm extends React.Component {
     try {
       if (name.length === 0) {
         this.setState({
-          errorMessage: 'Please enter a name'
+          errorMessage: 'Please enter a name!'
         })
         return
       }
 
       if (password.length === 0) {
         this.setState({
-          errorMessage: 'Please enter a password'
+          errorMessage: 'Please enter a password!'
         })
         return
       }
@@ -124,6 +144,8 @@ export default class LoginForm extends React.Component {
         isSignedIn={this.props.isSignedIn}
         onLogin={this._boundLoginAnonymously}
         isLoggingIn={this.state.isLoggingIn}
+        isSelected={this.state.selected === 'new'}
+        onSelect={this._boundSetSelected}
       />
 
       <SavedAvatarsList>
@@ -133,6 +155,8 @@ export default class LoginForm extends React.Component {
           grid={this.props.grids.find(grid => grid.get('name') === avatar.get('grid'))}
           onLogin={this._boundLoginWithSavedAvatar}
           isLoggingIn={this.state.isLoggingIn}
+          isSelected={this.state.selected === avatar.get('avatarIdentifier')}
+          onSelect={this._boundSetSelected}
         />)}
       </SavedAvatarsList>
 

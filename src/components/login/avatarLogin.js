@@ -10,7 +10,7 @@ const Container = styled.div`
   margin: 1em;
   padding: 1em;
   border-radius: .5em;
-  box-shadow: .2em .2em .7em black;
+  box-shadow: 0.2em 0.2em 0.4em 0.1em black;
 
   @supports (display: grid) {
     display: grid;
@@ -31,6 +31,12 @@ const Container = styled.div`
       text-align: center;
     }
   }
+
+  &.not-selected {
+    cursor: pointer;
+    background-color: rgb(95, 95, 95);
+    box-shadow: 0.1em 0.1em 0.3em 0px black;
+  }
 `
 
 const Name = styled.span`
@@ -40,6 +46,12 @@ const Name = styled.span`
 
 const Grid = styled.span`
   grid-area: grid-name;
+`
+
+const ActiveText = styled.span`
+  grid-area: password / password / password-input-end / password-input-end;
+  text-align: center;
+  color: rgba(255, 255, 255, .7);
 `
 
 const PasswordInfo = styled.span`
@@ -53,6 +65,10 @@ const PasswordInfo = styled.span`
 
 const PasswordInput = styled.input`
   grid-area: password-input;
+
+  &:invalid {
+    outline: 1px solid red;
+  }
 `
 
 const LoginButton = styled.button`
@@ -64,7 +80,22 @@ const LoginButton = styled.button`
   }
 `
 
-export default function AvatarLogin ({ avatar, grid, isLoggingIn = false, onLogin }) {
+export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSelected, onSelect }) {
+  if (!isSelected) {
+    const onSetActive = event => {
+      event.preventDefault()
+      const avID = avatar.get('avatarIdentifier')
+      onSelect(avID)
+    }
+
+    return <Container onClick={onSetActive} className='not-selected'>
+      <Name>{new AvatarName(avatar.get('name')).getDisplayName()}</Name>
+      <Grid>@{grid.get('name')}</Grid>
+
+      <ActiveText>click to login</ActiveText>
+    </Container>
+  }
+
   const ref = React.createRef()
 
   const onClick = event => {
@@ -80,7 +111,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn = false, onLogi
     }
   }
 
-  return <Container>
+  return <Container className='selected'>
     <Name>{new AvatarName(avatar.get('name')).getDisplayName()}</Name>
     <Grid>@{grid.get('name')}</Grid>
 
@@ -89,6 +120,8 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn = false, onLogi
       type='password'
       innerRef={ref}
       onKeyUp={onKeyUp}
+      required
+      autoFocus
       disabled={isLoggingIn}
     />
 

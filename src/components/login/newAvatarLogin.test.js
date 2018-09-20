@@ -19,6 +19,11 @@ test('renders without crashing', () => {
   shallow(<NewAvatarLogin
     grids={grids}
   />)
+
+  shallow(<NewAvatarLogin
+    grids={grids}
+    isSelected
+  />)
 })
 
 test('not signed in login works', () => {
@@ -47,6 +52,7 @@ test('not signed in login works', () => {
       })
     }}
     isLoggingIn={false}
+    isSelected
   />)
 
   const nameInput = rendered.find('[type="text"]').first()
@@ -135,6 +141,7 @@ test('signed in login works', () => {
       })
     }}
     isLoggingIn={false}
+    isSelected
   />)
 
   const nameInput = rendered.find('[type="text"]').first()
@@ -227,6 +234,7 @@ test('adding new grid', () => {
       })
     }}
     isLoggingIn={false}
+    isSelected
   />)
 
   const gridSelect = rendered.find('option').first().parent()
