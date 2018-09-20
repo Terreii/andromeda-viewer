@@ -1,5 +1,5 @@
 import React from 'react'
-import { shallow, mount } from 'enzyme'
+import { shallow } from 'enzyme'
 import { fromJS } from 'immutable'
 
 import NewAvatarLogin from './newAvatarLogin'
@@ -35,7 +35,7 @@ test('not signed in login works', () => {
 
   const loginData = []
 
-  const rendered = mount(<NewAvatarLogin
+  const rendered = shallow(<NewAvatarLogin
     grids={grids}
     isSignedIn={false}
     onLogin={(name, password, grid, save) => {
@@ -49,23 +49,30 @@ test('not signed in login works', () => {
     isLoggingIn={false}
   />)
 
-  const nameInput = rendered.find('input[type="text"]')
-  const passwordInput = rendered.find('input[type="password"]')
+  const nameInput = rendered.find('[type="text"]').first()
+  const passwordInput = rendered.find('[type="password"]')
   const saveCheckbox = rendered.find('#saveNewAvatarButton')
-  const loginButton = rendered.find('button')
+  const loginButton = rendered.children().last()
 
   nameInput.simulate('change', {
     target: {
-      value: 'Tester'
+      value: 'Tester',
+      validity: {
+        valid: true
+      }
     }
   })
 
   passwordInput.simulate('change', {
     target: {
-      value: 'secret'
+      value: 'secret',
+      validity: {
+        valid: true
+      }
     }
   })
 
+  rendered.update()
   loginButton.simulate('click')
 
   expect(loginData.length).toBe(1)
@@ -116,7 +123,7 @@ test('signed in login works', () => {
 
   const loginData = []
 
-  const rendered = mount(<NewAvatarLogin
+  const rendered = shallow(<NewAvatarLogin
     grids={grids}
     isSignedIn
     onLogin={(name, password, grid, save) => {
@@ -130,23 +137,30 @@ test('signed in login works', () => {
     isLoggingIn={false}
   />)
 
-  const nameInput = rendered.find('input[type="text"]')
-  const passwordInput = rendered.find('input[type="password"]')
+  const nameInput = rendered.find('[type="text"]').first()
+  const passwordInput = rendered.find('[type="password"]')
   const saveCheckbox = rendered.find('#saveNewAvatarButton')
-  const loginButton = rendered.find('button')
+  const loginButton = rendered.children().last()
 
   nameInput.simulate('change', {
     target: {
-      value: 'Tester'
+      value: 'Tester',
+      validity: {
+        valid: true
+      }
     }
   })
 
   passwordInput.simulate('change', {
     target: {
-      value: 'secret'
+      value: 'secret',
+      validity: {
+        valid: true
+      }
     }
   })
 
+  rendered.update()
   loginButton.simulate('click')
 
   expect(loginData.length).toBe(1)
@@ -184,5 +198,101 @@ test('signed in login works', () => {
     password: 'secret',
     grid: 'Second Life',
     save: false
+  })
+})
+
+test('adding new grid', () => {
+  const grids = fromJS([
+    {
+      name: 'Second Life',
+      loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
+    },
+    {
+      name: 'OS Grid',
+      loginURL: 'http://login.osgrid.org/'
+    }
+  ])
+
+  const loginData = []
+
+  const rendered = shallow(<NewAvatarLogin
+    grids={grids}
+    isSignedIn
+    onLogin={(name, password, grid, save) => {
+      loginData.push({
+        name,
+        password,
+        grid,
+        save
+      })
+    }}
+    isLoggingIn={false}
+  />)
+
+  const gridSelect = rendered.find('option').first().parent()
+  const gridName = rendered.find('div > input[type="text"]')
+  const gridURL = rendered.find('[type="url"]')
+
+  gridSelect.simulate('change', {
+    target: {
+      value: 'new-grid',
+      validity: {
+        valid: true
+      }
+    }
+  })
+
+  gridName.simulate('change', {
+    target: {
+      value: 'Alpha Grid',
+      validity: {
+        valid: true
+      }
+    }
+  })
+
+  gridURL.simulate('change', {
+    target: {
+      value: 'https://alpha-grid.com/login',
+      validity: {
+        valid: true
+      }
+    }
+  })
+  rendered.update()
+
+  const nameInput = rendered.find('[type="text"]').first()
+  const passwordInput = rendered.find('[type="password"]')
+  const loginButton = rendered.children().last()
+
+  nameInput.simulate('change', {
+    target: {
+      value: 'Tester',
+      validity: {
+        valid: true
+      }
+    }
+  })
+
+  passwordInput.simulate('change', {
+    target: {
+      value: 'secret',
+      validity: {
+        valid: true
+      }
+    }
+  })
+
+  loginButton.simulate('click')
+
+  expect(loginData.length).toBe(1)
+  expect(loginData[0]).toEqual({
+    name: 'Tester',
+    password: 'secret',
+    grid: {
+      name: 'Alpha Grid',
+      url: 'https://alpha-grid.com/login'
+    },
+    save: true
   })
 })

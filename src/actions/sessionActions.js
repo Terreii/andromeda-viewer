@@ -4,7 +4,7 @@ import { v4 as uuid } from 'uuid'
 import { viewerName, viewerVersion, viewerPlatform } from '../viewerInfo'
 import { getValueOf, getStringValueOf } from '../network/msgGetters'
 
-import { saveAvatar } from './viewerAccount'
+import { saveAvatar, saveGrid } from './viewerAccount'
 import { getLocalChatHistory, loadIMChats } from './chatMessageActions'
 import { getAllFriendsDisplayNames } from './friendsActions'
 import { fetchSeedCapabilities } from './llsd'
@@ -62,6 +62,14 @@ export function login (avatarName, password, grid, save, addAvatar) {
     if (body.login !== 'true') {
       dispatch({ type: 'loginDidFail' })
       throw new Error(body.message)
+    }
+
+    // save grid if it is new (do not save if login did fail)
+    const gridExists = getState().account.get('savedGrids').some(savedGrid => {
+      return savedGrid.get('name') === grid.name
+    })
+    if (save && addAvatar && !gridExists) {
+      await dispatch(saveGrid(grid))
     }
 
     // Set the active circuit

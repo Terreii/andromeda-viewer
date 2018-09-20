@@ -21,6 +21,7 @@ const Container = styled.div`
       "name name-input name-input"
       "password password-input password-input"
       "grid grid-select grid-select"
+      "new-grid new-grid new-grid"
       ". save login";
     grid-gap: .5em;
     text-align: left;
@@ -28,6 +29,10 @@ const Container = styled.div`
     & > span, & > div {
       margin-top: 0em;
     }
+  }
+
+  & input:invalid {
+    outline: 1px solid red;
   }
 `
 
@@ -69,6 +74,26 @@ const LoginButton = styled.button`
   grid-area: login;
 `
 
+const NewGridLine = styled.fieldset`
+  grid-area: new-grid;
+  display: ${props => props.show ? 'flex' : 'none'};
+  flex-direction: row;
+  text-align: center;
+
+  & > div {
+    flex: auto;
+  }
+
+  @media (max-width: 450px) {
+    flex-direction: column;
+    
+    & > div {
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+`
+
 export default class NewAvatarLogin extends React.Component {
   constructor (props) {
     super(props)
@@ -76,13 +101,26 @@ export default class NewAvatarLogin extends React.Component {
       name: '',
       password: '',
       grid: 'Second Life',
-      save: false
+      save: false,
+      newGridName: '',
+      newGridURL: '',
+      valid: {
+        name: false,
+        password: false,
+        grid: false, // is not used
+        newGridName: false,
+        newGridURL: false
+      }
     }
 
     this._boundName = this._inInputChange.bind(this, 'name')
     this._boundPassword = this._inInputChange.bind(this, 'password')
     this._boundGridChange = this._inInputChange.bind(this, 'grid')
     this._boundSaveChange = this._saveChange.bind(this)
+
+    this._boundNewGridName = this._inInputChange.bind(this, 'newGridName')
+    this._boundNewGridURL = this._inInputChange.bind(this, 'newGridURL')
+
     this._boundLogin = this._onLogin.bind(this)
     this._boundKeyUp = this._onKeyUp.bind(this)
   }
@@ -109,6 +147,19 @@ export default class NewAvatarLogin extends React.Component {
     this.setState({
       [key]: event.target.value
     })
+
+    const valid = event.target.validity.valid
+
+    if (this.state.valid[key] !== valid) {
+      const newValidState = Object.assign({}, this.state.valid, {
+        [key]: valid
+      })
+
+      // setState collects all changes and applies it after this function call ends
+      this.setState({
+        valid: newValidState
+      })
+    }
   }
 
   _saveChange (event) {
@@ -124,7 +175,12 @@ export default class NewAvatarLogin extends React.Component {
 
     const name = this.state.name
     const password = this.state.password
-    const grid = this.state.grid
+    const grid = this.state.grid !== 'new-grid'
+      ? this.state.grid
+      : {
+        name: this.state.newGridName,
+        url: this.state.newGridURL
+      }
     const save = this.state.save && this.props.isSignedIn
 
     this.props.onLogin(name, password, grid, save)
@@ -144,6 +200,15 @@ export default class NewAvatarLogin extends React.Component {
       </option>
     })
 
+    const isNewGrid = this.state.grid === 'new-grid'
+
+    const gridIsValid = !isNewGrid ||
+      (this.state.valid.newGridName && this.state.valid.newGridURL)
+
+    const isValid = this.state.valid.name &&
+      this.state.valid.password &&
+      gridIsValid
+
     return <Container>
       <Title>Add avatar or login anonymously</Title>
 
@@ -153,6 +218,8 @@ export default class NewAvatarLogin extends React.Component {
         onChange={this._boundName}
         onKeyUp={this._boundKeyUp}
         disabled={this.props.isLoggingIn}
+        minLength='2'
+        required
       />
 
       <Password>Password:</Password>
@@ -162,15 +229,44 @@ export default class NewAvatarLogin extends React.Component {
         onChange={this._boundPassword}
         onKeyUp={this._boundKeyUp}
         disabled={this.props.isLoggingIn}
+        minLength='2'
+        required
       />
 
       <Grid>Grid:</Grid>
       <GridSelect value={this.state.grid} onChange={this._boundGridChange}>
         {grids}
+        <option value='new-grid'>+ Add new Grid</option>
       </GridSelect>
 
+      <NewGridLine show={isNewGrid}>
+        <legend>Add a new Grid</legend>
+
+        <div>
+          Name
+          <input
+            type='text'
+            value={this.state.newGridName}
+            onChange={this._boundNewGridName}
+            onKeyUp={this._boundKeyUp}
+            minLength='2'
+            required={isNewGrid}
+          />
+        </div>
+        <div>
+          URL
+          <input
+            type='url'
+            placeholder='https://example.com/login'
+            value={this.state.newGridURL}
+            onChange={this._boundNewGridURL}
+            onKeyUp={this._boundKeyUp}
+            required={isNewGrid}
+          />
+        </div>
+      </NewGridLine>
+
       <SaveNew title="Save and sync this avatar and it's chats">
-        <label htmlFor='saveNewAvatarButton'>Save / Add</label>
         <input
           id='saveNewAvatarButton'
           type='checkbox'
@@ -178,8 +274,12 @@ export default class NewAvatarLogin extends React.Component {
           checked={this.state.save}
           disabled={!this.props.isSignedIn || this.props.isLoggingIn}
         />
+        <label htmlFor='saveNewAvatarButton'>Save / Add</label>
       </SaveNew>
-      <LoginButton onClick={this._boundLogin} disabled={this.props.isLoggingIn}>
+      <LoginButton
+        onClick={this._boundLogin}
+        disabled={this.props.isLoggingIn || !isValid}
+      >
         {this.props.isLoggingIn === this.state.name ? 'Connecting ...' : 'Login'}
       </LoginButton>
     </Container>

@@ -23,9 +23,7 @@ import {
   unlock,
   signIn,
   signUp,
-  signOut,
-  saveAvatar,
-  saveGrid
+  signOut
 } from '../actions/viewerAccount'
 import { login } from '../actions/sessionActions'
 
@@ -83,8 +81,6 @@ class App extends React.Component {
         isSignedIn={this.props.isSignedIn}
         avatars={this.props.avatars}
         grids={this.props.grids}
-        saveAvatar={this.props.saveAvatar}
-        saveGrid={this.props.saveGrid}
       />
 
     return <AppContainer>
@@ -132,8 +128,6 @@ const mapDispatchToProps = {
   signIn, // For viewer-account (to sync)
   signUp,
   signOut,
-  saveAvatar,
-  saveGrid,
   login // For Avatar
 }
 

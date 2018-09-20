@@ -48,18 +48,6 @@ export default class LoginForm extends React.Component {
 
     this._boundLoginAnonymously = this._loginAnonymously.bind(this)
     this._boundLoginWithSavedAvatar = this._loginWithSavedAvatar.bind(this)
-    this._boundAddGrid = this._addGrid.bind(this)
-  }
-
-  _addGrid (event) {
-    const nameInput = document.getElementById('newGridName')
-    const urlInput = document.getElementById('newGridURL')
-    const name = nameInput.value
-    const url = urlInput.value
-    if (name.length === 0 || url.length === 0) return
-    this.props.saveGrid(name, url)
-    nameInput.value = ''
-    urlInput.value = ''
   }
 
   // Login with new or an anonym avatar.
@@ -72,10 +60,10 @@ export default class LoginForm extends React.Component {
     const name = avatar.get('name')
     const gridName = avatar.get('grid')
 
-    this._login(name, password, gridName, true)
+    this._login(name, password, gridName, true, false)
   }
 
-  async _login (name, password, gridName, save, isNew = false) {
+  async _login (name, password, gridName, save, isNew) {
     try {
       if (name.length === 0) {
         this.setState({
@@ -91,7 +79,9 @@ export default class LoginForm extends React.Component {
         return
       }
 
-      const grid = this.props.grids.find(grid => grid.get('name') === gridName)
+      const grid = typeof gridName === 'string'
+        ? this.props.grids.find(grid => grid.get('name') === gridName)
+        : gridName
       if (grid == null) {
         this.setState({
           errorMessage: `Unknown Grid! The Grid ${gridName} isn't in the grid-list!`
@@ -100,8 +90,8 @@ export default class LoginForm extends React.Component {
       }
 
       const gridData = {
-        name: grid.get('name'),
-        url: grid.get('loginURL')
+        name: grid.name || grid.get('name'),
+        url: grid.url || grid.get('loginURL')
       }
 
       const avatarName = new AvatarName(name)
@@ -149,14 +139,6 @@ export default class LoginForm extends React.Component {
       <ErrorOut show={this.state.errorMessage.length !== 0}>
         {this.state.errorMessage}
       </ErrorOut>
-      <div>
-        Add Grid:
-        <br />
-        <input id='newGridName' type='text' placeholder='Grid Name' />
-        <input id='newGridURL' type='url' placeholder='Grid Login URL' />
-        <br />
-        <input type='button' value='add' onClick={this._boundAddGrid} />
-      </div>
     </Main>
   }
 }

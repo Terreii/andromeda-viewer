@@ -103,26 +103,18 @@ function avatarsDidChange (type, doc) {
   }
 }
 
-export function saveGrid (name, loginURL) {
-  name = name.trim()
+export function saveGrid (newGrid) {
   return (dispatch, getState, { hoodie }) => {
-    if (getState().account.get('savedGrids').some(value => value.get('name') === name)) return
+    const name = newGrid.name.trim()
 
-    const gridInfo = {
-      _id: 'grids/' + uuid(),
+    if (getState().account.get('savedGrids').some(value => value.get('name') === name)) {
+      return Promise.reject(new Error('Grid already exist!'))
+    }
+
+    return hoodie.cryptoStore.withIdPrefix('grids/').add({
       name,
-      loginURL
-    }
-
-    if (!getState().account.getIn(['viewerAccount', 'loggedIn'])) {
-      dispatch({
-        type: 'GridAdded',
-        grid: gridInfo
-      })
-      return Promise.resolve()
-    }
-
-    hoodie.cryptoStore.add(gridInfo)
+      loginURL: newGrid.url
+    })
   }
 }
 
