@@ -243,7 +243,7 @@ test('adding new grid', () => {
 
   gridSelect.simulate('change', {
     target: {
-      value: 'new-grid',
+      value: '',
       validity: {
         valid: true
       }

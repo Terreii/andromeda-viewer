@@ -6,12 +6,16 @@ import AvatarLogin from './avatarLogin'
 import AvatarName from '../../avatarName'
 import { viewerName } from '../../viewerInfo'
 
+const Container = styled.div`
+  overflow: scroll;
+`
+
 const Main = styled.div`
   background-color: rgb(77, 80, 85);
   color: rgb(255, 255, 255);
   border-radius: 1em;
   padding: 0.8em;
-  max-width: 30em;
+  max-width: 75vw;
   margin-top: 2em;
   margin-left: auto;
   margin-right: auto;
@@ -32,10 +36,26 @@ const ErrorOut = styled.p`
   display: ${props => props.show ? '' : 'none'};
 `
 
-const SavedAvatarsList = styled.div`
+const AvatarsList = styled.div`
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
+
+  & > div {
+    flex: fit-content;
+  }
+
+  @media (min-width: 750px) {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: start;
+  }
+
+  @supports (display: grid) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 25em);
+  }
 `
 
 export default class LoginForm extends React.Component {
@@ -131,38 +151,40 @@ export default class LoginForm extends React.Component {
   }
 
   render () {
-    return <Main>
-      <h1>
-        {'Login to '}
-        <ViewerNameCapitalizer>
-          {viewerName}
-        </ViewerNameCapitalizer>
-      </h1>
+    return <Container>
+      <Main>
+        <h1>
+          {'Login to '}
+          <ViewerNameCapitalizer>
+            {viewerName}
+          </ViewerNameCapitalizer>
+        </h1>
 
-      <LoginNewAvatar
-        grids={this.props.grids}
-        isSignedIn={this.props.isSignedIn}
-        onLogin={this._boundLoginAnonymously}
-        isLoggingIn={this.state.isLoggingIn}
-        isSelected={this.state.selected === 'new'}
-        onSelect={this._boundSetSelected}
-      />
+        <AvatarsList>
+          <LoginNewAvatar
+            grids={this.props.grids}
+            isSignedIn={this.props.isSignedIn}
+            onLogin={this._boundLoginAnonymously}
+            isLoggingIn={this.state.isLoggingIn}
+            isSelected={this.state.selected === 'new'}
+            onSelect={this._boundSetSelected}
+          />
 
-      <SavedAvatarsList>
-        {this.props.avatars.map(avatar => <AvatarLogin
-          key={avatar.get('_id')}
-          avatar={avatar}
-          grid={this.props.grids.find(grid => grid.get('name') === avatar.get('grid'))}
-          onLogin={this._boundLoginWithSavedAvatar}
-          isLoggingIn={this.state.isLoggingIn}
-          isSelected={this.state.selected === avatar.get('avatarIdentifier')}
-          onSelect={this._boundSetSelected}
-        />)}
-      </SavedAvatarsList>
+          {this.props.avatars.map(avatar => <AvatarLogin
+            key={avatar.get('_id')}
+            avatar={avatar}
+            grid={this.props.grids.find(grid => grid.get('name') === avatar.get('grid'))}
+            onLogin={this._boundLoginWithSavedAvatar}
+            isLoggingIn={this.state.isLoggingIn}
+            isSelected={this.state.selected === avatar.get('avatarIdentifier')}
+            onSelect={this._boundSetSelected}
+          />)}
+        </AvatarsList>
 
-      <ErrorOut show={this.state.errorMessage.length !== 0}>
-        {this.state.errorMessage}
-      </ErrorOut>
-    </Main>
+        <ErrorOut show={this.state.errorMessage.length !== 0}>
+          {this.state.errorMessage}
+        </ErrorOut>
+      </Main>
+    </Container>
   }
 }

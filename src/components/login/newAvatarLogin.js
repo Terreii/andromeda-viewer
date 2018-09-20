@@ -46,6 +46,7 @@ const Title = styled.h3`
   grid-area: title;
   margin: .3em;
   text-align: center;
+  white-space: nowrap;
 `
 
 const ActiveText = styled.span`
@@ -187,7 +188,7 @@ export default class NewAvatarLogin extends React.Component {
 
     const name = this.state.name
     const password = this.state.password
-    const grid = this.state.grid !== 'new-grid'
+    const grid = this.state.grid !== ''
       ? this.state.grid
       : {
         name: this.state.newGridName,
@@ -225,7 +226,7 @@ export default class NewAvatarLogin extends React.Component {
       </option>
     })
 
-    const isNewGrid = this.state.grid === 'new-grid'
+    const isNewGrid = this.state.grid === ''
 
     const gridIsValid = !isNewGrid ||
       (this.state.valid.newGridName && this.state.valid.newGridURL)
@@ -243,7 +244,7 @@ export default class NewAvatarLogin extends React.Component {
         onChange={this._boundName}
         onKeyUp={this._boundKeyUp}
         disabled={this.props.isLoggingIn}
-        minLength='2'
+        minLength='1'
         required
         autoFocus
       />
@@ -262,7 +263,7 @@ export default class NewAvatarLogin extends React.Component {
       <Grid>Grid:</Grid>
       <GridSelect value={this.state.grid} onChange={this._boundGridChange}>
         {grids}
-        <option value='new-grid'>+ Add new Grid</option>
+        <option value=''>+ Add new Grid</option>
       </GridSelect>
 
       <NewGridLine show={isNewGrid}>
@@ -275,7 +276,7 @@ export default class NewAvatarLogin extends React.Component {
             value={this.state.newGridName}
             onChange={this._boundNewGridName}
             onKeyUp={this._boundKeyUp}
-            minLength='2'
+            minLength='1'
             required={isNewGrid}
           />
         </div>

@@ -42,10 +42,12 @@ const Container = styled.div`
 const Name = styled.span`
   grid-area: name;
   font-size: 140%;
+  white-space: nowrap;
 `
 
 const Grid = styled.span`
   grid-area: grid-name;
+  white-space: nowrap;
 `
 
 const ActiveText = styled.span`
