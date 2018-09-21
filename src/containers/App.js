@@ -9,7 +9,7 @@ import styled from 'styled-components'
 import Helmet from 'react-helmet'
 
 import ChatContainer from './chatContainer'
-import LoginForm from '../components/login'
+import LoginForm from '../components/login/'
 import Popup from '../components/popup'
 import SignInPopup from '../components/signInPopup'
 import SignOutPopup from '../components/signOutPopup'
@@ -21,11 +21,10 @@ import {
   closePopup,
   isSignedIn,
   unlock,
+  showSignInPopup,
   signIn,
   signUp,
-  signOut,
-  saveAvatar,
-  saveGrid
+  signOut
 } from '../actions/viewerAccount'
 import { login } from '../actions/sessionActions'
 
@@ -83,8 +82,7 @@ class App extends React.Component {
         isSignedIn={this.props.isSignedIn}
         avatars={this.props.avatars}
         grids={this.props.grids}
-        saveAvatar={this.props.saveAvatar}
-        saveGrid={this.props.saveGrid}
+        showSignInPopup={this.props.showSignInPopup}
       />
 
     return <AppContainer>
@@ -128,12 +126,11 @@ const mapStateToProps = state => {
 const mapDispatchToProps = {
   closePopup,
   getIsSignedIn: isSignedIn,
+  showSignInPopup,
   unlock,
   signIn, // For viewer-account (to sync)
   signUp,
   signOut,
-  saveAvatar,
-  saveGrid,
   login // For Avatar
 }
 

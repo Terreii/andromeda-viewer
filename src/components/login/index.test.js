@@ -2,9 +2,11 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import Immutable from 'immutable'
 
-import Login from './login'
+import Login from './index'
 
 test('renders without crashing', () => {
+  const avatars = Immutable.List()
+
   const grids = Immutable.fromJS([
     {
       name: 'Second Life',
@@ -21,6 +23,7 @@ test('renders without crashing', () => {
   ])
 
   shallow(<Login
+    avatars={avatars}
     grids={grids}
   />)
 })
@@ -44,7 +47,8 @@ test('renders with avatars', () => {
   const avatars = Immutable.fromJS([
     {
       _id: 'avatar/testery',
-      name: 'Testery MacTestface'
+      name: 'Testery MacTestface',
+      grid: 'Second Life'
     }
   ])
 

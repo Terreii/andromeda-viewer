@@ -37,6 +37,13 @@ function getDefault () {
 
 export default function accountReducer (state = getDefault(), action) {
   switch (action.type) {
+    case 'startLogin':
+      return state.merge({
+        avatarName: action.name,
+        avatarIdentifier: action.avatarIdentifier,
+        sync: action.sync
+      })
+
     case 'didLogin':
       return state.merge({
         avatarName: action.name,
@@ -44,6 +51,15 @@ export default function accountReducer (state = getDefault(), action) {
         avatarIdentifier: action.avatarIdentifier,
         avatarDataSaveId: action.dataSaveId,
         agentId: action.uuid
+      })
+
+    case 'loginDidFail':
+      return state.merge({
+        avatarName: '',
+        loggedIn: false,
+        avatarIdentifier: '',
+        avatarDataSaveId: '',
+        sync: false
       })
 
     case 'ViewerAccountLogInStatus':
@@ -83,9 +99,6 @@ export default function accountReducer (state = getDefault(), action) {
           signInPopup: ''
         }
       })
-
-    case 'SavingAvatar':
-      return state.set('sync', true)
 
     case 'AvatarSaved':
       return state.set('savedAvatars',

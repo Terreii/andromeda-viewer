@@ -33,30 +33,21 @@ export function closePopup () {
 
 export function saveAvatar (name, grid) {
   return (dispatch, getState, { hoodie }) => {
-    if (!getState().account.getIn(['viewerAccount', 'loggedIn'])) return
+    const gridName = typeof grid === 'string' ? grid : grid.get('name')
 
-    const avatarIdentifier = `${name.getFullName()}@${grid.get('name')}`
+    const avatarIdentifier = `${name.getFullName()}@${gridName}`
+
     if (getState().account.get('savedAvatars').some(avatar => {
       return avatar.get('avatarIdentifier') === avatarIdentifier
     })) {
-      dispatch({
-        type: 'AvatarNotAdded'
-      })
-      return
+      return Promise.reject(new Error('Avatar already exist!'))
     }
 
-    const dataSaveId = getState().account.get('avatarDataSaveId')
-
-    dispatch({
-      type: 'SavingAvatar',
-      name
-    })
-
-    hoodie.cryptoStore.withIdPrefix('avatars/').add({
-      dataSaveId,
+    return hoodie.cryptoStore.withIdPrefix('avatars/').add({
+      dataSaveId: uuid(),
       avatarIdentifier,
       name: name.getFullName(),
-      grid: grid.name
+      grid: gridName
     })
   }
 }
@@ -83,6 +74,16 @@ export function loadSavedAvatars () {
     })
 
     const avatars = await avatarsStore.findAll()
+
+    avatars.sort((a, b) => {
+      const aDate = a.hoodie.createdAt
+      const bDate = b.hoodie.createdAt
+
+      if (aDate > bDate) return 1
+      if (aDate < bDate) return -1
+      return 0
+    })
+
     dispatch({
       type: 'AvatarsLoaded',
       avatars
@@ -112,26 +113,18 @@ function avatarsDidChange (type, doc) {
   }
 }
 
-export function saveGrid (name, loginURL) {
-  name = name.trim()
+export function saveGrid (newGrid) {
   return (dispatch, getState, { hoodie }) => {
-    if (getState().account.get('savedGrids').some(value => value.get('name') === name)) return
+    const name = newGrid.name.trim()
 
-    const gridInfo = {
-      _id: 'grids/' + uuid(),
+    if (getState().account.get('savedGrids').some(value => value.get('name') === name)) {
+      return Promise.reject(new Error('Grid already exist!'))
+    }
+
+    return hoodie.cryptoStore.withIdPrefix('grids/').add({
       name,
-      loginURL
-    }
-
-    if (!getState().account.getIn(['viewerAccount', 'loggedIn'])) {
-      dispatch({
-        type: 'GridAdded',
-        grid: gridInfo
-      })
-      return Promise.resolve()
-    }
-
-    hoodie.cryptoStore.add(gridInfo)
+      loginURL: newGrid.url
+    })
   }
 }
 
