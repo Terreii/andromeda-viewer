@@ -41,7 +41,7 @@
     "enzyme": "^3.6.0",
     "enzyme-adapter-react-16": "^1.5.0",
     "immutable": "^3.8.2",
-    "jest-enzyme": "^6.0.4",
+    "jest-enzyme": "^6.1.1",
     "jest-styled-components": "^6.2.0",
     "markdown-chalk": "^2.0.0",
     "prop-types": "^15.6.2",
