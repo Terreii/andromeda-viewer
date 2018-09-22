@@ -111,36 +111,42 @@ export function login (avatarName, password, grid, save, addAvatar) {
   }
 }
 
-// Placeholder for the logout process
+// Logout an avatar
 export function logout () {
   return (dispatch, getState, extra) => {
     const circuit = extra.circuit
     const session = getState().session
-    if (!session.get('loggedIn')) {
-      throw new Error("You aren't logged in!")
-    }
 
-    circuit.send('LogoutRequest', {
-      AgentData: [
-        {
-          AgentID: session.get('agentId'),
-          SessionID: session.get('sessionId')
-        }
-      ]
-    }, true)
+    return new Promise((resolve, reject) => {
+      if (!session.get('loggedIn')) {
+        reject(new Error("You aren't logged in!"))
+        return
+      }
 
-    dispatch({
-      type: 'StartLogout'
-    })
+      circuit.send('LogoutRequest', {
+        AgentData: [
+          {
+            AgentID: session.get('agentId'),
+            SessionID: session.get('sessionId')
+          }
+        ]
+      }, true)
+        .catch(reject)
 
-    circuit.once('LogoutReply', msg => {
       dispatch({
-        type: 'DidLogout'
+        type: 'StartLogout'
       })
 
-      circuit.close()
-      circuit.removeAllListeners()
-      extra.circuit = null
+      circuit.once('LogoutReply', msg => {
+        dispatch({
+          type: 'DidLogout'
+        })
+
+        circuit.close()
+        circuit.removeAllListeners()
+        extra.circuit = null
+        resolve()
+      })
     })
   }
 }
