@@ -72,9 +72,8 @@ export function login (avatarName, password, grid, save, addAvatar) {
       await dispatch(saveGrid(grid))
     }
 
-    // Set the active circuit
-    extra.circuit = connectToSim(body, await circuit)
-    dispatch(connectCircuit()) // Connect message parsing with circuit.
+    // Set the active circuit and connect to sim
+    dispatch(connectToSim(body, await circuit))
 
     const avatarData = save && addAvatar
       ? await dispatch(saveAvatar(avatarName, grid.name)) // adding new avatars
@@ -107,8 +106,6 @@ export function login (avatarName, password, grid, save, addAvatar) {
     dispatch(loadIMChats())
     dispatch(fetchSeedCapabilities(body['seed_capability']))
       .then(() => dispatch(getAllFriendsDisplayNames()))
-
-    extra.circuit.on('KickUser', msg => dispatch(getKicked(msg)))
 
     return body
   }
@@ -150,69 +147,74 @@ export function logout () {
 
 // Login to a sim. Is called on the login process and sim-change
 function connectToSim (sessionInfo, circuit) {
-  const Circuit = circuit.default
-  const circuitCode = sessionInfo.circuit_code
-  const activeCircuit = new Circuit(sessionInfo.sim_ip, sessionInfo.sim_port, circuitCode)
+  return async (dispatch, getState, extraArgs) => {
+    const Circuit = circuit.default
+    const circuitCode = sessionInfo.circuit_code
+    const activeCircuit = new Circuit(sessionInfo.sim_ip, sessionInfo.sim_port, circuitCode)
+    extraArgs.circuit = activeCircuit
 
-  activeCircuit.send('UseCircuitCode', {
-    CircuitCode: [
-      {
-        Code: circuitCode,
-        SessionID: sessionInfo.session_id,
-        ID: sessionInfo.agent_id
-      }
-    ]
-  }, true)
+    dispatch(connectCircuit()) // Connect message parsing with circuit.
 
-  activeCircuit.send('CompleteAgentMovement', {
-    AgentData: [
-      {
-        AgentID: sessionInfo.agent_id,
-        SessionID: sessionInfo.session_id,
-        CircuitCode: circuitCode
-      }
-    ]
-  }, true)
+    activeCircuit.on('KickUser', msg => dispatch(getKicked(msg)))
 
-  activeCircuit.send('AgentUpdate', {
-    AgentData: [
-      {
-        AgentID: sessionInfo.agent_id,
-        SessionID: sessionInfo.session_id,
-        BodyRotation: [0, 0, 0],
-        HeadRotation: [0, 0, 0],
-        State: 0,
-        CameraCenter: [0, 0, 0],
-        CameraAtAxis: [0, 0, 0],
-        CameraLeftAxis: [0, 0, 0],
-        CameraUpAxis: [0, 0, 0],
-        Far: 0,
-        ControlFlags: 0,
-        Flags: 0
-      }
-    ]
-  }, true)
-
-  activeCircuit.send('UUIDNameRequest', {
-    UUIDNameBlock: [
-      {
-        ID: sessionInfo.agent_id
-      }
-    ]
-  }, true)
-
-  setTimeout(function () {
-    activeCircuit.send('RequestRegionInfo', {
-      AgentData: [
+    await activeCircuit.send('UseCircuitCode', {
+      CircuitCode: [
         {
-          AgentID: sessionInfo.agent_id,
-          SessionID: sessionInfo.session_id
+          Code: circuitCode,
+          SessionID: sessionInfo.session_id,
+          ID: sessionInfo.agent_id
         }
       ]
     }, true)
-  }, 100)
 
-  return activeCircuit
+    await activeCircuit.send('CompleteAgentMovement', {
+      AgentData: [
+        {
+          AgentID: sessionInfo.agent_id,
+          SessionID: sessionInfo.session_id,
+          CircuitCode: circuitCode
+        }
+      ]
+    }, true)
+
+    await activeCircuit.send('AgentUpdate', {
+      AgentData: [
+        {
+          AgentID: sessionInfo.agent_id,
+          SessionID: sessionInfo.session_id,
+          BodyRotation: [0, 0, 0],
+          HeadRotation: [0, 0, 0],
+          State: 0,
+          CameraCenter: [0, 0, 0],
+          CameraAtAxis: [0, 0, 0],
+          CameraLeftAxis: [0, 0, 0],
+          CameraUpAxis: [0, 0, 0],
+          Far: 0,
+          ControlFlags: 0,
+          Flags: 0
+        }
+      ]
+    }, true)
+
+    activeCircuit.send('UUIDNameRequest', {
+      UUIDNameBlock: [
+        {
+          ID: sessionInfo.agent_id
+        }
+      ]
+    }, true)
+
+    setTimeout(function () {
+      activeCircuit.send('RequestRegionInfo', {
+        AgentData: [
+          {
+            AgentID: sessionInfo.agent_id,
+            SessionID: sessionInfo.session_id
+          }
+        ]
+      }, true)
+    }, 100)
+  }
 }
 
 function getKicked (msg) {

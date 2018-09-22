@@ -380,6 +380,100 @@ test('Acks are send 2 times with the PacketAck message', () => {
   })
 })
 
+describe('circuit returns a Promise by reliable packages', () => {
+  let reliablePackage = null
+
+  test('circuit returns a Promise by reliable packages', () => {
+    circuit.simAcks.clear()
+    circuit.simAcksOnPacket.clear()
+    circuit.viewerAcks = []
+
+    const result = circuit.send('OpenCircuit', {
+      CircuitInfo: [
+        {
+          IP: '0.0.0.0',
+          Port: 13
+        }
+      ]
+    }, true)
+
+    expect(result).toBeInstanceOf(Promise)
+
+    reliablePackage = result
+  })
+
+  test('Promise resolves if ack is received', () => {
+    const sequenceNumber = circuit.viewerAcks[0].sequenceNumber
+
+    const acksBody = createBody('PacketAck', {
+      Packets: [
+        { ID: sequenceNumber }
+      ]
+    })
+    const header = createTestHeader(false, false, false)
+    const message = Buffer.concat([header, acksBody.buffer])
+
+    setTimeout(() => {
+      circuit.websocket.onmessage({ data: message })
+    }, 50)
+
+    expect(reliablePackage).toBeTruthy()
+    return reliablePackage
+  })
+
+  test('Promise rejects after sending it Package 4 times', async () => {
+    let error = null
+
+    try {
+      await circuit.send('OpenCircuit', {
+        CircuitInfo: [
+          {
+            IP: '0.0.0.0',
+            Port: 13
+          }
+        ]
+      }, true)
+    } catch (err) {
+      error = err
+    }
+
+    expect(error).toBeInstanceOf(Error)
+    expect(error.message).toBe('Server did timeout')
+  })
+
+  test('Promise also resolves if the Packet was resend', () => {
+    let messageWasAlreadySend = false
+    circuit.websocket.onTestMessage = buffer => {
+      if (messageWasAlreadySend) {
+        const sequenceNumber = circuit.viewerAcks[0].sequenceNumber
+
+        const acksBody = createBody('PacketAck', {
+          Packets: [
+            { ID: sequenceNumber }
+          ]
+        })
+        const header = createTestHeader(false, false, false)
+        const message = Buffer.concat([header, acksBody.buffer])
+
+        circuit.websocket.onmessage({ data: message })
+      } else {
+        messageWasAlreadySend = true
+      }
+    }
+
+    const result = circuit.send('OpenCircuit', {
+      CircuitInfo: [
+        {
+          IP: '0.0.0.0',
+          Port: 13
+        }
+      ]
+    }, true)
+    expect(result).toBeInstanceOf(Promise)
+    return result
+  })
+})
+
 test('circuit closes', () => {
   let websocketClosed = false
   circuit.websocket.close = () => {
