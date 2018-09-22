@@ -90,7 +90,7 @@ export default class Circuit extends events.EventEmitter {
 
     const acks = hasAck ? extractAcks(msg) : []
     if (acks.length > 0) {
-      this._filterViewerAcks(acks)
+      this._resolveAcks(acks)
     }
     if (parsedBody.name === 'StartPingCheck') {
       this.send('CompletePingCheck', {
@@ -103,7 +103,7 @@ export default class Circuit extends events.EventEmitter {
     } else if (parsedBody.name === 'CompletePingCheck') {
       // TODO: use the ping time
     } else if (parsedBody.name === 'PacketAck') {
-      this._filterViewerAcks(mapBlockOf(parsedBody, 'Packets', getValue => getValue('ID')))
+      this._resolveAcks(mapBlockOf(parsedBody, 'Packets', getValue => getValue('ID')))
     } else {
       // For every message that is not a circuit control message
       this.emit(parsedBody.name, parsedBody)
@@ -132,10 +132,24 @@ export default class Circuit extends events.EventEmitter {
     }
     ipPort.writeUInt16LE(this.port, 4)
 
-    this._combineAndSend(ipPort, bodyBuffer, acksBuffer, reliable, body.needsZeroEncode, 0)
+    let promiseCallbacks = {
+      resolve: () => {},
+      reject: () => {}
+    }
+
+    this._combineAndSend(
+      ipPort, bodyBuffer, acksBuffer, reliable, body.needsZeroEncode, 0, promiseCallbacks
+    )
+
+    if (reliable) {
+      return new Promise((resolve, reject) => {
+        promiseCallbacks.resolve = resolve
+        promiseCallbacks.reject = reject
+      })
+    }
   }
 
-  _combineAndSend (target, body, acks, reliable, zeroEncoded, resentCount) {
+  _combineAndSend (target, body, acks, reliable, zeroEncoded, resentCount, promise) {
     // http://wiki.secondlife.com/wiki/Packet_Layout
 
     // Set header byte 0 flags
@@ -175,6 +189,7 @@ export default class Circuit extends events.EventEmitter {
         acks,
         zeroEncoded,
         resentCount,
+        promise,
         time: Date.now()
       })
     }
@@ -253,6 +268,17 @@ export default class Circuit extends events.EventEmitter {
     })
   }
 
+  // Resolves the Promises of reliable Messages and filters them out
+  _resolveAcks (acks) {
+    if (acks.length === 0) return
+
+    for (const ack of this.viewerAcks.filter(ack => acks.includes(ack.sequenceNumber))) {
+      ack.promise.resolve()
+    }
+
+    this._filterViewerAcks(acks)
+  }
+
   // Filter received acks out from the viewerAcks array
   _filterViewerAcks (acks) {
     if (acks.length === 0) return
@@ -269,7 +295,16 @@ export default class Circuit extends events.EventEmitter {
 
     toSendPackages.forEach(ack => {
       const count = ack.resentCount + 1
-      this._combineAndSend(ack.target, ack.body, ack.acks, true, ack.zeroEncoded, count)
+
+      // if the reliable msg was send 4 times, then it rejects
+      if (count >= 4) {
+        ack.promise.reject(new Error('Server did timeout'))
+        return
+      }
+
+      this._combineAndSend(
+        ack.target, ack.body, ack.acks, true, ack.zeroEncoded, count, ack.promise
+      )
     })
   }
 }
