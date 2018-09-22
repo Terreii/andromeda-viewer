@@ -240,10 +240,12 @@ export function signUp (username, password, cryptoPassword) {
 }
 
 export function signOut () {
-  return (dispatch, getState, extra) => {
+  return async (dispatch, getState, extra) => {
     dispatch(closePopup())
-    if (getState().account.get('loggedIn')) {
-      // logout() TODO: log out if sign out
+    if (getState().session.get('loggedIn')) {
+      // logout if an avatar is still logged in
+      const { logout } = await import('./sessionActions')
+      await dispatch(logout())
     }
     const hoodie = extra.hoodie
 
