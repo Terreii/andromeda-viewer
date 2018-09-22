@@ -249,7 +249,8 @@ export function signOut () {
     }
     const hoodie = extra.hoodie
 
-    return hoodie.account.signOut().then(sessionProperties => {
+    try {
+      await hoodie.account.signOut()
       extra.handlersUnsubscribe.forEach(unsubscribe => { // unsubscribe to events from hoodie
         unsubscribe()
       })
@@ -258,8 +259,8 @@ export function signOut () {
       dispatch({
         type: 'ViewerAccountSignOut'
       })
-    }).catch(err => {
+    } catch (err) {
       console.error(err)
-    })
+    }
   }
 }
