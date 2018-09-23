@@ -53,7 +53,7 @@ export function saveAvatar (name, grid) {
 }
 
 export function loadSavedAvatars () {
-  return async (dispatch, getState, extra) => {
+  return async (dispatch, getState, { hoodie }) => {
     const account = getState().account
 
     if (!account.getIn(['viewerAccount', 'loggedIn'])) {
@@ -62,14 +62,14 @@ export function loadSavedAvatars () {
 
     if (account.get('savedAvatarsLoaded')) return
 
-    const avatarsStore = extra.hoodie.cryptoStore.withIdPrefix('avatars/')
+    const avatarsStore = hoodie.cryptoStore.withIdPrefix('avatars/')
 
     const changeHandler = (eventName, doc) => {
       dispatch(avatarsDidChange(eventName, doc))
     }
 
     avatarsStore.on('change', changeHandler)
-    extra.handlersUnsubscribe.push(() => {
+    hoodie.account.one('signout', () => {
       avatarsStore.off('change', changeHandler)
     })
 
@@ -129,7 +129,7 @@ export function saveGrid (newGrid) {
 }
 
 export function loadSavedGrids () {
-  return async (dispatch, getState, extra) => {
+  return async (dispatch, getState, { hoodie }) => {
     const account = getState().account
 
     if (!account.getIn(['viewerAccount', 'loggedIn'])) {
@@ -138,14 +138,14 @@ export function loadSavedGrids () {
 
     if (account.get('savedGridsLoaded')) return
 
-    const gridsStore = extra.hoodie.cryptoStore.withIdPrefix('grids/')
+    const gridsStore = hoodie.cryptoStore.withIdPrefix('grids/')
 
     const changeHandler = (change, doc) => {
       dispatch(gridsDidChange(change, doc))
     }
 
     gridsStore.on('change', changeHandler)
-    extra.handlersUnsubscribe.push(() => {
+    hoodie.account.one('signout', () => {
       gridsStore.off('change', changeHandler)
     })
 
@@ -251,10 +251,6 @@ export function signOut () {
 
     try {
       await hoodie.account.signOut()
-      extra.handlersUnsubscribe.forEach(unsubscribe => { // unsubscribe to events from hoodie
-        unsubscribe()
-      })
-      extra.handlersUnsubscribe = []
 
       dispatch({
         type: 'ViewerAccountSignOut'
