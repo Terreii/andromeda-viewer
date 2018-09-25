@@ -45,7 +45,7 @@
     "jest-styled-components": "^6.2.1",
     "markdown-chalk": "^2.0.0",
     "prop-types": "^15.6.2",
-    "rc-tabs": "^9.4.3",
+    "rc-tabs": "^9.4.6",
     "react": "^16.5.2",
     "react-burger-menu": "^2.5.2",
     "react-dom": "^16.5.2",
@@ -65,7 +65,7 @@
   },
   "dependencies": {
     "hoodie": "^28.2.6",
-    "hoodie-plugin-store-crypto": "^1.1.0",
+    "hoodie-plugin-store-crypto": "^1.1.1",
     "macaddress": "^0.2.9",
     "node-fetch": "^2.2.0",
     "uuid": "^3.3.2",
