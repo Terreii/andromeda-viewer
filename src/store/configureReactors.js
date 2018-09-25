@@ -1,4 +1,4 @@
-import requestIdleCallback from 'requestidlecallback'
+import { request as requestIdleCallback } from 'requestidlecallback'
 
 import reactors from '../reactors/'
 

@@ -1,3 +1,7 @@
 // combines all reactors into an array
 
-export default []
+import { saveLocalChat } from './chat'
+
+export default [
+  saveLocalChat
+]

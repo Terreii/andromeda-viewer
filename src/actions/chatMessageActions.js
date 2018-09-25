@@ -116,19 +116,26 @@ export function sendInstantMessage (text, to, id) {
  */
 
 export function receiveChatFromSimulator (msg) {
-  const chatMsg = {
-    fromName: getStringValueOf(msg, 'ChatData', 'FromName'),
-    sourceID: getValueOf(msg, 'ChatData', 'SourceID'),
-    ownerID: getValueOf(msg, 'ChatData', 'OwnerID'),
-    sourceType: getValueOf(msg, 'ChatData', 'SourceType'),
-    chatType: getValueOf(msg, 'ChatData', 'ChatType'),
-    audible: getValueOf(msg, 'ChatData', 'Audible'),
-    position: getValueOf(msg, 'ChatData', 'Position'),
-    message: getStringValueOf(msg, 'ChatData', 'Message'),
-    time: Date.now()
-  }
+  return (dispatch, getState) => {
+    const time = new Date()
 
-  return dispatchChatAction(msg.name, chatMsg, 'localchat/' + new Date(chatMsg.time).toJSON())
+    dispatch({
+      type: msg.name,
+      msg: {
+        _id: `${getState().account.get('avatarDataSaveId')}/localchat/${time.toJSON()}`,
+
+        fromName: getStringValueOf(msg, 'ChatData', 'FromName'),
+        sourceID: getValueOf(msg, 'ChatData', 'SourceID'),
+        ownerID: getValueOf(msg, 'ChatData', 'OwnerID'),
+        sourceType: getValueOf(msg, 'ChatData', 'SourceType'),
+        chatType: getValueOf(msg, 'ChatData', 'ChatType'),
+        audible: getValueOf(msg, 'ChatData', 'Audible'),
+        position: getValueOf(msg, 'ChatData', 'Position'),
+        message: getStringValueOf(msg, 'ChatData', 'Message'),
+        time: time.getTime()
+      }
+    })
+  }
 }
 
 export function receiveIM (message) {
