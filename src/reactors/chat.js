@@ -1,10 +1,13 @@
 import { createSelector } from 'reselect'
 
+import { saveLocalChatMessages } from '../actions/chatMessageActions'
+
+import { getLocalChat, getShouldSaveChat } from '../selectors/chat'
+
 export const saveLocalChat = createSelector(
   [
-    state => state.localChat,
-    state => state.account.get('sync') &&
-      state.account.getIn(['viewerAccount', 'loggedIn'])
+    getLocalChat,
+    getShouldSaveChat
   ],
   (localChat, shouldSaveChat) => {
     if (!shouldSaveChat) return null
@@ -23,30 +26,6 @@ export const saveLocalChat = createSelector(
 
     if (messagesToSave.length === 0) return null
 
-    return async (dispatch, getState, { hoodie }) => {
-      const messages = messagesToSave.map(msg => msg.toJSON())
-
-      dispatch({
-        type: 'StartSavingLocalChatMessages',
-        saving: messages.map(msg => msg._id)
-      })
-
-      const saved = await hoodie.cryptoStore.updateOrAdd(messages)
-
-      const didError = []
-
-      for (let i = 0; i < saved.length; i += 1) {
-        const msg = saved[i]
-        if (msg instanceof Error) {
-          didError.push(messages[i]._id)
-        }
-      }
-
-      dispatch({
-        type: 'didSaveLocalChatMessage',
-        saved: saved.filter(msg => !didError.includes(msg._id)),
-        didError
-      })
-    }
+    return saveLocalChatMessages(messagesToSave)
   }
 )

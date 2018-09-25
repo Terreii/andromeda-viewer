@@ -138,6 +138,34 @@ export function receiveChatFromSimulator (msg) {
   }
 }
 
+export function saveLocalChatMessages (messagesToSave) {
+  return async (dispatch, getState, { hoodie }) => {
+    const messages = messagesToSave.map(msg => msg.toJSON())
+
+    dispatch({
+      type: 'StartSavingLocalChatMessages',
+      saving: messages.map(msg => msg._id)
+    })
+
+    const saved = await hoodie.cryptoStore.updateOrAdd(messages)
+
+    const didError = []
+
+    for (let i = 0; i < saved.length; i += 1) {
+      const msg = saved[i]
+      if (msg instanceof Error) {
+        didError.push(messages[i]._id)
+      }
+    }
+
+    dispatch({
+      type: 'didSaveLocalChatMessage',
+      saved: saved.filter(msg => !didError.includes(msg._id)),
+      didError
+    })
+  }
+}
+
 export function receiveIM (message) {
   return async (dispatch, getState) => {
     const toAgentID = getValueOf(message, 'MessageBlock', 'ToAgentID')

@@ -237,7 +237,7 @@ export default class NewAvatarLogin extends React.Component {
 
     return <Container>
       <Title>
-        {this.props.isSignedIn ? 'Add avatar or' : ''}
+        {this.props.isSignedIn ? 'Add avatar or ' : ''}
         login anonymously
       </Title>
 
