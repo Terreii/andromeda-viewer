@@ -30,6 +30,7 @@ injectGlobal`
 
   .bm-burger-bars {
     background: rgb(211, 211, 211);
+    border-radius: 1em;
   }
 
   .bm-morph-shape {

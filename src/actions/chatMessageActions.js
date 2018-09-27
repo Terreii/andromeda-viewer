@@ -77,7 +77,7 @@ export function sendInstantMessage (text, to, id) {
       }, true)
 
       const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
-      const chatSaveId = activeState.IMs.getIn([id, 'saveId'])
+      const chatSaveId = getIMChats(activeState).getIn([id, 'saveId'])
       const msg = {
         _id: `${avatarDataSaveId}/imChats/${chatSaveId}/${time.toJSON()}`,
         chatUUID: id,
@@ -198,16 +198,13 @@ export function receiveIM (message) {
     // If it is a group chat, toAgentID is the Group-UUID.
     IMmsg.chatUUID = IMmsg.fromGroup ? IMmsg.toAgentID : IMmsg.id
 
-    const imChats = getState().IMs
-    const hasThisChat = imChats.has(IMmsg.chatUUID)
-
-    if (!hasThisChat) {
+    if (!getIMChats(getState()).has(IMmsg.chatUUID)) {
       // Start a new IMChat.
       dispatch(createNewIMChat(dialog, IMmsg.chatUUID, fromId, fromAgentName))
     }
 
     const activeState = getState()
-    const chatSaveId = activeState.IMs.getIn([IMmsg.chatUUID, 'saveId'])
+    const chatSaveId = getIMChats(activeState).getIn([IMmsg.chatUUID, 'saveId'])
 
     const saveId = activeState.account.get('avatarDataSaveId')
     IMmsg._id = `${saveId}/imChats/${chatSaveId}/${new Date(IMmsg.time).toJSON()}`
@@ -323,9 +320,9 @@ function createNewIMChat (dialog, chatUUID, target, name) {
 
   return (dispatch, getState, { hoodie }) => {
     const activeState = getState()
-    const hasChat = activeState.IMs.has(chatUUID)
+    const hasChat = getIMChats(activeState).has(chatUUID)
     // Stop if the chat already exists.
-    if (hasChat && activeState.IMs.getIn([chatUUID, 'active'])) return
+    if (hasChat && getIMChats(activeState).getIn([chatUUID, 'active'])) return
 
     const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
     const saveId = uuid()
