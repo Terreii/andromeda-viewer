@@ -140,7 +140,11 @@ export function receiveChatFromSimulator (msg) {
 
 export function saveLocalChatMessages (messagesToSave) {
   return async (dispatch, getState, { hoodie }) => {
-    const messages = messagesToSave.map(msg => msg.toJSON())
+    const messages = messagesToSave.map(msg => {
+      const toSave = msg.toJSON()
+      delete toSave.didSave
+      return toSave
+    })
 
     dispatch({
       type: 'StartSavingLocalChatMessages',
@@ -175,6 +179,7 @@ export function receiveIM (message) {
     const fromAgentName = getStringValueOf(message, 'MessageBlock', 'FromAgentName')
 
     const IMmsg = {
+      _id: '',
       sessionID: getValueOf(message, 'AgentData', 'SessionID'),
       fromId,
       fromGroup: getValueOf(message, 'MessageBlock', 'FromGroup'),
@@ -202,35 +207,16 @@ export function receiveIM (message) {
       await dispatch(createNewIMChat(dialog, IMmsg.chatUUID, fromId, fromAgentName))
     }
 
-    const chatSaveId = getState().IMs.getIn([IMmsg.chatUUID, 'saveId'])
-
-    const id = `imChats/${chatSaveId}/${new Date(IMmsg.time).toJSON()}`
-    dispatch(dispatchChatAction(message.name, IMmsg, id))
-  }
-}
-
-// Dispatches chat (and IM) messages.
-// They will be saved and synced under the avatarDataSaveId.
-function dispatchChatAction (name, msg, id) {
-  return async (dispatch, getState, { hoodie }) => {
     const activeState = getState()
+    const chatSaveId = activeState.IMs.getIn([IMmsg.chatUUID, 'saveId'])
 
-    if (shouldSaveChat(activeState)) {
-      // Save messages. They will also be synced!
-      msg._id = activeState.account.get('avatarDataSaveId') + '/' + id
+    const saveId = activeState.account.get('avatarDataSaveId')
+    IMmsg._id = `${saveId}/imChats/${chatSaveId}/${new Date(IMmsg.time).toJSON()}`
 
-      const doc = await hoodie.cryptoStore.add(msg)
-      dispatch({
-        type: name,
-        msg: doc
-      })
-    } else {
-      // This is the path for every message, that will not be synced and saved.
-      dispatch({
-        type: name,
-        msg
-      })
-    }
+    dispatch({
+      type: message.name,
+      msg: IMmsg
+    })
   }
 }
 

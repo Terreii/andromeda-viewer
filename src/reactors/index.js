@@ -1,7 +1,8 @@
 // combines all reactors into an array
 
-import { saveLocalChat } from './chat'
+import { saveLocalChat, saveIMChat } from './chat'
 
 export default [
-  saveLocalChat
+  saveLocalChat,
+  saveIMChat
 ]
