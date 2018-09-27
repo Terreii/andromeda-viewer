@@ -99,9 +99,6 @@ export function sendInstantMessage (text, to, id) {
         msg
       }
 
-      if (shouldSaveChat(activeState)) {
-        await hoodie.cryptoStore.add(msg)
-      }
       dispatch(actionData)
     } catch (e) {
       console.error(e)
@@ -216,6 +213,69 @@ export function receiveIM (message) {
     dispatch({
       type: message.name,
       msg: IMmsg
+    })
+  }
+}
+
+export function saveIMChatMessages (ims) {
+  return async (dispatch, getState, { hoodie }) => {
+    const unsavedChats = ims.filter(chat => chat.get('hasUnsavedMSG'))
+
+    const chatsToSave = []
+
+    unsavedChats.forEach((chat, key) => {
+      const messages = chat.get('messages')
+
+      const toSaveMsg = messages.filter(msg => !msg.get('didSave')).toJSON().map(msg => {
+        const toSave = Object.assign({}, msg)
+        delete toSave.didSave
+        return toSave
+      })
+
+      chatsToSave.push(...toSaveMsg)
+    })
+
+    dispatch({
+      type: 'StartSavingIMMessages',
+      chats: chatsToSave.reduce((all, msg) => {
+        let messages = all[msg.chatUUID]
+
+        if (messages == null) {
+          messages = []
+          all[msg.chatUUID] = messages
+        }
+
+        messages.push(msg._id)
+        return all
+      }, {})
+    })
+
+    const saved = await hoodie.cryptoStore.updateOrAdd(chatsToSave)
+
+    const results = saved.reduce((all, msg, index) => {
+      const chatUUID = chatsToSave[index].chatUUID
+      let chat = all[chatUUID]
+
+      if (chat == null) {
+        chat = {
+          saved: [],
+          didError: []
+        }
+        all[chatUUID] = chat
+      }
+
+      if (msg instanceof Error) {
+        chat.didError.push(chatsToSave[index]._id)
+      } else {
+        chat.saved.push(msg)
+      }
+
+      return all
+    }, {})
+
+    dispatch({
+      type: 'didSaveIMMessages',
+      chats: results
     })
   }
 }
