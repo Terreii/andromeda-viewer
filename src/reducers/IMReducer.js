@@ -32,16 +32,27 @@ function IMChat (state = Immutable.Map(), action) {
     case 'CreateNewIMChat':
     case 'IMChatInfosLoaded':
       return state.merge({
+        _id: state.has('_id') ? state.get('_id') : action._id,
+        didSaveChatInfo: action.type === 'IMChatInfosLoaded',
         chatUUID: action.chatUUID,
         saveId: action.saveId,
         type: action.chatType,
         withId: action.target,
+        name: action.name,
         didLoadHistory: state.get('didLoadHistory') || false,
         isLoadingHistory: state.get('isLoadingHistory') || false,
         active: true,
         hasUnsavedMSG: state.get('hasUnsavedMSG') || false,
         messages: state.has('messages') ? state.get('messages') : Immutable.List()
       })
+
+    case 'startSavingIMChatInfo':
+    case 'didSaveIMChatInfo':
+      if (action.chatUUIDs.includes(state.get('chatUUID'))) {
+        return state.set('didSaveChatInfo', action.type === 'startSavingIMChatInfo')
+      } else {
+        return state
+      }
 
     case 'ImprovedInstantMessage':
     case 'SelfSendImprovedInstantMessage':
@@ -129,6 +140,22 @@ export default function IMReducer (state = Immutable.Map(), action) {
         const updatedChat = IMChat(state.get(action.chatUUID), innerAction)
         return lastState.set(chat.chatUUID, updatedChat)
       }, state)
+
+    case 'startSavingIMChatInfo':
+      return state.withMutations(oldState => {
+        action.chatUUIDs.reduce((state, id) => {
+          const updatedChat = IMChat(state.get(id), action)
+          return state.set(id, updatedChat)
+        }, oldState)
+      })
+
+    case 'didSaveIMChatInfo':
+      return state.withMutations(oldState => {
+        action.didError.reduce((state, id) => {
+          const updatedChat = IMChat(state.get(id), action)
+          return state.set(id, updatedChat)
+        }, oldState)
+      })
 
     case 'ImprovedInstantMessage':
     case 'SelfSendImprovedInstantMessage':

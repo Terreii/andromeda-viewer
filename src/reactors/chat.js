@@ -1,6 +1,10 @@
 import { createSelector } from 'reselect'
 
-import { saveLocalChatMessages, saveIMChatMessages } from '../actions/chatMessageActions'
+import {
+  saveLocalChatMessages,
+  saveIMChatInfos,
+  saveIMChatMessages
+} from '../actions/chatMessageActions'
 
 import { getLocalChat, getIMChats, getShouldSaveChat } from '../selectors/chat'
 
@@ -30,6 +34,18 @@ export const saveLocalChat = createSelector(
   }
 )
 
+export const saveIMChatInfo = createSelector(
+  [
+    getIMChats,
+    getShouldSaveChat
+  ],
+  (ims, shouldSaveChat) => {
+    if (!shouldSaveChat || ims.every(chat => chat.get('didSaveChatInfo'))) return null
+
+    return saveIMChatInfos()
+  }
+)
+
 export const saveIMChat = createSelector(
   [
     getIMChats,
@@ -38,6 +54,6 @@ export const saveIMChat = createSelector(
   (ims, shouldSaveChat) => {
     if (!shouldSaveChat || !ims.some(chat => chat.get('hasUnsavedMSG'))) return null
 
-    return saveIMChatMessages(ims)
+    return saveIMChatMessages()
   }
 )

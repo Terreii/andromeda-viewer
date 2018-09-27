@@ -5,6 +5,8 @@
 import { getValueOf, getStringValueOf } from '../network/msgGetters'
 import { v4 as uuid } from 'uuid'
 
+import { getIMChats } from '../selectors/chat'
+
 /*
  *
  *  Sending Messages
@@ -201,7 +203,7 @@ export function receiveIM (message) {
 
     if (!hasThisChat) {
       // Start a new IMChat.
-      await dispatch(createNewIMChat(dialog, IMmsg.chatUUID, fromId, fromAgentName))
+      dispatch(createNewIMChat(dialog, IMmsg.chatUUID, fromId, fromAgentName))
     }
 
     const activeState = getState()
@@ -217,9 +219,9 @@ export function receiveIM (message) {
   }
 }
 
-export function saveIMChatMessages (ims) {
+export function saveIMChatMessages () {
   return async (dispatch, getState, { hoodie }) => {
-    const unsavedChats = ims.filter(chat => chat.get('hasUnsavedMSG'))
+    const unsavedChats = getIMChats(getState()).filter(chat => chat.get('hasUnsavedMSG'))
 
     const chatsToSave = []
 
@@ -234,6 +236,8 @@ export function saveIMChatMessages (ims) {
 
       chatsToSave.push(...toSaveMsg)
     })
+
+    if (chatsToSave.length === 0) return
 
     dispatch({
       type: 'StartSavingIMMessages',
@@ -306,7 +310,7 @@ export function startNewIMChat (dialog, targetId, name) {
       }
     }
 
-    await dispatch(createNewIMChat(dialog, chatUUID, targetId, name))
+    dispatch(createNewIMChat(dialog, chatUUID, targetId, name))
 
     return chatUUID
   }
@@ -323,29 +327,57 @@ function createNewIMChat (dialog, chatUUID, target, name) {
     // Stop if the chat already exists.
     if (hasChat && activeState.IMs.getIn([chatUUID, 'active'])) return
 
+    const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
     const saveId = uuid()
 
     dispatch({
       type: 'CreateNewIMChat',
-      chatType: type,
-      chatUUID,
-      saveId,
-      target,
-      name
-    })
-
-    // If the user is logged in with a viewer-account, then save the IMChat.
-    if (hasChat || !shouldSaveChat(activeState)) return
-    const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
-    const doc = {
       _id: `${avatarDataSaveId}/imChatsInfos/${saveId}`,
       chatType: type,
       chatUUID,
       saveId,
       target,
       name
-    }
-    return hoodie.cryptoStore.findOrAdd(doc)
+    })
+  }
+}
+
+export function saveIMChatInfos () {
+  return async (dispatch, getState, { hoodie }) => {
+    const chatInfosToSave = getIMChats(getState()).filter(chat => !chat.get('didSaveChatInfo'))
+      .valueSeq()
+      .map(chat => {
+        return {
+          _id: chat.get('_id'),
+          chatType: chat.get('type'),
+          chatUUID: chat.get('chatUUID'),
+          saveId: chat.get('saveId'),
+          target: chat.get('withId'),
+          name: chat.get('name')
+        }
+      })
+      .toJSON()
+
+    if (chatInfosToSave.length === 0) return
+
+    dispatch({
+      type: 'startSavingIMChatInfo',
+      chatUUIDs: chatInfosToSave.map(chat => chat.chatUUID)
+    })
+
+    const result = await hoodie.cryptoStore.findOrAdd(chatInfosToSave)
+
+    const didError = []
+    result.forEach((doc, index) => {
+      if (doc instanceof Error) {
+        didError.push(chatInfosToSave[index].chatUUID)
+      }
+    })
+
+    dispatch({
+      type: 'didSaveIMChatInfo',
+      didError
+    })
   }
 }
 
@@ -398,12 +430,6 @@ export function getIMHistory (chatUUID, chatSaveId) {
  * Helper functions
  *
  */
-
-// checks if the chat history should be saved and synced
-function shouldSaveChat (activeState) {
-  return activeState.account.getIn(['viewerAccount', 'loggedIn']) &&
-    activeState.account.get('sync')
-}
 
 // UUID make structure: 00000000-0000-4000-x000-000000000000
 // all are hexadecimal numbers.
