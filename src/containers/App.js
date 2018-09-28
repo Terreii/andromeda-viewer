@@ -7,8 +7,8 @@ import React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
 import Helmet from 'react-helmet'
+import Loadable from 'react-loadable'
 
-import ChatContainer from './chatContainer'
 import LoginForm from '../components/login/'
 import Popup from '../components/popup'
 import SignInPopup from '../components/signInPopup'
@@ -41,6 +41,11 @@ const AppContainer = styled.div`
   padding: 0px;
   margin: 0px;
 `
+
+const LoadableChatComponent = Loadable({
+  loader: () => import('./chatContainer'),
+  loading: () => <div>Loading ...</div>
+})
 
 class App extends React.Component {
   componentDidMount () {
@@ -76,7 +81,7 @@ class App extends React.Component {
   render () {
     const isLoggedIn = this.props.isLoggedIn
     const mainSection = isLoggedIn
-      ? <ChatContainer />
+      ? <LoadableChatComponent />
       : <LoginForm
         login={this.props.login}
         isSignedIn={this.props.isSignedIn}
