@@ -5,6 +5,8 @@
 import { getValueOf, getStringValueOf } from '../network/msgGetters'
 import { v4 as uuid } from 'uuid'
 
+import { getShouldSaveChat, getLocalChat, getIMChats } from '../selectors/chat'
+
 /*
  *
  *  Sending Messages
@@ -75,7 +77,7 @@ export function sendInstantMessage (text, to, id) {
       }, true)
 
       const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
-      const chatSaveId = activeState.IMs.getIn([id, 'saveId'])
+      const chatSaveId = getIMChats(activeState).getIn([id, 'saveId'])
       const msg = {
         _id: `${avatarDataSaveId}/imChats/${chatSaveId}/${time.toJSON()}`,
         chatUUID: id,
@@ -99,9 +101,6 @@ export function sendInstantMessage (text, to, id) {
         msg
       }
 
-      if (shouldSaveChat(activeState)) {
-        await hoodie.cryptoStore.add(msg)
-      }
       dispatch(actionData)
     } catch (e) {
       console.error(e)
@@ -116,19 +115,95 @@ export function sendInstantMessage (text, to, id) {
  */
 
 export function receiveChatFromSimulator (msg) {
-  const chatMsg = {
-    fromName: getStringValueOf(msg, 'ChatData', 'FromName'),
-    sourceID: getValueOf(msg, 'ChatData', 'SourceID'),
-    ownerID: getValueOf(msg, 'ChatData', 'OwnerID'),
-    sourceType: getValueOf(msg, 'ChatData', 'SourceType'),
-    chatType: getValueOf(msg, 'ChatData', 'ChatType'),
-    audible: getValueOf(msg, 'ChatData', 'Audible'),
-    position: getValueOf(msg, 'ChatData', 'Position'),
-    message: getStringValueOf(msg, 'ChatData', 'Message'),
-    time: Date.now()
-  }
+  return (dispatch, getState) => {
+    const time = new Date()
 
-  return dispatchChatAction(msg.name, chatMsg, 'localchat/' + new Date(chatMsg.time).toJSON())
+    dispatch({
+      type: msg.name,
+      msg: {
+        _id: `${getState().account.get('avatarDataSaveId')}/localchat/${time.toJSON()}`,
+
+        fromName: getStringValueOf(msg, 'ChatData', 'FromName'),
+        sourceID: getValueOf(msg, 'ChatData', 'SourceID'),
+        ownerID: getValueOf(msg, 'ChatData', 'OwnerID'),
+        sourceType: getValueOf(msg, 'ChatData', 'SourceType'),
+        chatType: getValueOf(msg, 'ChatData', 'ChatType'),
+        audible: getValueOf(msg, 'ChatData', 'Audible'),
+        position: getValueOf(msg, 'ChatData', 'Position'),
+        message: getStringValueOf(msg, 'ChatData', 'Message'),
+        time: time.getTime()
+      }
+    })
+  }
+}
+
+export function saveLocalChatMessages () {
+  return async (dispatch, getState, { hoodie }) => {
+    const localChat = getLocalChat(getState())
+    const messagesToSave = []
+
+    for (let i = localChat.size - 1; i >= 0; i -= 1) {
+      const msg = localChat.get(i)
+
+      if (msg.get('didSave')) {
+        break
+      } else {
+        const toSave = msg.toJSON()
+        delete toSave.didSave
+        delete toSave.position
+        if (toSave.ownerID === toSave.sourceID) {
+          // ownerID and source is the same (by normal messages)
+          // ownerID is for objects
+          delete toSave.ownerID
+        }
+        messagesToSave.push(toSave)
+      }
+    }
+
+    if (messagesToSave.length === 0) return
+
+    dispatch({
+      type: 'StartSavingLocalChatMessages',
+      saving: messagesToSave.map(msg => msg._id)
+    })
+
+    const saved = await hoodie.cryptoStore.updateOrAdd(messagesToSave)
+
+    const didError = []
+
+    for (let i = 0; i < saved.length; i += 1) {
+      const msg = saved[i]
+      if (msg instanceof Error) {
+        didError.push(messagesToSave[i]._id)
+      }
+    }
+
+    dispatch({
+      type: 'didSaveLocalChatMessage',
+      saved: saved.filter(msg => !didError.includes(msg._id)),
+      didError
+    })
+  }
+}
+
+export function deleteOldLocalChat () {
+  const maxLocalChatHistory = 200
+
+  return (dispatch, getState, { hoodie }) => {
+    const activeState = getState()
+    if (!getShouldSaveChat(activeState)) return Promise.resolve()
+
+    const localChat = getLocalChat(activeState)
+    if (localChat.size <= maxLocalChatHistory) return Promise.resolve()
+
+    const toDeleteIds = []
+    for (let i = 0, max = localChat.size - maxLocalChatHistory; i < max; i += 1) {
+      const id = localChat.getIn([i, '_id'])
+      toDeleteIds.push(id)
+    }
+
+    return hoodie.cryptoStore.remove(toDeleteIds)
+  }
 }
 
 export function receiveIM (message) {
@@ -140,6 +215,7 @@ export function receiveIM (message) {
     const fromAgentName = getStringValueOf(message, 'MessageBlock', 'FromAgentName')
 
     const IMmsg = {
+      _id: '',
       sessionID: getValueOf(message, 'AgentData', 'SessionID'),
       fromId,
       fromGroup: getValueOf(message, 'MessageBlock', 'FromGroup'),
@@ -159,43 +235,99 @@ export function receiveIM (message) {
     // If it is a group chat, toAgentID is the Group-UUID.
     IMmsg.chatUUID = IMmsg.fromGroup ? IMmsg.toAgentID : IMmsg.id
 
-    const imChats = getState().IMs
-    const hasThisChat = imChats.has(IMmsg.chatUUID)
-
-    if (!hasThisChat) {
+    if (!getIMChats(getState()).has(IMmsg.chatUUID)) {
       // Start a new IMChat.
-      await dispatch(createNewIMChat(dialog, IMmsg.chatUUID, fromId, fromAgentName))
+      dispatch(createNewIMChat(dialog, IMmsg.chatUUID, fromId, fromAgentName))
     }
 
-    const chatSaveId = getState().IMs.getIn([IMmsg.chatUUID, 'saveId'])
+    const activeState = getState()
+    const chatSaveId = getIMChats(activeState).getIn([IMmsg.chatUUID, 'saveId'])
 
-    const id = `imChats/${chatSaveId}/${new Date(IMmsg.time).toJSON()}`
-    dispatch(dispatchChatAction(message.name, IMmsg, id))
+    const saveId = activeState.account.get('avatarDataSaveId')
+    IMmsg._id = `${saveId}/imChats/${chatSaveId}/${new Date(IMmsg.time).toJSON()}`
+
+    dispatch({
+      type: message.name,
+      msg: IMmsg
+    })
   }
 }
 
-// Dispatches chat (and IM) messages.
-// They will be saved and synced under the avatarDataSaveId.
-function dispatchChatAction (name, msg, id) {
+export function saveIMChatMessages () {
   return async (dispatch, getState, { hoodie }) => {
-    const activeState = getState()
+    const unsavedChats = getIMChats(getState()).filter(chat => chat.get('hasUnsavedMSG'))
 
-    if (shouldSaveChat(activeState)) {
-      // Save messages. They will also be synced!
-      msg._id = activeState.account.get('avatarDataSaveId') + '/' + id
+    const chatsToSave = []
+    const savingIds = {}
+    const saveIdToChatId = {}
 
-      const doc = await hoodie.cryptoStore.add(msg)
-      dispatch({
-        type: name,
-        msg: doc
-      })
-    } else {
-      // This is the path for every message, that will not be synced and saved.
-      dispatch({
-        type: name,
-        msg
-      })
-    }
+    unsavedChats.forEach((chat, key) => {
+      const messages = chat.get('messages')
+
+      const chatUUID = chat.get('chatUUID')
+      const ids = []
+      savingIds[chatUUID] = ids
+      saveIdToChatId[chat.get('saveId')] = chatUUID
+
+      const toSaveMsg = messages.filter(msg => !msg.get('didSave')).map(msg => {
+        const id = msg.get('_id')
+        ids.push(id) // side-effect!
+
+        const binaryBucket = msg.get('binaryBucket')
+        return {
+          _id: id,
+          _rev: msg.get('_rev'),
+          hoodie: msg.get('hoodie'),
+          dialog: msg.get('dialog'),
+          fromId: msg.get('fromId'),
+          fromAgentName: msg.get('fromAgentName'),
+          message: msg.get('message'),
+          time: msg.get('time'),
+          binaryBucket: binaryBucket != null && binaryBucket.toJSON().data.length > 1
+            ? binaryBucket
+            : undefined
+        }
+      }).toJSON()
+
+      chatsToSave.push(...toSaveMsg)
+    })
+
+    if (chatsToSave.length === 0) return
+
+    dispatch({
+      type: 'StartSavingIMMessages',
+      chats: savingIds
+    })
+
+    const saved = await hoodie.cryptoStore.updateOrAdd(chatsToSave)
+
+    const results = saved.reduce((all, msg, index) => {
+      const chatSaveId = chatsToSave[index]._id.split('/')[2]
+      const chatUUID = saveIdToChatId[chatSaveId]
+
+      let chat = all[chatUUID]
+
+      if (chat == null) {
+        chat = {
+          saved: [],
+          didError: []
+        }
+        all[chatUUID] = chat
+      }
+
+      if (msg instanceof Error) {
+        chat.didError.push(chatsToSave[index]._id)
+      } else {
+        chat.saved.push(msg)
+      }
+
+      return all
+    }, {})
+
+    dispatch({
+      type: 'didSaveIMMessages',
+      chats: results
+    })
   }
 }
 
@@ -225,7 +357,7 @@ export function startNewIMChat (dialog, targetId, name) {
       }
     }
 
-    await dispatch(createNewIMChat(dialog, chatUUID, targetId, name))
+    dispatch(createNewIMChat(dialog, chatUUID, targetId, name))
 
     return chatUUID
   }
@@ -238,33 +370,61 @@ function createNewIMChat (dialog, chatUUID, target, name) {
 
   return (dispatch, getState, { hoodie }) => {
     const activeState = getState()
-    const hasChat = activeState.IMs.has(chatUUID)
+    const hasChat = getIMChats(activeState).has(chatUUID)
     // Stop if the chat already exists.
-    if (hasChat && activeState.IMs.getIn([chatUUID, 'active'])) return
+    if (hasChat && getIMChats(activeState).getIn([chatUUID, 'active'])) return
 
+    const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
     const saveId = uuid()
 
     dispatch({
       type: 'CreateNewIMChat',
-      chatType: type,
-      chatUUID,
-      saveId,
-      target,
-      name
-    })
-
-    // If the user is logged in with a viewer-account, then save the IMChat.
-    if (hasChat || !shouldSaveChat(activeState)) return
-    const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
-    const doc = {
       _id: `${avatarDataSaveId}/imChatsInfos/${saveId}`,
       chatType: type,
       chatUUID,
       saveId,
       target,
       name
-    }
-    return hoodie.cryptoStore.findOrAdd(doc)
+    })
+  }
+}
+
+export function saveIMChatInfos () {
+  return async (dispatch, getState, { hoodie }) => {
+    const chatInfosToSave = getIMChats(getState()).filter(chat => !chat.get('didSaveChatInfo'))
+      .valueSeq()
+      .map(chat => {
+        return {
+          _id: chat.get('_id'),
+          chatType: chat.get('type'),
+          chatUUID: chat.get('chatUUID'),
+          saveId: chat.get('saveId'),
+          target: chat.get('withId'),
+          name: chat.get('name')
+        }
+      })
+      .toJSON()
+
+    if (chatInfosToSave.length === 0) return
+
+    dispatch({
+      type: 'startSavingIMChatInfo',
+      chatUUIDs: chatInfosToSave.map(chat => chat.chatUUID)
+    })
+
+    const result = await hoodie.cryptoStore.findOrAdd(chatInfosToSave)
+
+    const didError = []
+    result.forEach((doc, index) => {
+      if (doc instanceof Error) {
+        didError.push(chatInfosToSave[index].chatUUID)
+      }
+    })
+
+    dispatch({
+      type: 'didSaveIMChatInfo',
+      didError
+    })
   }
 }
 
@@ -317,12 +477,6 @@ export function getIMHistory (chatUUID, chatSaveId) {
  * Helper functions
  *
  */
-
-// checks if the chat history should be saved and synced
-function shouldSaveChat (activeState) {
-  return activeState.account.getIn(['viewerAccount', 'loggedIn']) &&
-    activeState.account.get('sync')
-}
 
 // UUID make structure: 00000000-0000-4000-x000-000000000000
 // all are hexadecimal numbers.

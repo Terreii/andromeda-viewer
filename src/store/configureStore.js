@@ -2,6 +2,7 @@ import { createStore, applyMiddleware, compose } from 'redux'
 import thunkMiddleware from 'redux-thunk'
 
 import rootReducer from '../reducers'
+import configureReactors from './configureReactors'
 
 // Create Redux-Store with Hoodie
 const configureStore = preloadedState => {
@@ -33,6 +34,8 @@ const configureStore = preloadedState => {
     }
     window.devStore = store
   }
+
+  configureReactors(store)
 
   return store
 }

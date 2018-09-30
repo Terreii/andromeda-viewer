@@ -5,7 +5,7 @@ import { viewerName, viewerVersion, viewerPlatform } from '../viewerInfo'
 import { getValueOf, getStringValueOf } from '../network/msgGetters'
 
 import { saveAvatar, saveGrid } from './viewerAccount'
-import { getLocalChatHistory, loadIMChats } from './chatMessageActions'
+import { getLocalChatHistory, loadIMChats, deleteOldLocalChat } from './chatMessageActions'
 import { getAllFriendsDisplayNames } from './friendsActions'
 import { fetchSeedCapabilities } from './llsd'
 import connectCircuit from './connectCircuit'
@@ -117,12 +117,11 @@ export function logout () {
     const circuit = extra.circuit
     const session = getState().session
 
-    return new Promise((resolve, reject) => {
-      if (!session.get('loggedIn')) {
-        reject(new Error("You aren't logged in!"))
-        return
-      }
+    if (!session.get('loggedIn')) {
+      return Promise.reject(new Error("You aren't logged in!"))
+    }
 
+    const logoutPromise = new Promise((resolve, reject) => {
       circuit.send('LogoutRequest', {
         AgentData: [
           {
@@ -148,6 +147,11 @@ export function logout () {
         resolve()
       })
     })
+
+    return Promise.all([
+      logoutPromise,
+      dispatch(deleteOldLocalChat())
+    ])
   }
 }
 
@@ -236,6 +240,8 @@ function getKicked (msg) {
       circuit.close()
       circuit.removeAllListeners()
       extra.circuit = null
+
+      dispatch(deleteOldLocalChat())
 
       dispatch({
         type: 'UserWasKicked',
