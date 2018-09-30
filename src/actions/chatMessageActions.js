@@ -5,7 +5,7 @@
 import { getValueOf, getStringValueOf } from '../network/msgGetters'
 import { v4 as uuid } from 'uuid'
 
-import { getIMChats } from '../selectors/chat'
+import { getLocalChat, getIMChats } from '../selectors/chat'
 
 /*
  *
@@ -137,33 +137,44 @@ export function receiveChatFromSimulator (msg) {
   }
 }
 
-export function saveLocalChatMessages (messagesToSave) {
+export function saveLocalChatMessages () {
   return async (dispatch, getState, { hoodie }) => {
-    const messages = messagesToSave.map(msg => {
-      const toSave = msg.toJSON()
-      delete toSave.didSave
-      delete toSave.position
-      if (toSave.ownerID === toSave.sourceID) {
-        // ownerID and source is the same (by normal messages)
-        // ownerID is for objects
-        delete toSave.ownerID
+    const localChat = getLocalChat(getState())
+    const messagesToSave = []
+
+    for (let i = localChat.size - 1; i >= 0; i -= 1) {
+      const msg = localChat.get(i)
+
+      if (msg.get('didSave')) {
+        break
+      } else {
+        const toSave = msg.toJSON()
+        delete toSave.didSave
+        delete toSave.position
+        if (toSave.ownerID === toSave.sourceID) {
+          // ownerID and source is the same (by normal messages)
+          // ownerID is for objects
+          delete toSave.ownerID
+        }
+        messagesToSave.push(toSave)
       }
-      return toSave
-    })
+    }
+
+    if (messagesToSave.length === 0) return
 
     dispatch({
       type: 'StartSavingLocalChatMessages',
-      saving: messages.map(msg => msg._id)
+      saving: messagesToSave.map(msg => msg._id)
     })
 
-    const saved = await hoodie.cryptoStore.updateOrAdd(messages)
+    const saved = await hoodie.cryptoStore.updateOrAdd(messagesToSave)
 
     const didError = []
 
     for (let i = 0; i < saved.length; i += 1) {
       const msg = saved[i]
       if (msg instanceof Error) {
-        didError.push(messages[i]._id)
+        didError.push(messagesToSave[i]._id)
       }
     }
 

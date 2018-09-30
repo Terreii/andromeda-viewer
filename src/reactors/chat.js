@@ -30,7 +30,7 @@ export const saveLocalChat = createSelector(
 
     if (messagesToSave.length === 0) return null
 
-    return saveLocalChatMessages(messagesToSave)
+    return saveLocalChatMessages()
   }
 )
 
