@@ -30,8 +30,10 @@ const List = styled.ul`
 const ListItem = styled.li`
   display: flex;
   flex-direction: row;
+  padding: 0.2em;
+  border-radius: 0.2em;
 
-  &::nth-child(odd) {
+  &:nth-child(even) {
     background-color: rgb(173, 173, 173);
   }
 `

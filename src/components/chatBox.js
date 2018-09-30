@@ -10,6 +10,7 @@ import Helmet from 'react-helmet'
 
 import ChatDialog from './chatDialog'
 import FriendsList from './friendsList'
+import GroupsList from './groupsList'
 
 import 'rc-tabs/assets/index.css'
 
@@ -51,6 +52,10 @@ export default function ChatBox (props) {
           startNewIMChat={props.startNewIMChat}
           updateRights={props.updateRights}
         />
+      </TabPane>
+
+      <TabPane tab='Groups' key='groups'>
+        <GroupsList groups={props.groups} />
       </TabPane>
 
       <TabPane tab='Local' key='local'>

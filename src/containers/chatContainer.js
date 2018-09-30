@@ -17,6 +17,7 @@ const mapStateToProps = state => {
     selfName: state.account.get('avatarName'),
     localChat: getLocalChat(state),
     IMs: getIMChats(state),
+    groups: state.groups,
     names: state.names,
     friends: state.friends
   }
