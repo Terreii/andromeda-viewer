@@ -8,13 +8,15 @@ import {
 } from '../actions/chatMessageActions'
 import { updateRights } from '../actions/friendsActions'
 
+import { getLocalChat, getIMChats } from '../selectors/chat'
+
 import ChatBox from '../components/chatBox'
 
 const mapStateToProps = state => {
   return {
     selfName: state.account.get('avatarName'),
-    localChat: state.localChat,
-    IMs: state.IMs,
+    localChat: getLocalChat(state),
+    IMs: getIMChats(state),
     names: state.names,
     friends: state.friends
   }
