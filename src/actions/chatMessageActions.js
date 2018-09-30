@@ -5,7 +5,7 @@
 import { getValueOf, getStringValueOf } from '../network/msgGetters'
 import { v4 as uuid } from 'uuid'
 
-import { getLocalChat, getIMChats } from '../selectors/chat'
+import { getShouldSaveChat, getLocalChat, getIMChats } from '../selectors/chat'
 
 /*
  *
@@ -183,6 +183,26 @@ export function saveLocalChatMessages () {
       saved: saved.filter(msg => !didError.includes(msg._id)),
       didError
     })
+  }
+}
+
+export function deleteOldLocalChat () {
+  const maxLocalChatHistory = 200
+
+  return (dispatch, getState, { hoodie }) => {
+    const activeState = getState()
+    if (!getShouldSaveChat(activeState)) return Promise.resolve()
+
+    const localChat = getLocalChat(activeState)
+    if (localChat.size <= maxLocalChatHistory) return Promise.resolve()
+
+    const toDeleteIds = []
+    for (let i = 0, max = localChat.size - maxLocalChatHistory; i < max; i += 1) {
+      const id = localChat.getIn([i, '_id'])
+      toDeleteIds.push(id)
+    }
+
+    return hoodie.cryptoStore.remove(toDeleteIds)
   }
 }
 
