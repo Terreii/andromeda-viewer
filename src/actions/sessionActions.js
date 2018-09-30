@@ -223,6 +223,8 @@ function connectToSim (sessionInfo, circuit) {
           }
         ]
       }, true)
+
+      dispatch(requestAvatarProperties(sessionInfo.agent_id))
     }, 100)
   }
 }
@@ -248,5 +250,23 @@ function getKicked (msg) {
         reason: getStringValueOf(msg, 'UserInfo', 0, 'Reason')
       })
     }
+  }
+}
+
+function requestAvatarProperties (avatarID) {
+  return (dispatch, getState, { circuit }) => {
+    const session = getState().session
+    const agentID = session.get('agentId')
+    const sessionID = session.get('sessionId')
+
+    circuit.send('AvatarPropertiesRequest', {
+      AgentData: [
+        {
+          AgentID: agentID,
+          SessionID: sessionID,
+          AvatarID: avatarID
+        }
+      ]
+    }, true)
   }
 }
