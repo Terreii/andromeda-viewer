@@ -143,6 +143,11 @@ export function saveLocalChatMessages (messagesToSave) {
       const toSave = msg.toJSON()
       delete toSave.didSave
       delete toSave.position
+      if (toSave.ownerID === toSave.sourceID) {
+        // ownerID and source is the same (by normal messages)
+        // ownerID is for objects
+        delete toSave.ownerID
+      }
       return toSave
     })
 
