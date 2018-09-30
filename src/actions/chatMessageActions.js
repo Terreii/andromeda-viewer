@@ -142,6 +142,7 @@ export function saveLocalChatMessages (messagesToSave) {
     const messages = messagesToSave.map(msg => {
       const toSave = msg.toJSON()
       delete toSave.didSave
+      delete toSave.position
       return toSave
     })
 
@@ -221,15 +222,36 @@ export function saveIMChatMessages () {
     const unsavedChats = getIMChats(getState()).filter(chat => chat.get('hasUnsavedMSG'))
 
     const chatsToSave = []
+    const savingIds = {}
+    const saveIdToChatId = {}
 
     unsavedChats.forEach((chat, key) => {
       const messages = chat.get('messages')
 
-      const toSaveMsg = messages.filter(msg => !msg.get('didSave')).toJSON().map(msg => {
-        const toSave = Object.assign({}, msg)
-        delete toSave.didSave
-        return toSave
-      })
+      const chatUUID = chat.get('chatUUID')
+      const ids = []
+      savingIds[chatUUID] = ids
+      saveIdToChatId[chat.get('saveId')] = chatUUID
+
+      const toSaveMsg = messages.filter(msg => !msg.get('didSave')).map(msg => {
+        const id = msg.get('_id')
+        ids.push(id) // side-effect!
+
+        const binaryBucket = msg.get('binaryBucket')
+        return {
+          _id: id,
+          _rev: msg.get('_rev'),
+          hoodie: msg.get('hoodie'),
+          dialog: msg.get('dialog'),
+          fromId: msg.get('fromId'),
+          fromAgentName: msg.get('fromAgentName'),
+          message: msg.get('message'),
+          time: msg.get('time'),
+          binaryBucket: binaryBucket != null && binaryBucket.toJSON().data.length > 1
+            ? binaryBucket
+            : undefined
+        }
+      }).toJSON()
 
       chatsToSave.push(...toSaveMsg)
     })
@@ -238,23 +260,15 @@ export function saveIMChatMessages () {
 
     dispatch({
       type: 'StartSavingIMMessages',
-      chats: chatsToSave.reduce((all, msg) => {
-        let messages = all[msg.chatUUID]
-
-        if (messages == null) {
-          messages = []
-          all[msg.chatUUID] = messages
-        }
-
-        messages.push(msg._id)
-        return all
-      }, {})
+      chats: savingIds
     })
 
     const saved = await hoodie.cryptoStore.updateOrAdd(chatsToSave)
 
     const results = saved.reduce((all, msg, index) => {
-      const chatUUID = chatsToSave[index].chatUUID
+      const chatSaveId = chatsToSave[index]._id.split('/')[2]
+      const chatUUID = saveIdToChatId[chatSaveId]
+
       let chat = all[chatUUID]
 
       if (chat == null) {
