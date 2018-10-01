@@ -9,6 +9,7 @@ import {
 import { updateRights } from '../actions/friendsActions'
 
 import { getLocalChat, getIMChats } from '../selectors/chat'
+import { getNames } from '../selectors/names'
 
 import ChatBox from '../components/chatBox'
 
@@ -18,7 +19,7 @@ const mapStateToProps = state => {
     localChat: getLocalChat(state),
     IMs: getIMChats(state),
     groups: state.groups,
-    names: state.names,
+    names: getNames(state),
     friends: state.friends
   }
 }

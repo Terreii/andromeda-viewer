@@ -15,15 +15,15 @@ import GroupsList from './groupsList'
 import 'rc-tabs/assets/index.css'
 
 export default function ChatBox (props) {
-  const names = props.names.get('names')
+  const names = props.names
   const imsIds = props.IMs.keySeq().toJSON()
 
   const panels = imsIds.map(id => {
     const chat = props.IMs.get(id)
     const target = chat.get('withId')
-    const name = names.has(target)
-      ? names.get(target).getName()
-      : target
+    const name = chat.get('chatType') === 'personal'
+      ? (names.has(target) ? names.get(target).getName() : chat.get('name'))
+      : chat.get('name')
 
     return <TabPane tab={name} key={id}>
       <ChatDialog
