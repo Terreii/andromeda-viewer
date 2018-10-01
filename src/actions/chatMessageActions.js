@@ -213,12 +213,13 @@ export function receiveIM (message) {
     const time = getValueOf(message, 'MessageBlock', 'Timestamp')
     const dialog = getValueOf(message, 'MessageBlock', 'Dialog')
     const fromAgentName = getStringValueOf(message, 'MessageBlock', 'FromAgentName')
+    const fromGroup = getValueOf(message, 'MessageBlock', 'FromGroup')
 
     const IMmsg = {
       _id: '',
       sessionID: getValueOf(message, 'AgentData', 'SessionID'),
       fromId,
-      fromGroup: getValueOf(message, 'MessageBlock', 'FromGroup'),
+      fromGroup,
       toAgentID,
       parentEstateID: getValueOf(message, 'MessageBlock', 'ParentEstateID'),
       regionID: getValueOf(message, 'MessageBlock', 'RegionID'),
@@ -233,11 +234,11 @@ export function receiveIM (message) {
     }
 
     // If it is a group chat, toAgentID is the Group-UUID.
-    IMmsg.chatUUID = IMmsg.fromGroup ? IMmsg.toAgentID : IMmsg.id
+    IMmsg.chatUUID = fromGroup ? IMmsg.toAgentID : IMmsg.id
 
     if (!getIMChats(getState()).has(IMmsg.chatUUID)) {
       // Start a new IMChat.
-      dispatch(createNewIMChat(dialog, IMmsg.chatUUID, fromId, fromAgentName))
+      dispatch(createNewIMChat(dialog, IMmsg.chatUUID, fromId, fromAgentName, fromGroup))
     }
 
     const activeState = getState()
@@ -363,12 +364,12 @@ export function startNewIMChat (dialog, targetId, name) {
   }
 }
 
-// Starts a new IMChat. It also saves it into Hoodie.
-function createNewIMChat (dialog, chatUUID, target, name) {
-  const type = getIMChatTypeOfDialog(dialog)
+// Starts a new IMChat.
+function createNewIMChat (dialog, chatUUID, target, name, isFromGroup) {
+  const type = getIMChatTypeOfDialog(dialog, isFromGroup)
   if (type == null) return () => {}
 
-  return (dispatch, getState, { hoodie }) => {
+  return (dispatch, getState) => {
     const activeState = getState()
     const hasChat = getIMChats(activeState).has(chatUUID)
     // Stop if the chat already exists.
@@ -511,16 +512,22 @@ function uuidXOR (idIn1, idIn2, correct = false) {
 function calcChatUUID (type, targetId, agentId) {
   if (type === 'personal') {
     return uuidXOR(agentId, targetId)
+  } else if (type === 'groupSession' || type === 'session') {
+    return targetId
   } else {
     throw new Error(`Chat type '${type}' not jet supported!`)
   }
 }
 
 // Get the chatType stored in an IMChat Info from the dialog value in IMs.
-export function getIMChatTypeOfDialog (dialog) {
+export function getIMChatTypeOfDialog (dialog, isFromGroup = false) {
   switch (dialog) {
     case 0:
       return 'personal'
+    case 15:
+      return 'groupSession'
+    case 17:
+      return 'session'
     default:
       return undefined
   }
