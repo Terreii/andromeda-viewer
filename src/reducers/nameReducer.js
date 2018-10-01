@@ -91,9 +91,11 @@ function namesReducer (state = Immutable.Map(), action) {
       return action.agents.reduce((names, agent) => {
         const id = agent.id.toString()
         const old = names.has(id) ? names.get(id) : new AvatarName(agent.username)
-        const next = old.withDisplayNameSetTo(agent.display_name)
-        next.first = agent.legacy_first_name
-        next.last = agent.legacy_last_name
+        const next = old.withDisplayNameSetTo(
+          agent.display_name,
+          agent.legacy_first_name,
+          agent.legacy_last_name
+        )
         return names.set(id, next)
       }, state)
 
