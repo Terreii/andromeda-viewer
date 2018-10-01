@@ -21,7 +21,8 @@ export default function ChatBox (props) {
   const panels = imsIds.map(id => {
     const chat = props.IMs.get(id)
     const target = chat.get('withId')
-    const name = chat.get('chatType') === 'personal'
+    const type = chat.get('chatType')
+    const name = type === 'personal'
       ? (names.has(target) ? names.get(target).getName() : chat.get('name'))
       : chat.get('name')
 
@@ -29,8 +30,9 @@ export default function ChatBox (props) {
       <ChatDialog
         data={chat}
         isIM
-        sendTo={text => props.sendInstantMessage(text, target, id)}
+        sendTo={text => props.sendInstantMessage(text, target, id, type === 'personal' ? 0 : 17)}
         names={names}
+        type={type}
         loadHistory={props.getIMHistory}
       />
     </TabPane>

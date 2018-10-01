@@ -36,11 +36,13 @@ export function sendLocalChatMessage (text, type, channel) {
   }
 }
 
-export function sendInstantMessage (text, to, id) {
+export function sendInstantMessage (text, to, id, dialog = 0) {
   return async (dispatch, getState, { hoodie, circuit }) => {
     try {
       const activeState = getState()
       const session = activeState.session
+
+      const chat = getIMChats(activeState).find(chat => chat.get('chatUUID') === id)
 
       const agentID = session.get('agentId')
       const sessionID = session.get('sessionId')
@@ -48,7 +50,9 @@ export function sendInstantMessage (text, to, id) {
       const regionID = session.getIn(['regionInfo', 'regionID'])
       const position = session.getIn(['position', 'position'])
       const fromAgentName = activeState.names.getIn(['names', agentID]).getFullName()
-      const binaryBucket = Buffer.from([])
+      const binaryBucket = dialog === 17
+        ? chat.get('name')
+        : Buffer.from([])
       const time = new Date()
 
       circuit.send('ImprovedInstantMessage', {
@@ -66,7 +70,7 @@ export function sendInstantMessage (text, to, id) {
             RegionID: regionID,
             Position: position,
             Offline: 0,
-            Dialog: 0,
+            Dialog: dialog,
             ID: id,
             Timestamp: Math.floor(time.getTime() / 1000),
             FromAgentName: fromAgentName,
@@ -89,7 +93,7 @@ export function sendInstantMessage (text, to, id) {
         regionID,
         position,
         offline: 0,
-        dialog: 0,
+        dialog: dialog,
         id,
         fromAgentName,
         message: text,
@@ -238,7 +242,10 @@ export function receiveIM (message) {
 
     if (!getIMChats(getState()).has(IMmsg.chatUUID)) {
       // Start a new IMChat.
-      dispatch(createNewIMChat(dialog, IMmsg.chatUUID, fromId, fromAgentName, fromGroup))
+      const name = dialog === 17
+        ? getStringValueOf(message, 'MessageBlock', 'BinaryBucket')
+        : fromAgentName
+      dispatch(createNewIMChat(dialog, IMmsg.chatUUID, fromId, name))
     }
 
     const activeState = getState()
@@ -274,19 +281,38 @@ export function saveIMChatMessages () {
         const id = msg.get('_id')
         ids.push(id) // side-effect!
 
-        const binaryBucket = msg.get('binaryBucket')
+        const dialog = msg.get('dialog')
+
+        let binaryBucket
+        switch (dialog) {
+          case 0:
+          case 13:
+          case 14:
+          case 15:
+          case 16:
+          case 17:
+          case 18:
+            binaryBucket = undefined
+            break
+
+          default:
+            const theBucket = msg.get('binaryBucket')
+            binaryBucket = theBucket != null && theBucket.toJSON().data.length > 1
+              ? theBucket
+              : undefined
+            break
+        }
+
         return {
           _id: id,
           _rev: msg.get('_rev'),
           hoodie: msg.get('hoodie'),
-          dialog: msg.get('dialog'),
+          dialog,
           fromId: msg.get('fromId'),
           fromAgentName: msg.get('fromAgentName'),
           message: msg.get('message'),
           time: msg.get('time'),
-          binaryBucket: binaryBucket != null && binaryBucket.toJSON().data.length > 1
-            ? binaryBucket
-            : undefined
+          binaryBucket
         }
       }).toJSON()
 
@@ -365,8 +391,8 @@ export function startNewIMChat (dialog, targetId, name) {
 }
 
 // Starts a new IMChat.
-function createNewIMChat (dialog, chatUUID, target, name, isFromGroup) {
-  const type = getIMChatTypeOfDialog(dialog, isFromGroup)
+function createNewIMChat (dialog, chatUUID, target, name) {
+  const type = getIMChatTypeOfDialog(dialog)
   if (type == null) return () => {}
 
   return (dispatch, getState) => {
@@ -520,7 +546,7 @@ function calcChatUUID (type, targetId, agentId) {
 }
 
 // Get the chatType stored in an IMChat Info from the dialog value in IMs.
-export function getIMChatTypeOfDialog (dialog, isFromGroup = false) {
+export function getIMChatTypeOfDialog (dialog) {
   switch (dialog) {
     case 0:
       return 'personal'
