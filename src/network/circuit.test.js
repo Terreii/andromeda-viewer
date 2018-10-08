@@ -444,7 +444,7 @@ describe('circuit returns a Promise by reliable packages', () => {
   test('Promise also resolves if the Packet was resend', () => {
     let messageWasAlreadySend = false
     circuit.websocket.onTestMessage = buffer => {
-      if (messageWasAlreadySend) {
+      if (messageWasAlreadySend && circuit.viewerAcks.length > 0) {
         const sequenceNumber = circuit.viewerAcks[0].sequenceNumber
 
         const acksBody = createBody('PacketAck', {
