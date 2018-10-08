@@ -34,6 +34,12 @@
     "url": "https://github.com/Terreii/andromeda-viewer/issues"
   },
   "proxy": "http://localhost:8080",
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
   "devDependencies": {
     "autoscroll-react": "^3.2.0",
     "concurrently": "^4.0.1",
@@ -41,7 +47,7 @@
     "enzyme": "^3.6.0",
     "enzyme-adapter-react-16": "^1.5.0",
     "immutable": "^3.8.2",
-    "jest-enzyme": "^6.1.2",
+    "jest-enzyme": "^7.0.0",
     "jest-styled-components": "^6.2.1",
     "markdown-chalk": "^2.0.0",
     "prop-types": "^15.6.2",
@@ -50,8 +56,9 @@
     "react-burger-menu": "^2.5.3",
     "react-dom": "^16.5.2",
     "react-helmet": "^5.2.0",
+    "react-loadable": "^5.5.0",
     "react-redux": "^5.0.7",
-    "react-scripts": "1.1.5",
+    "react-scripts": "2.0.4",
     "react-test-renderer": "^16.5.2",
     "redux": "^4.0.0",
     "redux-burger-menu": "^0.2.8",
