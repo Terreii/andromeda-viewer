@@ -96,7 +96,7 @@ function FriendRow ({ friend, name, onRightsChanged, startNewIMChat }) {
       href='#startChat'
       onClick={event => {
         event.preventDefault()
-        startNewIMChat(0, id, name)
+        startNewIMChat(0, id, name, true)
           .then(chatUUID => console.log(chatUUID)) // TODO: switch to tap
       }}>
       <img src={chatBubble} height='20' width='20' alt={`Start new chat with ${name}`} />

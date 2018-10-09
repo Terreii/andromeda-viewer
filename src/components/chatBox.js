@@ -57,7 +57,10 @@ export default function ChatBox (props) {
       </TabPane>
 
       <TabPane tab='Groups' key='groups'>
-        <GroupsList groups={props.groups} />
+        <GroupsList
+          groups={props.groups}
+          startNewIMChat={props.startNewIMChat}
+        />
       </TabPane>
 
       <TabPane tab='Local' key='local'>

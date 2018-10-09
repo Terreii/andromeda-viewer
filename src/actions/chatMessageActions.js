@@ -371,7 +371,7 @@ export function getLocalChatHistory (avatarDataSaveId) {
 }
 
 // Start a new IM Chat from the UI.
-export function startNewIMChat (dialog, targetId, name) {
+export function startNewIMChat (dialog, targetId, name, activate = false) {
   return async (dispatch, getState, { hoodie }) => {
     const chatType = getIMChatTypeOfDialog(dialog)
     const chatUUID = calcChatUUID(chatType, targetId, getState().account.get('agentId'))
@@ -385,6 +385,9 @@ export function startNewIMChat (dialog, targetId, name) {
     }
 
     dispatch(createNewIMChat(dialog, chatUUID, targetId, name))
+    if (activate) {
+      dispatch(activateIMChat(chatUUID))
+    }
 
     return chatUUID
   }
@@ -397,9 +400,9 @@ function createNewIMChat (dialog, chatUUID, target, name) {
 
   return (dispatch, getState) => {
     const activeState = getState()
-    const hasChat = getIMChats(activeState).has(chatUUID)
+
     // Stop if the chat already exists.
-    if (hasChat && getIMChats(activeState).getIn([chatUUID, 'active'])) return
+    if (getIMChats(activeState).has(chatUUID)) return
 
     const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
     const saveId = uuid()
@@ -413,6 +416,13 @@ function createNewIMChat (dialog, chatUUID, target, name) {
       target,
       name
     })
+  }
+}
+
+export function activateIMChat (chatUUID) {
+  return {
+    type: 'ActivateIMChat',
+    chatUUID
   }
 }
 

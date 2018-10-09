@@ -39,7 +39,7 @@ const ListItemLink = styled.a`
   flex: 20px 0 0;
 `
 
-function GroupRow ({ group }) {
+function GroupRow ({ group, startNewIMChat }) {
   const name = group.get('name')
 
   return <ListItem>
@@ -48,20 +48,23 @@ function GroupRow ({ group }) {
       href='#startChat'
       onClick={event => {
         event.preventDefault()
-        console.log('start chat of group ' + name)
+        startNewIMChat(15, group.get('id'), name, true)
+        // TODO: switch to tap
+        // .then(chatUUID => console.log(`activate group chat ${name} ${chatUUID}`))
       }}>
       <img src={chatBubble} height='20' width='20' alt={`Start new chat with ${name}`} />
     </ListItemLink>
   </ListItem>
 }
 
-export default function GroupsList ({ groups }) {
+export default function GroupsList ({ groups, startNewIMChat }) {
   return <Outer>
     <ListTitle>Groups</ListTitle>
     <List>
       {groups.map(group => <GroupRow
         key={group.get('id')}
         group={group}
+        startNewIMChat={startNewIMChat}
       />)}
     </List>
   </Outer>

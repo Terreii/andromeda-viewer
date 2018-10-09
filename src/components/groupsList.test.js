@@ -17,7 +17,7 @@ test('renders without crashing', () => {
     })
   ])
 
-  mount(<GroupsList groups={groups} />)
+  mount(<GroupsList groups={groups} startNewIMChat={() => {}} />)
 })
 
 test('rendering', () => {
@@ -40,7 +40,7 @@ test('rendering', () => {
     })
   ])
 
-  const rendered = mount(<GroupsList groups={groups} />)
+  const rendered = mount(<GroupsList groups={groups} startNewIMChat={() => {}} />)
 
   const liElements = rendered.find('li')
   expect(liElements.length).toBe(2)
@@ -52,5 +52,41 @@ test('rendering', () => {
       .toBe('Start new chat with ' + (isFirst ? 'Test Group' : 'The other Group'))
 
     expect(row.first().text()).toBe(isFirst ? 'Test Group' : 'The other Group')
+  })
+})
+
+test('start chat', () => {
+  const groups = List([
+    Map({
+      id: uuid(),
+      name: 'Test Group',
+      insigniaID: uuid(),
+      title: 'Member of the Test Group',
+      acceptNotices: true,
+      powers: [0, 0]
+    })
+  ])
+
+  const actions = []
+
+  const rendered = mount(<GroupsList
+    groups={groups}
+    startNewIMChat={(dialog, targetId, name, activate) => {
+      actions.push({ dialog, targetId, name, activate })
+      return Promise.resolve(targetId)
+    }}
+  />)
+
+  const newChatLink = rendered.find('a')
+  newChatLink.simulate('click', {
+    preventDefault: () => {}
+  })
+
+  expect(actions.length).toBe(1)
+  expect(actions[0]).toEqual({
+    dialog: 15,
+    targetId: groups.getIn([0, 'id']),
+    name: 'Test Group',
+    activate: true
   })
 })
