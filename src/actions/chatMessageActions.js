@@ -14,7 +14,7 @@ import { getShouldSaveChat, getLocalChat, getIMChats } from '../selectors/chat'
  */
 
 export function sendLocalChatMessage (text, type, channel) {
-  // Sends messages from the localchat
+  // Sends messages from the local chat
   // No UI update, because the server/sim will send it
   return (dispatch, getState, { circuit }) => {
     const session = getState().session
@@ -37,7 +37,7 @@ export function sendLocalChatMessage (text, type, channel) {
 }
 
 export function sendInstantMessage (text, to, id, dialog = 0) {
-  return async (dispatch, getState, { hoodie, circuit }) => {
+  return async (dispatch, getState, { circuit }) => {
     try {
       const activeState = getState()
       const session = activeState.session
