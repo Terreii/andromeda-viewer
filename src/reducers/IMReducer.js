@@ -41,7 +41,7 @@ function IMChat (state = Immutable.Map(), action) {
         name: action.name,
         didLoadHistory: state.get('didLoadHistory') || false,
         isLoadingHistory: state.get('isLoadingHistory') || false,
-        active: false,
+        active: state.get('active') || false,
         hasUnsavedMSG: state.get('hasUnsavedMSG') || false,
         messages: state.has('messages') ? state.get('messages') : Immutable.List()
       })
@@ -142,8 +142,12 @@ export default function IMReducer (state = Immutable.Map(), action) {
         const innerAction = Object.assign({}, chat, {
           type: action.type
         })
-        const updatedChat = IMChat(state.get(action.chatUUID), innerAction)
-        return lastState.set(chat.chatUUID, updatedChat)
+        const chatData = state.get(chat.chatUUID)
+        const updatedChat = IMChat(chatData, innerAction)
+
+        return updatedChat === chatData
+          ? lastState
+          : lastState.set(chat.chatUUID, updatedChat)
       }, state)
 
     case 'startSavingIMChatInfo':

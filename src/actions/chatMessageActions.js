@@ -473,11 +473,24 @@ export function loadIMChats () {
     if (!activeState.account.getIn(['viewerAccount', 'loggedIn'])) return
 
     const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
-    hoodie.cryptoStore.withIdPrefix(`${avatarDataSaveId}/imChatsInfos/`).findAll().then(result => {
+    const store = hoodie.cryptoStore.withIdPrefix(`${avatarDataSaveId}/imChatsInfos/`)
+    store.findAll().then(result => {
       dispatch({
         type: 'IMChatInfosLoaded',
         chats: result
       })
+    })
+
+    // if the syncing didn't finish and new chat infos are loaded
+    const handler = doc => {
+      dispatch({
+        type: 'IMChatInfosLoaded',
+        chats: [doc]
+      })
+    }
+    store.on('add', handler)
+    hoodie.one('avatarDidLogout', () => {
+      store.off('add', handler)
     })
   }
 }

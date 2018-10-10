@@ -64,9 +64,10 @@ function namesReducer (state = Immutable.Map(), action) {
 
     case 'IMChatInfosLoaded':
       return state.merge(action.chats.reduce((all, chat) => {
-        if (chat.chatType !== 'personal') return all
+        const avatarId = chat.target
+        if (chat.chatType !== 'personal' || state.has(avatarId)) return all
 
-        all[chat.target] = new AvatarName(chat.name)
+        all[avatarId] = new AvatarName(chat.name)
         return all
       }, {}))
 
