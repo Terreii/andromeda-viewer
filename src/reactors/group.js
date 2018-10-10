@@ -6,19 +6,11 @@ export const groupsDidLoad = createSelector(
   [
     state => state.groups
   ],
-  (() => {
-    let lastCount = 0
-    let lastGroupIds = []
+  groups => {
+    const groupsWithNoImSession = groups.filter(group => !group.get('sessionStarted'))
 
-    return groups => {
-      if (lastCount === groups.size || groups.size === 0) return null
+    if (groupsWithNoImSession.size === 0) return null
 
-      const changedGroups = groups.filter(group => !lastGroupIds.includes(group.get('id')))
-
-      lastCount = groups.size
-      lastGroupIds = groups.map(group => group.get('id')).toJSON()
-
-      return startGroupChat(changedGroups.toJSON())
-    }
-  })()
+    return startGroupChat(groupsWithNoImSession.toJSON())
+  }
 )

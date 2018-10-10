@@ -43,5 +43,10 @@ export function startGroupChat (groups) {
 
       dispatch(startNewIMChat(15, groupId, group.name))
     })
+
+    dispatch({
+      type: 'ChatSessionsStarted',
+      chatUUIDs: groups.map(group => group.id)
+    })
   }
 }

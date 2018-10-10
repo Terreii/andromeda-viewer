@@ -24,6 +24,12 @@ export default function groupsReducer (state = List(), action) {
         }))
       )
 
+    case 'ChatSessionsStarted':
+      return state.map(group => action.chatUUIDs.includes(group.get('id'))
+        ? group.set('sessionStarted', true)
+        : group
+      )
+
     case 'DidLogout':
     case 'UserWasKicked':
       return List()
