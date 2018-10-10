@@ -21,7 +21,7 @@ export default function ChatBox (props) {
   const panels = imsIds.map(id => {
     const chat = props.IMs.get(id)
     const target = chat.get('withId')
-    const type = chat.get('chatType')
+    const type = chat.get('type')
     const name = type === 'personal'
       ? (names.has(target) ? names.get(target).getName() : chat.get('name'))
       : chat.get('name')
