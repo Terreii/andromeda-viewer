@@ -370,9 +370,9 @@ export function getLocalChatHistory (avatarDataSaveId) {
   }
 }
 
-// Start a new IM Chat from the UI.
+// Start a new IM Chat from the UI or startGroupChat.
 export function startNewIMChat (dialog, targetId, name, activate = false) {
-  return async (dispatch, getState, { hoodie }) => {
+  return async (dispatch, getState) => {
     const chatType = getIMChatTypeOfDialog(dialog)
     const chatUUID = calcChatUUID(chatType, targetId, getState().account.get('agentId'))
 
@@ -561,7 +561,7 @@ function uuidXOR (idIn1, idIn2, correct = false) {
 function calcChatUUID (type, targetId, agentId) {
   if (type === 'personal') {
     return uuidXOR(agentId, targetId)
-  } else if (type === 'groupSession' || type === 'session') {
+  } else if (type === 'group' || type === 'conference') {
     return targetId
   } else {
     throw new Error(`Chat type '${type}' not jet supported!`)
@@ -574,9 +574,12 @@ export function getIMChatTypeOfDialog (dialog) {
     case 0:
       return 'personal'
     case 15:
-      return 'groupSession'
+      return 'group' // session with a group
+    case 13:
+    case 14:
+    case 16:
     case 17:
-      return 'session'
+      return 'conference' // session with multiple people
     default:
       return undefined
   }
