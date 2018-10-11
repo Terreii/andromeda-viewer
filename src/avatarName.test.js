@@ -2,128 +2,138 @@
 
 import AvatarName from './avatarName'
 
-global.test('should parse a given name', () => {
-  global.expect(new AvatarName('First.Last')).toEqual({
+test('should parse a given name', () => {
+  expect(new AvatarName('First.Last')).toEqual({
     first: 'First',
     last: 'Last',
     displayName: '',
+    isUsingDisplayName: false,
     didLoadDisplayName: false,
     isLoadingDisplayName: false
   })
-  global.expect(new AvatarName('Tester Linden')).toEqual({
+  expect(new AvatarName('Tester Linden')).toEqual({
     first: 'Tester',
     last: 'Linden',
     displayName: '',
+    isUsingDisplayName: false,
     didLoadDisplayName: false,
     isLoadingDisplayName: false
   })
-  global.expect(new AvatarName('Tester')).toEqual({
+  expect(new AvatarName('Tester')).toEqual({
     first: 'Tester',
     last: 'Resident',
     displayName: '',
+    isUsingDisplayName: false,
     didLoadDisplayName: false,
     isLoadingDisplayName: false
   })
-  global.expect(new AvatarName({ first: 'Tester' })).toEqual({
+  expect(new AvatarName({ first: 'Tester' })).toEqual({
     first: 'Tester',
     last: 'Resident',
     displayName: '',
+    isUsingDisplayName: false,
     didLoadDisplayName: false,
     isLoadingDisplayName: false
   })
-  global.expect(new AvatarName({
+  expect(new AvatarName({
     first: 'Tester',
     last: 'Linden',
     displayName: '',
+    isUsingDisplayName: false,
     didLoadDisplayName: false,
     isLoadingDisplayName: false
   })).toEqual({
     first: 'Tester',
     last: 'Linden',
     displayName: '',
+    isUsingDisplayName: false,
     didLoadDisplayName: false,
     isLoadingDisplayName: false
   })
 })
 
-global.test(
+test(
   'should give only the first name by the method getName() if the ' +
 'last name is "Resident"',
   () => {
-    global.expect(new AvatarName('Tester.Resident').getName()).toBe('Tester')
-    global.expect(new AvatarName('hal2000').getName()).toBe('Hal2000')
+    expect(new AvatarName('Tester.Resident').getName()).toBe('Tester')
+    expect(new AvatarName('hal2000').getName()).toBe('Hal2000')
   }
 )
 
-global.test('should give the full name with the method getFullName()', () => {
-  global.expect(new AvatarName('Tester').getFullName()).toBe('Tester Resident')
-  global.expect(new AvatarName('Tester.Linden').getFullName()).toBe('Tester Linden')
+test('should give the full name with the method getFullName()', () => {
+  expect(new AvatarName('Tester').getFullName()).toBe('Tester Resident')
+  expect(new AvatarName('Tester.Linden').getFullName()).toBe('Tester Linden')
 })
 
-global.test('should have a toString method that behaves like getFullName', () => {
-  global.expect(new AvatarName('Tester.Resident').toString()).toBe('Tester')
-  global.expect(new AvatarName('hal2000').toString()).toBe('Hal2000')
+test('should have a toString method that behaves like getFullName', () => {
+  expect(new AvatarName('Tester.Resident').toString()).toBe('Tester')
+  expect(new AvatarName('hal2000').toString()).toBe('Hal2000')
 })
 
-global.test('should be comparable with the compare method', () => {
+test('should be comparable with the compare method', () => {
   const first = new AvatarName('test')
   const second = new AvatarName({ first: 'test', last: 'Linden' })
   const third = new AvatarName('tEst Resident')
 
-  global.expect(first.compare(second)).toBe(false)
-  global.expect(second.compare(third)).toBe(false)
-  global.expect(second.compare('Test Linden')).toBe(true)
-  global.expect(second.compare(third)).toBe(false)
-  global.expect(first.compare({
+  expect(first.compare(second)).toBe(false)
+  expect(second.compare(third)).toBe(false)
+  expect(second.compare('Test Linden')).toBe(true)
+  expect(second.compare(third)).toBe(false)
+  expect(first.compare({
     first: 'Test',
     last: 'Resident'
   })).toBe(true)
 })
 
-global.test('should format names', () => {
-  global.expect(new AvatarName('tester linden')).toEqual({
+test('should format names', () => {
+  expect(new AvatarName('tester linden')).toEqual({
     first: 'Tester',
     last: 'Linden',
     displayName: '',
+    isUsingDisplayName: false,
     didLoadDisplayName: false,
     isLoadingDisplayName: false
   })
 
-  global.expect(new AvatarName('teSteR lInDeN')).toEqual({
+  expect(new AvatarName('teSteR lInDeN')).toEqual({
     first: 'Tester',
     last: 'Linden',
     displayName: '',
+    isUsingDisplayName: false,
     didLoadDisplayName: false,
     isLoadingDisplayName: false
   })
 })
 
-global.test('should copy itself', () => {
+test('should copy itself', () => {
   const old = new AvatarName('test')
   const isLoading = old.withIsLoadingSetTo(true)
   const displayName = isLoading.withDisplayNameSetTo('Hello')
 
-  global.expect(old).not.toBe(isLoading)
-  global.expect(isLoading).not.toBe(displayName)
+  expect(old).not.toBe(isLoading)
+  expect(isLoading).not.toBe(displayName)
 })
 
-global.test('should update its display name', () => {
+test('should update its display name', () => {
   const old = new AvatarName('test')
   const isLoading = old.withIsLoadingSetTo(true)
   const displayName = isLoading.withDisplayNameSetTo('Hello')
 
-  global.expect(isLoading).toEqual({
+  expect(isLoading).toEqual({
     first: 'Test',
     last: 'Resident',
     displayName: '',
+    isUsingDisplayName: false,
     didLoadDisplayName: false,
     isLoadingDisplayName: true
   })
 
-  global.expect(displayName).toEqual({
+  expect(displayName).toEqual({
     first: 'Test',
     last: 'Resident',
     displayName: 'Hello',
+    isUsingDisplayName: true,
     didLoadDisplayName: true,
     isLoadingDisplayName: false
   })

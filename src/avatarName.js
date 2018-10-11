@@ -18,6 +18,7 @@ export default class AvatarName {
       this.first = name.first
       this.last = name.last
       this.displayName = name.displayName
+      this.isUsingDisplayName = name.isUsingDisplayName
       this.didLoadDisplayName = name.didLoadDisplayName
       this.isLoadingDisplayName = name.isLoadingDisplayName
       return
@@ -39,6 +40,7 @@ export default class AvatarName {
       this.last = cleanName(arguments[1])
     }
     this.displayName = ''
+    this.isUsingDisplayName = false
     this.didLoadDisplayName = false
     this.isLoadingDisplayName = false
   }
@@ -56,7 +58,7 @@ export default class AvatarName {
   }
 
   getDisplayName () {
-    if (this.didLoadDisplayName) {
+    if (this.didLoadDisplayName && this.isUsingDisplayName) {
       return `${this.displayName} (${this.getName()})`
     } else {
       return this.getName()
@@ -87,11 +89,20 @@ export default class AvatarName {
     return next
   }
 
-  withDisplayNameSetTo (displayName) {
+  withDisplayNameSetTo (displayName, legacyFirstName, legacyLastName) {
     const next = new AvatarName(this)
+
+    if (legacyFirstName != null) {
+      next.first = legacyFirstName
+    }
+    if (legacyLastName != null) {
+      next.last = legacyLastName
+    }
+
     next.isLoadingDisplayName = false
     next.didLoadDisplayName = true
     next.displayName = displayName
+    next.isUsingDisplayName = next.getName() !== displayName
     return next
   }
 }

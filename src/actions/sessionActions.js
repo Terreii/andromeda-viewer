@@ -121,7 +121,7 @@ export function logout () {
       return Promise.reject(new Error("You aren't logged in!"))
     }
 
-    const logoutPromise = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       circuit.send('LogoutRequest', {
         AgentData: [
           {
@@ -137,21 +137,15 @@ export function logout () {
       })
 
       circuit.once('LogoutReply', msg => {
+        dispatch(afterAvatarSessionEnds())
+
         dispatch({
           type: 'DidLogout'
         })
 
-        circuit.close()
-        circuit.removeAllListeners()
-        extra.circuit = null
         resolve()
       })
     })
-
-    return Promise.all([
-      logoutPromise,
-      dispatch(deleteOldLocalChat())
-    ])
   }
 }
 
@@ -223,13 +217,14 @@ function connectToSim (sessionInfo, circuit) {
           }
         ]
       }, true)
+
+      dispatch(requestAvatarProperties(sessionInfo.agent_id))
     }, 100)
   }
 }
 
 function getKicked (msg) {
   return (dispatch, getState, extra) => {
-    const circuit = extra.circuit
     const session = getState().session
     const agentId = session.get('agentId')
     const sessionId = session.get('sessionId')
@@ -237,16 +232,43 @@ function getKicked (msg) {
     const msgSessionId = getValueOf(msg, 'UserInfo', 0, 'SessionID')
 
     if (agentId === msgAgentId && sessionId === msgSessionId) {
-      circuit.close()
-      circuit.removeAllListeners()
-      extra.circuit = null
-
-      dispatch(deleteOldLocalChat())
+      dispatch(afterAvatarSessionEnds())
 
       dispatch({
         type: 'UserWasKicked',
         reason: getStringValueOf(msg, 'UserInfo', 0, 'Reason')
       })
     }
+  }
+}
+
+// Cleanup thats happens after logout and getting kicked
+function afterAvatarSessionEnds () {
+  return (dispatch, getState, extra) => {
+    extra.circuit.close()
+    extra.circuit.removeAllListeners()
+    extra.circuit = null
+
+    extra.hoodie.trigger('avatarDidLogout')
+
+    return dispatch(deleteOldLocalChat())
+  }
+}
+
+function requestAvatarProperties (avatarID) {
+  return (dispatch, getState, { circuit }) => {
+    const session = getState().session
+    const agentID = session.get('agentId')
+    const sessionID = session.get('sessionId')
+
+    circuit.send('AvatarPropertiesRequest', {
+      AgentData: [
+        {
+          AgentID: agentID,
+          SessionID: sessionID,
+          AvatarID: avatarID
+        }
+      ]
+    }, true)
   }
 }

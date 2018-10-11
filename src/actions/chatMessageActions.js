@@ -14,7 +14,7 @@ import { getShouldSaveChat, getLocalChat, getIMChats } from '../selectors/chat'
  */
 
 export function sendLocalChatMessage (text, type, channel) {
-  // Sends messages from the localchat
+  // Sends messages from the local chat
   // No UI update, because the server/sim will send it
   return (dispatch, getState, { circuit }) => {
     const session = getState().session
@@ -36,11 +36,13 @@ export function sendLocalChatMessage (text, type, channel) {
   }
 }
 
-export function sendInstantMessage (text, to, id) {
-  return async (dispatch, getState, { hoodie, circuit }) => {
+export function sendInstantMessage (text, to, id, dialog = 0) {
+  return async (dispatch, getState, { circuit }) => {
     try {
       const activeState = getState()
       const session = activeState.session
+
+      const chat = getIMChats(activeState).find(chat => chat.get('chatUUID') === id)
 
       const agentID = session.get('agentId')
       const sessionID = session.get('sessionId')
@@ -48,7 +50,9 @@ export function sendInstantMessage (text, to, id) {
       const regionID = session.getIn(['regionInfo', 'regionID'])
       const position = session.getIn(['position', 'position'])
       const fromAgentName = activeState.names.getIn(['names', agentID]).getFullName()
-      const binaryBucket = Buffer.from([])
+      const binaryBucket = dialog === 17
+        ? chat.get('name')
+        : Buffer.from([])
       const time = new Date()
 
       circuit.send('ImprovedInstantMessage', {
@@ -66,7 +70,7 @@ export function sendInstantMessage (text, to, id) {
             RegionID: regionID,
             Position: position,
             Offline: 0,
-            Dialog: 0,
+            Dialog: dialog,
             ID: id,
             Timestamp: Math.floor(time.getTime() / 1000),
             FromAgentName: fromAgentName,
@@ -89,7 +93,7 @@ export function sendInstantMessage (text, to, id) {
         regionID,
         position,
         offline: 0,
-        dialog: 0,
+        dialog: dialog,
         id,
         fromAgentName,
         message: text,
@@ -213,12 +217,13 @@ export function receiveIM (message) {
     const time = getValueOf(message, 'MessageBlock', 'Timestamp')
     const dialog = getValueOf(message, 'MessageBlock', 'Dialog')
     const fromAgentName = getStringValueOf(message, 'MessageBlock', 'FromAgentName')
+    const fromGroup = getValueOf(message, 'MessageBlock', 'FromGroup')
 
     const IMmsg = {
       _id: '',
       sessionID: getValueOf(message, 'AgentData', 'SessionID'),
       fromId,
-      fromGroup: getValueOf(message, 'MessageBlock', 'FromGroup'),
+      fromGroup,
       toAgentID,
       parentEstateID: getValueOf(message, 'MessageBlock', 'ParentEstateID'),
       regionID: getValueOf(message, 'MessageBlock', 'RegionID'),
@@ -233,11 +238,14 @@ export function receiveIM (message) {
     }
 
     // If it is a group chat, toAgentID is the Group-UUID.
-    IMmsg.chatUUID = IMmsg.fromGroup ? IMmsg.toAgentID : IMmsg.id
+    IMmsg.chatUUID = fromGroup ? IMmsg.toAgentID : IMmsg.id
 
     if (!getIMChats(getState()).has(IMmsg.chatUUID)) {
       // Start a new IMChat.
-      dispatch(createNewIMChat(dialog, IMmsg.chatUUID, fromId, fromAgentName))
+      const name = dialog === 17
+        ? getStringValueOf(message, 'MessageBlock', 'BinaryBucket')
+        : fromAgentName
+      dispatch(createNewIMChat(dialog, IMmsg.chatUUID, fromId, name))
     }
 
     const activeState = getState()
@@ -273,19 +281,38 @@ export function saveIMChatMessages () {
         const id = msg.get('_id')
         ids.push(id) // side-effect!
 
-        const binaryBucket = msg.get('binaryBucket')
+        const dialog = msg.get('dialog')
+
+        let binaryBucket
+        switch (dialog) {
+          case 0:
+          case 13:
+          case 14:
+          case 15:
+          case 16:
+          case 17:
+          case 18:
+            binaryBucket = undefined
+            break
+
+          default:
+            const theBucket = msg.get('binaryBucket')
+            binaryBucket = theBucket != null && theBucket.toJSON().data.length > 1
+              ? theBucket
+              : undefined
+            break
+        }
+
         return {
           _id: id,
           _rev: msg.get('_rev'),
           hoodie: msg.get('hoodie'),
-          dialog: msg.get('dialog'),
+          dialog,
           fromId: msg.get('fromId'),
           fromAgentName: msg.get('fromAgentName'),
           message: msg.get('message'),
           time: msg.get('time'),
-          binaryBucket: binaryBucket != null && binaryBucket.toJSON().data.length > 1
-            ? binaryBucket
-            : undefined
+          binaryBucket
         }
       }).toJSON()
 
@@ -343,9 +370,9 @@ export function getLocalChatHistory (avatarDataSaveId) {
   }
 }
 
-// Start a new IM Chat from the UI.
-export function startNewIMChat (dialog, targetId, name) {
-  return async (dispatch, getState, { hoodie }) => {
+// Start a new IM Chat from the UI or startGroupChat.
+export function startNewIMChat (dialog, targetId, name, activate = false) {
+  return async (dispatch, getState) => {
     const chatType = getIMChatTypeOfDialog(dialog)
     const chatUUID = calcChatUUID(chatType, targetId, getState().account.get('agentId'))
 
@@ -358,21 +385,24 @@ export function startNewIMChat (dialog, targetId, name) {
     }
 
     dispatch(createNewIMChat(dialog, chatUUID, targetId, name))
+    if (activate) {
+      dispatch(activateIMChat(chatUUID))
+    }
 
     return chatUUID
   }
 }
 
-// Starts a new IMChat. It also saves it into Hoodie.
+// Starts a new IMChat.
 function createNewIMChat (dialog, chatUUID, target, name) {
   const type = getIMChatTypeOfDialog(dialog)
   if (type == null) return () => {}
 
-  return (dispatch, getState, { hoodie }) => {
+  return (dispatch, getState) => {
     const activeState = getState()
-    const hasChat = getIMChats(activeState).has(chatUUID)
+
     // Stop if the chat already exists.
-    if (hasChat && getIMChats(activeState).getIn([chatUUID, 'active'])) return
+    if (getIMChats(activeState).has(chatUUID)) return
 
     const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
     const saveId = uuid()
@@ -386,6 +416,13 @@ function createNewIMChat (dialog, chatUUID, target, name) {
       target,
       name
     })
+  }
+}
+
+export function activateIMChat (chatUUID) {
+  return {
+    type: 'ActivateIMChat',
+    chatUUID
   }
 }
 
@@ -436,11 +473,24 @@ export function loadIMChats () {
     if (!activeState.account.getIn(['viewerAccount', 'loggedIn'])) return
 
     const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
-    hoodie.cryptoStore.withIdPrefix(`${avatarDataSaveId}/imChatsInfos/`).findAll().then(result => {
+    const store = hoodie.cryptoStore.withIdPrefix(`${avatarDataSaveId}/imChatsInfos/`)
+    store.findAll().then(result => {
       dispatch({
         type: 'IMChatInfosLoaded',
         chats: result
       })
+    })
+
+    // if the syncing didn't finish and new chat infos are loaded
+    const handler = doc => {
+      dispatch({
+        type: 'IMChatInfosLoaded',
+        chats: [doc]
+      })
+    }
+    store.on('add', handler)
+    hoodie.one('avatarDidLogout', () => {
+      store.off('add', handler)
     })
   }
 }
@@ -511,6 +561,8 @@ function uuidXOR (idIn1, idIn2, correct = false) {
 function calcChatUUID (type, targetId, agentId) {
   if (type === 'personal') {
     return uuidXOR(agentId, targetId)
+  } else if (type === 'group' || type === 'conference') {
+    return targetId
   } else {
     throw new Error(`Chat type '${type}' not jet supported!`)
   }
@@ -521,6 +573,13 @@ export function getIMChatTypeOfDialog (dialog) {
   switch (dialog) {
     case 0:
       return 'personal'
+    case 15:
+      return 'group' // session with a group
+    case 13:
+    case 14:
+    case 16:
+    case 17:
+      return 'conference' // session with multiple people
     default:
       return undefined
   }

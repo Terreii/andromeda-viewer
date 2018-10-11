@@ -10,26 +10,29 @@ import Helmet from 'react-helmet'
 
 import ChatDialog from './chatDialog'
 import FriendsList from './friendsList'
+import GroupsList from './groupsList'
 
 import 'rc-tabs/assets/index.css'
 
 export default function ChatBox (props) {
-  const names = props.names.get('names')
+  const names = props.names
   const imsIds = props.IMs.keySeq().toJSON()
 
   const panels = imsIds.map(id => {
     const chat = props.IMs.get(id)
     const target = chat.get('withId')
-    const name = names.has(target)
-      ? names.get(target).getName()
-      : target
+    const type = chat.get('type')
+    const name = type === 'personal'
+      ? (names.has(target) ? names.get(target).getName() : chat.get('name'))
+      : chat.get('name')
 
     return <TabPane tab={name} key={id}>
       <ChatDialog
         data={chat}
         isIM
-        sendTo={text => props.sendInstantMessage(text, target, id)}
+        sendTo={text => props.sendInstantMessage(text, target, id, type === 'personal' ? 0 : 17)}
         names={names}
+        type={type}
         loadHistory={props.getIMHistory}
       />
     </TabPane>
@@ -50,6 +53,13 @@ export default function ChatBox (props) {
           friends={props.friends}
           startNewIMChat={props.startNewIMChat}
           updateRights={props.updateRights}
+        />
+      </TabPane>
+
+      <TabPane tab='Groups' key='groups'>
+        <GroupsList
+          groups={props.groups}
+          startNewIMChat={props.startNewIMChat}
         />
       </TabPane>
 

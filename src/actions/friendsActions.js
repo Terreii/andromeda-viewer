@@ -1,5 +1,7 @@
 import { fetchLLSD } from './llsd'
 
+import { getNames } from '../selectors/names'
+
 function sendUUIDNameRequest (ids) {
   return (dispatch, getState, { circuit }) => {
     if (ids.length === 0) return
@@ -43,13 +45,9 @@ function loadDisplayNames (idsArray) {
   }
 }
 
-export function getDisplayName (id) {
+export function getDisplayName () {
   return (dispatch, getState) => {
-    const state = getState()
-
-    const names = state.names.get('names')
-    const idString = id.toString()
-    if (names.has(idString) && names.get(idString).willHaveDisplayName()) return
+    const names = getNames(getState())
 
     const toLoad = names.filter(name => !name.willHaveDisplayName()).keySeq().toArray()
     if (toLoad.length > 0) {
@@ -62,7 +60,7 @@ export function getAllFriendsDisplayNames () {
   return (dispatch, getState) => {
     const state = getState()
 
-    const names = state.names.get('names')
+    const names = getNames(state)
     const friendsIds = state.friends
       .map(friend => friend.get('id'))
       .push(state.account.get('agentId')) // Add self

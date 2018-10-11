@@ -30,8 +30,10 @@ const List = styled.ul`
 const ListItem = styled.li`
   display: flex;
   flex-direction: row;
+  padding: 0.2em;
+  border-radius: 0.2em;
 
-  &::nth-child(odd) {
+  &:nth-child(even) {
     background-color: rgb(173, 173, 173);
   }
 `
@@ -94,7 +96,7 @@ function FriendRow ({ friend, name, onRightsChanged, startNewIMChat }) {
       href='#startChat'
       onClick={event => {
         event.preventDefault()
-        startNewIMChat(0, id, name)
+        startNewIMChat(0, id, name, true)
           .then(chatUUID => console.log(chatUUID)) // TODO: switch to tap
       }}>
       <img src={chatBubble} height='20' width='20' alt={`Start new chat with ${name}`} />

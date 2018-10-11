@@ -18,6 +18,9 @@ function simActionFilter (msg) {
 
     // For all messages that will and can be directly dispatched
     case 'AgentMovementComplete':
+    case 'AvatarPropertiesReply':
+    case 'AvatarInterestsReply':
+    case 'AvatarGroupsReply':
     case 'RegionInfo':
     case 'UUIDNameReply':
       return msg

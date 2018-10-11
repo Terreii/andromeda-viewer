@@ -64,9 +64,22 @@ function namesReducer (state = Immutable.Map(), action) {
 
     case 'IMChatInfosLoaded':
       return state.merge(action.chats.reduce((all, chat) => {
-        all[chat.target] = new AvatarName(chat.name)
+        const avatarId = chat.target
+        if (chat.chatType !== 'personal' || state.has(avatarId)) return all
+
+        all[avatarId] = new AvatarName(chat.name)
         return all
       }, {}))
+
+    case 'IMHistoryLoaded':
+      return state.withMutations(oldState => {
+        action.messages.reduce((state, msg) => {
+          if (!state.has(msg.fromId)) {
+            return state.set(msg.fromId, new AvatarName(msg.fromAgentName))
+          }
+          return state
+        }, oldState)
+      })
 
     case 'DisplayNamesStartLoading':
       return action.ids.reduce((names, id) => {
@@ -79,9 +92,11 @@ function namesReducer (state = Immutable.Map(), action) {
       return action.agents.reduce((names, agent) => {
         const id = agent.id.toString()
         const old = names.has(id) ? names.get(id) : new AvatarName(agent.username)
-        const next = old.withDisplayNameSetTo(agent.display_name)
-        next.first = agent.legacy_first_name
-        next.last = agent.legacy_last_name
+        const next = old.withDisplayNameSetTo(
+          agent.display_name,
+          agent.legacy_first_name,
+          agent.legacy_last_name
+        )
         return names.set(id, next)
       }, state)
 
@@ -98,6 +113,7 @@ export default function namesCoreReducer (state = Immutable.Map(), action) {
     case 'didLogin':
     case 'UUIDNameReply':
     case 'IMChatInfosLoaded':
+    case 'IMHistoryLoaded':
     case 'DisplayNamesStartLoading':
     case 'DisplayNamesLoaded':
       return state.set('names', namesReducer(state.get('names'), action))
