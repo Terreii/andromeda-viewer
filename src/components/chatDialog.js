@@ -54,6 +54,29 @@ export default class ChatDialog extends React.Component {
     }
   }
 
+  _onChange (event, value) {
+    this.setState({
+      text: event.target.value
+    })
+  }
+
+  _onKeyDown (event) {
+    if (event.keyCode === 13) {
+      this._send(event)
+    }
+  }
+
+  _send (event) {
+    event.preventDefault()
+    const text = this.state.text.trim()
+    if (text) {
+      this.props.sendTo(text)
+    }
+    this.setState({
+      text: ''
+    })
+  }
+
   render () {
     const messages = this.props.isIM ? this.props.data.get('messages') : this.props.data
 
@@ -81,29 +104,6 @@ export default class ChatDialog extends React.Component {
         </SendButton>
       </ChatTextSend>
     </Main>
-  }
-
-  _onChange (event, value) {
-    this.setState({
-      text: event.target.value
-    })
-  }
-
-  _onKeyDown (event) {
-    if (event.keyCode === 13) {
-      this._send(event)
-    }
-  }
-
-  _send (event) {
-    event.preventDefault()
-    const text = this.state.text.trim()
-    if (text) {
-      this.props.sendTo(text)
-    }
-    this.setState({
-      text: ''
-    })
   }
 }
 
