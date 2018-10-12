@@ -39,9 +39,14 @@ export default class ChatDialog extends React.Component {
     this._boundChange = this._onChange.bind(this)
     this._boundKeyDown = this._onKeyDown.bind(this)
     this._boundClickSend = this._send.bind(this)
+    this._boundLoadHistory = this._loadHistory.bind(this)
   }
 
   componentDidMount () {
+    this._loadHistory()
+  }
+
+  _loadHistory () {
     const isIM = this.props.isIM
     const data = this.props.data
     if (isIM && !data.get('didLoadHistory') && !data.get('isLoadingHistory')) {
@@ -60,6 +65,7 @@ export default class ChatDialog extends React.Component {
         messages={messages}
         isIM={this.props.isIM}
         names={this.props.names}
+        onScrolledTop={this._boundLoadHistory}
       />
       <ChatTextSend>
         <TextBox
