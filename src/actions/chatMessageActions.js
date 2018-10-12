@@ -517,12 +517,11 @@ export function getIMHistory (chatUUID, chatSaveId) {
       const idsResult = await hoodie.store.db.allDocs({
         startkey: firstMsgId,
         endkey: chatSavePrefix,
-        inclusive_end: false,
-        limit: 100,
+        limit: 101,
         descending: true
       })
 
-      if (idsResult.rows.length === 0) {
+      if (idsResult.rows.length <= 1) {
         dispatch({
           type: 'IMHistoryLoaded',
           chatUUID,
@@ -532,7 +531,7 @@ export function getIMHistory (chatUUID, chatSaveId) {
         return
       }
 
-      const ids = idsResult.rows.map(row => row.id).reverse()
+      const ids = idsResult.rows.map(row => row.id).reverse().slice(0, 100)
       const messages = await hoodie.cryptoStore.find(ids)
 
       dispatch({
