@@ -508,7 +508,8 @@ export function getIMHistory (chatUUID, chatSaveId) {
 
     const chat = getIMChats(getState()).get(chatUUID)
     // get the _id of the oldest loaded msg
-    const firstMsgId = chat.hasIn(['messages', 0, '_id'])
+    const hasAMessage = chat.hasIn(['messages', 0, '_id'])
+    const firstMsgId = hasAMessage
       ? chat.getIn(['messages', 0, '_id'])
       : (chatSavePrefix + '/\uFFFF') // or one with a special id that is always the last
 
@@ -517,11 +518,16 @@ export function getIMHistory (chatUUID, chatSaveId) {
       const idsResult = await hoodie.store.db.allDocs({
         startkey: firstMsgId,
         endkey: chatSavePrefix,
-        limit: 101,
+        limit: hasAMessage ? 101 : 100, // 100 + last
         descending: true
       })
 
-      if (idsResult.rows.length <= 1) {
+      const ids = idsResult.rows
+        .map(row => row.id)
+        .reverse()
+        .filter(id => id !== firstMsgId)
+
+      if (ids.length === 0) {
         dispatch({
           type: 'IMHistoryLoaded',
           chatUUID,
@@ -531,7 +537,6 @@ export function getIMHistory (chatUUID, chatSaveId) {
         return
       }
 
-      const ids = idsResult.rows.map(row => row.id).reverse().slice(0, 100)
       const messages = await hoodie.cryptoStore.find(ids)
 
       dispatch({
