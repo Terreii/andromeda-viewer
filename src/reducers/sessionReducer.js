@@ -81,6 +81,9 @@ export default function SessionReducer (state = Map({ loggedIn: false, error: nu
     case 'ClosePopup':
       return state.set('error', null)
 
+    case 'SeedCapabilitiesLoaded':
+      return state.set('eventQueueGetUrl', action.capabilities.EventQueueGet)
+
     default:
       return state
   }
