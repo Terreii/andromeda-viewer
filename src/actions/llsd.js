@@ -1,4 +1,5 @@
 import LLSD from '../llsd'
+import caps from './capabilities.json'
 
 async function parseLLSD (response) {
   const body = await response.text()
@@ -32,20 +33,17 @@ export async function fetchLLSD (method, url, data = null, mimeType = LLSD.MIMET
 }
 
 export function fetchSeedCapabilities (url) {
-  return dispatch => {
-    const finished = fetchLLSD('POST', url, [
-      'EventQueueGet',
-      'GetDisplayNames'
-    ])
-      .then(capabilities => {
-        dispatch({
-          type: 'SeedCapabilitiesLoaded',
-          capabilities
-        })
-        dispatch(activateEventQueue())
+  return async dispatch => {
+    try {
+      const capabilities = await fetchLLSD('POST', url, caps)
+      dispatch({
+        type: 'SeedCapabilitiesLoaded',
+        capabilities
       })
-      .catch(error => console.error(error))
-    return finished
+      dispatch(activateEventQueue())
+    } catch (error) {
+      console.error(error)
+    }
   }
 }
 
