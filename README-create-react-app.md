@@ -96,7 +96,7 @@ You can find the most recent version of this guide [here](https://github.com/fac
   - [S3 and CloudFront](#s3-and-cloudfront)
   - [Surge](#surge)
 - [Advanced Configuration](#advanced-configuration)
-- [Troubleshooting](#troubleshooting)
+- [Troubleshooting](#troubleshooting-1)
   - [`npm start` doesn’t detect changes](#npm-start-doesnt-detect-changes)
   - [`npm test` hangs or crashes on macOS Sierra](#npm-test-hangs-or-crashes-on-macos-sierra)
   - [`npm run build` exits too early](#npm-run-build-exits-too-early)
@@ -163,6 +163,8 @@ Read instructions below for using assets from JavaScript and HTML.
 
 You can, however, create more top-level directories.<br>
 They will not be included in the production build so you can use them for things like documentation.
+
+If you have Git installed and your project is not part of a larger repository, then a new repository will be initialized resulting in an additional `.git/` top-level directory.
 
 ## Available Scripts
 
@@ -596,13 +598,21 @@ This will allow you to do imports like
 
 > **Note:** You must prefix imports from `node_modules` with `~` as displayed above.
 
+> **Note:** If you're using Flow, add the following to your `.flowconfig` so it'll recognize the `.sass` or `.scss` imports.
+
+```
+[options]
+module.file_ext=.sass
+module.file_ext=.scss
+```
+
 ## Post-Processing CSS
 
 This project setup minifies your CSS and adds vendor prefixes to it automatically through [Autoprefixer](https://github.com/postcss/autoprefixer) so you don’t need to worry about it.
 
 Support for new CSS features like the [`all` property](https://developer.mozilla.org/en-US/docs/Web/CSS/all), [`break` properties](https://www.w3.org/TR/css-break-3/#breaking-controls), [custom properties](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_variables), and [media query ranges](https://www.w3.org/TR/mediaqueries-4/#range-context) are automatically polyfilled to add support for older browsers.
 
-You can customize your target support browsers by adjusting the `browserslist` key in `package.json` accoring to the [Browserslist specification](https://github.com/browserslist/browserslist#readme).
+You can customize your target support browsers by adjusting the `browserslist` key in `package.json` according to the [Browserslist specification](https://github.com/browserslist/browserslist#readme).
 
 For example, this:
 
@@ -1240,7 +1250,7 @@ set HTTPS=true&&npm start
 #### Windows (Powershell)
 
 ```Powershell
-($env:HTTPS = $true) -and (npm start)
+($env:HTTPS = "true") -and (npm start)
 ```
 
 #### Linux, macOS (Bash)
@@ -1457,6 +1467,48 @@ Import it in [`src/setupTests.js`](#initializing-test-environment) to make its m
 ```js
 import 'jest-enzyme';
 ```
+
+#### Use `react-testing-library`
+
+As an alternative or companion to `enzyme`, you may consider using `react-testing-library`. [`react-testing-library`](https://github.com/kentcdodds/react-testing-library) is a library for testing React components in a way that resembles the way the components are used by end users. It is well suited for unit, integration, and end-to-end testing of React components and applications. It works more directly with DOM nodes, and therefore it's recommended to use with [`jest-dom`](https://github.com/gnapse/jest-dom) for improved assertions.
+
+To install `react-testing-library` and `jest-dom`, you can run:
+
+```sh
+npm install --save react-testing-library jest-dom
+```
+
+Alternatively you may use `yarn`:
+
+```sh
+yarn add react-testing-library jest-dom
+```
+
+Similar to `enzyme` you can create a `src/setupTests.js` file to avoid boilerplate in your test files:
+
+```js
+// react-testing-library renders your components to document.body,
+// this will ensure they're removed after each test.
+import 'react-testing-library/cleanup-after-each';
+
+// this adds jest-dom's custom assertions
+import 'jest-dom/extend-expect';
+```
+
+Here's an example of using `react-testing-library` and `jest-dom` for testing that the `<App />` component renders "Welcome to React".
+
+```js
+import React from 'react';
+import { render } from 'react-testing-library';
+import App from './App';
+
+it('renders welcome message', () => {
+  const { getByText } = render(<App />);
+  expect(getByText('Welcome to React')).toBeInTheDocument();
+});
+```
+
+Learn more about the utilities provided by `react-testing-library` to facilitate testing asynchronous interactions as well as selecting form elements from [the `react-testing-library` documentation](https://github.com/kentcdodds/react-testing-library) and [examples](https://codesandbox.io/s/github/kentcdodds/react-testing-library-examples).
 
 ### Using Third Party Assertion Libraries
 
@@ -1852,15 +1904,31 @@ or unreliable network.
 If you do decide to opt-in to service worker registration, please take the
 following into account:
 
+1. After the initial caching is done, the [service worker lifecycle](https://developers.google.com/web/fundamentals/primers/service-workers/lifecycle)
+controls when updated content ends up being shown to users. In order to guard against
+[race conditions with lazy-loaded content](https://github.com/facebook/create-react-app/issues/3613#issuecomment-353467430),
+the default behavior is to conservatively keep the updated service worker in the "[waiting](https://developers.google.com/web/fundamentals/primers/service-workers/lifecycle#waiting)"
+state. This means that users will end up seeing older content until they close (reloading is not
+enough) their existing, open tabs. See [this blog post](https://jeffy.info/2018/10/10/sw-in-c-r-a.html)
+for more details about this behavior.
+
+1. Users aren't always familiar with offline-first web apps. It can be useful to
+   [let the user know](https://developers.google.com/web/fundamentals/instant-and-offline/offline-ux#inform_the_user_when_the_app_is_ready_for_offline_consumption)
+   when the service worker has finished populating your caches (showing a "This web
+   app works offline!" message) and also let them know when the service worker has
+   fetched the latest updates that will be available the next time they load the
+   page (showing a "New content is available once existing tabs are closed." message). Showing
+   this messages is currently left as an exercise to the developer, but as a
+   starting point, you can make use of the logic included in [`src/serviceWorker.js`](src/serviceWorker.js), which
+   demonstrates which service worker lifecycle events to listen for to detect each
+   scenario, and which as a default, just logs appropriate messages to the
+   JavaScript console.
+
 1. Service workers [require HTTPS](https://developers.google.com/web/fundamentals/getting-started/primers/service-workers#you_need_https),
    although to facilitate local testing, that policy
    [does not apply to `localhost`](http://stackoverflow.com/questions/34160509/options-for-testing-service-workers-via-http/34161385#34161385).
    If your production web server does not support HTTPS, then the service worker
    registration will fail, but the rest of your web app will remain functional.
-
-1. Service workers are [not supported](https://jakearchibald.github.io/isserviceworkerready/#moar)
-   in older web browsers. Service worker registration [won't be attempted](src/registerServiceWorker.js)
-   on browsers that lack support.
 
 1. The service worker is only enabled in the [production environment](#deployment),
    e.g. the output of `npm run build`. It's recommended that you do not enable an
@@ -1874,18 +1942,6 @@ following into account:
    instructions for one way to test your production build locally and the [deployment instructions](#deployment) have
    instructions for using other methods. _Be sure to always use an
    incognito window to avoid complications with your browser cache._
-
-1. Users aren't always familiar with offline-first web apps. It can be useful to
-   [let the user know](https://developers.google.com/web/fundamentals/instant-and-offline/offline-ux#inform_the_user_when_the_app_is_ready_for_offline_consumption)
-   when the service worker has finished populating your caches (showing a "This web
-   app works offline!" message) and also let them know when the service worker has
-   fetched the latest updates that will be available the next time they load the
-   page (showing a "New content is available; please refresh." message). Showing
-   this messages is currently left as an exercise to the developer, but as a
-   starting point, you can make use of the logic included in [`src/registerServiceWorker.js`](src/registerServiceWorker.js), which
-   demonstrates which service worker lifecycle events to listen for to detect each
-   scenario, and which as a default, just logs appropriate messages to the
-   JavaScript console.
 
 1. By default, the generated service worker file will not intercept or cache any
    cross-origin traffic, like HTTP [API requests](#integrating-with-an-api-backend),
@@ -2403,18 +2459,19 @@ Note that in order to support routers that use HTML5 `pushState` API, you may wa
 
 You can adjust various development and production settings by setting environment variables in your shell or with [.env](#adding-development-environment-variables-in-env).
 
-| Variable            |      Development       |     Production     | Usage                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| :------------------ | :--------------------: | :----------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| BROWSER             |   :white_check_mark:   |        :x:         | By default, Create React App will open the default system browser, favoring Chrome on macOS. Specify a [browser](https://github.com/sindresorhus/opn#app) to override this behavior, or set it to `none` to disable it completely. If you need to customize the way the browser is launched, you can specify a node script instead. Any arguments passed to `npm start` will also be passed to this script, and the url where your app is served will be the last argument. Your script's file name must have the `.js` extension.                                                                                                                                       |
-| HOST                |   :white_check_mark:   |        :x:         | By default, the development web server binds to `localhost`. You may use this variable to specify a different host.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| PORT                |   :white_check_mark:   |        :x:         | By default, the development web server will attempt to listen on port 3000 or prompt you to attempt the next available port. You may use this variable to specify a different port.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| HTTPS               |   :white_check_mark:   |        :x:         | When set to `true`, Create React App will run the development server in `https` mode.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| PUBLIC_URL          |          :x:           | :white_check_mark: | Create React App assumes your application is hosted at the serving web server's root or a subpath as specified in [`package.json` (`homepage`)](#building-for-relative-paths). Normally, Create React App ignores the hostname. You may use this variable to force assets to be referenced verbatim to the url you provide (hostname included). This may be particularly useful when using a CDN to host your application.                                                                                                                                                                                                                                               |
-| CI                  | :large_orange_diamond: | :white_check_mark: | When set to `true`, Create React App treats warnings as failures in the build. It also makes the test runner non-watching. Most CIs set this flag by default.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| REACT_EDITOR        |   :white_check_mark:   |        :x:         | When an app crashes in development, you will see an error overlay with clickable stack trace. When you click on it, Create React App will try to determine the editor you are using based on currently running processes, and open the relevant source file. You can [send a pull request to detect your editor of choice](https://github.com/facebook/create-react-app/issues/2636). Setting this environment variable overrides the automatic detection. If you do it, make sure your systems [PATH](<https://en.wikipedia.org/wiki/PATH_(variable)>) environment variable points to your editor’s bin folder. You can also set it to `none` to disable it completely. |
-| CHOKIDAR_USEPOLLING |   :white_check_mark:   |        :x:         | When set to `true`, the watcher runs in polling mode, as necessary inside a VM. Use this option if `npm start` isn't detecting changes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| GENERATE_SOURCEMAP  |          :x:           | :white_check_mark: | When set to `false`, source maps are not generated for a production build. This solves OOM issues on some smaller machines.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| NODE_PATH           |   :white_check_mark:   | :white_check_mark: | Same as [`NODE_PATH` in Node.js](https://nodejs.org/api/modules.html#modules_loading_from_the_global_folders), but only relative folders are allowed. Can be handy for emulating a monorepo setup by setting `NODE_PATH=src`.                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Variable             |      Development       |     Production     | Usage                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| :------------------: | :--------------------: | :----------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BROWSER              |   :white_check_mark:   |        :x:         | By default, Create React App will open the default system browser, favoring Chrome on macOS. Specify a [browser](https://github.com/sindresorhus/opn#app) to override this behavior, or set it to `none` to disable it completely. If you need to customize the way the browser is launched, you can specify a node script instead. Any arguments passed to `npm start` will also be passed to this script, and the url where your app is served will be the last argument. Your script's file name must have the `.js` extension.                                                                                                                                       |
+| HOST                 |   :white_check_mark:   |        :x:         | By default, the development web server binds to `localhost`. You may use this variable to specify a different host.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| PORT                 |   :white_check_mark:   |        :x:         | By default, the development web server will attempt to listen on port 3000 or prompt you to attempt the next available port. You may use this variable to specify a different port.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| HTTPS                |   :white_check_mark:   |        :x:         | When set to `true`, Create React App will run the development server in `https` mode.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| PUBLIC_URL           |          :x:           | :white_check_mark: | Create React App assumes your application is hosted at the serving web server's root or a subpath as specified in [`package.json` (`homepage`)](#building-for-relative-paths). Normally, Create React App ignores the hostname. You may use this variable to force assets to be referenced verbatim to the url you provide (hostname included). This may be particularly useful when using a CDN to host your application.                                                                                                                                                                                                                                               |
+| CI                   | :large_orange_diamond: | :white_check_mark: | When set to `true`, Create React App treats warnings as failures in the build. It also makes the test runner non-watching. Most CIs set this flag by default.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| REACT_EDITOR         |   :white_check_mark:   |        :x:         | When an app crashes in development, you will see an error overlay with clickable stack trace. When you click on it, Create React App will try to determine the editor you are using based on currently running processes, and open the relevant source file. You can [send a pull request to detect your editor of choice](https://github.com/facebook/create-react-app/issues/2636). Setting this environment variable overrides the automatic detection. If you do it, make sure your systems [PATH](<https://en.wikipedia.org/wiki/PATH_(variable)>) environment variable points to your editor’s bin folder. You can also set it to `none` to disable it completely. |
+| CHOKIDAR_USEPOLLING  |   :white_check_mark:   |        :x:         | When set to `true`, the watcher runs in polling mode, as necessary inside a VM. Use this option if `npm start` isn't detecting changes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| GENERATE_SOURCEMAP   |          :x:           | :white_check_mark: | When set to `false`, source maps are not generated for a production build. This solves OOM issues on some smaller machines.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| NODE_PATH            |   :white_check_mark:   | :white_check_mark: | Same as [`NODE_PATH` in Node.js](https://nodejs.org/api/modules.html#modules_loading_from_the_global_folders), but only relative folders are allowed. Can be handy for emulating a monorepo setup by setting `NODE_PATH=src`.                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| INLINE_RUNTIME_CHUNK |          :x:           | :white_check_mark: | By default, Create React App will embed the runtime script into `index.html` during the production build. When set to `false`, the script will not be embedded and will be imported as usual. This is normally required when dealing with CSP.                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ## Troubleshooting
 
