@@ -1,7 +1,7 @@
 import React from 'react'
 import Menu from 'react-burger-menu/lib/menus/slide'
 import { decorator as reduxBurgerMenu } from 'redux-burger-menu'
-import styled, { injectGlobal } from 'styled-components'
+import styled, { createGlobalStyle } from 'styled-components'
 
 const Link = styled.a`
   color: white;
@@ -15,7 +15,7 @@ const LogoutButton = styled(Link)`
 
 const MenuText = Link.withComponent('span')
 
-injectGlobal`
+const GlobalStyles = createGlobalStyle`
   .bm-burger-button {
     position: fixed;
     width: 36px;
@@ -97,6 +97,8 @@ export default function BurgerMenu ({ account, signIn, signUp, logout, signOut }
     </Link>
 
   return <SlideMenu>
+    <GlobalStyles />
+
     <MenuText>{greeting}</MenuText>
 
     {viewerAccountText}
