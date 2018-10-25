@@ -56,7 +56,6 @@
     "react-burger-menu": "^2.5.4",
     "react-dom": "^16.6.0",
     "react-helmet": "^5.2.0",
-    "react-loadable": "^5.5.0",
     "react-redux": "^5.0.7",
     "react-scripts": "2.0.5",
     "react-test-renderer": "^16.6.0",
