@@ -3,11 +3,10 @@
  *
  */
 
-import React from 'react'
+import React, { lazy, Suspense } from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
 import Helmet from 'react-helmet'
-import Loadable from 'react-loadable'
 
 import LoginForm from '../components/login/'
 import Popup from '../components/popup'
@@ -30,6 +29,8 @@ import { login } from '../actions/sessionActions'
 
 import { viewerName } from '../viewerInfo'
 
+const ChatContainer = lazy(() => import('./chatContainer'))
+
 const AppContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -50,12 +51,15 @@ const LoadingView = styled.div`
   color: rgba(0, 0, 0, 0.5);
 `
 
-const LoadableChatComponent = Loadable({
-  loader: () => import('./chatContainer'),
-  loading: () => <LoadingView>
+function LoadableChatComponent () {
+  const fallback = <LoadingView>
     <span>Loading ...</span>
   </LoadingView>
-})
+
+  return <Suspense fallback={fallback}>
+    <ChatContainer />
+  </Suspense>
+}
 
 class App extends React.Component {
   componentDidMount () {
