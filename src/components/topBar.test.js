@@ -31,5 +31,5 @@ test('renders without crashing', () => {
   />)
 
   expect(withMessage.find('#messageOfTheDay').text())
-    .toBe('Message of the day:Hi there! Please go to: <styled.a />')
+    .toBe('Message of the day:Hi there! Please go to: https://example.com')
 })
