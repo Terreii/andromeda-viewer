@@ -30,4 +30,7 @@ fetch('https://bitbucket.org/lindenlab/viewer-release/raw/tip/indra/newview/llvi
     return writeFile(outPath, capsJSON + '\n')
   })
 
-  .catch(console.error)
+  .catch(error => {
+    console.error(error)
+    process.exit(1)
+  })

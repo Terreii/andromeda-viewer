@@ -7,19 +7,7 @@ async function parseLLSD (response) {
 }
 
 export async function fetchLLSD (method, url, data = null, mimeType = LLSD.MIMETYPE_XML) {
-  const headers = new window.Headers()
-  headers.append('content-type', 'text/plain')
-  headers.append('x-andromeda-fetch-url', url)
-  headers.append('x-andromeda-fetch-method', method)
-  headers.append('x-andromeda-fetch-type', mimeType)
-
-  const body = data == null ? undefined : LLSD.format(mimeType, data)
-
-  const response = await window.fetch('/hoodie/andromeda-viewer/proxy', {
-    method: 'POST',
-    headers,
-    body
-  })
+  const response = await minimalFetchLLSD(method, url, data, mimeType)
 
   switch (response.headers.get('content-type')) {
     case 'application/llsd+binary':
@@ -30,6 +18,22 @@ export async function fetchLLSD (method, url, data = null, mimeType = LLSD.MIMET
     default:
       throw new Error(await response.text())
   }
+}
+
+async function minimalFetchLLSD (method, url, data = null, mimeType = LLSD.MIMETYPE_XML) {
+  const headers = new window.Headers()
+  headers.append('content-type', 'text/plain')
+  headers.append('x-andromeda-fetch-url', url)
+  headers.append('x-andromeda-fetch-method', method)
+  headers.append('x-andromeda-fetch-type', mimeType)
+
+  const body = data == null ? undefined : LLSD.format(mimeType, data)
+
+  return window.fetch('/hoodie/andromeda-viewer/proxy', {
+    method: 'POST',
+    headers,
+    body
+  })
 }
 
 export function fetchSeedCapabilities (url) {
@@ -47,33 +51,46 @@ export function fetchSeedCapabilities (url) {
   }
 }
 
-async function * eventQueueGet (getState, ack) {
+// http://wiki.secondlife.com/wiki/EventQueueGet
+async function * eventQueueGet (getState) {
   const url = getState().session.get('eventQueueGetUrl')
+  let ack = 0
 
   while (getState().session.get('loggedIn')) {
-    const data = {
-      done: false,
-      ack: ack.last
+    let response
+    try {
+      response = await minimalFetchLLSD('POST', url, { done: false, ack })
+    } catch (err) {
+      // network error?
+      console.error(err)
+      continue
     }
 
-    try {
-      yield fetchLLSD('POST', url, data)
-    } catch (err) {
-      console.error(err)
+    if (response.status >= 200 && response.status < 300) {
+      const body = await parseLLSD(response)
+      ack = body.id
+      yield body.events
+    } else if (response.status === 404) { // Session did end
+      return []
+    } else if (response.status === 502) {
+      // Request did Timeout. This is not an error! This is expected.
+      continue
+    } else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+      // Some error did happen!
+      throw new Error(`${response.status} - ${response.statusText}\n\n${await response.text()}`)
+    } else {
+      await new Promise(resolve => { setTimeout(resolve, 200) })
+      continue
     }
   }
 
-  fetchLLSD('POST', url, { done: true, ack: ack.last })
+  fetchLLSD('POST', url, { done: true, ack })
 }
 
 function activateEventQueue () {
-  const ack = { last: 0 }
-
   return async (dispatch, getState) => {
-    for await (const eventQueue of eventQueueGet(getState, ack)) {
-      ack.last = eventQueue.id
-
-      for (const event of eventQueue.events) {
+    for await (const eventQueueEvents of eventQueueGet(getState)) {
+      for (const event of eventQueueEvents) {
         try {
           dispatch({
             type: 'EVENT_QUEUE_' + event.message,
