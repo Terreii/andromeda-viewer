@@ -20,24 +20,16 @@ After every packet is processed to will have following layout:
   frequency: 'High' || 'Medium' || 'Low' || 'Fixed',
   number: Number,
   trusted: Boolean,
-  zerocoded: Boolean,
   isOld: undefined || String,
   size: Number,
-  buffer: Buffer, // only the message body part
-  body: [
-    { // block
-      name: String,
-      data: [ // times the quantity of the block
-        {
-          nameOfTheVariable: { // MessageDataType
-            name: String,
-            value: valueOfTheVariable
-          },
-          all: [] // all variables
-       }
-     ]
-   }
- ]
+  blocks: [ // List of all blocks
+    [] block instances
+  ],
+  "block-name": [ // times the quantity of the block
+    {
+      nameOfTheVariable: valueOfTheVariable
+    }
+  ]
 };
 ```
 
@@ -45,17 +37,10 @@ After every packet is processed to will have following layout:
 * `frequency` is how often it will be sent. Also a part of the identifier.
 * `number` identifier in the frequency
 * `trusted` is it from LL?
-* `zerocoded` was the body zeroencoded
 * `isOld` normally it will be undefined. This should never be a String. Or else it is obsolete
 * `size` size in bytes
-* `buffer` part of the message that was the body
-* `body` Array of all blocks
-  * `block` A block as in the message template
-  * `name` String name of the block
-  * `data` Array containing the same number of Objects that the message have. If it is a Single block it will have 1 object. Else it will have more.
-
-In every data-Object there is for every variable an Object with its name and the value.
-It also has under all an Array containing all variable objects.
+* `blocks` Array of all blocks
+* All blocks are accessible through their names.
 
 ## JSON Layout for outgoing messages
 
