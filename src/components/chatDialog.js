@@ -39,42 +39,19 @@ export default class ChatDialog extends React.Component {
     this._boundChange = this._onChange.bind(this)
     this._boundKeyDown = this._onKeyDown.bind(this)
     this._boundClickSend = this._send.bind(this)
+    this._boundLoadHistory = this._loadHistory.bind(this)
   }
 
   componentDidMount () {
+    this._loadHistory()
+  }
+
+  _loadHistory () {
     const isIM = this.props.isIM
     const data = this.props.data
     if (isIM && !data.get('didLoadHistory') && !data.get('isLoadingHistory')) {
       this.props.loadHistory(data.get('chatUUID'), data.get('saveId'))
     }
-  }
-
-  render () {
-    const messages = this.props.isIM ? this.props.data.get('messages') : this.props.data
-
-    const placeholderText = 'Send ' +
-      (this.props.isIM ? 'Instant Message' : 'to local chat')
-
-    return <Main>
-      <ChatMessagesList
-        messages={messages}
-        isIM={this.props.isIM}
-        names={this.props.names}
-      />
-      <ChatTextSend>
-        <TextBox
-          type='text'
-          name='chatInput'
-          placeholder={placeholderText}
-          value={this.state.text}
-          onChange={this._boundChange}
-          onKeyDown={this._boundKeyDown}
-        />
-        <SendButton onClick={this._boundClickSend}>
-          send
-        </SendButton>
-      </ChatTextSend>
-    </Main>
   }
 
   _onChange (event, value) {
@@ -98,6 +75,35 @@ export default class ChatDialog extends React.Component {
     this.setState({
       text: ''
     })
+  }
+
+  render () {
+    const messages = this.props.isIM ? this.props.data.get('messages') : this.props.data
+
+    const placeholderText = 'Send ' +
+      (this.props.isIM ? 'Instant Message' : 'to local chat')
+
+    return <Main>
+      <ChatMessagesList
+        messages={messages}
+        isIM={this.props.isIM}
+        names={this.props.names}
+        onScrolledTop={this._boundLoadHistory}
+      />
+      <ChatTextSend>
+        <TextBox
+          type='text'
+          name='chatInput'
+          placeholder={placeholderText}
+          value={this.state.text}
+          onChange={this._boundChange}
+          onKeyDown={this._boundKeyDown}
+        />
+        <SendButton onClick={this._boundClickSend}>
+          send
+        </SendButton>
+      </ChatTextSend>
+    </Main>
   }
 }
 
