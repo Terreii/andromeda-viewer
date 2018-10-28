@@ -3,11 +3,11 @@
  *
  */
 
-import React, { lazy, Suspense } from 'react'
+import React from 'react'
 import { connect } from 'react-redux'
-import styled from 'styled-components'
 import Helmet from 'react-helmet'
 
+import { AppContainer, LoadableChatComponent } from '../components/main'
 import LoginForm from '../components/login/'
 import Popup from '../components/popup'
 import SignInPopup from '../components/signInPopup'
@@ -29,39 +29,7 @@ import { login } from '../actions/sessionActions'
 
 import { viewerName } from '../viewerInfo'
 
-const ChatContainer = lazy(() => import('./chatContainer'))
-
-const AppContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  width: 100vw;
-  height: 100vh;
-  padding: 0px;
-  margin: 0px;
-`
-
-const LoadingView = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: rgba(0, 0, 0, 0.5);
-`
-
-function LoadableChatComponent () {
-  const fallback = <LoadingView>
-    <span>Loading ...</span>
-  </LoadingView>
-
-  return <Suspense fallback={fallback}>
-    <ChatContainer />
-  </Suspense>
-}
-
-class App extends React.Component {
+class App extends React.PureComponent {
   componentDidMount () {
     if (process.env.NODE_ENV !== 'production') {
       if (this.props.isSignedIn) return // component was hot reloaded
