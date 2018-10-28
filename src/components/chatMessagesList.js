@@ -35,7 +35,7 @@ class ChatList extends React.Component {
       const fromId = isIM ? msg.get('fromId') : msg.get('sourceID')
       const name = names.get(fromId) || ''
       return (
-        <Message key={time.getTime()}>
+        <Message key={msg.get('_id')}>
           <span className='time'>
             {leadingZero(time.getHours())}
             :

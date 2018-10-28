@@ -4,29 +4,6 @@
 
 import Immutable from 'immutable'
 
-function setHistory (state, action) {
-  const messages = Immutable
-    .fromJS(action.messages.map(msg => {
-      return Object.assign({}, msg, { didSave: true })
-    }))
-    .concat(state.get('messages'))
-  const imIds = []
-  const messagesFiltered = messages.filter(msg => {
-    // filter duplicate messages.
-    const id = msg.get('_id')
-    if (imIds.includes(id)) {
-      return false
-    }
-    imIds.push(id)
-    return true
-  })
-  return state.merge({
-    didLoadHistory: true,
-    isLoadingHistory: false,
-    messages: messagesFiltered
-  })
-}
-
 function IMChat (state = Immutable.Map(), action) {
   switch (action.type) {
     case 'CreateNewIMChat':
@@ -69,6 +46,17 @@ function IMChat (state = Immutable.Map(), action) {
         messages: nextMessages,
         active: true,
         hasUnsavedMSG: true
+      })
+
+    case 'IMHistoryLoaded':
+      const historyMsg = action.messages.map(msg => Immutable.Map({
+        ...msg,
+        didSave: true
+      }))
+      return state.merge({
+        messages: Immutable.List(historyMsg).concat(state.get('messages')),
+        isLoadingHistory: false,
+        didLoadHistory: action.didLoadAll
       })
 
     case 'StartSavingIMMessages':
@@ -186,7 +174,7 @@ export default function IMReducer (state = Immutable.Map(), action) {
       return state.setIn([action.chatUUID, 'isLoadingHistory'], true)
 
     case 'IMHistoryLoaded':
-      return state.set(action.chatUUID, setHistory(state.get(action.chatUUID), action))
+      return state.set(action.chatUUID, IMChat(state.get(action.chatUUID), action))
 
     case 'DidLogout':
     case 'UserWasKicked':
