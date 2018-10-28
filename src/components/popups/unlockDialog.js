@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 
 import Popup from './popup'
 
-import lockIcon from '../icons/black_lock.svg'
+import lockIcon from '../../icons/black_lock.svg'
 
 const Content = styled.div`
   display: flex;

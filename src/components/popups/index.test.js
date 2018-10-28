@@ -1,7 +1,7 @@
 import React from 'react'
 import { shallow, mount } from 'enzyme'
 
-import PopupRenderer from './popupRenderer'
+import PopupRenderer from './index'
 
 test('renders without crashing', () => {
   shallow(

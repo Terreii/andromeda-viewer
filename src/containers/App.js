@@ -9,7 +9,7 @@ import Helmet from 'react-helmet'
 
 import { AppContainer, LoadableChatComponent } from '../components/main'
 import LoginForm from '../components/login/'
-import PopupRenderer from '../components/popupRenderer'
+import PopupRenderer from '../components/popups/'
 
 import TopMenuBar from './topMenuBar'
 
