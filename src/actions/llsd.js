@@ -74,6 +74,8 @@ async function * eventQueueGet (getState) {
       return []
     } else if (response.status === 502) {
       // Request did Timeout. This is not an error! This is expected.
+      // The EventQueue server is a proxy. If the server behind the proxy times out, than the
+      // EventQueue server interprets this as a generic error and returns a 502.
       continue
     } else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
       // Some error did happen!

@@ -30,6 +30,30 @@ export default function groupsReducer (state = List(), action) {
         : group
       )
 
+    case 'EVENT_QUEUE_AgentGroupDataUpdate':
+      return state.withMutations(groups => {
+        action.body.GroupData.reduce((groups, groupData) => {
+          const id = groupData.GroupID.uuid
+
+          const index = groups.findIndex(group => group.get('id') === id)
+          const isNewGroup = index < 0
+
+          const oldGroup = isNewGroup ? Map() : groups.get(index)
+          const newGroupData = oldGroup.merge({
+            id,
+            name: groupData.GroupName,
+            insigniaID: groupData.GroupInsigniaID.uuid,
+            acceptNotices: groupData.AcceptNotices,
+            powers: Buffer.from(groupData.GroupPowers.octets),
+            listInProfile: groupData.ListInProfile
+          })
+
+          return isNewGroup
+            ? groups.push(newGroupData)
+            : groups.set(index, newGroupData)
+        }, groups)
+      })
+
     case 'DidLogout':
     case 'UserWasKicked':
       return List()
