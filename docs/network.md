@@ -105,4 +105,10 @@ More and more is done over HTTP(S). And mostly encoded in LindenLabs [LLSD](http
 
 The http endpoints are called capabilities and change for every session and sometimes also when changing the SIM. The URL of them can be fetched at the `SeedCapabilities` endpoint, which will be returned on login or on the sim change.
 
-A LLSD-List with all Capabilities-names is PUSHed to the SeedCapabilities and return as a LLSD-Dictionary ({cap-name: URL}).
+A LLSD-List with all capabilities-names is PUSHed to the SeedCapabilities and return as a LLSD-Dictionary ({cap-name: URL}).
+
+### EventQueueGet
+
+[`EventQueueGet`](http://wiki.secondlife.com/wiki/EventQueueGet) is a special capability: it, together with the UDP-circuit, are the only way the sim-server can push events to the client/viewer. This is done using the __HTTP Long Polling__ technique.
+
+More can be found in its [documentation](http://wiki.secondlife.com/wiki/EventQueueGet).
