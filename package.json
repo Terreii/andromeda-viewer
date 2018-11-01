@@ -57,7 +57,7 @@
     "react-dom": "^16.6.0",
     "react-helmet": "^5.2.0",
     "react-loadable": "^5.5.0",
-    "react-redux": "^5.0.7",
+    "react-redux": "^5.1.0",
     "react-scripts": "2.1.1",
     "react-test-renderer": "^16.6.0",
     "redux": "^4.0.1",
@@ -66,7 +66,7 @@
     "requestidlecallback": "^0.3.0",
     "reselect": "^4.0.0",
     "standard": "^12.0.1",
-    "styled-components": "^4.0.0",
+    "styled-components": "^4.0.3",
     "weallbehave": "^1.2.0",
     "weallcontribute": "^1.0.8"
   },
