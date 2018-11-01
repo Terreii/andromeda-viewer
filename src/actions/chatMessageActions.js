@@ -497,28 +497,81 @@ export function loadIMChats () {
 
 // Loads messages of an IM Chat.
 export function getIMHistory (chatUUID, chatSaveId) {
-  return (dispatch, getState, { hoodie }) => {
+  return async (dispatch, getState, { hoodie }) => {
     dispatch({
       type: 'IMHistoryStartLoading',
-      chatUUID,
-      saveId: chatSaveId
+      chatUUID
     })
 
     const avatarDataSaveId = getState().account.get('avatarDataSaveId')
-    hoodie.cryptoStore.withIdPrefix(`${avatarDataSaveId}/imChats/${chatSaveId}`)
-      .findAll().catch(err => {
-        if (err.status === 404) {
-          return []
-        }
-        throw err
-      }).then(docs => {
+    const chatSavePrefix = `${avatarDataSaveId}/imChats/${chatSaveId}`
+
+    const chat = getIMChats(getState()).get(chatUUID)
+    // get the _id of the oldest loaded msg
+    const hasAMessage = chat.hasIn(['messages', 0, '_id'])
+    const firstMsgId = hasAMessage
+      ? chat.getIn(['messages', 0, '_id'])
+      : (chatSavePrefix + '/\uFFFF') // or one with a special id that is always the last
+
+    try {
+      // using PouchDB -> https://pouchdb.com/api.html#batch_fetch
+      const idsResult = await hoodie.store.db.allDocs({
+        startkey: firstMsgId,
+        endkey: chatSavePrefix,
+        limit: hasAMessage ? 101 : 100, // 100 + last
+        descending: true
+      })
+
+      const ids = idsResult.rows
+        .map(row => row.id)
+        .reverse()
+        .filter(id => id !== firstMsgId)
+
+      if (ids.length === 0) {
         dispatch({
           type: 'IMHistoryLoaded',
           chatUUID,
-          saveId: chatSaveId,
-          messages: docs
+          messages: [],
+          didLoadAll: true
         })
+        return
+      }
+
+      const messages = await hoodie.cryptoStore.find(ids)
+
+      dispatch({
+        type: 'IMHistoryLoaded',
+        chatUUID,
+        messages,
+        didLoadAll: messages.length < 100
       })
+    } catch (err) {
+      if (err.message === 'database is destroyed') {
+        // handle destroyed DB
+        const docs = await hoodie.cryptoStore.withIdPrefix(chatSavePrefix).findAll()
+
+        const endIndex = firstMsgId.endsWith('\uFFFF')
+          ? docs.length
+          : docs.findIndex(doc => doc._id === firstMsgId)
+
+        const startIndex = Math.max(0, endIndex - 100)
+        const messages = docs.slice(startIndex, endIndex)
+
+        dispatch({
+          type: 'IMHistoryLoaded',
+          chatUUID,
+          messages,
+          didLoadAll: messages.length === 0
+        })
+      } else {
+        dispatch({
+          type: 'IMHistoryLoaded',
+          chatUUID,
+          message: [],
+          didLoadAll: false
+        })
+      }
+    }
   }
 }
 

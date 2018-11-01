@@ -120,7 +120,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
     <PasswordInfo>Password:</PasswordInfo>
     <PasswordInput
       type='password'
-      innerRef={ref}
+      ref={ref}
       onKeyUp={onKeyUp}
       required
       autoFocus
