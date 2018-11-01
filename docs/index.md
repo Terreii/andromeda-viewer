@@ -16,8 +16,6 @@ You can view the documentation here. It exists correctly only to help developmen
 
 - How the network operates is described in [Network documentation](./network.html)!
 
-- You will get a understanding of the UI in its [documentation](./ui.html)!
-
 - For the data layout in hoodie visit the [synchronizing documentation](./synchronizing.html)!
 
 ## How to get started
@@ -27,7 +25,7 @@ If you would like to use the viewer or help developing it, you need to run it yo
 What you need is:
 
 - A [Git](https://git-scm.com/) client. [How to set it up](https://help.github.com/articles/set-up-git/).
-- [node.js](https://nodejs.org/) version 6.9.0 or higher.
+- [node.js](https://nodejs.org/) version 8.9.0 or higher.
 - [npm](https://npmjs.org/) (Included in node.js).
 - And a modern web-browser.
 
@@ -40,6 +38,10 @@ npm install
 npm run build
 ```
 
-With `npm start` you start a server, which will run the backend of this viewer. To stop the viewer fokus your terminal and press ctrl + c.
+With `npm start` you start a server, which will run the backend of this viewer. To stop the viewer focus your terminal and press ctrl + c.
 
 When the server runs, you can access the viewer in your browser under http://127.0.0.1:8000/.
+
+There is also a live reload mode! Whenever you save and change a file, the viewer/client will be reloaded, without the state of the viewer to reloaded. This can be accomplished if you enter the command `npm run watch`.
+
+The last two commands can be combined with `npm run startDev`.
