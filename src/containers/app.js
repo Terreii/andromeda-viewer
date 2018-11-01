@@ -5,15 +5,11 @@
 
 import React from 'react'
 import { connect } from 'react-redux'
-import styled from 'styled-components'
 import Helmet from 'react-helmet'
-import Loadable from 'react-loadable'
 
+import { AppContainer, LoadableChatComponent } from '../components/main'
 import LoginForm from '../components/login/'
-import Popup from '../components/popup'
-import SignInPopup from '../components/signInPopup'
-import SignOutPopup from '../components/signOutPopup'
-import UnlockDialog from '../components/unlockDialog'
+import PopupRenderer from '../components/popups/'
 
 import TopMenuBar from './topMenuBar'
 
@@ -30,62 +26,15 @@ import { login } from '../actions/sessionActions'
 
 import { viewerName } from '../viewerInfo'
 
-const AppContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  width: 100vw;
-  height: 100vh;
-  padding: 0px;
-  margin: 0px;
-`
+const Popups = React.memo(PopupRenderer)
 
-const LoadingView = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: rgba(0, 0, 0, 0.5);
-`
-
-const LoadableChatComponent = Loadable({
-  loader: () => import('./chatContainer'),
-  loading: () => <LoadingView>
-    <span>Loading ...</span>
-  </LoadingView>
-})
-
-class App extends React.Component {
+class App extends React.PureComponent {
   componentDidMount () {
     if (process.env.NODE_ENV !== 'production') {
       if (this.props.isSignedIn) return // component was hot reloaded
     }
 
     this.props.getIsSignedIn()
-  }
-
-  getPopup () {
-    const popup = this.props.popup
-    if (popup == null || popup.length === 0) return null
-    const close = this.props.closePopup
-
-    switch (popup) {
-      case 'signIn':
-        return <SignInPopup onCancel={close} onSend={this.props.signIn} />
-
-      case 'signUp':
-        return <SignInPopup onCancel={close} isSignUp onSend={this.props.signUp} />
-
-      case 'signOut':
-        return <SignOutPopup onCancel={close} onSignOut={this.props.signOut} />
-
-      default:
-        return <Popup title={'Error'} onClose={close}>
-          {popup}
-        </Popup>
-    }
   }
 
   render () {
@@ -107,13 +56,16 @@ class App extends React.Component {
       />
       <TopMenuBar messageOfTheDay={isLoggedIn ? this.props.messageOfTheDay : null} />
       {mainSection}
-      {this.getPopup()}
-      {!this.props.isUnlocked && this.props.isSignedIn
-        ? <UnlockDialog
-          onUnlock={this.props.unlock}
-          onSignOut={this.props.signOut}
-        />
-        : null}
+      <Popups
+        popup={!this.props.isUnlocked && this.props.isSignedIn
+          ? 'unlock'
+          : this.props.popup}
+        closePopup={this.props.closePopup}
+        signUp={this.props.signUp}
+        signIn={this.props.signIn}
+        unlock={this.props.unlock}
+        signOut={this.props.signOut}
+      />
     </AppContainer>
   }
 }

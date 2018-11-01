@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import closeIcon from '../icons/icon_close.svg'
+import closeIcon from '../../icons/icon_close.svg'
 
 const Background = styled.div`
   position: absolute;
