@@ -1,4 +1,5 @@
-import { fetchLLSD } from './llsd'
+import { fetchLLSD, fetchSeedCapabilities } from './llsd'
+import capabilities from './capabilities.json'
 
 test('get LLSD', async () => {
   let mimeType = ''
@@ -16,10 +17,10 @@ test('get LLSD', async () => {
         get: () => 'application/llsd+xml'
       },
       text: () => {
-        return '<llsd><map>' +
+        return Promise.resolve('<llsd><map>' +
           '<key>test</key><string>hello world!</string>' +
           '<key>a</key><array><integer>4</integer><boolean>true</boolean></array>' +
-          '</map></llsd>'
+          '</map></llsd>')
       }
     })
   })
@@ -70,9 +71,6 @@ test('POST LLSD', async () => {
         })
         break
 
-      case 'application/llsd+binary':
-        break
-
       default:
         throw new Error('unknown mime-type: ' + requestType)
     }
@@ -82,7 +80,7 @@ test('POST LLSD', async () => {
         get: () => requestType
       },
       text: () => {
-        return options.body
+        return Promise.resolve(options.body)
       }
     })
   })
@@ -96,7 +94,6 @@ test('POST LLSD', async () => {
   const tests = [
     'application/llsd+xml',
     'application/llsd+json'
-    // 'application/llsd+binary' // there seems to be an error in LindenLabs LLSD parser
   ].map(async type => {
     mimeType = type
     expect(await fetchLLSD('POST', '/test-url', { ack: 123, done: false }, type)).toEqual({
@@ -106,4 +103,64 @@ test('POST LLSD', async () => {
   })
 
   return Promise.all(tests)
+})
+
+describe('Capabilities', () => {
+  test('fetching capabilities urls', () => {
+    global.fetch = jest.fn().mockImplementation((url, options) => {
+      expect(options.headers.get('x-andromeda-fetch-url')).toBe('/test-url/seed-cap')
+
+      capabilities.forEach(capName => {
+        expect(options.body).toEqual(expect.stringContaining(capName))
+      })
+
+      const returnBody = capabilities.reduce((result, capName) => {
+        return result + `<key>${capName}</key><string>/cap-url/${capName}/</string>`
+      }, '<llsd><map>') + '</map></llsd>'
+
+      return Promise.resolve({
+        headers: {
+          get: () => 'application/llsd+xml'
+        },
+        text: () => {
+          return Promise.resolve(returnBody)
+        }
+      })
+    })
+
+    return new Promise((resolve, reject) => {
+      let callCount = 0
+
+      const dispatch = event => {
+        try {
+          // fetchSeedCapabilities should dispatch 2 actions
+          if (callCount === 0) {
+            // first must be the SeedCapabilitiesLoaded action
+            expect(typeof event).toBe('object')
+            expect(event.type).toBe('SeedCapabilitiesLoaded')
+            expect(Array.from(capabilities).sort())
+              .toEqual(Object.keys(event.capabilities).sort())
+            expect(event.capabilities['EventQueueGet']).toBe('/cap-url/EventQueueGet/')
+          } else if (callCount === 1) {
+            // second must be the activateEventQueue function/action
+            expect(typeof event).toBe('function')
+
+            resolve()
+          } else {
+            reject(new Error('called to many times!'))
+          }
+        } catch (error) {
+          reject(error)
+        } finally {
+          callCount += 1
+        }
+      }
+
+      try {
+        fetchSeedCapabilities('/test-url/seed-cap')(dispatch)
+      } catch (error) {
+        reject(error)
+      }
+    })
+  })
 })
