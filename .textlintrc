@@ -1,6 +1,9 @@
 {
   "filters": {},
   "rules": {
+    "alex": {
+      "allow": []
+    },
     "common-misspellings": true,
     "rousseau": {
       "severity" : "warning",
