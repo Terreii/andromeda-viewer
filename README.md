@@ -52,12 +52,13 @@ command | what it does
 `npm run help` | Prints out this README.md.
 `npm run build` | Builds the viewer. The viewer is in a unusable state after cloning.
 `npm run watch` | Builds the viewer. It continues to run and build the viewer when a file changes. This is the recommended build command while developing!
-`npm test` | Runs all tests and alex.js. Please run this before committing!
-npm run alex | Runs [alex.js](https://alexjs.com/) for catching insensitive, inconsiderate writing in the documentation.
+`npm test` | Runs all tests and test:docs. Please run this before committing!
+`npm run test:docs` | Runs [textlint](https://textlint.github.io/) and [alex.js](https://alexjs.com/) for catching misspelled, insensitive, inconsiderate writing in the documentation.
 `npm run update-caps` | Updates all [capabilities names](http://wiki.secondlife.com/wiki/Category:Capabilities).
 `npm run update-coc` | Updates the CODE_OF_CONDUCT.md
 `npm run update-contrib` | Updates the CONTRIBUTING.md
-`npm run fixStyle` | Runs standard --fix. It can fix many standard style rules.
+`npm run fix:docs` | Runs `textlint --fix`.
+`npm run fix:style` | Runs `standard --fix`. It can fix many standard style rules.
 `npm run startDev` | combined `npm start` and `npm run watch`.
 `npm start` | Starts the server. The viewer can then be used on the local computer.
 

@@ -1,0 +1,10 @@
+{
+  "filters": {},
+  "rules": {
+    "common-misspellings": true,
+    "rousseau": {
+      "severity" : "warning",
+      "ignoreTypes": ["sentence:uppercase","sentence:start"]
+    }
+  }
+}
