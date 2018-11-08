@@ -3,13 +3,14 @@
   "version": "0.0.1",
   "description": "Small web-client for connecting to the virtual world of Second Life.",
   "scripts": {
+    "alex": "alex README.md ./docs/*.md",
     "prebuild": "npm run build-messages",
     "build": "react-scripts build",
     "prewatch": "npm run build-messages",
     "watch": "react-scripts start",
     "help": "markdown-chalk --input README.md",
     "pretest": "npm run build-messages",
-    "test": "standard && react-scripts test --env=jsdom",
+    "test": "standard && npm run alex && react-scripts test --env=jsdom",
     "fixStyle": "standard --fix",
     "build-messages": "node ./tools/createMessageTemplate",
     "update-coc": "weallbehave -o . && git add CODE_OF_CONDUCT.md && git commit -m 'docs(coc): updated CODE_OF_CONDUCT.md'",
@@ -42,6 +43,7 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "alex": "^6.0.0",
     "autoscroll-react": "^3.2.0",
     "concurrently": "^4.0.1",
     "double-ended-queue": "^2.1.0-0",

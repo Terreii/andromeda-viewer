@@ -49,16 +49,17 @@ Everything needed for this project should be a npm dependency. So that all can b
 
 command | what it does
 --------|-------------
-npm run help | Prints out this README.md.
-npm run build | Builds the viewer. The viewer is in a unusable state after cloning.
-npm run watch | Builds the viewer. It continues to run and build the viewer when a file changes. This is the recommended build command while developing!
-npm test | Runs all tests. Please run this before committing!
-npm run update-caps | Updates all [capabilities names](http://wiki.secondlife.com/wiki/Category:Capabilities).
-npm run update-coc | Updates the CODE_OF_CONDUCT.md
-npm run update-contrib | Updates the CONTRIBUTING.md
-npm run fixStyle | Runs standard --fix. It can fix many standard style rules.
-npm run startDev | combined `npm start` and `npm run watch`.
-npm start | Starts the server. The viewer can then be used on the local computer.
+`npm run help` | Prints out this README.md.
+`npm run build` | Builds the viewer. The viewer is in a unusable state after cloning.
+`npm run watch` | Builds the viewer. It continues to run and build the viewer when a file changes. This is the recommended build command while developing!
+`npm test` | Runs all tests and alex.js. Please run this before committing!
+npm run alex | Runs [alex.js](https://alexjs.com/) for catching insensitive, inconsiderate writing in the documentation.
+`npm run update-caps` | Updates all [capabilities names](http://wiki.secondlife.com/wiki/Category:Capabilities).
+`npm run update-coc` | Updates the CODE_OF_CONDUCT.md
+`npm run update-contrib` | Updates the CONTRIBUTING.md
+`npm run fixStyle` | Runs standard --fix. It can fix many standard style rules.
+`npm run startDev` | combined `npm start` and `npm run watch`.
+`npm start` | Starts the server. The viewer can then be used on the local computer.
 
 Enter those commands in a terminal (cmd or PowerShell on Windows) and press enter to run them.
 
@@ -67,7 +68,7 @@ All documentation for the SL-protocol can be found in the [SL-Wiki](http://wiki.
 
 ### Known Issues
 
-If testing fails to start. You might need to install [Facebooks Watchman](https://facebook.github.io/watchman/). [More here](https://github.com/Terreii/andromeda-viewer/blob/latest/README-create-react-app.md).
+[If testing fails to start on MacOS](https://github.com/Terreii/andromeda-viewer/blob/latest/README-create-react-app.md).
 
 ## Disclaimer
 [Second Life(TM)](https://secondlife.com) is a product by [Linden Lab](http://www.lindenlab.com/). Linden Lab is not involved with this project!
