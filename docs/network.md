@@ -1,18 +1,21 @@
 # Network
 
+The [SL/openSIM-Protocol](http://wiki.secondlife.com/wiki/Protocol) uses both UDP and HTTP(S).
+The server acts as a proxy of all protocols parts.
+
 ## UDP packets
-The [SL-Protocol](http://wiki.secondlife.com/wiki/Protocol) uses UDP for communication.
+The SL-Protocol uses UDP for its realtime communication.
 
-A browser doesn't allow a UDP-connection. So instead the viewer uses a WebSocket to send the packets to the server, with will send it to the SL-SIM. And backwards, too.
+Because browser don't have a UDP-API for sites, a WebSocket is used for sending the packets. It will send them to the Andromeda server, which will send it to the SL- or openSIM sim, and backwards, too.
 
-To communication is done thru the **circuit.js**. With **networkNessages** the packets are then translated to a JSON-Object.
+Communication is done thru the Circuit class in **circuit.js**. In **networkNessages** the packets are then translated between a JSON representation for the client and a TypedArray for the SIM.
 
-For a list of all messages of the SL-protocol look in the [tools/master_message_template.msg](http://secondlife.com/app/message_template/master_message_template.msg).
+A list of all messages of the SL-protocol can be found in [tools/master_message_template.msg](http://secondlife.com/app/message_template/master_message_template.msg).
 
-For an exact description of every message, look in the SL-wiki under [all messages](http://wiki.secondlife.com/wiki/Category:Messages) or go directly to **wiki.secondlife.com/wiki/[_put message name here_]**.
+For an exact description of every message, look in the SL-wiki under [all messages](http://wiki.secondlife.com/wiki/Category:Messages) or directly go to **wiki.secondlife.com/wiki/[_put message name here_]**.
 
-## JSON Layout for incoming messages
-After every packet is processed to will have following layout:
+### JSON Layout for incoming messages
+After every packet is processed, it will have following layout:
 
 ```javascript
 {
@@ -20,24 +23,16 @@ After every packet is processed to will have following layout:
   frequency: 'High' || 'Medium' || 'Low' || 'Fixed',
   number: Number,
   trusted: Boolean,
-  zerocoded: Boolean,
   isOld: undefined || String,
   size: Number,
-  buffer: Buffer, // only the message body part
-  body: [
-    { // block
-      name: String,
-      data: [ // times the quantity of the block
-        {
-          nameOfTheVariable: { // MessageDataType
-            name: String,
-            value: valueOfTheVariable
-          },
-          all: [] // all variables
-       }
-     ]
-   }
- ]
+  blocks: [ // List of all blocks
+    [] block instances
+  ],
+  "block-name": [ // times the quantity of the block
+    {
+      nameOfTheVariable: valueOfTheVariable
+    }
+  ]
 };
 ```
 
@@ -45,19 +40,12 @@ After every packet is processed to will have following layout:
 * `frequency` is how often it will be sent. Also a part of the identifier.
 * `number` identifier in the frequency
 * `trusted` is it from LL?
-* `zerocoded` was the body zeroencoded
 * `isOld` normally it will be undefined. This should never be a String. Or else it is obsolete
 * `size` size in bytes
-* `buffer` part of the message that was the body
-* `body` Array of all blocks
-  * `block` A block as in the message template
-  * `name` String name of the block
-  * `data` Array containing the same number of Objects that the message have. If it is a Single block it will have 1 object. Else it will have more.
+* `blocks` Array of all blocks
+* All blocks are accessible through their names.
 
-In every data-Object there is for every variable an Object with its name and the value.
-It also has under all an Array containing all variable objects.
-
-## JSON Layout for outgoing messages
+### JSON Layout for outgoing messages
 
 ```javascript
 {
@@ -73,8 +61,54 @@ It also has under all an Array containing all variable objects.
 
 To identify which message it is, the first argument of the send-method of a circuit is the name of the message as a String.
 
-## Wiki
+```javascript
+circuit.send('TestMessage', {
+  TestBlock1: [
+    {
+      Test1: 1
+    }
+  ],
+  NeighborBlock: [
+    {
+      Test0: 2,
+      Test1: 3,
+      Test2: 4
+    },
+    {
+      Test0: 2,
+      Test1: 3,
+      Test2: 4
+    },
+    {
+      Test0: 2,
+      Test1: 3,
+      Test2: 4
+    },
+    {
+      Test0: 2,
+      Test1: 3,
+      Test2: 4
+    }
+  ]
+}, [reliable])
+```
+
+### Wiki
 * [Message Layout](http://wiki.secondlife.com/wiki/Message_Layout)
 * [Packet Layout](http://wiki.secondlife.com/wiki/Packet_Layout)
 * [Circuits](http://wiki.secondlife.com/wiki/Circuits)
 * [Packet Accounting](http://wiki.secondlife.com/wiki/Packet_Accounting)
+
+## LLSD
+
+More and more is done over HTTP(S). And mostly encoded in LindenLabs [LLSD](http://wiki.secondlife.com/wiki/LLSD) format. `src/llsd.js` is a complete Javascript implementation from LindenLab. It supports all concodings: XML, Binary and JSON. The XML encoding is the default one.
+
+The http endpoints are called capabilities and change for every session and sometimes also when changing the SIM. The URL of them can be fetched at the `SeedCapabilities` endpoint, which will be returned on login or on the sim change.
+
+A LLSD-List with all capabilities-names is PUSHed to the SeedCapabilities and return as a LLSD-Dictionary ({cap-name: URL}).
+
+### EventQueueGet
+
+[`EventQueueGet`](http://wiki.secondlife.com/wiki/EventQueueGet) is a special capability: it, together with the UDP-circuit, are the only way the sim-server can push events to the client/viewer. This is done using the __HTTP Long Polling__ technique.
+
+More can be found in its [documentation](http://wiki.secondlife.com/wiki/EventQueueGet).
