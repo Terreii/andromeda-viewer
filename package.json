@@ -59,7 +59,7 @@
     "react-helmet": "^5.2.0",
     "react-redux": "^5.1.0",
     "react-scripts": "2.1.1",
-    "react-test-renderer": "^16.6.0",
+    "react-test-renderer": "^16.6.2",
     "redux": "^4.0.1",
     "redux-burger-menu": "^0.2.8",
     "redux-thunk": "^2.3.0",
