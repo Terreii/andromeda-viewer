@@ -53,7 +53,7 @@
     "markdown-chalk": "^2.1.0",
     "prop-types": "^15.6.2",
     "rc-tabs": "^9.4.7",
-    "react": "^16.6.0",
+    "react": "^16.6.2",
     "react-burger-menu": "^2.5.4",
     "react-dom": "^16.6.0",
     "react-helmet": "^5.2.0",
