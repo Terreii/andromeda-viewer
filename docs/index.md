@@ -10,11 +10,11 @@ But you can contribute under the [GitHub repository](https://github.com/Terreii/
 
 ## Documentation
 
-You can view the documentation here. It exists correctly only to help development.
+You can view the development documentation here.
 
 - To get a general overview of the client, please read the [General documentation](./general.html)!
 
-- How the network operates is described in [Network documentation](./network.html)!
+- [Network documentation](./network.html) documents the protocol between client and server!
 
 - For the data layout in hoodie visit the [synchronizing documentation](./synchronizing.html)!
 
@@ -42,6 +42,6 @@ With `npm start` you start a server, which will run the backend of this viewer. 
 
 When the server runs, you can access the viewer in your browser under http://127.0.0.1:8000/.
 
-There is also a live reload mode! Whenever you save and change a file, the viewer/client will be reloaded, without the state of the viewer to reloaded. This can be accomplished if you enter the command `npm run watch`.
+There is also a live reload mode! Run `npm run watch` and whenever you save a changed file, the viewer/client updates. Without reloading the viewer-state!
 
-The last two commands can be combined with `npm run startDev`.
+`npm run startDev` is a combination of the last two commands.

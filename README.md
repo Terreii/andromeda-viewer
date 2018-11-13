@@ -39,11 +39,11 @@ If you want to start developing you should run in a new terminal window `npm run
 npm run watch
 ```
 
-You can also only use `npm run startDev` to start the server and run the continuously build process!
+You can also use `npm run startDev`. It will start the server and also run the continuous build process!
 
 For more information how to use npm, please read the [npm-documentation](https://docs.npmjs.com/).
 
-Everything needed for this project should be a npm dependency. So that all can be installed by running _npm install_
+To make the setup-process easier, everything needed for this project should be a npm dependency.
 
 ### npm scripts for this project
 
@@ -65,7 +65,7 @@ command | what it does
 Enter those commands in a terminal (cmd or PowerShell on Windows) and press enter to run them.
 
 ### Getting SL Protocol documentation
-All documentation for the SL-protocol can be found in the [SL-Wiki](http://wiki.secondlife.com/wiki/Protocol)
+The [SL-Wiki](http://wiki.secondlife.com/wiki/Protocol) has most documentation for the SL-protocol.
 
 ### Known Issues
 

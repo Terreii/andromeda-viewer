@@ -4,18 +4,18 @@ The [SL/openSIM-Protocol](http://wiki.secondlife.com/wiki/Protocol) uses both UD
 The server acts as a proxy of all protocols parts.
 
 ## UDP packets
-The SL-Protocol uses UDP for its realtime communication.
+The SL-Protocol uses UDP for its real-time communication.
 
-Because browser don't have a UDP-API for sites, a WebSocket is used for sending the packets. It will send them to the Andromeda server, which will send it to the SL- or openSIM sim, and backwards, too.
+Because browser don't have a UDP-API for sites, packets are send through the server using a WebSocket. The server will act as a proxy between client and SL/openSim server.
 
-Communication is done thru the Circuit class in **circuit.js**. In **networkNessages** the packets are then translated between a JSON representation for the client and a TypedArray for the SIM.
+The Circuit class in **circuit.js** handles the UDP-communication. It uses **networkMessages.js** to read and write packets.
 
-A list of all messages of the SL-protocol can be found in [tools/master_message_template.msg](http://secondlife.com/app/message_template/master_message_template.msg).
+A list of all messages of the SL-protocol exist in [tools/master_message_template.msg](http://secondlife.com/app/message_template/master_message_template.msg).
 
-For an exact description of every message, look in the SL-wiki under [all messages](http://wiki.secondlife.com/wiki/Category:Messages) or directly go to **wiki.secondlife.com/wiki/[_put message name here_]**.
+For an exact description of every message, look in the SL-wiki under [all messages](http://wiki.secondlife.com/wiki/Category:Messages). Or open **wiki.secondlife.com/wiki/[_put message name here_]**.
 
 ### JSON Layout for incoming messages
-After every packet is processed, it will have following layout:
+Every incoming packet will have following layout:
 
 ```javascript
 {
@@ -37,10 +37,10 @@ After every packet is processed, it will have following layout:
 ```
 
 * `name` is the message type name as it is in the template and on the wiki.
-* `frequency` is how often it will be sent. Also a part of the identifier.
+* `frequency` send frequency. Also a part of the identifier.
 * `number` identifier in the frequency
 * `trusted` is it from LL?
-* `isOld` normally it will be undefined. This should never be a String. Or else it is obsolete
+* `isOld` Will contain a string if it is obsolete. And `undefined` if it is not obsolete.
 * `size` size in bytes
 * `blocks` Array of all blocks
 * All blocks are accessible through their names.
@@ -56,8 +56,8 @@ After every packet is processed, it will have following layout:
   ]
 }
  ```
-* `nameOfTheBlock` the name as it is in the wiki and template file. Containing as many objects as needed. Single will have one.
-  * `variableName` the name of the variable as it is in the wiki and template file. It value should be in the range and the type of the varibale.
+* `nameOfTheBlock` the name as it is in the wiki and template file. Every object will be a block-instance. Single will have one. Missing block-instances will result to 0s.
+  * `variableName` the name of the variable as it is in the wiki and template file. It value should be in the range and the type of the variable.
 
 To identify which message it is, the first argument of the send-method of a circuit is the name of the message as a String.
 
@@ -101,14 +101,14 @@ circuit.send('TestMessage', {
 
 ## LLSD
 
-More and more is done over HTTP(S). And mostly encoded in LindenLabs [LLSD](http://wiki.secondlife.com/wiki/LLSD) format. `src/llsd.js` is a complete Javascript implementation from LindenLab. It supports all concodings: XML, Binary and JSON. The XML encoding is the default one.
+More and more UDP packages get obsoleted in favor of HTTP(S) based messages. They get encoded using LindenLabs [LLSD](http://wiki.secondlife.com/wiki/LLSD) format. `src/llsd.js` is a complete Javascript implementation from LindenLab. It supports all encodings: XML, Binary and JSON. The XML encoding is the default one.
 
-The http endpoints are called capabilities and change for every session and sometimes also when changing the SIM. The URL of them can be fetched at the `SeedCapabilities` endpoint, which will be returned on login or on the sim change.
+The http endpoints get revered as capabilities. Their URL change for every session and sometimes also when changing the SIM. The login result will contain the `SeedCapabilities`. it will result a list of all capability-urls.
 
-A LLSD-List with all capabilities-names is PUSHed to the SeedCapabilities and return as a LLSD-Dictionary ({cap-name: URL}).
+A LLSD-List with all capabilities-names gets pushed to the SeedCapabilities. Resulting to a LLSD-Dictionary ({ cap-name: URL }).
 
 ### EventQueueGet
 
-[`EventQueueGet`](http://wiki.secondlife.com/wiki/EventQueueGet) is a special capability: it, together with the UDP-circuit, are the only way the sim-server can push events to the client/viewer. This is done using the __HTTP Long Polling__ technique.
+[`EventQueueGet`](http://wiki.secondlife.com/wiki/EventQueueGet) is a special capability: it is one of the two ways the sim-server can push events to the client/viewer. The technique used here is __HTTP Long Polling__. The other being UDP.
 
-More can be found in its [documentation](http://wiki.secondlife.com/wiki/EventQueueGet).
+You can find more in its [documentation](http://wiki.secondlife.com/wiki/EventQueueGet).
