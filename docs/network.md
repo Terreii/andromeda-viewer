@@ -1,18 +1,21 @@
 # Network
 
+The [SL/openSIM-Protocol](http://wiki.secondlife.com/wiki/Protocol) uses both UDP and HTTP(S).
+The server acts as a proxy of all protocols parts.
+
 ## UDP packets
-The [SL-Protocol](http://wiki.secondlife.com/wiki/Protocol) uses UDP for communication.
+The SL-Protocol uses UDP for its real-time communication.
 
-A browser doesn't allow a UDP-connection. So instead the viewer uses a WebSocket to send the packets to the server, with will send it to the SL-SIM. And backwards, too.
+Because browser don't have a UDP-API for sites, packets are send through the server using a WebSocket. The server will act as a proxy between client and SL/openSim server.
 
-To communication is done thru the **circuit.js**. With **networkNessages** the packets are then translated to a JSON-Object.
+The Circuit class in **circuit.js** handles the UDP-communication. It uses **networkMessages.js** to read and write packets.
 
-For a list of all messages of the SL-protocol look in the [tools/master_message_template.msg](http://secondlife.com/app/message_template/master_message_template.msg).
+A list of all messages of the SL-protocol exist in [tools/master_message_template.msg](http://secondlife.com/app/message_template/master_message_template.msg).
 
-For an exact description of every message, look in the SL-wiki under [all messages](http://wiki.secondlife.com/wiki/Category:Messages) or go directly to **wiki.secondlife.com/wiki/[_put message name here_]**.
+For an exact description of every message, look in the SL-wiki under [all messages](http://wiki.secondlife.com/wiki/Category:Messages). Or open **wiki.secondlife.com/wiki/[_put message name here_]**.
 
-## JSON Layout for incoming messages
-After every packet is processed to will have following layout:
+### JSON Layout for incoming messages
+Every incoming packet will have following layout:
 
 ```javascript
 {
@@ -20,44 +23,29 @@ After every packet is processed to will have following layout:
   frequency: 'High' || 'Medium' || 'Low' || 'Fixed',
   number: Number,
   trusted: Boolean,
-  zerocoded: Boolean,
   isOld: undefined || String,
   size: Number,
-  buffer: Buffer, // only the message body part
-  body: [
-    { // block
-      name: String,
-      data: [ // times the quantity of the block
-        {
-          nameOfTheVariable: { // MessageDataType
-            name: String,
-            value: valueOfTheVariable
-          },
-          all: [] // all variables
-       }
-     ]
-   }
- ]
+  blocks: [ // List of all blocks
+    [] block instances
+  ],
+  "block-name": [ // times the quantity of the block
+    {
+      nameOfTheVariable: valueOfTheVariable
+    }
+  ]
 };
 ```
 
 * `name` is the message type name as it is in the template and on the wiki.
-* `frequency` is how often it will be sent. Also a part of the identifier.
+* `frequency` send frequency. Also a part of the identifier.
 * `number` identifier in the frequency
 * `trusted` is it from LL?
-* `zerocoded` was the body zeroencoded
-* `isOld` normally it will be undefined. This should never be a String. Or else it is obsolete
+* `isOld` Will contain a string if it is obsolete. And `undefined` if it is not obsolete.
 * `size` size in bytes
-* `buffer` part of the message that was the body
-* `body` Array of all blocks
-  * `block` A block as in the message template
-  * `name` String name of the block
-  * `data` Array containing the same number of Objects that the message have. If it is a Single block it will have 1 object. Else it will have more.
+* `blocks` Array of all blocks
+* All blocks are accessible through their names.
 
-In every data-Object there is for every variable an Object with its name and the value.
-It also has under all an Array containing all variable objects.
-
-## JSON Layout for outgoing messages
+### JSON Layout for outgoing messages
 
 ```javascript
 {
@@ -68,13 +56,59 @@ It also has under all an Array containing all variable objects.
   ]
 }
  ```
-* `nameOfTheBlock` the name as it is in the wiki and template file. Containing as many objects as needed. Single will have one.
-  * `variableName` the name of the variable as it is in the wiki and template file. It value should be in the range and the type of the varibale.
+* `nameOfTheBlock` the name as it is in the wiki and template file. Every object will be a block-instance. Single will have one. Missing block-instances will result to 0s.
+  * `variableName` the name of the variable as it is in the wiki and template file. It value should be in the range and the type of the variable.
 
 To identify which message it is, the first argument of the send-method of a circuit is the name of the message as a String.
 
-## Wiki
+```javascript
+circuit.send('TestMessage', {
+  TestBlock1: [
+    {
+      Test1: 1
+    }
+  ],
+  NeighborBlock: [
+    {
+      Test0: 2,
+      Test1: 3,
+      Test2: 4
+    },
+    {
+      Test0: 2,
+      Test1: 3,
+      Test2: 4
+    },
+    {
+      Test0: 2,
+      Test1: 3,
+      Test2: 4
+    },
+    {
+      Test0: 2,
+      Test1: 3,
+      Test2: 4
+    }
+  ]
+}, [reliable])
+```
+
+### Wiki
 * [Message Layout](http://wiki.secondlife.com/wiki/Message_Layout)
 * [Packet Layout](http://wiki.secondlife.com/wiki/Packet_Layout)
 * [Circuits](http://wiki.secondlife.com/wiki/Circuits)
 * [Packet Accounting](http://wiki.secondlife.com/wiki/Packet_Accounting)
+
+## LLSD
+
+More and more UDP packages get obsoleted in favor of HTTP(S) based messages. They get encoded using LindenLabs [LLSD](http://wiki.secondlife.com/wiki/LLSD) format. `src/llsd.js` is a complete Javascript implementation from LindenLab. It supports all encodings: XML, Binary and JSON. The XML encoding is the default one.
+
+The http endpoints get revered as capabilities. Their URL change for every session and sometimes also when changing the SIM. The login result will contain the `SeedCapabilities`. it will result a list of all capability-urls.
+
+A LLSD-List with all capabilities-names gets pushed to the SeedCapabilities. Resulting to a LLSD-Dictionary ({ cap-name: URL }).
+
+### EventQueueGet
+
+[`EventQueueGet`](http://wiki.secondlife.com/wiki/EventQueueGet) is a special capability: it is one of the two ways the sim-server can push events to the client/viewer. The technique used here is __HTTP Long Polling__. The other being UDP.
+
+You can find more in its [documentation](http://wiki.secondlife.com/wiki/EventQueueGet).
