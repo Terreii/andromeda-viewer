@@ -1,35 +1,31 @@
 # General Documentation
 
 ## Architecture
-The Viewer is seperated into 2 parts:
+The Viewer is consists of 2 parts:
 
 * Server
 * Client
 
 ### Server
-The server is responsible for:
+The server handles:
 
-* Being a web-server and serving the client (HTML, CSS & JS)
+* Serving the client (HTML, CSS & JS)
 * Login
 * WebSocket <-> UDP bridge
 
 ### Client
-The client does most of the work. It receives UDP-packages thru the web-socket connection to the server.
+The client does most of the work. It receives UDP-packages through the web-socket connection to the server.
 
 ## Login
-The client encodes the password using MD5 (this is required by the SL/openSIM-protocol and only used for transporting). It then sends all needed information in a [JSON](http://json.org)-string to the server.
+The client encodes the password using MD5. It then sends all needed information in a [JSON](http://json.org)-string to the server.
 
 The server then adds its own MAC-address and translates the JSON-data to the [XML-RPC-format](https://en.wikipedia.org/wiki/XML-RPC) used for the [login-process](http://wiki.secondlife.com/wiki/Current_login_protocols) of SL.
 
-Second Lifes XML-RPC response will then be translated back to JSON and send to the client as the response of its request.
+The server translates the XML-RPC response to JSON and send and sends it back to the client as the response of its request.
 
-A WebSocket is then opend by the client. The server acts as a WebSocket to UDP bridge. For every WebSocket-connection the server listen on a new UDP-Port, to seperat multiple clients. For many Packet types it is the only way to identify the target client.
+The client will the open a WebSocket back to the server. The server acts as a WebSocket to UDP bridge. For every WebSocket-connection the server listen on a new UDP-Port, to differentiate clients. A lot of Packet types have no way of identifying the target client. Having a port per client fixes this.
 
-**No client-data will be saved server-side**
+**The server keeps no log of the network-data**
 
 ## Client View
-Facebooks [FLUX](http://facebook.github.io/flux/) ideas are used instead of a traditional MVC modell. The state is implemented with [redux](http://redux.js.org). The view-component is [React](https://facebook.github.io/react/).
-
-The login page is written in plain HTML, CSS and JavaScript. But this can change in the future.
-
-CSS is merged and extended using [CSS-Modules](https://github.com/css-modules/css-modules).
+The client uses the [FLUX](http://facebook.github.io/flux/) model. Where [redux](https://redux.js.org/) manages the state and the view-components are using [React](https://facebook.github.io/react/). And they styled with [styled-components](https://www.styled-components.com/).
