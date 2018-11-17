@@ -50,6 +50,11 @@ export function login (avatarName, password, grid, save, addAvatar) {
 
     const circuit = import('../network/circuit')
 
+    if (save) {
+      const profile = await extra.hoodie.account.get('id')
+      loginData.viewerUserId = profile.id
+    }
+
     const response = await window.fetch('/hoodie/andromeda-viewer/login', {
       method: 'POST',
       body: JSON.stringify(loginData),

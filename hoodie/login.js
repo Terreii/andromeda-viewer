@@ -39,7 +39,14 @@ function processLogin (request, reply) {
     ? xmlrpc.createSecureClient(loginURL)
     : xmlrpc.createClient(loginURL) // osgrid uses http for login ... why??
 
-  reqData.mac = macaddress // adding the needed mac-address
+  reqData.mac = getMacAddress(request) // adding the needed mac-address
+
+  ;[
+    'grid',
+    'viewerUserId'
+  ].forEach(key => {
+    reqData[key] = undefined
+  })
 
   const method = 'login_to_simulator'
 
@@ -59,4 +66,30 @@ exports.init = function loginInit (server) {
     path: '/login',
     handler: processLogin
   })
+}
+
+function getMacAddress (request) {
+  if ('viewerUserId' in request.payload) {
+    return generateMacAddress(request.payload.viewerUserId)
+  } else {
+    return macaddress
+  }
+}
+
+function generateMacAddress (userId) {
+  // userId to ASCII Binary
+  const result = Array.from(userId).reduce((mac, char) => {
+    return mac + char.charCodeAt(0).toString(2).padStart(7, '0')
+  }, '')
+  // Transform into a hex-number
+  // userId is one hex-number to log for a mac-address -> remove the first
+  const num = parseInt(result, 2).toString(16).slice(1)
+
+  let mac = ''
+  for (let i = 0; i < 6; ++i) {
+    const index = i * 2
+    const sep = i === 0 ? '' : ':'
+    mac += `${sep}${num.charAt(index)}${num.charAt(index + 1)}`
+  }
+  return mac
 }
