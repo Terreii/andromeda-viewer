@@ -14,8 +14,18 @@ require('macaddress').one((error, mac) => {
   }
 })
 
+exports.init = loginInit
+
 // SL uses its own tls-certificate
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+
+function loginInit (server) {
+  server.route({
+    method: 'POST',
+    path: '/login',
+    handler: processLogin
+  })
+}
 
 // Sends a login request as a XML-RPC post to the grid
 function processLogin (request, reply) {
@@ -50,7 +60,7 @@ function processLogin (request, reply) {
 
   const method = 'login_to_simulator'
 
-  xmlrpcClient.methodCall(method, [reqData], function (err, data) {
+  xmlrpcClient.methodCall(method, [reqData], (err, data) => {
     if (err) {
       reply(err)
     } else {
@@ -60,19 +70,11 @@ function processLogin (request, reply) {
   })
 }
 
-exports.init = function loginInit (server) {
-  server.route({
-    method: 'POST',
-    path: '/login',
-    handler: processLogin
-  })
-}
-
 function getMacAddress (request) {
   if ('viewerUserId' in request.payload) {
     return generateMacAddress(request.payload.viewerUserId)
   } else {
-    return macaddress
+    return generateMacAddressFromIP(request.info.remoteAddress)
   }
 }
 
@@ -92,4 +94,14 @@ function generateMacAddress (userId) {
     mac += `${sep}${num.charAt(index)}${num.charAt(index + 1)}`
   }
   return mac
+}
+
+function generateMacAddressFromIP (ip) {
+  const ip4 = ip.split('.')
+  if (ip4.length === 4) {
+    const hexNum = ip4.map(part => parseInt(part, 10).toString(16).padStart(2, '0'))
+    return '00:00:' + hexNum.join(':')
+  }
+
+  return macaddress
 }
