@@ -3,17 +3,6 @@
 const url = require('url')
 const xmlrpc = require('xmlrpc')
 
-var macaddress
-// the macaddress can be found in node version 0.12 in os.networkInterfaces()
-require('macaddress').one((error, mac) => {
-  if (!error) {
-    macaddress = mac
-  } else {
-    macaddress = '00:00:00:00:00:00'
-    console.error("Mac address wasn't found!")
-  }
-})
-
 exports.init = loginInit
 
 // SL uses its own tls-certificate
@@ -58,9 +47,7 @@ function processLogin (request, reply) {
     reqData[key] = undefined
   })
 
-  const method = 'login_to_simulator'
-
-  xmlrpcClient.methodCall(method, [reqData], (err, data) => {
+  xmlrpcClient.methodCall('login_to_simulator', [reqData], (err, data) => {
     if (err) {
       reply(err)
     } else {
@@ -103,5 +90,18 @@ function generateMacAddressFromIP (ip) {
     return '00:00:' + hexNum.join(':')
   }
 
-  return macaddress
+  // is IPv6
+  const ip6 = ip.replace(/:/g, '')
+  let resultAddress = ''
+
+  for (let i = 0; i < 12; ++i) {
+    const index = ip6.length - (i + 1)
+    const char = index < 0 ? '0' : ip6.charAt(index)
+    resultAddress = char + resultAddress
+
+    if (i % 2 === 1) {
+      resultAddress = ':' + resultAddress
+    }
+  }
+  return resultAddress.substring(1)
 }
