@@ -113,8 +113,10 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
     }
   }
 
+  const avatarName = new AvatarName(avatar.get('name')).getDisplayName()
+
   return <Container className='selected'>
-    <Name>{new AvatarName(avatar.get('name')).getDisplayName()}</Name>
+    <Name>{avatarName}</Name>
     <Grid>@{grid.get('name')}</Grid>
 
     <PasswordInfo>Password:</PasswordInfo>
@@ -125,6 +127,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
       required
       autoFocus
       disabled={isLoggingIn}
+      aria-label={'password for ' + avatarName}
     />
 
     <LoginButton
