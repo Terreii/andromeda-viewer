@@ -3,7 +3,7 @@ import styled from 'styled-components'
 
 import AvatarName from '../../avatarName'
 
-const Container = styled.div`
+const Container = styled.form`
   display: flex;
   flex-direction: column;
   background-color: rgb(110, 110, 110);
@@ -36,6 +36,10 @@ const Container = styled.div`
     cursor: pointer;
     background-color: rgb(95, 95, 95);
     box-shadow: 0.1em 0.1em 0.3em 0px black;
+  }
+
+  &.not-selected:focus {
+    outline: 2px solid highlight;
   }
 `
 
@@ -90,7 +94,16 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
       onSelect(avID)
     }
 
-    return <Container onClick={onSetActive} className='not-selected'>
+    return <Container
+      onClick={onSetActive}
+      onKeyUp={event => {
+        if (event.keyCode === 13) {
+          onSetActive(event)
+        }
+      }}
+      className='not-selected'
+      tabIndex='0'
+    >
       <Name>{new AvatarName(avatar.get('name')).getDisplayName()}</Name>
       <Grid>@{grid.get('name')}</Grid>
 

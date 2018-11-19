@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 
-const Container = styled.div`
+const Container = styled.form`
   display: flex;
   flex-direction: column;
   background-color: rgb(110, 110, 110);
@@ -35,6 +35,10 @@ const Container = styled.div`
     cursor: pointer;
     background-color: rgb(95, 95, 95);
     box-shadow: 0.1em 0.1em 0.3em 0px black;
+  }
+
+  &.not-selected:focus {
+    outline: 2px solid highlight;
   }
 
   & input:invalid {
@@ -212,7 +216,16 @@ export default class NewAvatarLogin extends React.Component {
         this.props.onSelect('new')
       }
 
-      return <Container onClick={onSetActive} className='not-selected'>
+      return <Container
+        onClick={onSetActive}
+        onKeyUp={event => {
+          if (event.keyCode === 13) {
+            onSetActive(event)
+          }
+        }}
+        className='not-selected'
+        tabIndex='0'
+      >
         <Title>Add avatar or login anonymously</Title>
 
         <ActiveText>click to add</ActiveText>
