@@ -59,7 +59,7 @@ const ActiveText = styled.span`
   color: rgba(255, 255, 255, .7);
 `
 
-const Name = styled.span`
+const Name = styled.label`
   grid-area: name;
 `
 
@@ -67,7 +67,7 @@ const NameInput = styled.input`
   grid-area: name-input;
 `
 
-const Password = styled.span`
+const Password = styled.label`
   grid-area: password;
 `
 
@@ -75,7 +75,7 @@ const PasswordInput = styled.input`
   grid-area: password-input;
 `
 
-const Grid = styled.span`
+const Grid = styled.label`
   grid-area: grid;
 `
 
@@ -254,8 +254,9 @@ export default class NewAvatarLogin extends React.Component {
         login anonymously
       </Title>
 
-      <Name>Avatar:</Name>
+      <Name htmlFor='newAvatarNameInput'>Avatar:</Name>
       <NameInput
+        id='newAvatarNameInput'
         type='text'
         onChange={this._boundName}
         onKeyUp={this._boundKeyUp}
@@ -265,8 +266,9 @@ export default class NewAvatarLogin extends React.Component {
         autoFocus
       />
 
-      <Password>Password:</Password>
+      <Password htmlFor='newAvatarPasswordInput'>Password:</Password>
       <PasswordInput
+        id='newAvatarPasswordInput'
         type='password'
         value={this.state.password}
         onChange={this._boundPassword}
@@ -276,8 +278,12 @@ export default class NewAvatarLogin extends React.Component {
         required
       />
 
-      <Grid>Grid:</Grid>
-      <GridSelect value={this.state.grid} onChange={this._boundGridChange}>
+      <Grid htmlFor='newAvatarGridSelection'>Grid:</Grid>
+      <GridSelect
+        id='newAvatarGridSelection'
+        value={this.state.grid}
+        onChange={this._boundGridChange}
+      >
         {grids}
         <option value=''>+ Add new Grid</option>
       </GridSelect>
@@ -286,8 +292,9 @@ export default class NewAvatarLogin extends React.Component {
         <legend>Add a new Grid</legend>
 
         <div>
-          Name
+          <label htmlFor='newGridNameInput'>Name</label>
           <input
+            id='newGridNameInput'
             type='text'
             value={this.state.newGridName}
             onChange={this._boundNewGridName}
@@ -297,8 +304,9 @@ export default class NewAvatarLogin extends React.Component {
           />
         </div>
         <div>
-          URL
+          <label htmlFor='newGridUrlInput'>URL</label>
           <input
+            id='newGridUrlInput'
             type='url'
             placeholder='https://example.com/login'
             value={this.state.newGridURL}
