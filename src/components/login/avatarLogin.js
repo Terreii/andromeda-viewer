@@ -60,7 +60,7 @@ const ActiveText = styled.span`
   color: rgba(255, 255, 255, .7);
 `
 
-const PasswordInfo = styled.span`
+const PasswordInfo = styled.label`
   grid-area: password;
   margin-top: .5em;
   
@@ -127,13 +127,15 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
   }
 
   const avatarName = new AvatarName(avatar.get('name')).getDisplayName()
+  const passwordInputId = `passwordFor${avatar.get('avatarIdentifier')}`
 
   return <Container className='selected'>
     <Name>{avatarName}</Name>
     <Grid>@{grid.get('name')}</Grid>
 
-    <PasswordInfo>Password:</PasswordInfo>
+    <PasswordInfo htmlFor={passwordInputId}>Password:</PasswordInfo>
     <PasswordInput
+      id={passwordInputId}
       type='password'
       ref={ref}
       onKeyUp={onKeyUp}
