@@ -1,3 +1,4 @@
+import { axe } from 'jest-axe'
 import React from 'react'
 import { shallow, mount } from 'enzyme'
 
@@ -114,4 +115,12 @@ test('click actions', () => {
 
   expect(cancelCallCount).toBe(4)
   expect(sendCallCount).toBe(2)
+})
+
+test('should pass aXe', async () => {
+  const renderedSignUp = mount(<SignInPopup onCancel={() => {}} isSignUp onSend={() => {}} />)
+  expect(await axe(renderedSignUp.html())).toHaveNoViolations()
+
+  const renderedSignIn = mount(<SignInPopup onCancel={() => {}} onSend={() => {}} />)
+  expect(await axe(renderedSignIn.html())).toHaveNoViolations()
 })

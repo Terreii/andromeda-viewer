@@ -62,6 +62,7 @@ export default class SignInPopup extends React.Component {
             onChange={this._boundInputChange}
             placeholder='Username / eMail'
             autoFocus
+            aria-label='username'
           />
           <input
             type='password'
@@ -70,6 +71,7 @@ export default class SignInPopup extends React.Component {
             autoComplete={this.props.isSignUp ? 'new-password' : 'current-password'}
             onChange={this._boundInputChange}
             placeholder='Password'
+            aria-label='password'
           />
           <input
             style={{ display: this.props.isSignUp ? '' : 'none' }}
@@ -79,6 +81,7 @@ export default class SignInPopup extends React.Component {
             autoComplete='new-password'
             onChange={this._boundInputChange}
             placeholder='repeat password'
+            aria-label='repeat password'
           />
           <input
             type='password'
@@ -86,6 +89,7 @@ export default class SignInPopup extends React.Component {
             data-key='cryptoPassword'
             onChange={this._boundInputChange}
             placeholder='set encryption password'
+            aria-label='set encryption password'
           />
           <input
             style={{ display: this.props.isSignUp ? '' : 'none' }}
@@ -94,6 +98,7 @@ export default class SignInPopup extends React.Component {
             data-key='cryptoPassword2'
             onChange={this._boundInputChange}
             placeholder='repeat encryption password'
+            aria-label='repeat encryption password'
           />
         </InputContainer>
         <div>

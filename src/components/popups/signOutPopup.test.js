@@ -1,3 +1,4 @@
+import { axe } from 'jest-axe'
 import React from 'react'
 import { shallow, mount } from 'enzyme'
 
@@ -47,4 +48,10 @@ test('event handling', () => {
 
   expect(cancelCount).toBe(2)
   expect(sendCount).toBe(1)
+})
+
+test('should pass aXe', async () => {
+  const rendered = mount(<SignOutPopup onCancel={() => {}} onSignOut={() => {}} />)
+
+  expect(await axe(rendered.html())).toHaveNoViolations()
 })
