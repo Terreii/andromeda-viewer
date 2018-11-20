@@ -46,11 +46,12 @@ const Container = styled.form`
   }
 `
 
-const Title = styled.h3`
+const Title = styled.h2`
   grid-area: title;
   margin: .3em;
   text-align: center;
   white-space: nowrap;
+  font-size: 120%;
 `
 
 const ActiveText = styled.span`
