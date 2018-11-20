@@ -68,8 +68,8 @@ test('click actions', () => {
   ;[signUp, signIn].forEach((popup, index) => {
     const isSignUp = index === 0
 
-    popup.find('button').first().simulate('click')
-    popup.find('a[href="#close_popup"]').simulate('click', {
+    popup.find('button').at(1).simulate('click')
+    popup.find('button.closePopup').simulate('click', {
       preventDefault: () => {}
     })
 

@@ -1,3 +1,4 @@
+import { axe } from 'jest-axe'
 import React from 'react'
 import { shallow, mount } from 'enzyme'
 
@@ -42,7 +43,7 @@ test('call the onClose callback', () => {
   let wasCalled = false
   let defaultPrevented = false
 
-  const aPopup = shallow(
+  const aPopup = mount(
     <Popup
       title='Welcome'
       onClose={() => {
@@ -53,7 +54,7 @@ test('call the onClose callback', () => {
     </Popup>
   )
 
-  aPopup.find('a').simulate('click', {
+  aPopup.find('button').simulate('click', {
     preventDefault: () => {
       defaultPrevented = true
     }
@@ -61,4 +62,15 @@ test('call the onClose callback', () => {
 
   expect(wasCalled).toBe(true)
   expect(defaultPrevented).toBe(true)
+})
+
+test('should pass aXe', async () => {
+  const rendered = mount(<Popup
+    title='Welcome'
+    onClose={() => {}}
+  >
+    Hello World!
+  </Popup>)
+
+  expect(await axe(rendered.html())).toHaveNoViolations()
 })
