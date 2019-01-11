@@ -1,3 +1,4 @@
+import { axe } from 'jest-axe'
 import React from 'react'
 import { mount } from 'enzyme'
 import { List, Map } from 'immutable'
@@ -77,8 +78,8 @@ test('start chat', () => {
     }}
   />)
 
-  const newChatLink = rendered.find('a')
-  newChatLink.simulate('click', {
+  const newChatButton = rendered.find('button')
+  newChatButton.simulate('click', {
     preventDefault: () => {}
   })
 
@@ -89,4 +90,29 @@ test('start chat', () => {
     name: 'Test Group',
     activate: true
   })
+})
+
+test('should pass aXe', async () => {
+  const groups = List([
+    Map({
+      id: uuid(),
+      name: 'Test Group',
+      insigniaID: uuid(),
+      title: 'Member of the Test Group',
+      acceptNotices: true,
+      powers: [0, 0]
+    }),
+    Map({
+      id: uuid(),
+      name: 'The other Group',
+      insigniaID: uuid(),
+      title: 'Just another group',
+      acceptNotices: true,
+      powers: [2048, 134283266]
+    })
+  ])
+
+  const rendered = mount(<GroupsList groups={groups} startNewIMChat={() => {}} />)
+
+  expect(await axe(rendered.html())).toHaveNoViolations()
 })
