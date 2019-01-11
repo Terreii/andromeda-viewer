@@ -48,7 +48,7 @@ const ListItemInput = styled.input`
   background: none;
 `
 
-const ListItemLink = ListItemInput.withComponent('button')
+const ListItemButton = ListItemInput.withComponent('button')
 
 const SkipContent = styled.a`
   display: block;
@@ -110,14 +110,14 @@ function FriendRow ({ friend, name, skipLink, onRightsChanged, startNewIMChat })
   return <ListItem id={'friends_list_' + friend.get('id')}>
     <NameCell>{name}</NameCell>
     <SkipContent href={skipLink}>{`Skip ${name}`}</SkipContent>
-    <ListItemLink
+    <ListItemButton
       onClick={event => {
         event.preventDefault()
         startNewIMChat(0, id, name, true)
           .then(chatUUID => console.log(chatUUID)) // TODO: switch to tap
       }}>
       <img src={chatBubble} height='20' width='20' alt={`Start new chat with ${name}`} />
-    </ListItemLink>
+    </ListItemButton>
     {rights}
   </ListItem>
 }
