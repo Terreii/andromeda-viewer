@@ -38,7 +38,7 @@ export default function ChatBox (props) {
     </TabPane>
   })
 
-  return <React.Fragment>
+  return <>
     <Helmet aria-disabled='false'>
       <title>{props.selfName.getName()}</title>
     </Helmet>
@@ -73,6 +73,6 @@ export default function ChatBox (props) {
 
       {panels}
     </Tabs>
-  </React.Fragment>
+  </>
 }
 ChatBox.displayName = 'ChatBox'
