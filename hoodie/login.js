@@ -2,6 +2,7 @@
 
 const url = require('url')
 const xmlrpc = require('xmlrpc')
+const uuid = require('uuid').v4
 
 exports.init = loginInit
 
@@ -18,61 +19,87 @@ function loginInit (server) {
 
 // Sends a login request as a XML-RPC post to the grid
 function processLogin (request, reply) {
-  const reqData = request.payload
+  getMacAddress(request)
+    .then(function (mac) {
+      const reqData = request.payload
 
-  var loginURL
-  if (reqData.grid && typeof reqData.grid.url === 'string') {
-    loginURL = url.parse(reqData.grid.url)
-  } else {
-    loginURL = {
-      host: 'login.agni.lindenlab.com',
-      port: 443,
-      path: '/cgi-bin/login.cgi'
-    }
-  }
-  if (!loginURL || loginURL.host == null) {
-    reply(400)
-    return
-  }
-  var xmlrpcClient = loginURL.protocol == null || loginURL.protocol === 'https:'
-    ? xmlrpc.createSecureClient(loginURL)
-    : xmlrpc.createClient(loginURL) // osgrid uses http for login ... why??
+      var loginURL
+      if (reqData.grid && typeof reqData.grid.url === 'string') {
+        loginURL = url.parse(reqData.grid.url)
+      } else {
+        loginURL = {
+          host: 'login.agni.lindenlab.com',
+          port: 443,
+          path: '/cgi-bin/login.cgi'
+        }
+      }
+      if (!loginURL || loginURL.host == null) {
+        reply(400)
+        return
+      }
+      var xmlrpcClient = loginURL.protocol == null || loginURL.protocol === 'https:'
+        ? xmlrpc.createSecureClient(loginURL)
+        : xmlrpc.createClient(loginURL) // osgrid uses http for login ... why??
 
-  reqData.mac = getMacAddress(request) // adding the needed mac-address
+      reqData.mac = mac // adding the needed mac-address
 
-  ;[
-    'grid',
-    'viewerUserId'
-  ].forEach(key => {
-    reqData[key] = undefined
-  })
+      ;[
+        'grid',
+        'viewerUserId'
+      ].forEach(key => {
+        reqData[key] = undefined
+      })
 
-  xmlrpcClient.methodCall('login_to_simulator', [reqData], (err, data) => {
-    if (err) {
+      xmlrpcClient.methodCall('login_to_simulator', [reqData], (err, data) => {
+        if (err) {
+          reply(err)
+        } else {
+          var response = reply(undefined, data)
+          response.type('application/json')
+        }
+      })
+    })
+    .catch(function (err) {
       reply(err)
-    } else {
-      var response = reply(undefined, data)
-      response.type('application/json')
-    }
-  })
+    })
 }
 
 function getMacAddress (request) {
+  // If it is a logged in user
   if ('viewerUserId' in request.payload) {
-    return generateMacAddress(request.payload.viewerUserId)
+    return request.server.plugins.account.api.accounts.find(request.payload.viewerUserId, {
+      include: 'profile'
+    })
+
+      .then(function (user) {
+        // test the mac-address
+        if ('mac' in user.profile && /(?:[a-fA-F\d]{2}:){5}[a-fA-F\d]{2}/i.test(user.profile.mac)) {
+          return user.profile.mac
+        } else {
+          // Add a mac-address to the user
+          return request.server.plugins.account.api.accounts.update(user, function (user) {
+            user.profile.mac = generateMacAddress()
+            return user
+          }, {
+            include: 'profile'
+          })
+
+            .then(function (user) {
+              return user.profile.mac
+            })
+        }
+      })
   } else {
-    return generateMacAddressFromIP(request.info.remoteAddress)
+    // new user
+    return Promise.resolve(
+      generateMacAddressFromIP(request.info.remoteAddress)
+    )
   }
 }
 
 function generateMacAddress (userId) {
-  // userId to ASCII Binary
-  const result = Array.from(userId).reduce((mac, char) => {
-    return mac + char.charCodeAt(0).toString(2).padStart(7, '0')
-  }, '')
-  // Transform into a hex-number
-  // userId is one hex-number to log for a mac-address -> remove the first
-  const num = parseInt(result, 2).toString(16).slice(1)
+  // generate a UUID and transfrom it into a "MAC"-address
+  const num = uuid().replace(/-/g, '').slice(0, 12)
 
   let mac = ''
   for (let i = 0; i < 6; ++i) {

@@ -52,7 +52,7 @@ export function login (avatarName, password, grid, save, addAvatar) {
 
     if (save) {
       const profile = await extra.hoodie.account.get('id')
-      loginData.viewerUserId = profile.id
+      loginData.viewerUserId = profile
     }
 
     const response = await window.fetch('/hoodie/andromeda-viewer/login', {
