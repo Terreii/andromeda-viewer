@@ -74,19 +74,24 @@ async function getMacAddress (request) {
     try {
       const user = await accounts.find(payload.viewerUserId, { include: 'profile' })
 
-      // test the mac-address
-      if (/(?:[a-fA-F\d]{2}:){5}[a-fA-F\d]{2}/i.test(user.profile.mac)) {
+      if (
+        user.profile != null &&
+        // test the mac-address
+        /(?:[a-fA-F\d]{1,2}:){5}[a-fA-F\d]{1,2}/i.test(user.profile.mac)
+      ) {
         return user.profile.mac
       } else {
         // Add a mac-address to the user
-        const updated = await accounts.update(user, user => {
+        const updated = await accounts.update(payload.viewerUserId, user => {
           let mac
 
           do {
             mac = generateMacAddress()
           } while (/^00:00/.test(mac))
 
-          user.profile.mac = mac
+          const profile = user.profile || {}
+          profile.mac = mac
+          user.profile = profile
           return user
         }, {
           include: 'profile'
