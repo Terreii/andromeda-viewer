@@ -80,7 +80,13 @@ async function getMacAddress (request) {
       } else {
         // Add a mac-address to the user
         const updated = await accounts.update(user, user => {
-          user.profile.mac = generateMacAddress()
+          let mac
+
+          do {
+            mac = generateMacAddress()
+          } while (/^00:00/.test(mac))
+
+          user.profile.mac = mac
           return user
         }, {
           include: 'profile'
