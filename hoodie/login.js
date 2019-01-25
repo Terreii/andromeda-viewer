@@ -64,36 +64,36 @@ function processLogin (request, reply) {
     })
 }
 
-function getMacAddress (request) {
+async function getMacAddress (request) {
+  const payload = request.payload
+
   // If it is a logged in user
-  if ('viewerUserId' in request.payload) {
-    return request.server.plugins.account.api.accounts.find(request.payload.viewerUserId, {
-      include: 'profile'
-    })
+  if ('viewerUserId' in payload) {
+    const accounts = request.server.plugins.account.api.accounts
 
-      .then(function (user) {
-        // test the mac-address
-        if ('mac' in user.profile && /(?:[a-fA-F\d]{2}:){5}[a-fA-F\d]{2}/i.test(user.profile.mac)) {
-          return user.profile.mac
-        } else {
-          // Add a mac-address to the user
-          return request.server.plugins.account.api.accounts.update(user, function (user) {
-            user.profile.mac = generateMacAddress()
-            return user
-          }, {
-            include: 'profile'
-          })
+    try {
+      const user = await accounts.find(payload.viewerUserId, { include: 'profile' })
 
-            .then(function (user) {
-              return user.profile.mac
-            })
-        }
-      })
+      // test the mac-address
+      if (/(?:[a-fA-F\d]{2}:){5}[a-fA-F\d]{2}/i.test(user.profile.mac)) {
+        return user.profile.mac
+      } else {
+        // Add a mac-address to the user
+        const updated = await accounts.update(user, user => {
+          user.profile.mac = generateMacAddress()
+          return user
+        }, {
+          include: 'profile'
+        })
+
+        return updated.profile.mac
+      }
+    } catch (err) {
+      return generateMacAddressFromIP(request.info.remoteAddress)
+    }
   } else {
-    // new user
-    return Promise.resolve(
-      generateMacAddressFromIP(request.info.remoteAddress)
-    )
+    // new and anonym user
+    return generateMacAddressFromIP(request.info.remoteAddress)
   }
 }
 
