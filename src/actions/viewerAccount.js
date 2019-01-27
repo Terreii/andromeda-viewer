@@ -201,8 +201,7 @@ export function unlock (cryptoPassword) {
       throw new Error('Not signed in!')
     }
 
-    await hoodie.store.pull('_design/cryptoStore/salt')
-    await hoodie.cryptoStore.setPassword(cryptoPassword)
+    await hoodie.cryptoStore.unlock(cryptoPassword)
 
     dispatch({
       type: 'ViewerAccountUnlocked'
@@ -218,8 +217,7 @@ export function signIn (username, password, cryptoPassword) {
     dispatch(closePopup())
     try {
       const accountProperties = await hoodie.account.signIn({ username, password })
-      await hoodie.store.pull('_design/cryptoStore/salt')
-      await hoodie.cryptoStore.setPassword(cryptoPassword)
+      await hoodie.cryptoStore.unlock(cryptoPassword)
       dispatch(didSignIn(true, true, accountProperties.username))
 
       await dispatch(loadSavedGrids())
@@ -235,6 +233,7 @@ export function signUp (username, password, cryptoPassword) {
   return async (dispatch, getState, { hoodie }) => {
     dispatch(closePopup())
     await hoodie.account.signUp({ username, password })
+    await hoodie.cryptoStore.setup(cryptoPassword)
     dispatch(signIn(username, password, cryptoPassword))
   }
 }

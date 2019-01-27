@@ -1,3 +1,4 @@
+import { axe } from 'jest-axe'
 import React from 'react'
 import { shallow } from 'enzyme'
 import { fromJS } from 'immutable'
@@ -303,4 +304,41 @@ test('adding new grid', () => {
     },
     save: true
   })
+})
+
+test('should pass aXe', async () => {
+  const grids = fromJS([
+    {
+      name: 'Second Life',
+      loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
+    },
+    {
+      name: 'OS Grid',
+      loginURL: 'http://login.osgrid.org/'
+    }
+  ])
+
+  const notSelected = shallow(<NewAvatarLogin
+    grids={grids}
+  />)
+
+  const selected = shallow(<NewAvatarLogin
+    grids={grids}
+    isSelected
+  />)
+
+  expect(await axe(notSelected.html())).toHaveNoViolations()
+  expect(await axe(selected.html())).toHaveNoViolations()
+
+  // adding new grid
+  selected.find('#newAvatarGridSelection').simulate('change', {
+    target: {
+      value: '',
+      validity: {
+        valid: true
+      }
+    }
+  })
+
+  expect(await axe(selected.html())).toHaveNoViolations()
 })

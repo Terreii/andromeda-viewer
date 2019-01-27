@@ -1,3 +1,4 @@
+import { axe } from 'jest-axe'
 import React from 'react'
 import { shallow, mount } from 'enzyme'
 
@@ -16,8 +17,8 @@ test('renders title and buttons', () => {
 
   const buttons = popup.find('button')
 
-  expect(buttons.length).toBe(2)
-  expect(buttons.first().text()).toBe('cancel')
+  expect(buttons.length).toBe(3)
+  expect(buttons.at(1).text()).toBe('cancel')
   expect(buttons.last().text()).toBe('sign out')
 })
 
@@ -35,13 +36,22 @@ test('event handling', () => {
   />)
 
   popup.find('button').forEach(button => {
+    if (button.hasClass('closePopup')) {
+      return
+    }
     button.simulate('click')
   })
 
-  popup.find('a[href="#close_popup"]').simulate('click', {
+  popup.find('button.closePopup').simulate('click', {
     preventDefault: () => {}
   })
 
   expect(cancelCount).toBe(2)
   expect(sendCount).toBe(1)
+})
+
+test('should pass aXe', async () => {
+  const rendered = mount(<SignOutPopup onCancel={() => {}} onSignOut={() => {}} />)
+
+  expect(await axe(rendered.html())).toHaveNoViolations()
 })

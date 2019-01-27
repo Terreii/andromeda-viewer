@@ -3,17 +3,20 @@ import Menu from 'react-burger-menu/lib/menus/slide'
 import { decorator as reduxBurgerMenu } from 'redux-burger-menu'
 import styled, { createGlobalStyle } from 'styled-components'
 
-const Link = styled.a`
+const MenuButton = styled.button`
   color: white;
+  background: rgba(0, 0, 0, 0);
+  border: 0px;
+  font-size: 1.15em;
 `
 
-const LogoutButton = styled(Link)`
+const LogoutButton = styled(MenuButton)`
   :after {
     content: " >>";
   }
 `
 
-const MenuText = Link.withComponent('span')
+const MenuText = MenuButton.withComponent('span')
 
 const GlobalStyles = createGlobalStyle`
   .bm-burger-button {
@@ -22,6 +25,10 @@ const GlobalStyles = createGlobalStyle`
     height: 30px;
     left: 9px;
     top: 9px;
+
+    button:focus {
+      outline: 2px solid highlight;
+    }
   }
 
   .bm-overlay {
@@ -44,7 +51,8 @@ const GlobalStyles = createGlobalStyle`
   .bm-menu {
     background: #373a47;
 
-    a, span {
+    button, span {
+      font-family: serif;
       color: #b8b7ad;
 
       &:hover,
@@ -54,17 +62,13 @@ const GlobalStyles = createGlobalStyle`
     }
   }
 
-  .bm-item-list a, .bm-item-list span {
+  .bm-item-list button, .bm-item-list span {
     padding: 0.8em 0em 0.8em 0em;
     font-weight: 700;
 
     span {
       margin-left: 10px;
     }
-  }
-
-  .bm-item-list a {
-    display: block;
   }
 
   .bm-cross {
@@ -84,50 +88,36 @@ export default function BurgerMenu ({ account, signIn, signUp, logout, signOut }
   const avatarName = account.get('avatarName')
   const viewerLoggedIn = account.getIn(['viewerAccount', 'loggedIn'])
   const username = account.getIn(['viewerAccount', 'username'])
-  const greeting = avatarLoggedIn
-    ? `Hello ${avatarName}`
-    : ''
-
-  const viewerAccountText = viewerLoggedIn
-    ? <MenuText>
-      {`Hello ${username}`}
-    </MenuText>
-    : <Link href='#signin' onClick={signIn}>
-      Sign into Andromeda
-    </Link>
 
   return <SlideMenu>
     <GlobalStyles />
 
-    <MenuText>{greeting}</MenuText>
+    {avatarLoggedIn ? <MenuText>{`Hello ${avatarName}`}</MenuText> : null}
 
-    {viewerAccountText}
+    {viewerLoggedIn
+      ? <MenuText>{`Hello ${username}`}</MenuText>
+      : <MenuButton onClick={signIn}>Sign into Andromeda</MenuButton>
+    }
 
-    <Link
-      className='menu-item'
-      style={{ display: viewerLoggedIn ? 'none' : '' }}
-      href='#signup'
-      onClick={signUp}
-    >
-      Sign up to Andromeda
-    </Link>
+    {viewerLoggedIn
+      ? null
+      : <MenuButton className='menu-item' onClick={signUp}>
+        Sign up to Andromeda
+      </MenuButton>
+    }
 
-    <LogoutButton
-      className='menu-item'
-      style={{ display: avatarLoggedIn ? '' : 'none' }}
-      href='#logout'
-      onClick={logout}
-    >
-      log out
-    </LogoutButton>
+    {avatarLoggedIn
+      ? <LogoutButton className='menu-item' onClick={logout}>
+        log out
+      </LogoutButton>
+      : null
+    }
 
-    <Link
-      className='menu-item'
-      style={{ display: viewerLoggedIn ? '' : 'none' }}
-      href='#signout'
-      onClick={signOut}
-    >
-      Log out from Viewer
-    </Link>
+    {viewerLoggedIn
+      ? <LogoutButton className='menu-item' onClick={signOut}>
+        Log out from Viewer
+      </LogoutButton>
+      : null
+    }
   </SlideMenu>
 }

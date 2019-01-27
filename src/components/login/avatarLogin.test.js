@@ -1,3 +1,4 @@
+import { axe } from 'jest-axe'
 import React from 'react'
 import { shallow, mount } from 'enzyme'
 import { Map } from 'immutable'
@@ -76,4 +77,36 @@ test('login works', () => {
   expect(loginInfo.count).toBe(2)
   expect(loginInfo.avatar).toBe(avatar)
   expect(loginInfo.password).toBe('')
+})
+
+test('should pass aXe', async () => {
+  const avatar = Map({
+    _id: 'avatar/testery',
+    name: 'Testery MacTestface',
+    grid: 'Second Life'
+  })
+
+  const grid = Map({
+    name: 'Second Life',
+    loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
+  })
+
+  const loginInfo = {
+    count: 0,
+    avatar: null,
+    password: null
+  }
+
+  const rendered = mount(<AvatarLogin
+    avatar={avatar}
+    grid={grid}
+    onLogin={(theAvatar, password) => {
+      loginInfo.count += 1
+      loginInfo.avatar = theAvatar
+      loginInfo.password = password
+    }}
+    isSelected
+  />)
+
+  expect(await axe(rendered.html())).toHaveNoViolations()
 })

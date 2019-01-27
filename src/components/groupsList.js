@@ -35,8 +35,10 @@ const NameCell = styled.div`
   flex: auto;
 `
 
-const ListItemLink = styled.a`
+const ListItemButton = styled.button`
   flex: 20px 0 0;
+  border: 0px;
+  background: rgba(0, 0, 0, 0);
 `
 
 function GroupRow ({ group, startNewIMChat }) {
@@ -44,8 +46,7 @@ function GroupRow ({ group, startNewIMChat }) {
 
   return <ListItem>
     <NameCell>{name}</NameCell>
-    <ListItemLink
-      href='#startChat'
+    <ListItemButton
       onClick={event => {
         event.preventDefault()
         startNewIMChat(15, group.get('id'), name, true)
@@ -53,7 +54,7 @@ function GroupRow ({ group, startNewIMChat }) {
         // .then(chatUUID => console.log(`activate group chat ${name} ${chatUUID}`))
       }}>
       <img src={chatBubble} height='20' width='20' alt={`Start new chat with ${name}`} />
-    </ListItemLink>
+    </ListItemButton>
   </ListItem>
 }
 

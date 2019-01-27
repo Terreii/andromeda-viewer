@@ -1,18 +1,42 @@
 'use strict'
 
+let storeData = {}
+
 const hoodie = {
   account: {
     on: function () {}
   },
+
   store: {
-    find: function () {
+    find: function (id) {
+      if (Array.isArray(id)) {
+        return Promise.all(
+          id.map(
+            aID => hoodie.store.find(aID).catch(() => ({ status: 404 }))
+          )
+        )
+      }
+
+      const doc = storeData[id]
+      if (doc != null) {
+        return Promise.resolve(doc)
+      }
+
       const error = new Error('not found')
       error.status = 404
       return Promise.reject(error)
     },
+
     updateOrAdd: function (doc) {
-      return Promise.resolve(doc)
+      const newDoc = Object.assign(storeData[doc._id] || {}, doc)
+      storeData[doc._id] = newDoc
+      return Promise.resolve(newDoc)
     },
+
+    pull: function (ids) {
+      return Promise.all(ids.map(id => hoodie.store.find(id))).catch(() => [])
+    },
+
     on: function () {},
     off: function () {},
     one: function () {}
@@ -30,7 +54,8 @@ test('import is a function that adds the cryptoStore to hoodie', () => {
 test('cryptoStore and its methods exists', () => {
   expect(typeof hoodie.cryptoStore).toBe('object')
 
-  expect(typeof hoodie.cryptoStore.setPassword).toBe('function')
+  expect(typeof hoodie.cryptoStore.setup).toBe('function')
+  expect(typeof hoodie.cryptoStore.unlock).toBe('function')
   expect(typeof hoodie.cryptoStore.changePassword).toBe('function')
 
   expect(typeof hoodie.cryptoStore.add).toBe('function')
@@ -52,10 +77,8 @@ test('cryptoStore and its methods exists', () => {
 })
 
 test('cryptoStore requires to be unlocked', async () => {
-  const salt = await hoodie.cryptoStore.setPassword('test')
-
-  expect(typeof salt).toBe('string')
-  expect(salt.length).toBe(32)
+  await hoodie.cryptoStore.setup('test')
+  await hoodie.cryptoStore.unlock('test')
 })
 
 test('cryptoStore encrypts documents', async () => {

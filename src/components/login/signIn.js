@@ -15,6 +15,10 @@ const Container = styled.div`
   box-shadow: 0.2em 0.2em 0.4em 0.1em black;
 `
 
+const Title = styled.h2`
+  font-size: 130%;
+`
+
 const ButtonRow = styled.div`
   display: flex;
   flex-direction: row;
@@ -39,7 +43,7 @@ const Separator = styled.div`
 
 export default function SignIn ({ showSignInPopup }) {
   return <Container>
-    <h3>New to this viewer?</h3>
+    <Title>New to this viewer?</Title>
     <ButtonRow>
       <SignInButton onClick={() => { showSignInPopup() }}>Sign In</SignInButton>
       <Separator>or</Separator>
