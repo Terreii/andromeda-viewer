@@ -213,7 +213,9 @@ The fn gets a getter-function passed.
 Argument | Type | Description | Required
 ---------|------|-------------|---------
 `varName` | String | Name of the variable that should be accessed. | Yes
-`isString` | Boolean | Should the variable get passed as String? Defaults to 0. | No
+`isString` | Boolean | Should the variable get passed as String? Defaults to false. | No
+
+Returns the value of that variable.
 
 The getter function can get called as often as needed.
 

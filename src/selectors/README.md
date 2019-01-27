@@ -41,6 +41,7 @@ const getShouldSaveChat = createSelector(
   [
     state => state.account // input selectors
   ],
+  // This should also be a pure function!
   account => account.get('sync') && account.getIn(['viewerAccount', 'loggedIn'])
 )
 ```
