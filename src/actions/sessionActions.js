@@ -31,8 +31,17 @@ export function login (avatarName, password, grid, save, addAvatar) {
     hash.update(password, 'ascii')
     const finalPassword = '$1$' + hash.digest('hex')
 
+    const viewerData = {
+      grid
+    }
+
+    if (save) {
+      const userId = await extra.hoodie.account.get('id')
+      viewerData.userId = userId
+    }
+
     const loginData = {
-      grid,
+      viewerData,
       first: avatarName.first,
       last: avatarName.last,
       passwd: finalPassword,
