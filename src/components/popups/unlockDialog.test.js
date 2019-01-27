@@ -1,3 +1,4 @@
+import { axe } from 'jest-axe'
 import React from 'react'
 import { shallow, mount } from 'enzyme'
 
@@ -136,4 +137,10 @@ test('sign out', () => {
 
   expect(unlockCount).toBe(0)
   expect(signOutCount).toBe(1)
+})
+
+test('should pass aXe', async () => {
+  const rendered = mount(<UnlockDialog onUnlock={() => {}} onSignOut={() => {}} />)
+
+  expect(await axe(rendered.html())).toHaveNoViolations()
 })

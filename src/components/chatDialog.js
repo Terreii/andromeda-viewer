@@ -80,8 +80,7 @@ export default class ChatDialog extends React.Component {
   render () {
     const messages = this.props.isIM ? this.props.data.get('messages') : this.props.data
 
-    const placeholderText = 'Send ' +
-      (this.props.isIM ? 'Instant Message' : 'to local chat')
+    const placeholderText = `Send ${this.props.isIM ? 'Instant Message' : 'to local chat'}`
 
     return <Main>
       <ChatMessagesList
@@ -95,6 +94,7 @@ export default class ChatDialog extends React.Component {
           type='text'
           name='chatInput'
           placeholder={placeholderText}
+          aria-label={placeholderText}
           value={this.state.text}
           onChange={this._boundChange}
           onKeyDown={this._boundKeyDown}

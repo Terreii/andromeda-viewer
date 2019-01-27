@@ -1,3 +1,4 @@
+import { axe } from 'jest-axe'
 import React from 'react'
 import { shallow, mount } from 'enzyme'
 
@@ -27,4 +28,10 @@ test('on buttons click', () => {
     undefined, // singIn
     'signUp'
   ])
+})
+
+test('should pass aXe', async () => {
+  const rendered = mount(<SignIn showSignInPopup={() => {}} />)
+
+  expect(await axe(rendered.html())).toHaveNoViolations()
 })

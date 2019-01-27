@@ -17,6 +17,17 @@ const Background = styled.div`
   z-index: 1000;
 `
 
+const CloseButton = styled.button`
+  display: ${props => props.show ? '' : 'none'};
+  padding: 0px;
+  background: none;
+  border: 0px;
+
+  &:focus {
+    outline: 2px solid highlight;
+  }
+`
+
 const Border = styled.div`
   background-color: rgb(255, 250, 250);
   border-radius: 1em;
@@ -46,16 +57,16 @@ export default function Popup (props) {
   const showCloseIcon = typeof props.onClose === 'function'
 
   const closeIconInHeader = showCloseIcon
-    ? <a
-      style={{ display: showCloseIcon ? '' : 'none' }}
-      href='#close_popup'
+    ? <CloseButton
+      className='closePopup'
+      show={showCloseIcon}
       onClick={event => {
         event.preventDefault()
         props.onClose()
       }}
     >
       <img src={closeIcon} alt='close popup' height='32' width='32' />
-    </a>
+    </CloseButton>
     : <span />
 
   return <Background>

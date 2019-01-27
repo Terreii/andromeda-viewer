@@ -53,6 +53,7 @@ command | what it does
 `npm run build` | Builds the viewer. The viewer is in a unusable state after cloning.
 `npm run watch` | Builds the viewer. It continues to run and build the viewer when a file changes. This is the recommended build command while developing!
 `npm test` | Runs all tests and test:docs. Please run this before committing!
+`npm run test:coverage` | Runs all test and outputs a test coverage report. And will open the report.
 `npm run test:docs` | Runs [textlint](https://textlint.github.io/) and [alex.js](https://alexjs.com/) for catching misspelled, insensitive, inconsiderate writing in the documentation.
 `npm run update-caps` | Updates all [capabilities names](http://wiki.secondlife.com/wiki/Category:Capabilities).
 `npm run update-coc` | Updates the CODE_OF_CONDUCT.md
