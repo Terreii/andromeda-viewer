@@ -15,23 +15,21 @@ test('renders without crashing', () => {
 })
 
 test('renders different with isSignUp', () => {
-  const signUp = shallow(<SignInPopup onCancel={() => {}} isSignUp onSend={() => {}} />)
+  const signUp = mount(<SignInPopup onCancel={() => {}} isSignUp onSend={() => {}} />)
 
-  const signIn = shallow(<SignInPopup onCancel={() => {}} onSend={() => {}} />)
+  const signIn = mount(<SignInPopup onCancel={() => {}} onSend={() => {}} />)
 
-  expect(signUp.find('Popup').prop('title')).toBe('sign up')
+  expect(signUp.find('Popup').prop('title')).toBe('Sign up')
   expect(signUp.find('input').length).toBe(5)
 
-  expect(signIn.find('Popup').prop('title')).toBe('sign in')
-  expect(signIn.find('input[autoComplete="new-password"]').first().prop('style')).toEqual({
-    display: 'none'
-  })
+  expect(signIn.find('Popup').prop('title')).toBe('Sign in')
+  expect(signIn.find('.password2').length).toBe(0)
 
   ;[signUp, signIn].forEach((popup, index) => {
     const buttons = popup.find('button')
 
-    expect(buttons.length).toBe(2)
-    expect(buttons.first().text()).toBe('cancel')
+    expect(buttons.length).toBe(3)
+    expect(buttons.at(1).text()).toBe('cancel')
     expect(buttons.last().text()).toBe(index === 0 ? 'sign up' : 'sign in')
   })
 })

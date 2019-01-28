@@ -33,7 +33,7 @@ test('renders signIn without crashing', () => {
     />
   )
 
-  expect(rendered.find('h4').text()).toBe('sign in')
+  expect(rendered.find('h4').text()).toBe('Sign in')
 })
 
 test('renders signUp without crashing', () => {
@@ -45,7 +45,7 @@ test('renders signUp without crashing', () => {
     />
   )
 
-  expect(rendered.find('h4').text()).toBe('sign up')
+  expect(rendered.find('h4').text()).toBe('Sign up')
 })
 
 test('renders signOut without crashing', () => {

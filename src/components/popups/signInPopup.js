@@ -3,9 +3,43 @@ import styled from 'styled-components'
 
 import Popup from './popup'
 
-const InputContainer = styled.div`
+const Container = styled.form`
   display: flex;
   flex-direction: column;
+  
+  @supports (display: grid) {
+    display: grid;
+    grid-template-areas:
+      "name nameIn nameIn"
+      "pw pwIn pwIn"
+      "crypto cryptoIn cryptoIn"
+      "cancel ok ok";
+    grid-gap: .3em;
+
+    &.SignUp {
+      grid-template-areas:
+        "name nameIn nameIn"
+        "pw pwIn pwIn"
+        "pw2 pwIn2 pwIn2"
+        "crypto cryptoIn cryptoIn"
+        "crypto2 cryptoIn2 cryptoIn2"
+        "cancel ok ok";
+    }
+  }
+`
+
+const InputInGrid = styled.input`
+  grid-area: ${props => props.grid};
+  display: ${props => props.show ? '' : 'none'};
+`
+
+const LabelInGrid = styled.label`
+  grid-area: ${props => props.grid};
+  display: ${props => props.show ? '' : 'none'};
+`
+
+const ButtonsInGrid = styled.button`
+  grid-area: ${props => props.grid};
 `
 
 export default class SignInPopup extends React.Component {
@@ -50,63 +84,98 @@ export default class SignInPopup extends React.Component {
   }
 
   render () {
-    const title = this.props.isSignUp ? 'sign up' : 'sign in'
+    const title = this.props.isSignUp ? 'Sign up' : 'Sign in'
     return <Popup title={title} onClose={this.props.onCancel}>
       <div>
-        <InputContainer>
-          <input
+        <Container className={this.props.isSignUp ? 'SignUp' : ''}>
+          <LabelInGrid htmlFor='userNameIn' grid='name' show>
+            Username / eMail
+          </LabelInGrid>
+          <InputInGrid
+            id='userNameIn'
+            grid='nameIn'
+            show
             type='email'
             value={this.state.username}
             data-key='username'
             autoComplete='email'
             onChange={this._boundInputChange}
-            placeholder='Username / eMail'
+            placeholder='me-avatar@example.com'
             autoFocus
-            aria-label='username'
+            required
           />
-          <input
+
+          <LabelInGrid htmlFor='password' grid='pw' show>
+            Password
+          </LabelInGrid>
+          <InputInGrid
+            id='password'
+            grid='pwIn'
+            show
             type='password'
             value={this.state.password}
             data-key='password'
             autoComplete={this.props.isSignUp ? 'new-password' : 'current-password'}
             onChange={this._boundInputChange}
-            placeholder='Password'
-            aria-label='password'
+            required
           />
-          <input
-            style={{ display: this.props.isSignUp ? '' : 'none' }}
+
+          <LabelInGrid
+            htmlFor='password2'
+            grid='pw2'
+            show={this.props.isSignUp}
+          >
+            Repeat password
+          </LabelInGrid>
+          <InputInGrid
+            id='password2'
+            grid='pwIn2'
+            show={this.props.isSignUp}
             type='password'
             value={this.state.password2}
             data-key='password2'
             autoComplete='new-password'
             onChange={this._boundInputChange}
-            placeholder='repeat password'
-            aria-label='repeat password'
+            required={this.props.isSignUp}
           />
-          <input
+
+          <LabelInGrid htmlFor='cryptoPassword' grid='crypto' show>
+            Encryption Password
+          </LabelInGrid>
+          <InputInGrid
+            id='cryptoPassword'
+            grid='cryptoIn'
+            show
             type='password'
             value={this.state.cryptoPassword}
             data-key='cryptoPassword'
             onChange={this._boundInputChange}
-            placeholder='set encryption password'
-            aria-label='set encryption password'
+            required
           />
-          <input
-            style={{ display: this.props.isSignUp ? '' : 'none' }}
+
+          <LabelInGrid
+            htmlFor='cryptoPassword2'
+            grid='crypto2'
+            show={this.props.isSignUp}
+          >
+            Repeat Encryption Password
+          </LabelInGrid>
+          <InputInGrid
+            id='cryptoPassword2'
+            grid='cryptoIn2'
+            show={this.props.isSignUp}
             type='password'
             value={this.state.cryptoPassword2}
             data-key='cryptoPassword2'
             onChange={this._boundInputChange}
-            placeholder='repeat encryption password'
-            aria-label='repeat encryption password'
+            required={this.props.isSignUp}
           />
-        </InputContainer>
-        <div>
-          <button onClick={this.props.onCancel}>cancel</button>
-          <button onClick={this._boundSend}>
+
+          <ButtonsInGrid onClick={this.props.onCancel} grid='cancel'>cancel</ButtonsInGrid>
+          <ButtonsInGrid onClick={this._boundSend} grid='ok'>
             {this.props.isSignUp ? 'sign up' : 'sign in'}
-          </button>
-        </div>
+          </ButtonsInGrid>
+        </Container>
       </div>
     </Popup>
   }
