@@ -15,7 +15,7 @@ const FormElement = styled.div`
   margin: .3em;
 `
 
-const InputInGrid = styled.input`
+const Input = styled.input`
   padding: 0.45em 1em;
   border: 1px solid rgba(34, 36, 38, 0.15);
   border-radius: 0.3rem;
@@ -28,7 +28,7 @@ const InputInGrid = styled.input`
   }
 `
 
-const LabelInGrid = styled.label`
+const Label = styled.label`
   margin-right: .3em;
   color: rgba(0, 0, 0, 0.87);
   font-weight: 700;
@@ -36,14 +36,21 @@ const LabelInGrid = styled.label`
   line-height: 1.4em;
 `
 
+const Help = styled.small`
+  color: #6c757d;
+  line-height: 1.5;
+  display: ${props => props.hide ? 'none' : ''};
+`
+
 const ButtonsContainer = styled.div`
   flex: auto;
   display: flex;
   flex-direction: row;
+  margin-top: 0.3em;
   padding: 0 0.3em;
 `
 
-const ButtonsInGrid = styled.button`
+const Button = styled.button`
   flex: auto;
   margin-top: .5rem;
   padding: .5em;
@@ -123,10 +130,10 @@ export default class SignInPopup extends React.Component {
     return <Popup title={title} onClose={this.props.onCancel}>
       <Container className={this.props.isSignUp ? 'SignUp' : ''}>
         <FormElement show>
-          <LabelInGrid htmlFor='userNameIn'>
+          <Label htmlFor='userNameIn'>
             Username / eMail:
-          </LabelInGrid>
-          <InputInGrid
+          </Label>
+          <Input
             id='userNameIn'
             type='email'
             value={this.state.username}
@@ -136,14 +143,18 @@ export default class SignInPopup extends React.Component {
             placeholder='me-avatar@example.com'
             autoFocus
             required
+            aria-describedby='mainHelp'
           />
+          <Help id='mainHelp' hide={!this.props.isSignUp}>
+            Must be an eMail. We'll never share your email with anyone else.
+          </Help>
         </FormElement>
 
         <FormElement show>
-          <LabelInGrid htmlFor='password'>
+          <Label htmlFor='password'>
             Password:
-          </LabelInGrid>
-          <InputInGrid
+          </Label>
+          <Input
             id='password'
             type='password'
             value={this.state.password}
@@ -151,14 +162,27 @@ export default class SignInPopup extends React.Component {
             autoComplete={this.props.isSignUp ? 'new-password' : 'current-password'}
             onChange={this._boundInputChange}
             required
+            aria-describedby='passwordHelp'
           />
+          <Help id='passwordHelp' hide={!this.props.isSignUp}>
+            Please use a strong and unique password!<br />
+            {'A '}
+            <a
+              href='https://en.wikipedia.org/wiki/List_of_password_managers'
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              Password Manager
+            </a>
+            {' is recommended.'}
+          </Help>
         </FormElement>
 
         <FormElement show={this.props.isSignUp}>
-          <LabelInGrid htmlFor='password2'>
+          <Label htmlFor='password2'>
             Repeat password:
-          </LabelInGrid>
-          <InputInGrid
+          </Label>
+          <Input
             id='password2'
             type='password'
             value={this.state.password2}
@@ -170,24 +194,33 @@ export default class SignInPopup extends React.Component {
         </FormElement>
 
         <FormElement show>
-          <LabelInGrid htmlFor='cryptoPassword'>
-            Encryption Password:
-          </LabelInGrid>
-          <InputInGrid
+          <Label htmlFor='cryptoPassword'>
+            Encryption password:
+          </Label>
+          <Input
             id='cryptoPassword'
             type='password'
             value={this.state.cryptoPassword}
             data-key='cryptoPassword'
             onChange={this._boundInputChange}
             required
+            aria-describedby='cryptoPwHelp'
           />
+          <Help id='cryptoPwHelp' hide={!this.props.isSignUp}>
+            This password is used to encrypt your personal data.<br />
+            This includes: <i>Avatar login-info</i>, <i>grids</i>, and <i>chat-logs</i>.<br />
+            <b>Your personal data is encrypted on your machine.<br />
+            and will never leave it un-encrypted!</b>
+            <br />
+            This password will <b>never</b> be saved or leave your machine!
+          </Help>
         </FormElement>
 
         <FormElement show={this.props.isSignUp}>
-          <LabelInGrid htmlFor='cryptoPassword2'>
-            Repeat Encryption Password:
-          </LabelInGrid>
-          <InputInGrid
+          <Label htmlFor='cryptoPassword2'>
+            Repeat encryption password:
+          </Label>
+          <Input
             id='cryptoPassword2'
             type='password'
             value={this.state.cryptoPassword2}
@@ -198,12 +231,12 @@ export default class SignInPopup extends React.Component {
         </FormElement>
 
         <ButtonsContainer>
-          <ButtonsInGrid className='cancel' onClick={this.props.onCancel}>
+          <Button className='cancel' onClick={this.props.onCancel}>
             cancel
-          </ButtonsInGrid>
-          <ButtonsInGrid className='ok' onClick={this._boundSend}>
+          </Button>
+          <Button className='ok' onClick={this._boundSend}>
             {this.props.isSignUp ? 'sign up' : 'sign in'}
-          </ButtonsInGrid>
+          </Button>
         </ButtonsContainer>
       </Container>
     </Popup>
