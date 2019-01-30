@@ -40,6 +40,15 @@ const Help = styled.small`
   color: #6c757d;
   line-height: 1.5;
   display: ${props => props.hide ? 'none' : ''};
+
+  &.Error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 0.2em;
+    padding: 0.50rem 1.00rem;
+    margin-top: 0.25rem;
+  }
 `
 
 const ButtonsContainer = styled.div`
@@ -99,11 +108,11 @@ export default class SignInPopup extends React.Component {
   }
 
   _inputChange (event) {
-    const key = event.target.dataset.key
+    const id = event.target.id
     const value = event.target.value
     this.setState({
-      usernameValid: key === 'username' ? event.target.validity.valid : this.state.usernameValid,
-      [key]: value
+      usernameValid: id === 'username' ? event.target.validity.valid : this.state.usernameValid,
+      [id]: value
     })
   }
 
@@ -130,14 +139,13 @@ export default class SignInPopup extends React.Component {
     return <Popup title={title} onClose={this.props.onCancel}>
       <Container className={this.props.isSignUp ? 'SignUp' : ''}>
         <FormElement show>
-          <Label htmlFor='userNameIn'>
-            Username / eMail:
+          <Label htmlFor='username'>
+            Username / email:
           </Label>
           <Input
-            id='userNameIn'
+            id='username'
             type='email'
             value={this.state.username}
-            data-key='username'
             autoComplete='email'
             onChange={this._boundInputChange}
             placeholder='me-avatar@example.com'
@@ -146,7 +154,7 @@ export default class SignInPopup extends React.Component {
             aria-describedby='mainHelp'
           />
           <Help id='mainHelp' hide={!this.props.isSignUp}>
-            Must be an eMail. We'll never share your email with anyone else.
+            Must be an email. We'll never share your email with anyone else.
           </Help>
         </FormElement>
 
@@ -158,7 +166,6 @@ export default class SignInPopup extends React.Component {
             id='password'
             type='password'
             value={this.state.password}
-            data-key='password'
             autoComplete={this.props.isSignUp ? 'new-password' : 'current-password'}
             onChange={this._boundInputChange}
             required
@@ -186,11 +193,16 @@ export default class SignInPopup extends React.Component {
             id='password2'
             type='password'
             value={this.state.password2}
-            data-key='password2'
             autoComplete='new-password'
             onChange={this._boundInputChange}
             required={this.props.isSignUp}
           />
+          <Help
+            className='Error'
+            hide={this.state.password2.length === 0 || this.state.password === this.state.password2}
+          >
+            Password doesn't match!
+          </Help>
         </FormElement>
 
         <FormElement show>
@@ -201,7 +213,6 @@ export default class SignInPopup extends React.Component {
             id='cryptoPassword'
             type='password'
             value={this.state.cryptoPassword}
-            data-key='cryptoPassword'
             onChange={this._boundInputChange}
             required
             aria-describedby='cryptoPwHelp'
@@ -224,10 +235,17 @@ export default class SignInPopup extends React.Component {
             id='cryptoPassword2'
             type='password'
             value={this.state.cryptoPassword2}
-            data-key='cryptoPassword2'
             onChange={this._boundInputChange}
             required={this.props.isSignUp}
           />
+          <Help
+            className='Error'
+            hide={this.state.cryptoPassword2.length === 0 ||
+              this.state.cryptoPassword === this.state.cryptoPassword2
+            }
+          >
+            Encryption password doesn't match!
+          </Help>
         </FormElement>
 
         <ButtonsContainer>

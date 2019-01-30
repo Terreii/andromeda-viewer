@@ -80,9 +80,7 @@ test('click actions', () => {
         validity: {
           valid: true
         },
-        dataset: {
-          key: 'username'
-        }
+        id: 'username'
       }
     })
 
@@ -93,9 +91,7 @@ test('click actions', () => {
       aInput.simulate('change', {
         target: {
           value: password,
-          dataset: {
-            key
-          }
+          id: key
         }
       })
     }
