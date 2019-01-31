@@ -42,7 +42,7 @@ test('click actions', () => {
   const onSend = (username, password, cryptoPassword, type, ...rest) => {
     expect(shouldCallSend).toBe(true)
     expect(username).toBe('testery.mactestface@example.com')
-    expect(password).toBe('secret')
+    expect(password).toBe('secretPassword')
     expect(cryptoPassword).toBe('encrypted')
     expect(rest.length).toBe(0)
 
@@ -95,11 +95,11 @@ test('click actions', () => {
         }
       })
     }
-    addPassword(passwordInputs.first(), 'password', 'secret')
+    addPassword(passwordInputs.first(), 'password', 'secretPassword')
     addPassword(passwordInputs.at(2), 'cryptoPassword', 'encrypted')
     if (isSignUp) {
       popup.find('button').last().simulate('click')
-      addPassword(passwordInputs.at(1), 'password2', 'secret')
+      addPassword(passwordInputs.at(1), 'password2', 'secretPassword')
       addPassword(passwordInputs.at(3), 'cryptoPassword2', 'encrypted')
     }
 
