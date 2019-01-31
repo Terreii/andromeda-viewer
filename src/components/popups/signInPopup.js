@@ -2,6 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 import Popup from './popup'
+import { Button } from '../formElements'
 
 const Container = styled.form`
   display: flex;
@@ -57,42 +58,13 @@ const ButtonsContainer = styled.div`
   flex-direction: row;
   margin-top: 0.3em;
   padding: 0 0.3em;
-`
 
-const Button = styled.button`
-  flex: auto;
-  margin-top: .5rem;
-  padding: .5em;
-  font-size: 1rem;
-  border-radius: .25rem;
-  border: 0px;
-  font-weight: 400;
-  font-family: Helvetica, Arial, sans-serif;
-
-  &:disabled {
-    opacity: 0.65;
+  & > button {
+    margin-top: .5rem;
   }
 
-  & + & {
+  & > button + button {
     margin-left: 0.55em;
-  }
-
-  &.cancel {
-    color: white;
-    background: #dc3545;
-
-    &:hover, &:focus {
-      background: #c82333;
-    }
-  }
-
-  &.ok {
-    color: white;
-    background: #28a745;
-
-    &:hover, &:focus {
-      background: #218838;
-    }
   }
 `
 
@@ -286,7 +258,7 @@ export default class SignInPopup extends React.Component {
         </FormElement>
 
         <ButtonsContainer>
-          <Button className='cancel' onClick={this.props.onCancel}>
+          <Button onClick={this.props.onCancel}>
             cancel
           </Button>
           <Button className='ok' onClick={this._boundSend} disabled={!this._isInputValid()}>

@@ -120,7 +120,7 @@ test('sign out', () => {
   let unlockCount = 0
   let signOutCount = 0
 
-  const rendered = shallow(<UnlockDialog
+  const rendered = mount(<UnlockDialog
     onUnlock={() => {
       unlockCount += 1
     }}

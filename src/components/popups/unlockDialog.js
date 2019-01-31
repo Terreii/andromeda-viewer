@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import PropTypes from 'prop-types'
 
 import Popup from './popup'
+import { Button } from '../formElements'
 
 import lockIcon from '../../icons/black_lock.svg'
 
@@ -43,7 +44,11 @@ const ButtonsRow = styled.div`
   flex-direction: row-reverse;
   justify-content: space-between;
   margin-top: .7em;
-  padding: .5em;
+  padding: .25em 0em;
+
+  & > button + button {
+    margin-right: 2.75em;
+  }
 `
 
 export default class UnlockDialog extends React.Component {
@@ -114,7 +119,7 @@ export default class UnlockDialog extends React.Component {
 
     return <Popup title={title}>
       <Content>
-        <span>Please enter your Password to unlock this app!</span>
+        <span>Please enter your Encryption-Password to unlock this app!</span>
         <ErrorOut hasError={this.state.errorText != null}>{this.state.errorText}</ErrorOut>
         <PasswordRow>
           Password:
@@ -129,18 +134,20 @@ export default class UnlockDialog extends React.Component {
           />
         </PasswordRow>
         <ButtonsRow>
-          <button
+          <Button
+            className='primary'
             onClick={this._boundUnlock}
             disabled={this.state.isUnlocking}
           >
-            unlock
-          </button>
-          <button
+            Unlock
+          </Button>
+          <Button
+            className='danger'
             onClick={this.props.onSignOut}
             disabled={this.state.isUnlocking}
           >
             Sign out
-          </button>
+          </Button>
         </ButtonsRow>
       </Content>
     </Popup>
