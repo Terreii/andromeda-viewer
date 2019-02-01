@@ -166,6 +166,7 @@ export default class SignInPopup extends React.Component {
           <Help
             className='Error'
             hide={this.state.password2.length === 0 || this.state.password === this.state.password2}
+            role='alert'
           >
             Password doesn't match!
           </Help>
@@ -211,6 +212,7 @@ export default class SignInPopup extends React.Component {
           />
           <Help
             className='Error'
+            role='alert'
             hide={this.state.cryptoPassword2.length === 0 ||
               this.state.cryptoPassword === this.state.cryptoPassword2
             }

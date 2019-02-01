@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import PropTypes from 'prop-types'
 
 import Popup from './popup'
-import { Button, FormField, Input } from '../formElements'
+import { Button, FormField, Input, Help } from '../formElements'
 
 import lockIcon from '../../icons/black_lock.svg'
 
@@ -17,15 +17,6 @@ const LockItemStyled = styled.img`
   left: -10%;
   margin: 0px;
   margin-right: 0.3em;
-`
-
-const ErrorOut = styled.span`
-  margin-top: 0.5em;
-  padding: .3em;
-  border-radius: 0.3em;
-  background-color: rgb(227, 0, 0);
-
-  display: ${props => props.hasError ? '' : 'none'};
 `
 
 const PasswordRow = styled(FormField)`
@@ -92,9 +83,13 @@ export default class UnlockDialog extends React.Component {
 
       .catch(error => {
         console.error(error)
+        const errorText = typeof error.message === 'string'
+          ? error.message
+          : error.toString()
+
         this.setState({
           isUnlocking: false,
-          errorText: error.toString()
+          errorText
         })
       })
   }
@@ -113,7 +108,7 @@ export default class UnlockDialog extends React.Component {
     return <Popup title={title}>
       <Content>
         <span>Please enter your Encryption-Password to unlock this app!</span>
-        <ErrorOut hasError={this.state.errorText != null}>{this.state.errorText}</ErrorOut>
+
         <PasswordRow>
           <label htmlFor='unlockPasswordIn'>Password:</label>
           <Input
@@ -125,7 +120,11 @@ export default class UnlockDialog extends React.Component {
             value={this.state.password}
             onChange={this._boundChange}
             onKeyUp={this._boundInput}
+            aria-describedby='unlockError'
           />
+          <Help id='unlockError' className='Error' hide={this.state.errorText == null} role='alert'>
+            {this.state.errorText}
+          </Help>
         </PasswordRow>
         <ButtonsRow>
           <Button
