@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 import Popup from './popup'
-import { Button } from '../formElements'
+import { Button, Input, FormField, Help } from '../formElements'
 
 const Container = styled.form`
   display: flex;
@@ -10,46 +10,8 @@ const Container = styled.form`
   font-family: Helvetica, Arial, sans-serif;
 `
 
-const FormElement = styled.div`
+const FormElement = styled(FormField)`
   display: ${props => props.show ? 'flex' : 'none'};
-  flex-direction: column;
-  margin: .3em;
-`
-
-const Input = styled.input`
-  padding: 0.45em 1em;
-  border: 1px solid rgba(34, 36, 38, 0.15);
-  border-radius: 0.3rem;
-  font-size: 1rem;
-  line-height: 1.2em;
-  color: rgba(0, 0, 0, 0.87);
-
-  &:focus {
-    border-color: highlight;
-  }
-`
-
-const Label = styled.label`
-  margin-right: .3em;
-  color: rgba(0, 0, 0, 0.87);
-  font-weight: 700;
-  font-size: 0.8em;
-  line-height: 1.4em;
-`
-
-const Help = styled.small`
-  color: #6c757d;
-  line-height: 1.5;
-  display: ${props => props.hide ? 'none' : ''};
-
-  &.Error {
-    color: #721c24;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    border-radius: 0.2em;
-    padding: 0.50rem 1.00rem;
-    margin-top: 0.25rem;
-  }
 `
 
 const ButtonsContainer = styled.div`
@@ -137,9 +99,9 @@ export default class SignInPopup extends React.Component {
     return <Popup title={title} onClose={this.props.onCancel}>
       <Container className={this.props.isSignUp ? 'SignUp' : ''}>
         <FormElement show>
-          <Label htmlFor='username'>
+          <label htmlFor='username'>
             Username / email:
-          </Label>
+          </label>
           <Input
             id='username'
             type='email'
@@ -158,9 +120,9 @@ export default class SignInPopup extends React.Component {
         </FormElement>
 
         <FormElement show>
-          <Label htmlFor='password'>
+          <label htmlFor='password'>
             Password:
-          </Label>
+          </label>
           <Input
             id='password'
             type='password'
@@ -188,9 +150,9 @@ export default class SignInPopup extends React.Component {
         </FormElement>
 
         <FormElement show={this.props.isSignUp}>
-          <Label htmlFor='password2'>
+          <label htmlFor='password2'>
             Repeat password:
-          </Label>
+          </label>
           <Input
             id='password2'
             type='password'
@@ -210,9 +172,9 @@ export default class SignInPopup extends React.Component {
         </FormElement>
 
         <FormElement show>
-          <Label htmlFor='cryptoPassword'>
+          <label htmlFor='cryptoPassword'>
             Encryption password:
-          </Label>
+          </label>
           <Input
             id='cryptoPassword'
             type='password'
@@ -235,9 +197,9 @@ export default class SignInPopup extends React.Component {
         </FormElement>
 
         <FormElement show={this.props.isSignUp}>
-          <Label htmlFor='cryptoPassword2'>
+          <label htmlFor='cryptoPassword2'>
             Repeat encryption password:
-          </Label>
+          </label>
           <Input
             id='cryptoPassword2'
             type='password'

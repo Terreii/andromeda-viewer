@@ -53,3 +53,45 @@ export const Button = styled.button`
     }
   }
 `
+
+export const Input = styled.input`
+  padding: 0.45em 1em;
+  border: 1px solid rgba(34, 36, 38, 0.15);
+  border-radius: 0.3rem;
+  font-size: 1rem;
+  line-height: 1.2em;
+  color: rgba(0, 0, 0, 0.87);
+
+  &:focus {
+    border-color: highlight;
+  }
+`
+
+export const FormField = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin: .3em;
+
+  & > label {
+    margin-right: .3em;
+    color: rgba(0, 0, 0, 0.87);
+    font-weight: 700;
+    font-size: 0.8em;
+    line-height: 1.4em;
+  }
+`
+
+export const Help = styled.small`
+  color: #6c757d;
+  line-height: 1.5;
+  display: ${props => props.hide ? 'none' : ''};
+
+  &.Error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 0.2em;
+    padding: 0.50rem 1.00rem;
+    margin-top: 0.25rem;
+  }
+`

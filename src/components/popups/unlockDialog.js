@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import PropTypes from 'prop-types'
 
 import Popup from './popup'
-import { Button } from '../formElements'
+import { Button, FormField, Input } from '../formElements'
 
 import lockIcon from '../../icons/black_lock.svg'
 
@@ -28,15 +28,8 @@ const ErrorOut = styled.span`
   display: ${props => props.hasError ? '' : 'none'};
 `
 
-const PasswordRow = styled.label`
-  display: flex;
-  flex-direction: row;
-  margin-top: 1.7em;
-
-  & > input {
-    flex: auto;
-    margin-left: 2em;
-  }
+const PasswordRow = styled(FormField)`
+  margin-top: 0.75em;
 `
 
 const ButtonsRow = styled.div`
@@ -122,8 +115,9 @@ export default class UnlockDialog extends React.Component {
         <span>Please enter your Encryption-Password to unlock this app!</span>
         <ErrorOut hasError={this.state.errorText != null}>{this.state.errorText}</ErrorOut>
         <PasswordRow>
-          Password:
-          <input
+          <label htmlFor='unlockPasswordIn'>Password:</label>
+          <Input
+            id='unlockPasswordIn'
             type='password'
             autoComplete='current-password'
             autoFocus
