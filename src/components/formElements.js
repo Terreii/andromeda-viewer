@@ -7,7 +7,6 @@ export const Button = styled.button`
   border-radius: .25rem;
   border: 0px;
   font-weight: 400;
-  font-family: Helvetica, Arial, sans-serif;
   background: #e0e0e0;
 
   &:hover, &:focus {
@@ -64,6 +63,10 @@ export const Input = styled.input`
 
   &:focus {
     border-color: highlight;
+  }
+
+  &.medium {
+    font-size: 0.75rem;
   }
 `
 

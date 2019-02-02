@@ -11,6 +11,7 @@ export const AppContainer = styled.div`
   height: 100vh;
   padding: 0px;
   margin: 0px;
+  font-family: Helvetica, Arial, sans-serif;
 `
 
 const LoadingView = styled.div`
