@@ -8,19 +8,7 @@ export const loadNames = createSelector(
   [
     getNames
   ],
-  names => {
-    const shouldLoad = names.some(name => {
-      if (name.willHaveDisplayName()) {
-        return false
-      } else {
-        return true
-      }
-    })
-
-    if (shouldLoad) {
-      return getDisplayName()
-    } else {
-      return null
-    }
-  }
+  names => names.some(name => !name.willHaveDisplayName())
+    ? getDisplayName()
+    : null
 )
