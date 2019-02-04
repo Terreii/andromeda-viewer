@@ -2,7 +2,7 @@
 
 This is the source of the client.
 
-It is a [React](https://reactjs.org/) and [Hoodie](http://hood.ie/) based client. State gets handled by [redux](ttps://redux.js.org/), [redux-thunk](https://github.com/reduxjs/redux-thunk) and [reselect](https://www.npmjs.com/package/reselect).
+It is a [React](https://reactjs.org/) and [Hoodie](http://hood.ie/) based client. State gets handled by [redux](https://redux.js.org/), [redux-thunk](https://github.com/reduxjs/redux-thunk) and [reselect](https://www.npmjs.com/package/reselect).
 
 In this directory are the general and setup modules located. Most of the App is in the directories.
 
