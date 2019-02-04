@@ -53,6 +53,7 @@
   "MeshUploadFlag",
   "NavMeshGenerationStatus",
   "NewFileAgentInventory",
+  "ObjectAnimation",
   "ObjectMedia",
   "ObjectMediaNavigate",
   "ObjectNavMeshProperties",
