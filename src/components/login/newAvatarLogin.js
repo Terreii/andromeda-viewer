@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 
-const Container = styled.div`
+const Container = styled.form`
   display: flex;
   flex-direction: column;
   background-color: rgb(110, 110, 110);
@@ -37,16 +37,21 @@ const Container = styled.div`
     box-shadow: 0.1em 0.1em 0.3em 0px black;
   }
 
+  &.not-selected:focus {
+    outline: 2px solid highlight;
+  }
+
   & input:invalid {
     outline: 1px solid red;
   }
 `
 
-const Title = styled.h3`
+const Title = styled.h2`
   grid-area: title;
   margin: .3em;
   text-align: center;
   white-space: nowrap;
+  font-size: 120%;
 `
 
 const ActiveText = styled.span`
@@ -55,7 +60,7 @@ const ActiveText = styled.span`
   color: rgba(255, 255, 255, .7);
 `
 
-const Name = styled.span`
+const Name = styled.label`
   grid-area: name;
 `
 
@@ -63,7 +68,7 @@ const NameInput = styled.input`
   grid-area: name-input;
 `
 
-const Password = styled.span`
+const Password = styled.label`
   grid-area: password;
 `
 
@@ -71,7 +76,7 @@ const PasswordInput = styled.input`
   grid-area: password-input;
 `
 
-const Grid = styled.span`
+const Grid = styled.label`
   grid-area: grid;
 `
 
@@ -212,7 +217,16 @@ export default class NewAvatarLogin extends React.Component {
         this.props.onSelect('new')
       }
 
-      return <Container onClick={onSetActive} className='not-selected'>
+      return <Container
+        onClick={onSetActive}
+        onKeyUp={event => {
+          if (event.keyCode === 13) {
+            onSetActive(event)
+          }
+        }}
+        className='not-selected'
+        tabIndex='0'
+      >
         <Title>Add avatar or login anonymously</Title>
 
         <ActiveText>click to add</ActiveText>
@@ -241,8 +255,9 @@ export default class NewAvatarLogin extends React.Component {
         login anonymously
       </Title>
 
-      <Name>Avatar:</Name>
+      <Name htmlFor='newAvatarNameInput'>Avatar:</Name>
       <NameInput
+        id='newAvatarNameInput'
         type='text'
         onChange={this._boundName}
         onKeyUp={this._boundKeyUp}
@@ -252,8 +267,9 @@ export default class NewAvatarLogin extends React.Component {
         autoFocus
       />
 
-      <Password>Password:</Password>
+      <Password htmlFor='newAvatarPasswordInput'>Password:</Password>
       <PasswordInput
+        id='newAvatarPasswordInput'
         type='password'
         value={this.state.password}
         onChange={this._boundPassword}
@@ -263,8 +279,12 @@ export default class NewAvatarLogin extends React.Component {
         required
       />
 
-      <Grid>Grid:</Grid>
-      <GridSelect value={this.state.grid} onChange={this._boundGridChange}>
+      <Grid htmlFor='newAvatarGridSelection'>Grid:</Grid>
+      <GridSelect
+        id='newAvatarGridSelection'
+        value={this.state.grid}
+        onChange={this._boundGridChange}
+      >
         {grids}
         <option value=''>+ Add new Grid</option>
       </GridSelect>
@@ -273,8 +293,9 @@ export default class NewAvatarLogin extends React.Component {
         <legend>Add a new Grid</legend>
 
         <div>
-          Name
+          <label htmlFor='newGridNameInput'>Name</label>
           <input
+            id='newGridNameInput'
             type='text'
             value={this.state.newGridName}
             onChange={this._boundNewGridName}
@@ -284,8 +305,9 @@ export default class NewAvatarLogin extends React.Component {
           />
         </div>
         <div>
-          URL
+          <label htmlFor='newGridUrlInput'>URL</label>
           <input
+            id='newGridUrlInput'
             type='url'
             placeholder='https://example.com/login'
             value={this.state.newGridURL}

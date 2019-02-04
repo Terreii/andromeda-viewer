@@ -1,3 +1,4 @@
+import { axe } from 'jest-axe'
 import React from 'react'
 import { shallow } from 'enzyme'
 import Immutable from 'immutable'
@@ -56,4 +57,43 @@ test('renders with avatars', () => {
     grids={grids}
     avatars={avatars}
   />)
+})
+
+test('should pass aXe', async () => {
+  const grids = Immutable.fromJS([
+    {
+      name: 'Second Life',
+      loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
+    },
+    {
+      name: 'Second Life Beta',
+      loginURL: 'https://login.aditi.lindenlab.com/cgi-bin/login.cgi'
+    },
+    {
+      name: 'OS Grid',
+      loginURL: 'http://login.osgrid.org/'
+    }
+  ])
+
+  const avatars = Immutable.fromJS([
+    {
+      _id: 'avatar/testery',
+      name: 'Testery MacTestface',
+      grid: 'Second Life'
+    }
+  ])
+
+  const rendered = shallow(<Login
+    grids={grids}
+    avatars={avatars}
+  />)
+
+  const renderedNewUser = shallow(<Login
+    grids={grids}
+    avatars={Immutable.List()}
+  />)
+
+  expect(await axe(rendered.html())).toHaveNoViolations()
+
+  expect(await axe(renderedNewUser.html())).toHaveNoViolations()
 })

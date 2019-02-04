@@ -1,3 +1,4 @@
+import { axe } from 'jest-axe'
 import React from 'react'
 import { mount } from 'enzyme'
 import Immutable from 'immutable'
@@ -140,4 +141,25 @@ test('event handling/changing rights', () => {
     canSeeOnMap: 1,
     canModifyObjects: 1
   })
+})
+
+test('should pass aXe', async () => {
+  const friends = Immutable.fromJS([
+    {
+      id: 'first',
+      rightsGiven: {},
+      rightsHas: {}
+    }
+  ])
+
+  const names = Immutable.Map({
+    first: new AvatarName('Testery MacTestface')
+  })
+
+  const rendered = mount(<FriendsList
+    friends={friends}
+    names={names}
+  />)
+
+  expect(await axe(rendered.html())).toHaveNoViolations()
 })

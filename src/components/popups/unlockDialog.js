@@ -27,7 +27,7 @@ const ErrorOut = styled.span`
   display: ${props => props.hasError ? '' : 'none'};
 `
 
-const PasswordRow = styled.div`
+const PasswordRow = styled.label`
   display: flex;
   flex-direction: row;
   margin-top: 1.7em;
