@@ -15,6 +15,7 @@ In this directory are the general and setup modules located. Most of the App is 
 - [`icons`](./icons) all icons and images.
 - [`network`](./network) contains the UDP-network lair.
 - [`reactors`](./reactors) contains functions that react to state changes and dispatch actions.
+- [`reducers`]('./reducers) update the state by reducing the old state and actions to the new state.
 - [`selectors`](./selectors) contains functions to access and derive state.
 - [`store`](./store) sets up the store.
 

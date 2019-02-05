@@ -6,7 +6,7 @@ On start `server.js` will get loaded. `client.js` would be the same, but for the
 
 ## Server
 
-The server is a [`Hapi` server](https://hapijs.com/). The `server.js` will be loaded as a *hapi-plugin*. It will then load following modules:
+The server is a [`Hapi` server](https://hapijs.com/). The `server.js` will get loaded as a *hapi-plugin*. It will then load following modules:
 
 File | Description
 -----|-----
