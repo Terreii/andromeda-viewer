@@ -60,7 +60,7 @@
     "rc-tabs": "^9.6.0",
     "react": "^16.8.1",
     "react-burger-menu": "^2.6.3",
-    "react-dom": "^16.7.0",
+    "react-dom": "^16.8.1",
     "react-helmet": "^5.2.0",
     "react-redux": "^6.0.0",
     "react-scripts": "2.1.3",
