@@ -58,7 +58,7 @@
     "opn-cli": "^4.0.0",
     "prop-types": "^15.6.2",
     "rc-tabs": "^9.6.0",
-    "react": "^16.7.0",
+    "react": "^16.8.1",
     "react-burger-menu": "^2.6.3",
     "react-dom": "^16.7.0",
     "react-helmet": "^5.2.0",
