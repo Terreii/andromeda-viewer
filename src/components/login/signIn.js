@@ -1,6 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
 
+import { Button } from '../formElements'
+
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -26,12 +28,7 @@ const ButtonRow = styled.div`
   align-items: center;
 `
 
-const SignInButton = styled.button`
-  width: 5em;
-  border: 0px;
-  border-radius: 1em;
-  padding: 5px;
-  white-space: nowrap;
+const SignInButton = styled(Button)`
   font-size: 130%;
   box-shadow: 2px 2px 5px black;
 `
