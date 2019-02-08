@@ -23,6 +23,13 @@ const Main = styled.div`
   text-align: center;
   display: flex;
   flex-direction: column;
+
+  @media (max-width: 750px) {
+    background-color: rgba(0, 0, 0, 0);
+    color: #000;
+    margin-top: 0;
+    padding-top: 0;
+  }
 `
 
 const ViewerNameCapitalizer = styled.span`
@@ -42,6 +49,7 @@ const AvatarsList = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  color: #fff;
 
   & > div {
     flex: fit-content;

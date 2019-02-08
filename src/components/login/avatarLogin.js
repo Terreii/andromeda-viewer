@@ -145,6 +145,15 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
       autoFocus
       disabled={isLoggingIn}
       aria-label={'password for ' + avatarName}
+      onFocus={event => {
+        const target = event.target
+
+        setTimeout(() => {
+          if (target == null) return
+
+          target.scrollIntoView({ block: 'center' })
+        }, 16)
+      }}
     />
 
     <LoginButton

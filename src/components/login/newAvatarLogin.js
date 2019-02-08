@@ -267,6 +267,15 @@ export default class NewAvatarLogin extends React.Component {
         minLength='1'
         required
         autoFocus
+        onFocus={event => {
+          const target = event.target
+
+          setTimeout(() => {
+            if (target == null) return
+
+            target.scrollIntoView({ block: 'center' })
+          }, 16)
+        }}
       />
 
       <Password htmlFor='newAvatarPasswordInput'>Password:</Password>
