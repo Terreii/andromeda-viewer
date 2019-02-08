@@ -39,7 +39,9 @@ export default class SignInPopup extends React.Component {
       password: '',
       password2: '',
       cryptoPassword: '',
-      cryptoPassword2: ''
+      cryptoPassword2: '',
+      isSigningIn: false,
+      error: null
     }
 
     this._boundInputChange = this._inputChange.bind(this)
@@ -56,13 +58,30 @@ export default class SignInPopup extends React.Component {
     })
   }
 
-  _send (event) {
+  async _send (event) {
+    event.preventDefault()
     if (!this._isInputValid()) {
       return
     }
 
+    this.setState({
+      isSigningIn: true
+    })
+
     const type = this.props.isSignUp ? 'signUp' : 'signIn'
-    this.props.onSend(this.state.username, this.state.password, this.state.cryptoPassword, type)
+    try {
+      await this.props.onSend(
+        this.state.username,
+        this.state.password,
+        this.state.cryptoPassword,
+        type
+      )
+    } catch (err) {
+      this.setState({
+        isSigningIn: false,
+        error: err.message || err.toString()
+      })
+    }
   }
 
   _isInputValid () {
@@ -113,6 +132,7 @@ export default class SignInPopup extends React.Component {
             autoFocus
             required
             aria-describedby='mainHelp'
+            disabled={this.state.isSigningIn}
           />
           <Help id='mainHelp' hide={!this.props.isSignUp}>
             Must be an email. We'll never share your email with anyone else.
@@ -133,6 +153,7 @@ export default class SignInPopup extends React.Component {
             required
             minLength='8'
             aria-describedby='passwordHelp'
+            disabled={this.state.isSigningIn}
           />
           <Help id='passwordHelp' hide={!this.props.isSignUp}>
             Please use a strong and unique password!<br />
@@ -162,6 +183,7 @@ export default class SignInPopup extends React.Component {
             onKeyPress={this._boundKeyPress}
             required={this.props.isSignUp}
             minLength='8'
+            disabled={this.state.isSigningIn}
           />
           <Help
             className='Error'
@@ -185,6 +207,7 @@ export default class SignInPopup extends React.Component {
             required
             minLength='8'
             aria-describedby='cryptoPwHelp'
+            disabled={this.state.isSigningIn}
           />
           <Help id='cryptoPwHelp' hide={!this.props.isSignUp}>
             Minimal length: 8 characters!<br />
@@ -209,6 +232,7 @@ export default class SignInPopup extends React.Component {
             onKeyPress={this._boundKeyPress}
             required={this.props.isSignUp}
             minLength='8'
+            disabled={this.state.isSigningIn}
           />
           <Help
             className='Error'
@@ -221,11 +245,21 @@ export default class SignInPopup extends React.Component {
           </Help>
         </FormElement>
 
+        {this.state.error == null
+          ? null
+          : <Help className='Error' hide={this.state.error == null} role='alert'>
+            {this.state.error}
+          </Help>}
+
         <ButtonsContainer>
-          <Button onClick={this.props.onCancel}>
+          <Button onClick={this.props.onCancel} disabled={this.state.isSigningIn}>
             cancel
           </Button>
-          <Button className='ok' onClick={this._boundSend} disabled={!this._isInputValid()}>
+          <Button
+            className='ok'
+            onClick={this._boundSend}
+            disabled={!this._isInputValid() || this.state.isSigningIn}
+          >
             {this.props.isSignUp ? 'sign up' : 'sign in'}
           </Button>
         </ButtonsContainer>

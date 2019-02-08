@@ -34,10 +34,12 @@ test('renders different with isSignUp', () => {
   })
 })
 
-test('click actions', () => {
+test('click actions', async () => {
   let cancelCallCount = 0
   let sendCallCount = 0
   let shouldCallSend = false
+
+  let rejectLast = null
 
   const onSend = (username, password, cryptoPassword, type, ...rest) => {
     expect(shouldCallSend).toBe(true)
@@ -47,6 +49,10 @@ test('click actions', () => {
     expect(rest.length).toBe(0)
 
     sendCallCount += 1
+
+    return new Promise((resolve, reject) => {
+      rejectLast = reject
+    })
   }
 
   const onCancel = event => {
@@ -64,7 +70,7 @@ test('click actions', () => {
     onSend={onSend}
   />)
 
-  ;[signUp, signIn].forEach((popup, index) => {
+  await Promise.all([signUp, signIn].map(async (popup, index) => {
     const isSignUp = index === 0
 
     popup.find('button').at(1).simulate('click')
@@ -105,7 +111,32 @@ test('click actions', () => {
 
     shouldCallSend = true
     popup.find('button').last().simulate('click')
-  })
+
+    popup.update()
+
+    popup.find('input').forEach(input => {
+      expect(input.prop('disabled')).toBeTruthy()
+    })
+    popup.find('button').forEach((button, index) => {
+      if (index === 0) return // skip close button
+
+      expect(button.prop('disabled')).toBeTruthy()
+    })
+
+    rejectLast(new Error('test error')) // false sign in
+
+    await new Promise(resolve => { setTimeout(resolve, 5) })
+    popup.update()
+
+    popup.find('input').forEach(input => {
+      expect(input.prop('disabled')).toBeFalsy()
+    })
+    popup.find('button').forEach((button, index) => {
+      if (index === 0) return // skip close button
+
+      expect(button.prop('disabled')).toBeFalsy()
+    })
+  }))
 
   expect(cancelCallCount).toBe(4)
   expect(sendCallCount).toBe(2)
