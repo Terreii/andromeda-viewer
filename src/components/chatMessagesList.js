@@ -5,7 +5,7 @@ import autoscroll from 'autoscroll-react'
 const MessageList = styled.div`
   flex: 1 1 100%;
   overflow-y: scroll;
-  max-height: calc(100vh - 8em);
+  max-height: calc(100vh - 8.7em);
 `
 
 const Message = styled.div`

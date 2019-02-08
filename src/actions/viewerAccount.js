@@ -214,27 +214,35 @@ export function unlock (cryptoPassword) {
 
 export function signIn (username, password, cryptoPassword) {
   return async (dispatch, getState, { hoodie }) => {
-    dispatch(closePopup())
     try {
       const accountProperties = await hoodie.account.signIn({ username, password })
       await hoodie.cryptoStore.unlock(cryptoPassword)
+
+      dispatch(closePopup())
       dispatch(didSignIn(true, true, accountProperties.username))
 
       await dispatch(loadSavedGrids())
       dispatch(loadSavedAvatars())
     } catch (err) {
-      dispatch(didSignIn(false))
       console.error(err)
+
+      // if the cryptoPassword is wrong, but the user password right
+      const properties = await hoodie.account.get(['session', 'username'])
+      const signedIn = properties.session != null
+      if (signedIn) {
+        await hoodie.account.signOut()
+        throw new Error('Encryption password is wrong!')
+      }
+      throw new Error('Username or password is wrong!')
     }
   }
 }
 
 export function signUp (username, password, cryptoPassword) {
   return async (dispatch, getState, { hoodie }) => {
-    dispatch(closePopup())
     await hoodie.account.signUp({ username, password })
     await hoodie.cryptoStore.setup(cryptoPassword)
-    dispatch(signIn(username, password, cryptoPassword))
+    await dispatch(signIn(username, password, cryptoPassword))
   }
 }
 

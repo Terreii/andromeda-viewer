@@ -15,40 +15,44 @@ test('renders without crashing', () => {
 })
 
 test('renders different with isSignUp', () => {
-  const signUp = shallow(<SignInPopup onCancel={() => {}} isSignUp onSend={() => {}} />)
+  const signUp = mount(<SignInPopup onCancel={() => {}} isSignUp onSend={() => {}} />)
 
-  const signIn = shallow(<SignInPopup onCancel={() => {}} onSend={() => {}} />)
+  const signIn = mount(<SignInPopup onCancel={() => {}} onSend={() => {}} />)
 
-  expect(signUp.find('Popup').prop('title')).toBe('sign up')
+  expect(signUp.find('Popup').prop('title')).toBe('Sign up')
   expect(signUp.find('input').length).toBe(5)
 
-  expect(signIn.find('Popup').prop('title')).toBe('sign in')
-  expect(signIn.find('input[autoComplete="new-password"]').first().prop('style')).toEqual({
-    display: 'none'
-  })
+  expect(signIn.find('Popup').prop('title')).toBe('Sign in')
+  expect(signIn.find('.password2').length).toBe(0)
 
   ;[signUp, signIn].forEach((popup, index) => {
     const buttons = popup.find('button')
 
-    expect(buttons.length).toBe(2)
-    expect(buttons.first().text()).toBe('cancel')
+    expect(buttons.length).toBe(3)
+    expect(buttons.at(1).text()).toBe('cancel')
     expect(buttons.last().text()).toBe(index === 0 ? 'sign up' : 'sign in')
   })
 })
 
-test('click actions', () => {
+test('click actions', async () => {
   let cancelCallCount = 0
   let sendCallCount = 0
   let shouldCallSend = false
 
+  let rejectLast = null
+
   const onSend = (username, password, cryptoPassword, type, ...rest) => {
     expect(shouldCallSend).toBe(true)
     expect(username).toBe('testery.mactestface@example.com')
-    expect(password).toBe('secret')
+    expect(password).toBe('secretPassword')
     expect(cryptoPassword).toBe('encrypted')
     expect(rest.length).toBe(0)
 
     sendCallCount += 1
+
+    return new Promise((resolve, reject) => {
+      rejectLast = reject
+    })
   }
 
   const onCancel = event => {
@@ -66,7 +70,7 @@ test('click actions', () => {
     onSend={onSend}
   />)
 
-  ;[signUp, signIn].forEach((popup, index) => {
+  await Promise.all([signUp, signIn].map(async (popup, index) => {
     const isSignUp = index === 0
 
     popup.find('button').at(1).simulate('click')
@@ -82,9 +86,7 @@ test('click actions', () => {
         validity: {
           valid: true
         },
-        dataset: {
-          key: 'username'
-        }
+        id: 'username'
       }
     })
 
@@ -95,23 +97,46 @@ test('click actions', () => {
       aInput.simulate('change', {
         target: {
           value: password,
-          dataset: {
-            key
-          }
+          id: key
         }
       })
     }
-    addPassword(passwordInputs.first(), 'password', 'secret')
+    addPassword(passwordInputs.first(), 'password', 'secretPassword')
     addPassword(passwordInputs.at(2), 'cryptoPassword', 'encrypted')
     if (isSignUp) {
       popup.find('button').last().simulate('click')
-      addPassword(passwordInputs.at(1), 'password2', 'secret')
+      addPassword(passwordInputs.at(1), 'password2', 'secretPassword')
       addPassword(passwordInputs.at(3), 'cryptoPassword2', 'encrypted')
     }
 
     shouldCallSend = true
     popup.find('button').last().simulate('click')
-  })
+
+    popup.update()
+
+    popup.find('input').forEach(input => {
+      expect(input.prop('disabled')).toBeTruthy()
+    })
+    popup.find('button').forEach((button, index) => {
+      if (index === 0) return // skip close button
+
+      expect(button.prop('disabled')).toBeTruthy()
+    })
+
+    rejectLast(new Error('test error')) // false sign in
+
+    await new Promise(resolve => { setTimeout(resolve, 5) })
+    popup.update()
+
+    popup.find('input').forEach(input => {
+      expect(input.prop('disabled')).toBeFalsy()
+    })
+    popup.find('button').forEach((button, index) => {
+      if (index === 0) return // skip close button
+
+      expect(button.prop('disabled')).toBeFalsy()
+    })
+  }))
 
   expect(cancelCallCount).toBe(4)
   expect(sendCallCount).toBe(2)

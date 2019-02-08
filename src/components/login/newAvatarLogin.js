@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
+import { Button, Input, FormField, Help } from '../formElements'
 
 const Container = styled.form`
   display: flex;
@@ -22,7 +23,7 @@ const Container = styled.form`
       "password password-input password-input"
       "grid grid-select grid-select"
       "new-grid new-grid new-grid"
-      ". save login";
+      "save save login";
     grid-gap: .5em;
     text-align: left;
 
@@ -64,7 +65,7 @@ const Name = styled.label`
   grid-area: name;
 `
 
-const NameInput = styled.input`
+const NameInput = styled(Input)`
   grid-area: name-input;
 `
 
@@ -72,7 +73,7 @@ const Password = styled.label`
   grid-area: password;
 `
 
-const PasswordInput = styled.input`
+const PasswordInput = styled(Input)`
   grid-area: password-input;
 `
 
@@ -80,7 +81,7 @@ const Grid = styled.label`
   grid-area: grid;
 `
 
-const GridSelect = styled.select`
+const GridSelect = styled(Input.withComponent('select'))`
   grid-area: grid-select;
 `
 
@@ -88,7 +89,7 @@ const SaveNew = styled.div`
   grid-area: save;
 `
 
-const LoginButton = styled.button`
+const LoginButton = styled(Button)`
   grid-area: login;
 `
 
@@ -96,20 +97,19 @@ const NewGridLine = styled.fieldset`
   grid-area: new-grid;
   display: ${props => props.show ? 'flex' : 'none'};
   flex-direction: row;
-  text-align: center;
+  flex-direction: column;
+
+  & > div > label {
+    color: rgba(255, 255, 255, 0.87);
+  }
 
   & > div {
     flex: auto;
   }
+`
 
-  @media (max-width: 450px) {
-    flex-direction: column;
-    
-    & > div {
-      display: flex;
-      justify-content: space-between;
-    }
-  }
+const SaveHelp = styled(Help)`
+  color: white;
 `
 
 export default class NewAvatarLogin extends React.Component {
@@ -245,7 +245,7 @@ export default class NewAvatarLogin extends React.Component {
     const gridIsValid = !isNewGrid ||
       (this.state.valid.newGridName && this.state.valid.newGridURL)
 
-    const isValid = this.state.valid.name &&
+    const isValid = this.state.valid.name && this.state.name.length > 1 &&
       this.state.valid.password &&
       gridIsValid
 
@@ -259,6 +259,8 @@ export default class NewAvatarLogin extends React.Component {
       <NameInput
         id='newAvatarNameInput'
         type='text'
+        className='medium'
+        value={this.state.name}
         onChange={this._boundName}
         onKeyUp={this._boundKeyUp}
         disabled={this.props.isLoggingIn}
@@ -271,6 +273,7 @@ export default class NewAvatarLogin extends React.Component {
       <PasswordInput
         id='newAvatarPasswordInput'
         type='password'
+        className='medium'
         value={this.state.password}
         onChange={this._boundPassword}
         onKeyUp={this._boundKeyUp}
@@ -282,6 +285,7 @@ export default class NewAvatarLogin extends React.Component {
       <Grid htmlFor='newAvatarGridSelection'>Grid:</Grid>
       <GridSelect
         id='newAvatarGridSelection'
+        className='medium'
         value={this.state.grid}
         onChange={this._boundGridChange}
       >
@@ -292,9 +296,9 @@ export default class NewAvatarLogin extends React.Component {
       <NewGridLine show={isNewGrid}>
         <legend>Add a new Grid</legend>
 
-        <div>
+        <FormField>
           <label htmlFor='newGridNameInput'>Name</label>
-          <input
+          <Input
             id='newGridNameInput'
             type='text'
             value={this.state.newGridName}
@@ -303,10 +307,10 @@ export default class NewAvatarLogin extends React.Component {
             minLength='1'
             required={isNewGrid}
           />
-        </div>
-        <div>
+        </FormField>
+        <FormField>
           <label htmlFor='newGridUrlInput'>URL</label>
-          <input
+          <Input
             id='newGridUrlInput'
             type='url'
             placeholder='https://example.com/login'
@@ -315,18 +319,25 @@ export default class NewAvatarLogin extends React.Component {
             onKeyUp={this._boundKeyUp}
             required={isNewGrid}
           />
-        </div>
+        </FormField>
       </NewGridLine>
 
-      <SaveNew title="Save and sync this avatar and it's chats">
+      <SaveNew>
         <input
           id='saveNewAvatarButton'
           type='checkbox'
           onChange={this._boundSaveChange}
           checked={this.state.save}
           disabled={!this.props.isSignedIn || this.props.isLoggingIn}
+          aria-describedby='saveNewAvatarHelp'
         />
         <label htmlFor='saveNewAvatarButton'>Save / Add</label>
+        <br />
+        <SaveHelp id='saveNewAvatarHelp'>
+          Save and sync this avatar and it's chats,
+          <br />
+          after the first successful login.
+        </SaveHelp>
       </SaveNew>
       <LoginButton
         onClick={this._boundLogin}

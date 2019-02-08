@@ -238,9 +238,9 @@ test('adding new grid', () => {
     isSelected
   />)
 
-  const gridSelect = rendered.find('option').first().parent()
-  const gridName = rendered.find('div > input[type="text"]')
-  const gridURL = rendered.find('[type="url"]')
+  const gridSelect = rendered.find('#newAvatarGridSelection')
+  const gridName = rendered.find('#newGridNameInput')
+  const gridURL = rendered.find('#newGridUrlInput')
 
   gridSelect.simulate('change', {
     target: {
@@ -270,8 +270,8 @@ test('adding new grid', () => {
   })
   rendered.update()
 
-  const nameInput = rendered.find('[type="text"]').first()
-  const passwordInput = rendered.find('[type="password"]')
+  const nameInput = rendered.find('#newAvatarNameInput').first()
+  const passwordInput = rendered.find('#newAvatarPasswordInput').first()
   const loginButton = rendered.children().last()
 
   nameInput.simulate('change', {

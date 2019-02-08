@@ -8,6 +8,7 @@ import Immutable from 'immutable'
 import styled from 'styled-components'
 
 import ChatMessagesList from './chatMessagesList'
+import { Button, Input } from './formElements'
 
 const Main = styled.div`
   margin: 0.3em;
@@ -21,11 +22,11 @@ const ChatTextSend = styled.div`
   flex-direction: row;
 `
 
-const SendButton = styled.button`
+const SendButton = styled(Button)`
   flex: 1 0 auto;
 `
 
-const TextBox = styled.input`
+const TextBox = styled(Input)`
   flex: 4 0 auto;
   margin-right: 0.5em;
 `
@@ -99,7 +100,7 @@ export default class ChatDialog extends React.Component {
           onChange={this._boundChange}
           onKeyDown={this._boundKeyDown}
         />
-        <SendButton onClick={this._boundClickSend}>
+        <SendButton className='primary' onClick={this._boundClickSend}>
           send
         </SendButton>
       </ChatTextSend>

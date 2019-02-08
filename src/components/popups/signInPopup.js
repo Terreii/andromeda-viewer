@@ -2,10 +2,32 @@ import React from 'react'
 import styled from 'styled-components'
 
 import Popup from './popup'
+import { Button, Input, FormField, Help } from '../formElements'
 
-const InputContainer = styled.div`
+const Container = styled.form`
   display: flex;
   flex-direction: column;
+  font-family: Helvetica, Arial, sans-serif;
+`
+
+const FormElement = styled(FormField)`
+  display: ${props => props.show ? 'flex' : 'none'};
+`
+
+const ButtonsContainer = styled.div`
+  flex: auto;
+  display: flex;
+  flex-direction: row;
+  margin-top: 0.3em;
+  padding: 0 0.3em;
+
+  & > button {
+    margin-top: .5rem;
+  }
+
+  & > button + button {
+    margin-left: 0.55em;
+  }
 `
 
 export default class SignInPopup extends React.Component {
@@ -17,97 +39,231 @@ export default class SignInPopup extends React.Component {
       password: '',
       password2: '',
       cryptoPassword: '',
-      cryptoPassword2: ''
+      cryptoPassword2: '',
+      isSigningIn: false,
+      error: null
     }
+
     this._boundInputChange = this._inputChange.bind(this)
     this._boundSend = this._send.bind(this)
+    this._boundKeyPress = this._onKeyPress.bind(this)
   }
 
   _inputChange (event) {
-    const key = event.target.dataset.key
+    const id = event.target.id
     const value = event.target.value
     this.setState({
-      usernameValid: key === 'username' ? event.target.validity.valid : this.state.usernameValid,
-      [key]: value
+      usernameValid: id === 'username' ? event.target.validity.valid : this.state.usernameValid,
+      [id]: value
     })
   }
 
-  _send (event) {
+  async _send (event) {
+    event.preventDefault()
+    if (!this._isInputValid()) {
+      return
+    }
+
+    this.setState({
+      isSigningIn: true
+    })
+
+    const type = this.props.isSignUp ? 'signUp' : 'signIn'
+    try {
+      await this.props.onSend(
+        this.state.username,
+        this.state.password,
+        this.state.cryptoPassword,
+        type
+      )
+    } catch (err) {
+      this.setState({
+        isSigningIn: false,
+        error: err.message || err.toString()
+      })
+    }
+  }
+
+  _isInputValid () {
     const username = this.state.username
     const password = this.state.password
+    const password2 = this.state.password2
     const cryptoPassword = this.state.cryptoPassword
-    if (username.length === 0 || password.length === 0 || !this.state.usernameValid) {
-      return
+    const cryptoPassword2 = this.state.cryptoPassword2
+    const isSignUp = this.props.isSignUp
+
+    if ([password, cryptoPassword].some((s, i) => s.length < 8)) {
+      return false
     }
-    if (this.props.isSignUp && (
-      password !== this.state.password2 ||
-      cryptoPassword !== this.state.cryptoPassword2
-    )) {
-      return
+
+    // this also checks length of password2 and cryptoPassword2
+    if (isSignUp && (password !== password2 || cryptoPassword !== cryptoPassword2)) {
+      return false
     }
-    const type = this.props.isSignUp ? 'signUp' : 'signIn'
-    this.props.onSend(username, password, cryptoPassword, type)
+
+    return username.length > 4 && this.state.usernameValid
+  }
+
+  _onKeyPress (event) {
+    if (event.key === 'Enter') {
+      event.preventDefault()
+
+      this._send(event)
+    }
   }
 
   render () {
-    const title = this.props.isSignUp ? 'sign up' : 'sign in'
+    const title = this.props.isSignUp ? 'Sign up' : 'Sign in'
+
     return <Popup title={title} onClose={this.props.onCancel}>
-      <div>
-        <InputContainer>
-          <input
+      <Container className={this.props.isSignUp ? 'SignUp' : ''}>
+        <FormElement show>
+          <label htmlFor='username'>
+            Username / email:
+          </label>
+          <Input
+            id='username'
             type='email'
             value={this.state.username}
-            data-key='username'
             autoComplete='email'
             onChange={this._boundInputChange}
-            placeholder='Username / eMail'
+            onKeyPress={this._boundKeyPress}
+            placeholder='me-avatar@example.com'
             autoFocus
-            aria-label='username'
+            required
+            aria-describedby='mainHelp'
+            disabled={this.state.isSigningIn}
           />
-          <input
+          <Help id='mainHelp' hide={!this.props.isSignUp}>
+            Must be an email. We'll never share your email with anyone else.
+          </Help>
+        </FormElement>
+
+        <FormElement show>
+          <label htmlFor='password'>
+            Password:
+          </label>
+          <Input
+            id='password'
             type='password'
             value={this.state.password}
-            data-key='password'
             autoComplete={this.props.isSignUp ? 'new-password' : 'current-password'}
             onChange={this._boundInputChange}
-            placeholder='Password'
-            aria-label='password'
+            onKeyPress={this._boundKeyPress}
+            required
+            minLength='8'
+            aria-describedby='passwordHelp'
+            disabled={this.state.isSigningIn}
           />
-          <input
-            style={{ display: this.props.isSignUp ? '' : 'none' }}
+          <Help id='passwordHelp' hide={!this.props.isSignUp}>
+            Please use a strong and unique password!<br />
+            Minimal length: 8 characters!<br />
+            {'A '}
+            <a
+              href='https://en.wikipedia.org/wiki/List_of_password_managers'
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              Password Manager
+            </a>
+            {' is recommended.'}
+          </Help>
+        </FormElement>
+
+        <FormElement show={this.props.isSignUp}>
+          <label htmlFor='password2'>
+            Repeat password:
+          </label>
+          <Input
+            id='password2'
             type='password'
             value={this.state.password2}
-            data-key='password2'
             autoComplete='new-password'
             onChange={this._boundInputChange}
-            placeholder='repeat password'
-            aria-label='repeat password'
+            onKeyPress={this._boundKeyPress}
+            required={this.props.isSignUp}
+            minLength='8'
+            disabled={this.state.isSigningIn}
           />
-          <input
+          <Help
+            className='Error'
+            hide={this.state.password2.length === 0 || this.state.password === this.state.password2}
+            role='alert'
+          >
+            Password doesn't match!
+          </Help>
+        </FormElement>
+
+        <FormElement show>
+          <label htmlFor='cryptoPassword'>
+            Encryption password:
+          </label>
+          <Input
+            id='cryptoPassword'
             type='password'
             value={this.state.cryptoPassword}
-            data-key='cryptoPassword'
             onChange={this._boundInputChange}
-            placeholder='set encryption password'
-            aria-label='set encryption password'
+            onKeyPress={this._boundKeyPress}
+            required
+            minLength='8'
+            aria-describedby='cryptoPwHelp'
+            disabled={this.state.isSigningIn}
           />
-          <input
-            style={{ display: this.props.isSignUp ? '' : 'none' }}
+          <Help id='cryptoPwHelp' hide={!this.props.isSignUp}>
+            Minimal length: 8 characters!<br />
+            This password is used to encrypt your personal data.<br />
+            This includes: <i>Avatar login-info</i>, <i>grids</i>, and <i>chat-logs</i>.<br />
+            <b>Your personal data is encrypted on your machine.<br />
+            and will never leave it un-encrypted!</b>
+            <br />
+            This password will <b>never</b> be saved or leave your machine!
+          </Help>
+        </FormElement>
+
+        <FormElement show={this.props.isSignUp}>
+          <label htmlFor='cryptoPassword2'>
+            Repeat encryption password:
+          </label>
+          <Input
+            id='cryptoPassword2'
             type='password'
             value={this.state.cryptoPassword2}
-            data-key='cryptoPassword2'
             onChange={this._boundInputChange}
-            placeholder='repeat encryption password'
-            aria-label='repeat encryption password'
+            onKeyPress={this._boundKeyPress}
+            required={this.props.isSignUp}
+            minLength='8'
+            disabled={this.state.isSigningIn}
           />
-        </InputContainer>
-        <div>
-          <button onClick={this.props.onCancel}>cancel</button>
-          <button onClick={this._boundSend}>
+          <Help
+            className='Error'
+            role='alert'
+            hide={this.state.cryptoPassword2.length === 0 ||
+              this.state.cryptoPassword === this.state.cryptoPassword2
+            }
+          >
+            Encryption password doesn't match!
+          </Help>
+        </FormElement>
+
+        {this.state.error == null
+          ? null
+          : <Help className='Error' hide={this.state.error == null} role='alert'>
+            {this.state.error}
+          </Help>}
+
+        <ButtonsContainer>
+          <Button onClick={this.props.onCancel} disabled={this.state.isSigningIn}>
+            cancel
+          </Button>
+          <Button
+            className='ok'
+            onClick={this._boundSend}
+            disabled={!this._isInputValid() || this.state.isSigningIn}
+          >
             {this.props.isSignUp ? 'sign up' : 'sign in'}
-          </button>
-        </div>
-      </div>
+          </Button>
+        </ButtonsContainer>
+      </Container>
     </Popup>
   }
 }

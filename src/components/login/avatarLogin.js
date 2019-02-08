@@ -2,6 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 import AvatarName from '../../avatarName'
+import { Button, Input } from '../formElements'
 
 const Container = styled.form`
   display: flex;
@@ -69,7 +70,7 @@ const PasswordInfo = styled.label`
   }
 `
 
-const PasswordInput = styled.input`
+const PasswordInput = styled(Input)`
   grid-area: password-input;
 
   &:invalid {
@@ -77,7 +78,7 @@ const PasswordInput = styled.input`
   }
 `
 
-const LoginButton = styled.button`
+const LoginButton = styled(Button)`
   grid-area: login;
   margin-top: .7em;
   
@@ -137,6 +138,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
     <PasswordInput
       id={passwordInputId}
       type='password'
+      className='medium'
       ref={ref}
       onKeyUp={onKeyUp}
       required
