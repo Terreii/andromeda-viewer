@@ -105,7 +105,7 @@ function namesReducer (state = Immutable.Map(), action) {
   }
 }
 
-export default function namesCoreReducer (state = Immutable.Map(), action) {
+export default function namesCoreReducer (state = Immutable.fromJS({ names: {} }), action) {
   switch (action.type) {
     case '@@INIT':
     case 'ChatFromSimulator':
