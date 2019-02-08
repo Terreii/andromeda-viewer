@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import { Button, Input, FormField } from '../formElements'
+import { Button, Input, FormField, Help } from '../formElements'
 
 const Container = styled.form`
   display: flex;
@@ -23,7 +23,7 @@ const Container = styled.form`
       "password password-input password-input"
       "grid grid-select grid-select"
       "new-grid new-grid new-grid"
-      ". save login";
+      "save save login";
     grid-gap: .5em;
     text-align: left;
 
@@ -106,6 +106,10 @@ const NewGridLine = styled.fieldset`
   & > div {
     flex: auto;
   }
+`
+
+const SaveHelp = styled(Help)`
+  color: white;
 `
 
 export default class NewAvatarLogin extends React.Component {
@@ -318,15 +322,22 @@ export default class NewAvatarLogin extends React.Component {
         </FormField>
       </NewGridLine>
 
-      <SaveNew title="Save and sync this avatar and it's chats">
+      <SaveNew>
         <input
           id='saveNewAvatarButton'
           type='checkbox'
           onChange={this._boundSaveChange}
           checked={this.state.save}
           disabled={!this.props.isSignedIn || this.props.isLoggingIn}
+          aria-describedby='saveNewAvatarHelp'
         />
         <label htmlFor='saveNewAvatarButton'>Save / Add</label>
+        <br />
+        <SaveHelp id='saveNewAvatarHelp'>
+          Save and sync this avatar and it's chats,
+          <br />
+          after the first successful login.
+        </SaveHelp>
       </SaveNew>
       <LoginButton
         onClick={this._boundLogin}
