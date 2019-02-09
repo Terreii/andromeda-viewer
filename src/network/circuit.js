@@ -25,9 +25,6 @@ export default class Circuit extends events.EventEmitter {
 
     this.websocketIsOpen = false
     const socketUrl = new window.URL(window.location.href.replace(/#.*$/, ''))
-    if (process.env.NODE_ENV !== 'production' && socketUrl.hostname === 'localhost') {
-      socketUrl.port = 8080
-    }
     // http -> ws  &  https -> wss
     socketUrl.protocol = socketUrl.protocol.replace(/^http/, 'ws')
     socketUrl.pathname = '/andromeda-bridge'
