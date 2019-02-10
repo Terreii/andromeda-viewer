@@ -54,7 +54,7 @@ class App extends React.PureComponent {
         titleTemplate={`%s - ${viewerName}`}
         defaultTitle={viewerName}
       />
-      <TopMenuBar messageOfTheDay={isLoggedIn ? this.props.messageOfTheDay : null} />
+      <TopMenuBar />
       {mainSection}
       <Popups
         popup={!this.props.isUnlocked && this.props.isSignedIn
@@ -78,15 +78,14 @@ const mapStateToProps = state => {
   const grids = state.account.get('savedGrids')
   const isSignedIn = state.account.getIn(['viewerAccount', 'loggedIn'])
   const isLoggedIn = state.session.get('loggedIn')
-  const messageOfTheDay = state.session.get('message')
+
   return {
     avatars,
     grids,
     isUnlocked,
     isLoggedIn, // Avatar session
     isSignedIn, // Viewer account
-    popup,
-    messageOfTheDay
+    popup
   }
 }
 

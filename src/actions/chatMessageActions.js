@@ -203,7 +203,10 @@ export function deleteOldLocalChat () {
     const toDeleteIds = []
     for (let i = 0, max = localChat.size - maxLocalChatHistory; i < max; i += 1) {
       const id = localChat.getIn([i, '_id'])
-      toDeleteIds.push(id)
+
+      if (id !== 'messageOfTheDay') {
+        toDeleteIds.push(id)
+      }
     }
 
     return hoodie.cryptoStore.remove(toDeleteIds)

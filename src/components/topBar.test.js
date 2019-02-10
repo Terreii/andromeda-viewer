@@ -17,24 +17,9 @@ test('renders without crashing', () => {
       signInPopup: ''
     }
   })
-  const noMessage = shallow(<TopBar
+  shallow(<TopBar
     account={account}
   />)
-
-  expect(noMessage).toContainReact(<span>Welcome</span>)
-
-  const messageOfTheDay = Immutable.Map({
-    text: 'Hi there! Please go to: ',
-    href: 'https://example.com'
-  })
-
-  const withMessage = shallow(<TopBar
-    account={account}
-    messageOfTheDay={messageOfTheDay}
-  />)
-
-  expect(withMessage.find('#messageOfTheDay').text())
-    .toBe('Message of the day:Hi there! Please go to: https://example.com')
 })
 
 test('should pass aXe', async () => {
@@ -49,25 +34,11 @@ test('should pass aXe', async () => {
       signInPopup: ''
     }
   })
-  const noMessage = mount(<Provider store={store}>
+  const rendered = mount(<Provider store={store}>
     <TopBar
       account={account}
     />
   </Provider>)
 
-  expect(await axe(noMessage.html())).toHaveNoViolations()
-
-  const messageOfTheDay = Immutable.Map({
-    text: 'Hi there! Please go to: ',
-    href: 'https://example.com'
-  })
-
-  const withMessage = mount(<Provider store={store}>
-    <TopBar
-      account={account}
-      messageOfTheDay={messageOfTheDay}
-    />
-  </Provider>)
-
-  expect(await axe(withMessage.html())).toHaveNoViolations()
+  expect(await axe(rendered.html())).toHaveNoViolations()
 })
