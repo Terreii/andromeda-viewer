@@ -8,7 +8,8 @@ const MenuBar = styled.div`
   top: 0em;
   left: 0em;
   width: 100vw;
-  height: 2rem;
+  min-height: 2rem;
+  max-height: 5rem;
   background-color: rgb(77, 80, 85);
   color: rgb(211, 211, 211);
   padding-top: .5em;
