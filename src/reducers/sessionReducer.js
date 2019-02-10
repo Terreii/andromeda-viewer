@@ -20,17 +20,7 @@ export default function SessionReducer (state = Map({ loggedIn: false, error: nu
           case 'firstName':
           case 'lastName':
           case 'lookAt':
-            return info
-
           case 'message':
-            const messageOfTheDay = action.sessionInfo.message
-            const index = messageOfTheDay.search('http')
-            const msgOfDayHref = messageOfTheDay.substr(index)
-            const msgOfDayText = messageOfTheDay.substr(0, index)
-            info.message = Map({
-              href: msgOfDayHref,
-              text: msgOfDayText
-            })
             return info
 
           default:
