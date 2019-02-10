@@ -13,24 +13,26 @@ export default function localChatReducer (state = List(), action) {
       return state.push(Map(action.msg))
 
     case 'didLogin':
-      return action.localChatHistory
-        .reduce((chatData, msg) => chatData.push(Map({
-          ...msg,
-          didSave: true
-        })), state)
-        .sort((a, b) => a.get('time') - b.get('time'))
-        .push(Map({
-          _id: 'messageOfTheDay',
-          fromName: 'Message of the Day',
-          sourceID: 'messageOfTheDay',
-          sourceType: 0,
-          chatType: 8,
-          audible: 1,
-          position: [0, 0, 0],
-          message: action.sessionInfo.message,
-          time: action.sessionInfo.seconds_since_epoch * 1000,
-          didSave: true
-        }))
+      return state.withMutations(oldState => {
+        action.localChatHistory
+          .reduce((chatData, msg) => chatData.push(Map({
+            ...msg,
+            didSave: true
+          })), oldState)
+          .push(Map({
+            _id: 'messageOfTheDay',
+            fromName: 'Message of the Day',
+            sourceID: 'messageOfTheDay',
+            sourceType: 0,
+            chatType: 8,
+            audible: 1,
+            position: [0, 0, 0],
+            message: action.sessionInfo.message,
+            time: action.sessionInfo.seconds_since_epoch * 1000,
+            didSave: true
+          }))
+          .sort((a, b) => a.get('time') - b.get('time'))
+      })
 
     case 'StartSavingLocalChatMessages':
       if (action.saving.length === 0) return state
