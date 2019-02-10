@@ -31,6 +31,5 @@ export default function TopBar ({ account, signIn, signUp, signOut, logout }) {
       signOut={signOut}
       logout={logout}
     />
-    <span />
   </MenuBar>
 }
