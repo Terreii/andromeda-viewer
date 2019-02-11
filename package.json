@@ -63,7 +63,7 @@
     "react-dom": "^16.8.1",
     "react-helmet": "^5.2.0",
     "react-redux": "^6.0.0",
-    "react-scripts": "2.1.3",
+    "react-scripts": "2.1.5",
     "react-test-renderer": "^16.8.1",
     "redux": "^4.0.1",
     "redux-burger-menu": "^0.2.8",
