@@ -8,6 +8,7 @@ const Container = styled.form`
   background-color: rgb(110, 110, 110);
   margin: 1em;
   padding: 1em;
+  max-width: calc(100vw - 2em);
   border-radius: .5em;
   box-shadow: 0.2em 0.2em 0.4em 0.1em black;
 
@@ -53,6 +54,10 @@ const Title = styled.h2`
   text-align: center;
   white-space: nowrap;
   font-size: 120%;
+
+  @media (max-width: 450px) {
+    white-space: normal;
+  }
 `
 
 const ActiveText = styled.span`
