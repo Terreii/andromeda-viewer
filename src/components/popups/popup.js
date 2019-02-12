@@ -1,6 +1,5 @@
 import React from 'react'
 import styled from 'styled-components'
-import { Portal } from 'react-portal'
 
 import closeIcon from '../../icons/icon_close.svg'
 
@@ -89,17 +88,15 @@ export default function Popup (props) {
     </CloseButton>
     : <span />
 
-  return <Portal>
-    <Background>
-      <Border>
-        <Header>
-          {closeIconInHeader}
-          <PopupTitle>{props.title}</PopupTitle>
-        </Header>
-        <Content>
-          {props.children}
-        </Content>
-      </Border>
-    </Background>
-  </Portal>
+  return <Background>
+    <Border>
+      <Header>
+        {closeIconInHeader}
+        <PopupTitle>{props.title}</PopupTitle>
+      </Header>
+      <Content>
+        {props.children}
+      </Content>
+    </Border>
+  </Background>
 }
