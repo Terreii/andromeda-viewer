@@ -152,7 +152,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
         setTimeout(() => {
           if (target == null) return
 
-          target.scrollIntoView({ block: 'center' })
+          target.parentElement.scrollIntoView(true)
         }, 16)
       }}
     />

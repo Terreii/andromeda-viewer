@@ -278,7 +278,7 @@ export default class NewAvatarLogin extends React.Component {
           setTimeout(() => {
             if (target == null) return
 
-            target.scrollIntoView({ block: 'center' })
+            target.parentElement.scrollIntoView(true)
           }, 16)
         }}
       />
