@@ -8,6 +8,10 @@ const Container = styled.form`
   display: flex;
   flex-direction: column;
   font-family: Helvetica, Arial, sans-serif;
+
+  & > * {
+    flex-shrink: 0;
+  }
 `
 
 const FormElement = styled(FormField)`

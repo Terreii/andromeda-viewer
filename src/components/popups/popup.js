@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
+import { Portal } from 'react-portal'
 
 import closeIcon from '../../icons/icon_close.svg'
 
@@ -15,6 +16,12 @@ const Background = styled.div`
   justify-content: center;
   align-items: center;
   z-index: 1000;
+
+  @media (max-width: 750px) {
+    height: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: scroll;
+  }
 `
 
 const CloseButton = styled.button`
@@ -29,6 +36,7 @@ const CloseButton = styled.button`
 `
 
 const Border = styled.div`
+  position: relative;
   background-color: rgb(255, 250, 250);
   border-radius: 1em;
   max-height: 100vh;
@@ -54,8 +62,15 @@ const PopupTitle = styled.h4`
 `
 
 const Content = styled.div`
+  position: relative;
   margin: 1em;
   overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+
+  & > * {
+    flex-shrink: 0;
+  }
 `
 
 export default function Popup (props) {
@@ -74,15 +89,17 @@ export default function Popup (props) {
     </CloseButton>
     : <span />
 
-  return <Background>
-    <Border>
-      <Header>
-        {closeIconInHeader}
-        <PopupTitle>{props.title}</PopupTitle>
-      </Header>
-      <Content>
-        {props.children}
-      </Content>
-    </Border>
-  </Background>
+  return <Portal>
+    <Background>
+      <Border>
+        <Header>
+          {closeIconInHeader}
+          <PopupTitle>{props.title}</PopupTitle>
+        </Header>
+        <Content>
+          {props.children}
+        </Content>
+      </Border>
+    </Background>
+  </Portal>
 }
