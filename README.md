@@ -1,5 +1,5 @@
 # Andromeda-Viewer
-Small web-client for connecting to the virtual world of [Second Life](https://secondlife.com)(TM).
+Small web-client for connecting to the virtual world of [Second Life](https://secondlife.com)™ and [OpenSimulator](http://opensimulator.org/wiki/Main_Page).
 
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 [![Dependency Status](https://david-dm.org/Terreii/andromeda-viewer.svg)](https://david-dm.org/Terreii/andromeda-viewer)
@@ -17,7 +17,7 @@ Please read and review the documentation. You can find it in the **doc-folder**.
 Contact me at any time.
 
 ### How to get started
-You need to have **[node.js](https://nodejs.org/) version 8.9.0 or higher** installed. [More on node.js and npm.js](https://docs.npmjs.com/getting-started/what-is-npm) (npm.js comes with node.js). You can check your installed version with the command `node -v`.
+You need to have **[node.js](https://nodejs.org/) version 8.9.0 or higher** installed and a *Second Life* account or an *account on an [OpenSimulator Grid](http://opensimulator.org/wiki/Grid_List)*. [More on node.js and npm.js](https://docs.npmjs.com/getting-started/what-is-npm) (npm.js comes with node.js). You can check your installed version with the command `node -v`.
 
 To start open a terminal window (cmd or PowerShell on windows) in your working copy of this project. And run the command `npm install`. This will install all dependencies.
 
