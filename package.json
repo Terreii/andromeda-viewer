@@ -59,7 +59,7 @@
     "prop-types": "^15.7.2",
     "rc-tabs": "^9.6.0",
     "react": "^16.8.2",
-    "react-burger-menu": "^2.6.4",
+    "react-burger-menu": "^2.6.5",
     "react-dom": "^16.8.2",
     "react-helmet": "^5.2.0",
     "react-redux": "^6.0.0",
