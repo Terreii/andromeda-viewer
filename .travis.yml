@@ -6,6 +6,7 @@ node_js:
   - "node"
   - "10"
   - "8"
+install: npm install
 env:
   - CXX=g++-4.9
 addons:
