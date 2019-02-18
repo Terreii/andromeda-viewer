@@ -7,10 +7,10 @@ node_js:
   - "10"
   - "8"
 install:
-  - if [ $TRAVIS_BRANCH =~ /greenkeeper/ ]; then
-      npm install
+  - if [ "$TRAVIS_BRANCH" =~ /greenkeeper/ ]; then
+      npm install;
     else
-      npm ci
+      npm ci;
     fi
 env:
   - CXX=g++-4.9
