@@ -2,6 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 import BurgerMenu from './burgerMenu'
+import { viewerName } from '../viewerInfo'
 
 const MenuBar = styled.div`
   z-index: 100;
@@ -23,6 +24,10 @@ const MenuBar = styled.div`
   }
 `
 
+const ViewerName = styled.span`
+  text-transform: capitalize;
+`
+
 export default function TopBar ({ account, signIn, signUp, signOut, logout }) {
   return <MenuBar>
     <BurgerMenu
@@ -32,5 +37,10 @@ export default function TopBar ({ account, signIn, signUp, signOut, logout }) {
       signOut={signOut}
       logout={logout}
     />
+    {account.getIn(['loggedIn'])
+      ? null
+      : <span>Login to <ViewerName>{viewerName}</ViewerName></span>
+    }
+    <span />
   </MenuBar>
 }

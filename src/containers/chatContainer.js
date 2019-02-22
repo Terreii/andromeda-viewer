@@ -1,4 +1,6 @@
+import React from 'react'
 import { connect } from 'react-redux'
+import Helmet from 'react-helmet'
 
 import {
   sendLocalChatMessage,
@@ -13,8 +15,18 @@ import { getNames } from '../selectors/names'
 
 import ChatBox from '../components/chatBox'
 
+function ChatContainer (props) {
+  return <>
+    <Helmet aria-disabled='false'>
+      <title>{props.selfName.getName()}</title>
+    </Helmet>
+    <ChatBox {...props} />
+  </>
+}
+
 const mapStateToProps = state => {
   return {
+    selfName: state.account.get('avatarName'),
     localChat: getLocalChat(state),
     IMs: getActiveIMChats(state),
     groups: state.groups,
@@ -31,4 +43,4 @@ const mapDispatchToProps = {
   updateRights
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ChatBox)
+export default connect(mapStateToProps, mapDispatchToProps)(ChatContainer)
