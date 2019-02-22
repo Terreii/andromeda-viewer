@@ -50,12 +50,12 @@ class App extends React.PureComponent {
       />
 
     return <AppContainer>
-      <TopMenuBar />
       <Helmet
         titleTemplate={`%s - ${viewerName}`}
         defaultTitle={viewerName}
       />
       {mainSection}
+      <TopMenuBar />
       <Popups
         popup={!this.props.isUnlocked && this.props.isSignedIn
           ? 'unlock'

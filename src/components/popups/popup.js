@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import closeIcon from '../../icons/icon_close.svg'
 
 const Background = styled.div`
-  position: absolute;
+  position: fixed;
   top: 0px;
   left: 0px;
   width: 100vw;
@@ -39,6 +39,7 @@ const Border = styled.div`
   background-color: rgb(255, 250, 250);
   border-radius: 1em;
   max-height: 100vh;
+  max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
 `
@@ -64,6 +65,7 @@ const Content = styled.div`
   position: relative;
   margin: 1em;
   overflow-y: scroll;
+  overscroll-behavior-y: contain;
   display: flex;
   flex-direction: column;
 
