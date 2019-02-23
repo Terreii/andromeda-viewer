@@ -2,6 +2,8 @@
 
 import { v4 as uuid } from 'uuid'
 
+import { getIsLoggedIn } from '../selectors/session'
+
 export function didSignIn (did, isUnlocked, username = '') {
   const isLoggedIn = Boolean(did)
   return {
@@ -249,7 +251,7 @@ export function signUp (username, password, cryptoPassword) {
 export function signOut () {
   return async (dispatch, getState, extra) => {
     dispatch(closePopup())
-    if (getState().session.get('loggedIn')) {
+    if (getIsLoggedIn(getState())) {
       // logout if an avatar is still logged in
       const { logout } = await import('./sessionActions')
       await dispatch(logout())

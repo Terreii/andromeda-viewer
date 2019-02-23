@@ -24,6 +24,8 @@ import {
 } from '../actions/viewerAccount'
 import { login } from '../actions/sessionActions'
 
+import { getIsLoggedIn } from '../selectors/session'
+
 import { viewerName } from '../viewerInfo'
 
 const Popups = React.memo(PopupRenderer)
@@ -77,7 +79,7 @@ const mapStateToProps = state => {
   const isUnlocked = state.account.get('unlocked')
   const grids = state.account.get('savedGrids')
   const isSignedIn = state.account.getIn(['viewerAccount', 'loggedIn'])
-  const isLoggedIn = state.session.get('loggedIn')
+  const isLoggedIn = getIsLoggedIn(state)
 
   return {
     avatars,
