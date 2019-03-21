@@ -5,11 +5,11 @@
 
 import React from 'react'
 import { connect } from 'react-redux'
-import Helmet from 'react-helmet'
 
 import { AppContainer, LoadableChatComponent } from '../components/main'
 import LoginForm from '../components/login/'
 import PopupRenderer from '../components/popups/'
+import Helmet from './helmet'
 
 import TopMenuBar from './topMenuBar'
 
@@ -25,8 +25,6 @@ import {
 import { login } from '../actions/sessionActions'
 
 import { getIsLoggedIn } from '../selectors/session'
-
-import { viewerName } from '../viewerInfo'
 
 const Popups = React.memo(PopupRenderer)
 
@@ -52,10 +50,7 @@ class App extends React.PureComponent {
       />
 
     return <AppContainer>
-      <Helmet
-        titleTemplate={`%s - ${viewerName}`}
-        defaultTitle={viewerName}
-      />
+      <Helmet />
       {mainSection}
       <TopMenuBar />
       <Popups
