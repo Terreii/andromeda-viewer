@@ -1,6 +1,8 @@
 import LLSD from '../llsd'
 import caps from './capabilities.json'
 
+import { getIsLoggedIn, getAvatarIdentifier } from '../selectors/session'
+
 async function parseLLSD (response) {
   const body = await response.text()
   return LLSD.parse(response.headers.get('content-type'), body)
@@ -20,7 +22,7 @@ export async function fetchLLSD (method, url, data = null, mimeType = LLSD.MIMET
   }
 }
 
-async function minimalFetchLLSD (method, url, data = null, mimeType = LLSD.MIMETYPE_XML) {
+function minimalFetchLLSD (method, url, data = null, mimeType = LLSD.MIMETYPE_XML) {
   const headers = new window.Headers()
   headers.append('content-type', 'text/plain')
   headers.append('x-andromeda-fetch-url', url)
@@ -54,9 +56,10 @@ export function fetchSeedCapabilities (url) {
 // http://wiki.secondlife.com/wiki/EventQueueGet
 async function * eventQueueGet (getState) {
   const url = getState().session.get('eventQueueGetUrl')
+  const avatarIdentifier = getAvatarIdentifier(getState())
   let ack = 0
 
-  while (getState().session.get('loggedIn')) {
+  while (getIsLoggedIn(getState()) && getAvatarIdentifier(getState()) === avatarIdentifier) {
     let response
     try {
       response = await minimalFetchLLSD('POST', url, { done: false, ack })
@@ -72,21 +75,26 @@ async function * eventQueueGet (getState) {
       yield body.events
     } else if (response.status === 404) { // Session did end
       return []
-    } else if (response.status === 502) {
+    } else if (response.status === 502 || response.status === 499) {
       // Request did Timeout. This is not an error! This is expected.
       // The EventQueue server is a proxy. If the server behind the proxy times out, than the
       // EventQueue server interprets this as a generic error and returns a 502.
+      // 499 is from the dev-server.
       continue
     } else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
       // Some error did happen!
-      throw new Error(`${response.status} - ${response.statusText}\n\n${await response.text()}`)
+      console.error(
+        new Error(`${response.status} - ${response.statusText}\n\n${await response.text()}`)
+      )
+      return
     } else {
       await new Promise(resolve => { setTimeout(resolve, 200) })
       continue
     }
   }
 
-  fetchLLSD('POST', url, { done: true, ack })
+  minimalFetchLLSD('POST', url, { done: true, ack })
+    .catch(() => {})
 }
 
 function activateEventQueue () {

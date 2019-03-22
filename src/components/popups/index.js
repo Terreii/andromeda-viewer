@@ -1,4 +1,5 @@
 import React from 'react'
+import { Portal } from 'react-portal'
 
 import Popup from './popup'
 import SignInPopup from './signInPopup'
@@ -10,20 +11,30 @@ export default function PopupRenderer ({ popup, closePopup, signIn, signUp, unlo
 
   switch (popup) {
     case 'unlock':
-      return <UnlockDialog onUnlock={unlock} onSignOut={signOut} />
+      return <Portal>
+        <UnlockDialog onUnlock={unlock} onSignOut={signOut} />
+      </Portal>
 
     case 'signIn':
-      return <SignInPopup onCancel={closePopup} onSend={signIn} />
+      return <Portal>
+        <SignInPopup onCancel={closePopup} onSend={signIn} />
+      </Portal>
 
     case 'signUp':
-      return <SignInPopup onCancel={closePopup} isSignUp onSend={signUp} />
+      return <Portal>
+        <SignInPopup onCancel={closePopup} isSignUp onSend={signUp} />
+      </Portal>
 
     case 'signOut':
-      return <SignOutPopup onCancel={closePopup} onSignOut={signOut} />
+      return <Portal>
+        <SignOutPopup onCancel={closePopup} onSignOut={signOut} />
+      </Portal>
 
     default:
-      return <Popup title={'Error'} onClose={closePopup}>
-        {popup}
-      </Popup>
+      return <Portal>
+        <Popup title={'Error'} onClose={closePopup}>
+          {popup}
+        </Popup>
+      </Portal>
   }
 }

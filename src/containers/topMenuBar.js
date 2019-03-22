@@ -42,7 +42,6 @@ class TopBarContainer extends React.Component {
 
   render () {
     return <TopBar
-      messageOfTheDay={this.props.messageOfTheDay}
       account={this.props.account}
       signIn={this._boundSignIn}
       signUp={this._boundSignUp}

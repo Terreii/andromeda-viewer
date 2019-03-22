@@ -10,12 +10,14 @@ import { getAllFriendsDisplayNames } from './friendsActions'
 import { fetchSeedCapabilities } from './llsd'
 import connectCircuit from './connectCircuit'
 
+import { getIsLoggedIn } from '../selectors/session'
+
 // Actions for the session of an avatar
 
 // Logon the user. It will post using fetch to the server.
 export function login (avatarName, password, grid, save, addAvatar) {
   return async (dispatch, getState, extra) => {
-    if (getState().session.get('loggedIn')) throw new Error('There is already an avatar logged in!')
+    if (getIsLoggedIn(getState())) throw new Error('There is already an avatar logged in!')
 
     const avatarIdentifier = `${avatarName.getFullName()}@${grid.name}`
 
@@ -124,9 +126,10 @@ export function login (avatarName, password, grid, save, addAvatar) {
 export function logout () {
   return (dispatch, getState, extra) => {
     const circuit = extra.circuit
-    const session = getState().session
+    const activeState = getState()
+    const session = activeState.session
 
-    if (!session.get('loggedIn')) {
+    if (!getIsLoggedIn(activeState)) {
       return Promise.reject(new Error("You aren't logged in!"))
     }
 

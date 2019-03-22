@@ -8,6 +8,7 @@ const Container = styled.form`
   background-color: rgb(110, 110, 110);
   margin: 1em;
   padding: 1em;
+  max-width: calc(100vw - 2em);
   border-radius: .5em;
   box-shadow: 0.2em 0.2em 0.4em 0.1em black;
 
@@ -53,6 +54,10 @@ const Title = styled.h2`
   text-align: center;
   white-space: nowrap;
   font-size: 120%;
+
+  @media (max-width: 450px) {
+    white-space: normal;
+  }
 `
 
 const ActiveText = styled.span`
@@ -267,6 +272,15 @@ export default class NewAvatarLogin extends React.Component {
         minLength='1'
         required
         autoFocus
+        onFocus={event => {
+          const target = event.target
+
+          setTimeout(() => {
+            if (target == null) return
+
+            target.parentElement.scrollIntoView(true)
+          }, 16)
+        }}
       />
 
       <Password htmlFor='newAvatarPasswordInput'>Password:</Password>

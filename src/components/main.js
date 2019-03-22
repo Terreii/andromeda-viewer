@@ -1,18 +1,34 @@
 import React, { lazy, Suspense } from 'react'
-import styled from 'styled-components'
+import styled, { createGlobalStyle } from 'styled-components'
 
-export const AppContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  position: fixed;
+const RootStyle = createGlobalStyle`
+  :root, body {
+    margin: 0px;
+    padding: 0px;
+  }
+
+  div.rc-tabs.rc-tabs-top {
+    height: calc(100vh - 3rem);
+    margin-top: 0.5rem; 
+  }
+`
+
+const AppContainerStyle = styled.div`
   top: 0px;
   left: 0px;
   width: 100vw;
-  height: 100vh;
   padding: 0px;
+  padding-top: 2.5rem;
   margin: 0px;
   font-family: Helvetica, Arial, sans-serif;
 `
+
+export const AppContainer = ({ children, ...props }) => (
+  <AppContainerStyle {...props}>
+    <RootStyle />
+    {children}
+  </AppContainerStyle>
+)
 
 const LoadingView = styled.div`
   display: flex;

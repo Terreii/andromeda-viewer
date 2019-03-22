@@ -37,7 +37,6 @@
   "bugs": {
     "url": "https://github.com/Terreii/andromeda-viewer/issues"
   },
-  "proxy": "http://localhost:8080",
   "browserslist": [
     ">0.2%",
     "not dead",
@@ -50,6 +49,7 @@
     "double-ended-queue": "^2.1.0-0",
     "enzyme": "^3.9.0",
     "enzyme-adapter-react-16": "^1.11.2",
+    "http-proxy-middleware": "^0.19.1",
     "immutable": "^3.8.2",
     "jest-axe": "^3.1.1",
     "jest-enzyme": "^7.0.2",
@@ -62,6 +62,7 @@
     "react-burger-menu": "^2.6.5",
     "react-dom": "^16.8.4",
     "react-helmet": "^5.2.0",
+    "react-portal": "^4.2.0",
     "react-redux": "^6.0.1",
     "react-scripts": "2.1.8",
     "react-test-renderer": "^16.8.4",

@@ -83,7 +83,7 @@ test('it should create an instance', () => {
   expect(circuit.ip).toBe('127.0.0.1')
   expect(circuit.ipArray).toEqual([127, 0, 0, 1])
   expect(circuit.port).toBe(8080)
-  expect(circuit.websocket.url).toBe('ws://localhost:8080/andromeda-bridge')
+  expect(circuit.websocket.url).toBe('ws://localhost/andromeda-bridge')
 
   expect(circuit.websocketIsOpen).toBe(false)
 })

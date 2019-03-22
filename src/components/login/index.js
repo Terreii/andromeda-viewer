@@ -5,7 +5,6 @@ import LoginNewAvatar from './newAvatarLogin'
 import AvatarLogin from './avatarLogin'
 import SignIn from './signIn'
 import AvatarName from '../../avatarName'
-import { viewerName } from '../../viewerInfo'
 
 const Container = styled.div`
   overflow: scroll;
@@ -20,13 +19,17 @@ const Main = styled.div`
   margin-top: 2em;
   margin-left: auto;
   margin-right: auto;
+  margin-bottom: 0.5em;
   text-align: center;
   display: flex;
   flex-direction: column;
-`
 
-const ViewerNameCapitalizer = styled.span`
-  text-transform: capitalize;
+  @media (max-width: 750px) {
+    background-color: rgba(0, 0, 0, 0);
+    color: #000;
+    margin-top: 0;
+    padding-top: 0;
+  }
 `
 
 const ErrorOut = styled.p`
@@ -42,6 +45,7 @@ const AvatarsList = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  color: #fff;
 
   & > div {
     flex: fit-content;
@@ -160,13 +164,6 @@ export default class LoginForm extends React.Component {
 
     return <Container>
       <Main>
-        <h1>
-          {'Login to '}
-          <ViewerNameCapitalizer>
-            {viewerName}
-          </ViewerNameCapitalizer>
-        </h1>
-
         <AvatarsList>
           <LoginNewAvatar
             grids={this.props.grids}

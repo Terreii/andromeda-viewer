@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import closeIcon from '../../icons/icon_close.svg'
 
 const Background = styled.div`
-  position: absolute;
+  position: fixed;
   top: 0px;
   left: 0px;
   width: 100vw;
@@ -15,6 +15,12 @@ const Background = styled.div`
   justify-content: center;
   align-items: center;
   z-index: 1000;
+
+  @media (max-width: 750px) {
+    height: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: scroll;
+  }
 `
 
 const CloseButton = styled.button`
@@ -29,12 +35,18 @@ const CloseButton = styled.button`
 `
 
 const Border = styled.div`
+  position: relative;
   background-color: rgb(255, 250, 250);
   border-radius: 1em;
+  max-height: 100vh;
+  max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
 `
 
 const Header = styled.div`
   border-bottom: 1px solid black;
+  flex: 0 0 2em;
   display: flex;
   flex-direction: row-reverse;
   justify-content: space-between;
@@ -50,7 +62,16 @@ const PopupTitle = styled.h4`
 `
 
 const Content = styled.div`
-  padding: 1em;
+  position: relative;
+  margin: 1em;
+  overflow-y: scroll;
+  overscroll-behavior-y: contain;
+  display: flex;
+  flex-direction: column;
+
+  & > * {
+    flex-shrink: 0;
+  }
 `
 
 export default function Popup (props) {

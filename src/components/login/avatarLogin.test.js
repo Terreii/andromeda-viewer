@@ -58,25 +58,39 @@ test('login works', () => {
     isSelected
   />)
 
+  const input = rendered.find('input')
   const button = rendered.find('button')
+
+  input.simulate('keyUp', {
+    keyCode: 13
+  })
+
+  // no password
+  expect(button.prop('disabled')).toBeTruthy()
+  expect(loginInfo.count).toBe(0)
+
+  input.simulate('change', {
+    target: {
+      value: 'aPassword'
+    }
+  })
 
   button.simulate('click')
 
   expect(loginInfo.count).toBe(1)
   expect(loginInfo.avatar).toBe(avatar)
-  expect(loginInfo.password).toBe('') // input value sadly can't be changed ...
+  expect(loginInfo.password).toBe('aPassword')
 
   loginInfo.avatar = null
   loginInfo.password = null
 
-  const input = rendered.find('input')
   input.simulate('keyUp', {
     keyCode: 13
   })
 
   expect(loginInfo.count).toBe(2)
   expect(loginInfo.avatar).toBe(avatar)
-  expect(loginInfo.password).toBe('')
+  expect(loginInfo.password).toBe('aPassword')
 })
 
 test('should pass aXe', async () => {

@@ -5,11 +5,11 @@
 
 import React from 'react'
 import { connect } from 'react-redux'
-import Helmet from 'react-helmet'
 
 import { AppContainer, LoadableChatComponent } from '../components/main'
 import LoginForm from '../components/login/'
 import PopupRenderer from '../components/popups/'
+import Helmet from './helmet'
 
 import TopMenuBar from './topMenuBar'
 
@@ -24,7 +24,7 @@ import {
 } from '../actions/viewerAccount'
 import { login } from '../actions/sessionActions'
 
-import { viewerName } from '../viewerInfo'
+import { getIsLoggedIn } from '../selectors/session'
 
 const Popups = React.memo(PopupRenderer)
 
@@ -50,12 +50,9 @@ class App extends React.PureComponent {
       />
 
     return <AppContainer>
-      <Helmet
-        titleTemplate={`%s - ${viewerName}`}
-        defaultTitle={viewerName}
-      />
-      <TopMenuBar />
+      <Helmet />
       {mainSection}
+      <TopMenuBar />
       <Popups
         popup={!this.props.isUnlocked && this.props.isSignedIn
           ? 'unlock'
@@ -77,7 +74,7 @@ const mapStateToProps = state => {
   const isUnlocked = state.account.get('unlocked')
   const grids = state.account.get('savedGrids')
   const isSignedIn = state.account.getIn(['viewerAccount', 'loggedIn'])
-  const isLoggedIn = state.session.get('loggedIn')
+  const isLoggedIn = getIsLoggedIn(state)
 
   return {
     avatars,

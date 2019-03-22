@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 
 import AvatarName from '../../avatarName'
@@ -10,6 +10,7 @@ const Container = styled.form`
   background-color: rgb(110, 110, 110);
   margin: 1em;
   padding: 1em;
+  max-width: calc(100vw - 2em);
   border-radius: .5em;
   box-shadow: 0.2em 0.2em 0.4em 0.1em black;
 
@@ -88,6 +89,11 @@ const LoginButton = styled(Button)`
 `
 
 export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSelected, onSelect }) {
+  const [password, setPassword] = useState('')
+  useEffect(() => {
+    setPassword('')
+  }, [isSelected])
+
   if (!isSelected) {
     const onSetActive = event => {
       event.preventDefault()
@@ -112,13 +118,12 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
     </Container>
   }
 
-  const ref = React.createRef()
-
   const onClick = event => {
     event.preventDefault()
 
-    const password = ref.current.value
-    onLogin(avatar, password)
+    if (password.length > 0) {
+      onLogin(avatar, password)
+    }
   }
 
   const onKeyUp = event => {
@@ -139,17 +144,27 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
       id={passwordInputId}
       type='password'
       className='medium'
-      ref={ref}
+      value={password}
+      onChange={event => { setPassword(event.target.value) }}
       onKeyUp={onKeyUp}
       required
       autoFocus
       disabled={isLoggingIn}
       aria-label={'password for ' + avatarName}
+      onFocus={event => {
+        const target = event.target
+
+        setTimeout(() => {
+          if (target == null) return
+
+          target.parentElement.scrollIntoView(true)
+        }, 16)
+      }}
     />
 
     <LoginButton
       onClick={onClick}
-      disabled={isLoggingIn}
+      disabled={isLoggingIn || password.length === 0}
     >
       {isLoggingIn === avatar.get('name') ? 'Connecting ...' : 'Login'}
     </LoginButton>
