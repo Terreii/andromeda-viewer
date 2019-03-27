@@ -243,8 +243,16 @@ export function signIn (username, password, cryptoPassword) {
 export function signUp (username, password, cryptoPassword) {
   return async (dispatch, getState, { hoodie }) => {
     await hoodie.account.signUp({ username, password })
-    await hoodie.cryptoStore.setup(cryptoPassword)
-    await dispatch(signIn(username, password, cryptoPassword))
+    const resetKeys = await hoodie.cryptoStore.setup(cryptoPassword)
+
+    await dispatch(
+      signIn(username, password, cryptoPassword)
+    )
+
+    dispatch({
+      type: 'DISPLAY_VIEWER_ACCOUNT_RESET_KEYS',
+      resetKeys
+    })
   }
 }
 

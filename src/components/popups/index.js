@@ -5,8 +5,9 @@ import Popup from './popup'
 import SignInPopup from './signInPopup'
 import SignOutPopup from './signOutPopup'
 import UnlockDialog from './unlockDialog'
+import ResetKeysPopup from './resetKeysPopup'
 
-export default function PopupRenderer ({ popup, closePopup, signIn, signUp, unlock, signOut }) {
+export default ({ popup, data, closePopup, signIn, signUp, unlock, signOut }) => {
   if (popup == null || popup.length === 0) return null
 
   switch (popup) {
@@ -23,6 +24,11 @@ export default function PopupRenderer ({ popup, closePopup, signIn, signUp, unlo
     case 'signUp':
       return <Portal>
         <SignInPopup onCancel={closePopup} isSignUp onSend={signUp} />
+      </Portal>
+
+    case 'resetKeys':
+      return <Portal>
+        <ResetKeysPopup onClose={closePopup} resetKeys={data} />
       </Portal>
 
     case 'signOut':
