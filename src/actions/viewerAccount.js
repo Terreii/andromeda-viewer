@@ -284,6 +284,9 @@ export function changeEncryptionPassword (resetKey, newPassword) {
     dispatch(closePopup())
 
     dispatch(showResetKeys(result.resetKeys))
+
+    await dispatch(loadSavedGrids())
+    dispatch(loadSavedAvatars())
   }
 }
 
