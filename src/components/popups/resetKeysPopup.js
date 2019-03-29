@@ -12,6 +12,10 @@ const Container = styled.form`
   text-align: center;
 `
 
+const Text = styled.p`
+  line-height: 1.5;
+`
+
 const KeysList = styled.ul`
   font-family: monospace;
   list-style: none;
@@ -56,13 +60,13 @@ export default function ResetKeysPopup ({ resetKeys, onClose }) {
 
   return <Popup title='Password reset keys' onClose={onClose}>
     <Container>
-      <p>
+      <Text>
         Those are your <b>encryption reset-keys</b>.<br />
         You need them, when you did forget your encryption-password!<br />
         <b>Please save them!</b><br />
         <b>Save them some where secure!</b><br />
         There is no other way to get your data back!
-      </p>
+      </Text>
 
       <KeysList>
         {resetKeys.map((key, index) => <li key={`reset-key-${index}`}>
@@ -87,6 +91,10 @@ export default function ResetKeysPopup ({ resetKeys, onClose }) {
         width='200'
         alt='Gandalf saying: Keep it secret, keep it safe!'
       />
+
+      <Text>
+        Remember: If you lose your encryption password and the reset-keys, you lose your data!
+      </Text>
 
       <Button className='ok' onClick={onClose}>OK, I did save them!</Button>
     </Container>
