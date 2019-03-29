@@ -22,8 +22,13 @@ export default function ResetPasswordDialog ({ type, onChangePassword, onSignOut
   const [resetKey, setResetKey] = useState('')
   const [password1, setPassword1] = useState('')
   const [password2, setPassword2] = useState('')
+  const [errorMessage, setErrorMessage] = useState(null)
+  const [isChanging, setIsChanging] = useState(false)
 
-  const canChange = resetKey.length === 32 && password1.length >= 8 && password1 === password2
+  const canChange = !isChanging &&
+    resetKey.length === 32 &&
+    password1.length >= 8 &&
+    password1 === password2
 
   return <Popup title='Reset password' onClose={onCancel}>
     <FormField>
@@ -35,8 +40,17 @@ export default function ResetPasswordDialog ({ type, onChangePassword, onSignOut
         onChange={event => { setResetKey(event.target.value) }}
         autoFocus
         required
+        disabled={isChanging}
       />
       <Help id='helpOld'>Please enter one of your reset-keys</Help>
+      <Help
+        id='oldInputError'
+        className='Error'
+        hide={errorMessage == null || errorMessage.length === 0}
+        role='alert'
+      >
+        {errorMessage}
+      </Help>
     </FormField>
 
     <FormField>
@@ -48,6 +62,7 @@ export default function ResetPasswordDialog ({ type, onChangePassword, onSignOut
         onChange={event => { setPassword1(event.target.value) }}
         required
         aria-describedby='newPasswordHelp'
+        disabled={isChanging}
       />
       <Help id='newPasswordHelp'>Minimal length: 8 characters!</Help>
     </FormField>
@@ -61,6 +76,7 @@ export default function ResetPasswordDialog ({ type, onChangePassword, onSignOut
         onChange={event => { setPassword2(event.target.value) }}
         required
         aria-describedby='secondPwInputError'
+        disabled={isChanging}
       />
       <Help
         id='secondPwInputError'
@@ -73,15 +89,22 @@ export default function ResetPasswordDialog ({ type, onChangePassword, onSignOut
     </FormField>
 
     <ButtonsRow>
-      <Button className='secondary' onClick={onCancel}>cancel</Button>
-      <Button className='danger' onClick={onSignOut}>sign out</Button>
+      <Button className='secondary' onClick={onCancel} disabled={isChanging}>cancel</Button>
+      <Button className='danger' onClick={onSignOut} disabled={isChanging}>sign out</Button>
     </ButtonsRow>
     <ButtonsRow>
       <Button
         className='primary'
         onClick={() => {
           if (canChange) {
+            setIsChanging(true)
+            setErrorMessage(null)
+
             onChangePassword(resetKey, password1)
+              .catch(err => {
+                setErrorMessage(err.reason || err.toString())
+                setIsChanging(false)
+              })
           }
         }}
         disabled={!canChange}

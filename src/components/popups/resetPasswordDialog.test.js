@@ -27,6 +27,7 @@ test('should call onChangePassword only if the input is valid', () => {
     onChangePassword={(resetKey, password, other) => {
       changePwCount += 1
       changePwArgs = { resetKey, password, other }
+      return Promise.resolve()
     }}
     onSignOut={() => {
       signOutCount += 1
@@ -134,6 +135,7 @@ test('should call onSignOut and onCancel', () => {
     type='encryption'
     onChangePassword={() => {
       changePwCount += 1
+      return Promise.resolve()
     }}
     onSignOut={() => {
       signOutCount += 1

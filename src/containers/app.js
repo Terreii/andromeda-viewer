@@ -18,6 +18,7 @@ import {
   isSignedIn,
   unlock,
   showResetPassword,
+  changeEncryptionPassword,
   showSignInPopup,
   signIn,
   signUp,
@@ -64,6 +65,7 @@ class App extends React.PureComponent {
         signIn={this.props.signIn}
         unlock={this.props.unlock}
         signOut={this.props.signOut}
+        changePassword={this.props.changeEncryptionPassword}
       />
     </AppContainer>
   }
@@ -89,6 +91,7 @@ const mapDispatchToProps = {
   getIsSignedIn: isSignedIn,
   showSignInPopup,
   showResetPassword,
+  changeEncryptionPassword,
   unlock,
   signIn, // For viewer-account (to sync)
   signUp,
