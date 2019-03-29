@@ -61,7 +61,7 @@ const PopupTitle = styled.h4`
   margin-top: .5em;
 `
 
-const Content = styled.div`
+const Content = styled.article`
   position: relative;
   margin: 1em;
   overflow-y: scroll;
