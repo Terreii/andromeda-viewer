@@ -17,6 +17,7 @@ import {
   closePopup,
   isSignedIn,
   unlock,
+  showResetPassword,
   showSignInPopup,
   signIn,
   signUp,
@@ -55,10 +56,9 @@ class App extends React.PureComponent {
       {mainSection}
       <TopMenuBar />
       <Popups
-        popup={!this.props.isUnlocked && this.props.isSignedIn
-          ? 'unlock'
-          : this.props.popup}
+        popup={this.props.popup}
         closePopup={this.props.closePopup}
+        displayResetPassword={this.props.showResetPassword}
         data={this.props.popupData}
         signUp={this.props.signUp}
         signIn={this.props.signIn}
@@ -71,14 +71,12 @@ class App extends React.PureComponent {
 
 const mapStateToProps = state => {
   const avatars = state.account.get('savedAvatars')
-  const isUnlocked = state.account.get('unlocked')
   const grids = state.account.get('savedGrids')
   const isSignedIn = state.account.getIn(['viewerAccount', 'loggedIn'])
 
   return {
     avatars,
     grids,
-    isUnlocked,
     isLoggedIn: getIsLoggedIn(state), // Avatar session
     isSignedIn, // Viewer account
     popup: selectPopup(state),
@@ -90,6 +88,7 @@ const mapDispatchToProps = {
   closePopup,
   getIsSignedIn: isSignedIn,
   showSignInPopup,
+  showResetPassword,
   unlock,
   signIn, // For viewer-account (to sync)
   signUp,

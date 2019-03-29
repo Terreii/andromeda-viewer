@@ -94,6 +94,14 @@ export default function accountReducer (state = getDefault(), action) {
         }
       })
 
+    case 'SHOW_PASSWORD_RESET':
+      return state.mergeDeep({
+        viewerAccount: {
+          signInPopup: 'resetPassword',
+          popupData: action.passwordType
+        }
+      })
+
     case 'DISPLAY_VIEWER_ACCOUNT_RESET_KEYS':
       return state.mergeDeep({
         viewerAccount: {

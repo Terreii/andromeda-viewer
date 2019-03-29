@@ -27,6 +27,13 @@ export function showSignOutPopup () {
   }
 }
 
+export function showResetPassword (type) {
+  return {
+    type: 'SHOW_PASSWORD_RESET',
+    passwordType: type
+  }
+}
+
 export function closePopup () {
   return {
     type: 'ClosePopup'

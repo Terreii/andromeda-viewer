@@ -17,11 +17,26 @@ test('renders unlock without crashing', () => {
     <PopupRenderer
       popup='unlock'
       unlock={() => {}}
+      displayResetPassword={() => {}}
       signOut={() => {}}
     />
   )
 
   expect(rendered.find('h4 span').text()).toBe('Unlock')
+})
+
+test('renders resetPassword without crashing', () => {
+  const rendered = mount(
+    <PopupRenderer
+      popup='resetPassword'
+      changePassword={() => {}}
+      closePopup={() => {}}
+      signOut={() => {}}
+      data='encryption'
+    />
+  )
+
+  expect(rendered.find('h4').text()).toBe('Reset password')
 })
 
 test('renders signIn without crashing', () => {

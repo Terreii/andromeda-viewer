@@ -6,14 +6,29 @@ import SignInPopup from './signInPopup'
 import SignOutPopup from './signOutPopup'
 import UnlockDialog from './unlockDialog'
 import ResetKeysPopup from './resetKeysPopup'
+import ResetPasswordDialog from './resetPasswordDialog'
 
-export default ({ popup, data, closePopup, signIn, signUp, unlock, signOut }) => {
+export default ({
+  popup,
+  data,
+  closePopup,
+  displayResetPassword,
+  signIn,
+  signUp,
+  unlock,
+  signOut,
+  changePassword
+}) => {
   if (popup == null || popup.length === 0) return null
 
   switch (popup) {
     case 'unlock':
       return <Portal>
-        <UnlockDialog onUnlock={unlock} onSignOut={signOut} />
+        <UnlockDialog
+          onUnlock={unlock}
+          onForgottenPassword={displayResetPassword}
+          onSignOut={signOut}
+        />
       </Portal>
 
     case 'signIn':
@@ -34,6 +49,16 @@ export default ({ popup, data, closePopup, signIn, signUp, unlock, signOut }) =>
     case 'signOut':
       return <Portal>
         <SignOutPopup onCancel={closePopup} onSignOut={signOut} />
+      </Portal>
+
+    case 'resetPassword':
+      return <Portal>
+        <ResetPasswordDialog
+          onChangePassword={changePassword}
+          onCancel={closePopup}
+          onSignOut={signOut}
+          type={data}
+        />
       </Portal>
 
     default:

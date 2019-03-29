@@ -5,10 +5,13 @@ import { shallow, mount } from 'enzyme'
 import UnlockDialog from './unlockDialog'
 
 test('renders without crashing', () => {
-  shallow(<UnlockDialog
+  const rendered = shallow(<UnlockDialog
     onUnlock={() => {}}
+    onForgottenPassword={() => {}}
     onSignOut={() => {}}
   />)
+
+  expect(rendered).toBeTruthy()
 })
 
 test('unlock with return key', () => {
@@ -18,6 +21,7 @@ test('unlock with return key', () => {
     nextShouldError: null
   }
   let signOutCount = 0
+  let resetPasswordCount = 0
 
   const rendered = mount(<UnlockDialog
     onUnlock={password => {
@@ -32,6 +36,9 @@ test('unlock with return key', () => {
         return Promise.resolve()
       }
     }}
+    onForgottenPassword={() => {
+      resetPasswordCount += 1
+    }}
     onSignOut={() => {
       signOutCount += 1
     }}
@@ -40,11 +47,15 @@ test('unlock with return key', () => {
   const pwInput = rendered.find('input[type="password"]')
   expect(pwInput).toBeTruthy()
 
+  expect(rendered.find('small').first().text()).toBe(
+    'If you did forget your encryption-password?Reset password'
+  )
+
   pwInput.simulate('keyUp', {
     keyCode: 13
   })
   expect(unlockEvents.count).toBe(0) // empty input doesn't unlock
-  expect(rendered.find('small').first().text()).toBe('No password was entered jet!')
+  expect(rendered.find('small').at(1).text()).toBe('No password was entered jet!')
 
   pwInput.simulate('change', {
     target: {
@@ -62,6 +73,7 @@ test('unlock with return key', () => {
   })
 
   expect(signOutCount).toBe(0)
+  expect(resetPasswordCount).toBe(0)
 })
 
 test('unlock with button', () => {
@@ -71,6 +83,7 @@ test('unlock with button', () => {
     nextShouldError: null
   }
   let signOutCount = 0
+  let resetPasswordCount = 0
 
   const rendered = mount(<UnlockDialog
     onUnlock={password => {
@@ -85,6 +98,9 @@ test('unlock with button', () => {
         return Promise.resolve()
       }
     }}
+    onForgottenPassword={() => {
+      resetPasswordCount += 1
+    }}
     onSignOut={() => {
       signOutCount += 1
     }}
@@ -92,14 +108,18 @@ test('unlock with button', () => {
 
   const pwInput = rendered.find('input[type="password"]')
   expect(pwInput).toBeTruthy()
-  const unlockButton = rendered.find('button').at(0)
+  const unlockButton = rendered.find('#unlockButton').first()
   expect(unlockButton).toBeTruthy()
-  const signOutButton = rendered.find('button').at(1)
+  const signOutButton = rendered.find('#signOutButton').first()
   expect(signOutButton).toBeTruthy()
+
+  expect(rendered.find('small').first().text()).toBe(
+    'If you did forget your encryption-password?Reset password'
+  )
 
   unlockButton.simulate('click')
   expect(unlockEvents.count).toBe(0) // empty input doesn't unlock
-  expect(rendered.find('small').first().text()).toBe('No password was entered jet!')
+  expect(rendered.find('small').at(1).text()).toBe('No password was entered jet!')
 
   pwInput.simulate('change', {
     target: {
@@ -114,22 +134,27 @@ test('unlock with button', () => {
   })
 
   expect(signOutCount).toBe(0)
+  expect(resetPasswordCount).toBe(0)
 })
 
 test('sign out', () => {
   let unlockCount = 0
   let signOutCount = 0
+  let resetPasswordCount = 0
 
   const rendered = mount(<UnlockDialog
     onUnlock={() => {
       unlockCount += 1
+    }}
+    onForgottenPassword={() => {
+      resetPasswordCount += 1
     }}
     onSignOut={() => {
       signOutCount += 1
     }}
   />)
 
-  const signOutButton = rendered.find('button').at(1)
+  const signOutButton = rendered.find('#signOutButton').first()
   expect(signOutButton).toBeTruthy()
   expect(signOutButton.text()).toBe('Sign out')
 
@@ -137,10 +162,42 @@ test('sign out', () => {
 
   expect(unlockCount).toBe(0)
   expect(signOutCount).toBe(1)
+  expect(resetPasswordCount).toBe(0)
+})
+
+test('should callOnForgottenPassword if the reset password button is clicked', () => {
+  let unlockCount = 0
+  let signOutCount = 0
+  let resetPasswordCount = 0
+
+  const rendered = mount(<UnlockDialog
+    onUnlock={() => {
+      unlockCount += 1
+    }}
+    onForgottenPassword={arg => {
+      resetPasswordCount += 1
+      expect(arg).toBe('encryption')
+    }}
+    onSignOut={() => {
+      signOutCount += 1
+    }}
+  />)
+
+  const resetPasswordButton = rendered.find('#resetPasswordButton').first()
+
+  resetPasswordButton.simulate('click')
+
+  expect(unlockCount).toBe(0)
+  expect(signOutCount).toBe(0)
+  expect(resetPasswordCount).toBe(1)
 })
 
 test('should pass aXe', async () => {
-  const rendered = mount(<UnlockDialog onUnlock={() => {}} onSignOut={() => {}} />)
+  const rendered = mount(<UnlockDialog
+    onUnlock={() => {}}
+    onForgottenPassword={() => {}}
+    onSignOut={() => {}}
+  />)
 
   expect(await axe(rendered.html())).toHaveNoViolations()
 })
