@@ -17,6 +17,8 @@ import {
   closePopup,
   isSignedIn,
   unlock,
+  showResetPassword,
+  changeEncryptionPassword,
   showSignInPopup,
   signIn,
   signUp,
@@ -25,6 +27,7 @@ import {
 import { login } from '../actions/sessionActions'
 
 import { getIsLoggedIn } from '../selectors/session'
+import { selectPopup, selectPopupData } from '../selectors/popup'
 
 const Popups = React.memo(PopupRenderer)
 
@@ -54,35 +57,32 @@ class App extends React.PureComponent {
       {mainSection}
       <TopMenuBar />
       <Popups
-        popup={!this.props.isUnlocked && this.props.isSignedIn
-          ? 'unlock'
-          : this.props.popup}
+        popup={this.props.popup}
         closePopup={this.props.closePopup}
+        displayResetPassword={this.props.showResetPassword}
+        data={this.props.popupData}
         signUp={this.props.signUp}
         signIn={this.props.signIn}
         unlock={this.props.unlock}
         signOut={this.props.signOut}
+        changePassword={this.props.changeEncryptionPassword}
       />
     </AppContainer>
   }
 }
 
 const mapStateToProps = state => {
-  const popup = state.account.getIn(['viewerAccount', 'signInPopup']) ||
-    state.session.get('error')
   const avatars = state.account.get('savedAvatars')
-  const isUnlocked = state.account.get('unlocked')
   const grids = state.account.get('savedGrids')
   const isSignedIn = state.account.getIn(['viewerAccount', 'loggedIn'])
-  const isLoggedIn = getIsLoggedIn(state)
 
   return {
     avatars,
     grids,
-    isUnlocked,
-    isLoggedIn, // Avatar session
+    isLoggedIn: getIsLoggedIn(state), // Avatar session
     isSignedIn, // Viewer account
-    popup
+    popup: selectPopup(state),
+    popupData: selectPopupData(state)
   }
 }
 
@@ -90,6 +90,8 @@ const mapDispatchToProps = {
   closePopup,
   getIsSignedIn: isSignedIn,
   showSignInPopup,
+  showResetPassword,
+  changeEncryptionPassword,
   unlock,
   signIn, // For viewer-account (to sync)
   signUp,

@@ -28,13 +28,36 @@ const hoodie = {
     },
 
     updateOrAdd: function (doc) {
-      const newDoc = Object.assign(storeData[doc._id] || {}, doc)
+      if (Array.isArray(doc)) {
+        return Promise.all(doc.map(hoodie.store.updateOrAdd))
+      }
+
+      const newDoc = Object.assign(storeData[doc._id] || {}, doc, {
+        _rev: doc._rev != null && doc._rev.length > 0 ? doc._rev : '1-1234567890'
+      })
       storeData[doc._id] = newDoc
+
       return Promise.resolve(newDoc)
     },
 
     pull: function (ids) {
       return Promise.all(ids.map(id => hoodie.store.find(id))).catch(() => [])
+    },
+
+    withIdPrefix: function (prefix) {
+      return {
+        findAll () {
+          const docs = []
+
+          for (const key in storeData) {
+            if (key.startsWith(prefix)) {
+              docs.push(storeData[key])
+            }
+          }
+
+          return Promise.resolve(docs)
+        }
+      }
     },
 
     on: function () {},
@@ -77,8 +100,8 @@ test('cryptoStore and its methods exists', () => {
 })
 
 test('cryptoStore requires to be unlocked', async () => {
-  await hoodie.cryptoStore.setup('test')
-  await hoodie.cryptoStore.unlock('test')
+  await hoodie.cryptoStore.setup('testPassword')
+  await hoodie.cryptoStore.unlock('testPassword')
 })
 
 test('cryptoStore encrypts documents', async () => {
@@ -91,6 +114,7 @@ test('cryptoStore encrypts documents', async () => {
     unencrypted = doc
 
     const result = Object.assign({}, doc, {
+      _rev: doc._rev != null && doc._rev.length > 0 ? doc._rev : '1-1234567890',
       hoodie: {
         created: new Date().toJSON()
       }

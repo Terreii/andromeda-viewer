@@ -35,6 +35,18 @@ const ButtonsRow = styled.div`
   }
 `
 
+const ResetButton = styled.button`
+  border: 0px;
+  background: none;
+  color: blue;
+  text-decoration: underline;
+  display: inline;
+  padding: 0;
+  padding-left: 1em;
+  margin: 0;
+  cursor: pointer;
+`
+
 export default class UnlockDialog extends React.Component {
   constructor (props) {
     super(props)
@@ -107,7 +119,7 @@ export default class UnlockDialog extends React.Component {
 
     return <Popup title={title}>
       <Content>
-        <span>Please enter your Encryption-Password to unlock this app!</span>
+        <span>Please enter your <i>Encryption-Password</i> to unlock this app!</span>
 
         <PasswordRow>
           <label htmlFor='unlockPasswordIn'>Password:</label>
@@ -120,14 +132,24 @@ export default class UnlockDialog extends React.Component {
             value={this.state.password}
             onChange={this._boundChange}
             onKeyUp={this._boundInput}
-            aria-describedby='unlockError'
+            aria-describedby='resetPassword'
           />
+          <Help id='resetPassword'>
+            If you did forget your encryption-password?
+            <ResetButton
+              id='resetPasswordButton'
+              onClick={() => { this.props.onForgottenPassword('encryption') }}
+            >
+              Reset password
+            </ResetButton>
+          </Help>
           <Help id='unlockError' className='Error' hide={this.state.errorText == null} role='alert'>
             {this.state.errorText}
           </Help>
         </PasswordRow>
         <ButtonsRow>
           <Button
+            id='unlockButton'
             className='primary'
             onClick={this._boundUnlock}
             disabled={this.state.isUnlocking}
@@ -135,6 +157,7 @@ export default class UnlockDialog extends React.Component {
             Unlock
           </Button>
           <Button
+            id='signOutButton'
             className='danger'
             onClick={this.props.onSignOut}
             disabled={this.state.isUnlocking}

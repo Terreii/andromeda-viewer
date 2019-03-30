@@ -27,6 +27,20 @@ export function showSignOutPopup () {
   }
 }
 
+export function showResetPassword (type) {
+  return {
+    type: 'SHOW_PASSWORD_RESET',
+    passwordType: type
+  }
+}
+
+function showResetKeys (resetKeys) {
+  return {
+    type: 'DISPLAY_VIEWER_ACCOUNT_RESET_KEYS',
+    resetKeys
+  }
+}
+
 export function closePopup () {
   return {
     type: 'ClosePopup'
@@ -243,8 +257,36 @@ export function signIn (username, password, cryptoPassword) {
 export function signUp (username, password, cryptoPassword) {
   return async (dispatch, getState, { hoodie }) => {
     await hoodie.account.signUp({ username, password })
-    await hoodie.cryptoStore.setup(cryptoPassword)
-    await dispatch(signIn(username, password, cryptoPassword))
+    const resetKeys = await hoodie.cryptoStore.setup(cryptoPassword)
+
+    await dispatch(
+      signIn(username, password, cryptoPassword)
+    )
+
+    dispatch(showResetKeys(resetKeys))
+  }
+}
+
+/**
+ * Changes the encryption-password and unlocks the viewer.
+ * @param {string} resetKey One of the 10 reset-keys
+ * @param {string} newPassword The new encryption password
+ * @throws Will throw an error if the reset-key is wrong.
+ */
+export function changeEncryptionPassword (resetKey, newPassword) {
+  return async (dispatch, getState, { hoodie }) => {
+    await hoodie.store.sync()
+    const result = await hoodie.cryptoStore.resetPassword(resetKey, newPassword)
+
+    dispatch({
+      type: 'ViewerAccountUnlocked'
+    })
+    dispatch(closePopup())
+
+    dispatch(showResetKeys(result.resetKeys))
+
+    await dispatch(loadSavedGrids())
+    dispatch(loadSavedAvatars())
   }
 }
 

@@ -12,7 +12,8 @@ function getDefault () {
     viewerAccount: {
       loggedIn: false,
       username: '',
-      signInPopup: ''
+      signInPopup: '',
+      popupData: null
     },
     savedAvatars: [],
     savedAvatarsLoaded: false,
@@ -93,10 +94,27 @@ export default function accountReducer (state = getDefault(), action) {
         }
       })
 
+    case 'SHOW_PASSWORD_RESET':
+      return state.mergeDeep({
+        viewerAccount: {
+          signInPopup: 'resetPassword',
+          popupData: action.passwordType
+        }
+      })
+
+    case 'DISPLAY_VIEWER_ACCOUNT_RESET_KEYS':
+      return state.mergeDeep({
+        viewerAccount: {
+          signInPopup: 'resetKeys',
+          popupData: action.resetKeys
+        }
+      })
+
     case 'ClosePopup':
       return state.mergeDeep({
         viewerAccount: {
-          signInPopup: ''
+          signInPopup: '',
+          popupData: null
         }
       })
 
