@@ -4,6 +4,8 @@ import Helmet from 'react-helmet'
 
 import { viewerName } from '../viewerInfo'
 
+import { getIsLoggedIn, getAvatarName } from '../selectors/session'
+
 function HelmetContainer ({ isLoggedIn, selfName }) {
   return <Helmet
     defaultTitle={isLoggedIn
@@ -15,8 +17,8 @@ function HelmetContainer ({ isLoggedIn, selfName }) {
 
 const mapStateToProps = state => {
   return {
-    selfName: state.account.get('avatarName'),
-    isLoggedIn: state.session.get('loggedIn')
+    selfName: getAvatarName(state),
+    isLoggedIn: getIsLoggedIn(state)
   }
 }
 

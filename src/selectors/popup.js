@@ -1,16 +1,17 @@
 import { createSelector } from 'reselect'
 
+import { getIsSignedIn, getIsUnlocked } from './viewer'
 import { getErrorMessage } from './session'
 
 export const selectPopup = createSelector(
   [
-    state => state.account,
+    getIsSignedIn,
+    getIsUnlocked,
+    state => state.account.getIn(['viewerAccount', 'signInPopup']),
     getErrorMessage
   ],
-  (account, sessionError) => {
-    const isUnlocked = account.get('unlocked')
-    const isSignedIn = account.getIn(['viewerAccount', 'loggedIn'])
-    const popup = account.getIn(['viewerAccount', 'signInPopup']) || sessionError
+  (isSignedIn, isUnlocked, signInPopup, sessionError) => {
+    const popup = signInPopup || sessionError
 
     if (popup === 'resetPassword') return popup
 

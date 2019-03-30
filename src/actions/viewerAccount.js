@@ -2,6 +2,14 @@
 
 import { v4 as uuid } from 'uuid'
 
+import {
+  getIsSignedIn,
+  getIsUnlocked,
+  getSavedAvatars,
+  getSavedAvatarsAreLoaded,
+  getSavedGrids,
+  getSavedGridsAreLoaded
+} from '../selectors/viewer'
 import { getIsLoggedIn } from '../selectors/session'
 
 export function didSignIn (did, isUnlocked, username = '') {
@@ -53,7 +61,7 @@ export function saveAvatar (name, grid) {
 
     const avatarIdentifier = `${name.getFullName()}@${gridName}`
 
-    if (getState().account.get('savedAvatars').some(avatar => {
+    if (getSavedAvatars(getState()).some(avatar => {
       return avatar.get('avatarIdentifier') === avatarIdentifier
     })) {
       return Promise.reject(new Error('Avatar already exist!'))
@@ -70,13 +78,13 @@ export function saveAvatar (name, grid) {
 
 export function loadSavedAvatars () {
   return async (dispatch, getState, { hoodie }) => {
-    const account = getState().account
+    const activeState = getState()
 
-    if (!account.getIn(['viewerAccount', 'loggedIn'])) {
+    if (!getIsSignedIn(activeState)) {
       throw new Error('Not signed in to Viewer!')
     }
 
-    if (account.get('savedAvatarsLoaded')) return
+    if (getSavedAvatarsAreLoaded(activeState)) return
 
     const avatarsStore = hoodie.cryptoStore.withIdPrefix('avatars/')
 
@@ -133,7 +141,7 @@ export function saveGrid (newGrid) {
   return (dispatch, getState, { hoodie }) => {
     const name = newGrid.name.trim()
 
-    if (getState().account.get('savedGrids').some(value => value.get('name') === name)) {
+    if (getSavedGrids(getState()).some(value => value.get('name') === name)) {
       return Promise.reject(new Error('Grid already exist!'))
     }
 
@@ -146,13 +154,13 @@ export function saveGrid (newGrid) {
 
 export function loadSavedGrids () {
   return async (dispatch, getState, { hoodie }) => {
-    const account = getState().account
+    const activeState = getState()
 
-    if (!account.getIn(['viewerAccount', 'loggedIn'])) {
+    if (!getIsSignedIn(activeState)) {
       throw new Error('Not signed in to Viewer!')
     }
 
-    if (account.get('savedGridsLoaded')) return
+    if (getSavedGridsAreLoaded(activeState)) return
 
     const gridsStore = hoodie.cryptoStore.withIdPrefix('grids/')
 
@@ -209,11 +217,11 @@ export function isSignedIn () {
 export function unlock (cryptoPassword) {
   return async (dispatch, getState, { hoodie }) => {
     const activeState = getState()
-    if (activeState.account.get('unlocked')) {
+    if (getIsUnlocked(activeState)) {
       return
     }
 
-    if (!activeState.account.getIn(['viewerAccount', 'loggedIn'])) {
+    if (!getIsSignedIn(activeState)) {
       throw new Error('Not signed in!')
     }
 

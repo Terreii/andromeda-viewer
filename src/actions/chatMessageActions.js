@@ -6,6 +6,8 @@ import { getValueOf, getStringValueOf } from '../network/msgGetters'
 import { v4 as uuid } from 'uuid'
 
 import { getShouldSaveChat, getLocalChat, getIMChats } from '../selectors/chat'
+import { getIsSignedIn } from '../selectors/viewer'
+import { getAvatarDataSaveId } from '../selectors/session'
 
 /*
  *
@@ -80,10 +82,9 @@ export function sendInstantMessage (text, to, id, dialog = 0) {
         ]
       }, true)
 
-      const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
       const chatSaveId = getIMChats(activeState).getIn([id, 'saveId'])
       const msg = {
-        _id: `${avatarDataSaveId}/imChats/${chatSaveId}/${time.toJSON()}`,
+        _id: `${getAvatarDataSaveId(activeState)}/imChats/${chatSaveId}/${time.toJSON()}`,
         chatUUID: id,
         sessionID,
         fromId: agentID,
@@ -125,7 +126,7 @@ export function receiveChatFromSimulator (msg) {
     dispatch({
       type: msg.name,
       msg: {
-        _id: `${getState().account.get('avatarDataSaveId')}/localchat/${time.toJSON()}`,
+        _id: `${getAvatarDataSaveId(getState())}/localchat/${time.toJSON()}`,
 
         fromName: getStringValueOf(msg, 'ChatData', 'FromName'),
         sourceID: getValueOf(msg, 'ChatData', 'SourceID'),
@@ -254,7 +255,7 @@ export function receiveIM (message) {
     const activeState = getState()
     const chatSaveId = getIMChats(activeState).getIn([IMmsg.chatUUID, 'saveId'])
 
-    const saveId = activeState.account.get('avatarDataSaveId')
+    const saveId = getAvatarDataSaveId(activeState)
     IMmsg._id = `${saveId}/imChats/${chatSaveId}/${new Date(IMmsg.time).toJSON()}`
 
     dispatch({
@@ -407,12 +408,11 @@ function createNewIMChat (dialog, chatUUID, target, name) {
     // Stop if the chat already exists.
     if (getIMChats(activeState).has(chatUUID)) return
 
-    const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
     const saveId = uuid()
 
     dispatch({
       type: 'CreateNewIMChat',
-      _id: `${avatarDataSaveId}/imChatsInfos/${saveId}`,
+      _id: `${getAvatarDataSaveId(activeState)}/imChatsInfos/${saveId}`,
       chatType: type,
       chatUUID,
       saveId,
@@ -473,9 +473,9 @@ export function loadIMChats () {
   return (dispatch, getState, { hoodie }) => {
     const activeState = getState()
     // Only load the history if the user is logged into a viewer-account.
-    if (!activeState.account.getIn(['viewerAccount', 'loggedIn'])) return
+    if (!getIsSignedIn(activeState)) return
 
-    const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
+    const avatarDataSaveId = getAvatarDataSaveId(activeState)
     const store = hoodie.cryptoStore.withIdPrefix(`${avatarDataSaveId}/imChatsInfos/`)
     store.findAll().then(result => {
       dispatch({
@@ -506,10 +506,10 @@ export function getIMHistory (chatUUID, chatSaveId) {
       chatUUID
     })
 
-    const avatarDataSaveId = getState().account.get('avatarDataSaveId')
-    const chatSavePrefix = `${avatarDataSaveId}/imChats/${chatSaveId}`
+    const activeState = getState()
+    const chatSavePrefix = `${getAvatarDataSaveId(activeState)}/imChats/${chatSaveId}`
 
-    const chat = getIMChats(getState()).get(chatUUID)
+    const chat = getIMChats(activeState).get(chatUUID)
     // get the _id of the oldest loaded msg
     const hasAMessage = chat.hasIn(['messages', 0, '_id'])
     const firstMsgId = hasAMessage

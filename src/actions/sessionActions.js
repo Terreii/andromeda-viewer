@@ -10,6 +10,7 @@ import { getAllFriendsDisplayNames } from './friendsActions'
 import { fetchSeedCapabilities } from './llsd'
 import connectCircuit from './connectCircuit'
 
+import { getSavedAvatars, getSavedGrids } from '../selectors/viewer'
 import { getIsLoggedIn } from '../selectors/session'
 
 // Actions for the session of an avatar
@@ -76,7 +77,7 @@ export function login (avatarName, password, grid, save, addAvatar) {
     }
 
     // save grid if it is new (do not save if login did fail)
-    const gridExists = getState().account.get('savedGrids').some(savedGrid => {
+    const gridExists = getSavedGrids(getState()).some(savedGrid => {
       return savedGrid.get('name') === grid.name
     })
     if (save && addAvatar && !gridExists) {
@@ -88,7 +89,7 @@ export function login (avatarName, password, grid, save, addAvatar) {
 
     const avatarData = save && addAvatar
       ? await dispatch(saveAvatar(avatarName, grid.name)) // adding new avatars
-      : getState().account.get('savedAvatars').reduce((last, avatar) => { // for saved avatars
+      : getSavedAvatars(getState()).reduce((last, avatar) => { // for saved avatars
         if (last != null) return last
 
         if (avatar.get('avatarIdentifier') === avatarIdentifier) {

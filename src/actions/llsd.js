@@ -1,7 +1,7 @@
 import LLSD from '../llsd'
 import caps from './capabilities.json'
 
-import { getIsLoggedIn, getAvatarIdentifier } from '../selectors/session'
+import { getAvatarIdentifier } from '../selectors/session'
 
 async function parseLLSD (response) {
   const body = await response.text()
@@ -59,7 +59,7 @@ async function * eventQueueGet (getState) {
   const avatarIdentifier = getAvatarIdentifier(getState())
   let ack = 0
 
-  while (getIsLoggedIn(getState()) && getAvatarIdentifier(getState()) === avatarIdentifier) {
+  while (getAvatarIdentifier(getState()) === avatarIdentifier) {
     let response
     try {
       response = await minimalFetchLLSD('POST', url, { done: false, ack })
