@@ -3,17 +3,15 @@ import Immutable from 'immutable'
 function getDefault () {
   const defaultData = {
     avatarIdentifier: '',
-    avatarDataSaveId: '',
     sync: false,
     unlocked: false,
-    viewerAccount: {
-      loggedIn: false,
-      username: '',
-      signInPopup: '',
-      popupData: null
-    },
+    loggedIn: false,
+    username: '',
+    signInPopup: '',
+    popupData: null,
     savedAvatars: [],
     savedAvatarsLoaded: false,
+    anonymAvatarData: null,
     savedGrids: [
       {
         name: 'Second Life',
@@ -42,25 +40,33 @@ export default function accountReducer (state = getDefault(), action) {
       })
 
     case 'didLogin':
-      return state.merge({
-        avatarIdentifier: action.avatarIdentifier,
-        avatarDataSaveId: action.dataSaveId
-      })
+      if (action.save) {
+        return state.merge({
+          avatarIdentifier: action.avatarIdentifier
+        })
+      } else { // Anonym
+        return state.merge({
+          avatarIdentifier: action.avatarIdentifier,
+          anonymAvatarData: Immutable.Map({
+            grid: action.grid.name,
+            name: action.name.getFullName(),
+            avatarIdentifier: action.avatarIdentifier,
+            dataSaveId: action.dataSaveId
+          })
+        })
+      }
 
     case 'loginDidFail':
       return state.merge({
         avatarIdentifier: '',
-        avatarDataSaveId: '',
         sync: false
       })
 
     case 'ViewerAccountLogInStatus':
-      return state.mergeDeep({
+      return state.merge({
         unlocked: action.isUnlocked == null ? state.get('unlocked') : action.isUnlocked,
-        viewerAccount: {
-          loggedIn: action.isLoggedIn,
-          username: action.username
-        }
+        loggedIn: action.isLoggedIn,
+        username: action.username
       })
 
     case 'ViewerAccountSignOut':
@@ -73,40 +79,30 @@ export default function accountReducer (state = getDefault(), action) {
 
     case 'ShowSignInPopup':
       return state.mergeDeep({
-        viewerAccount: {
-          signInPopup: action.popup
-        }
+        signInPopup: action.popup
       })
 
     case 'ShowSignOutPopup':
       return state.mergeDeep({
-        viewerAccount: {
-          signInPopup: 'signOut'
-        }
+        signInPopup: 'signOut'
       })
 
     case 'SHOW_PASSWORD_RESET':
       return state.mergeDeep({
-        viewerAccount: {
-          signInPopup: 'resetPassword',
-          popupData: action.passwordType
-        }
+        signInPopup: 'resetPassword',
+        popupData: action.passwordType
       })
 
     case 'DISPLAY_VIEWER_ACCOUNT_RESET_KEYS':
       return state.mergeDeep({
-        viewerAccount: {
-          signInPopup: 'resetKeys',
-          popupData: action.resetKeys
-        }
+        signInPopup: 'resetKeys',
+        popupData: action.resetKeys
       })
 
     case 'ClosePopup':
       return state.mergeDeep({
-        viewerAccount: {
-          signInPopup: '',
-          popupData: null
-        }
+        signInPopup: '',
+        popupData: null
       })
 
     case 'AvatarSaved':
@@ -168,7 +164,7 @@ export default function accountReducer (state = getDefault(), action) {
     case 'UserWasKicked':
       return state.merge({
         avatarIdentifier: '',
-        avatarDataSaveId: '',
+        anonymAvatarData: null,
         sync: false
       })
 

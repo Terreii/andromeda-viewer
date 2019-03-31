@@ -16,7 +16,7 @@ import { getIsLoggedIn, getAgentId, getSessionId } from '../selectors/session'
 // Actions for the session of an avatar
 
 // Logon the user. It will post using fetch to the server.
-export function login (avatarName, password, grid, save, addAvatar) {
+export function login (avatarName, password, grid, save, isNew) {
   return async (dispatch, getState, extra) => {
     if (getIsLoggedIn(getState())) throw new Error('There is already an avatar logged in!')
 
@@ -80,14 +80,11 @@ export function login (avatarName, password, grid, save, addAvatar) {
     const gridExists = getSavedGrids(getState()).some(savedGrid => {
       return savedGrid.get('name') === grid.name
     })
-    if (save && addAvatar && !gridExists) {
+    if (save && isNew && !gridExists) {
       await dispatch(saveGrid(grid))
     }
 
-    // Set the active circuit and connect to sim
-    dispatch(connectToSim(body, await circuit))
-
-    const avatarData = save && addAvatar
+    const avatarData = save && isNew
       ? await dispatch(saveAvatar(avatarName, grid.name)) // adding new avatars
       : getSavedAvatars(getState()).reduce((last, avatar) => { // for saved avatars
         if (last != null) return last
@@ -99,13 +96,14 @@ export function login (avatarName, password, grid, save, addAvatar) {
         }
       }, null)
 
-    const localChatHistory = !addAvatar && save
+    const localChatHistory = !isNew && save
       ? await dispatch(getLocalChatHistory(avatarData.dataSaveId))
       : []
 
     dispatch({
       type: 'didLogin',
       name: avatarName,
+      save,
       avatarIdentifier: avatarData != null ? avatarData.avatarIdentifier : avatarIdentifier,
       dataSaveId: avatarData != null ? avatarData.dataSaveId : uuid(),
       grid,
@@ -116,6 +114,10 @@ export function login (avatarName, password, grid, save, addAvatar) {
     })
 
     dispatch(loadIMChats())
+
+    // Set the active circuit and connect to sim
+    dispatch(connectToSim(body, await circuit))
+
     dispatch(fetchSeedCapabilities(body['seed_capability']))
       .then(() => dispatch(getAllFriendsDisplayNames()))
 

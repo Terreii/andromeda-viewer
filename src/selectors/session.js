@@ -2,9 +2,27 @@
 
 import { createSelector } from 'reselect'
 
+import { getSavedAvatars, getAnonymAvatarData } from './viewer'
+
 export const getAvatarIdentifier = state => state.account.get('avatarIdentifier')
 
-export const getAvatarDataSaveId = state => state.account.get('avatarDataSaveId')
+export const getCurrentAvatarData = createSelector(
+  [
+    getSavedAvatars,
+    getAnonymAvatarData,
+    getAvatarIdentifier
+  ],
+  (savedAvatars, anonymAvatarData, avatarIdentifier) => anonymAvatarData != null
+    ? anonymAvatarData
+    : savedAvatars.find(avatarData => avatarData.get('avatarIdentifier') === avatarIdentifier)
+)
+
+export const getAvatarDataSaveId = createSelector(
+  [
+    getCurrentAvatarData
+  ],
+  avatarData => avatarData.get('dataSaveId')
+)
 
 export const getErrorMessage = state => state.session.get('error')
 
