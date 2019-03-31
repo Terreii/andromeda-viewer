@@ -141,7 +141,7 @@ export function saveGrid (newGrid) {
   return (dispatch, getState, { hoodie }) => {
     const name = newGrid.name.trim()
 
-    if (getSavedGrids(getState()).some(value => value.get('name') === name)) {
+    if (getSavedGrids(getState()).some(grid => grid.get('name') === name)) {
       return Promise.reject(new Error('Grid already exist!'))
     }
 
@@ -299,14 +299,13 @@ export function changeEncryptionPassword (resetKey, newPassword) {
 }
 
 export function signOut () {
-  return async (dispatch, getState, extra) => {
+  return async (dispatch, getState, { hoodie }) => {
     dispatch(closePopup())
     if (getIsLoggedIn(getState())) {
       // logout if an avatar is still logged in
       const { logout } = await import('./sessionActions')
       await dispatch(logout())
     }
-    const hoodie = extra.hoodie
 
     try {
       await hoodie.account.signOut()

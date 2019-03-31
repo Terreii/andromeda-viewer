@@ -11,7 +11,7 @@ import { fetchSeedCapabilities } from './llsd'
 import connectCircuit from './connectCircuit'
 
 import { getSavedAvatars, getSavedGrids } from '../selectors/viewer'
-import { getIsLoggedIn } from '../selectors/session'
+import { getIsLoggedIn, getAgentId, getSessionId } from '../selectors/session'
 
 // Actions for the session of an avatar
 
@@ -128,7 +128,6 @@ export function logout () {
   return (dispatch, getState, extra) => {
     const circuit = extra.circuit
     const activeState = getState()
-    const session = activeState.session
 
     if (!getIsLoggedIn(activeState)) {
       return Promise.reject(new Error("You aren't logged in!"))
@@ -138,8 +137,8 @@ export function logout () {
       circuit.send('LogoutRequest', {
         AgentData: [
           {
-            AgentID: session.get('agentId'),
-            SessionID: session.get('sessionId')
+            AgentID: getAgentId(activeState),
+            SessionID: getSessionId(activeState)
           }
         ]
       }, true)
@@ -238,9 +237,9 @@ function connectToSim (sessionInfo, circuit) {
 
 function getKicked (msg) {
   return (dispatch, getState, extra) => {
-    const session = getState().session
-    const agentId = session.get('agentId')
-    const sessionId = session.get('sessionId')
+    const activeState = getState()
+    const agentId = getAgentId(activeState)
+    const sessionId = getSessionId(activeState)
     const msgAgentId = getValueOf(msg, 'UserInfo', 0, 'AgentID')
     const msgSessionId = getValueOf(msg, 'UserInfo', 0, 'SessionID')
 
@@ -270,9 +269,9 @@ function afterAvatarSessionEnds () {
 
 function requestAvatarProperties (avatarID) {
   return (dispatch, getState, { circuit }) => {
-    const session = getState().session
-    const agentID = session.get('agentId')
-    const sessionID = session.get('sessionId')
+    const activeState = getState()
+    const agentID = getAgentId(activeState)
+    const sessionID = getSessionId(activeState)
 
     circuit.send('AvatarPropertiesRequest', {
       AgentData: [

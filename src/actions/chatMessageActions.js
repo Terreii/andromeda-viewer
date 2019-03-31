@@ -7,7 +7,8 @@ import { v4 as uuid } from 'uuid'
 
 import { getShouldSaveChat, getLocalChat, getIMChats } from '../selectors/chat'
 import { getIsSignedIn } from '../selectors/viewer'
-import { getAvatarDataSaveId } from '../selectors/session'
+import { getAvatarDataSaveId, getAgentId, getSessionId } from '../selectors/session'
+import { getAvatarNameById } from '../selectors/names'
 
 /*
  *
@@ -19,12 +20,12 @@ export function sendLocalChatMessage (text, type, channel) {
   // Sends messages from the local chat
   // No UI update, because the server/sim will send it
   return (dispatch, getState, { circuit }) => {
-    const session = getState().session
+    const activeState = getState()
     circuit.send('ChatFromViewer', {
       AgentData: [
         {
-          AgentID: session.get('agentId'),
-          SessionID: session.get('sessionId')
+          AgentID: getAgentId(activeState),
+          SessionID: getSessionId(activeState)
         }
       ],
       ChatData: [
@@ -46,12 +47,12 @@ export function sendInstantMessage (text, to, id, dialog = 0) {
 
       const chat = getIMChats(activeState).find(chat => chat.get('chatUUID') === id)
 
-      const agentID = session.get('agentId')
-      const sessionID = session.get('sessionId')
+      const agentID = getAgentId(activeState)
+      const sessionID = getSessionId(activeState)
       const parentEstateID = session.getIn(['regionInfo', 'ParentEstateID'])
       const regionID = session.getIn(['regionInfo', 'regionID'])
       const position = session.getIn(['position', 'position'])
-      const fromAgentName = activeState.names.getIn(['names', agentID]).getFullName()
+      const fromAgentName = getAvatarNameById(activeState, agentID).getFullName()
       const binaryBucket = dialog === 17
         ? chat.get('name')
         : Buffer.from([])
@@ -378,11 +379,11 @@ export function getLocalChatHistory (avatarDataSaveId) {
 export function startNewIMChat (dialog, targetId, name, activate = false) {
   return async (dispatch, getState) => {
     const chatType = getIMChatTypeOfDialog(dialog)
-    const chatUUID = calcChatUUID(chatType, targetId, getState().account.get('agentId'))
+    const chatUUID = calcChatUUID(chatType, targetId, getAgentId(getState()))
 
     if (chatType === 'personal') {
       try {
-        name = getState().names.getIn(['names', targetId.toString()]).getName()
+        name = getAvatarNameById(getState(), targetId.toString()).getName()
       } catch (error) {
         console.error(error)
       }

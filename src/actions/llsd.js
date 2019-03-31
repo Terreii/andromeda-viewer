@@ -1,7 +1,7 @@
 import LLSD from '../llsd'
 import caps from './capabilities.json'
 
-import { getAvatarIdentifier } from '../selectors/session'
+import { getAvatarIdentifier, getEventQueueGetUrl } from '../selectors/session'
 
 async function parseLLSD (response) {
   const body = await response.text()
@@ -55,7 +55,7 @@ export function fetchSeedCapabilities (url) {
 
 // http://wiki.secondlife.com/wiki/EventQueueGet
 async function * eventQueueGet (getState) {
-  const url = getState().session.get('eventQueueGetUrl')
+  const url = getEventQueueGetUrl(getState())
   const avatarIdentifier = getAvatarIdentifier(getState())
   let ack = 0
 
