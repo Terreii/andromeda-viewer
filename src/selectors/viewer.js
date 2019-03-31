@@ -5,6 +5,8 @@ export const getIsSignedIn = state => state.account.getIn(['viewerAccount', 'log
 
 export const getIsUnlocked = state => state.account.get('unlocked')
 
+export const getUserName = state => state.account.getIn(['viewerAccount', 'username'])
+
 export const getSavedAvatars = state => state.account.get('savedAvatars')
 
 export const getSavedAvatarsAreLoaded = state => state.account.get('savedAvatarsLoaded')
