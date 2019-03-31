@@ -1,7 +1,8 @@
 import LLSD from '../llsd'
 import caps from './capabilities.json'
 
-import { getAvatarIdentifier, getEventQueueGetUrl } from '../selectors/session'
+import { getAvatarIdentifier } from '../selectors/session'
+import { getEventQueueGetUrl } from '../selectors/region'
 
 async function parseLLSD (response) {
   const body = await response.text()

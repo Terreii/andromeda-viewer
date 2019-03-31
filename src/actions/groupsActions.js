@@ -4,25 +4,27 @@ import { startNewIMChat } from './chatMessageActions'
 
 import { getAgentId, getSessionId } from '../selectors/session'
 import { getAvatarNameById } from '../selectors/names'
+import { getPosition } from '../selectors/region'
 
 export function startGroupChat (groups) {
   return (dispatch, getState, { circuit }) => {
     const activeState = getState()
-    const session = activeState.session
 
     const agentID = getAgentId(activeState)
-    const position = session.getIn(['position', 'position'])
+    const AgentData = [
+      {
+        AgentID: agentID,
+        SessionID: getSessionId(activeState)
+      }
+    ]
+    const position = getPosition(activeState)
+    const agentName = getAvatarNameById(activeState, agentID).getFullName()
     const binaryBucket = Buffer.from([])
     const time = new Date()
 
     groups.forEach(group => {
       circuit.send('ImprovedInstantMessage', {
-        AgentData: [
-          {
-            AgentID: agentID,
-            SessionID: getSessionId(activeState)
-          }
-        ],
+        AgentData,
         MessageBlock: [
           {
             FromGroup: false,
@@ -34,7 +36,7 @@ export function startGroupChat (groups) {
             Dialog: 15,
             ID: group.id,
             Timestamp: Math.floor(time.getTime() / 1000),
-            FromAgentName: getAvatarNameById(activeState, agentID).getFullName(),
+            FromAgentName: agentName,
             Message: Buffer.from([]),
             BinaryBucket: binaryBucket
           }

@@ -2,13 +2,15 @@
  * Every local chat and IM related action
  */
 
-import { getValueOf, getStringValueOf } from '../network/msgGetters'
 import { v4 as uuid } from 'uuid'
+
+import { getValueOf, getStringValueOf } from '../network/msgGetters'
 
 import { getShouldSaveChat, getLocalChat, getIMChats } from '../selectors/chat'
 import { getIsSignedIn } from '../selectors/viewer'
 import { getAvatarDataSaveId, getAgentId, getSessionId } from '../selectors/session'
 import { getAvatarNameById } from '../selectors/names'
+import { getRegionId, getParentEstateID, getPosition } from '../selectors/region'
 
 /*
  *
@@ -43,15 +45,14 @@ export function sendInstantMessage (text, to, id, dialog = 0) {
   return async (dispatch, getState, { circuit }) => {
     try {
       const activeState = getState()
-      const session = activeState.session
 
       const chat = getIMChats(activeState).find(chat => chat.get('chatUUID') === id)
 
       const agentID = getAgentId(activeState)
       const sessionID = getSessionId(activeState)
-      const parentEstateID = session.getIn(['regionInfo', 'ParentEstateID'])
-      const regionID = session.getIn(['regionInfo', 'regionID'])
-      const position = session.getIn(['position', 'position'])
+      const parentEstateID = getParentEstateID(activeState)
+      const regionID = getRegionId(activeState)
+      const position = getPosition(activeState)
       const fromAgentName = getAvatarNameById(activeState, agentID).getFullName()
       const binaryBucket = dialog === 17
         ? chat.get('name')
