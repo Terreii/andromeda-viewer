@@ -2,13 +2,10 @@ import Immutable from 'immutable'
 
 function getDefault () {
   const defaultData = {
-    avatarName: '',
-    loggedIn: false,
     avatarIdentifier: '',
     avatarDataSaveId: '',
     sync: false,
     unlocked: false,
-    agentId: '',
     viewerAccount: {
       loggedIn: false,
       username: '',
@@ -40,24 +37,18 @@ export default function accountReducer (state = getDefault(), action) {
   switch (action.type) {
     case 'startLogin':
       return state.merge({
-        avatarName: action.name,
         avatarIdentifier: action.avatarIdentifier,
         sync: action.sync
       })
 
     case 'didLogin':
       return state.merge({
-        avatarName: action.name,
-        loggedIn: true,
         avatarIdentifier: action.avatarIdentifier,
-        avatarDataSaveId: action.dataSaveId,
-        agentId: action.uuid
+        avatarDataSaveId: action.dataSaveId
       })
 
     case 'loginDidFail':
       return state.merge({
-        avatarName: '',
-        loggedIn: false,
         avatarIdentifier: '',
         avatarDataSaveId: '',
         sync: false
@@ -176,12 +167,9 @@ export default function accountReducer (state = getDefault(), action) {
     case 'DidLogout':
     case 'UserWasKicked':
       return state.merge({
-        avatarName: '',
-        loggedIn: false,
         avatarIdentifier: '',
         avatarDataSaveId: '',
-        sync: false,
-        agentId: ''
+        sync: false
       })
 
     default:

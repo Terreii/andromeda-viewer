@@ -9,7 +9,7 @@ import { getValueOf, getStringValueOf } from '../network/msgGetters'
 import { getShouldSaveChat, getLocalChat, getIMChats } from '../selectors/chat'
 import { getIsSignedIn } from '../selectors/viewer'
 import { getAvatarDataSaveId, getAgentId, getSessionId } from '../selectors/session'
-import { getAvatarNameById } from '../selectors/names'
+import { getAvatarNameById, getOwnAvatarName } from '../selectors/names'
 import { getRegionId, getParentEstateID, getPosition } from '../selectors/region'
 
 /*
@@ -53,7 +53,7 @@ export function sendInstantMessage (text, to, id, dialog = 0) {
       const parentEstateID = getParentEstateID(activeState)
       const regionID = getRegionId(activeState)
       const position = getPosition(activeState)
-      const fromAgentName = getAvatarNameById(activeState, agentID).getFullName()
+      const fromAgentName = getOwnAvatarName(activeState).getFullName()
       const binaryBucket = dialog === 17
         ? chat.get('name')
         : Buffer.from([])

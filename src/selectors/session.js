@@ -1,8 +1,6 @@
 // Selectors for general session-data
 
-export const getIsLoggedIn = state => state.session.get('loggedIn')
-
-export const getAvatarName = state => state.account.get('avatarName')
+import { createSelector } from 'reselect'
 
 export const getAvatarIdentifier = state => state.account.get('avatarIdentifier')
 
@@ -13,3 +11,13 @@ export const getErrorMessage = state => state.session.get('error')
 export const getAgentId = state => state.session.get('agentId')
 
 export const getSessionId = state => state.session.get('sessionId')
+
+export const getIsLoggedIn = createSelector(
+  [
+    getAvatarIdentifier,
+    getSessionId
+  ],
+  (avatarIdentifier, sessionId) => avatarIdentifier != null &&
+    avatarIdentifier.length > 0 &&
+    sessionId != null
+)

@@ -3,22 +3,21 @@
 import { startNewIMChat } from './chatMessageActions'
 
 import { getAgentId, getSessionId } from '../selectors/session'
-import { getAvatarNameById } from '../selectors/names'
+import { getOwnAvatarName } from '../selectors/names'
 import { getPosition } from '../selectors/region'
 
 export function startGroupChat (groups) {
   return (dispatch, getState, { circuit }) => {
     const activeState = getState()
 
-    const agentID = getAgentId(activeState)
     const AgentData = [
       {
-        AgentID: agentID,
+        AgentID: getAgentId(activeState),
         SessionID: getSessionId(activeState)
       }
     ]
     const position = getPosition(activeState)
-    const agentName = getAvatarNameById(activeState, agentID).getFullName()
+    const agentName = getOwnAvatarName(activeState).getFullName()
     const binaryBucket = Buffer.from([])
     const time = new Date()
 

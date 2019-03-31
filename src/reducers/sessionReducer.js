@@ -2,7 +2,7 @@ import { Map } from 'immutable'
 
 import { getValueOf, getValuesOf } from '../network/msgGetters'
 
-export default function SessionReducer (state = Map({ loggedIn: false, error: null }), action) {
+export default function SessionReducer (state = Map({ error: null }), action) {
   switch (action.type) {
     case 'didLogin':
       const sessionInfo = Object.keys(action.sessionInfo).reduce((info, key) => {
@@ -28,7 +28,6 @@ export default function SessionReducer (state = Map({ loggedIn: false, error: nu
             return info
         }
       }, {})
-      sessionInfo.loggedIn = true
       sessionInfo.position = Map({
         position: [],
         lookAt: JSON.parse(action.sessionInfo.look_at.replace(/r/gi, ''))
@@ -64,7 +63,6 @@ export default function SessionReducer (state = Map({ loggedIn: false, error: nu
     case 'DidLogout':
     case 'UserWasKicked':
       return Map({
-        loggedIn: false,
         error: action.type === 'UserWasKicked' ? action.reason : null
       })
 

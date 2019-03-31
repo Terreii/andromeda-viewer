@@ -8,7 +8,8 @@ import { logout } from '../actions/sessionActions'
 import { showSignOutPopup, showSignInPopup } from '../actions/viewerAccount'
 
 import { getIsSignedIn, getUserName } from '../selectors/viewer'
-import { getIsLoggedIn, getAvatarName } from '../selectors/session'
+import { getIsLoggedIn } from '../selectors/session'
+import { getOwnAvatarName } from '../selectors/names'
 
 class TopBarContainer extends React.Component {
   constructor () {
@@ -62,7 +63,7 @@ const mapStateToProps = state => {
     isSignedIn: getIsSignedIn(state),
     userName: getUserName(state),
     isLoggedIn: getIsLoggedIn(state),
-    avatarName: getAvatarName(state)
+    avatarName: getOwnAvatarName(state)
   }
 }
 
