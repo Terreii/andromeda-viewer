@@ -1,4 +1,8 @@
+// Selectors for chat (local chat and IMs)
+
 import { createSelector } from 'reselect'
+
+import { getIsSignedIn, getShouldSync } from './viewer'
 
 export const getLocalChat = state => state.localChat
 
@@ -14,7 +18,8 @@ export const getActiveIMChats = createSelector(
 // checks if the chat history should be saved and synced
 export const getShouldSaveChat = createSelector(
   [
-    state => state.account
+    getShouldSync,
+    getIsSignedIn
   ],
-  account => account.get('sync') && account.getIn(['viewerAccount', 'loggedIn'])
+  (sync, isSignedIn) => sync && isSignedIn
 )

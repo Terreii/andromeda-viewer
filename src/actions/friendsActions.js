@@ -1,6 +1,7 @@
 import { fetchLLSD } from './llsd'
 
 import { getAgentId, getSessionId } from '../selectors/session'
+import { getFriends, getFriendById } from '../selectors/people'
 import { getNames, getDisplayNamesURL } from '../selectors/names'
 
 function sendUUIDNameRequest (ids) {
@@ -63,7 +64,7 @@ export function getAllFriendsDisplayNames () {
     const state = getState()
 
     const names = getNames(state)
-    const friendsIds = state.friends
+    const friendsIds = getFriends(state)
       .map(friend => friend.get('id'))
       .push(getAgentId(state)) // Add self
       .filter(id => !names.has(id) || !names.get(id).willHaveDisplayName()) // unknown only
@@ -80,7 +81,7 @@ export function updateRights (friendUUID, changedRights) {
     const state = getState()
 
     // Get friend
-    const friend = state.friends.find(friend => friend.get('id') === id)
+    const friend = getFriendById(state, id)
     if (friend == null) return
 
     const getRight = name => changedRights[name] == null

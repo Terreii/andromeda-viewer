@@ -14,3 +14,5 @@ export const getSavedAvatarsAreLoaded = state => state.account.get('savedAvatars
 export const getSavedGrids = state => state.account.get('savedGrids')
 
 export const getSavedGridsAreLoaded = state => state.account.get('savedGridsLoaded')
+
+export const getShouldSync = state => state.account.get('sync')
