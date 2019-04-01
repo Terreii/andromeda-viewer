@@ -55,11 +55,11 @@ export function closePopup () {
   }
 }
 
-export function saveAvatar (name, grid) {
+export function saveAvatar (name, agentId, grid) {
   return (dispatch, getState, { hoodie }) => {
     const gridName = typeof grid === 'string' ? grid : grid.get('name')
 
-    const avatarIdentifier = `${name.getFullName()}@${gridName}`
+    const avatarIdentifier = `${agentId}@${gridName}`
 
     if (getSavedAvatars(getState()).some(avatar => {
       return avatar.get('avatarIdentifier') === avatarIdentifier

@@ -2,7 +2,6 @@ import Immutable from 'immutable'
 
 function getDefault () {
   const defaultData = {
-    avatarIdentifier: '',
     sync: false,
     unlocked: false,
     loggedIn: false,
@@ -33,20 +32,14 @@ function getDefault () {
 
 export default function accountReducer (state = getDefault(), action) {
   switch (action.type) {
-    case 'startLogin':
-      return state.merge({
-        avatarIdentifier: action.avatarIdentifier,
-        sync: action.sync
-      })
-
     case 'didLogin':
       if (action.save) {
         return state.merge({
-          avatarIdentifier: action.avatarIdentifier
+          sync: action.save
         })
       } else { // Anonym
         return state.merge({
-          avatarIdentifier: action.avatarIdentifier,
+          sync: action.save,
           anonymAvatarData: Immutable.Map({
             grid: action.grid.name,
             name: action.name.getFullName(),
@@ -58,7 +51,6 @@ export default function accountReducer (state = getDefault(), action) {
 
     case 'loginDidFail':
       return state.merge({
-        avatarIdentifier: '',
         sync: false
       })
 
@@ -163,7 +155,6 @@ export default function accountReducer (state = getDefault(), action) {
     case 'DidLogout':
     case 'UserWasKicked':
       return state.merge({
-        avatarIdentifier: '',
         anonymAvatarData: null,
         sync: false
       })

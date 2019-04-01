@@ -4,7 +4,7 @@ import { createSelector } from 'reselect'
 
 import { getSavedAvatars, getAnonymAvatarData } from './viewer'
 
-export const getAvatarIdentifier = state => state.account.get('avatarIdentifier')
+export const getAvatarIdentifier = state => state.session.get('avatarIdentifier')
 
 export const getCurrentAvatarData = createSelector(
   [
@@ -35,7 +35,5 @@ export const getIsLoggedIn = createSelector(
     getAvatarIdentifier,
     getSessionId
   ],
-  (avatarIdentifier, sessionId) => avatarIdentifier != null &&
-    avatarIdentifier.length > 0 &&
-    sessionId != null
+  (avatarIdentifier, sessionId) => avatarIdentifier != null && sessionId != null
 )

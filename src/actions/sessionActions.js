@@ -20,13 +20,10 @@ export function login (avatarName, password, grid, save, isNew) {
   return async (dispatch, getState, extra) => {
     if (getIsLoggedIn(getState())) throw new Error('There is already an avatar logged in!')
 
-    const avatarIdentifier = `${avatarName.getFullName()}@${grid.name}`
-
     dispatch({
       type: 'startLogin',
       name: avatarName,
       grid,
-      avatarIdentifier,
       sync: save
     })
 
@@ -84,8 +81,10 @@ export function login (avatarName, password, grid, save, isNew) {
       await dispatch(saveGrid(grid))
     }
 
+    const avatarIdentifier = `${body.agent_id}@${grid.name}`
+
     const avatarData = save && isNew
-      ? await dispatch(saveAvatar(avatarName, grid.name)) // adding new avatars
+      ? await dispatch(saveAvatar(avatarName, body.agent_id, grid.name)) // adding new avatars
       : getSavedAvatars(getState()).reduce((last, avatar) => { // for saved avatars
         if (last != null) return last
 
