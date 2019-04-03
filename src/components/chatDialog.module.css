@@ -1,0 +1,26 @@
+/*
+ * Styles for Chat Dialog
+ */
+
+.Container {
+  margin: 0.3em;
+  display: flex;
+  flex-direction: column;
+}
+
+.InputRow {
+  margin: .4em;
+  display: flex;
+  flex-direction: row;
+}
+
+.SendButton {
+  composes: PrimaryButton from "./formElements.module.css";
+  flex: 1 0 auto;
+}
+
+.TextBox {
+  composes: Input from "./formElements.module.css";
+  flex: 4 0 auto;
+  margin-right: 0.5em;
+}

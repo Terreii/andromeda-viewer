@@ -12,6 +12,7 @@ import FriendsList from './friendsList'
 import GroupsList from './groupsList'
 
 import 'rc-tabs/assets/index.css'
+import './chatBox.css'
 
 export default function ChatBox (props) {
   const names = props.names
