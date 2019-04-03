@@ -1,0 +1,50 @@
+.Container {
+  padding: 1em;
+}
+
+.Title {
+  font-size: 120%;
+  border-bottom: 1px solid grey;
+  margin: 0px;
+}
+
+.List {
+  list-style: none;
+  padding-left: 1em;
+  max-width: 15cm;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.Item {
+  display: flex;
+  flex-direction: row;
+  padding: 0.2em;
+  border-radius: 0.2em;
+}
+.Item:nth-child(even) {
+  background-color: rgb(173, 173, 173);
+}
+
+.Name {
+  flex: auto;
+}
+
+.ListItemInput {
+  flex: 20px 0 0;
+  border: 0px;
+  background: rgba(0, 0, 0, 0);
+}
+
+.SkipToContentLink {
+  display: block;
+  position: absolute;
+  left: -999px;
+  top: -999px;
+}
+.SkipToContentLink:focus {
+  position: static;
+  padding: 3px;
+  background: #ffc;
+  border:1px solid #900;
+}
