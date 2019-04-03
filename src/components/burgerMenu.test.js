@@ -61,10 +61,10 @@ test('click handling', () => {
     }}
   />)
 
-  expect(menu.children().length).toBe(3)
+  expect(menu.children().length).toBe(2)
 
-  menu.childAt(1).simulate('click') // viewer sign in
-  menu.childAt(2).simulate('click') // viewer sign up
+  menu.childAt(0).simulate('click') // viewer sign in
+  menu.childAt(1).simulate('click') // viewer sign up
 
   expect(signInCount).toBe(1)
   expect(signUpCount).toBe(1)
@@ -92,11 +92,11 @@ test('click handling', () => {
     }}
   />)
 
-  expect(menuAvatarLoggedIn.children().length).toBe(5)
+  expect(menuAvatarLoggedIn.children().length).toBe(4)
 
-  menuAvatarLoggedIn.childAt(2).simulate('click') // viewer sign in
-  menuAvatarLoggedIn.childAt(3).simulate('click') // viewer sign up
-  menuAvatarLoggedIn.childAt(4).simulate('click') // avatar logout
+  menuAvatarLoggedIn.childAt(1).simulate('click') // viewer sign in
+  menuAvatarLoggedIn.childAt(2).simulate('click') // viewer sign up
+  menuAvatarLoggedIn.childAt(3).simulate('click') // avatar logout
 
   expect(signInCount).toBe(2)
   expect(signUpCount).toBe(2)
@@ -126,9 +126,9 @@ test('click handling', () => {
     }}
   />)
 
-  expect(menuViewerSignedIn.children().length).toBe(3)
+  expect(menuViewerSignedIn.children().length).toBe(2)
 
-  menuViewerSignedIn.childAt(2).simulate('click') // viewer sign out
+  menuViewerSignedIn.childAt(1).simulate('click') // viewer sign out
 
   expect(signInCount).toBe(2)
   expect(signUpCount).toBe(2)
@@ -160,10 +160,10 @@ test('click handling', () => {
     }}
   />)
 
-  expect(menuAllIn.children().length).toBe(5)
+  expect(menuAllIn.children().length).toBe(4)
 
-  menuAllIn.childAt(3).simulate('click') // avatar logout
-  menuAllIn.childAt(4).simulate('click') // viewer sign out
+  menuAllIn.childAt(2).simulate('click') // avatar logout
+  menuAllIn.childAt(3).simulate('click') // viewer sign out
 
   expect(signInCount).toBe(2)
   expect(signUpCount).toBe(2)
