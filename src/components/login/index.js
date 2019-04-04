@@ -1,67 +1,11 @@
 import React from 'react'
-import styled from 'styled-components'
 
 import LoginNewAvatar from './newAvatarLogin'
 import AvatarLogin from './avatarLogin'
 import SignIn from './signIn'
 import AvatarName from '../../avatarName'
 
-const Container = styled.div`
-  overflow: scroll;
-`
-
-const Main = styled.div`
-  background-color: rgb(77, 80, 85);
-  color: rgb(255, 255, 255);
-  border-radius: 1em;
-  padding: 0.8em;
-  max-width: 75vw;
-  margin-top: 2em;
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 0.5em;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-
-  @media (max-width: 750px) {
-    background-color: rgba(0, 0, 0, 0);
-    color: #000;
-    margin-top: 0;
-    padding-top: 0;
-  }
-`
-
-const ErrorOut = styled.p`
-  background-color: rgb(215, 0, 0);
-  border-radius: 0.3em;
-  margin-top: 0.3em;
-  padding: 0.3em;
-  display: ${props => props.show ? '' : 'none'};
-`
-
-const AvatarsList = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: #fff;
-
-  & > div {
-    flex: fit-content;
-  }
-
-  @media (min-width: 750px) {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: start;
-  }
-
-  @supports (display: grid) {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, 25em);
-  }
-`
+import styles from './index.module.css'
 
 export default class LoginForm extends React.Component {
   constructor () {
@@ -162,9 +106,9 @@ export default class LoginForm extends React.Component {
       ? null
       : <SignIn showSignInPopup={this.props.showSignInPopup} />
 
-    return <Container>
-      <Main>
-        <AvatarsList>
+    return <div className={styles.Container}>
+      <main className={styles.Main}>
+        <div className={styles.AvatarList}>
           <LoginNewAvatar
             grids={this.props.grids}
             isSignedIn={this.props.isSignedIn}
@@ -185,12 +129,12 @@ export default class LoginForm extends React.Component {
             isSelected={this.state.selected === avatar.get('avatarIdentifier')}
             onSelect={this._boundSetSelected}
           />)}
-        </AvatarsList>
+        </div>
 
-        <ErrorOut show={this.state.errorMessage.length !== 0}>
+        <p className={styles.ErrorOut} data-show={this.state.errorMessage.length !== 0}>
           {this.state.errorMessage}
-        </ErrorOut>
-      </Main>
-    </Container>
+        </p>
+      </main>
+    </div>
   }
 }

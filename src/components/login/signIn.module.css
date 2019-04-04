@@ -1,0 +1,40 @@
+/*
+ * Styles for signIn section
+ */
+
+.Container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  max-width: 15em;
+  background-color: rgb(110, 110, 110);
+  margin: 1em;
+  padding: 1em;
+  padding-top: 0px;
+  border-radius: .5em;
+  box-shadow: 0.2em 0.2em 0.4em 0.1em black;
+}
+
+.Title {
+  font-size: 130%;
+}
+
+.ButtonRow {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.SignInButton {
+  composes: Button from "../formElements.module.css";
+  font-size: 130%;
+  box-shadow: 2px 2px 5px black;
+}
+
+.Separator {
+  display: block;
+  margin-left: 0.6em;
+  margin-right: 0.6em;
+}
