@@ -1,51 +1,11 @@
 import React from 'react'
-import styled from 'styled-components'
 import PropTypes from 'prop-types'
 
 import Popup from './popup'
-import { Button, FormField, Input, Help } from '../formElements'
 
+import styles from './unlockDialog.module.css'
+import formStyles from '../formElements.module.css'
 import lockIcon from '../../icons/black_lock.svg'
-
-const Content = styled.div`
-  display: flex;
-  flex-direction: column;
-`
-
-const LockItemStyled = styled.img`
-  position: relative;
-  left: -10%;
-  margin: 0px;
-  margin-right: 0.3em;
-`
-
-const PasswordRow = styled(FormField)`
-  margin-top: 0.75em;
-`
-
-const ButtonsRow = styled.div`
-  display: flex;
-  flex-direction: row-reverse;
-  justify-content: space-between;
-  margin-top: .7em;
-  padding: .25em 0em;
-
-  & > button + button {
-    margin-right: 2.75em;
-  }
-`
-
-const ResetButton = styled.button`
-  border: 0px;
-  background: none;
-  color: blue;
-  text-decoration: underline;
-  display: inline;
-  padding: 0;
-  padding-left: 1em;
-  margin: 0;
-  cursor: pointer;
-`
 
 export default class UnlockDialog extends React.Component {
   constructor (props) {
@@ -108,7 +68,8 @@ export default class UnlockDialog extends React.Component {
 
   render () {
     const title = <span>
-      <LockItemStyled
+      <img
+        className={styles.LockItem}
         src={lockIcon}
         height='18'
         width='18'
@@ -118,14 +79,15 @@ export default class UnlockDialog extends React.Component {
     </span>
 
     return <Popup title={title}>
-      <Content>
+      <form className={styles.Content}>
         <span>Please enter your <i>Encryption-Password</i> to unlock this app!</span>
 
-        <PasswordRow>
+        <div className={styles.PasswordRow}>
           <label htmlFor='unlockPasswordIn'>Password:</label>
-          <Input
+          <input
             id='unlockPasswordIn'
             type='password'
+            className={formStyles.Input}
             autoComplete='current-password'
             autoFocus
             disabled={this.state.isUnlocking}
@@ -134,38 +96,44 @@ export default class UnlockDialog extends React.Component {
             onKeyUp={this._boundInput}
             aria-describedby='resetPassword'
           />
-          <Help id='resetPassword'>
+          <small id='resetPassword' className={formStyles.Help}>
             If you did forget your encryption-password?
-            <ResetButton
+            <button
               id='resetPasswordButton'
+              className={styles.ResetButton}
               onClick={() => { this.props.onForgottenPassword('encryption') }}
             >
               Reset password
-            </ResetButton>
-          </Help>
-          <Help id='unlockError' className='Error' hide={this.state.errorText == null} role='alert'>
+            </button>
+          </small>
+          <small
+            id='unlockError'
+            className={formStyles.Error}
+            data-hide={this.state.errorText == null}
+            role='alert'
+          >
             {this.state.errorText}
-          </Help>
-        </PasswordRow>
-        <ButtonsRow>
-          <Button
+          </small>
+        </div>
+        <div className={styles.ButtonsRow}>
+          <button
             id='unlockButton'
-            className='primary'
+            className={formStyles.PrimaryButton}
             onClick={this._boundUnlock}
             disabled={this.state.isUnlocking}
           >
             Unlock
-          </Button>
-          <Button
+          </button>
+          <button
             id='signOutButton'
-            className='danger'
+            className={formStyles.DangerButton}
             onClick={this.props.onSignOut}
             disabled={this.state.isUnlocking}
           >
             Sign out
-          </Button>
-        </ButtonsRow>
-      </Content>
+          </button>
+        </div>
+      </form>
     </Popup>
   }
 }

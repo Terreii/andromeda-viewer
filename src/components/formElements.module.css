@@ -104,6 +104,6 @@
   margin-top: 0.25rem;
 }
 
-.Help[data-hide], .Error[data-hide] {
+.Help[data-hide="true"], .Error[data-hide="true"] {
   display: none;
 }
