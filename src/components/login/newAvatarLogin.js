@@ -1,121 +1,7 @@
 import React from 'react'
-import styled from 'styled-components'
-import { Button, Input, FormField, Help } from '../formElements'
 
-const Container = styled.form`
-  display: flex;
-  flex-direction: column;
-  background-color: rgb(110, 110, 110);
-  margin: 1em;
-  padding: 1em;
-  max-width: calc(100vw - 2em);
-  border-radius: .5em;
-  box-shadow: 0.2em 0.2em 0.4em 0.1em black;
-
-  & > span, & > div {
-    margin-top: .7em;
-  }
-
-  @supports (display: grid) {
-    display: grid;
-    grid-template-areas:
-      "title title title"
-      "name name-input name-input"
-      "password password-input password-input"
-      "grid grid-select grid-select"
-      "new-grid new-grid new-grid"
-      "save save login";
-    grid-gap: .5em;
-    text-align: left;
-
-    & > span, & > div {
-      margin-top: 0em;
-    }
-  }
-
-  &.not-selected {
-    cursor: pointer;
-    background-color: rgb(95, 95, 95);
-    box-shadow: 0.1em 0.1em 0.3em 0px black;
-  }
-
-  &.not-selected:focus {
-    outline: 2px solid highlight;
-  }
-
-  & input:invalid {
-    outline: 1px solid red;
-  }
-`
-
-const Title = styled.h2`
-  grid-area: title;
-  margin: .3em;
-  text-align: center;
-  white-space: nowrap;
-  font-size: 120%;
-
-  @media (max-width: 450px) {
-    white-space: normal;
-  }
-`
-
-const ActiveText = styled.span`
-  grid-area: password / password / password-input-end / password-input-end;
-  text-align: center;
-  color: rgba(255, 255, 255, .7);
-`
-
-const Name = styled.label`
-  grid-area: name;
-`
-
-const NameInput = styled(Input)`
-  grid-area: name-input;
-`
-
-const Password = styled.label`
-  grid-area: password;
-`
-
-const PasswordInput = styled(Input)`
-  grid-area: password-input;
-`
-
-const Grid = styled.label`
-  grid-area: grid;
-`
-
-const GridSelect = styled(Input.withComponent('select'))`
-  grid-area: grid-select;
-`
-
-const SaveNew = styled.div`
-  grid-area: save;
-`
-
-const LoginButton = styled(Button)`
-  grid-area: login;
-`
-
-const NewGridLine = styled.fieldset`
-  grid-area: new-grid;
-  display: ${props => props.show ? 'flex' : 'none'};
-  flex-direction: row;
-  flex-direction: column;
-
-  & > div > label {
-    color: rgba(255, 255, 255, 0.87);
-  }
-
-  & > div {
-    flex: auto;
-  }
-`
-
-const SaveHelp = styled(Help)`
-  color: white;
-`
+import formElementsStyles from '../formElements.module.css'
+import styles from './avatarLogin.module.css'
 
 export default class NewAvatarLogin extends React.Component {
   constructor (props) {
@@ -222,20 +108,20 @@ export default class NewAvatarLogin extends React.Component {
         this.props.onSelect('new')
       }
 
-      return <Container
+      return <form
+        className={`${styles.NewAvatarLoginContainer} ${styles['not-selected']}`}
         onClick={onSetActive}
         onKeyUp={event => {
           if (event.keyCode === 13) {
             onSetActive(event)
           }
         }}
-        className='not-selected'
         tabIndex='0'
       >
-        <Title>Add avatar or login anonymously</Title>
+        <h2 className={styles.Title}>Add avatar or login anonymously</h2>
 
-        <ActiveText>click to add</ActiveText>
-      </Container>
+        <span className={styles.ActiveText}>click to add</span>
+      </form>
     }
 
     const grids = this.props.grids.map(grid => {
@@ -254,17 +140,17 @@ export default class NewAvatarLogin extends React.Component {
       this.state.valid.password &&
       gridIsValid
 
-    return <Container>
-      <Title>
+    return <form className={styles.NewAvatarLoginContainer}>
+      <h2 className={styles.Title}>
         {this.props.isSignedIn ? 'Add avatar or ' : ''}
         login anonymously
-      </Title>
+      </h2>
 
-      <Name htmlFor='newAvatarNameInput'>Avatar:</Name>
-      <NameInput
+      <label className={styles.NewName} htmlFor='newAvatarNameInput'>Avatar:</label>
+      <input
         id='newAvatarNameInput'
         type='text'
-        className='medium'
+        className={styles.NewNameInput}
         value={this.state.name}
         onChange={this._boundName}
         onKeyUp={this._boundKeyUp}
@@ -283,11 +169,11 @@ export default class NewAvatarLogin extends React.Component {
         }}
       />
 
-      <Password htmlFor='newAvatarPasswordInput'>Password:</Password>
-      <PasswordInput
+      <label className={styles.NewPassword} htmlFor='newAvatarPasswordInput'>Password:</label>
+      <input
         id='newAvatarPasswordInput'
         type='password'
-        className='medium'
+        className={styles.PasswordInput}
         value={this.state.password}
         onChange={this._boundPassword}
         onKeyUp={this._boundKeyUp}
@@ -296,47 +182,49 @@ export default class NewAvatarLogin extends React.Component {
         required
       />
 
-      <Grid htmlFor='newAvatarGridSelection'>Grid:</Grid>
-      <GridSelect
+      <label className={styles.Grid} htmlFor='newAvatarGridSelection'>Grid:</label>
+      <select
         id='newAvatarGridSelection'
-        className='medium'
+        className={styles.GridSelection}
         value={this.state.grid}
         onChange={this._boundGridChange}
       >
         {grids}
         <option value=''>+ Add new Grid</option>
-      </GridSelect>
+      </select>
 
-      <NewGridLine show={isNewGrid}>
+      <fieldset className={styles.NewGridLine} data-show={isNewGrid}>
         <legend>Add a new Grid</legend>
 
-        <FormField>
+        <div className={formElementsStyles.FormField}>
           <label htmlFor='newGridNameInput'>Name</label>
-          <Input
+          <input
             id='newGridNameInput'
             type='text'
+            className={formElementsStyles.Input}
             value={this.state.newGridName}
             onChange={this._boundNewGridName}
             onKeyUp={this._boundKeyUp}
             minLength='1'
             required={isNewGrid}
           />
-        </FormField>
-        <FormField>
+        </div>
+        <div className={formElementsStyles.FormField}>
           <label htmlFor='newGridUrlInput'>URL</label>
-          <Input
+          <input
             id='newGridUrlInput'
             type='url'
+            className={formElementsStyles.Input}
             placeholder='https://example.com/login'
             value={this.state.newGridURL}
             onChange={this._boundNewGridURL}
             onKeyUp={this._boundKeyUp}
             required={isNewGrid}
           />
-        </FormField>
-      </NewGridLine>
+        </div>
+      </fieldset>
 
-      <SaveNew>
+      <div className={styles.SaveNew}>
         <input
           id='saveNewAvatarButton'
           type='checkbox'
@@ -347,18 +235,19 @@ export default class NewAvatarLogin extends React.Component {
         />
         <label htmlFor='saveNewAvatarButton'>Save / Add</label>
         <br />
-        <SaveHelp id='saveNewAvatarHelp'>
+        <small id='saveNewAvatarHelp' className={styles.SaveHelp}>
           Save and sync this avatar and it's chats,
           <br />
           after the first successful login.
-        </SaveHelp>
-      </SaveNew>
-      <LoginButton
+        </small>
+      </div>
+      <button
+        className={styles.LoginButton}
         onClick={this._boundLogin}
         disabled={this.props.isLoggingIn || !isValid}
       >
         {this.props.isLoggingIn === this.state.name ? 'Connecting ...' : 'Login'}
-      </LoginButton>
-    </Container>
+      </button>
+    </form>
   }
 }

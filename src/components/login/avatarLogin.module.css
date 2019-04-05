@@ -1,0 +1,187 @@
+/*
+ * Styles for avatarLogin and newAvatarLogin
+ */
+
+/* Common */
+
+.Container {
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(110, 110, 110);
+  margin: 1em;
+  padding: 1em;
+  max-width: calc(100vw - 2em);
+  border-radius: .5em;
+  box-shadow: 0.2em 0.2em 0.4em 0.1em black;
+}
+.Container.not-selected {
+  cursor: pointer;
+  background-color: rgb(95, 95, 95);
+  box-shadow: 0.1em 0.1em 0.3em 0px black;
+}
+.Container.not-selected:focus {
+  outline: 2px solid highlight;
+}
+
+.AvatarLoginContainer {
+  composes: Container;
+}
+
+.NewAvatarLoginContainer {
+  composes: Container;
+}
+.NewAvatarLoginContainer > span,
+.NewAvatarLoginContainer > div {
+  margin-top: .7em;
+}
+
+@supports (display: grid) {
+  .AvatarLoginContainer {
+    display: grid;
+    grid-template-areas:
+      "name name grid-name"
+      "password password-input password-input"
+      ". login .";
+    grid-gap: .5em;
+    text-align: left;
+  }
+
+  @media (max-width: 450px) {
+    .AvatarLoginContainer {
+      grid-template-areas:
+        "name"
+        "grid-name"
+        "password"
+        "password-input"
+        "login";
+      text-align: center;
+    }
+  }
+
+  .NewAvatarLoginContainer {
+    display: grid;
+    grid-template-areas:
+      "title title title"
+      "name name-input name-input"
+      "password password-input password-input"
+      "grid-name grid-select grid-select"
+      "new-grid new-grid new-grid"
+      "save save login";
+    grid-gap: .5em;
+    text-align: left;
+  }
+  .NewAvatarLoginContainer > span,
+  .NewAvatarLoginContainer > div {
+    margin-top: 0em;
+  }
+}
+
+.Container input:invalid {
+  outline: 1px solid red;
+}
+
+.ActiveText {
+  grid-area: password / password / password-input-end / password-input-end;
+  text-align: center;
+  color: rgba(255, 255, 255, .7);
+}
+
+.Grid {
+  grid-area: grid-name;
+  white-space: nowrap;
+}
+
+.PasswordInput {
+  composes: MediumInput from "../formElements.module.css";
+  grid-area: password-input;
+}
+
+/* avatarLogin labels and inputs */
+.Name {
+  grid-area: name;
+  font-size: 140%;
+  white-space: nowrap;
+  margin: 0em;
+}
+
+.PasswordInfo {
+  grid-area: password;
+  margin-top: .5em;
+}
+
+.LoginButton {
+  composes: Button from "../formElements.module.css";
+  grid-area: login;
+}
+.AvatarLoginContainer .LoginButton {
+  margin-top: .7em;
+}
+
+@supports (display: grid) {
+  .PasswordInfo {
+    margin-top: 0em;
+  }
+
+  .LoginButton {
+    margin-top: 0em;
+  }
+}
+
+/* newAvatarLogin */
+
+.Title {
+  grid-area: title;
+  margin: .3em;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 120%;
+}
+
+@media (max-width: 450px) {
+  .Title {
+    white-space: normal;
+  }
+}
+
+.NewName {
+  grid-area: name;
+}
+
+.NewNameInput {
+  composes: MediumInput from "../formElements.module.css";
+  grid-area: name-input;
+}
+
+.NewPassword {
+  grid-area: password;
+}
+
+.GridSelection {
+  composes: MediumInput from "../formElements.module.css";
+  grid-area: grid-select;
+}
+
+.NewGridLine {
+  grid-area: new-grid;
+  display: none;
+  flex-direction: row;
+  flex-direction: column;
+}
+.NewGridLine[data-show="true"] {
+  display: flex;
+}
+.NewGridLine > div > label {
+  color: rgba(255, 255, 255, 0.87);
+}
+.NewGridLine > div {
+  flex: auto;
+}
+
+.SaveNew {
+  grid-area: save;
+}
+
+.SaveHelp {
+  composes: Help from "../formElements.module.css";
+  color: #fff;
+}
