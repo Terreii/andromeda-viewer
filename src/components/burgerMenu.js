@@ -83,37 +83,41 @@ const GlobalStyles = createGlobalStyle`
 
 const SlideMenu = reduxBurgerMenu(Menu)
 
-export default function BurgerMenu ({ account, signIn, signUp, logout, signOut }) {
-  const avatarLoggedIn = account.get('loggedIn')
-  const avatarName = account.get('avatarName')
-  const viewerLoggedIn = account.getIn(['viewerAccount', 'loggedIn'])
-  const username = account.getIn(['viewerAccount', 'username'])
-
+export default function BurgerMenu ({
+  isSignedIn,
+  userName,
+  isLoggedIn,
+  avatarName,
+  signIn,
+  signUp,
+  logout,
+  signOut
+}) {
   return <SlideMenu>
     <GlobalStyles />
 
-    {avatarLoggedIn ? <MenuText>{`Hello ${avatarName}`}</MenuText> : null}
+    {isLoggedIn ? <MenuText>{`Hello ${avatarName}`}</MenuText> : null}
 
-    {viewerLoggedIn
-      ? <MenuText>{`Hello ${username}`}</MenuText>
+    {isSignedIn
+      ? <MenuText>{`Hello ${userName}`}</MenuText>
       : <MenuButton onClick={signIn}>Sign into Andromeda</MenuButton>
     }
 
-    {viewerLoggedIn
+    {isSignedIn
       ? null
       : <MenuButton className='menu-item' onClick={signUp}>
         Sign up to Andromeda
       </MenuButton>
     }
 
-    {avatarLoggedIn
+    {isLoggedIn
       ? <LogoutButton className='menu-item' onClick={logout}>
         log out
       </LogoutButton>
       : null
     }
 
-    {viewerLoggedIn
+    {isSignedIn
       ? <LogoutButton className='menu-item' onClick={signOut}>
         Log out from Viewer
       </LogoutButton>

@@ -26,6 +26,11 @@ import {
 } from '../actions/viewerAccount'
 import { login } from '../actions/sessionActions'
 
+import {
+  getIsSignedIn,
+  getSavedAvatars,
+  getSavedGrids
+} from '../selectors/viewer'
 import { getIsLoggedIn } from '../selectors/session'
 import { selectPopup, selectPopupData } from '../selectors/popup'
 
@@ -72,15 +77,11 @@ class App extends React.PureComponent {
 }
 
 const mapStateToProps = state => {
-  const avatars = state.account.get('savedAvatars')
-  const grids = state.account.get('savedGrids')
-  const isSignedIn = state.account.getIn(['viewerAccount', 'loggedIn'])
-
   return {
-    avatars,
-    grids,
+    avatars: getSavedAvatars(state),
+    grids: getSavedGrids(state),
     isLoggedIn: getIsLoggedIn(state), // Avatar session
-    isSignedIn, // Viewer account
+    isSignedIn: getIsSignedIn(state), // Viewer account
     popup: selectPopup(state),
     popupData: selectPopupData(state)
   }

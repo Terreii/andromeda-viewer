@@ -2,15 +2,13 @@ import { createSelector } from 'reselect'
 
 import { startGroupChat } from '../actions/groupsActions'
 
+import { getGroupsWithNoActiveChat } from '../selectors/groups'
+
 export const groupsDidLoad = createSelector(
   [
-    state => state.groups
+    getGroupsWithNoActiveChat
   ],
-  groups => {
-    const groupsWithNoImSession = groups.filter(group => !group.get('sessionStarted'))
-
-    if (groupsWithNoImSession.size === 0) return null
-
-    return startGroupChat(groupsWithNoImSession.toJSON())
-  }
+  groupsWithNoImSession => groupsWithNoImSession.size !== 0
+    ? startGroupChat(groupsWithNoImSession.toJSON())
+    : null
 )

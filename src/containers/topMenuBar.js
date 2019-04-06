@@ -7,6 +7,10 @@ import TopBar from '../components/topBar'
 import { logout } from '../actions/sessionActions'
 import { showSignOutPopup, showSignInPopup } from '../actions/viewerAccount'
 
+import { getIsSignedIn, getUserName } from '../selectors/viewer'
+import { getIsLoggedIn } from '../selectors/session'
+import { getOwnAvatarName } from '../selectors/names'
+
 class TopBarContainer extends React.Component {
   constructor () {
     super()
@@ -42,7 +46,10 @@ class TopBarContainer extends React.Component {
 
   render () {
     return <TopBar
-      account={this.props.account}
+      isSignedIn={this.props.isSignedIn}
+      userName={this.props.userName}
+      isLoggedIn={this.props.isLoggedIn}
+      avatarName={this.props.avatarName}
       signIn={this._boundSignIn}
       signUp={this._boundSignUp}
       signOut={this._boundSignOut}
@@ -53,7 +60,10 @@ class TopBarContainer extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    account: state.account
+    isSignedIn: getIsSignedIn(state),
+    userName: getUserName(state),
+    isLoggedIn: getIsLoggedIn(state),
+    avatarName: getOwnAvatarName(state)
   }
 }
 
