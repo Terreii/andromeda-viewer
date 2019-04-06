@@ -92,21 +92,20 @@ test('click actions', async () => {
 
     popup.find('button').last().simulate('click')
 
-    const passwordInputs = popup.find('input[type="password"]')
-    const addPassword = (aInput, key, password) => {
-      aInput.simulate('change', {
+    const addPassword = (id, password) => {
+      popup.find('#' + id).simulate('change', {
         target: {
           value: password,
-          id: key
+          id
         }
       })
     }
-    addPassword(passwordInputs.first(), 'password', 'secretPassword')
-    addPassword(passwordInputs.at(2), 'cryptoPassword', 'encrypted')
+    addPassword('password', 'secretPassword')
+    addPassword('cryptoPassword', 'encrypted')
     if (isSignUp) {
       popup.find('button').last().simulate('click')
-      addPassword(passwordInputs.at(1), 'password2', 'secretPassword')
-      addPassword(passwordInputs.at(3), 'cryptoPassword2', 'encrypted')
+      addPassword('password2', 'secretPassword')
+      addPassword('cryptoPassword2', 'encrypted')
     }
 
     shouldCallSend = true

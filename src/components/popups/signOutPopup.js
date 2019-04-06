@@ -2,7 +2,7 @@ import React from 'react'
 
 import Popup from './popup'
 
-import styles from './unlockDialog.module.css'
+import styles from './unlockAndSignOut.module.css'
 import formStyles from '../formElements.module.css'
 
 export default function SignOutPopup ({ onCancel, onSignOut }) {

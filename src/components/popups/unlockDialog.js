@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 import Popup from './popup'
 
-import styles from './unlockDialog.module.css'
+import styles from './unlockAndSignOut.module.css'
 import formStyles from '../formElements.module.css'
 import lockIcon from '../../icons/black_lock.svg'
 
@@ -24,6 +24,7 @@ export default class UnlockDialog extends React.Component {
 
   _onKeyInputPressed (event) {
     if (event.keyCode === 13) {
+      event.preventDefault()
       this._onUnlock()
     }
   }
@@ -93,7 +94,7 @@ export default class UnlockDialog extends React.Component {
             disabled={this.state.isUnlocking}
             value={this.state.password}
             onChange={this._boundChange}
-            onKeyUp={this._boundInput}
+            onKeyDown={this._boundInput}
             aria-describedby='resetPassword'
           />
           <small id='resetPassword' className={formStyles.Help}>
@@ -127,7 +128,10 @@ export default class UnlockDialog extends React.Component {
           <button
             id='signOutButton'
             className={formStyles.DangerButton}
-            onClick={this.props.onSignOut}
+            onClick={event => {
+              event.preventDefault()
+              this.props.onSignOut()
+            }}
             disabled={this.state.isUnlocking}
           >
             Sign out

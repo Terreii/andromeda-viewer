@@ -1,38 +1,9 @@
 import React from 'react'
-import styled from 'styled-components'
 
 import Popup from './popup'
-import { Button, Input, FormField, Help } from '../formElements'
 
-const Container = styled.form`
-  display: flex;
-  flex-direction: column;
-  font-family: Helvetica, Arial, sans-serif;
-
-  & > * {
-    flex-shrink: 0;
-  }
-`
-
-const FormElement = styled(FormField)`
-  display: ${props => props.show ? 'flex' : 'none'};
-`
-
-const ButtonsContainer = styled.div`
-  flex: auto;
-  display: flex;
-  flex-direction: row;
-  margin-top: 0.3em;
-  padding: 0 0.3em;
-
-  & > button {
-    margin-top: .5rem;
-  }
-
-  & > button + button {
-    margin-left: 0.55em;
-  }
-`
+import styles from './signInPopup.module.css'
+import formStyles from '../formElements.module.css'
 
 export default class SignInPopup extends React.Component {
   constructor () {
@@ -130,14 +101,15 @@ export default class SignInPopup extends React.Component {
     const title = this.props.isSignUp ? 'Sign up' : 'Sign in'
 
     return <Popup title={title} onClose={this.props.onCancel}>
-      <Container className={this.props.isSignUp ? 'SignUp' : ''}>
-        <FormElement show>
+      <form className={styles.Container}>
+        <div className={formStyles.FormField}>
           <label htmlFor='username'>
             Username / email:
           </label>
-          <Input
+          <input
             id='username'
             type='email'
+            className={formStyles.Input}
             value={this.state.username}
             autoComplete='email'
             onChange={this._boundInputChange}
@@ -149,18 +121,19 @@ export default class SignInPopup extends React.Component {
             disabled={this.state.isSigningIn}
             onFocus={this._onFocus}
           />
-          <Help id='mainHelp' hide={!this.props.isSignUp}>
+          <small id='mainHelp' className={formStyles.Help} data-hide={!this.props.isSignUp}>
             Must be an email. We'll never share your email with anyone else.
-          </Help>
-        </FormElement>
+          </small>
+        </div>
 
-        <FormElement show>
+        <div className={formStyles.FormField}>
           <label htmlFor='password'>
             Password:
           </label>
-          <Input
+          <input
             id='password'
             type='password'
+            className={formStyles.Input}
             value={this.state.password}
             autoComplete={this.props.isSignUp ? 'new-password' : 'current-password'}
             onChange={this._boundInputChange}
@@ -171,7 +144,7 @@ export default class SignInPopup extends React.Component {
             disabled={this.state.isSigningIn}
             onFocus={this._onFocus}
           />
-          <Help id='passwordHelp' hide={!this.props.isSignUp}>
+          <small id='passwordHelp' className={formStyles.Help} data-hide={!this.props.isSignUp}>
             Please use a strong and unique password!<br />
             Minimal length: 8 characters!<br />
             {'A '}
@@ -183,41 +156,46 @@ export default class SignInPopup extends React.Component {
               Password Manager
             </a>
             {' is recommended.'}
-          </Help>
-        </FormElement>
+          </small>
+        </div>
 
-        <FormElement show={this.props.isSignUp}>
-          <label htmlFor='password2'>
-            Repeat password:
-          </label>
-          <Input
-            id='password2'
-            type='password'
-            value={this.state.password2}
-            autoComplete='new-password'
-            onChange={this._boundInputChange}
-            onKeyPress={this._boundKeyPress}
-            required={this.props.isSignUp}
-            minLength='8'
-            disabled={this.state.isSigningIn}
-            onFocus={this._onFocus}
-          />
-          <Help
-            className='Error'
-            hide={this.state.password2.length === 0 || this.state.password === this.state.password2}
-            role='alert'
-          >
-            Password doesn't match!
-          </Help>
-        </FormElement>
+        {this.props.isSignUp
+          ? <div className={formStyles.FormField}>
+            <label htmlFor='password2'>
+              Repeat password:
+            </label>
+            <input
+              id='password2'
+              type='password'
+              className={formStyles.Input}
+              value={this.state.password2}
+              autoComplete='new-password'
+              onChange={this._boundInputChange}
+              onKeyPress={this._boundKeyPress}
+              required={this.props.isSignUp}
+              minLength='8'
+              disabled={this.state.isSigningIn}
+              onFocus={this._onFocus}
+            />
+            <small
+              className={formStyles.Error}
+              data-hide={this.state.password2.length === 0 ||
+                this.state.password === this.state.password2}
+              role='alert'
+            >
+              Password doesn't match!
+            </small>
+          </div>
+          : null}
 
-        <FormElement show>
+        <div className={formStyles.FormField}>
           <label htmlFor='cryptoPassword'>
             Encryption password:
           </label>
-          <Input
+          <input
             id='cryptoPassword'
             type='password'
+            className={formStyles.Input}
             value={this.state.cryptoPassword}
             onChange={this._boundInputChange}
             onKeyPress={this._boundKeyPress}
@@ -227,7 +205,7 @@ export default class SignInPopup extends React.Component {
             disabled={this.state.isSigningIn}
             onFocus={this._onFocus}
           />
-          <Help id='cryptoPwHelp' hide={!this.props.isSignUp}>
+          <small id='cryptoPwHelp' className={formStyles.Help} data-hide={!this.props.isSignUp}>
             Minimal length: 8 characters!<br />
             This password is used to encrypt your personal data.<br />
             This includes: <i>Avatar login-info</i>, <i>grids</i>, and <i>chat-logs</i>.<br />
@@ -235,59 +213,63 @@ export default class SignInPopup extends React.Component {
             and will never leave it un-encrypted!</b>
             <br />
             This password will <b>never</b> be saved or leave your machine!
-          </Help>
-        </FormElement>
+          </small>
+        </div>
 
-        <FormElement show={this.props.isSignUp}>
-          <label htmlFor='cryptoPassword2'>
-            Repeat encryption password:
-          </label>
-          <Input
-            id='cryptoPassword2'
-            type='password'
-            value={this.state.cryptoPassword2}
-            onChange={this._boundInputChange}
-            onKeyPress={this._boundKeyPress}
-            required={this.props.isSignUp}
-            minLength='8'
-            disabled={this.state.isSigningIn}
-            onFocus={this._onFocus}
-          />
-          <Help
-            className='Error'
-            role='alert'
-            hide={this.state.cryptoPassword2.length === 0 ||
-              this.state.cryptoPassword === this.state.cryptoPassword2
-            }
-          >
-            Encryption password doesn't match!
-          </Help>
-        </FormElement>
+        {this.props.isSignUp
+          ? <div className={formStyles.FormField}>
+            <label htmlFor='cryptoPassword2'>
+              Repeat encryption password:
+            </label>
+            <input
+              id='cryptoPassword2'
+              type='password'
+              className={formStyles.Input}
+              value={this.state.cryptoPassword2}
+              onChange={this._boundInputChange}
+              onKeyPress={this._boundKeyPress}
+              required={this.props.isSignUp}
+              minLength='8'
+              disabled={this.state.isSigningIn}
+              onFocus={this._onFocus}
+            />
+            <small
+              className={formStyles.Error}
+              role='alert'
+              data-hide={this.state.cryptoPassword2.length === 0 ||
+                this.state.cryptoPassword === this.state.cryptoPassword2
+              }
+            >
+              Encryption password doesn't match!
+            </small>
+          </div>
+          : null}
 
         {this.state.error == null
           ? null
-          : <Help className='Error' hide={this.state.error == null} role='alert'>
+          : <small className={formStyles.Error} data-hide={this.state.error == null} role='alert'>
             {this.state.error}
-          </Help>}
+          </small>}
 
-        <ButtonsContainer>
-          <Button
+        <div className={styles.ButtonsContainer}>
+          <button
+            className={formStyles.Button}
             onClick={this.props.onCancel}
             disabled={this.state.isSigningIn}
             onFocus={this._onFocus}
           >
             cancel
-          </Button>
-          <Button
-            className='ok'
+          </button>
+          <button
+            className={formStyles.OkButton}
             onClick={this._boundSend}
             disabled={!this._isInputValid() || this.state.isSigningIn}
             onFocus={this._onFocus}
           >
             {this.props.isSignUp ? 'sign up' : 'sign in'}
-          </Button>
-        </ButtonsContainer>
-      </Container>
+          </button>
+        </div>
+      </form>
     </Popup>
   }
 }
