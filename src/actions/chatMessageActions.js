@@ -2,10 +2,15 @@
  * Every local chat and IM related action
  */
 
-import { getValueOf, getStringValueOf } from '../network/msgGetters'
 import { v4 as uuid } from 'uuid'
 
+import { getValueOf, getStringValueOf } from '../network/msgGetters'
+
 import { getShouldSaveChat, getLocalChat, getIMChats } from '../selectors/chat'
+import { getIsSignedIn } from '../selectors/viewer'
+import { getAvatarDataSaveId, getAgentId, getSessionId } from '../selectors/session'
+import { getAvatarNameById, getOwnAvatarName } from '../selectors/names'
+import { getRegionId, getParentEstateID, getPosition } from '../selectors/region'
 
 /*
  *
@@ -17,12 +22,12 @@ export function sendLocalChatMessage (text, type, channel) {
   // Sends messages from the local chat
   // No UI update, because the server/sim will send it
   return (dispatch, getState, { circuit }) => {
-    const session = getState().session
+    const activeState = getState()
     circuit.send('ChatFromViewer', {
       AgentData: [
         {
-          AgentID: session.get('agentId'),
-          SessionID: session.get('sessionId')
+          AgentID: getAgentId(activeState),
+          SessionID: getSessionId(activeState)
         }
       ],
       ChatData: [
@@ -40,16 +45,15 @@ export function sendInstantMessage (text, to, id, dialog = 0) {
   return async (dispatch, getState, { circuit }) => {
     try {
       const activeState = getState()
-      const session = activeState.session
 
       const chat = getIMChats(activeState).find(chat => chat.get('chatUUID') === id)
 
-      const agentID = session.get('agentId')
-      const sessionID = session.get('sessionId')
-      const parentEstateID = session.getIn(['regionInfo', 'ParentEstateID'])
-      const regionID = session.getIn(['regionInfo', 'regionID'])
-      const position = session.getIn(['position', 'position'])
-      const fromAgentName = activeState.names.getIn(['names', agentID]).getFullName()
+      const agentID = getAgentId(activeState)
+      const sessionID = getSessionId(activeState)
+      const parentEstateID = getParentEstateID(activeState)
+      const regionID = getRegionId(activeState)
+      const position = getPosition(activeState)
+      const fromAgentName = getOwnAvatarName(activeState).getFullName()
       const binaryBucket = dialog === 17
         ? chat.get('name')
         : Buffer.from([])
@@ -80,10 +84,9 @@ export function sendInstantMessage (text, to, id, dialog = 0) {
         ]
       }, true)
 
-      const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
       const chatSaveId = getIMChats(activeState).getIn([id, 'saveId'])
       const msg = {
-        _id: `${avatarDataSaveId}/imChats/${chatSaveId}/${time.toJSON()}`,
+        _id: `${getAvatarDataSaveId(activeState)}/imChats/${chatSaveId}/${time.toJSON()}`,
         chatUUID: id,
         sessionID,
         fromId: agentID,
@@ -125,7 +128,7 @@ export function receiveChatFromSimulator (msg) {
     dispatch({
       type: msg.name,
       msg: {
-        _id: `${getState().account.get('avatarDataSaveId')}/localchat/${time.toJSON()}`,
+        _id: `${getAvatarDataSaveId(getState())}/localchat/${time.toJSON()}`,
 
         fromName: getStringValueOf(msg, 'ChatData', 'FromName'),
         sourceID: getValueOf(msg, 'ChatData', 'SourceID'),
@@ -254,7 +257,7 @@ export function receiveIM (message) {
     const activeState = getState()
     const chatSaveId = getIMChats(activeState).getIn([IMmsg.chatUUID, 'saveId'])
 
-    const saveId = activeState.account.get('avatarDataSaveId')
+    const saveId = getAvatarDataSaveId(activeState)
     IMmsg._id = `${saveId}/imChats/${chatSaveId}/${new Date(IMmsg.time).toJSON()}`
 
     dispatch({
@@ -377,11 +380,11 @@ export function getLocalChatHistory (avatarDataSaveId) {
 export function startNewIMChat (dialog, targetId, name, activate = false) {
   return async (dispatch, getState) => {
     const chatType = getIMChatTypeOfDialog(dialog)
-    const chatUUID = calcChatUUID(chatType, targetId, getState().account.get('agentId'))
+    const chatUUID = calcChatUUID(chatType, targetId, getAgentId(getState()))
 
     if (chatType === 'personal') {
       try {
-        name = getState().names.getIn(['names', targetId.toString()]).getName()
+        name = getAvatarNameById(getState(), targetId.toString()).getName()
       } catch (error) {
         console.error(error)
       }
@@ -407,12 +410,11 @@ function createNewIMChat (dialog, chatUUID, target, name) {
     // Stop if the chat already exists.
     if (getIMChats(activeState).has(chatUUID)) return
 
-    const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
     const saveId = uuid()
 
     dispatch({
       type: 'CreateNewIMChat',
-      _id: `${avatarDataSaveId}/imChatsInfos/${saveId}`,
+      _id: `${getAvatarDataSaveId(activeState)}/imChatsInfos/${saveId}`,
       chatType: type,
       chatUUID,
       saveId,
@@ -473,9 +475,9 @@ export function loadIMChats () {
   return (dispatch, getState, { hoodie }) => {
     const activeState = getState()
     // Only load the history if the user is logged into a viewer-account.
-    if (!activeState.account.getIn(['viewerAccount', 'loggedIn'])) return
+    if (!getIsSignedIn(activeState)) return
 
-    const avatarDataSaveId = activeState.account.get('avatarDataSaveId')
+    const avatarDataSaveId = getAvatarDataSaveId(activeState)
     const store = hoodie.cryptoStore.withIdPrefix(`${avatarDataSaveId}/imChatsInfos/`)
     store.findAll().then(result => {
       dispatch({
@@ -506,10 +508,10 @@ export function getIMHistory (chatUUID, chatSaveId) {
       chatUUID
     })
 
-    const avatarDataSaveId = getState().account.get('avatarDataSaveId')
-    const chatSavePrefix = `${avatarDataSaveId}/imChats/${chatSaveId}`
+    const activeState = getState()
+    const chatSavePrefix = `${getAvatarDataSaveId(activeState)}/imChats/${chatSaveId}`
 
-    const chat = getIMChats(getState()).get(chatUUID)
+    const chat = getIMChats(activeState).get(chatUUID)
     // get the _id of the oldest loaded msg
     const hasAMessage = chat.hasIn(['messages', 0, '_id'])
     const firstMsgId = hasAMessage

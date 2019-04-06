@@ -7,37 +7,41 @@ import './burgerMenu.css'
 
 const SlideMenu = reduxBurgerMenu(Menu)
 
-export default function BurgerMenu ({ account, signIn, signUp, logout, signOut }) {
-  const avatarLoggedIn = account.get('loggedIn')
-  const avatarName = account.get('avatarName')
-  const viewerLoggedIn = account.getIn(['viewerAccount', 'loggedIn'])
-  const username = account.getIn(['viewerAccount', 'username'])
-
+export default function BurgerMenu ({
+  isSignedIn,
+  userName,
+  isLoggedIn,
+  avatarName,
+  signIn,
+  signUp,
+  logout,
+  signOut
+}) {
   return <SlideMenu>
-    {avatarLoggedIn
+    {isLoggedIn
       ? <span className={styles.BurgerMenuItem}>{`Hello ${avatarName}`}</span>
       : null}
 
-    {viewerLoggedIn
-      ? <span className={styles.BurgerMenuItem}>{`Hello ${username}`}</span>
+    {isSignedIn
+      ? <span className={styles.BurgerMenuItem}>{`Hello ${userName}`}</span>
       : <button className={styles.BurgerMenuItem} onClick={signIn}>Sign into Andromeda</button>
     }
 
-    {viewerLoggedIn
+    {isSignedIn
       ? null
       : <button className={'menu-item ' + styles.BurgerMenuItem} onClick={signUp}>
         Sign up to Andromeda
       </button>
     }
 
-    {avatarLoggedIn
+    {isLoggedIn
       ? <button className={'menu-item ' + styles.BurgerMenuLogout} onClick={logout}>
         log out
       </button>
       : null
     }
 
-    {viewerLoggedIn
+    {isSignedIn
       ? <button className={'menu-item ' + styles.BurgerMenuLogout} onClick={signOut}>
         Log out from Viewer
       </button>

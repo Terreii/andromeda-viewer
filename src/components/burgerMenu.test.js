@@ -1,25 +1,17 @@
 import { axe } from 'jest-axe'
 import React from 'react'
 import { shallow, mount } from 'enzyme'
-import Immutable from 'immutable'
 import { Provider } from 'react-redux'
 
 import BurgerMenu from './burgerMenu'
 import configureStore from '../store/configureStore'
 
 test('renders without crashing', () => {
-  const account = Immutable.fromJS({
-    avatarName: '',
-    loggedIn: false,
-    viewerAccount: {
-      loggedIn: false,
-      username: '',
-      signInPopup: ''
-    }
-  })
-
   shallow(<BurgerMenu
-    account={account}
+    isSignedIn={false}
+    userName={''}
+    isLoggedIn={false}
+    avatarName={''}
     signIn={() => {}}
     signUp={() => {}}
     signOut={() => {}}
@@ -28,16 +20,6 @@ test('renders without crashing', () => {
 })
 
 test('click handling', () => {
-  const account = Immutable.fromJS({
-    avatarName: '',
-    loggedIn: false,
-    viewerAccount: {
-      loggedIn: false,
-      username: '',
-      signInPopup: ''
-    }
-  })
-
   let signInCount = 0
   let signUpCount = 0
   let signOutCount = 0
@@ -46,7 +28,10 @@ test('click handling', () => {
   // Nothing logged in
 
   const menu = shallow(<BurgerMenu
-    account={account}
+    isSignedIn={false}
+    userName={''}
+    isLoggedIn={false}
+    avatarName={''}
     signIn={() => {
       signInCount += 1
     }}
@@ -74,10 +59,10 @@ test('click handling', () => {
   // Avatar logged in
 
   const menuAvatarLoggedIn = shallow(<BurgerMenu
-    account={account.merge({
-      avatarName: 'Tester',
-      loggedIn: true
-    })}
+    isSignedIn={false}
+    userName={''}
+    isLoggedIn
+    avatarName={'Tester'}
     signIn={() => {
       signInCount += 1
     }}
@@ -106,12 +91,10 @@ test('click handling', () => {
   // Viewr account logged in
 
   const menuViewerSignedIn = shallow(<BurgerMenu
-    account={account.mergeDeep({
-      viewerAccount: {
-        loggedIn: true,
-        username: 'tester@test.org'
-      }
-    })}
+    isSignedIn
+    userName={'tester@test.org'}
+    isLoggedIn={false}
+    avatarName={''}
     signIn={() => {
       signInCount += 1
     }}
@@ -138,14 +121,10 @@ test('click handling', () => {
   // Viewer and avatar logged in
 
   const menuAllIn = shallow(<BurgerMenu
-    account={account.mergeDeep({
-      avatarName: 'Tester',
-      loggedIn: true,
-      viewerAccount: {
-        loggedIn: true,
-        username: 'tester@test.org'
-      }
-    })}
+    isSignedIn
+    userName={'tester@test.org'}
+    isLoggedIn
+    avatarName={'Tester'}
     signIn={() => {
       signInCount += 1
     }}
@@ -172,19 +151,12 @@ test('click handling', () => {
 })
 
 test('should pass aXe', async () => {
-  const account = Immutable.fromJS({
-    avatarName: '',
-    loggedIn: false,
-    viewerAccount: {
-      loggedIn: false,
-      username: '',
-      signInPopup: ''
-    }
-  })
-
   const rendered = mount(<Provider store={configureStore()}>
     <BurgerMenu
-      account={account}
+      isSignedIn={false}
+      userName={''}
+      isLoggedIn={false}
+      avatarName={''}
       signIn={() => {}}
       signUp={() => {}}
       signOut={() => {}}

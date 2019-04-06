@@ -5,16 +5,28 @@ import { viewerName } from '../viewerInfo'
 
 import styles from './topBar.module.css'
 
-export default function TopBar ({ account, signIn, signUp, signOut, logout }) {
+export default function TopBar ({
+  isSignedIn,
+  userName,
+  isLoggedIn,
+  avatarName,
+  signIn,
+  signUp,
+  signOut,
+  logout
+}) {
   return <div className={styles.Container}>
     <BurgerMenu
-      account={account}
+      isSignedIn={isSignedIn}
+      userName={userName}
+      isLoggedIn={isLoggedIn}
+      avatarName={avatarName}
       signIn={signIn}
       signUp={signUp}
       signOut={signOut}
       logout={logout}
     />
-    {account.getIn(['loggedIn'])
+    {isLoggedIn
       ? null
       : <span>Login to <span>{viewerName}</span></span>
     }
