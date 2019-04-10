@@ -15,11 +15,13 @@
 
 .bm-burger-bars {
   background: rgb(211, 211, 211);
+  background: var(--top-bar-color);
   border-radius: 1em;
 }
 
 .bm-morph-shape {
   fill: #373a47;
+  fill: var(--burger-menu-background);
 }
 
 .bm-menu-wrap {
@@ -28,13 +30,16 @@
 
 .bm-menu {
   background: #373a47;
+  background: var(--burger-menu-background);
 }
 .bm-menu button, .bm-menu span {
   font-family: serif;
   color: #b8b7ad;
+  color: var(--burger-menu-color);
 }
 .bm-menu button:hover, .bm-menu span:hover {
   color: #c94e50;
+  color: var(--burger-menu-color-hover);
 }
 
 .bm-item-list button, .bm-item-list span {
@@ -46,7 +51,8 @@
 }
 
 .bm-cross {
-  background: #bdc3c7;
+  background: #b8b7ad;
+  background: var(--burger-menu-color);
 }
 
 .bm-menu {

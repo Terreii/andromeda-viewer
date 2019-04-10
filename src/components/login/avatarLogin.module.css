@@ -8,6 +8,8 @@
   display: flex;
   flex-direction: column;
   background-color: rgb(110, 110, 110);
+  background-color: var(--dialog-background-active);
+  color: var(--dialog-color-active);
   margin: 1em;
   padding: 1em;
   max-width: calc(100vw - 2em);
@@ -17,6 +19,8 @@
 .Container.not-selected {
   cursor: pointer;
   background-color: rgb(95, 95, 95);
+  background-color: var(--dialog-background);
+  color: var(--dialog-color);
   box-shadow: 0.1em 0.1em 0.3em 0px black;
 }
 .Container.not-selected:focus {
@@ -184,4 +188,5 @@
 .SaveHelp {
   composes: Help from "../formElements.module.css";
   color: #fff;
+  color: var(--dialog-color-active)
 }

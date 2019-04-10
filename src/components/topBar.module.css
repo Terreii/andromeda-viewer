@@ -9,7 +9,9 @@
   width: 100vw;
   height: 2rem;
   background-color: rgb(77, 80, 85);
+  background-color: var(--top-bar-background);
   color: rgb(211, 211, 211);
+  color: var(--top-bar-color);
   padding-top: .5em;
   padding-bottom: .5em;
 }

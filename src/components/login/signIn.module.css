@@ -9,6 +9,8 @@
   align-items: center;
   max-width: 15em;
   background-color: rgb(110, 110, 110);
+  background-color: var(--dialog-background-active);
+  color: var(--dialog-color-active);
   margin: 1em;
   padding: 1em;
   padding-top: 0px;
