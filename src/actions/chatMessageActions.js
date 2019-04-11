@@ -10,6 +10,7 @@ import { getShouldSaveChat, getLocalChat, getIMChats } from '../selectors/chat'
 import { getIsSignedIn } from '../selectors/viewer'
 import { getAvatarDataSaveId, getAgentId, getSessionId } from '../selectors/session'
 import { getAvatarNameById, getOwnAvatarName } from '../selectors/names'
+import { getGroupsIDs } from '../selectors/groups'
 import { getRegionId, getParentEstateID, getPosition } from '../selectors/region'
 
 /*
@@ -218,6 +219,94 @@ export function deleteOldLocalChat () {
 
 export function receiveIM (message) {
   return async (dispatch, getState) => {
+    const state = getState()
+
+    switch (getValueOf(message, 'MessageBlock', 'Dialog')) {
+      case 17: // SessionSend
+        if (getGroupsIDs(state).includes(getValueOf(message, 'AgentData', 'SessionID'))) {
+          dispatch(handleGroupIM(message))
+        } else {
+          dispatch(handleConferenceIM(message))
+        }
+        break
+
+      case 0: // MessageFromAgent
+        if (getStringValueOf(message, 'MessageBlock', 'FromAgentName') === 'Second Life') {
+          dispatch(handleIMFromObject(message))
+        } else if (
+          getValueOf(message, 'AgentData', 'AgentID') === '00000000-0000-0000-0000-000000000000'
+        ) {
+          dispatch(handleNotification(message))
+        } else if (
+          getValueOf(message, 'MessageBlock', 'FromGroup') ||
+          getGroupsIDs(state).includes(getValueOf(message, 'AgentData', 'SessionID'))
+        ) {
+          dispatch(handleGroupIM(message))
+        } else if (getValueOf(message, 'MessageBlock', 'BinaryBucket').length > 1) {
+          dispatch(handleConferenceIM(message))
+        } else if (
+          getValueOf(message, 'AgentData', 'SessionID') === '00000000-0000-0000-0000-000000000000'
+        ) {
+          dispatch(handleNotificationInChat(message))
+        } else {
+          dispatch(handleIM(message))
+        }
+        break
+
+      case 19: // MessageFromObject
+        dispatch(handleIMFromObject(message))
+        break
+
+      case 41: // start typing
+      case 42: // stop typing
+        dispatch(handleIMTypingEvent(message))
+        break
+
+      case 1: // MessageBox
+        dispatch(handleNotification(message))
+        break
+
+      case 22: // RequestTeleport
+        dispatch(handleNotification(message))
+        break
+
+      case 26: // RequestTeleportLure
+        dispatch(handleNotification(message))
+        break
+
+      case 3: // GroupInvitation
+        dispatch(handleNotification(message))
+        break
+
+      case 38: // FriendshipOffered
+        if (getStringValueOf(message, 'MessageBlock', 'FromAgentName') === 'Second Life') {
+          dispatch(handleIMFromObject(message))
+        } else {
+          dispatch(handleNotification(message))
+        }
+        break
+
+      case 4: // InventoryOffered
+        dispatch(handleNotification(message))
+        break
+
+      case 5: // InventoryAccepted
+      case 6: // InventoryDeclined
+        dispatch(handleNotificationInChat(message))
+        break
+
+      case 9: // TaskInventoryOffered
+        dispatch(handleNotification(message))
+        break
+
+      case 32: // GroupNotice
+        dispatch(handleNotification(message))
+        break
+
+      default:
+        console.log(`Unhandled IM! Dialog: ${getValueOf(message, 'MessageBlock', 'Dialog')}`)
+    }
+
     const toAgentID = getValueOf(message, 'MessageBlock', 'ToAgentID')
     const fromId = getValueOf(message, 'AgentData', 'AgentID')
     const time = getValueOf(message, 'MessageBlock', 'Timestamp')
@@ -266,6 +355,48 @@ export function receiveIM (message) {
     })
   }
 }
+
+/**
+ * Handles a direct IM.
+ * @param {object} msg IM Message from the server
+ */
+function handleIM (msg) {}
+
+/**
+ * Handles messages to Group chats
+ * @param {object} msg IM Message from the server
+ */
+function handleGroupIM (msg) {}
+
+/**
+ * Handles messages send to a conference of multiple peoples
+ * @param {object} msg IM Message from the server
+ */
+function handleConferenceIM (msg) {}
+
+/**
+ * Handles messages from Objects
+ * @param {object} msg IM Message from the server
+ */
+function handleIMFromObject (msg) {}
+
+/**
+ * Handles messages that are notifications
+ * @param {object} msg IM Message from the server
+ */
+function handleNotification (msg) {}
+
+/**
+ * Handles messages that are notifications, but should be displayed in an chat
+ * @param {object} msg IM Message from the server
+ */
+function handleNotificationInChat (msg) {}
+
+/**
+ * Handles start and stop typing events in IM-chats
+ * @param {object} msg IM Message from the server
+ */
+function handleIMTypingEvent (msg) {}
 
 export function saveIMChatMessages () {
   return async (dispatch, getState, { hoodie }) => {
