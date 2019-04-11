@@ -253,7 +253,7 @@ export default class SignInPopup extends React.Component {
 
         <div className={styles.ButtonsContainer}>
           <button
-            className={formStyles.Button}
+            className={formStyles.SecondaryButton}
             onClick={this.props.onCancel}
             disabled={this.state.isSigningIn}
             onFocus={this._onFocus}

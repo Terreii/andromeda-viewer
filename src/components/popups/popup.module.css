@@ -30,7 +30,9 @@
 
 .Border {
   position: relative;
-  background-color: rgb(255, 250, 250);
+  background: rgb(255, 250, 250);
+  background: var(--modal-background);
+  color: var(--modal-color);
   border-radius: 1em;
   max-height: 100vh;
   max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
@@ -40,6 +42,7 @@
 
 .Header {
   border-bottom: 1px solid black;
+  border-bottom: 1px solid var(--modal-color);
   flex: 0 0 2em;
   display: flex;
   flex-direction: row-reverse;

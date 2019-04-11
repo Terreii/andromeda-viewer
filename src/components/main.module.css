@@ -41,4 +41,10 @@ body {
   --dialog-color: white;
   --dialog-background-active: rgb(110, 110, 110);
   --dialog-color-active: white;
+
+  --modal-background: rgb(255, 250, 250);
+  --modal-color: black;
+
+  --button-border-width: 0px;
+  --button-border: var(--button-border-width) solid var(--main-color);
 }

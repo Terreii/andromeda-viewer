@@ -10,6 +10,7 @@
   font-size: 1rem;
   border-radius: .25rem;
   border: 0px;
+  border: var(--button-border);
   font-weight: 400;
   background: #e0e0e0;
 }
