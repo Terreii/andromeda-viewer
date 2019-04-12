@@ -223,7 +223,7 @@ export function receiveIM (message) {
 
     switch (getValueOf(message, 'MessageBlock', 'Dialog')) {
       case 17: // SessionSend
-        if (getGroupsIDs(state).includes(getValueOf(message, 'AgentData', 'SessionID'))) {
+        if (getGroupsIDs(state).includes(getValueOf(message, 'MessageBlock', 'ID'))) {
           dispatch(handleGroupIM(message))
         } else {
           dispatch(handleConferenceIM(message))
@@ -231,6 +231,8 @@ export function receiveIM (message) {
         break
 
       case 0: // MessageFromAgent
+        const id = getValueOf(message, 'MessageBlock', 'ID')
+
         if (getStringValueOf(message, 'MessageBlock', 'FromAgentName') === 'Second Life') {
           dispatch(handleIMFromObject(message))
         } else if (
@@ -239,14 +241,12 @@ export function receiveIM (message) {
           dispatch(handleNotification(message))
         } else if (
           getValueOf(message, 'MessageBlock', 'FromGroup') ||
-          getGroupsIDs(state).includes(getValueOf(message, 'AgentData', 'SessionID'))
+          getGroupsIDs(state).includes(id)
         ) {
           dispatch(handleGroupIM(message))
         } else if (getValueOf(message, 'MessageBlock', 'BinaryBucket').length > 1) {
           dispatch(handleConferenceIM(message))
-        } else if (
-          getValueOf(message, 'AgentData', 'SessionID') === '00000000-0000-0000-0000-000000000000'
-        ) {
+        } else if (id === '00000000-0000-0000-0000-000000000000') {
           dispatch(handleNotificationInChat(message))
         } else {
           dispatch(handleIM(message))
@@ -360,7 +360,52 @@ export function receiveIM (message) {
  * Handles a direct IM.
  * @param {object} msg IM Message from the server
  */
-function handleIM (msg) {}
+function handleIM (msg) {
+  return (dispatch, getState) => {
+    const state = getState()
+
+    const id = getValueOf(msg, 'MessageBlock', 'ID')
+    const fromAgentId = getValueOf(msg, 'AgentData', 'AgentID')
+    const fromAgentName = getStringValueOf(msg, 'MessageBlock', 'FromAgentName')
+    const avatarSaveId = getAvatarDataSaveId(state)
+
+    const time = new Date()
+    const timeStamp = +getValueOf(msg, 'MessageBlock', 'Timestamp')
+    if (timeStamp !== 0) {
+      time.setTime(timeStamp * 1000)
+    }
+
+    let chat = getIMChats(state).get(id)
+    if (chat == null) {
+      const saveId = uuid()
+
+      dispatch({
+        type: 'CreateNewIMChat',
+        _id: `${avatarSaveId}/imChatsInfos/${saveId}`,
+        chatType: 'personal',
+        chatUUID: id,
+        saveId,
+        target: fromAgentId,
+        name: fromAgentName
+      })
+
+      chat = getIMChats(getState()).get(id)
+    }
+
+    dispatch({
+      type: 'IM_PERSONAL_RECEIVED',
+      msg: {
+        _id: `${avatarSaveId}/imChats/${chat.get('saveId')}/${time.toJSON()}`,
+        chatUUID: id,
+        fromAgentName,
+        fromAgentId,
+        offline: getValueOf(msg, 'MessageBlock', 'Offline'),
+        message: getStringValueOf(msg, 'MessageBlock', 'Message'),
+        time: time.getTime()
+      }
+    })
+  }
+}
 
 /**
  * Handles messages to Group chats
