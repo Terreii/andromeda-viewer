@@ -44,6 +44,9 @@ function namesReducer (state = Immutable.Map(), action) {
       return addNameFromLocalChat(state, action.msg)
 
     case 'ImprovedInstantMessage':
+    case 'PERSONAL_IM_RECEIVED':
+    case 'GROUP_IM_RECEIVED':
+    case 'CONFERENCE_IM_RECEIVED':
       if (state.has(action.msg.fromId)) return state
       return addNameFromIM(state, action.msg)
 
@@ -110,6 +113,9 @@ export default function namesCoreReducer (state = Immutable.fromJS({ names: {} }
     case '@@INIT':
     case 'ChatFromSimulator':
     case 'ImprovedInstantMessage':
+    case 'PERSONAL_IM_RECEIVED':
+    case 'GROUP_IM_RECEIVED':
+    case 'CONFERENCE_IM_RECEIVED':
     case 'didLogin':
     case 'UUIDNameReply':
     case 'IMChatInfosLoaded':

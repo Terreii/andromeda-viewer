@@ -36,8 +36,11 @@ function imChat (state = Immutable.Map(), action) {
 
     case 'ImprovedInstantMessage':
     case 'SelfSendImprovedInstantMessage':
-    case 'IM_PERSONAL_RECEIVED':
+    case 'PERSONAL_IM_RECEIVED':
+    case 'GROUP_IM_RECEIVED':
+    case 'CONFERENCE_IM_RECEIVED':
       const messages = state.has('messages') ? state.get('messages') : Immutable.List()
+
       return state.merge({
         messages: messages.push(Immutable.Map({
           ...action.msg,
@@ -155,7 +158,7 @@ export default function IMReducer (state = Immutable.Map(), action) {
 
     case 'ImprovedInstantMessage':
     case 'SelfSendImprovedInstantMessage':
-    case 'IM_PERSONAL_RECEIVED':
+    case 'PERSONAL_IM_RECEIVED':
       // filter start/end typing
       if (action.msg.dialog === 41 || action.msg.dialog === 42) return state
 
@@ -165,6 +168,19 @@ export default function IMReducer (state = Immutable.Map(), action) {
       return oldChat === updatedChat
         ? state
         : state.set(action.msg.chatUUID, updatedChat)
+
+    case 'GROUP_IM_RECEIVED':
+    case 'CONFERENCE_IM_RECEIVED':
+      const id = action.type === 'GROUP_IM_RECEIVED'
+        ? action.groupId
+        : action.conferenceId
+
+      const oldChatData = state.get(id)
+      const updatedChatData = imChat(oldChatData, action)
+
+      return oldChatData === updatedChatData
+        ? state
+        : state.set(id, updatedChatData)
 
     case 'StartSavingIMMessages':
     case 'didSaveIMMessages':

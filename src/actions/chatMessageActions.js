@@ -228,7 +228,7 @@ export function receiveIM (message) {
         } else {
           dispatch(handleConferenceIM(message))
         }
-        break
+        return
 
       case 0: // MessageFromAgent
         const id = getValueOf(message, 'MessageBlock', 'ID')
@@ -244,12 +244,15 @@ export function receiveIM (message) {
           getGroupsIDs(state).includes(id)
         ) {
           dispatch(handleGroupIM(message))
+          return
         } else if (getValueOf(message, 'MessageBlock', 'BinaryBucket').length > 1) {
           dispatch(handleConferenceIM(message))
+          return
         } else if (id === '00000000-0000-0000-0000-000000000000') {
           dispatch(handleNotificationInChat(message))
         } else {
           dispatch(handleIM(message))
+          return
         }
         break
 
@@ -393,12 +396,12 @@ function handleIM (msg) {
     }
 
     dispatch({
-      type: 'IM_PERSONAL_RECEIVED',
+      type: 'PERSONAL_IM_RECEIVED',
       msg: {
         _id: `${avatarSaveId}/imChats/${chat.get('saveId')}/${time.toJSON()}`,
         chatUUID: id,
         fromAgentName,
-        fromAgentId,
+        fromId: fromAgentId,
         offline: getValueOf(msg, 'MessageBlock', 'Offline'),
         message: getStringValueOf(msg, 'MessageBlock', 'Message'),
         time: time.getTime()
@@ -411,13 +414,75 @@ function handleIM (msg) {
  * Handles messages to Group chats
  * @param {object} msg IM Message from the server
  */
-function handleGroupIM (msg) {}
+function handleGroupIM (msg) {
+  return (dispatch, getState) => {
+    const state = getState()
+
+    const id = getValueOf(msg, 'MessageBlock', 'ID')
+    const time = new Date()
+    const chat = getIMChats(state).get(id)
+
+    // Group chat will be started by the group reactors.
+    if (chat == null) {
+      throw new Error(`chat for group ${id} doesn't exist!`)
+    }
+
+    dispatch({
+      type: 'GROUP_IM_RECEIVED',
+      groupId: id,
+      msg: {
+        _id: `${getAvatarDataSaveId(state)}/imChats/${chat.get('saveId')}/${time.toJSON()}`,
+        fromAgentName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
+        fromId: getValueOf(msg, 'AgentData', 'AgentID'),
+        message: getStringValueOf(msg, 'MessageBlock', 'Message'),
+        time: time.getTime()
+      }
+    })
+  }
+}
 
 /**
  * Handles messages send to a conference of multiple peoples
  * @param {object} msg IM Message from the server
  */
-function handleConferenceIM (msg) {}
+function handleConferenceIM (msg) {
+  return (dispatch, getState) => {
+    const state = getState()
+
+    const id = getValueOf(msg, 'MessageBlock', 'ID')
+    const avatarSaveId = getAvatarDataSaveId(state)
+    const time = new Date()
+
+    let chat = getIMChats(state).get(id)
+    if (chat == null) {
+      const saveId = uuid()
+
+      dispatch({
+        type: 'CreateNewIMChat',
+        _id: `${avatarSaveId}/imChatsInfos/${saveId}`,
+        chatType: 'conference',
+        chatUUID: id,
+        saveId,
+        target: id,
+        name: getStringValueOf(msg, 'MessageBlock', 'BinaryBucket')
+      })
+
+      chat = getIMChats(getState()).get(id)
+    }
+
+    dispatch({
+      type: 'CONFERENCE_IM_RECEIVED',
+      conferenceId: id,
+      msg: {
+        _id: `${avatarSaveId}/imChats/${chat.get('saveId')}/${time.toJSON()}`,
+        fromAgentName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
+        fromId: getValueOf(msg, 'AgentData', 'AgentID'),
+        message: getStringValueOf(msg, 'MessageBlock', 'Message'),
+        time: time.getTime()
+      }
+    })
+  }
+}
 
 /**
  * Handles messages from Objects
