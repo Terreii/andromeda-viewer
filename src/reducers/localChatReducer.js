@@ -34,6 +34,20 @@ export default function localChatReducer (state = List(), action) {
           .sort((a, b) => a.get('time') - b.get('time'))
       })
 
+    case 'NOTIFICATION_IN_CHAT_ADDED':
+      return state.push(Map({
+        _id: 'notification_' + state.size,
+        fromName: action.fromName,
+        sourceID: action.fromId || 'object',
+        sourceType: 2,
+        chatType: 8,
+        audible: 1,
+        position: [0, 0, 0],
+        message: action.text,
+        time: action.time,
+        didSave: false
+      }))
+
     case 'StartSavingLocalChatMessages':
       if (action.saving.length === 0) return state
 

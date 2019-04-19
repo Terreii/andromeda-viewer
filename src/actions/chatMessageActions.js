@@ -4,6 +4,7 @@
 
 import { v4 as uuid } from 'uuid'
 
+import { UUID as LLUUID } from '../llsd'
 import { getValueOf, getStringValueOf } from '../network/msgGetters'
 
 import { getShouldSaveChat, getLocalChat, getIMChats } from '../selectors/chat'
@@ -235,6 +236,7 @@ export function receiveIM (message) {
 
         if (getStringValueOf(message, 'MessageBlock', 'FromAgentName') === 'Second Life') {
           dispatch(handleIMFromObject(message))
+          return
         } else if (
           getValueOf(message, 'AgentData', 'AgentID') === '00000000-0000-0000-0000-000000000000'
         ) {
@@ -249,7 +251,11 @@ export function receiveIM (message) {
           dispatch(handleConferenceIM(message))
           return
         } else if (id === '00000000-0000-0000-0000-000000000000') {
-          dispatch(handleNotificationInChat(message))
+          const text = getStringValueOf(message, 'MessageBlock', 'Message')
+          const fromId = getValueOf(message, 'AgentData', 'AgentID')
+          const fromAgentName = getStringValueOf(message, 'MessageBlock', 'FromAgentName')
+          dispatch(handleNotificationInChat(text, fromAgentName, fromId))
+          return
         } else {
           dispatch(handleIM(message))
           return
@@ -258,7 +264,7 @@ export function receiveIM (message) {
 
       case 19: // MessageFromObject
         dispatch(handleIMFromObject(message))
-        break
+        return
 
       case 41: // start typing
       case 42: // stop typing
@@ -284,6 +290,7 @@ export function receiveIM (message) {
       case 38: // FriendshipOffered
         if (getStringValueOf(message, 'MessageBlock', 'FromAgentName') === 'Second Life') {
           dispatch(handleIMFromObject(message))
+          return
         } else {
           dispatch(handleNotification(message))
         }
@@ -295,8 +302,12 @@ export function receiveIM (message) {
 
       case 5: // InventoryAccepted
       case 6: // InventoryDeclined
-        dispatch(handleNotificationInChat(message))
-        break
+        const agentName = getStringValueOf(message, 'MessageBlock', 'FromAgentName')
+        const dialog = getValueOf(message, 'MessageBlock', 'Dialog')
+        dispatch(handleNotificationInChat(
+          `${agentName} ${dialog === 5 ? 'accepted' : 'declined'} your inventory offer.`
+        ))
+        return
 
       case 9: // TaskInventoryOffered
         dispatch(handleNotification(message))
@@ -488,7 +499,14 @@ function handleConferenceIM (msg) {
  * Handles messages from Objects
  * @param {object} msg IM Message from the server
  */
-function handleIMFromObject (msg) {}
+function handleIMFromObject (msg) {
+  // TODO: add handling of muted objects (+ their owners)
+
+  return handleNotificationInChat(
+    getStringValueOf(msg, 'MessageBlock', 'Message'),
+    getStringValueOf(msg, 'MessageBlock', 'FromAgentName')
+  )
+}
 
 /**
  * Handles messages that are notifications
@@ -497,10 +515,26 @@ function handleIMFromObject (msg) {}
 function handleNotification (msg) {}
 
 /**
- * Handles messages that are notifications, but should be displayed in an chat
- * @param {object} msg IM Message from the server
+ * Handles messages that are notifications, but should be displayed in local chat.
+ * @param {string} text Text of the Notification that should be displayed.
+ * @param {string} [fromName=""] Displayed name of the sender.
+ * @param {string|object} [fromId] Optional UUID of the sender.
  */
-function handleNotificationInChat (msg) {}
+function handleNotificationInChat (text, fromName = '', fromId) {
+  if (text == null) {
+    throw new TypeError("handleNotificationInChat must receive a message! It didn't!")
+  }
+
+  return {
+    type: 'NOTIFICATION_IN_CHAT_ADDED',
+    text: text.toString(),
+    fromName: fromName.toString(),
+    fromId: typeof fromId === 'string'
+      ? fromId
+      : (fromId != null && fromId instanceof LLUUID ? fromId.toString() : null),
+    time: Date.now()
+  }
+}
 
 /**
  * Handles start and stop typing events in IM-chats
