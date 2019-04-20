@@ -20,6 +20,7 @@ function imChat (state = Immutable.Map(), action) {
         isLoadingHistory: state.get('isLoadingHistory') || false,
         active: state.get('active') || false,
         hasUnsavedMSG: state.get('hasUnsavedMSG') || false,
+        areTyping: Immutable.Set(),
         messages: state.has('messages') ? state.get('messages') : Immutable.List()
       })
 
@@ -49,6 +50,12 @@ function imChat (state = Immutable.Map(), action) {
         active: true,
         hasUnsavedMSG: true
       })
+
+    case 'IM_START_TYPING':
+      return state.set('areTyping', state.get('areTyping').add(action.agentId))
+
+    case 'IM_STOP_TYPING':
+      return state.set('areTyping', state.get('areTyping').delete(action.agentId))
 
     case 'IMHistoryLoaded':
       const historyMsg = action.messages.map(msg => Immutable.Map({
@@ -181,6 +188,16 @@ export default function IMReducer (state = Immutable.Map(), action) {
       return oldChatData === updatedChatData
         ? state
         : state.set(id, updatedChatData)
+
+    case 'IM_START_TYPING':
+    case 'IM_STOP_TYPING':
+      const oldIMChatData = state.get(action.chatUUID)
+      if (oldIMChatData == null) return state
+
+      const newIMChatData = imChat(oldIMChatData, action)
+      return newIMChatData === oldIMChatData
+        ? state
+        : state.set(action.chatUUID, newIMChatData)
 
     case 'StartSavingIMMessages':
     case 'didSaveIMMessages':

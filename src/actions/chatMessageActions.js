@@ -269,7 +269,7 @@ export function receiveIM (message) {
       case 41: // start typing
       case 42: // stop typing
         dispatch(handleIMTypingEvent(message))
-        break
+        return
 
       case 1: // MessageBox
         dispatch(handleNotification(message))
@@ -540,7 +540,21 @@ function handleNotificationInChat (text, fromName = '', fromId) {
  * Handles start and stop typing events in IM-chats
  * @param {object} msg IM Message from the server
  */
-function handleIMTypingEvent (msg) {}
+function handleIMTypingEvent (msg) {
+  const dialog = getValueOf(msg, 'MessageBlock', 'Dialog')
+
+  if (dialog !== 41 && dialog !== 42) {
+    throw new TypeError('handleIMTypingEvent did receive wrong Dialog: ' + dialog)
+  }
+
+  return {
+    type: dialog === 41
+      ? 'IM_START_TYPING'
+      : 'IM_STOP_TYPING',
+    chatUUID: getValueOf(msg, 'MessageBlock', 'ID'),
+    agentId: getValueOf(msg, 'AgentData', 'AgentID')
+  }
+}
 
 export function saveIMChatMessages () {
   return async (dispatch, getState, { hoodie }) => {
