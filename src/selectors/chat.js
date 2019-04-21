@@ -4,6 +4,8 @@ import { createSelector } from 'reselect'
 
 import { getIsSignedIn, getShouldSync } from './viewer'
 
+export const getActiveTab = state => state.session.get('activeChatTab')
+
 export const getLocalChat = state => state.localChat
 
 export const getIMChats = state => state.IMs
@@ -25,3 +27,11 @@ export const getShouldSaveChat = createSelector(
 )
 
 export const getNotifications = state => state.session.get('notifications')
+
+export const getShouldDisplayNotifications = createSelector(
+  [
+    getNotifications,
+    getActiveTab
+  ],
+  (notifications, activeTab) => !notifications.isEmpty() || activeTab === 'notifications'
+)

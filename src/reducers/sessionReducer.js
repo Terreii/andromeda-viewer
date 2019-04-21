@@ -4,6 +4,7 @@ import { getValueOf, getValuesOf } from '../network/msgGetters'
 
 export default function sessionReducer (state = Map({
   avatarIdentifier: null,
+  activeChatTab: 'local',
   notifications: List(),
   notificationId: 0,
   error: null
@@ -66,6 +67,9 @@ export default function sessionReducer (state = Map({
         }
       })
 
+    case 'CHAT_TAB_CHANGED':
+      return state.set('activeChatTab', action.key)
+
     case 'NOTIFICATION_RECEIVED':
       const notificationId = state.get('notificationId')
       return state.merge({
@@ -85,6 +89,7 @@ export default function sessionReducer (state = Map({
     case 'UserWasKicked':
       return Map({
         avatarIdentifier: null,
+        activeChatTab: 'local',
         notifications: List(),
         notificationId: 0,
         error: action.type === 'UserWasKicked' ? action.reason : null

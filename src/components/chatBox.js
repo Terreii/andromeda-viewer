@@ -39,7 +39,8 @@ export default function ChatBox (props) {
   })
 
   return <Tabs
-    defaultActiveKey='local'
+    activeKey={props.activeTab}
+    onChange={props.changeTab}
     renderTabBar={() => <ScrollableInkTabBar />}
     renderTabContent={() => <TabContent />}
   >
@@ -59,7 +60,7 @@ export default function ChatBox (props) {
       />
     </TabPane>
 
-    {!props.notifications.isEmpty()
+    {props.shouldDisplayNotifications
       ? <TabPane tab='Notifications' key='notifications'>
         <Notifications
           notifications={props.notifications}

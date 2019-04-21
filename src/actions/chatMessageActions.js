@@ -14,6 +14,13 @@ import { getAvatarNameById, getOwnAvatarName } from '../selectors/names'
 import { getGroupsIDs } from '../selectors/groups'
 import { getRegionId, getParentEstateID, getPosition } from '../selectors/region'
 
+export function changeTab (newTab) {
+  return {
+    type: 'CHAT_TAB_CHANGED',
+    key: newTab
+  }
+}
+
 /*
  *
  *  Sending Messages
