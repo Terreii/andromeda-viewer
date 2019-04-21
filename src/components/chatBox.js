@@ -10,6 +10,7 @@ import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar'
 import ChatDialog from './chatDialog'
 import FriendsList from './friendsList'
 import GroupsList from './groupsList'
+import Notifications from './notifications'
 
 import 'rc-tabs/assets/index.css'
 
@@ -57,6 +58,17 @@ export default function ChatBox (props) {
         startNewIMChat={props.startNewIMChat}
       />
     </TabPane>
+
+    {!props.notifications.isEmpty()
+      ? <TabPane tab='Notifications' key='notifications'>
+        <Notifications
+          notifications={props.notifications}
+          onClick={console.warn.bind(console, 'TODO: Implement callbacks')}
+          onCancel={props.closeNotification}
+        />
+      </TabPane>
+      : null
+    }
 
     <TabPane tab='Local' key='local'>
       <ChatDialog

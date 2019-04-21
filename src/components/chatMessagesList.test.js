@@ -36,7 +36,7 @@ test('renders local chat without crashing', () => {
 
   expect(rendered.find('div').length).toBe(3)
 
-  const timeElements = rendered.find('span.time')
+  const timeElements = rendered.find('time')
   expect(timeElements.length).toBe(2)
   timeElements.forEach(element => {
     const text = element.text()
@@ -82,7 +82,7 @@ test('renders IM chat without crashing', () => {
 
   expect(rendered.find('div').length).toBe(3)
 
-  const timeElements = rendered.find('span.time')
+  const timeElements = rendered.find('time')
   expect(timeElements.length).toBe(2)
   timeElements.forEach(element => {
     const text = element.text()

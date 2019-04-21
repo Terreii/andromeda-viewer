@@ -9,7 +9,7 @@ const MessageList = styled.div`
 `
 
 const Message = styled.div`
-  & > span {
+  & > span, & > time {
     padding-right: 0.3em;
     font-size: 120%;
   }
@@ -36,13 +36,13 @@ class ChatList extends React.Component {
       const name = names.get(fromId) || msg.get(isIM ? 'fromAgentName' : 'fromName') || ''
 
       return <Message key={msg.get('_id')}>
-        <span className='time'>
+        <time dateTime={time.toISOString()}>
           {leadingZero(time.getHours())}
           :
           {leadingZero(time.getMinutes())}
           :
           {leadingZero(time.getSeconds())}
-        </span>
+        </time>
         <AvatarName>{name.toString()}</AvatarName>
         <span className='messageText'>{msg.get('message')}</span>
       </Message>

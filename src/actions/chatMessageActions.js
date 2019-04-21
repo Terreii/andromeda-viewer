@@ -273,7 +273,7 @@ export function receiveIM (message) {
 
       case 1: // MessageBox
         dispatch(handleNotification(message))
-        break
+        return
 
       case 22: // RequestTeleport
         dispatch(handleNotification(message))
@@ -512,7 +512,28 @@ function handleIMFromObject (msg) {
  * Handles messages that are notifications
  * @param {object} msg IM Message from the server
  */
-function handleNotification (msg) {}
+function handleNotification (msg) {
+  let body = {
+    notificationType: 0,
+    text: '',
+    callbackId: null
+  }
+
+  switch (getValueOf(msg, 'MessageBlock', 'Dialog')) {
+    case 1: // MessageBox
+      body.text = getStringValueOf(msg, 'MessageBlock', 'Message')
+      break
+
+    default:
+      console.error(new Error('Unknown notification-type received!'), msg)
+      return
+  }
+
+  return {
+    type: 'NOTIFICATION_RECEIVED',
+    msg: body
+  }
+}
 
 /**
  * Handles messages that are notifications, but should be displayed in local chat.
@@ -553,6 +574,13 @@ function handleIMTypingEvent (msg) {
       : 'IM_STOP_TYPING',
     chatUUID: getValueOf(msg, 'MessageBlock', 'ID'),
     agentId: getValueOf(msg, 'AgentData', 'AgentID')
+  }
+}
+
+export function closeNotification (id) {
+  return {
+    type: 'NOTIFICATION_CLOSED',
+    id
   }
 }
 

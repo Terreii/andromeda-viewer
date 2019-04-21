@@ -4,11 +4,12 @@ import {
   sendLocalChatMessage,
   sendInstantMessage,
   startNewIMChat,
-  getIMHistory
+  getIMHistory,
+  closeNotification
 } from '../actions/chatMessageActions'
 import { updateRights } from '../actions/friendsActions'
 
-import { getLocalChat, getActiveIMChats } from '../selectors/chat'
+import { getLocalChat, getActiveIMChats, getNotifications } from '../selectors/chat'
 import { getNames } from '../selectors/names'
 import { getFriends } from '../selectors/people'
 import { getGroups } from '../selectors/groups'
@@ -19,6 +20,7 @@ const mapStateToProps = state => {
   return {
     localChat: getLocalChat(state),
     IMs: getActiveIMChats(state),
+    notifications: getNotifications(state),
     groups: getGroups(state),
     names: getNames(state),
     friends: getFriends(state)
@@ -30,6 +32,7 @@ const mapDispatchToProps = {
   sendInstantMessage,
   startNewIMChat,
   getIMHistory,
+  closeNotification,
   updateRights
 }
 

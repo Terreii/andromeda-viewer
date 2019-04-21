@@ -1,9 +1,11 @@
-import { Map } from 'immutable'
+import { Map, List } from 'immutable'
 
 import { getValueOf, getValuesOf } from '../network/msgGetters'
 
 export default function sessionReducer (state = Map({
   avatarIdentifier: null,
+  notifications: List(),
+  notificationId: 0,
   error: null
 }), action) {
   switch (action.type) {
@@ -64,10 +66,27 @@ export default function sessionReducer (state = Map({
         }
       })
 
+    case 'NOTIFICATION_RECEIVED':
+      const notificationId = state.get('notificationId')
+      return state.merge({
+        notifications: state.get('notifications').push({
+          ...action.msg,
+          id: notificationId
+        }),
+        notificationId: notificationId + 1
+      })
+
+    case 'NOTIFICATION_CLOSED':
+      return state.set('notifications',
+        state.get('notifications').filter(notification => action.id !== notification.id)
+      )
+
     case 'DidLogout':
     case 'UserWasKicked':
       return Map({
         avatarIdentifier: null,
+        notifications: List(),
+        notificationId: 0,
         error: action.type === 'UserWasKicked' ? action.reason : null
       })
 

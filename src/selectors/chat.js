@@ -23,3 +23,5 @@ export const getShouldSaveChat = createSelector(
   ],
   (sync, isSignedIn) => sync && isSignedIn
 )
+
+export const getNotifications = state => state.session.get('notifications')
