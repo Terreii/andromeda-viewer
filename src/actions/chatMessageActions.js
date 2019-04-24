@@ -243,31 +243,28 @@ export function receiveIM (message) {
 
         if (getStringValueOf(message, 'MessageBlock', 'FromAgentName') === 'Second Life') {
           dispatch(handleIMFromObject(message))
-          return
         } else if (
           getValueOf(message, 'AgentData', 'AgentID') === '00000000-0000-0000-0000-000000000000'
         ) {
-          dispatch(handleNotification(message))
+          dispatch(handleTextOnlyNotification(
+            getStringValueOf(message, 'MessageBlock', 'Message')
+          ))
         } else if (
           getValueOf(message, 'MessageBlock', 'FromGroup') ||
           getGroupsIDs(state).includes(id)
         ) {
           dispatch(handleGroupIM(message))
-          return
         } else if (getValueOf(message, 'MessageBlock', 'BinaryBucket').length > 1) {
           dispatch(handleConferenceIM(message))
-          return
         } else if (id === '00000000-0000-0000-0000-000000000000') {
           const text = getStringValueOf(message, 'MessageBlock', 'Message')
           const fromId = getValueOf(message, 'AgentData', 'AgentID')
           const fromAgentName = getStringValueOf(message, 'MessageBlock', 'FromAgentName')
           dispatch(handleNotificationInChat(text, fromAgentName, fromId))
-          return
         } else {
           dispatch(handleIM(message))
-          return
         }
-        break
+        return
 
       case 19: // MessageFromObject
         dispatch(handleIMFromObject(message))
@@ -279,7 +276,9 @@ export function receiveIM (message) {
         return
 
       case 1: // MessageBox
-        dispatch(handleNotification(message))
+        dispatch(handleTextOnlyNotification(
+          getStringValueOf(message, 'MessageBlock', 'Message')
+        ))
         return
 
       case 22: // RequestTeleport
@@ -516,14 +515,29 @@ function handleIMFromObject (msg) {
 }
 
 /**
+ * Handle text only notifications.
+ * @param {string} text Text that should be displayed.
+ */
+function handleTextOnlyNotification (text) {
+  return {
+    type: 'NOTIFICATION_RECEIVED',
+    msg: {
+      notificationType: 0,
+      text: text.toString(),
+      msg: null
+    }
+  }
+}
+
+/**
  * Handles messages that are notifications
  * @param {object} msg IM Message from the server
  */
 function handleNotification (msg) {
-  let body = {
+  const body = {
     notificationType: 0,
     text: '',
-    callbackId: null
+    msg: null
   }
 
   switch (getValueOf(msg, 'MessageBlock', 'Dialog')) {
@@ -533,7 +547,7 @@ function handleNotification (msg) {
 
     default:
       console.error(new Error('Unknown notification-type received!'), msg)
-      return
+      return () => {}
   }
 
   return {

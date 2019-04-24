@@ -225,7 +225,7 @@ export default class NewAvatarLogin extends React.Component {
       return <Container
         onClick={onSetActive}
         onKeyUp={event => {
-          if (event.keyCode === 13) {
+          if (event.keyCode === 13 || event.keyCode === 32) {
             onSetActive(event)
           }
         }}

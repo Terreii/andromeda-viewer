@@ -104,7 +104,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
     return <Container
       onClick={onSetActive}
       onKeyUp={event => {
-        if (event.keyCode === 13) {
+        if (event.keyCode === 13 || event.keyCode === 32) {
           onSetActive(event)
         }
       }}

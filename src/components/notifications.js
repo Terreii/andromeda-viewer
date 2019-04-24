@@ -25,7 +25,9 @@ const NotificationBorder = styled.div`
   padding: 1em;
 `
 
-const Text = styled.p``
+const Text = styled.p`
+  line-height: 1.5;
+`
 
 const ButtonsRow = styled.div`
   display: flex;
@@ -55,7 +57,12 @@ function Notification ({ data, onClick, onCancel }) {
   }
 
   return <NotificationBorder>
-    <Text>{data.text}</Text>
+    <Text>
+      {data.text.split('\n').flatMap((line, index) => index === 0
+        ? line
+        : [<br key={'br_' + index} />, line]
+      )}
+    </Text>
 
     <ButtonsRow>{buttons}</ButtonsRow>
   </NotificationBorder>
