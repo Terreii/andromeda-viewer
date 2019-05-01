@@ -35,7 +35,6 @@ test('renders without crashing', () => {
     selfName={new AvatarName('self Resident')}
     names={names}
     IMs={im}
-    notifications={Immutable.List()}
     friends={friends}
     localChat={localChat}
     sendLocalChatMessage={() => {}}
@@ -72,7 +71,6 @@ test('should pass aXe', async () => {
       selfName={new AvatarName('self Resident')}
       names={names}
       IMs={im}
-      notifications={Immutable.List()}
       friends={friends}
       localChat={localChat}
       sendLocalChatMessage={() => {}}

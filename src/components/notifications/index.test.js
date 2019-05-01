@@ -3,7 +3,7 @@ import React from 'react'
 import { mount } from 'enzyme'
 import Immutable from 'immutable'
 
-import Notifications from './notifications'
+import Notifications from './index'
 
 test('renders without crashing', () => {
   const allNotifications = Immutable.List([
