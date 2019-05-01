@@ -51,7 +51,9 @@ export function login (avatarName, password, grid, save, isNew) {
       platform: viewerPlatform,
       // mac will be added on the server side
       options: [
-        'buddy-list'
+        'buddy-list',
+        'inventory-root',
+        'inventory-skeleton'
       ],
       agree_to_tos: 'true',
       read_critical: 'true'
@@ -107,7 +109,6 @@ export function login (avatarName, password, grid, save, isNew) {
       dataSaveId: avatarData != null ? avatarData.dataSaveId : uuid(),
       grid,
       uuid: body.agent_id,
-      buddyList: body['buddy-list'],
       sessionInfo: body,
       localChatHistory
     })

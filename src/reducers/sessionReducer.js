@@ -18,6 +18,8 @@ export default function sessionReducer (state = Map({
         // Remove data that is stored somewhere else
         switch (keyFixed) {
           case 'buddy-list':
+          case 'inventory-root':
+          case 'inventory-skeleton':
           case 'login':
           case 'seedCapability':
           case 'firstName':

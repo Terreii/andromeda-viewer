@@ -30,7 +30,7 @@ function parseFriendsList (state, friend) {
 export default function friendsReducer (state = Immutable.List(), action) {
   switch (action.type) {
     case 'didLogin':
-      return action.buddyList.reduce(parseFriendsList, state)
+      return action.sessionInfo['buddy-list'].reduce(parseFriendsList, state)
 
     case 'ChangeUserRights':
       return state.map(friend => {
