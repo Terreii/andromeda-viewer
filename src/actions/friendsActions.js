@@ -111,3 +111,52 @@ export function updateRights (friendUUID, changedRights) {
     }, true)
   }
 }
+
+export function acceptFriendshipOffer (agentId, sessionId) {
+  return (dispatch, getState, { circuit }) => {
+    const state = getState()
+
+    circuit.send('AcceptFriendship', {
+      AgentData: [
+        {
+          AgentID: getAgentId(state),
+          SessionID: getSessionId(state)
+        }
+      ],
+      TransactionBlock: [
+        { TransactionID: sessionId }
+      ],
+      FolderData: [
+        // TODO add folderId { FolderID: '' }
+      ]
+    }, true)
+
+    dispatch({
+      type: 'FRIENDSHIP_ACCEPTED',
+      agentId
+    })
+  }
+}
+
+export function declineFriendshipOffer (agentId, sessionId) {
+  return (dispatch, getState, { circuit }) => {
+    const state = getState()
+
+    circuit.send('DeclineFriendship', {
+      AgentData: [
+        {
+          AgentID: getAgentId(state),
+          SessionID: getSessionId(state)
+        }
+      ],
+      TransactionBlock: [
+        { TransactionID: sessionId }
+      ]
+    }, true)
+
+    dispatch({
+      type: 'FRIENDSHIP_DECLINED',
+      agentId
+    })
+  }
+}

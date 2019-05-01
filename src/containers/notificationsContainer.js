@@ -1,6 +1,7 @@
 import { connect } from 'react-redux'
 
 import { closeNotification } from '../actions/chatMessageActions'
+import { acceptFriendshipOffer, declineFriendshipOffer } from '../actions/friendsActions'
 
 import { getNotifications } from '../selectors/chat'
 
@@ -13,7 +14,9 @@ const mapStateToProps = state => {
 }
 
 const mapDispatchToProps = {
-  onCancel: closeNotification
+  acceptFriendship: acceptFriendshipOffer,
+  declineFriendship: declineFriendshipOffer,
+  onClose: closeNotification
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(NotificationsView)

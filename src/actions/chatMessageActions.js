@@ -298,7 +298,7 @@ export function receiveIM (message) {
           dispatch(handleIMFromObject(message))
           return
         } else {
-          dispatch(handleNotification(message))
+          dispatch(handleFriendshipOffer(message))
         }
         break
 
@@ -523,8 +523,24 @@ function handleTextOnlyNotification (text) {
     type: 'NOTIFICATION_RECEIVED',
     msg: {
       notificationType: 0,
-      text: text.toString(),
-      msg: null
+      text: text.toString()
+    }
+  }
+}
+
+/**
+ * Handles friendship offers by IM.
+ * @param {object} msg IM Message from the server
+ */
+function handleFriendshipOffer (msg) {
+  return {
+    type: 'NOTIFICATION_RECEIVED',
+    msg: {
+      notificationType: 1,
+      text: getStringValueOf(msg, 'MessageBlock', 'Message'),
+      fromId: getValueOf(msg, 'AgentData', 'AgentID'),
+      fromAgentName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
+      sessionId: getValueOf(msg, 'MessageBlock', 'ID')
     }
   }
 }
