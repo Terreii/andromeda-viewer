@@ -85,7 +85,7 @@ export default class LoginForm extends React.Component {
 
   componentWillReceiveProps (nextProps) {
     if (this.props.avatars.length === 0 && nextProps.avatars.length > 0) {
-      this._setSelected(this.props.avatars[0].avatarIdentifier)
+      this._setSelected(nextProps.avatars[0].avatarIdentifier)
     } else if (this.props.avatars.length > 0 && nextProps.avatars.length === 0) {
       this._setSelected('new')
     }
