@@ -33,7 +33,7 @@ class ChatList extends React.Component {
     const messagesLines = messages.map(msg => {
       const time = new Date(msg.get('time'))
       const fromId = isIM ? msg.get('fromId') : msg.get('sourceID')
-      const name = names.get(fromId) || msg.get(isIM ? 'fromAgentName' : 'fromName') || ''
+      const name = names[fromId] || msg.get(isIM ? 'fromAgentName' : 'fromName') || ''
 
       return <Message key={msg.get('_id')}>
         <span className='time'>

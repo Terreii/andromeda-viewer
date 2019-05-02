@@ -15,9 +15,9 @@ test('renders without crashing', () => {
     }
   ])
 
-  const names = Immutable.Map({
+  const names = {
     first: new AvatarName('Testery MacTestface')
-  })
+  }
 
   mount(<FriendsList
     friends={friends}
@@ -55,10 +55,10 @@ test('rendering', () => {
     }
   ])
 
-  const names = Immutable.Map({
+  const names = {
     first: new AvatarName('Testery MacTestface'),
     other: new AvatarName('Buddy Budds')
-  })
+  }
 
   const list = mount(<FriendsList
     friends={friends}
@@ -94,9 +94,9 @@ test('event handling/changing rights', () => {
     }
   ])
 
-  const names = Immutable.Map({
+  const names = {
     first: new AvatarName('Testery MacTestface')
-  })
+  }
 
   const changeCounts = {
     canSeeOnline: 0,
@@ -152,9 +152,9 @@ test('should pass aXe', async () => {
     }
   ])
 
-  const names = Immutable.Map({
+  const names = {
     first: new AvatarName('Testery MacTestface')
-  })
+  }
 
   const rendered = mount(<FriendsList
     friends={friends}

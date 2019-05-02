@@ -8,7 +8,7 @@ export const loadNames = createSelector(
   [
     getNames
   ],
-  names => names.some(name => !name.willHaveDisplayName())
+  names => Object.values(names).some(name => !name.willHaveDisplayName())
     ? getDisplayName()
     : null
 )

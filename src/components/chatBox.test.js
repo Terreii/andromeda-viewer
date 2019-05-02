@@ -7,11 +7,9 @@ import ChatBox from './chatBox'
 import AvatarName from '../avatarName'
 
 test('renders without crashing', () => {
-  const names = Immutable.fromJS({
-    names: {
-      first: new AvatarName('Testery MacTestface')
-    }
-  })
+  const names = {
+    first: new AvatarName('Testery MacTestface')
+  }
 
   const im = Immutable.fromJS({
     first: {
@@ -42,11 +40,9 @@ test('renders without crashing', () => {
 })
 
 test('should pass aXe', async () => {
-  const names = Immutable.fromJS({
-    names: {
-      first: new AvatarName('Testery MacTestface')
-    }
-  })
+  const names = {
+    first: new AvatarName('Testery MacTestface')
+  }
 
   const im = Immutable.fromJS({
     first: {

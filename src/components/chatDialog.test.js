@@ -7,11 +7,9 @@ import ChatDialog from './chatDialog'
 import AvatarName from '../avatarName'
 
 test('renders without crashing', () => {
-  const names = Immutable.fromJS({
-    names: {
-      first: new AvatarName('Testery MacTestface')
-    }
-  })
+  const names = {
+    first: new AvatarName('Testery MacTestface')
+  }
 
   const chatData = Immutable.fromJS([])
 
@@ -24,11 +22,9 @@ test('renders without crashing', () => {
 })
 
 test('renders local chat', () => {
-  const names = Immutable.fromJS({
-    names: {
-      first: new AvatarName('Testery MacTestface')
-    }
-  })
+  const names = {
+    first: new AvatarName('Testery MacTestface')
+  }
 
   const chatData = Immutable.fromJS([])
 
@@ -63,11 +59,9 @@ test('renders local chat', () => {
 })
 
 test('renders IM chat', () => {
-  const names = Immutable.fromJS({
-    names: {
-      first: new AvatarName('Testery MacTestface')
-    }
-  })
+  const names = {
+    first: new AvatarName('Testery MacTestface')
+  }
 
   const imData = Immutable.fromJS({
     chatUUID: 'abc',
@@ -121,11 +115,9 @@ test('renders IM chat', () => {
 })
 
 test('Local chat should pass aXe', async () => {
-  const names = Immutable.fromJS({
-    names: {
-      first: new AvatarName('Testery MacTestface')
-    }
-  })
+  const names = {
+    first: new AvatarName('Testery MacTestface')
+  }
 
   const chatData = Immutable.fromJS([])
 
@@ -147,11 +139,9 @@ test('Local chat should pass aXe', async () => {
 })
 
 test('IM chat should pass aXe', async () => {
-  const names = Immutable.fromJS({
-    names: {
-      first: new AvatarName('Testery MacTestface')
-    }
-  })
+  const names = {
+    first: new AvatarName('Testery MacTestface')
+  }
 
   const imData = Immutable.fromJS({
     chatUUID: 'abc',

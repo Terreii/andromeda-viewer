@@ -22,7 +22,7 @@ export default function ChatBox (props) {
     const target = chat.get('withId')
     const type = chat.get('type')
     const name = type === 'personal'
-      ? (names.has(target) ? names.get(target).getName() : chat.get('name'))
+      ? (target in names ? names[target].getName() : chat.get('name'))
       : chat.get('name')
 
     return <TabPane tab={name} key={id}>

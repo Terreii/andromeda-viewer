@@ -115,7 +115,7 @@ ChatDialog.propTypes = {
     PropTypes.instanceOf(Immutable.List),
     PropTypes.instanceOf(Immutable.Map)
   ]).isRequired,
-  names: PropTypes.instanceOf(Immutable.Map).isRequired,
+  names: PropTypes.object.isRequired,
   sendTo: PropTypes.func.isRequired,
   isIM: PropTypes.bool
 }

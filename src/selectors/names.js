@@ -4,11 +4,11 @@ import { createSelector } from 'reselect'
 
 import { getIsLoggedIn, getAgentId } from './session'
 
-export const getNames = state => state.names.get('names')
+export const getNames = state => state.names.names
 
-export const getAvatarNameById = (state, id) => state.names.getIn(['names', id])
+export const getAvatarNameById = (state, id) => getNames(state)[id]
 
-export const getDisplayNamesURL = state => state.names.get('getDisplayNamesURL')
+export const getDisplayNamesURL = state => state.names.getDisplayNamesURL
 
 export const getOwnAvatarName = createSelector(
   [
@@ -17,6 +17,6 @@ export const getOwnAvatarName = createSelector(
     getNames
   ],
   (isLoggedIn, agentId, names) => isLoggedIn
-    ? names.get(agentId)
+    ? names[agentId]
     : null
 )

@@ -125,7 +125,7 @@ function FriendRow ({ friend, name, skipLink, onRightsChanged, startNewIMChat })
 export default function FriendsList ({ friends, names, updateRights, startNewIMChat }) {
   const list = friends.map((friend, index, all) => {
     const id = friend.get('id')
-    const name = names.has(id) ? names.get(id).getDisplayName() : id
+    const name = id in names ? names[id].getDisplayName() : id
 
     return <FriendRow
       key={id}
@@ -149,6 +149,6 @@ export default function FriendsList ({ friends, names, updateRights, startNewIMC
 FriendsList.displayName = 'FriendsList'
 
 FriendsList.propTypes = {
-  names: PropTypes.instanceOf(Immutable.Map).isRequired,
+  names: PropTypes.object.isRequired,
   friends: PropTypes.instanceOf(Immutable.List).isRequired
 }
