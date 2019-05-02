@@ -66,8 +66,8 @@ export function getAllFriendsDisplayNames () {
 
     const names = getNames(state)
     const friendsIds = getFriends(state)
-      .map(friend => friend.get('id'))
-      .push(getAgentId(state)) // Add self
+      .map(friend => friend.id)
+      .concat([getAgentId(state)]) // Add self
       .filter(id => !(id in names) || !names[id].willHaveDisplayName()) // unknown only
 
     dispatch(loadDisplayNames(friendsIds))
@@ -85,7 +85,7 @@ export function updateRights (friendUUID, changedRights) {
     if (friend == null) return
 
     const getRight = name => changedRights[name] == null
-      ? friend.getIn(['rightsGiven', name])
+      ? friend.rightsGiven[name]
       : changedRights[name]
 
     // Get and combine rights

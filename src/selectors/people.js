@@ -2,5 +2,4 @@
 
 export const getFriends = state => state.friends
 
-export const getFriendById = (state, friendId) => getFriends(state)
-  .find(friend => friend.get('id') === friendId)
+export const getFriendById = (state, id) => getFriends(state).find(friend => friend.id === id)

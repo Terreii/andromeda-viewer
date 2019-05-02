@@ -19,13 +19,13 @@ test('renders without crashing', () => {
     }
   })
 
-  const friends = Immutable.fromJS([
+  const friends = [
     {
       id: 'first',
       rightsGiven: {},
       rightsHas: {}
     }
-  ])
+  ]
 
   const localChat = Immutable.fromJS([])
 
@@ -52,13 +52,13 @@ test('should pass aXe', async () => {
     }
   })
 
-  const friends = Immutable.fromJS([
+  const friends = [
     {
       id: 'first',
       rightsGiven: {},
       rightsHas: {}
     }
-  ])
+  ]
 
   const localChat = Immutable.fromJS([])
 

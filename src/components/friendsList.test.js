@@ -1,19 +1,18 @@
 import { axe } from 'jest-axe'
 import React from 'react'
 import { mount } from 'enzyme'
-import Immutable from 'immutable'
 
 import FriendsList from './friendsList'
 import AvatarName from '../avatarName'
 
 test('renders without crashing', () => {
-  const friends = Immutable.fromJS([
+  const friends = [
     {
       id: 'first',
       rightsGiven: {},
       rightsHas: {}
     }
-  ])
+  ]
 
   const names = {
     first: new AvatarName('Testery MacTestface')
@@ -26,7 +25,7 @@ test('renders without crashing', () => {
 })
 
 test('rendering', () => {
-  const friends = Immutable.fromJS([
+  const friends = [
     {
       id: 'first',
       rightsGiven: {
@@ -53,7 +52,7 @@ test('rendering', () => {
         canModifyObjects: false
       }
     }
-  ])
+  ]
 
   const names = {
     first: new AvatarName('Testery MacTestface'),
@@ -78,7 +77,7 @@ test('rendering', () => {
 })
 
 test('event handling/changing rights', () => {
-  const friends = Immutable.fromJS([
+  const friends = [
     {
       id: 'first',
       rightsGiven: {
@@ -92,7 +91,7 @@ test('event handling/changing rights', () => {
         canModifyObjects: false
       }
     }
-  ])
+  ]
 
   const names = {
     first: new AvatarName('Testery MacTestface')
@@ -144,13 +143,13 @@ test('event handling/changing rights', () => {
 })
 
 test('should pass aXe', async () => {
-  const friends = Immutable.fromJS([
+  const friends = [
     {
       id: 'first',
       rightsGiven: {},
       rightsHas: {}
     }
-  ])
+  ]
 
   const names = {
     first: new AvatarName('Testery MacTestface')
