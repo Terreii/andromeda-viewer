@@ -15,15 +15,14 @@ import 'rc-tabs/assets/index.css'
 
 export default function ChatBox (props) {
   const names = props.names
-  const imsIds = props.IMs.keySeq().toJSON()
 
-  const panels = imsIds.map(id => {
-    const chat = props.IMs.get(id)
-    const target = chat.get('withId')
-    const type = chat.get('type')
+  const panels = props.IMs.map(chat => {
+    const id = chat.chatUUID
+    const target = chat.withId
+    const type = chat.type
     const name = type === 'personal'
-      ? (target in names ? names[target].getName() : chat.get('name'))
-      : chat.get('name')
+      ? (target in names ? names[target].getName() : chat.name)
+      : chat.name
 
     return <TabPane tab={name} key={id}>
       <ChatDialog

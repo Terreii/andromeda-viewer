@@ -1,7 +1,6 @@
 import { axe } from 'jest-axe'
 import React from 'react'
 import { shallow, mount } from 'enzyme'
-import Immutable from 'immutable'
 
 import ChatBox from './chatBox'
 import AvatarName from '../avatarName'
@@ -11,13 +10,14 @@ test('renders without crashing', () => {
     first: new AvatarName('Testery MacTestface')
   }
 
-  const im = Immutable.fromJS({
-    first: {
+  const im = [
+    {
+      chatUUID: '2345',
       withId: 'first',
       isIM: true,
       messages: []
     }
-  })
+  ]
 
   const friends = [
     {
@@ -27,14 +27,12 @@ test('renders without crashing', () => {
     }
   ]
 
-  const localChat = Immutable.fromJS([])
-
   shallow(<ChatBox
     selfName={new AvatarName('self Resident')}
     names={names}
     IMs={im}
     friends={friends}
-    localChat={localChat}
+    localChat={[]}
     sendLocalChatMessage={() => {}}
   />)
 })
@@ -44,13 +42,14 @@ test('should pass aXe', async () => {
     first: new AvatarName('Testery MacTestface')
   }
 
-  const im = Immutable.fromJS({
-    first: {
+  const im = [
+    {
+      chatUUID: '2345',
       withId: 'first',
       isIM: true,
       messages: []
     }
-  })
+  ]
 
   const friends = [
     {
@@ -60,15 +59,13 @@ test('should pass aXe', async () => {
     }
   ]
 
-  const localChat = Immutable.fromJS([])
-
   const rendered = mount(<div>
     <ChatBox
       selfName={new AvatarName('self Resident')}
       names={names}
       IMs={im}
       friends={friends}
-      localChat={localChat}
+      localChat={[]}
       sendLocalChatMessage={() => {}}
     />
   </div>)
