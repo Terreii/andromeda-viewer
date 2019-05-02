@@ -14,14 +14,14 @@ export const getCurrentAvatarData = createSelector(
   ],
   (savedAvatars, anonymAvatarData, avatarIdentifier) => anonymAvatarData != null
     ? anonymAvatarData
-    : savedAvatars.find(avatarData => avatarData.get('avatarIdentifier') === avatarIdentifier)
+    : savedAvatars.find(avatarData => avatarData.avatarIdentifier === avatarIdentifier)
 )
 
 export const getAvatarDataSaveId = createSelector(
   [
     getCurrentAvatarData
   ],
-  avatarData => avatarData.get('dataSaveId')
+  avatarData => avatarData.dataSaveId
 )
 
 export const getErrorMessage = state => state.session.get('error')

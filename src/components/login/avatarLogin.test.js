@@ -1,21 +1,20 @@
 import { axe } from 'jest-axe'
 import React from 'react'
 import { shallow, mount } from 'enzyme'
-import { Map } from 'immutable'
 
 import AvatarLogin from './avatarLogin'
 
 test('renders without crashing', () => {
-  const avatar = Map({
+  const avatar = {
     _id: 'avatar/testery',
     name: 'Testery MacTestface',
     grid: 'Second Life'
-  })
+  }
 
-  const grid = Map({
+  const grid = {
     name: 'Second Life',
     loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
-  })
+  }
 
   shallow(<AvatarLogin
     avatar={avatar}
@@ -30,16 +29,16 @@ test('renders without crashing', () => {
 })
 
 test('login works', () => {
-  const avatar = Map({
+  const avatar = {
     _id: 'avatar/testery',
     name: 'Testery MacTestface',
     grid: 'Second Life'
-  })
+  }
 
-  const grid = Map({
+  const grid = {
     name: 'Second Life',
     loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
-  })
+  }
 
   const loginInfo = {
     count: 0,
@@ -94,16 +93,16 @@ test('login works', () => {
 })
 
 test('should pass aXe', async () => {
-  const avatar = Map({
+  const avatar = {
     _id: 'avatar/testery',
     name: 'Testery MacTestface',
     grid: 'Second Life'
-  })
+  }
 
-  const grid = Map({
+  const grid = {
     name: 'Second Life',
     loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
-  })
+  }
 
   const loginInfo = {
     count: 0,

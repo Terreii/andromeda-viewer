@@ -7,7 +7,7 @@ export const selectPopup = createSelector(
   [
     getIsSignedIn,
     getIsUnlocked,
-    state => state.account.get('signInPopup'),
+    state => state.account.signInPopup,
     getErrorMessage
   ],
   (isSignedIn, isUnlocked, signInPopup, sessionError) => {
@@ -21,4 +21,4 @@ export const selectPopup = createSelector(
   }
 )
 
-export const selectPopupData = state => state.account.get('popupData')
+export const selectPopupData = state => state.account.popupData
