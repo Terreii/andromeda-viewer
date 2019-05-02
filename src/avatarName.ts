@@ -4,7 +4,7 @@
 
 // first.last and first last will become {first: 'first', last: 'last'}
 
-function cleanName (name) {
+function cleanName (name: string) {
   // deletes characters that will be in names but shouldn't
   const trimmed = name.trim().replace(/["\0]/gi, '')
   const upperCased = trimmed.charAt(0).toUpperCase() + // name -> Name
@@ -13,7 +13,14 @@ function cleanName (name) {
 }
 
 export default class AvatarName {
-  constructor (name) {
+  first: string
+  last: string
+  displayName: string
+  isUsingDisplayName: boolean
+  didLoadDisplayName: boolean
+  isLoadingDisplayName: boolean
+
+  constructor (name: AvatarName | string | { first: string, last: string }) {
     if (name instanceof AvatarName) {
       this.first = name.first
       this.last = name.last
@@ -38,6 +45,8 @@ export default class AvatarName {
     } else if (typeof name === 'string' && typeof arguments[1] === 'string') {
       this.first = cleanName(name)
       this.last = cleanName(arguments[1])
+    } else {
+      throw new TypeError(`couldn't parse ${name}`)
     }
     this.displayName = ''
     this.isUsingDisplayName = false
@@ -69,7 +78,7 @@ export default class AvatarName {
     return this.getDisplayName()
   }
 
-  compare (other, strict) {
+  compare (other: AvatarName, strict: boolean = false) {
     if (strict && !(other instanceof AvatarName)) {
       return false
     }
@@ -83,13 +92,13 @@ export default class AvatarName {
     return this.didLoadDisplayName || this.isLoadingDisplayName || this.displayName.length > 0
   }
 
-  withIsLoadingSetTo (isLoading) {
+  withIsLoadingSetTo (isLoading: boolean) {
     const next = new AvatarName(this)
     next.isLoadingDisplayName = isLoading
     return next
   }
 
-  withDisplayNameSetTo (displayName, legacyFirstName, legacyLastName) {
+  withDisplayNameSetTo (displayName: string, legacyFirstName: string, legacyLastName: string) {
     const next = new AvatarName(this)
 
     if (legacyFirstName != null) {
