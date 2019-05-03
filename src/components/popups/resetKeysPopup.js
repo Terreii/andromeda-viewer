@@ -56,7 +56,7 @@ export default function ResetKeysPopup ({ resetKeys, onClose }) {
     return () => {
       window.URL.revokeObjectURL(objURL)
     }
-  }, resetKeys)
+  }, [resetKeys])
 
   return <Popup title='Password reset keys' onClose={onClose}>
     <Container>
