@@ -12,7 +12,7 @@ export const getActiveIMChats = createSelector(
   [
     getIMChats
   ],
-  chats => chats.filter(chat => chat.get('active'))
+  chats => Object.values(chats).filter(chat => chat.active)
 )
 
 // checks if the chat history should be saved and synced

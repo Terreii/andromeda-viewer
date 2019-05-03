@@ -1,4 +1,4 @@
-import Immutable from 'immutable'
+// Reducer for viewer-account and state
 
 function getDefault () {
   const defaultData = {
@@ -27,137 +27,163 @@ function getDefault () {
     ],
     savedGridsLoaded: false
   }
-  return Immutable.fromJS(defaultData)
+  return defaultData
 }
 
 export default function accountReducer (state = getDefault(), action) {
   switch (action.type) {
     case 'didLogin':
       if (action.save) {
-        return state.merge({
+        return {
+          ...state,
           sync: action.save
-        })
+        }
       } else { // Anonym
-        return state.merge({
+        return {
+          ...state,
           sync: action.save,
-          anonymAvatarData: Immutable.Map({
+          anonymAvatarData: {
             grid: action.grid.name,
             name: action.name.getFullName(),
             avatarIdentifier: action.avatarIdentifier,
             dataSaveId: action.dataSaveId
-          })
-        })
+          }
+        }
       }
 
     case 'loginDidFail':
-      return state.merge({
+      return {
+        ...state,
         sync: false
-      })
+      }
 
     case 'ViewerAccountLogInStatus':
-      return state.merge({
-        unlocked: action.isUnlocked == null ? state.get('unlocked') : action.isUnlocked,
+      return {
+        ...state,
+        unlocked: action.isUnlocked == null ? state.unlocked : action.isUnlocked,
         loggedIn: action.isLoggedIn,
         username: action.username
-      })
+      }
 
     case 'ViewerAccountSignOut':
       return getDefault()
 
     case 'ViewerAccountUnlocked':
-      return state.merge({
+      return {
+        ...state,
         unlocked: true
-      })
+      }
 
     case 'ShowSignInPopup':
-      return state.mergeDeep({
+      return {
+        ...state,
         signInPopup: action.popup
-      })
+      }
 
     case 'ShowSignOutPopup':
-      return state.mergeDeep({
+      return {
+        ...state,
         signInPopup: 'signOut'
-      })
+      }
 
     case 'SHOW_PASSWORD_RESET':
-      return state.mergeDeep({
+      return {
+        ...state,
         signInPopup: 'resetPassword',
         popupData: action.passwordType
-      })
+      }
 
     case 'DISPLAY_VIEWER_ACCOUNT_RESET_KEYS':
-      return state.mergeDeep({
+      return {
+        ...state,
         signInPopup: 'resetKeys',
         popupData: action.resetKeys
-      })
+      }
 
     case 'ClosePopup':
-      return state.mergeDeep({
+      return {
+        ...state,
         signInPopup: '',
         popupData: null
-      })
+      }
 
     case 'AvatarSaved':
-      return state.set('savedAvatars',
-        state.get('savedAvatars').push(
-          Immutable.Map(action.avatar)
-        )
-      )
+      return {
+        ...state,
+        savedAvatars: state.savedAvatars.concat([
+          action.avatar
+        ])
+      }
 
     case 'AvatarsLoaded':
-      const savedAvatars = Immutable.fromJS(action.avatars)
-      return state.merge({
-        savedAvatars,
+      return {
+        ...state,
+        savedAvatars: action.avatars,
         savedAvatarsLoaded: true
-      })
+      }
 
     case 'SavedAvatarUpdated':
-      return state.set('savedAvatars', state.get('savedAvatars').map(avatar => {
-        return avatar.get('_id') === action.avatar._id ? Immutable.fromJS(action.avatar) : avatar
-      }))
+      return {
+        ...state,
+        savedAvatars: state.savedAvatars.map(avatar => avatar._id === action.avatar._id
+          ? action.avatar
+          : avatar
+        )
+      }
 
     case 'SavedAvatarRemoved':
-      return state.set('savedAvatars', state.get('savedAvatars').filter(avatar => {
-        return avatar.get('_id') !== action.avatar._id
-      }))
+      return {
+        ...state,
+        savedAvatars: state.savedAvatars.filter(avatar => avatar._id !== action.avatar._id)
+      }
 
     case 'GridAdded':
-      const grids = state.get('savedGrids').push(Immutable.Map(action.grid))
-      return state.set('savedGrids', grids)
+      return {
+        ...state,
+        savedGrids: state.savedGrids.concat([
+          action.grid
+        ])
+      }
 
     case 'GridsLoaded':
-      const loadedGrids = Immutable.fromJS(action.grids)
-      return state.merge({
-        savedGrids: state.get('savedGrids').concat(loadedGrids),
+      return {
+        ...state,
+        savedGrids: state.savedGrids.concat(action.grids),
         savedGridsLoaded: true
-      })
+      }
 
     case 'SavedGridDidChanged':
-      return state.set('savedGrids', state.get('savedGrids').map(grid => {
-        if (grid.has('_id')) { // If grid has an id
-          return grid.get('_id') === action.grid._id
-            ? Immutable.fromJS(action.grid)
-            : grid
-        } else {
-          return grid.get('name') === action.grid.name
-            ? Immutable.fromJS(action.grid)
-            : grid
-        }
-      }))
+      return {
+        ...state,
+        savedGrids: state.savedGrids.map(grid => {
+          if (grid._id != null) { // If grid has an id
+            return grid._id === action.grid._id
+              ? action.grid
+              : grid
+          } else {
+            return grid.name === action.grid.name
+              ? action.grid
+              : grid
+          }
+        })
+      }
 
     case 'SavedGridRemoved':
-      return state.set('savedGrids', state.get('savedGrids').filter(grid => {
-        return grid.has('_id')
-          ? grid.get('_id') !== action.grid._id // grid has an id
-          : grid.get('name') !== action.grid.name
-      }))
+      return {
+        ...state,
+        savedGrids: state.savedGrids.filter(grid => grid._id != null
+          ? grid._id !== action.grid._id
+          : grid.name !== action.grid.name
+        )
+      }
 
     case 'DidLogout':
     case 'UserWasKicked':
-      return state.merge({
+      return {
+        ...state,
         anonymAvatarData: null,
         sync: false
-      })
+      }
 
     default:
       return state

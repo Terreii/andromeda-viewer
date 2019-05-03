@@ -74,9 +74,7 @@ export function login (avatarName, password, grid, save, isNew) {
     }
 
     // save grid if it is new (do not save if login did fail)
-    const gridExists = getSavedGrids(getState()).some(savedGrid => {
-      return savedGrid.get('name') === grid.name
-    })
+    const gridExists = getSavedGrids(getState()).some(savedGrid => savedGrid.name === grid.name)
     if (save && isNew && !gridExists) {
       await dispatch(saveGrid(grid))
     }
@@ -88,11 +86,9 @@ export function login (avatarName, password, grid, save, isNew) {
       : getSavedAvatars(getState()).reduce((last, avatar) => { // for saved avatars
         if (last != null) return last
 
-        if (avatar.get('avatarIdentifier') === avatarIdentifier) {
-          return avatar.toJS()
-        } else {
-          return last
-        }
+        return avatar.avatarIdentifier === avatarIdentifier
+          ? avatar
+          : last
       }, null)
 
     const localChatHistory = !isNew && save

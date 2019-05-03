@@ -4,7 +4,7 @@ import { createSelector } from 'reselect'
 
 import { getSavedAvatars, getAnonymAvatarData } from './viewer'
 
-export const getAvatarIdentifier = state => state.session.get('avatarIdentifier')
+export const getAvatarIdentifier = state => state.session.avatarIdentifier
 
 export const getCurrentAvatarData = createSelector(
   [
@@ -14,21 +14,21 @@ export const getCurrentAvatarData = createSelector(
   ],
   (savedAvatars, anonymAvatarData, avatarIdentifier) => anonymAvatarData != null
     ? anonymAvatarData
-    : savedAvatars.find(avatarData => avatarData.get('avatarIdentifier') === avatarIdentifier)
+    : savedAvatars.find(avatarData => avatarData.avatarIdentifier === avatarIdentifier)
 )
 
 export const getAvatarDataSaveId = createSelector(
   [
     getCurrentAvatarData
   ],
-  avatarData => avatarData.get('dataSaveId')
+  avatarData => avatarData.dataSaveId
 )
 
-export const getErrorMessage = state => state.session.get('error')
+export const getErrorMessage = state => state.session.error
 
-export const getAgentId = state => state.session.get('agentId')
+export const getAgentId = state => state.session.agentId
 
-export const getSessionId = state => state.session.get('sessionId')
+export const getSessionId = state => state.session.sessionId
 
 export const getIsLoggedIn = createSelector(
   [

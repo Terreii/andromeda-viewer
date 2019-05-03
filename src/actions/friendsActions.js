@@ -24,7 +24,7 @@ function loadDisplayNames (idsArray) {
     if (ids.length === 0) return
 
     const fetchUrlString = getDisplayNamesURL(getState())
-    if (fetchUrlString == null) return // Not jet loaded
+    if (fetchUrlString.length === 0) return // Not jet loaded
 
     const fetchUrl = new window.URL(fetchUrlString)
     ids.forEach(id => fetchUrl.searchParams.append('ids', id))
@@ -52,7 +52,8 @@ export function getDisplayName () {
   return (dispatch, getState) => {
     const names = getNames(getState())
 
-    const toLoad = names.filter(name => !name.willHaveDisplayName()).keySeq().toArray()
+    const toLoad = Object.keys(names).filter(id => !names[id].willHaveDisplayName())
+
     if (toLoad.length > 0) {
       dispatch(loadDisplayNames(toLoad))
     }
@@ -65,10 +66,9 @@ export function getAllFriendsDisplayNames () {
 
     const names = getNames(state)
     const friendsIds = getFriends(state)
-      .map(friend => friend.get('id'))
-      .push(getAgentId(state)) // Add self
-      .filter(id => !names.has(id) || !names.get(id).willHaveDisplayName()) // unknown only
-      .toArray()
+      .map(friend => friend.id)
+      .concat([getAgentId(state)]) // Add self
+      .filter(id => !(id in names) || !names[id].willHaveDisplayName()) // unknown only
 
     dispatch(loadDisplayNames(friendsIds))
   }
@@ -85,7 +85,7 @@ export function updateRights (friendUUID, changedRights) {
     if (friend == null) return
 
     const getRight = name => changedRights[name] == null
-      ? friend.getIn(['rightsGiven', name])
+      ? friend.rightsGiven[name]
       : changedRights[name]
 
     // Get and combine rights
