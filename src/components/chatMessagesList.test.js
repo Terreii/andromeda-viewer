@@ -1,13 +1,12 @@
 import { axe } from 'jest-axe'
 import React from 'react'
 import { mount } from 'enzyme'
-import Immutable from 'immutable'
 
 import ChatMessagesList from './chatMessagesList'
 import AvatarName from '../avatarName'
 
 test('renders local chat without crashing', () => {
-  const messages = Immutable.fromJS([
+  const messages = [
     {
       _id: 'first',
       sourceID: 'ABCB',
@@ -20,14 +19,12 @@ test('renders local chat without crashing', () => {
       message: 'How are you?',
       time: '2018-08-10T11:03:32.734Z'
     }
-  ])
+  ]
 
-  const names = Immutable.fromJS({
-    names: {
-      'ABCB': new AvatarName('Testery MacTestface'),
-      '1234': new AvatarName('Viewerer Account')
-    }
-  })
+  const names = {
+    'ABCB': new AvatarName('Testery MacTestface'),
+    '1234': new AvatarName('Viewerer Account')
+  }
 
   const rendered = mount(<ChatMessagesList
     messages={messages}
@@ -52,7 +49,7 @@ test('renders local chat without crashing', () => {
 })
 
 test('renders IM chat without crashing', () => {
-  const messages = Immutable.fromJS([
+  const messages = [
     {
       _id: 'first',
       fromId: 'ABCB',
@@ -65,14 +62,12 @@ test('renders IM chat without crashing', () => {
       message: 'How are you?',
       time: '2018-08-10T11:03:32.734Z'
     }
-  ])
+  ]
 
-  const names = Immutable.fromJS({
-    names: {
-      'ABCB': new AvatarName('Testery MacTestface'),
-      '1234': new AvatarName('Viewerer Account')
-    }
-  })
+  const names = {
+    'ABCB': new AvatarName('Testery MacTestface'),
+    '1234': new AvatarName('Viewerer Account')
+  }
 
   const rendered = mount(<ChatMessagesList
     messages={messages}
@@ -98,7 +93,7 @@ test('renders IM chat without crashing', () => {
 })
 
 test('Local chat should pass aXe', async () => {
-  const messages = Immutable.fromJS([
+  const messages = [
     {
       _id: 'first',
       sourceID: 'ABCB',
@@ -111,14 +106,12 @@ test('Local chat should pass aXe', async () => {
       message: 'How are you?',
       time: '2018-08-10T11:03:32.734Z'
     }
-  ])
+  ]
 
-  const names = Immutable.fromJS({
-    names: {
-      'ABCB': new AvatarName('Testery MacTestface'),
-      '1234': new AvatarName('Viewerer Account')
-    }
-  })
+  const names = {
+    'ABCB': new AvatarName('Testery MacTestface'),
+    '1234': new AvatarName('Viewerer Account')
+  }
 
   const rendered = mount(<ChatMessagesList
     messages={messages}
@@ -129,7 +122,7 @@ test('Local chat should pass aXe', async () => {
 })
 
 test('IM chat should pass aXe', async () => {
-  const messages = Immutable.fromJS([
+  const messages = [
     {
       _id: 'first',
       fromId: 'ABCB',
@@ -142,14 +135,12 @@ test('IM chat should pass aXe', async () => {
       message: 'How are you?',
       time: '2018-08-10T11:03:32.734Z'
     }
-  ])
+  ]
 
-  const names = Immutable.fromJS({
-    names: {
-      'ABCB': new AvatarName('Testery MacTestface'),
-      '1234': new AvatarName('Viewerer Account')
-    }
-  })
+  const names = {
+    'ABCB': new AvatarName('Testery MacTestface'),
+    '1234': new AvatarName('Viewerer Account')
+  }
 
   const rendered = mount(<ChatMessagesList
     messages={messages}

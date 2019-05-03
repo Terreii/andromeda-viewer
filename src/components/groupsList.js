@@ -42,14 +42,14 @@ const ListItemButton = styled.button`
 `
 
 function GroupRow ({ group, startNewIMChat }) {
-  const name = group.get('name')
+  const name = group.name
 
   return <ListItem>
     <NameCell>{name}</NameCell>
     <ListItemButton
       onClick={event => {
         event.preventDefault()
-        startNewIMChat(15, group.get('id'), name, true)
+        startNewIMChat(15, group.id, name, true)
         // TODO: switch to tap
         // .then(chatUUID => console.log(`activate group chat ${name} ${chatUUID}`))
       }}>
@@ -63,7 +63,7 @@ export default function GroupsList ({ groups, startNewIMChat }) {
     <ListTitle>Groups</ListTitle>
     <List>
       {groups.map(group => <GroupRow
-        key={group.get('id')}
+        key={group.id}
         group={group}
         startNewIMChat={startNewIMChat}
       />)}

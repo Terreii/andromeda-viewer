@@ -8,7 +8,7 @@ export const groupsDidLoad = createSelector(
   [
     getGroupsWithNoActiveChat
   ],
-  groupsWithNoImSession => groupsWithNoImSession.size !== 0
-    ? startGroupChat(groupsWithNoImSession.toJSON())
+  groupsWithNoImSession => groupsWithNoImSession.length !== 0
+    ? startGroupChat(groupsWithNoImSession)
     : null
 )

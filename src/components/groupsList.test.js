@@ -1,45 +1,44 @@
 import { axe } from 'jest-axe'
 import React from 'react'
 import { mount } from 'enzyme'
-import { List, Map } from 'immutable'
 import { v4 as uuid } from 'uuid'
 
 import GroupsList from './groupsList'
 
 test('renders without crashing', () => {
-  const groups = List([
-    Map({
+  const groups = [
+    {
       id: uuid(),
       name: 'Test Group',
       insigniaID: uuid(),
       title: 'Member of the Test Group',
       acceptNotices: true,
       powers: [0, 0]
-    })
-  ])
+    }
+  ]
 
   mount(<GroupsList groups={groups} startNewIMChat={() => {}} />)
 })
 
 test('rendering', () => {
-  const groups = List([
-    Map({
+  const groups = [
+    {
       id: uuid(),
       name: 'Test Group',
       insigniaID: uuid(),
       title: 'Member of the Test Group',
       acceptNotices: true,
       powers: [0, 0]
-    }),
-    Map({
+    },
+    {
       id: uuid(),
       name: 'The other Group',
       insigniaID: uuid(),
       title: 'Just another group',
       acceptNotices: true,
       powers: [2048, 134283266]
-    })
-  ])
+    }
+  ]
 
   const rendered = mount(<GroupsList groups={groups} startNewIMChat={() => {}} />)
 
@@ -57,16 +56,16 @@ test('rendering', () => {
 })
 
 test('start chat', () => {
-  const groups = List([
-    Map({
+  const groups = [
+    {
       id: uuid(),
       name: 'Test Group',
       insigniaID: uuid(),
       title: 'Member of the Test Group',
       acceptNotices: true,
       powers: [0, 0]
-    })
-  ])
+    }
+  ]
 
   const actions = []
 
@@ -86,31 +85,31 @@ test('start chat', () => {
   expect(actions.length).toBe(1)
   expect(actions[0]).toEqual({
     dialog: 15,
-    targetId: groups.getIn([0, 'id']),
+    targetId: groups[0].id,
     name: 'Test Group',
     activate: true
   })
 })
 
 test('should pass aXe', async () => {
-  const groups = List([
-    Map({
+  const groups = [
+    {
       id: uuid(),
       name: 'Test Group',
       insigniaID: uuid(),
       title: 'Member of the Test Group',
       acceptNotices: true,
       powers: [0, 0]
-    }),
-    Map({
+    },
+    {
       id: uuid(),
       name: 'The other Group',
       insigniaID: uuid(),
       title: 'Just another group',
       acceptNotices: true,
       powers: [2048, 134283266]
-    })
-  ])
+    }
+  ]
 
   const rendered = mount(<GroupsList groups={groups} startNewIMChat={() => {}} />)
 

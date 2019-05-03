@@ -8,5 +8,5 @@ export const getGroupsWithNoActiveChat = createSelector(
   [
     getGroups
   ],
-  groups => groups.filter(group => !group.get('sessionStarted'))
+  groups => groups.filter(group => !group.sessionStarted)
 )

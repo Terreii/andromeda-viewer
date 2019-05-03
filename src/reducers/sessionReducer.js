@@ -1,11 +1,8 @@
-import { Map } from 'immutable'
+// Reducer for general session info.
 
 import { getValueOf, getValuesOf } from '../network/msgGetters'
 
-export default function sessionReducer (state = Map({
-  avatarIdentifier: null,
-  error: null
-}), action) {
+export default function sessionReducer (state = { avatarIdentifier: null, error: null }, action) {
   switch (action.type) {
     case 'didLogin':
       const sessionInfo = Object.keys(action.sessionInfo).reduce((info, key) => {
@@ -34,50 +31,64 @@ export default function sessionReducer (state = Map({
         }
       }, {})
       sessionInfo.avatarIdentifier = action.avatarIdentifier
-      sessionInfo.position = Map({
+      sessionInfo.position = {
         position: [],
         lookAt: JSON.parse(action.sessionInfo.look_at.replace(/r/gi, ''))
-      })
-      sessionInfo.regionInfo = Map()
-      return state.merge(sessionInfo)
+      }
+      sessionInfo.regionInfo = {}
+      return {
+        ...state,
+        ...sessionInfo
+      }
 
     case 'AgentMovementComplete':
-      return state.mergeDeep({
+      return {
+        ...state,
         position: {
+          ...state.position,
           position: getValueOf(action, 'Data', 'Position'),
           lookAt: getValueOf(action, 'Data', 'LookAt')
         }
-      })
+      }
 
     case 'RegionInfo':
-      return state.mergeDeep({
+      return {
+        ...state,
         regionInfo: Object.assign(
           {},
           getValuesOf(action, 'RegionInfo', 0, []),
           getValuesOf(action, 'RegionInfo2', 0, [])
         )
-      })
+      }
 
     case 'RegionHandshake':
-      return state.mergeDeep({
+      return {
+        ...state,
         regionInfo: {
+          ...state.regionInfo,
           regionID: action.regionID,
           flags: action.flags
         }
-      })
+      }
 
     case 'DidLogout':
     case 'UserWasKicked':
-      return Map({
+      return {
         avatarIdentifier: null,
         error: action.type === 'UserWasKicked' ? action.reason : null
-      })
+      }
 
     case 'ClosePopup':
-      return state.set('error', null)
+      return {
+        ...state,
+        error: null
+      }
 
     case 'SeedCapabilitiesLoaded':
-      return state.set('eventQueueGetUrl', action.capabilities.EventQueueGet)
+      return {
+        ...state,
+        eventQueueGetUrl: action.capabilities.EventQueueGet
+      }
 
     default:
       return state
