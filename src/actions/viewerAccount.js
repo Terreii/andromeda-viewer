@@ -57,12 +57,12 @@ export function closePopup () {
 
 export function saveAvatar (name, agentId, grid) {
   return (dispatch, getState, { hoodie }) => {
-    const gridName = typeof grid === 'string' ? grid : grid.get('name')
+    const gridName = typeof grid === 'string' ? grid : grid.name
 
     const avatarIdentifier = `${agentId}@${gridName}`
 
     if (getSavedAvatars(getState()).some(avatar => {
-      return avatar.get('avatarIdentifier') === avatarIdentifier
+      return avatar.avatarIdentifier === avatarIdentifier
     })) {
       return Promise.reject(new Error('Avatar already exist!'))
     }
@@ -141,7 +141,7 @@ export function saveGrid (newGrid) {
   return (dispatch, getState, { hoodie }) => {
     const name = newGrid.name.trim()
 
-    if (getSavedGrids(getState()).some(grid => grid.get('name') === name)) {
+    if (getSavedGrids(getState()).some(grid => grid.name === name)) {
       return Promise.reject(new Error('Grid already exist!'))
     }
 
