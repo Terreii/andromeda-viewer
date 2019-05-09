@@ -1,36 +1,27 @@
 import { axe } from 'jest-axe'
 import React from 'react'
 import { shallow, mount } from 'enzyme'
-import Immutable from 'immutable'
 
 import ChatDialog from './chatDialog'
 import AvatarName from '../avatarName'
 
 test('renders without crashing', () => {
-  const names = Immutable.fromJS({
-    names: {
-      first: new AvatarName('Testery MacTestface')
-    }
-  })
-
-  const chatData = Immutable.fromJS([])
+  const names = {
+    first: new AvatarName('Testery MacTestface')
+  }
 
   shallow(<ChatDialog
     names={names}
-    data={chatData}
+    data={[]}
     isIM={false}
     sendTo={() => {}}
   />)
 })
 
 test('renders local chat', () => {
-  const names = Immutable.fromJS({
-    names: {
-      first: new AvatarName('Testery MacTestface')
-    }
-  })
-
-  const chatData = Immutable.fromJS([])
+  const names = {
+    first: new AvatarName('Testery MacTestface')
+  }
 
   const sendData = {
     text: null,
@@ -39,7 +30,7 @@ test('renders local chat', () => {
 
   const renderedLocal = mount(<ChatDialog
     names={names}
-    data={chatData}
+    data={[]}
     sendTo={text => {
       sendData.text = text
       sendData.count += 1
@@ -63,17 +54,15 @@ test('renders local chat', () => {
 })
 
 test('renders IM chat', () => {
-  const names = Immutable.fromJS({
-    names: {
-      first: new AvatarName('Testery MacTestface')
-    }
-  })
+  const names = {
+    first: new AvatarName('Testery MacTestface')
+  }
 
-  const imData = Immutable.fromJS({
+  const imData = {
     chatUUID: 'abc',
     saveId: 'def',
     messages: []
-  })
+  }
 
   const loadHistoryData = {
     id: null,
@@ -121,13 +110,9 @@ test('renders IM chat', () => {
 })
 
 test('Local chat should pass aXe', async () => {
-  const names = Immutable.fromJS({
-    names: {
-      first: new AvatarName('Testery MacTestface')
-    }
-  })
-
-  const chatData = Immutable.fromJS([])
+  const names = {
+    first: new AvatarName('Testery MacTestface')
+  }
 
   const sendData = {
     text: null,
@@ -136,7 +121,7 @@ test('Local chat should pass aXe', async () => {
 
   const rendered = mount(<ChatDialog
     names={names}
-    data={chatData}
+    data={[]}
     sendTo={text => {
       sendData.text = text
       sendData.count += 1
@@ -147,17 +132,15 @@ test('Local chat should pass aXe', async () => {
 })
 
 test('IM chat should pass aXe', async () => {
-  const names = Immutable.fromJS({
-    names: {
-      first: new AvatarName('Testery MacTestface')
-    }
-  })
+  const names = {
+    first: new AvatarName('Testery MacTestface')
+  }
 
-  const imData = Immutable.fromJS({
+  const imData = {
     chatUUID: 'abc',
     saveId: 'def',
     messages: []
-  })
+  }
 
   const loadHistoryData = {
     id: null,

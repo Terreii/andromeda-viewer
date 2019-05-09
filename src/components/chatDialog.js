@@ -4,7 +4,6 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import Immutable from 'immutable'
 
 import ChatMessagesList from './chatMessagesList'
 
@@ -29,8 +28,8 @@ export default class ChatDialog extends React.Component {
   _loadHistory () {
     const isIM = this.props.isIM
     const data = this.props.data
-    if (isIM && !data.get('didLoadHistory') && !data.get('isLoadingHistory')) {
-      this.props.loadHistory(data.get('chatUUID'), data.get('saveId'))
+    if (isIM && !data.didLoadHistory && !data.isLoadingHistory) {
+      this.props.loadHistory(data.chatUUID, data.saveId)
     }
   }
 
@@ -58,7 +57,7 @@ export default class ChatDialog extends React.Component {
   }
 
   render () {
-    const messages = this.props.isIM ? this.props.data.get('messages') : this.props.data
+    const messages = this.props.isIM ? this.props.data.messages : this.props.data
 
     const placeholderText = `Send ${this.props.isIM ? 'Instant Message' : 'to local chat'}`
 
@@ -92,10 +91,10 @@ ChatDialog.displayName = 'ChatDialog'
 // https://facebook.github.io/react/docs/typechecking-with-proptypes.html
 ChatDialog.propTypes = {
   data: PropTypes.oneOfType([
-    PropTypes.instanceOf(Immutable.List),
-    PropTypes.instanceOf(Immutable.Map)
+    PropTypes.array,
+    PropTypes.object
   ]).isRequired,
-  names: PropTypes.instanceOf(Immutable.Map).isRequired,
+  names: PropTypes.object.isRequired,
   sendTo: PropTypes.func.isRequired,
   isIM: PropTypes.bool
 }

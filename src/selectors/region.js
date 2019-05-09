@@ -1,9 +1,9 @@
 // Selectors for SIM, region, position and movement
 
-export const getRegionId = state => state.session.getIn(['regionInfo', 'regionID'])
+export const getRegionId = state => state.session.regionInfo.regionID
 
-export const getParentEstateID = state => state.session.getIn(['regionInfo', 'ParentEstateID'])
+export const getParentEstateID = state => state.session.regionInfo.ParentEstateID
 
-export const getPosition = state => state.session.getIn(['position', 'position'])
+export const getPosition = state => state.session.position.position
 
-export const getEventQueueGetUrl = state => state.session.get('eventQueueGetUrl')
+export const getEventQueueGetUrl = state => state.session.eventQueueGetUrl

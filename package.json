@@ -44,14 +44,12 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "acorn-dynamic-import": "^3.0.0",
     "autoscroll-react": "^3.2.0",
     "concurrently": "^4.1.0",
     "double-ended-queue": "^2.1.0-0",
     "enzyme": "^3.9.0",
     "enzyme-adapter-react-16": "^1.12.1",
     "http-proxy-middleware": "^0.19.1",
-    "immutable": "^3.8.2",
     "jest-axe": "^3.1.1",
     "jest-enzyme": "^7.0.2",
     "markdown-chalk": "^2.1.0",
@@ -64,7 +62,7 @@
     "react-helmet": "^5.2.1",
     "react-portal": "^4.2.0",
     "react-redux": "^7.0.3",
-    "react-scripts": "3.0.0",
+    "react-scripts": "3.0.1",
     "react-test-renderer": "^16.8.6",
     "redux": "^4.0.1",
     "redux-burger-menu": "^0.2.8",

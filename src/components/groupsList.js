@@ -4,7 +4,7 @@ import styles from './friendsAndGroupsList.module.css'
 import chatBubble from '../icons/chat_bubble.svg'
 
 function GroupRow ({ group, startNewIMChat }) {
-  const name = group.get('name')
+  const name = group.name
 
   return <li className={styles.Item}>
     <div className={styles.Name}>{name}</div>
@@ -12,7 +12,7 @@ function GroupRow ({ group, startNewIMChat }) {
       className={styles.ListItemInput}
       onClick={event => {
         event.preventDefault()
-        startNewIMChat(15, group.get('id'), name, true)
+        startNewIMChat(15, group.id, name, true)
         // TODO: switch to tap
         // .then(chatUUID => console.log(`activate group chat ${name} ${chatUUID}`))
       }}>
@@ -26,7 +26,7 @@ export default function GroupsList ({ groups, startNewIMChat }) {
     <h3 className={styles.Title}>Groups</h3>
     <ul className={styles.List}>
       {groups.map(group => <GroupRow
-        key={group.get('id')}
+        key={group.id}
         group={group}
         startNewIMChat={startNewIMChat}
       />)}

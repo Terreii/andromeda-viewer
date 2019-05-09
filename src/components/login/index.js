@@ -22,15 +22,15 @@ export default class LoginForm extends React.Component {
   }
 
   componentWillMount () {
-    if (this.props.avatars.size > 0) {
-      this._setSelected(this.props.avatars.getIn([0, 'avatarIdentifier']))
+    if (this.props.avatars.length > 0) {
+      this._setSelected(this.props.avatars[0].avatarIdentifier)
     }
   }
 
   componentWillReceiveProps (nextProps) {
-    if (this.props.avatars.size === 0 && nextProps.avatars.size > 0) {
-      this._setSelected(nextProps.avatars.getIn([0, 'avatarIdentifier']))
-    } else if (this.props.avatars.size > 0 && nextProps.avatars.size === 0) {
+    if (this.props.avatars.length === 0 && nextProps.avatars.length > 0) {
+      this._setSelected(nextProps.avatars[0].avatarIdentifier)
+    } else if (this.props.avatars.length > 0 && nextProps.avatars.length === 0) {
       this._setSelected('new')
     }
   }
@@ -48,8 +48,8 @@ export default class LoginForm extends React.Component {
 
   // Login with an already saved avatar.
   _loginWithSavedAvatar (avatar, password) {
-    const name = avatar.get('name')
-    const gridName = avatar.get('grid')
+    const name = avatar.name
+    const gridName = avatar.grid
 
     this._login(name, password, gridName, true, false)
   }
@@ -71,7 +71,7 @@ export default class LoginForm extends React.Component {
       }
 
       const grid = typeof gridName === 'string'
-        ? this.props.grids.find(grid => grid.get('name') === gridName)
+        ? this.props.grids.find(grid => grid.name === gridName)
         : gridName
       if (grid == null) {
         this.setState({
@@ -81,8 +81,8 @@ export default class LoginForm extends React.Component {
       }
 
       const gridData = {
-        name: grid.name || grid.get('name'),
-        url: grid.url || grid.get('loginURL')
+        name: grid.name,
+        url: grid.url || grid.loginURL
       }
 
       const avatarName = new AvatarName(name)
@@ -121,12 +121,12 @@ export default class LoginForm extends React.Component {
           {signInDialog}
 
           {this.props.avatars.map(avatar => <AvatarLogin
-            key={avatar.get('_id')}
+            key={avatar._id}
             avatar={avatar}
-            grid={this.props.grids.find(grid => grid.get('name') === avatar.get('grid'))}
+            grid={this.props.grids.find(grid => grid.name === avatar.grid)}
             onLogin={this._boundLoginWithSavedAvatar}
             isLoggingIn={this.state.isLoggingIn}
-            isSelected={this.state.selected === avatar.get('avatarIdentifier')}
+            isSelected={this.state.selected === avatar.avatarIdentifier}
             onSelect={this._boundSetSelected}
           />)}
         </div>

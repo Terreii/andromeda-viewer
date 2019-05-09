@@ -13,11 +13,11 @@ class ChatList extends React.Component {
     const { messages, isIM, names, ...props } = this.props
 
     const messagesLines = messages.map(msg => {
-      const time = new Date(msg.get('time'))
-      const fromId = isIM ? msg.get('fromId') : msg.get('sourceID')
-      const name = names.get(fromId) || msg.get(isIM ? 'fromAgentName' : 'fromName') || ''
+      const time = new Date(msg.time)
+      const fromId = isIM ? msg.fromId : msg.sourceID
+      const name = names[fromId] || msg[isIM ? 'fromAgentName' : 'fromName'] || ''
 
-      return <div key={msg.get('_id')} className={styles.Message}>
+      return <div key={msg._id} className={styles.Message}>
         <span className='time'>
           {leadingZero(time.getHours())}
           :
@@ -26,7 +26,7 @@ class ChatList extends React.Component {
           {leadingZero(time.getSeconds())}
         </span>
         <span className={styles.AvatarName}>{name.toString()}</span>
-        <span className='messageText'>{msg.get('message')}</span>
+        <span className='messageText'>{msg.message}</span>
       </div>
     })
 

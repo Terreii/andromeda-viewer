@@ -13,8 +13,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
   if (!isSelected) {
     const onSetActive = event => {
       event.preventDefault()
-      const avID = avatar.get('avatarIdentifier')
-      onSelect(avID)
+      onSelect(avatar.avatarIdentifier)
     }
 
     return <form
@@ -27,8 +26,8 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
       }}
       tabIndex='0'
     >
-      <span className={styles.Name}>{new AvatarName(avatar.get('name')).getDisplayName()}</span>
-      <span className={styles.Grid}>@{grid.get('name')}</span>
+      <span className={styles.Name}>{new AvatarName(avatar.name).getDisplayName()}</span>
+      <span className={styles.Grid}>@{grid.name}</span>
 
       <span className={styles.ActiveText}>click to login</span>
     </form>
@@ -48,12 +47,12 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
     }
   }
 
-  const avatarName = new AvatarName(avatar.get('name')).getDisplayName()
-  const passwordInputId = `passwordFor${avatar.get('avatarIdentifier')}`
+  const avatarName = new AvatarName(avatar.name).getDisplayName()
+  const passwordInputId = `passwordFor${avatar.avatarIdentifier}`
 
   return <form className={styles.AvatarLoginContainer}>
     <h2 className={styles.Name}>{avatarName}</h2>
-    <span className={styles.Grid}>@{grid.get('name')}</span>
+    <span className={styles.Grid}>@{grid.name}</span>
 
     <label className={styles.PasswordInfo} htmlFor={passwordInputId}>Password:</label>
     <input
@@ -83,7 +82,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
       onClick={onClick}
       disabled={isLoggingIn || password.length === 0}
     >
-      {isLoggingIn === avatar.get('name') ? 'Connecting ...' : 'Login'}
+      {isLoggingIn === avatar.name ? 'Connecting ...' : 'Login'}
     </button>
   </form>
 }
