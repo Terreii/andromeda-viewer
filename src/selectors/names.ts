@@ -1,20 +1,22 @@
 // Selectors for names
 
-import { Map } from 'immutable'
-
 import AvatarName from '../avatarName'
 
 import { createSelector } from 'reselect'
 
 import { getIsLoggedIn, getAgentId } from './session'
 
-export const getNames = (state: any): Map<string, AvatarName> => state.names.get('names')
+export interface NamesStore {
+  [key: string]: AvatarName
+}
 
-export const getAvatarNameById = (state: any, id: string): AvatarName => (
-  state.names.getIn(['names', id])
-)
+export const getNames = (state: any): NamesStore => state.names.names
 
-export const getDisplayNamesURL = (state: any): string => state.names.get('getDisplayNamesURL')
+export function getAvatarNameById (state: any, id: string): AvatarName | undefined {
+  return getNames(state)[id]
+}
+
+export const getDisplayNamesURL = (state: any): string => state.names.getDisplayNamesURL
 
 export const getOwnAvatarName = createSelector(
   [
@@ -23,6 +25,6 @@ export const getOwnAvatarName = createSelector(
     getNames
   ],
   (isLoggedIn, agentId, names) => isLoggedIn
-    ? names.get(agentId)
+    ? names[agentId]
     : null
 )
