@@ -20,7 +20,7 @@ export default class AvatarName {
   didLoadDisplayName: boolean
   isLoadingDisplayName: boolean
 
-  constructor (name: AvatarName | string | { first: string, last: string }) {
+  constructor (name: AvatarName | string | { first: string, last?: string }, lastName?: string) {
     if (name instanceof AvatarName) {
       this.first = name.first
       this.last = name.last
@@ -42,9 +42,9 @@ export default class AvatarName {
         this.first = cleanName(name)
         this.last = 'Resident'
       }
-    } else if (typeof name === 'string' && typeof arguments[1] === 'string') {
+    } else if (typeof name === 'string' && typeof lastName === 'string') {
       this.first = cleanName(name)
-      this.last = cleanName(arguments[1])
+      this.last = cleanName(lastName)
     } else {
       throw new TypeError(`couldn't parse ${name}`)
     }
