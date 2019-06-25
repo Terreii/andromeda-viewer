@@ -1,14 +1,11 @@
 import { axe } from 'jest-axe'
 import React from 'react'
 import { shallow } from 'enzyme'
-import Immutable from 'immutable'
 
 import Login from './index'
 
 test('renders without crashing', () => {
-  const avatars = Immutable.List()
-
-  const grids = Immutable.fromJS([
+  const grids = [
     {
       name: 'Second Life',
       loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
@@ -21,16 +18,16 @@ test('renders without crashing', () => {
       name: 'OS Grid',
       loginURL: 'http://login.osgrid.org/'
     }
-  ])
+  ]
 
   shallow(<Login
-    avatars={avatars}
+    avatars={[]}
     grids={grids}
   />)
 })
 
 test('renders with avatars', () => {
-  const grids = Immutable.fromJS([
+  const grids = [
     {
       name: 'Second Life',
       loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
@@ -43,15 +40,15 @@ test('renders with avatars', () => {
       name: 'OS Grid',
       loginURL: 'http://login.osgrid.org/'
     }
-  ])
+  ]
 
-  const avatars = Immutable.fromJS([
+  const avatars = [
     {
       _id: 'avatar/testery',
       name: 'Testery MacTestface',
       grid: 'Second Life'
     }
-  ])
+  ]
 
   shallow(<Login
     grids={grids}
@@ -60,7 +57,7 @@ test('renders with avatars', () => {
 })
 
 test('should pass aXe', async () => {
-  const grids = Immutable.fromJS([
+  const grids = [
     {
       name: 'Second Life',
       loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
@@ -73,15 +70,15 @@ test('should pass aXe', async () => {
       name: 'OS Grid',
       loginURL: 'http://login.osgrid.org/'
     }
-  ])
+  ]
 
-  const avatars = Immutable.fromJS([
+  const avatars = [
     {
       _id: 'avatar/testery',
       name: 'Testery MacTestface',
       grid: 'Second Life'
     }
-  ])
+  ]
 
   const rendered = shallow(<Login
     grids={grids}
@@ -90,7 +87,7 @@ test('should pass aXe', async () => {
 
   const renderedNewUser = shallow(<Login
     grids={grids}
-    avatars={Immutable.List()}
+    avatars={[]}
   />)
 
   expect(await axe(rendered.html())).toHaveNoViolations()

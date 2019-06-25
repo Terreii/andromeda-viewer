@@ -1,10 +1,8 @@
 // Groups of the avatar
 
-import { List, Map } from 'immutable'
-
 import { getValueOf, mapBlockOf } from '../network/msgGetters'
 
-export default function groupsReducer (state = List(), action) {
+export default function groupsReducer (state = [], action) {
   switch (action.type) {
     case 'UDPAvatarGroupsReply':
       if (
@@ -13,50 +11,54 @@ export default function groupsReducer (state = List(), action) {
       ) {
         return state
       }
-      return List(
-        mapBlockOf(action, 'GroupData', getValue => Map({
-          id: getValue('GroupID'),
-          name: getValue('GroupName', true),
-          insigniaID: getValue('GroupInsigniaID'),
-          title: getValue('GroupTitle', true),
-          acceptNotices: getValue('AcceptNotices'),
-          powers: getValue('GroupPowers')
-        }))
-      )
+      return mapBlockOf(action, 'GroupData', getValue => ({
+        id: getValue('GroupID'),
+        name: getValue('GroupName', true),
+        insigniaID: getValue('GroupInsigniaID'),
+        title: getValue('GroupTitle', true),
+        acceptNotices: getValue('AcceptNotices'),
+        powers: getValue('GroupPowers')
+      }))
 
     case 'ChatSessionsStarted':
-      return state.map(group => action.chatUUIDs.includes(group.get('id'))
-        ? group.set('sessionStarted', true)
+      return state.map(group => action.chatUUIDs.includes(group.id)
+        ? {
+          ...group,
+          sessionStarted: true
+        }
         : group
       )
 
     case 'EVENT_QUEUE_AgentGroupDataUpdate':
-      return state.withMutations(groups => {
-        action.body.GroupData.reduce((groups, groupData) => {
-          const id = groupData.GroupID.uuid
+      // this is OK, because the max number of groups an user can join is 60.
+      return action.body.GroupData.reduce((groups, groupData) => {
+        const id = groupData.GroupID.uuid
 
-          const index = groups.findIndex(group => group.get('id') === id)
-          const isNewGroup = index < 0
+        const index = groups.findIndex(group => group.id === id)
+        const isNewGroup = index < 0
 
-          const oldGroup = isNewGroup ? Map() : groups.get(index)
-          const newGroupData = oldGroup.merge({
-            id,
-            name: groupData.GroupName,
-            insigniaID: groupData.GroupInsigniaID.uuid,
-            acceptNotices: groupData.AcceptNotices,
-            powers: Buffer.from(groupData.GroupPowers.octets),
-            listInProfile: groupData.ListInProfile
-          })
+        const newGroupData = {
+          ...(isNewGroup ? {} : groups[index]),
+          id,
+          name: groupData.GroupName,
+          insigniaID: groupData.GroupInsigniaID.uuid,
+          acceptNotices: groupData.AcceptNotices,
+          powers: Buffer.from(groupData.GroupPowers.octets),
+          listInProfile: groupData.ListInProfile
+        }
 
-          return isNewGroup
-            ? groups.push(newGroupData)
-            : groups.set(index, newGroupData)
-        }, groups)
-      })
+        return isNewGroup
+          ? groups.concat([newGroupData])
+          : [
+            ...groups.slice(0, index),
+            newGroupData,
+            ...groups.slice(index + 1)
+          ]
+      }, state)
 
     case 'DidLogout':
     case 'UserWasKicked':
-      return List()
+      return []
 
     default:
       return state

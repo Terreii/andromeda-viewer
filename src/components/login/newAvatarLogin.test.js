@@ -1,12 +1,11 @@
 import { axe } from 'jest-axe'
 import React from 'react'
 import { shallow } from 'enzyme'
-import { fromJS } from 'immutable'
 
 import NewAvatarLogin from './newAvatarLogin'
 
 test('renders without crashing', () => {
-  const grids = fromJS([
+  const grids = [
     {
       name: 'Second Life',
       loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
@@ -15,7 +14,7 @@ test('renders without crashing', () => {
       name: 'OS Grid',
       loginURL: 'http://login.osgrid.org/'
     }
-  ])
+  ]
 
   shallow(<NewAvatarLogin
     grids={grids}
@@ -28,7 +27,7 @@ test('renders without crashing', () => {
 })
 
 test('not signed in login works', () => {
-  const grids = fromJS([
+  const grids = [
     {
       name: 'Second Life',
       loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
@@ -37,7 +36,7 @@ test('not signed in login works', () => {
       name: 'OS Grid',
       loginURL: 'http://login.osgrid.org/'
     }
-  ])
+  ]
 
   const loginData = []
 
@@ -117,7 +116,7 @@ test('not signed in login works', () => {
 })
 
 test('signed in login works', () => {
-  const grids = fromJS([
+  const grids = [
     {
       name: 'Second Life',
       loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
@@ -126,7 +125,7 @@ test('signed in login works', () => {
       name: 'OS Grid',
       loginURL: 'http://login.osgrid.org/'
     }
-  ])
+  ]
 
   const loginData = []
 
@@ -210,7 +209,7 @@ test('signed in login works', () => {
 })
 
 test('adding new grid', () => {
-  const grids = fromJS([
+  const grids = [
     {
       name: 'Second Life',
       loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
@@ -219,7 +218,7 @@ test('adding new grid', () => {
       name: 'OS Grid',
       loginURL: 'http://login.osgrid.org/'
     }
-  ])
+  ]
 
   const loginData = []
 
@@ -307,7 +306,7 @@ test('adding new grid', () => {
 })
 
 test('should pass aXe', async () => {
-  const grids = fromJS([
+  const grids = [
     {
       name: 'Second Life',
       loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
@@ -316,7 +315,7 @@ test('should pass aXe', async () => {
       name: 'OS Grid',
       loginURL: 'http://login.osgrid.org/'
     }
-  ])
+  ]
 
   const notSelected = shallow(<NewAvatarLogin
     grids={grids}
