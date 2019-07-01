@@ -6,36 +6,101 @@ import { getIsSignedIn, getShouldSync } from './viewer'
 
 // Local chat
 export enum LocalChatSourceType {
+  /**
+   * Chat from the grid or simulator.
+   */
   System = 0,
+  /**
+   * Chat from another avatar.
+   */
   Agent = 1,
+  /**
+   * Chat from an object.
+   */
   Object = 2,
+  /**
+   * For all unknown sources.
+   */
+  Unknown = 3,
 }
 
 export enum LocalChatType {
+  /**
+   * 5m radius - "Test User whispers: message"
+   */
   Whisper = 0,
+  /**
+   * 10/20m radius - "Test User: message"
+   */
   Normal = 1,
+  /**
+   * 100m radius - "Test User shouts: message"
+   */
   Shout = 2,
+  /**
+   * It is not known if this is used for anything - "Test User say, message"
+   * 
+   * It is undefined in the original viewer.
+   */
   Say = 3,
+  /**
+   * Lets others know you are typing.
+   */
   StartTyping = 4,
+  /**
+   * Lets others know you've stopped typing.
+   */
   StopTyping = 5,
+  /**
+   * Chat from debug channel.
+   */
   Debug = 6,
+  /**
+   * Private chat message from an object owned by you; this chat is only sent to you.
+   */
   OwnerSay = 8,
+  /**
+   * Original Viewer uses this for their llRegionSayTo().
+   */
+  Direct = 9, 
 }
 
 export enum LocalChatAudible {
+  /**
+   * Is not audible at all.
+   */
   Not = -1,
+  /**
+   * Is close to being out of range.
+   */
   Barely = 0,
+  /**
+   * Is in range.
+   */
   Fully = 1,
 }
 
+/**
+ * Message send to the local chat.
+ * 
+ * It can be from an Avatar, the system or an object.
+ */
 export interface LocalChatMessage {
   _id: string
   _rev?: string
   fromName: string
+  /**
+   * UUID from the sending avatar or object.
+   */
   sourceID: string
   sourceType: LocalChatSourceType
   chatType: LocalChatType
   audible: LocalChatAudible
+  /**
+   * Position of the avatar.
+   * 
+   * This is never read in the official viewer.
+   */
   position: [number, number, number]
   message: string
   time: number
@@ -43,6 +108,11 @@ export interface LocalChatMessage {
 }
 
 // IMs
+/**
+ * Represents a conversation.
+ * 
+ * In messages are the IM stored.
+ */
 export interface IMChat {
   _id: string
   _rev?: string
