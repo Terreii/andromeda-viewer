@@ -2,16 +2,7 @@
 
 import { createSelector } from 'reselect'
 
-export interface Group {
-  id: string
-  name: string
-  insigniaID: string
-  title: string
-  acceptNotices: boolean
-  listInProfile: boolean
-  powers: Buffer
-  sessionStarted: boolean
-}
+import { Group } from '../types/groups'
 
 export const getGroups = (state: any): Group[] => state.groups
 

@@ -6,11 +6,7 @@ import { createSelector } from 'reselect'
 
 import { getIsLoggedIn, getAgentId } from './session'
 
-export interface NamesStore {
-  [key: string]: AvatarName
-}
-
-export const getNames = (state: any): NamesStore => state.names.names
+export const getNames = (state: any): { [key: string]: AvatarName } => state.names.names
 
 export function getAvatarNameById (state: any, id: string): AvatarName | undefined {
   return getNames(state)[id]
