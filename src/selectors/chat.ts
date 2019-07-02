@@ -4,9 +4,11 @@ import { createSelector } from 'reselect'
 
 import { getIsSignedIn, getShouldSync } from './viewer'
 
-export const getLocalChat = state => state.localChat
+import { LocalChatMessage, IMChat } from '../types/chat'
 
-export const getIMChats = state => state.IMs
+export const getLocalChat = (state: any): LocalChatMessage[] => state.localChat
+
+export const getIMChats = (state: any): { [key: string]: IMChat } => state.IMs
 
 export const getActiveIMChats = createSelector(
   [
