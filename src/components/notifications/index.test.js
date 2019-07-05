@@ -1,7 +1,6 @@
 import { axe } from 'jest-axe'
 import React from 'react'
 import { mount } from 'enzyme'
-import Immutable from 'immutable'
 
 import Notifications from './index'
 
@@ -10,14 +9,14 @@ global.Array.prototype.flatMap = jest.fn(function (fn) {
 })
 
 test('renders without crashing', () => {
-  const allNotifications = Immutable.List([
+  const allNotifications = [
     {
       id: 0,
       notificationType: 0,
       text: 'Test',
       callbackId: null
     }
-  ])
+  ]
 
   mount(<Notifications
     notifications={allNotifications}
@@ -25,13 +24,13 @@ test('renders without crashing', () => {
 })
 
 test('renders a basic MessageBox', () => {
-  const allNotifications = Immutable.List([
+  const allNotifications = [
     {
       id: 4,
       notificationType: 0,
       text: 'Test'
     }
-  ])
+  ]
 
   const onClose = jest.fn()
 
@@ -53,7 +52,7 @@ test('renders a basic MessageBox', () => {
 test('renders a friendship request', () => {
   const fromId = '5df644f5-8b12-4caf-8e91-d7cae057e5f2'
   const sessionId = '84bcf978-fbb1-4fe8-b3fa-9d00e01a11d9'
-  const allNotifications = Immutable.List([
+  const allNotifications = [
     {
       id: 4,
       notificationType: 1,
@@ -62,7 +61,7 @@ test('renders a friendship request', () => {
       fromAgentName: 'Testy Tester',
       sessionId
     }
-  ])
+  ]
 
   const onAcceptFriendship = jest.fn()
   const onDeclineFriendship = jest.fn()
@@ -108,14 +107,14 @@ test('renders a friendship request', () => {
 })
 
 test('should pass aXe', async () => {
-  const allNotifications = Immutable.List([
+  const allNotifications = [
     {
       id: 0,
       notificationType: 0,
       text: 'Test',
       callbackId: null
     }
-  ])
+  ]
 
   const rendered = mount(<Notifications
     notifications={allNotifications}

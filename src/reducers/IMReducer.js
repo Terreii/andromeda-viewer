@@ -65,10 +65,19 @@ function imChat (state = {}, action) {
       }
 
     case 'IM_START_TYPING':
-      return state.set('areTyping', state.get('areTyping').add(action.agentId))
-
     case 'IM_STOP_TYPING':
-      return state.set('areTyping', state.get('areTyping').delete(action.agentId))
+      const newTyper = new Set(state.areTyping)
+
+      if (action.type === 'IM_START_TYPING') {
+        newTyper.add(action.agentId)
+      } else {
+        newTyper.delete(action.agentId)
+      }
+
+      return {
+        ...state,
+        areTyping: newTyper
+      }
 
     case 'IMHistoryLoaded':
       const historyMsg = action.messages.map(msg => ({
@@ -215,7 +224,7 @@ export default function IMReducer (state = {}, action) {
         ? state
         : {
           ...state,
-          [id]: updatedChat
+          [id]: updatedChatData
         }
 
     case 'IM_START_TYPING':

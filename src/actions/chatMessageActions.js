@@ -395,7 +395,7 @@ function handleIM (msg) {
       time.setTime(timeStamp * 1000)
     }
 
-    let chat = getIMChats(state).get(id)
+    let chat = getIMChats(state)[id]
     if (chat == null) {
       const saveId = uuid()
 
@@ -409,13 +409,13 @@ function handleIM (msg) {
         name: fromAgentName
       })
 
-      chat = getIMChats(getState()).get(id)
+      chat = getIMChats(getState())[id]
     }
 
     dispatch({
       type: 'PERSONAL_IM_RECEIVED',
       msg: {
-        _id: `${avatarSaveId}/imChats/${chat.get('saveId')}/${time.toJSON()}`,
+        _id: `${avatarSaveId}/imChats/${chat.saveId}/${time.toJSON()}`,
         chatUUID: id,
         fromAgentName,
         fromId: fromAgentId,
@@ -437,7 +437,7 @@ function handleGroupIM (msg) {
 
     const id = getValueOf(msg, 'MessageBlock', 'ID')
     const time = new Date()
-    const chat = getIMChats(state).get(id)
+    const chat = getIMChats(state)[id]
 
     // Group chat will be started by the group reactors.
     if (chat == null) {
@@ -448,7 +448,7 @@ function handleGroupIM (msg) {
       type: 'GROUP_IM_RECEIVED',
       groupId: id,
       msg: {
-        _id: `${getAvatarDataSaveId(state)}/imChats/${chat.get('saveId')}/${time.toJSON()}`,
+        _id: `${getAvatarDataSaveId(state)}/imChats/${chat.saveId}/${time.toJSON()}`,
         fromAgentName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
         fromId: getValueOf(msg, 'AgentData', 'AgentID'),
         message: getStringValueOf(msg, 'MessageBlock', 'Message'),
@@ -470,7 +470,7 @@ function handleConferenceIM (msg) {
     const avatarSaveId = getAvatarDataSaveId(state)
     const time = new Date()
 
-    let chat = getIMChats(state).get(id)
+    let chat = getIMChats(state)[id]
     if (chat == null) {
       const saveId = uuid()
 
@@ -484,14 +484,14 @@ function handleConferenceIM (msg) {
         name: getStringValueOf(msg, 'MessageBlock', 'BinaryBucket')
       })
 
-      chat = getIMChats(getState()).get(id)
+      chat = getIMChats(getState())[id]
     }
 
     dispatch({
       type: 'CONFERENCE_IM_RECEIVED',
       conferenceId: id,
       msg: {
-        _id: `${avatarSaveId}/imChats/${chat.get('saveId')}/${time.toJSON()}`,
+        _id: `${avatarSaveId}/imChats/${chat.saveId}/${time.toJSON()}`,
         fromAgentName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
         fromId: getValueOf(msg, 'AgentData', 'AgentID'),
         message: getStringValueOf(msg, 'MessageBlock', 'Message'),
