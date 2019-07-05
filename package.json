@@ -15,7 +15,7 @@
     "fix:docs": "textlint --fix README.md ./*/*.md ./src/*/*.md",
     "fix:style": "standard --fix",
     "build-messages": "node ./tools/createMessageTemplate",
-    "build:docs": "typedoc --out docs/types src && opn ./docs/types/index.html",
+    "build:type-docs": "typedoc --out docs/types src && opn ./docs/types/index.html",
     "open-type-docs": "opn ./docs/types/index.html",
     "update-coc": "weallbehave -o . && git add CODE_OF_CONDUCT.md && git commit -m 'docs(coc): update CODE_OF_CONDUCT.md'",
     "update-contrib": "weallcontribute -o . && git add CONTRIBUTING.md && git commit -m 'docs(contributing): update CONTRIBUTING.md'",

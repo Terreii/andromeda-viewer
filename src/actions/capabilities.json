@@ -16,6 +16,7 @@
   "DispatchRegionInfo",
   "DirectDelivery",
   "EnvironmentSettings",
+  "EstateAccess",
   "EstateChangeInfo",
   "EventQueueGet",
   "FacebookConnect",

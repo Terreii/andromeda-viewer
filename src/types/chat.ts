@@ -1,6 +1,6 @@
 // Types for chat
 
-import { HoodieTimeObject } from './viewer'
+import { HoodieObject } from './viewer'
 
 // Local chat
 export enum LocalChatSourceType {
@@ -83,10 +83,7 @@ export enum LocalChatAudible {
  * 
  * It can be from an Avatar, the system or an object.
  */
-export interface LocalChatMessage {
-  _id: string
-  _rev?: string
-  hoodie?: HoodieTimeObject
+export interface LocalChatMessage extends HoodieObject {
   fromName: string
   /**
    * UUID from the sending avatar or object.
@@ -112,10 +109,7 @@ export interface LocalChatMessage {
  * 
  * In messages are the IM stored.
  */
-export interface IMChat {
-  _id: string
-  _rev?: string
-  hoodie?: HoodieTimeObject
+export interface IMChat extends HoodieObject {
   didSaveChatInfo: boolean
   chatUUID: string
   saveId: string
@@ -152,8 +146,9 @@ export enum IMDialog {
   GroupInvitation = 3,
   /**
    * Inventory Offer.
+   * 
    * The ID is the transaction id.
-   * The binary bucket is a list of inventory UUID and type.
+   * The binary bucket is a list of inventory type and UUID (1 byte type and 16 byte UUID).
    */
   InventoryOffered = 4,
   /**
@@ -314,10 +309,7 @@ export enum IMDialog {
   StopTyping = 42,
 }
 
-export interface InstanceMessage {
-  _id: string
-  _rev?: string
-  hoodie?: HoodieTimeObject
+export interface InstanceMessage extends HoodieObject {
   dialog: IMDialog
   fromId: string
   fromAgentName: string
