@@ -51,7 +51,9 @@ export function login (avatarName, password, grid, save, isNew) {
       platform: viewerPlatform,
       // mac will be added on the server side
       options: [
-        'buddy-list'
+        'buddy-list',
+        'inventory-root',
+        'inventory-skeleton'
       ],
       agree_to_tos: 'true',
       read_critical: 'true'
@@ -74,9 +76,7 @@ export function login (avatarName, password, grid, save, isNew) {
     }
 
     // save grid if it is new (do not save if login did fail)
-    const gridExists = getSavedGrids(getState()).some(savedGrid => {
-      return savedGrid.get('name') === grid.name
-    })
+    const gridExists = getSavedGrids(getState()).some(savedGrid => savedGrid.name === grid.name)
     if (save && isNew && !gridExists) {
       await dispatch(saveGrid(grid))
     }
@@ -88,11 +88,9 @@ export function login (avatarName, password, grid, save, isNew) {
       : getSavedAvatars(getState()).reduce((last, avatar) => { // for saved avatars
         if (last != null) return last
 
-        if (avatar.get('avatarIdentifier') === avatarIdentifier) {
-          return avatar.toJS()
-        } else {
-          return last
-        }
+        return avatar.avatarIdentifier === avatarIdentifier
+          ? avatar
+          : last
       }, null)
 
     const localChatHistory = !isNew && save
@@ -107,7 +105,6 @@ export function login (avatarName, password, grid, save, isNew) {
       dataSaveId: avatarData != null ? avatarData.dataSaveId : uuid(),
       grid,
       uuid: body.agent_id,
-      buddyList: body['buddy-list'],
       sessionInfo: body,
       localChatHistory
     })

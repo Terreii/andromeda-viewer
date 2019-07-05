@@ -238,12 +238,9 @@ export default class NewAvatarLogin extends React.Component {
       </Container>
     }
 
-    const grids = this.props.grids.map(grid => {
-      const name = grid.get('name')
-      return <option key={name} value={name}>
-        {name}
-      </option>
-    })
+    const grids = this.props.grids.map(grid => <option key={grid.name} value={grid.name}>
+      {grid.name}
+    </option>)
 
     const isNewGrid = this.state.grid === ''
 

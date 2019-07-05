@@ -3,11 +3,15 @@ import { createSelector } from 'reselect'
 import { getIsSignedIn, getIsUnlocked } from './viewer'
 import { getErrorMessage } from './session'
 
+type SignInPopup = 'signUp' | 'signIn' | 'signOut' | 'resetPassword' | null
+
+export type PopupType = SignInPopup | 'unlock'
+
 export const selectPopup = createSelector(
   [
     getIsSignedIn,
     getIsUnlocked,
-    state => state.account.get('signInPopup'),
+    (state: any): SignInPopup => state.account.signInPopup,
     getErrorMessage
   ],
   (isSignedIn, isUnlocked, signInPopup, sessionError) => {
@@ -21,4 +25,4 @@ export const selectPopup = createSelector(
   }
 )
 
-export const selectPopupData = state => state.account.get('popupData')
+export const selectPopupData = (state: any): any | null => state.account.popupData

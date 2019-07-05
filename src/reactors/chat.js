@@ -18,10 +18,10 @@ export const saveLocalChat = createSelector(
 
     const messagesToSave = []
 
-    for (let i = localChat.size - 1; i >= 0; i -= 1) {
-      const msg = localChat.get(i)
+    for (let i = localChat.length - 1; i >= 0; i -= 1) {
+      const msg = localChat[i]
 
-      if (msg.get('didSave')) {
+      if (msg.didSave) {
         break
       } else {
         messagesToSave.push(msg)
@@ -40,7 +40,7 @@ export const saveIMChatInfo = createSelector(
     getShouldSaveChat
   ],
   (ims, shouldSaveChat) => {
-    if (!shouldSaveChat || ims.every(chat => chat.get('didSaveChatInfo'))) return null
+    if (!shouldSaveChat || Object.values(ims).every(chat => chat.didSaveChatInfo)) return null
 
     return saveIMChatInfos()
   }
@@ -52,7 +52,7 @@ export const saveIMChat = createSelector(
     getShouldSaveChat
   ],
   (ims, shouldSaveChat) => {
-    if (!shouldSaveChat || !ims.some(chat => chat.get('hasUnsavedMSG'))) return null
+    if (!shouldSaveChat || !Object.values(ims).some(chat => chat.hasUnsavedMSG)) return null
 
     return saveIMChatMessages()
   }

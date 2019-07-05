@@ -55,7 +55,7 @@ export function sendInstantMessage (text, to, id, dialog = 0) {
     try {
       const activeState = getState()
 
-      const chat = getIMChats(activeState).find(chat => chat.get('chatUUID') === id)
+      const chat = getIMChats(activeState)[id]
 
       const agentID = getAgentId(activeState)
       const sessionID = getSessionId(activeState)
@@ -64,7 +64,7 @@ export function sendInstantMessage (text, to, id, dialog = 0) {
       const position = getPosition(activeState)
       const fromAgentName = getOwnAvatarName(activeState).getFullName()
       const binaryBucket = dialog === 17
-        ? chat.get('name')
+        ? chat.name
         : Buffer.from([])
       const time = new Date()
 
@@ -93,7 +93,7 @@ export function sendInstantMessage (text, to, id, dialog = 0) {
         ]
       }, true)
 
-      const chatSaveId = getIMChats(activeState).getIn([id, 'saveId'])
+      const chatSaveId = getIMChats(activeState)[id].saveId
       const msg = {
         _id: `${getAvatarDataSaveId(activeState)}/imChats/${chatSaveId}/${time.toJSON()}`,
         chatUUID: id,
@@ -158,13 +158,13 @@ export function saveLocalChatMessages () {
     const localChat = getLocalChat(getState())
     const messagesToSave = []
 
-    for (let i = localChat.size - 1; i >= 0; i -= 1) {
-      const msg = localChat.get(i)
+    for (let i = localChat.length - 1; i >= 0; i -= 1) {
+      const msg = localChat[i]
 
-      if (msg.get('didSave')) {
+      if (msg.didSave) {
         break
       } else {
-        const toSave = msg.toJSON()
+        const toSave = Object.assign({}, msg)
         delete toSave.didSave
         delete toSave.position
         if (toSave.ownerID === toSave.sourceID) {
@@ -210,11 +210,11 @@ export function deleteOldLocalChat () {
     if (!getShouldSaveChat(activeState)) return Promise.resolve()
 
     const localChat = getLocalChat(activeState)
-    if (localChat.size <= maxLocalChatHistory) return Promise.resolve()
+    if (localChat.length <= maxLocalChatHistory) return Promise.resolve()
 
     const toDeleteIds = []
-    for (let i = 0, max = localChat.size - maxLocalChatHistory; i < max; i += 1) {
-      const id = localChat.getIn([i, '_id'])
+    for (let i = 0, max = localChat.length - maxLocalChatHistory; i < max; i += 1) {
+      const id = localChat[i]._id
 
       if (id !== 'messageOfTheDay') {
         toDeleteIds.push(id)
@@ -355,7 +355,7 @@ export function receiveIM (message) {
     // If it is a group chat, toAgentID is the Group-UUID.
     IMmsg.chatUUID = fromGroup ? IMmsg.toAgentID : IMmsg.id
 
-    if (!getIMChats(getState()).has(IMmsg.chatUUID)) {
+    if (!(IMmsg.chatUUID in getIMChats(getState()))) {
       // Start a new IMChat.
       const name = dialog === 17
         ? getStringValueOf(message, 'MessageBlock', 'BinaryBucket')
@@ -364,7 +364,7 @@ export function receiveIM (message) {
     }
 
     const activeState = getState()
-    const chatSaveId = getIMChats(activeState).getIn([IMmsg.chatUUID, 'saveId'])
+    const chatSaveId = getIMChats(activeState)[IMmsg.chatUUID].saveId
 
     const saveId = getAvatarDataSaveId(activeState)
     IMmsg._id = `${saveId}/imChats/${chatSaveId}/${new Date(IMmsg.time).toJSON()}`
@@ -623,25 +623,23 @@ export function closeNotification (id) {
 
 export function saveIMChatMessages () {
   return async (dispatch, getState, { hoodie }) => {
-    const unsavedChats = getIMChats(getState()).filter(chat => chat.get('hasUnsavedMSG'))
+    const unsavedChats = Object.values(getIMChats(getState())).filter(chat => chat.hasUnsavedMSG)
 
     const chatsToSave = []
     const savingIds = {}
     const saveIdToChatId = {}
 
     unsavedChats.forEach((chat, key) => {
-      const messages = chat.get('messages')
+      const messages = chat.messages
 
-      const chatUUID = chat.get('chatUUID')
       const ids = []
-      savingIds[chatUUID] = ids
-      saveIdToChatId[chat.get('saveId')] = chatUUID
+      savingIds[chat.chatUUID] = ids
+      saveIdToChatId[chat.saveId] = chat.chatUUID
 
-      const toSaveMsg = messages.filter(msg => !msg.get('didSave')).map(msg => {
-        const id = msg.get('_id')
-        ids.push(id) // side-effect!
+      const toSaveMsg = messages.filter(msg => !msg.didSave).map(msg => {
+        ids.push(msg._id) // side-effect!
 
-        const dialog = msg.get('dialog')
+        const dialog = msg.dialog
 
         let binaryBucket
         switch (dialog) {
@@ -656,7 +654,7 @@ export function saveIMChatMessages () {
             break
 
           default:
-            const theBucket = msg.get('binaryBucket')
+            const theBucket = msg.binaryBucket
             binaryBucket = theBucket != null && theBucket.toJSON().data.length > 1
               ? theBucket
               : undefined
@@ -664,17 +662,17 @@ export function saveIMChatMessages () {
         }
 
         return {
-          _id: id,
-          _rev: msg.get('_rev'),
-          hoodie: msg.get('hoodie'),
+          _id: msg._id,
+          _rev: msg._rev,
+          hoodie: msg.hoodie,
           dialog,
-          fromId: msg.get('fromId'),
-          fromAgentName: msg.get('fromAgentName'),
-          message: msg.get('message'),
-          time: msg.get('time'),
+          fromId: msg.fromId,
+          fromAgentName: msg.fromAgentName,
+          message: msg.message,
+          time: msg.time,
           binaryBucket
         }
-      }).toJSON()
+      })
 
       chatsToSave.push(...toSaveMsg)
     })
@@ -762,7 +760,7 @@ function createNewIMChat (dialog, chatUUID, target, name) {
     const activeState = getState()
 
     // Stop if the chat already exists.
-    if (getIMChats(activeState).has(chatUUID)) return
+    if (chatUUID in getIMChats(activeState)) return
 
     const saveId = uuid()
 
@@ -787,19 +785,16 @@ export function activateIMChat (chatUUID) {
 
 export function saveIMChatInfos () {
   return async (dispatch, getState, { hoodie }) => {
-    const chatInfosToSave = getIMChats(getState()).filter(chat => !chat.get('didSaveChatInfo'))
-      .valueSeq()
-      .map(chat => {
-        return {
-          _id: chat.get('_id'),
-          chatType: chat.get('type'),
-          chatUUID: chat.get('chatUUID'),
-          saveId: chat.get('saveId'),
-          target: chat.get('withId'),
-          name: chat.get('name')
-        }
-      })
-      .toJSON()
+    const chatInfosToSave = Object.values(getIMChats(getState()))
+      .filter(chat => !chat.didSaveChatInfo)
+      .map(chat => ({
+        _id: chat._id,
+        chatType: chat.type,
+        chatUUID: chat.chatUUID,
+        saveId: chat.saveId,
+        target: chat.withId,
+        name: chat.name
+      }))
 
     if (chatInfosToSave.length === 0) return
 
@@ -865,11 +860,11 @@ export function getIMHistory (chatUUID, chatSaveId) {
     const activeState = getState()
     const chatSavePrefix = `${getAvatarDataSaveId(activeState)}/imChats/${chatSaveId}`
 
-    const chat = getIMChats(activeState).get(chatUUID)
+    const chat = getIMChats(activeState)[chatUUID]
     // get the _id of the oldest loaded msg
-    const hasAMessage = chat.hasIn(['messages', 0, '_id'])
+    const hasAMessage = chat.messages.length > 0
     const firstMsgId = hasAMessage
-      ? chat.getIn(['messages', 0, '_id'])
+      ? chat.messages[0]._id
       : (chatSavePrefix + '/\uFFFF') // or one with a special id that is always the last
 
     try {

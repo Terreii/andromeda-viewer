@@ -97,8 +97,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
   if (!isSelected) {
     const onSetActive = event => {
       event.preventDefault()
-      const avID = avatar.get('avatarIdentifier')
-      onSelect(avID)
+      onSelect(avatar.avatarIdentifier)
     }
 
     return <Container
@@ -111,8 +110,8 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
       className='not-selected'
       tabIndex='0'
     >
-      <Name>{new AvatarName(avatar.get('name')).getDisplayName()}</Name>
-      <Grid>@{grid.get('name')}</Grid>
+      <Name>{new AvatarName(avatar.name).getDisplayName()}</Name>
+      <Grid>@{grid.name}</Grid>
 
       <ActiveText>click to login</ActiveText>
     </Container>
@@ -132,12 +131,12 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
     }
   }
 
-  const avatarName = new AvatarName(avatar.get('name')).getDisplayName()
-  const passwordInputId = `passwordFor${avatar.get('avatarIdentifier')}`
+  const avatarName = new AvatarName(avatar.name).getDisplayName()
+  const passwordInputId = `passwordFor${avatar.avatarIdentifier}`
 
   return <Container className='selected'>
     <Name>{avatarName}</Name>
-    <Grid>@{grid.get('name')}</Grid>
+    <Grid>@{grid.name}</Grid>
 
     <PasswordInfo htmlFor={passwordInputId}>Password:</PasswordInfo>
     <PasswordInput
@@ -166,7 +165,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
       onClick={onClick}
       disabled={isLoggingIn || password.length === 0}
     >
-      {isLoggingIn === avatar.get('name') ? 'Connecting ...' : 'Login'}
+      {isLoggingIn === avatar.name ? 'Connecting ...' : 'Login'}
     </LoginButton>
   </Container>
 }

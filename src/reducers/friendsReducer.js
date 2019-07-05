@@ -2,55 +2,48 @@
  * Reduces all friends and their rights
  */
 
-import Immutable from 'immutable'
-
 function parseRights (rights) {
-  const canModifyObjects = (rights & (1 << 2)) !== 0
-  const canSeeOnMap = (rights & (1 << 1)) !== 0
-  const canSeeOnline = (rights & (1 << 0)) !== 0
-  return Immutable.Map({
-    canSeeOnline: canSeeOnline,
-    canSeeOnMap: canSeeOnMap,
-    canModifyObjects: canModifyObjects
-  })
-}
-
-function parseFriendsList (state, friend) {
-  const rightsGiven = friend['buddy_rights_given'] // from me to friend
-  const rightsHas = friend['rights_has'] // Friend has given me rights
-
-  const data = {
-    id: friend['buddy_id'],
-    rightsGiven: parseRights(rightsGiven), // Rights you have given to friend
-    rightsHas: parseRights(rightsHas) // Rights friend has given you
+  return {
+    canSeeOnline: (rights & (1 << 0)) !== 0,
+    canSeeOnMap: (rights & (1 << 1)) !== 0,
+    canModifyObjects: (rights & (1 << 2)) !== 0
   }
-  return state.push(Immutable.Map(data))
 }
 
-export default function friendsReducer (state = Immutable.List(), action) {
+export default function friendsReducer (state = [], action) {
   switch (action.type) {
     case 'didLogin':
-      return action.buddyList.reduce(parseFriendsList, state)
+      return action.sessionInfo['buddy-list'].map(friend => {
+        const rightsGiven = friend['buddy_rights_given'] // from me to friend
+        const rightsHas = friend['rights_has'] // Friend has given me rights
+
+        return {
+          id: friend['buddy_id'],
+          rightsGiven: parseRights(rightsGiven), // Rights you have given to friend
+          rightsHas: parseRights(rightsHas) // Rights friend has given you
+        }
+      })
 
     case 'ChangeUserRights':
-      return state.map(friend => {
-        const friendId = friend.get('id')
+      const changed = action.userRights.reduce((all, user) => {
+        all[user.agentId] = user
+        return all
+      }, {})
 
-        // your friend updated the rights
-        if (action.msg.fromId === friendId) {
-          for (const user of action.msg.userRights) {
-            if (user.agentId === action.msg.ownId) { // if it is yourself
-              return friend.set('rightsHas', parseRights(user.rights))
-            }
+      return state.map(friend => {
+        // your update the rights
+        if (action.fromId === action.ownId && friend.id in changed) {
+          return {
+            ...friend,
+            rightsGiven: parseRights(changed[friend.id].rights)
           }
         }
 
-        // your update
-        if (action.msg.fromId === action.msg.ownId) {
-          for (const user of action.msg.userRights) {
-            if (user.agentId === friendId) {
-              return friend.set('rightsGiven', parseRights(user.rights))
-            }
+        // your friend updated the rights
+        if (action.fromId === friend.id && action.ownId in changed) {
+          return {
+            ...friend,
+            rightsHas: parseRights(changed[action.ownId].rights) // if it is yourself
           }
         }
 
@@ -59,7 +52,7 @@ export default function friendsReducer (state = Immutable.List(), action) {
 
     case 'DidLogout':
     case 'UserWasKicked':
-      return Immutable.List()
+      return []
 
     default:
       return state

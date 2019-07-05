@@ -2,16 +2,17 @@
  * Reduces the names of avatars
  */
 
-import Immutable from 'immutable'
-
 import AvatarName from '../avatarName'
 import { mapBlockOf } from '../network/msgGetters'
 
 // Only adds a Name to names if it is new or did change
 function addName (state, uuid, name) {
   const updated = new AvatarName(name)
-  if (!state.has(uuid) || !state.get(uuid).compare(updated)) {
-    return state.set(uuid, updated)
+  if (!(uuid in state) || !state[uuid].compare(updated)) {
+    return {
+      ...state,
+      [uuid]: updated
+    }
   } else {
     return state
   }
@@ -37,18 +38,20 @@ function addNameFromLocalChat (state, msg) {
   return state
 }
 
-function namesReducer (state = Immutable.Map(), action) {
+function namesReducer (state = {}, action) {
   switch (action.type) {
     case 'ChatFromSimulator':
-      if (state.has(action.msg.sourceID)) return state
-      return addNameFromLocalChat(state, action.msg)
+      return action.msg.sourceID in state
+        ? state
+        : addNameFromLocalChat(state, action.msg)
 
     case 'ImprovedInstantMessage':
     case 'PERSONAL_IM_RECEIVED':
     case 'GROUP_IM_RECEIVED':
     case 'CONFERENCE_IM_RECEIVED':
-      if (state.has(action.msg.fromId)) return state
-      return addNameFromIM(state, action.msg)
+      return action.msg.fromId in state
+        ? state
+        : addNameFromIM(state, action.msg)
 
     case 'didLogin':
       const selfName = addName(state, action.uuid, action.name)
@@ -66,49 +69,63 @@ function namesReducer (state = Immutable.Map(), action) {
       }, state)
 
     case 'IMChatInfosLoaded':
-      return state.merge(action.chats.reduce((all, chat) => {
-        const avatarId = chat.target
-        if (chat.chatType !== 'personal' || state.has(avatarId)) return all
+      return {
+        ...state,
+        ...action.chats.reduce((all, chat) => {
+          const avatarId = chat.target
+          if (chat.chatType !== 'personal' || avatarId in state) return all
 
-        all[avatarId] = new AvatarName(chat.name)
-        return all
-      }, {}))
+          all[avatarId] = new AvatarName(chat.name)
+          return all
+        }, {})
+      }
 
     case 'IMHistoryLoaded':
-      return state.withMutations(oldState => {
-        action.messages.reduce((state, msg) => {
-          if (!state.has(msg.fromId)) {
-            return state.set(msg.fromId, new AvatarName(msg.fromAgentName))
-          }
-          return state
-        }, oldState)
-      })
+      let didChange = false
+      return action.messages.reduce((oldState, msg) => {
+        if (msg.fromId in oldState) return oldState
+
+        if (didChange) {
+          oldState[msg.fromId] = new AvatarName(msg.fromAgentName)
+          return oldState
+        }
+
+        didChange = true
+        return {
+          ...oldState,
+          [msg.fromId]: new AvatarName(msg.fromAgentName)
+        }
+      }, state)
 
     case 'DisplayNamesStartLoading':
       return action.ids.reduce((names, id) => {
-        if (!names.has(id)) return names
-        const nextName = names.get(id).withIsLoadingSetTo(true)
-        return names.set(id, nextName)
-      }, state)
+        if (!(id in names)) return names
+
+        names[id] = names[id].withIsLoadingSetTo(true)
+        return names
+      }, { ...state })
 
     case 'DisplayNamesLoaded':
       return action.agents.reduce((names, agent) => {
         const id = agent.id.toString()
-        const old = names.has(id) ? names.get(id) : new AvatarName(agent.username)
+        const old = id in names ? names[id] : new AvatarName(agent.username)
+
         const next = old.withDisplayNameSetTo(
           agent.display_name,
           agent.legacy_first_name,
           agent.legacy_last_name
         )
-        return names.set(id, next)
-      }, state)
+
+        names[id] = next
+        return names
+      }, { ...state })
 
     default:
       return state
   }
 }
 
-export default function namesCoreReducer (state = Immutable.fromJS({ names: {} }), action) {
+export default function namesCoreReducer (state = { names: {}, getDisplayNamesURL: '' }, action) {
   switch (action.type) {
     case '@@INIT':
     case 'ChatFromSimulator':
@@ -122,16 +139,23 @@ export default function namesCoreReducer (state = Immutable.fromJS({ names: {} }
     case 'IMHistoryLoaded':
     case 'DisplayNamesStartLoading':
     case 'DisplayNamesLoaded':
-      return state.set('names', namesReducer(state.get('names'), action))
+      return {
+        ...state,
+        names: namesReducer(state.names, action)
+      }
 
     case 'SeedCapabilitiesLoaded':
-      return state.set('getDisplayNamesURL', action.capabilities.GetDisplayNames)
+      return {
+        ...state,
+        getDisplayNamesURL: action.capabilities.GetDisplayNames
+      }
 
     case 'DidLogout':
     case 'UserWasKicked':
-      return Immutable.Map({
-        names: namesReducer(undefined, action)
-      })
+      return {
+        names: namesReducer(undefined, action),
+        getDisplayNamesURL: ''
+      }
 
     default:
       return state

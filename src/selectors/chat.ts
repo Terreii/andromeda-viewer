@@ -4,17 +4,19 @@ import { createSelector } from 'reselect'
 
 import { getIsSignedIn, getShouldSync } from './viewer'
 
-export const getActiveTab = state => state.session.get('activeChatTab')
+import { LocalChatMessage, IMChat } from '../types/chat'
 
-export const getLocalChat = state => state.localChat
+export const getActiveTab = (state: any): string => state.session.activeChatTab
 
-export const getIMChats = state => state.IMs
+export const getLocalChat = (state: any): LocalChatMessage[] => state.localChat
+
+export const getIMChats = (state: any): { [key: string]: IMChat } => state.IMs
 
 export const getActiveIMChats = createSelector(
   [
     getIMChats
   ],
-  chats => chats.filter(chat => chat.get('active'))
+  chats => Object.values(chats).filter(chat => chat.active)
 )
 
 // checks if the chat history should be saved and synced
@@ -26,12 +28,12 @@ export const getShouldSaveChat = createSelector(
   (sync, isSignedIn) => sync && isSignedIn
 )
 
-export const getNotifications = state => state.session.get('notifications')
+export const getNotifications = (state: any): any[] => state.session.notifications
 
 export const getShouldDisplayNotifications = createSelector(
   [
     getNotifications,
     getActiveTab
   ],
-  (notifications, activeTab) => !notifications.isEmpty() || activeTab === 'notifications'
+  (notifications, activeTab) => notifications.length > 0 || activeTab === 'notifications'
 )

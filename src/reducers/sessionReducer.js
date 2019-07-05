@@ -1,14 +1,14 @@
-import { Map, List } from 'immutable'
+// Reducer for general session info.
 
 import { getValueOf, getValuesOf } from '../network/msgGetters'
 
-export default function sessionReducer (state = Map({
+export default function sessionReducer (state = {
   avatarIdentifier: null,
   activeChatTab: 'local',
-  notifications: List(),
+  notifications: [],
   notificationId: 0,
   error: null
-}), action) {
+}, action) {
   switch (action.type) {
     case 'didLogin':
       const sessionInfo = Object.keys(action.sessionInfo).reduce((info, key) => {
@@ -21,6 +21,8 @@ export default function sessionReducer (state = Map({
         // Remove data that is stored somewhere else
         switch (keyFixed) {
           case 'buddy-list':
+          case 'inventory-root':
+          case 'inventory-skeleton':
           case 'login':
           case 'seedCapability':
           case 'firstName':
@@ -35,71 +37,90 @@ export default function sessionReducer (state = Map({
         }
       }, {})
       sessionInfo.avatarIdentifier = action.avatarIdentifier
-      sessionInfo.position = Map({
+      sessionInfo.position = {
         position: [],
         lookAt: JSON.parse(action.sessionInfo.look_at.replace(/r/gi, ''))
-      })
-      sessionInfo.regionInfo = Map()
-      return state.merge(sessionInfo)
+      }
+      sessionInfo.regionInfo = {}
+      return {
+        ...state,
+        ...sessionInfo
+      }
 
     case 'AgentMovementComplete':
-      return state.mergeDeep({
+      return {
+        ...state,
         position: {
+          ...state.position,
           position: getValueOf(action, 'Data', 'Position'),
           lookAt: getValueOf(action, 'Data', 'LookAt')
         }
-      })
+      }
 
     case 'RegionInfo':
-      return state.mergeDeep({
+      return {
+        ...state,
         regionInfo: Object.assign(
           {},
           getValuesOf(action, 'RegionInfo', 0, []),
           getValuesOf(action, 'RegionInfo2', 0, [])
         )
-      })
+      }
 
     case 'RegionHandshake':
-      return state.mergeDeep({
+      return {
+        ...state,
         regionInfo: {
+          ...state.regionInfo,
           regionID: action.regionID,
           flags: action.flags
         }
-      })
+      }
 
     case 'CHAT_TAB_CHANGED':
-      return state.set('activeChatTab', action.key)
+      return {
+        ...state,
+        activeChatTab: action.key
+      }
 
     case 'NOTIFICATION_RECEIVED':
-      const notificationId = state.get('notificationId')
-      return state.merge({
-        notifications: state.get('notifications').push({
+      const notificationId = state.notificationId
+      return {
+        ...state,
+        notifications: state.notifications.concat([{
           ...action.msg,
           id: notificationId
-        }),
+        }]),
         notificationId: notificationId + 1
-      })
+      }
 
     case 'NOTIFICATION_CLOSED':
-      return state.set('notifications',
-        state.get('notifications').filter(notification => action.id !== notification.id)
-      )
+      return {
+        ...state,
+        notifications: state.notifications.filter(notification => action.id !== notification.id)
+      }
 
     case 'DidLogout':
     case 'UserWasKicked':
-      return Map({
+      return {
         avatarIdentifier: null,
         activeChatTab: 'local',
-        notifications: List(),
+        notifications: [],
         notificationId: 0,
         error: action.type === 'UserWasKicked' ? action.reason : null
-      })
+      }
 
     case 'ClosePopup':
-      return state.set('error', null)
+      return {
+        ...state,
+        error: null
+      }
 
     case 'SeedCapabilitiesLoaded':
-      return state.set('eventQueueGetUrl', action.capabilities.EventQueueGet)
+      return {
+        ...state,
+        eventQueueGetUrl: action.capabilities.EventQueueGet
+      }
 
     default:
       return state
