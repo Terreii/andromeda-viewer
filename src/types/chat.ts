@@ -146,8 +146,9 @@ export enum IMDialog {
   GroupInvitation = 3,
   /**
    * Inventory Offer.
+   * 
    * The ID is the transaction id.
-   * The binary bucket is a list of inventory UUID and type.
+   * The binary bucket is a list of inventory type and UUID (1 byte type and 16 byte UUID).
    */
   InventoryOffered = 4,
   /**
