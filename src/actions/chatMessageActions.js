@@ -14,6 +14,8 @@ import { getAvatarNameById, getOwnAvatarName } from '../selectors/names'
 import { getGroupsIDs } from '../selectors/groups'
 import { getRegionId, getParentEstateID, getPosition } from '../selectors/region'
 
+import { IMDialog } from '../types/chat'
+
 export function changeTab (newTab) {
   return {
     type: 'CHAT_TAB_CHANGED',
@@ -230,7 +232,7 @@ export function receiveIM (message) {
     const state = getState()
 
     switch (getValueOf(message, 'MessageBlock', 'Dialog')) {
-      case 17: // SessionSend
+      case IMDialog.SessionSend:
         if (getGroupsIDs(state).includes(getValueOf(message, 'MessageBlock', 'ID'))) {
           dispatch(handleGroupIM(message))
         } else {
@@ -238,7 +240,7 @@ export function receiveIM (message) {
         }
         return
 
-      case 0: // MessageFromAgent
+      case IMDialog.MessageFromAgent:
         const id = getValueOf(message, 'MessageBlock', 'ID')
 
         if (getStringValueOf(message, 'MessageBlock', 'FromAgentName') === 'Second Life') {
@@ -266,34 +268,34 @@ export function receiveIM (message) {
         }
         return
 
-      case 19: // MessageFromObject
+      case IMDialog.MessageFromObject:
         dispatch(handleIMFromObject(message))
         return
 
-      case 41: // start typing
-      case 42: // stop typing
+      case IMDialog.StartTyping:
+      case IMDialog.StopTyping:
         dispatch(handleIMTypingEvent(message))
         return
 
-      case 1: // MessageBox
+      case IMDialog.MessageBox:
         dispatch(handleTextOnlyNotification(
           getStringValueOf(message, 'MessageBlock', 'Message')
         ))
         return
 
-      case 22: // RequestTeleport
+      case IMDialog.RequestTeleport:
         dispatch(handleNotification(message))
         break
 
-      case 26: // RequestTeleportLure
+      case IMDialog.RequestLure:
         dispatch(handleNotification(message))
         break
 
-      case 3: // GroupInvitation
+      case IMDialog.GroupInvitation:
         dispatch(handleNotification(message))
         break
 
-      case 38: // FriendshipOffered
+      case IMDialog.FriendshipOffered:
         if (getStringValueOf(message, 'MessageBlock', 'FromAgentName') === 'Second Life') {
           dispatch(handleIMFromObject(message))
           return
@@ -302,12 +304,12 @@ export function receiveIM (message) {
         }
         break
 
-      case 4: // InventoryOffered
+      case IMDialog.InventoryOffered:
         dispatch(handleNotification(message))
         break
 
-      case 5: // InventoryAccepted
-      case 6: // InventoryDeclined
+      case IMDialog.InventoryAccepted:
+      case IMDialog.InventoryDeclined:
         const agentName = getStringValueOf(message, 'MessageBlock', 'FromAgentName')
         const dialog = getValueOf(message, 'MessageBlock', 'Dialog')
         dispatch(handleNotificationInChat(
@@ -315,11 +317,11 @@ export function receiveIM (message) {
         ))
         return
 
-      case 9: // TaskInventoryOffered
+      case IMDialog.TaskInventoryOffered:
         dispatch(handleNotification(message))
         break
 
-      case 32: // GroupNotice
+      case IMDialog.GroupNotice:
         dispatch(handleNotification(message))
         break
 
@@ -557,7 +559,7 @@ function handleNotification (msg) {
   }
 
   switch (getValueOf(msg, 'MessageBlock', 'Dialog')) {
-    case 1: // MessageBox
+    case IMDialog.MessageBox:
       body.text = getStringValueOf(msg, 'MessageBlock', 'Message')
       break
 
