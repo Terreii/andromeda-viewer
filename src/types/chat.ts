@@ -317,3 +317,53 @@ export interface InstanceMessage extends HoodieObject {
   time: number
   binaryBucket?: Buffer
 }
+
+export enum NotificationTypes {
+  /**
+   * This notification only has text and an OK-button.
+   */
+  TextOnly = 0,
+  /**
+   * This notification represents a friendship offer.
+   * 
+   * It has the avatar name, their message and accept and decline buttons.
+   */
+  FriendshipOffer,
+  /**
+   * This notification represents a group incitation.
+   * 
+   * It has the avatar name, their message, the group name and
+   * accept and decline buttons.
+   */
+  GroupInvitation,
+  /**
+   * A goto url notification.
+   * 
+   * It has the an info text with the avatar name, their message and a link and an OK-Button.
+   * 
+   * The link is: `<a href="link" target='_blank' rel="noopener noreferrer">`
+   */
+  LoadURL,
+  /**
+   * A request that you send a {@link IMDialog.RequestTeleport}.
+   * 
+   * It has the avatar info (+ message) and accept and decline buttons.
+   */
+  RequestLure,
+  /**
+   * A Teleport request. Clicking OK teleports you.
+   * 
+   * It has the avatar info (+ message), location info and accept and decline buttons.
+   */
+  TeleportLure,
+  /**
+   * A dialog from a script with buttons.
+   */
+  ScriptDialog,
+  /**
+   * A permission dialog.
+   * 
+   * Can a script have permissions over you?
+   */
+  Permissions,
+}

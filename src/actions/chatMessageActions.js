@@ -14,7 +14,7 @@ import { getAvatarNameById, getOwnAvatarName } from '../selectors/names'
 import { getGroupsIDs } from '../selectors/groups'
 import { getRegionId, getParentEstateID, getPosition } from '../selectors/region'
 
-import { IMDialog } from '../types/chat'
+import { IMDialog, NotificationTypes } from '../types/chat'
 
 export function changeTab (newTab) {
   return {
@@ -312,8 +312,11 @@ export function receiveIM (message) {
       case IMDialog.InventoryDeclined:
         const agentName = getStringValueOf(message, 'MessageBlock', 'FromAgentName')
         const dialog = getValueOf(message, 'MessageBlock', 'Dialog')
+        const acceptedText = dialog === IMDialog.InventoryAccepted ? 'accepted' : 'declined'
         dispatch(handleNotificationInChat(
-          `${agentName} ${dialog === 5 ? 'accepted' : 'declined'} your inventory offer.`
+          `${acceptedText} your inventory offer.`,
+          agentName,
+          getValueOf(message, 'AgentData', 'AgentID')
         ))
         return
 
@@ -512,7 +515,8 @@ function handleIMFromObject (msg) {
 
   return handleNotificationInChat(
     getStringValueOf(msg, 'MessageBlock', 'Message'),
-    getStringValueOf(msg, 'MessageBlock', 'FromAgentName')
+    getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
+    getValueOf(msg, 'MessageBlock', 'ID')
   )
 }
 
@@ -524,7 +528,7 @@ function handleTextOnlyNotification (text) {
   return {
     type: 'NOTIFICATION_RECEIVED',
     msg: {
-      notificationType: 0,
+      notificationType: NotificationTypes.TextOnly,
       text: text.toString()
     }
   }
@@ -538,7 +542,7 @@ function handleFriendshipOffer (msg) {
   return {
     type: 'NOTIFICATION_RECEIVED',
     msg: {
-      notificationType: 1,
+      notificationType: NotificationTypes.FriendshipOffer,
       text: getStringValueOf(msg, 'MessageBlock', 'Message'),
       fromId: getValueOf(msg, 'AgentData', 'AgentID'),
       fromAgentName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
@@ -553,7 +557,7 @@ function handleFriendshipOffer (msg) {
  */
 function handleNotification (msg) {
   const body = {
-    notificationType: 0,
+    notificationType: NotificationTypes.TextOnly,
     text: '',
     msg: null
   }
@@ -603,12 +607,12 @@ function handleNotificationInChat (text, fromName = '', fromId) {
 function handleIMTypingEvent (msg) {
   const dialog = getValueOf(msg, 'MessageBlock', 'Dialog')
 
-  if (dialog !== 41 && dialog !== 42) {
+  if (dialog !== IMDialog.StartTyping && dialog !== IMDialog.StopTyping) {
     throw new TypeError('handleIMTypingEvent did receive wrong Dialog: ' + dialog)
   }
 
   return {
-    type: dialog === 41
+    type: dialog === IMDialog.StartTyping
       ? 'IM_START_TYPING'
       : 'IM_STOP_TYPING',
     chatUUID: getValueOf(msg, 'MessageBlock', 'ID'),

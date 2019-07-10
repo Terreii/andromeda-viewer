@@ -84,14 +84,13 @@ export default function sessionReducer (state = {
       }
 
     case 'NOTIFICATION_RECEIVED':
-      const notificationId = state.notificationId
       return {
         ...state,
         notifications: state.notifications.concat([{
           ...action.msg,
-          id: notificationId
+          id: state.notificationId
         }]),
-        notificationId: notificationId + 1
+        notificationId: state.notificationId + 1
       }
 
     case 'NOTIFICATION_CLOSED':

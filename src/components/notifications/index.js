@@ -4,6 +4,8 @@ import styled from 'styled-components'
 import TextNotification from './textNotification'
 import FriendshipOffer from './friendshipOffer'
 
+import { NotificationTypes } from '../../types/chat'
+
 const Outer = styled.main`
   padding: 1em;
 `
@@ -31,7 +33,7 @@ export default function notificationsList ({
     <Content>
       {notifications.map(notification => {
         switch (notification.notificationType) {
-          case 1:
+          case NotificationTypes.FriendshipOffer:
             return <FriendshipOffer
               key={notification.id}
               data={notification}
@@ -40,7 +42,7 @@ export default function notificationsList ({
               onClose={onClose}
             />
 
-          case 0:
+          case NotificationTypes.TextOnly:
           default:
             return <TextNotification
               key={notification.id}
