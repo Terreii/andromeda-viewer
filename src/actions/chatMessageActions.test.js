@@ -14,7 +14,7 @@ mockdate.set(1562630524418)
 
 describe('incoming IM handling', () => {
   test('it should create a private chat and dispatch a private IM', () => {
-    const messageData = createImPackage()
+    const messageData = createImPackage(IMDialog.MessageFromAgent)
 
     const store = mockStore(actions => {
       const state = {
@@ -76,7 +76,7 @@ describe('incoming IM handling', () => {
   it("shouldn't create a new chat if a new message for it is received", () => {
     uuid.mockReturnValue('abcdef')
 
-    const messageData = createImPackage()
+    const messageData = createImPackage(IMDialog.MessageFromAgent)
 
     const store = mockStore({
       account: {
@@ -148,16 +148,15 @@ describe('incoming IM handling', () => {
     })
 
     // IMDialog.MessageFromAgent but with fromGroup set to true
-    store.dispatch(receiveIM(createImPackage({
+    store.dispatch(receiveIM(createImPackage(IMDialog.MessageFromAgent, {
       id: groupId,
       fromGroup: true,
       binaryBucket: 'A group has no name'
     })))
 
     // IMDialog.SessionSend
-    store.dispatch(receiveIM(createImPackage({
+    store.dispatch(receiveIM(createImPackage(IMDialog.SessionSend, {
       id: groupId,
-      dialog: IMDialog.SessionSend,
       binaryBucket: 'A group has no name'
     })))
 
@@ -190,8 +189,7 @@ describe('incoming IM handling', () => {
   it('should receive and process session messages', () => {
     const id = 'a-session-id'
 
-    const messageData = createImPackage({
-      dialog: IMDialog.SessionSend,
+    const messageData = createImPackage(IMDialog.SessionSend, {
       id,
       binaryBucket: 'A conference'
     })
@@ -230,8 +228,7 @@ describe('incoming IM handling', () => {
     store.dispatch(receiveIM(messageData))
 
     // IMDialog.MessageFromAgent with binaryBucket of length > 1
-    store.dispatch(receiveIM(createImPackage({
-      dialog: IMDialog.MessageFromAgent,
+    store.dispatch(receiveIM(createImPackage(IMDialog.MessageFromAgent, {
       id,
       binaryBucket: 'A conference'
     })))
@@ -264,14 +261,10 @@ describe('incoming IM handling', () => {
     const store = mockStore()
 
     // IMDialog.StartTyping
-    store.dispatch(receiveIM(createImPackage({
-      dialog: IMDialog.StartTyping
-    })))
+    store.dispatch(receiveIM(createImPackage(IMDialog.StartTyping)))
 
     // IMDialog.StopTyping
-    store.dispatch(receiveIM(createImPackage({
-      dialog: IMDialog.StopTyping
-    })))
+    store.dispatch(receiveIM(createImPackage(IMDialog.StopTyping)))
 
     expect(store.getActions()).toEqual([
       {
@@ -292,14 +285,12 @@ describe('incoming IM handling', () => {
       const store = mockStore()
 
       // IMDialog.MessageBox
-      store.dispatch(receiveIM(createImPackage({
-        dialog: IMDialog.MessageBox,
+      store.dispatch(receiveIM(createImPackage(IMDialog.MessageBox, {
         message: 'An interesting message'
       })))
 
       // IMDialog.MessageFromAgent but with AgentID === '00000000-0000-0000-0000-000000000000'
-      store.dispatch(receiveIM(createImPackage({
-        dialog: IMDialog.MessageFromAgent,
+      store.dispatch(receiveIM(createImPackage(IMDialog.MessageFromAgent, {
         agentId: '00000000-0000-0000-0000-000000000000',
         message: 'An interesting message'
       })))
@@ -332,20 +323,16 @@ describe('incoming IM handling', () => {
       })
 
       // IMDialog.MessageFromAgent with id === UUID.zero
-      store.dispatch(receiveIM(createImPackage({
+      store.dispatch(receiveIM(createImPackage(IMDialog.MessageFromAgent, {
         id: '00000000-0000-0000-0000-000000000000'
       })))
 
       // IMDialog.InventoryAccepted
-      store.dispatch(receiveIM(createImPackage({
-        dialog: IMDialog.InventoryAccepted
-      })))
+      store.dispatch(receiveIM(createImPackage(IMDialog.InventoryAccepted)))
 
       // IMDialog.InventoryDeclined
 
-      store.dispatch(receiveIM(createImPackage({
-        dialog: IMDialog.InventoryDeclined
-      })))
+      store.dispatch(receiveIM(createImPackage(IMDialog.InventoryDeclined)))
 
       expect(store.getActions()).toEqual([
         {
@@ -376,19 +363,15 @@ describe('incoming IM handling', () => {
       const store = mockStore()
 
       // IMDialog.MessageFromObject
-      store.dispatch(receiveIM(createImPackage({
-        dialog: IMDialog.MessageFromObject
-      })))
+      store.dispatch(receiveIM(createImPackage(IMDialog.MessageFromObject)))
 
       // IMDialog.MessageFromAgent but with FromAgentName === 'Second Life'
-      store.dispatch(receiveIM(createImPackage({
-        dialog: IMDialog.MessageFromAgent,
+      store.dispatch(receiveIM(createImPackage(IMDialog.MessageFromAgent, {
         fromAgentName: 'Second Life'
       })))
 
       // IMDialog.FriendshipOffered but from FromAgentName === 'Second Life'
-      store.dispatch(receiveIM(createImPackage({
-        dialog: IMDialog.FriendshipOffered,
+      store.dispatch(receiveIM(createImPackage(IMDialog.FriendshipOffered, {
         fromAgentName: 'Second Life'
       })))
 
@@ -416,6 +399,119 @@ describe('incoming IM handling', () => {
         }
       ])
     })
+
+    it('should handle friendship offers', () => {
+      const store = mockStore()
+
+      store.dispatch(receiveIM(createImPackage(IMDialog.FriendshipOffered, {
+        message: 'Friends?'
+      })))
+
+      expect(store.getActions()).toEqual([
+        {
+          type: 'NOTIFICATION_RECEIVED',
+          msg: {
+            notificationType: NotificationTypes.FriendshipOffer,
+            text: 'Friends?',
+            fromId: '01234567-8900-0000-0000-000000000000',
+            fromAgentName: 'Tester',
+            sessionId: '01234567-8900-0000-0000-009876543210'
+          }
+        }
+      ])
+    })
+
+    it('should handle group invitations', () => {
+      const store = mockStore()
+
+      const binaryBucket = Buffer.alloc(4 + 16)
+      binaryBucket.writeUInt32BE(1000, 0)
+      for (let i = 0; i < 16; ++i) {
+        binaryBucket.writeUInt8(i, i + 4)
+      }
+
+      store.dispatch(receiveIM(createImPackage(IMDialog.GroupInvitation, {
+        id: 'an-id',
+        fromGroup: true,
+        binaryBucket
+      })))
+
+      expect(store.getActions()).toEqual([
+        {
+          type: 'NOTIFICATION_RECEIVED',
+          msg: {
+            notificationType: NotificationTypes.GroupInvitation,
+            text: 'Hello World!',
+            cost: 1000,
+            roleId: '00010203-0405-4607-8809-0a0b0c0d0e0f',
+            groupId: '01234567-8900-0000-0000-000000000000',
+            transactionId: '01234567-8900-0000-0000-009876543210',
+            name: 'Tester'
+          }
+        }
+      ])
+    })
+
+    it('should handle goto URL notifications', () => {
+      const store = mockStore()
+
+      store.dispatch(receiveIM(createImPackage(IMDialog.GotoUrl, {
+        binaryBucket: createStringBuffer('http://wiki.secondlife.com/wiki/ImprovedInstantMessage')
+      })))
+
+      expect(store.getActions()).toEqual([
+        {
+          type: 'NOTIFICATION_RECEIVED',
+          msg: {
+            notificationType: NotificationTypes.LoadURL,
+            text: 'Hello World!',
+            url: new window.URL('http://wiki.secondlife.com/wiki/ImprovedInstantMessage'),
+            fromId: '01234567-8900-0000-0000-000000000000',
+            fromAgentName: 'Tester'
+          }
+        }
+      ])
+    })
+
+    it('should handle a request teleport lure', () => {
+      const store = mockStore()
+
+      store.dispatch(receiveIM(createImPackage(IMDialog.RequestTeleportLure)))
+
+      expect(store.getActions()).toEqual([
+        {
+          type: 'NOTIFICATION_RECEIVED',
+          msg: {
+            notificationType: NotificationTypes.RequestTeleportLure,
+            text: 'Hello World!',
+            fromId: '01234567-8900-0000-0000-000000000000',
+            fromAgentName: 'Tester'
+          }
+        }
+      ])
+    })
+
+    it('should handle a teleport lure', () => {
+      const store = mockStore()
+
+      store.dispatch(receiveIM(createImPackage(IMDialog.TeleportLureOffered)))
+
+      expect(store.getActions()).toEqual([
+        {
+          type: 'NOTIFICATION_RECEIVED',
+          msg: {
+            notificationType: NotificationTypes.TeleportLure,
+            text: 'Hello World!',
+            fromId: '01234567-8900-0000-0000-000000000000',
+            fromAgentName: 'Tester',
+            lureId: '01234567-8900-0000-0000-009876543210',
+            regionId: '00000000-1234-5678-9000-000000000000',
+            position: [1.2, 3.4, 5.6],
+            regionInfo: '' // TODO: find out format of binaryBucket
+          }
+        }
+      ])
+    })
   })
 })
 
@@ -428,7 +524,7 @@ function createStringBuffer (data) {
   ])
 }
 
-function createImPackage (data = {}) {
+function createImPackage (dialog, data = {}) {
   const getValue = (key, defaultValue) => {
     const value = data[key] || defaultValue
     return typeof value === 'string'
@@ -455,7 +551,7 @@ function createImPackage (data = {}) {
         RegionID: data.regionId || '00000000-1234-5678-9000-000000000000',
         Position: data.position || [1.2, 3.4, 5.6],
         Offline: data.offline || 0,
-        Dialog: data.dialog || IMDialog.MessageFromAgent,
+        Dialog: dialog,
         ID: data.id || '01234567-8900-0000-0000-009876543210',
         Timestamp: data.timestamp || 0,
         FromAgentName: fromAgentName,

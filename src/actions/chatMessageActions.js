@@ -283,11 +283,11 @@ export function receiveIM (message) {
         ))
         return
 
-      case IMDialog.RequestTeleport:
+      case IMDialog.TeleportLureOffered:
         dispatch(handleNotification(message))
         break
 
-      case IMDialog.RequestLure:
+      case IMDialog.RequestTeleportLure:
         dispatch(handleNotification(message))
         break
 
@@ -298,11 +298,10 @@ export function receiveIM (message) {
       case IMDialog.FriendshipOffered:
         if (getStringValueOf(message, 'MessageBlock', 'FromAgentName') === 'Second Life') {
           dispatch(handleIMFromObject(message))
-          return
         } else {
           dispatch(handleFriendshipOffer(message))
         }
-        break
+        return
 
       case IMDialog.InventoryOffered:
         dispatch(handleNotification(message))

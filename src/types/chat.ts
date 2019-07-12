@@ -228,23 +228,23 @@ export enum IMDialog {
   /**
    * Send a teleport lure.
    */
-  RequestTeleport = 22,
+  TeleportLureOffered = 22,
   /**
-   * Accept a teleport lure.
+   * Accept {@link IMDialog.TeleportLureOffered}.
    */
   AcceptTeleport = 23,
   /**
-   * Deny a teleport lure.
+   * Deny {@link IMDialog.TeleportLureOffered}.
    */
   DenyTeleport = 24,
   /**
    * A linden will teleport you.
    */
-  GodLikeRequestTeleport = 25,
+  GodLikeTeleportLureOffered = 25,
   /**
-   * Request a teleport lure {@link IMDialog.RequestTeleport}.
+   * Request a teleport lure {@link IMDialog.TeleportLureOffered}.
    */
-  RequestLure = 26,
+  RequestTeleportLure = 26,
   /**
    * Notification of a new group election.
    * @deprecated
@@ -345,11 +345,11 @@ export enum NotificationTypes {
    */
   LoadURL,
   /**
-   * A request that you send a {@link IMDialog.RequestTeleport}.
+   * A request that you send a {@link IMDialog.TeleportLureOffered}.
    * 
    * It has the avatar info (+ message) and accept and decline buttons.
    */
-  RequestLure,
+  RequestTeleportLure,
   /**
    * A Teleport request. Clicking OK teleports you.
    * 
