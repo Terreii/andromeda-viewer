@@ -74,8 +74,8 @@ const Content = styled.article`
   }
 `
 
-export default function Popup (props) {
-  const showCloseIcon = typeof props.onClose === 'function'
+export default function Popup ({ children, title, onClose }) {
+  const showCloseIcon = typeof onClose === 'function'
 
   const closeIconInHeader = showCloseIcon
     ? <CloseButton
@@ -83,7 +83,7 @@ export default function Popup (props) {
       show={showCloseIcon}
       onClick={event => {
         event.preventDefault()
-        props.onClose()
+        onClose()
       }}
     >
       <img src={closeIcon} alt='close popup' height='32' width='32' />
@@ -94,10 +94,10 @@ export default function Popup (props) {
     <Border>
       <Header>
         {closeIconInHeader}
-        <PopupTitle>{props.title}</PopupTitle>
+        <PopupTitle>{title}</PopupTitle>
       </Header>
       <Content>
-        {props.children}
+        {children}
       </Content>
     </Border>
   </Background>
