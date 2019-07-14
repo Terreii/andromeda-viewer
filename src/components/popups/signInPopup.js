@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useCallback } from 'react'
 import styled from 'styled-components'
 
 import Popup from './popup'
@@ -34,260 +34,237 @@ const ButtonsContainer = styled.div`
   }
 `
 
-export default class SignInPopup extends React.Component {
-  constructor () {
-    super()
-    this.state = {
-      username: '',
-      usernameValid: false,
-      password: '',
-      password2: '',
-      cryptoPassword: '',
-      cryptoPassword2: '',
-      isSigningIn: false,
-      error: null
-    }
+export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
+  const [username, setUsername] = useState('')
+  const [usernameValid, setUsernameValid] = useState(false)
 
-    this._boundInputChange = this._inputChange.bind(this)
-    this._boundSend = this._send.bind(this)
-    this._boundKeyPress = this._onKeyPress.bind(this)
-  }
+  const password = useFormInput('')
+  const password2 = useFormInput('')
 
-  _inputChange (event) {
-    const id = event.target.id
-    const value = event.target.value
-    this.setState({
-      usernameValid: id === 'username' ? event.target.validity.valid : this.state.usernameValid,
-      [id]: value
-    })
-  }
+  const cryptoPassword = useFormInput('')
+  const cryptoPassword2 = useFormInput('')
 
-  async _send (event) {
-    event.preventDefault()
-    if (!this._isInputValid()) {
-      return
-    }
+  const [isSigningIn, setIsSigningIn] = useState(false)
+  const [error, setError] = useState(null)
 
-    this.setState({
-      isSigningIn: true
-    })
-
-    const type = this.props.isSignUp ? 'signUp' : 'signIn'
-    try {
-      await this.props.onSend(
-        this.state.username,
-        this.state.password,
-        this.state.cryptoPassword,
-        type
-      )
-    } catch (err) {
-      this.setState({
-        isSigningIn: false,
-        error: err.message || err.toString()
-      })
-    }
-  }
-
-  _onFocus (event) {
-    const target = event.target
-
-    setTimeout(() => {
-      if (target == null) return
-
-      target.scrollIntoView({ block: 'center' })
-    }, 16)
-  }
-
-  _isInputValid () {
-    const username = this.state.username
-    const password = this.state.password
-    const password2 = this.state.password2
-    const cryptoPassword = this.state.cryptoPassword
-    const cryptoPassword2 = this.state.cryptoPassword2
-    const isSignUp = this.props.isSignUp
-
-    if ([password, cryptoPassword].some((s, i) => s.length < 8)) {
+  const isValid = (() => {
+    if ([password.value, cryptoPassword.value].some((s, i) => s.length < 8)) {
       return false
     }
 
     // this also checks length of password2 and cryptoPassword2
-    if (isSignUp && (password !== password2 || cryptoPassword !== cryptoPassword2)) {
+    if (isSignUp && (
+      password.value !== password2.value || cryptoPassword.value !== cryptoPassword2.value
+    )) {
       return false
     }
 
-    return username.length > 4 && this.state.usernameValid
+    return username.length > 4 && usernameValid
+  })()
+
+  const send = event => {
+    event.preventDefault()
+    if (!isValid) {
+      return
+    }
+
+    setIsSigningIn(true)
+
+    const type = isSignUp ? 'signUp' : 'signIn'
+    onSend(username, password.value, cryptoPassword.value, type)
+      .catch(err => {
+        setIsSigningIn(false)
+        setError(err.message || err.toString())
+      })
   }
 
-  _onKeyPress (event) {
+  const onKeyPress = event => {
     if (event.key === 'Enter') {
-      event.preventDefault()
-
-      this._send(event)
+      send(event)
     }
   }
 
-  render () {
-    const title = this.props.isSignUp ? 'Sign up' : 'Sign in'
+  return <Popup title={isSignUp ? 'Sign up' : 'Sign in'} onClose={onCancel}>
+    <Container className={isSignUp ? 'SignUp' : ''}>
+      <FormElement show>
+        <label htmlFor='username'>
+          Username / email:
+        </label>
+        <Input
+          id='username'
+          type='email'
+          autoComplete='email'
+          value={username}
+          onChange={event => {
+            setUsername(event.target.value)
+            setUsernameValid(event.target.validity.valid)
+          }}
+          onKeyPress={onKeyPress}
+          placeholder='me-avatar@example.com'
+          autoFocus
+          required
+          aria-describedby='mainHelp'
+          disabled={isSigningIn}
+          onFocus={onFocusScrollIntoView}
+        />
+        <Help id='mainHelp' hide={!isSignUp}>
+          Must be an email. We'll never share your email with anyone else.
+        </Help>
+      </FormElement>
 
-    return <Popup title={title} onClose={this.props.onCancel}>
-      <Container className={this.props.isSignUp ? 'SignUp' : ''}>
-        <FormElement show>
-          <label htmlFor='username'>
-            Username / email:
-          </label>
-          <Input
-            id='username'
-            type='email'
-            value={this.state.username}
-            autoComplete='email'
-            onChange={this._boundInputChange}
-            onKeyPress={this._boundKeyPress}
-            placeholder='me-avatar@example.com'
-            autoFocus
-            required
-            aria-describedby='mainHelp'
-            disabled={this.state.isSigningIn}
-            onFocus={this._onFocus}
-          />
-          <Help id='mainHelp' hide={!this.props.isSignUp}>
-            Must be an email. We'll never share your email with anyone else.
-          </Help>
-        </FormElement>
-
-        <FormElement show>
-          <label htmlFor='password'>
-            Password:
-          </label>
-          <Input
-            id='password'
-            type='password'
-            value={this.state.password}
-            autoComplete={this.props.isSignUp ? 'new-password' : 'current-password'}
-            onChange={this._boundInputChange}
-            onKeyPress={this._boundKeyPress}
-            required
-            minLength='8'
-            aria-describedby='passwordHelp'
-            disabled={this.state.isSigningIn}
-            onFocus={this._onFocus}
-          />
-          <Help id='passwordHelp' hide={!this.props.isSignUp}>
-            Please use a strong and unique password!<br />
-            Minimal length: 8 characters!<br />
-            {'A '}
-            <a
-              href='https://en.wikipedia.org/wiki/List_of_password_managers'
-              target='_blank'
-              rel='noopener noreferrer'
-            >
-              Password Manager
-            </a>
-            {' is recommended.'}
-          </Help>
-        </FormElement>
-
-        <FormElement show={this.props.isSignUp}>
-          <label htmlFor='password2'>
-            Repeat password:
-          </label>
-          <Input
-            id='password2'
-            type='password'
-            value={this.state.password2}
-            autoComplete='new-password'
-            onChange={this._boundInputChange}
-            onKeyPress={this._boundKeyPress}
-            required={this.props.isSignUp}
-            minLength='8'
-            disabled={this.state.isSigningIn}
-            onFocus={this._onFocus}
-          />
-          <Help
-            className='Error'
-            hide={this.state.password2.length === 0 || this.state.password === this.state.password2}
-            role='alert'
+      <FormElement show>
+        <label htmlFor='password'>
+          Password:
+        </label>
+        <Input
+          {...password}
+          id='password'
+          type='password'
+          autoComplete={isSignUp ? 'new-password' : 'current-password'}
+          onKeyPress={onKeyPress}
+          required
+          minLength='8'
+          aria-describedby='passwordHelp'
+          disabled={isSigningIn}
+          onFocus={onFocusScrollIntoView}
+        />
+        <Help id='passwordHelp' hide={!isSignUp}>
+          Please use a strong and unique password!<br />
+          Minimal length: 8 characters!<br />
+          {'A '}
+          <a
+            href='https://en.wikipedia.org/wiki/List_of_password_managers'
+            target='_blank'
+            rel='noopener noreferrer'
           >
-            Password doesn't match!
-          </Help>
-        </FormElement>
+            Password Manager
+          </a>
+          {' is recommended.'}
+        </Help>
+      </FormElement>
 
-        <FormElement show>
-          <label htmlFor='cryptoPassword'>
-            Encryption password:
-          </label>
-          <Input
-            id='cryptoPassword'
-            type='password'
-            value={this.state.cryptoPassword}
-            onChange={this._boundInputChange}
-            onKeyPress={this._boundKeyPress}
-            required
-            minLength='8'
-            aria-describedby='cryptoPwHelp'
-            disabled={this.state.isSigningIn}
-            onFocus={this._onFocus}
-          />
-          <Help id='cryptoPwHelp' hide={!this.props.isSignUp}>
-            Minimal length: 8 characters!<br />
-            This password is used to encrypt your personal data.<br />
-            This includes: <i>Avatar login-info</i>, <i>grids</i>, and <i>chat-logs</i>.<br />
-            <b>Your personal data is encrypted on your machine.<br />
-            and will never leave it un-encrypted!</b>
-            <br />
-            This password will <b>never</b> be saved or leave your machine!
-          </Help>
-        </FormElement>
+      <FormElement show={isSignUp}>
+        <label htmlFor='password2'>
+          Repeat password:
+        </label>
+        <Input
+          {...password2}
+          id='password2'
+          type='password'
+          autoComplete='new-password'
+          onKeyPress={onKeyPress}
+          required={isSignUp}
+          minLength='8'
+          disabled={isSigningIn}
+          onFocus={onFocusScrollIntoView}
+        />
+        <Help
+          className='Error'
+          hide={password2.value.length === 0 || password.value === password2.value}
+          role='alert'
+        >
+          Password doesn't match!
+        </Help>
+      </FormElement>
 
-        <FormElement show={this.props.isSignUp}>
-          <label htmlFor='cryptoPassword2'>
-            Repeat encryption password:
-          </label>
-          <Input
-            id='cryptoPassword2'
-            type='password'
-            value={this.state.cryptoPassword2}
-            onChange={this._boundInputChange}
-            onKeyPress={this._boundKeyPress}
-            required={this.props.isSignUp}
-            minLength='8'
-            disabled={this.state.isSigningIn}
-            onFocus={this._onFocus}
-          />
-          <Help
-            className='Error'
-            role='alert'
-            hide={this.state.cryptoPassword2.length === 0 ||
-              this.state.cryptoPassword === this.state.cryptoPassword2
-            }
-          >
-            Encryption password doesn't match!
-          </Help>
-        </FormElement>
+      <FormElement show>
+        <label htmlFor='cryptoPassword'>
+          Encryption password:
+        </label>
+        <Input
+          {...cryptoPassword}
+          id='cryptoPassword'
+          type='password'
+          onKeyPress={onKeyPress}
+          required
+          minLength='8'
+          aria-describedby='cryptoPwHelp'
+          disabled={isSigningIn}
+          onFocus={onFocusScrollIntoView}
+        />
+        <Help id='cryptoPwHelp' hide={!isSignUp}>
+          Minimal length: 8 characters!<br />
+          This password is used to encrypt your personal data.<br />
+          This includes: <i>Avatar login-info</i>, <i>grids</i>, and <i>chat-logs</i>.<br />
+          <b>Your personal data is encrypted on your machine.<br />
+          and will never leave it un-encrypted!</b>
+          <br />
+          This password will <b>never</b> be saved or leave your machine!
+        </Help>
+      </FormElement>
 
-        {this.state.error == null
-          ? null
-          : <Help className='Error' hide={this.state.error == null} role='alert'>
-            {this.state.error}
-          </Help>}
+      <FormElement show={isSignUp}>
+        <label htmlFor='cryptoPassword2'>
+          Repeat encryption password:
+        </label>
+        <Input
+          {...cryptoPassword2}
+          id='cryptoPassword2'
+          type='password'
+          onKeyPress={onKeyPress}
+          required={isSignUp}
+          minLength='8'
+          disabled={isSigningIn}
+          onFocus={onFocusScrollIntoView}
+        />
+        <Help
+          className='Error'
+          role='alert'
+          hide={cryptoPassword2.length === 0 || cryptoPassword.value === cryptoPassword2.value}
+        >
+          Encryption password doesn't match!
+        </Help>
+      </FormElement>
 
-        <ButtonsContainer>
-          <Button
-            onClick={this.props.onCancel}
-            disabled={this.state.isSigningIn}
-            onFocus={this._onFocus}
-          >
-            cancel
-          </Button>
-          <Button
-            className='ok'
-            onClick={this._boundSend}
-            disabled={!this._isInputValid() || this.state.isSigningIn}
-            onFocus={this._onFocus}
-          >
-            {this.props.isSignUp ? 'sign up' : 'sign in'}
-          </Button>
-        </ButtonsContainer>
-      </Container>
-    </Popup>
+      {error == null
+        ? null
+        : <Help className='Error' hide={error == null} role='alert'>
+          {error}
+        </Help>}
+
+      <ButtonsContainer>
+        <Button
+          onClick={onCancel}
+          disabled={isSigningIn}
+          onFocus={onFocusScrollIntoView}
+        >
+          cancel
+        </Button>
+        <Button
+          className='ok'
+          onClick={send}
+          disabled={!isValid || isSigningIn}
+          onFocus={onFocusScrollIntoView}
+        >
+          {isSignUp ? 'sign up' : 'sign in'}
+        </Button>
+      </ButtonsContainer>
+    </Container>
+  </Popup>
+}
+
+function onFocusScrollIntoView (event) {
+  const target = event.target
+
+  setTimeout(() => {
+    if (target == null) return
+
+    target.scrollIntoView({ block: 'center' })
+  }, 16)
+}
+
+function useFormInput (initialValue) {
+  const [value, setValue] = useState(initialValue)
+
+  const eventHandler = useCallback(event => {
+    const nextValue = typeof event === 'string'
+      ? event
+      : event.target.value
+    setValue(nextValue)
+  }, [setValue])
+
+  return {
+    value,
+    onChange: eventHandler
   }
 }
