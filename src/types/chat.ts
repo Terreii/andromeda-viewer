@@ -120,7 +120,7 @@ export interface IMChat extends HoodieObject {
   isLoadingHistory: boolean
   active: boolean
   hasUnsavedMSG: boolean
-  messages: InstanceMessage[]
+  messages: InstantMessage[]
 }
 
 export enum IMDialog {
@@ -309,7 +309,7 @@ export enum IMDialog {
   StopTyping = 42,
 }
 
-export interface InstanceMessage extends HoodieObject {
+export interface InstantMessage extends HoodieObject {
   dialog: IMDialog
   fromId: string
   fromAgentName: string
@@ -337,6 +337,12 @@ export enum NotificationTypes {
    */
   GroupInvitation,
   /**
+   * This notification is to all group members.
+   * 
+   * It can have an inventory item in it.
+   */
+  GroupNotice,
+  /**
    * A goto url notification.
    * 
    * It has the an info text with the avatar name, their message and a link and an OK-Button.
@@ -356,6 +362,16 @@ export enum NotificationTypes {
    * It has the avatar info (+ message), location info and accept and decline buttons.
    */
   TeleportLure,
+  /**
+   * An inventory item or folder was offered.
+   * 
+   * This can be from an avatar or an object. It will have accept and decline buttons.
+   * 
+   * This is a parsed {@link IMDialog.InventoryOffered} or {@link IMDialog.TaskInventoryOffered}.
+   * It results into {@link IMDialog.InventoryAccepted}, {@link IMDialog.InventoryDeclined},
+   * {@link IMDialog.TaskInventoryAccepted} and {@link IMDialog.TaskInventoryDeclined}.
+   */
+  InventoryOffered,
   /**
    * A dialog from a script with buttons.
    */

@@ -6,6 +6,7 @@ import mockdate from 'mockdate'
 import { receiveIM } from './chatMessageActions'
 
 import { IMDialog, NotificationTypes } from '../types/chat'
+import { AssetType } from '../types/inventory'
 
 const mockStore = configureMockStore([thunk])
 
@@ -452,6 +453,78 @@ describe('incoming IM handling', () => {
       ])
     })
 
+    it('should handle group notices', () => {
+      const store = mockStore()
+
+      const uuidArray = []
+      for (let i = 0; i < 16; ++i) {
+        uuidArray.push(i)
+      }
+
+      expect(() => {
+        store.dispatch(receiveIM(createImPackage(IMDialog.GroupNotice, {
+          message: 'Hello World!|Good news, everybody!',
+          binaryBucket: Buffer.from([0, 0])
+        })))
+
+        store.clearActions()
+      }).toThrow()
+
+      // Without item
+      store.dispatch(receiveIM(createImPackage(IMDialog.GroupNotice, {
+        message: 'Hello World!|Good news, everybody!',
+        binaryBucket: Buffer.from([0, 0, ...uuidArray])
+      })))
+
+      expect(store.getActions()).toEqual([
+        {
+          type: 'NOTIFICATION_RECEIVED',
+          msg: {
+            notificationType: NotificationTypes.GroupNotice,
+            title: 'Hello World!',
+            text: 'Good news, everybody!',
+            groupId: '00010203-0405-4607-8809-0a0b0c0d0e0f',
+            senderName: 'Tester',
+            senderId: '01234567-8900-0000-0000-000000000000',
+            time: 1562630524418,
+            item: null
+          }
+        }
+      ])
+
+      store.clearActions()
+
+      // With Item
+      store.dispatch(receiveIM(createImPackage(IMDialog.GroupNotice, {
+        message: 'Hello World!|Good news, everybody!',
+        binaryBucket: Buffer.concat([
+          Buffer.from([1, AssetType.ImageJPEG]),
+          Buffer.from(uuidArray),
+          createStringBuffer('Awesome Picture')
+        ])
+      })))
+
+      expect(store.getActions()).toEqual([
+        {
+          type: 'NOTIFICATION_RECEIVED',
+          msg: {
+            notificationType: NotificationTypes.GroupNotice,
+            title: 'Hello World!',
+            text: 'Good news, everybody!',
+            groupId: '00010203-0405-4607-8809-0a0b0c0d0e0f',
+            senderName: 'Tester',
+            senderId: '01234567-8900-0000-0000-000000000000',
+            time: 1562630524418,
+            item: {
+              name: 'Awesome Picture',
+              type: AssetType.ImageJPEG,
+              transactionId: '01234567-8900-0000-0000-009876543210'
+            }
+          }
+        }
+      ])
+    })
+
     it('should handle goto URL notifications', () => {
       const store = mockStore()
 
@@ -508,6 +581,56 @@ describe('incoming IM handling', () => {
             regionId: '00000000-1234-5678-9000-000000000000',
             position: [1.2, 3.4, 5.6],
             regionInfo: '' // TODO: find out format of binaryBucket
+          }
+        }
+      ])
+    })
+
+    it('should handle inventory offers', () => {
+      const store = mockStore()
+
+      const uuidArray = []
+      for (let i = 0; i < 16; ++i) {
+        uuidArray.push(i)
+      }
+
+      store.dispatch(receiveIM(createImPackage(IMDialog.InventoryOffered, {
+        binaryBucket: Buffer.from([AssetType.ImageJPEG, ...uuidArray])
+      })))
+
+      store.dispatch(receiveIM(createImPackage(IMDialog.TaskInventoryOffered, {
+        binaryBucket: Buffer.from([AssetType.ImageJPEG])
+      })))
+
+      expect(store.getActions()).toEqual([
+        {
+          type: 'NOTIFICATION_RECEIVED',
+          msg: {
+            notificationType: NotificationTypes.InventoryOffered,
+            message: 'Hello World!',
+            fromObject: false,
+            fromId: '01234567-8900-0000-0000-000000000000',
+            fromName: 'Tester',
+            item: {
+              id: '',
+              type: AssetType.ImageJPEG,
+              transactionId: '01234567-8900-0000-0000-009876543210'
+            }
+          }
+        },
+        {
+          type: 'NOTIFICATION_RECEIVED',
+          msg: {
+            notificationType: NotificationTypes.InventoryOffered,
+            message: 'Hello World!',
+            fromObject: true,
+            fromId: '01234567-8900-0000-0000-000000000000',
+            fromName: 'Tester',
+            item: {
+              id: null,
+              type: AssetType.ImageJPEG,
+              transactionId: '01234567-8900-0000-0000-009876543210'
+            }
           }
         }
       ])
