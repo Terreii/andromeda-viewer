@@ -1,5 +1,5 @@
 import React from 'react'
-import { connect } from 'react-redux'
+import { useSelector } from 'react-redux'
 import Helmet from 'react-helmet'
 
 import { viewerName } from '../viewerInfo'
@@ -7,7 +7,10 @@ import { viewerName } from '../viewerInfo'
 import { getIsLoggedIn } from '../selectors/session'
 import { getOwnAvatarName } from '../selectors/names'
 
-function HelmetContainer ({ isLoggedIn, selfName }) {
+export default function HelmetContainer (props) {
+  const selfName = useSelector(getOwnAvatarName)
+  const isLoggedIn = useSelector(getIsLoggedIn)
+
   return <Helmet
     defaultTitle={isLoggedIn
       ? `${selfName.getName()} - ${viewerName}`
@@ -15,12 +18,3 @@ function HelmetContainer ({ isLoggedIn, selfName }) {
     }
   />
 }
-
-const mapStateToProps = state => {
-  return {
-    selfName: getOwnAvatarName(state),
-    isLoggedIn: getIsLoggedIn(state)
-  }
-}
-
-export default connect(mapStateToProps)(HelmetContainer)
