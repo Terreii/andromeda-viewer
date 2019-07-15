@@ -53,7 +53,7 @@ describe('basic functionality of redux-store', () => {
   })
 
   test('subscribe should call the function and return a unsubscribe fn', () => {
-    let lastStates = [store.getState(), null]
+    const lastStates = [store.getState(), null]
     let callCount = 0
 
     const unsubscribe = store.subscribe(prop => {
