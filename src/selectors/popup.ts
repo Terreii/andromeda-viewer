@@ -3,7 +3,7 @@ import { createSelector } from 'reselect'
 import { getIsSignedIn, getIsUnlocked } from './viewer'
 import { getErrorMessage } from './session'
 
-type SignInPopup = 'signUp' | 'signIn' | 'signOut' | 'resetPassword' | null
+type SignInPopup = 'signUp' | 'signIn' | 'signOut' | 'resetPassword' | 'resetKeys' | null
 
 export type PopupType = SignInPopup | 'unlock'
 

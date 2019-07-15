@@ -1,5 +1,6 @@
 import React from 'react'
 import { Portal } from 'react-portal'
+import { useSelector, useDispatch } from 'react-redux'
 
 import Popup from './popup'
 import SignInPopup from './signInPopup'
@@ -8,62 +9,84 @@ import UnlockDialog from './unlockDialog'
 import ResetKeysPopup from './resetKeysPopup'
 import ResetPasswordDialog from './resetPasswordDialog'
 
-export default ({
-  popup,
-  data,
+import {
   closePopup,
-  displayResetPassword,
-  signIn,
   signUp,
-  unlock,
+  signIn,
   signOut,
-  changePassword
-}) => {
+  unlock,
+  showResetPassword,
+  changeEncryptionPassword
+} from '../../actions/viewerAccount'
+
+import { selectPopup, selectPopupData } from '../../selectors/popup'
+
+export default (props) => {
+  const popup = useSelector(selectPopup)
+  const data = useSelector(selectPopupData)
+
+  const dispatch = useDispatch()
+
+  const doClosePopup = () => dispatch(closePopup())
+  const doSignUp = (username, password, cryptoPassword) => dispatch(
+    signUp(username, password, cryptoPassword)
+  )
+  const doSignIn = (username, password, cryptoPassword) => dispatch(
+    // For viewer-account (to sync)
+    signIn(username, password, cryptoPassword)
+  )
+  const doSignOut = () => dispatch(signOut())
+  const doUnlock = cryptoPassword => dispatch(unlock(cryptoPassword))
+  const displayResetPassword = type => dispatch(showResetPassword(type))
+  const doChangeEncryptionPassword = (resetKey, nextPassword) => dispatch(
+    changeEncryptionPassword(resetKey, nextPassword)
+  )
+
   if (popup == null || popup.length === 0) return null
 
   switch (popup) {
     case 'unlock':
       return <Portal>
         <UnlockDialog
-          onUnlock={unlock}
+          onUnlock={doUnlock}
           onForgottenPassword={displayResetPassword}
-          onSignOut={signOut}
+          onSignOut={doSignOut}
         />
       </Portal>
 
     case 'signIn':
       return <Portal>
-        <SignInPopup onCancel={closePopup} onSend={signIn} />
+        <SignInPopup onCancel={doClosePopup} onSend={doSignIn} />
       </Portal>
 
     case 'signUp':
       return <Portal>
-        <SignInPopup onCancel={closePopup} isSignUp onSend={signUp} />
+        <SignInPopup onCancel={doClosePopup} isSignUp onSend={doSignUp} />
       </Portal>
 
     case 'resetKeys':
       return <Portal>
-        <ResetKeysPopup onClose={closePopup} resetKeys={data} />
+        <ResetKeysPopup onClose={doClosePopup} resetKeys={data} />
       </Portal>
 
     case 'signOut':
       return <Portal>
-        <SignOutPopup onCancel={closePopup} onSignOut={signOut} />
+        <SignOutPopup onCancel={doClosePopup} onSignOut={doSignOut} />
       </Portal>
 
     case 'resetPassword':
       return <Portal>
         <ResetPasswordDialog
-          onChangePassword={changePassword}
-          onCancel={closePopup}
-          onSignOut={signOut}
+          onChangePassword={doChangeEncryptionPassword}
+          onCancel={doClosePopup}
+          onSignOut={doSignOut}
           type={data}
         />
       </Portal>
 
     default:
       return <Portal>
-        <Popup title={'Error'} onClose={closePopup}>
+        <Popup title={'Error'} onClose={doClosePopup}>
           {popup}
         </Popup>
       </Portal>
