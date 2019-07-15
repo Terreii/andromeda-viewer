@@ -13,7 +13,7 @@ function parseRights (rights) {
 export default function friendsReducer (state = [], action) {
   switch (action.type) {
     case 'didLogin':
-      return action.buddyList.map(friend => {
+      return action.sessionInfo['buddy-list'].map(friend => {
         const rightsGiven = friend['buddy_rights_given'] // from me to friend
         const rightsHas = friend['rights_has'] // Friend has given me rights
 

@@ -16,13 +16,11 @@ fetch('https://bitbucket.org/lindenlab/viewer-release/raw/tip/indra/newview/llvi
     throw new Error(`${response.status} - ${response.statusText}`)
   })
 
-  .then(file => {
-    const caps = file
-      .split('\n')
-      .filter(line => line.includes('capabilityNames.append'))
-      .map(line => line.split('"')[1]) // capabilityNames.append("EventQueueGet"); -> EventQueueGet
-    return caps
-  })
+  .then(file => file
+    .split('\n')
+    .filter(line => line.includes('capabilityNames.append'))
+    .map(line => line.split('"')[1]) // capabilityNames.append("EventQueueGet"); -> EventQueueGet
+  )
 
   .then(caps => {
     const capsJSON = JSON.stringify(caps, null, 2)

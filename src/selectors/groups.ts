@@ -2,7 +2,9 @@
 
 import { createSelector } from 'reselect'
 
-export const getGroups = state => state.groups
+import { Group } from '../types/groups'
+
+export const getGroups = (state: any): Group[] => state.groups
 
 export const getGroupsWithNoActiveChat = createSelector(
   [
