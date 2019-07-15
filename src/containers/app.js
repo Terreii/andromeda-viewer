@@ -7,10 +7,9 @@ import React from 'react'
 import { connect } from 'react-redux'
 
 import { AppContainer, LoadableChatComponent } from '../components/main'
-import LoginForm from '../components/login/'
+import LoginForm from './loginForm'
 import PopupRenderer from '../components/popups/'
 import Helmet from './helmet'
-
 import TopMenuBar from './topMenuBar'
 
 import {
@@ -19,22 +18,17 @@ import {
   unlock,
   showResetPassword,
   changeEncryptionPassword,
-  showSignInPopup,
   signIn,
   signUp,
   signOut
 } from '../actions/viewerAccount'
-import { login } from '../actions/sessionActions'
 
-import {
-  getIsSignedIn,
-  getSavedAvatars,
-  getSavedGrids
-} from '../selectors/viewer'
+import { getIsSignedIn } from '../selectors/viewer'
 import { getIsLoggedIn } from '../selectors/session'
 import { selectPopup, selectPopupData } from '../selectors/popup'
 
 const Popups = React.memo(PopupRenderer)
+const LoginFormContainer = React.memo(LoginForm)
 
 class App extends React.PureComponent {
   componentDidMount () {
@@ -49,13 +43,7 @@ class App extends React.PureComponent {
     const isLoggedIn = this.props.isLoggedIn
     const mainSection = isLoggedIn
       ? <LoadableChatComponent />
-      : <LoginForm
-        login={this.props.login}
-        isSignedIn={this.props.isSignedIn}
-        avatars={this.props.avatars}
-        grids={this.props.grids}
-        showSignInPopup={this.props.showSignInPopup}
-      />
+      : <LoginFormContainer isSignedIn={this.props.isSignedIn} />
 
     return <AppContainer>
       <Helmet />
@@ -78,8 +66,6 @@ class App extends React.PureComponent {
 
 const mapStateToProps = state => {
   return {
-    avatars: getSavedAvatars(state),
-    grids: getSavedGrids(state),
     isLoggedIn: getIsLoggedIn(state), // Avatar session
     isSignedIn: getIsSignedIn(state), // Viewer account
     popup: selectPopup(state),
@@ -90,14 +76,12 @@ const mapStateToProps = state => {
 const mapDispatchToProps = {
   closePopup,
   getIsSignedIn: isSignedIn,
-  showSignInPopup,
   showResetPassword,
   changeEncryptionPassword,
   unlock,
   signIn, // For viewer-account (to sync)
   signUp,
-  signOut,
-  login // For Avatar
+  signOut
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(App)
