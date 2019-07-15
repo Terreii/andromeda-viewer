@@ -129,7 +129,7 @@ export default class Circuit extends events.EventEmitter {
     }
     ipPort.writeUInt16LE(this.port, 4)
 
-    let promiseCallbacks = {
+    const promiseCallbacks = {
       resolve: () => {},
       reject: () => {}
     }

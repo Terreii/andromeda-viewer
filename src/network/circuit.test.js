@@ -261,7 +261,7 @@ describe('circuit should remove acks that the server has send back', () => {
 })
 
 describe('sending only 255 or less acks at the end of a package', () => {
-  let sendAcks = []
+  const sendAcks = []
 
   test('circuit only sends less then 256 Acks', () => {
     circuit.simAcks.clear()
@@ -299,7 +299,7 @@ describe('sending only 255 or less acks at the end of a package', () => {
   })
 
   describe('send not-jet-send and the oldest acks by the next package', () => {
-    let newAcks = []
+    const newAcks = []
 
     test('send max possible acks', () => {
       circuit.send('OpenCircuit', {
