@@ -3,56 +3,43 @@
  *
  */
 
-import React from 'react'
-import { connect } from 'react-redux'
+import React, { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 
 import { AppContainer, LoadableChatComponent } from '../components/main'
 import LoginForm from './loginForm'
-import PopupRenderer from '../components/popups/'
+import Popups from '../components/popups/'
 import Helmet from './helmet'
 import TopMenuBar from './topMenuBar'
 
-import { isSignedIn } from '../actions/viewerAccount'
+import { isSignedIn as doGetIsSignedIn } from '../actions/viewerAccount'
 
 import { getIsSignedIn } from '../selectors/viewer'
 import { getIsLoggedIn } from '../selectors/session'
 
-const Popups = React.memo(PopupRenderer)
-const LoginFormContainer = React.memo(LoginForm)
+export default function App (props) {
+  const isLoggedIn = useSelector(getIsLoggedIn)
+  const isSignedIn = useSelector(getIsSignedIn)
 
-class App extends React.PureComponent {
-  componentDidMount () {
-    if (process.env.NODE_ENV !== 'production') {
-      if (this.props.isSignedIn) return // component was hot reloaded
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'production' && isSignedIn) {
+      return // component was hot reloaded
     }
 
-    this.props.getIsSignedIn()
-  }
+    dispatch(doGetIsSignedIn())
+    // it will only be called once!
+    // eslint-disable-next-line
+  }, [])
 
-  render () {
-    const isLoggedIn = this.props.isLoggedIn
-    const mainSection = isLoggedIn
+  return <AppContainer>
+    <Helmet />
+    {isLoggedIn
       ? <LoadableChatComponent />
-      : <LoginFormContainer isSignedIn={this.props.isSignedIn} />
-
-    return <AppContainer>
-      <Helmet />
-      {mainSection}
-      <TopMenuBar />
-      <Popups />
-    </AppContainer>
-  }
+      : <LoginForm isSignedIn={isSignedIn} />
+    }
+    <TopMenuBar />
+    <Popups />
+  </AppContainer>
 }
-
-const mapStateToProps = state => {
-  return {
-    isLoggedIn: getIsLoggedIn(state), // Avatar session
-    isSignedIn: getIsSignedIn(state) // Viewer account
-  }
-}
-
-const mapDispatchToProps = {
-  getIsSignedIn: isSignedIn
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(App)
