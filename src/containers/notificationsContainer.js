@@ -1,4 +1,5 @@
-import { connect } from 'react-redux'
+import React from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 
 import { closeNotification } from '../actions/chatMessageActions'
 import { acceptFriendshipOffer, declineFriendshipOffer } from '../actions/friendsActions'
@@ -7,16 +8,22 @@ import { getNotifications } from '../selectors/chat'
 
 import NotificationsView from '../components/notifications'
 
-const mapStateToProps = state => {
-  return {
-    notifications: getNotifications(state)
-  }
-}
+export default function NotificationsContainer (props) {
+  const notifications = useSelector(getNotifications)
+  const dispatch = useDispatch()
 
-const mapDispatchToProps = {
-  acceptFriendship: acceptFriendshipOffer,
-  declineFriendship: declineFriendshipOffer,
-  onClose: closeNotification
-}
+  const acceptFriendship = (fromId, sessionId) => dispatch(
+    acceptFriendshipOffer(fromId, sessionId)
+  )
+  const declineFriendship = (fromId, sessionId) => dispatch(
+    declineFriendshipOffer(fromId, sessionId)
+  )
+  const onClose = id => dispatch(closeNotification(id))
 
-export default connect(mapStateToProps, mapDispatchToProps)(NotificationsView)
+  return <NotificationsView
+    notifications={notifications}
+    acceptFriendship={acceptFriendship}
+    declineFriendship={declineFriendship}
+    onClose={onClose}
+  />
+}

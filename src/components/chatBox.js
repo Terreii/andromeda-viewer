@@ -10,9 +10,11 @@ import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar'
 import ChatDialog from './chatDialog'
 import FriendsList from './friendsList'
 import GroupsList from './groupsList'
-import Notifications from '../containers/notificationsContainer'
+import NotificationsContainer from '../containers/notificationsContainer'
 
 import 'rc-tabs/assets/index.css'
+
+const Notifications = React.memo(NotificationsContainer)
 
 export default function ChatBox (props) {
   const names = props.names
