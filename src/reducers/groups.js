@@ -11,13 +11,16 @@ export default function groupsReducer (state = [], action) {
       ) {
         return state
       }
+      const udpListInProfile = getValueOf(action, 'NewGroupData', 'ListInProfile')
+
       return mapBlockOf(action, 'GroupData', getValue => ({
         id: getValue('GroupID'),
         name: getValue('GroupName', true),
         insigniaID: getValue('GroupInsigniaID'),
         title: getValue('GroupTitle', true),
         acceptNotices: getValue('AcceptNotices'),
-        powers: getValue('GroupPowers')
+        powers: getValue('GroupPowers'),
+        listInProfile: udpListInProfile
       }))
 
     case 'ChatSessionsStarted':
@@ -38,7 +41,7 @@ export default function groupsReducer (state = [], action) {
         const isNewGroup = index < 0
 
         const newGroupData = {
-          ...(isNewGroup ? {} : groups[index]),
+          ...(isNewGroup ? { title: '' } : groups[index]),
           id,
           name: groupData.GroupName,
           insigniaID: groupData.GroupInsigniaID.uuid,

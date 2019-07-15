@@ -27,7 +27,7 @@ function processLogin (request, reply) {
 
       let loginURL
       if (viewerData.grid && typeof viewerData.grid.url === 'string') {
-        loginURL = url.parse(viewerData.grid.url)
+        loginURL = new url.URL(viewerData.grid.url)
       } else {
         loginURL = {
           host: 'login.agni.lindenlab.com',

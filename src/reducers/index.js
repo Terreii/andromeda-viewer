@@ -5,6 +5,7 @@ import account from './account'
 import friendsReducer from './friendsReducer'
 import groups from './groups'
 import IMReducer from './IMReducer'
+import inventory from './inventory'
 import localChatReducer from './localChatReducer'
 import namesCoreReducer from './nameReducer'
 import sessionReducer from './sessionReducer'
@@ -15,6 +16,7 @@ const rootReducer = combineReducers({
   friends: friendsReducer,
   groups,
   IMs: IMReducer,
+  inventory,
   localChat: localChatReducer,
   names: namesCoreReducer,
   session: sessionReducer
