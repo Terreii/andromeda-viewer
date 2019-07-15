@@ -93,7 +93,7 @@ describe('Variable1', () => {
   test('should throw an error if non array like structures are given to ' +
     'createBuffer', () => {
     try {
-      let test = Variable1.createBuffer({ '0': 2 })
+      let test = Variable1.createBuffer({ 0: 2 })
       test = Variable1.createBuffer({ length: 256 })
       expect(test).toBeNull()
     } catch (e) {
@@ -140,7 +140,7 @@ describe('Variable2', () => {
   test('should throw an error if non array like structures are given to ' +
     'createBuffer', () => {
     try {
-      let test = Variable1.createBuffer({ '0': 2 })
+      let test = Variable1.createBuffer({ 0: 2 })
       test = Variable1.createBuffer({ length: 65536 })
       expect(test).toBeNull()
     } catch (e) {

@@ -91,19 +91,19 @@ describe('parseBody', () => {
     const data2 = getValuesOf(testMessage, 'NeighborBlock', [])
 
     expect(data).toEqual({
-      'Test0': 0,
-      'Test1': 0,
-      'Test2': 0
+      Test0: 0,
+      Test1: 0,
+      Test2: 0
     })
     expect(data2).toEqual({
-      'Test0': 0,
-      'Test1': 0,
-      'Test2': 0
+      Test0: 0,
+      Test1: 0,
+      Test2: 0
     })
     expect(dataStr).toEqual({
-      'Test0': '0',
-      'Test1': '0',
-      'Test2': '0'
+      Test0: '0',
+      Test1: '0',
+      Test2: '0'
     })
   })
 })

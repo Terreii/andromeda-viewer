@@ -22,8 +22,8 @@ test('renders local chat without crashing', () => {
   ]
 
   const names = {
-    'ABCB': new AvatarName('Testery MacTestface'),
-    '1234': new AvatarName('Viewerer Account')
+    ABCB: new AvatarName('Testery MacTestface'),
+    1234: new AvatarName('Viewerer Account')
   }
 
   const rendered = mount(<ChatMessagesList
@@ -65,8 +65,8 @@ test('renders IM chat without crashing', () => {
   ]
 
   const names = {
-    'ABCB': new AvatarName('Testery MacTestface'),
-    '1234': new AvatarName('Viewerer Account')
+    ABCB: new AvatarName('Testery MacTestface'),
+    1234: new AvatarName('Viewerer Account')
   }
 
   const rendered = mount(<ChatMessagesList
@@ -109,8 +109,8 @@ test('Local chat should pass aXe', async () => {
   ]
 
   const names = {
-    'ABCB': new AvatarName('Testery MacTestface'),
-    '1234': new AvatarName('Viewerer Account')
+    ABCB: new AvatarName('Testery MacTestface'),
+    1234: new AvatarName('Viewerer Account')
   }
 
   const rendered = mount(<ChatMessagesList
@@ -138,8 +138,8 @@ test('IM chat should pass aXe', async () => {
   ]
 
   const names = {
-    'ABCB': new AvatarName('Testery MacTestface'),
-    '1234': new AvatarName('Viewerer Account')
+    ABCB: new AvatarName('Testery MacTestface'),
+    1234: new AvatarName('Viewerer Account')
   }
 
   const rendered = mount(<ChatMessagesList

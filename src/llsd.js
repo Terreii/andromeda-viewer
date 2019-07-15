@@ -249,7 +249,7 @@ export var LLSD, URI, UUID, Binary;
       }
 
       var encodings = {
-        'BINARY': {
+        BINARY: {
           encode: binstrToArray,
           decode: arrayToBinstr
         },
@@ -348,7 +348,7 @@ export var LLSD, URI, UUID, Binary;
           }
         },
 
-        'BASE64': {
+        BASE64: {
           // NOTE: encode/decode sense is reversed relative to normal usage;
           // a base64 encoder typically encodes binary to a string.
           encode: function (s) { // string -> binary
@@ -366,7 +366,7 @@ export var LLSD, URI, UUID, Binary;
           }
         },
 
-        'BASE16': {
+        BASE16: {
           encode: function (s) {
             s = s.replace(/\s+/g, '') // remove whitespace
 
@@ -400,7 +400,7 @@ export var LLSD, URI, UUID, Binary;
 
       function getEncoding (name) {
         name = String(name).toUpperCase()
-        if (encodings.hasOwnProperty(name)) {
+        if (Object.prototype.hasOwnProperty.call(encodings, name)) {
           return encodings[name]
         }
         throw new RangeError('unknown encoding: ' + name)
