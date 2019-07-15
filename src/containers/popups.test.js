@@ -2,7 +2,7 @@ import React from 'react'
 import { shallow, mount } from 'enzyme'
 import { Provider } from 'react-redux'
 
-import PopupRenderer from './index'
+import PopupRenderer from './popups'
 
 test('renders without crashing', () => {
   const store = {

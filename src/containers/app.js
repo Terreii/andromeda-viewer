@@ -8,7 +8,7 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { AppContainer, LoadableChatComponent } from '../components/main'
 import LoginForm from './loginForm'
-import Popups from '../components/popups/'
+import Popups from './popups'
 import Helmet from './helmet'
 import TopMenuBar from './topMenuBar'
 

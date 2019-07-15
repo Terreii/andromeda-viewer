@@ -2,12 +2,12 @@ import React from 'react'
 import { Portal } from 'react-portal'
 import { useSelector, useDispatch } from 'react-redux'
 
-import Popup from './popup'
-import SignInPopup from './signInPopup'
-import SignOutPopup from './signOutPopup'
-import UnlockDialog from './unlockDialog'
-import ResetKeysPopup from './resetKeysPopup'
-import ResetPasswordDialog from './resetPasswordDialog'
+import Popup from '../components/popups/popup'
+import SignInPopup from '../components/popups/signInPopup'
+import SignOutPopup from '../components/popups/signOutPopup'
+import UnlockDialog from '../components/popups/unlockDialog'
+import ResetKeysPopup from '../components/popups/resetKeysPopup'
+import ResetPasswordDialog from '../components/popups/resetPasswordDialog'
 
 import {
   closePopup,
@@ -17,9 +17,9 @@ import {
   unlock,
   showResetPassword,
   changeEncryptionPassword
-} from '../../actions/viewerAccount'
+} from '../actions/viewerAccount'
 
-import { selectPopup, selectPopupData } from '../../selectors/popup'
+import { selectPopup, selectPopupData } from '../selectors/popup'
 
 export default (props) => {
   const popup = useSelector(selectPopup)
