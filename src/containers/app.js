@@ -34,6 +34,8 @@ import {
 import { getIsLoggedIn } from '../selectors/session'
 import { selectPopup, selectPopupData } from '../selectors/popup'
 
+import 'normalize.css'
+
 const Popups = React.memo(PopupRenderer)
 
 class App extends React.PureComponent {
