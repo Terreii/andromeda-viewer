@@ -4,9 +4,20 @@ const dgram = require('dgram')
 
 const WebSocket = require('ws')
 
+module.exports = bridgeInit
+
 const openBridges = new WeakMap() // all Bridges will be stored here.
 // If a Bridge closes it will set its socket to undefined. the WeakMap will then
 // garbage collect the Bridge
+
+function bridgeInit (server) {
+  const wss = new WebSocket.Server({
+    server: server.listener,
+    perMessageDeflate: false,
+    path: '/andromeda-bridge'
+  })
+  wss.on('connection', ws => openBridges.set(ws, new Bridge(ws)))
+}
 
 // The Bridge stores the websocket to the client and the UDP-socket to the sim
 // the first 6 bytes of a message, between this server and a client, is the
@@ -65,13 +76,4 @@ class Bridge {
       this.socket = undefined
     }
   }
-}
-
-exports.init = function bridgeInit (server) {
-  const wss = new WebSocket.Server({
-    server: server.listener,
-    perMessageDeflate: false,
-    path: '/andromeda-bridge'
-  })
-  wss.on('connection', ws => openBridges.set(ws, new Bridge(ws)))
 }

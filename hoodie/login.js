@@ -4,7 +4,7 @@ const url = require('url')
 const xmlrpc = require('xmlrpc')
 const uuid = require('uuid').v4
 
-exports.init = loginInit
+module.exports = loginInit
 
 // SL uses its own tls-certificate
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
@@ -44,10 +44,21 @@ function processLogin (request, reply) {
         : xmlrpc.createClient(loginURL) // osgrid uses http for login ... why??
 
       reqData.mac = mac // adding the needed mac-address
+      reqData.id0 = mac
 
       xmlrpcClient.methodCall('login_to_simulator', [reqData], (err, data) => {
         if (err) {
-          reply(err)
+          const body = err.body != null
+            ? {
+              statusCode: (err.res && err.res.statusCode) || 500,
+              error: 'Login fail',
+              message: err.body
+            }
+            : err
+
+          const response = reply(body)
+          response.type('application/json')
+          response.statusCode = body.statusCode
         } else {
           const response = reply(undefined, data)
           response.type('application/json')
@@ -105,7 +116,7 @@ async function getMacAddress (request) {
 }
 
 function generateMacAddress (userId) {
-  // generate a UUID and transfrom it into a "MAC"-address
+  // generate a UUID and transform it into a "MAC"-address
   const num = uuid().replace(/-/g, '').slice(0, 12)
 
   let mac = ''
