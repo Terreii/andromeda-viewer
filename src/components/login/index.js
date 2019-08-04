@@ -133,7 +133,7 @@ export default class LoginForm extends React.Component {
       }
 
       const gridData = {
-        isLLSD: grid.isLoginLLSD || false,
+        isLoginLLSD: grid.isLoginLLSD || false,
         name: grid.name,
         url: grid.url || grid.loginURL
       }

@@ -33,10 +33,8 @@ export function login (avatarName, password, grid, save, isNew) {
     const finalPassword = '$1$' + hash.digest('hex')
 
     const viewerData = {
-      grid: {
-        url: grid.url,
-        isLoginLLSD: grid.isLLSD
-      }
+      loginUrl: grid.url,
+      userId: null
     }
 
     if (save) {
@@ -46,7 +44,7 @@ export function login (avatarName, password, grid, save, isNew) {
 
     const circuit = import('../network/circuit')
 
-    const body = viewerData.grid.isLoginLLSD
+    const body = grid.isLoginLLSD
       ? await loginWithLLSD(viewerData, avatarName.first, avatarName.last, finalPassword)
       : await loginWithXmlRpc(viewerData, avatarName.first, avatarName.last, finalPassword)
 
@@ -102,6 +100,26 @@ export function login (avatarName, password, grid, save, isNew) {
 }
 
 /**
+ * Generates the headers send to the Andromeda-Server to proxy it.
+ * @param {object} viewerData Object containing viewer related data.
+ * @param {string} viewerData.loginUrl Login URL for the grid.
+ * @param {string?} viewerData.userId id of a signed in user.
+ * @param {boolean?} isLLSD Should it add a LLSD-header?
+ */
+function createProxyLoginHeaders ({ loginUrl, userId = null }, isLLSD = false) {
+  const headers = new window.Headers()
+  headers.append('Content-Type', 'application/json')
+  headers.append('x-andromeda-login-url', loginUrl)
+  headers.append('x-andromeda-login-content-type', isLLSD ? 'llsd' : 'xml-rpc')
+
+  if (userId != null) {
+    headers.append('x-andromeda-login-user-id', userId)
+  }
+
+  return headers
+}
+
+/**
  * Login using XML-RPC.
  * @param {object} viewerData Object containing viewer related data. (grid ...)
  * @param {string} first First name of the avatar.
@@ -111,7 +129,6 @@ export function login (avatarName, password, grid, save, isNew) {
  */
 async function loginWithXmlRpc (viewerData, first, last, password) {
   const loginData = {
-    viewerData,
     first,
     last,
     passwd: password,
@@ -134,9 +151,7 @@ async function loginWithXmlRpc (viewerData, first, last, password) {
   const response = await window.fetch('/hoodie/andromeda-viewer/login', {
     method: 'POST',
     body: JSON.stringify(loginData),
-    headers: {
-      'Content-Type': 'application/json'
-    }
+    headers: createProxyLoginHeaders(viewerData)
   })
   return response.json()
 }
@@ -150,7 +165,6 @@ async function loginWithXmlRpc (viewerData, first, last, password) {
  */
 async function loginWithLLSD (viewerData, first, last, password) {
   const loginData = {
-    viewerData,
     first,
     last,
     passwd: password,
@@ -177,9 +191,7 @@ async function loginWithLLSD (viewerData, first, last, password) {
   const response = await window.fetch('/hoodie/andromeda-viewer/login', {
     method: 'POST',
     body: JSON.stringify(loginData),
-    headers: {
-      'Content-Type': 'application/json'
-    }
+    headers: createProxyLoginHeaders(viewerData, true)
   })
   const body = await response.text()
   const parsed = LLSD.parse(response.headers.get('content-type'), body)

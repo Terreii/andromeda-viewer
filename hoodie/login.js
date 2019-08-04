@@ -7,6 +7,10 @@ const uuid = require('uuid').v4
 
 module.exports = loginInit
 
+const LOGIN_URL_HEADER = 'x-andromeda-login-url'
+const LOGIN_CONTENT_TYPE_HEADER = 'x-andromeda-login-content-type'
+const LOGIN_USER_ID_HEADER = 'x-andromeda-login-user-id'
+
 // SL uses its own tls-certificate
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
@@ -23,19 +27,12 @@ function processLogin (request, reply) {
   getMacAddress(request)
     .then(function (mac) {
       const reqData = request.payload
-      const viewerData = reqData.viewerData // special data for the viewer
-      delete reqData.viewerData // that shouldn't be send to the grid
 
-      let loginURL
-      if (viewerData.grid && typeof viewerData.grid.url === 'string') {
-        loginURL = new url.URL(viewerData.grid.url)
-      } else {
-        loginURL = {
-          host: 'login.agni.lindenlab.com',
-          port: 443,
-          path: '/cgi-bin/login.cgi'
-        }
-      }
+      const reqLoginURL = request.headers[LOGIN_URL_HEADER]
+      const loginURL = reqLoginURL && reqLoginURL.length > 0
+        ? new url.URL(reqLoginURL)
+        : new url.URL('https://login.agni.lindenlab.com:443/cgi-bin/login.cgi')
+
       if (!loginURL || loginURL.host == null) {
         reply(400, { message: 'no grid login url!' })
         return
@@ -45,7 +42,7 @@ function processLogin (request, reply) {
       reqData.mac = mac
       reqData.id0 = mac
 
-      if (viewerData.grid.isLoginLLSD) {
+      if (request.headers[LOGIN_CONTENT_TYPE_HEADER] === 'llsd') {
         handleLLSD(reply, loginURL, reqData)
       } else {
         handleXmlRpc(reply, loginURL, reqData)
@@ -133,15 +130,13 @@ function stringifyLLSD (value) {
 }
 
 async function getMacAddress (request) {
-  const payload = request.payload
-  const viewerData = payload.viewerData
-
   // If it is a logged in user
-  if ('userId' in viewerData) {
+  if (LOGIN_USER_ID_HEADER in request.headers && request.headers[LOGIN_USER_ID_HEADER].length > 0) {
     const accounts = request.server.plugins.account.api.accounts
+    const userId = request.headers[LOGIN_USER_ID_HEADER]
 
     try {
-      const user = await accounts.find(viewerData.userId, { include: 'profile' })
+      const user = await accounts.find(userId, { include: 'profile' })
 
       if (
         user.profile != null &&
@@ -151,7 +146,7 @@ async function getMacAddress (request) {
         return user.profile.mac
       } else {
         // Add a mac-address to the user
-        const updated = await accounts.update(viewerData.userId, user => {
+        const updated = await accounts.update(userId, user => {
           let mac
 
           do {
