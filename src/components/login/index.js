@@ -36,7 +36,9 @@ const ErrorOut = styled.div`
   background-color: rgb(215, 0, 0);
   border-radius: 0.3em;
   margin-top: 0.3em;
-  padding: 0.3em;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0.3em 1em;
   display: ${props => props.show ? '' : 'none'};
 `
 
@@ -131,6 +133,7 @@ export default class LoginForm extends React.Component {
       }
 
       const gridData = {
+        isLLSD: grid.isLoginLLSD || false,
         name: grid.name,
         url: grid.url || grid.loginURL
       }

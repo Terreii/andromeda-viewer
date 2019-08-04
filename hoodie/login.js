@@ -2,6 +2,7 @@
 
 const url = require('url')
 const xmlrpc = require('xmlrpc')
+const fetch = require('node-fetch')
 const uuid = require('uuid').v4
 
 module.exports = loginInit
@@ -36,38 +37,99 @@ function processLogin (request, reply) {
         }
       }
       if (!loginURL || loginURL.host == null) {
-        reply(400)
+        reply(400, { message: 'no grid login url!' })
         return
       }
-      const xmlrpcClient = loginURL.protocol == null || loginURL.protocol === 'https:'
-        ? xmlrpc.createSecureClient(loginURL)
-        : xmlrpc.createClient(loginURL) // osgrid uses http for login ... why??
 
-      reqData.mac = mac // adding the needed mac-address
+      // adding the needed mac-address
+      reqData.mac = mac
       reqData.id0 = mac
 
-      xmlrpcClient.methodCall('login_to_simulator', [reqData], (err, data) => {
-        if (err) {
-          const body = err.body != null
-            ? {
-              statusCode: (err.res && err.res.statusCode) || 500,
-              error: 'Login fail',
-              message: err.body
-            }
-            : err
-
-          const response = reply(body)
-          response.type('application/json')
-          response.statusCode = body.statusCode
-        } else {
-          const response = reply(undefined, data)
-          response.type('application/json')
-        }
-      })
+      if (viewerData.grid.isLoginLLSD) {
+        handleLLSD(reply, loginURL, reqData)
+      } else {
+        handleXmlRpc(reply, loginURL, reqData)
+      }
     })
     .catch(function (err) {
       reply(err)
     })
+}
+
+function handleXmlRpc (reply, loginURL, reqData) {
+  const xmlrpcClient = loginURL.protocol == null || loginURL.protocol === 'https:'
+    ? xmlrpc.createSecureClient(loginURL)
+    : xmlrpc.createClient(loginURL) // osgrid uses http for login ... why??
+
+  xmlrpcClient.methodCall('login_to_simulator', [reqData], (err, data) => {
+    if (err) {
+      const body = err.body != null
+        ? {
+          statusCode: (err.res && err.res.statusCode) || 500,
+          error: 'Login fail',
+          message: err.body
+        }
+        : err
+
+      const response = reply(body)
+      response.type('application/json')
+      response.statusCode = body.statusCode
+    } else {
+      const response = reply(undefined, data)
+      response.type('application/json')
+    }
+  })
+}
+
+async function handleLLSD (reply, loginURL, reqData) {
+  const fetchResult = await fetch(loginURL, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/llsd+xml'
+    },
+    body: `<?xml version="1.0" encoding="UTF-8"?>
+    <llsd>${stringifyLLSD(reqData)}</llsd>
+    `
+  })
+  const body = await fetchResult.text()
+
+  if (fetchResult.statusCode < 300) {
+    const response = reply(undefined, body)
+    response.statusCode = fetchResult.status
+    response.type('application/llsd+xml')
+  } else {
+    const response = reply(body)
+    response.statusCode = fetchResult.status
+    response.type(fetchResult.headers.get('content-type'))
+  }
+}
+
+function stringifyLLSD (value) {
+  switch (typeof value) {
+    case 'boolean':
+      return `<boolean>${value.toString()}</boolean>`
+    case 'number':
+      if ((value << 0) === value) {
+        // is an int
+        return `<integer>${value}</integer>`
+      } else {
+        // is a double
+        return `<real>${value}</real>`
+      }
+    case 'string':
+      return `<string>${value}</string>`
+    case 'object':
+      if (Array.isArray(value)) {
+        return `<array>${value.map(stringifyLLSD).join('')}</array>`
+      } else {
+        const mapBody = Object.keys(value)
+          .map(key => `<key>${key}</key>${stringifyLLSD(value[key])}`)
+        return `<map>${mapBody.join('')}</map>`
+      }
+    case 'undefined':
+    default:
+      return '<undef />'
+  }
 }
 
 async function getMacAddress (request) {

@@ -1,13 +1,14 @@
 import crypto from 'crypto'
 import { v4 as uuid } from 'uuid'
 
-import { viewerName, viewerVersion, viewerPlatform } from '../viewerInfo'
+import { viewerName, viewerVersion, viewerPlatform, viewerPlatformVersion } from '../viewerInfo'
 import { getValueOf, getStringValueOf } from '../network/msgGetters'
 
 import { saveAvatar, saveGrid } from './viewerAccount'
 import { getLocalChatHistory, loadIMChats, deleteOldLocalChat } from './chatMessageActions'
 import { getAllFriendsDisplayNames } from './friendsActions'
 import { fetchSeedCapabilities } from './llsd'
+import LLSD from '../llsd'
 import connectCircuit from './connectCircuit'
 
 import { getSavedAvatars, getSavedGrids } from '../selectors/viewer'
@@ -32,7 +33,10 @@ export function login (avatarName, password, grid, save, isNew) {
     const finalPassword = '$1$' + hash.digest('hex')
 
     const viewerData = {
-      grid
+      grid: {
+        url: grid.url,
+        isLoginLLSD: grid.isLLSD
+      }
     }
 
     if (save) {
@@ -40,35 +44,11 @@ export function login (avatarName, password, grid, save, isNew) {
       viewerData.userId = userId
     }
 
-    const loginData = {
-      viewerData,
-      first: avatarName.first,
-      last: avatarName.last,
-      passwd: finalPassword,
-      start: 'last',
-      channel: viewerName,
-      version: viewerVersion,
-      platform: viewerPlatform,
-      // mac will be added on the server side
-      options: [
-        'buddy-list',
-        'inventory-root',
-        'inventory-skeleton'
-      ],
-      agree_to_tos: 'true',
-      read_critical: 'true'
-    }
-
     const circuit = import('../network/circuit')
 
-    const response = await window.fetch('/hoodie/andromeda-viewer/login', {
-      method: 'POST',
-      body: JSON.stringify(loginData),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    const body = await response.json()
+    const body = viewerData.grid.isLoginLLSD
+      ? await loginWithLLSD(viewerData, avatarName.first, avatarName.last, finalPassword)
+      : await loginWithXmlRpc(viewerData, avatarName.first, avatarName.last, finalPassword)
 
     if (body.login !== 'true') {
       dispatch({ type: 'loginDidFail' })
@@ -121,6 +101,93 @@ export function login (avatarName, password, grid, save, isNew) {
   }
 }
 
+/**
+ * Login using XML-RPC.
+ * @param {object} viewerData Object containing viewer related data. (grid ...)
+ * @param {string} first First name of the avatar.
+ * @param {string} last Last name of the avatar.
+ * @param {string} password Hashed and salted password.
+ * @returns {object} Login response from the grid.
+ */
+async function loginWithXmlRpc (viewerData, first, last, password) {
+  const loginData = {
+    viewerData,
+    first,
+    last,
+    passwd: password,
+    start: 'last',
+    channel: viewerName,
+    version: viewerVersion,
+    platform: viewerPlatform,
+    platform_version: viewerPlatformVersion,
+    last_exec_event: 0,
+    // mac and id0 will be added on the server side
+    options: [
+      'buddy-list',
+      'inventory-root',
+      'inventory-skeleton'
+    ],
+    agree_to_tos: 'true',
+    read_critical: 'true'
+  }
+
+  const response = await window.fetch('/hoodie/andromeda-viewer/login', {
+    method: 'POST',
+    body: JSON.stringify(loginData),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+  return response.json()
+}
+
+/**
+ * Login using LLSD (http://wiki.secondlife.com/wiki/LLSD).
+ * @param {object} viewerData Object containing viewer related data. (grid ...)
+ * @param {string} first First name of the avatar.
+ * @param {string} last Last name of the avatar.
+ * @param {string} password Hashed and salted password.
+ */
+async function loginWithLLSD (viewerData, first, last, password) {
+  const loginData = {
+    viewerData,
+    first,
+    last,
+    passwd: password,
+    start: 'last',
+    channel: viewerName,
+    version: viewerVersion,
+    platform: viewerPlatform,
+    platform_version: viewerPlatformVersion,
+    platform_string: window.navigator.userAgent,
+    // mac and id0 will be added on the server side
+    options: [
+      'buddy-list',
+      'inventory-root',
+      'inventory-skeleton'
+    ],
+    agree_to_tos: true,
+    read_critical: true,
+    viewer_digest: '',
+    last_exec_event: 0,
+    last_exec_duration: 0,
+    address_size: 32 // Is os 32 or 64 bit.
+  }
+
+  const response = await window.fetch('/hoodie/andromeda-viewer/login', {
+    method: 'POST',
+    body: JSON.stringify(loginData),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+  const body = await response.text()
+  const parsed = LLSD.parse(response.headers.get('content-type'), body)
+
+  // for transforming all UUIDs into strings
+  return JSON.parse(JSON.stringify(parsed))
+}
+
 // Logout an avatar
 export function logout () {
   return (dispatch, getState, extra) => {
@@ -167,6 +234,9 @@ function connectToSim (sessionInfo, circuit) {
     const activeCircuit = new Circuit(sessionInfo.sim_ip, sessionInfo.sim_port, circuitCode)
     extraArgs.circuit = activeCircuit
 
+    const sessionId = sessionInfo.session_id
+    const agentId = sessionInfo.agent_id
+
     dispatch(connectCircuit()) // Connect message parsing with circuit.
 
     activeCircuit.on('KickUser', msg => dispatch(getKicked(msg)))
@@ -175,8 +245,8 @@ function connectToSim (sessionInfo, circuit) {
       CircuitCode: [
         {
           Code: circuitCode,
-          SessionID: sessionInfo.session_id,
-          ID: sessionInfo.agent_id
+          SessionID: sessionId,
+          ID: agentId
         }
       ]
     }, true)
@@ -184,8 +254,8 @@ function connectToSim (sessionInfo, circuit) {
     await activeCircuit.send('CompleteAgentMovement', {
       AgentData: [
         {
-          AgentID: sessionInfo.agent_id,
-          SessionID: sessionInfo.session_id,
+          AgentID: agentId,
+          SessionID: sessionId,
           CircuitCode: circuitCode
         }
       ]
@@ -194,8 +264,8 @@ function connectToSim (sessionInfo, circuit) {
     await activeCircuit.send('AgentUpdate', {
       AgentData: [
         {
-          AgentID: sessionInfo.agent_id,
-          SessionID: sessionInfo.session_id,
+          AgentID: agentId,
+          SessionID: sessionId,
           BodyRotation: [0, 0, 0],
           HeadRotation: [0, 0, 0],
           State: 0,
@@ -213,7 +283,7 @@ function connectToSim (sessionInfo, circuit) {
     activeCircuit.send('UUIDNameRequest', {
       UUIDNameBlock: [
         {
-          ID: sessionInfo.agent_id
+          ID: agentId
         }
       ]
     }, true)
@@ -222,13 +292,13 @@ function connectToSim (sessionInfo, circuit) {
       activeCircuit.send('RequestRegionInfo', {
         AgentData: [
           {
-            AgentID: sessionInfo.agent_id,
-            SessionID: sessionInfo.session_id
+            AgentID: agentId,
+            SessionID: sessionId
           }
         ]
       }, true)
 
-      dispatch(requestAvatarProperties(sessionInfo.agent_id))
+      dispatch(requestAvatarProperties(agentId))
     }, 100)
   }
 }
