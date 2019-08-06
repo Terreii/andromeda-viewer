@@ -108,12 +108,15 @@ test('click actions', async () => {
         }
       })
     }
-    addPassword(passwordInputs.first(), 'password', 'secretPassword')
-    addPassword(passwordInputs.at(2), 'cryptoPassword', 'encrypted')
     if (isSignUp) {
       popup.find('button').last().simulate('click')
+      addPassword(passwordInputs.first(), 'password', 'secretPassword')
       addPassword(passwordInputs.at(1), 'password2', 'secretPassword')
+      addPassword(passwordInputs.at(2), 'cryptoPassword', 'encrypted')
       addPassword(passwordInputs.at(3), 'cryptoPassword2', 'encrypted')
+    } else {
+      addPassword(passwordInputs.first(), 'password', 'secretPassword')
+      addPassword(passwordInputs.at(1), 'cryptoPassword', 'encrypted')
     }
 
     shouldCallSend = true

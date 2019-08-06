@@ -103,13 +103,13 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
           placeholder='me-avatar@example.com'
           autoFocus
           required
-          aria-describedby='mainHelp'
+          aria-describedby={isSignUp && 'mainHelp'}
           disabled={isSigningIn}
           onFocus={onFocusScrollIntoView}
         />
-        <Help id='mainHelp' hide={!isSignUp}>
+        {isSignUp && <Help id='mainHelp'>
           Must be an email. We'll never share your email with anyone else.
-        </Help>
+        </Help>}
       </FormElement>
 
       <FormElement show>
@@ -124,11 +124,11 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
           onKeyPress={onKeyPress}
           required
           minLength='8'
-          aria-describedby='passwordHelp'
+          aria-describedby={isSignUp && 'passwordHelp'}
           disabled={isSigningIn}
           onFocus={onFocusScrollIntoView}
         />
-        <Help id='passwordHelp' hide={!isSignUp}>
+        {isSignUp && <Help id='passwordHelp'>
           Please use a strong and unique password!<br />
           Minimal length: 8 characters!<br />
           {'A '}
@@ -140,10 +140,10 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
             Password Manager
           </a>
           {' is recommended.'}
-        </Help>
+        </Help>}
       </FormElement>
 
-      <FormElement show={isSignUp}>
+      {isSignUp && <FormElement show>
         <label htmlFor='password2'>
           Repeat password:
         </label>
@@ -153,7 +153,7 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
           type='password'
           autoComplete='new-password'
           onKeyPress={onKeyPress}
-          required={isSignUp}
+          required
           minLength='8'
           disabled={isSigningIn}
           onFocus={onFocusScrollIntoView}
@@ -165,7 +165,7 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
         >
           Password doesn't match!
         </Help>
-      </FormElement>
+      </FormElement>}
 
       <FormElement show>
         <label htmlFor='cryptoPassword'>
@@ -178,11 +178,11 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
           onKeyPress={onKeyPress}
           required
           minLength='8'
-          aria-describedby='cryptoPwHelp'
+          aria-describedby={isSignUp && 'cryptoPwHelp'}
           disabled={isSigningIn}
           onFocus={onFocusScrollIntoView}
         />
-        <Help id='cryptoPwHelp' hide={!isSignUp}>
+        {isSignUp && <Help id='cryptoPwHelp'>
           Minimal length: 8 characters!<br />
           This password is used to encrypt your personal data.<br />
           This includes: <i>Avatar login-info</i>, <i>grids</i>, and <i>chat-logs</i>.<br />
@@ -190,10 +190,10 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
           and will never leave it un-encrypted!</b>
           <br />
           This password will <b>never</b> be saved or leave your machine!
-        </Help>
+        </Help>}
       </FormElement>
 
-      <FormElement show={isSignUp}>
+      {isSignUp && <FormElement show>
         <label htmlFor='cryptoPassword2'>
           Repeat encryption password:
         </label>
@@ -202,7 +202,7 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
           id='cryptoPassword2'
           type='password'
           onKeyPress={onKeyPress}
-          required={isSignUp}
+          required
           minLength='8'
           disabled={isSigningIn}
           onFocus={onFocusScrollIntoView}
@@ -214,13 +214,11 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
         >
           Encryption password doesn't match!
         </Help>
-      </FormElement>
+      </FormElement>}
 
-      {error == null
-        ? null
-        : <Help className='Error' hide={error == null} role='alert'>
-          {error}
-        </Help>}
+      {error && <Help className='Error' role='alert'>
+        {error}
+      </Help>}
 
       <ButtonsContainer>
         <Button
