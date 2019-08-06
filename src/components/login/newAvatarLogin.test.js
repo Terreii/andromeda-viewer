@@ -240,6 +240,7 @@ test('adding new grid', () => {
   const gridSelect = rendered.find('#newAvatarGridSelection')
   const gridName = rendered.find('#newGridNameInput')
   const gridURL = rendered.find('#newGridUrlInput')
+  const gridIsLLSD = rendered.find('#newGridIsLLSD')
 
   gridSelect.simulate('change', {
     target: {
@@ -267,6 +268,9 @@ test('adding new grid', () => {
       }
     }
   })
+
+  expect(gridIsLLSD.prop('checked')).toBeTruthy()
+
   rendered.update()
 
   const nameInput = rendered.find('#newAvatarNameInput').first()
@@ -299,7 +303,29 @@ test('adding new grid', () => {
     password: 'secret',
     grid: {
       name: 'Alpha Grid',
-      url: 'https://alpha-grid.com/login'
+      url: 'https://alpha-grid.com/login',
+      isLoginLLSD: true
+    },
+    save: true
+  })
+
+  // if grid is llsd is false.
+  gridIsLLSD.simulate('change', {
+    target: {
+      checked: false
+    }
+  })
+  rendered.update()
+  loginButton.simulate('click')
+
+  expect(loginData.length).toBe(2)
+  expect(loginData[1]).toEqual({
+    name: 'Tester',
+    password: 'secret',
+    grid: {
+      name: 'Alpha Grid',
+      url: 'https://alpha-grid.com/login',
+      isLoginLLSD: false
     },
     save: true
   })

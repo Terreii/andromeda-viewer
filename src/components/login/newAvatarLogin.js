@@ -111,6 +111,10 @@ const NewGridLine = styled.fieldset`
   & > div {
     flex: auto;
   }
+
+  & > #newGridIsLLSDLabel {
+    margin-top: 0.3em;
+  }
 `
 
 const SaveHelp = styled(Help)`
@@ -127,6 +131,7 @@ export default class NewAvatarLogin extends React.Component {
       save: false,
       newGridName: '',
       newGridURL: '',
+      newGridIsLLSD: true,
       valid: {
         name: false,
         password: false,
@@ -202,7 +207,8 @@ export default class NewAvatarLogin extends React.Component {
       ? this.state.grid
       : {
         name: this.state.newGridName,
-        url: this.state.newGridURL
+        url: this.state.newGridURL,
+        isLoginLLSD: this.state.newGridIsLLSD
       }
     const save = this.state.save && this.props.isSignedIn
 
@@ -331,6 +337,23 @@ export default class NewAvatarLogin extends React.Component {
             required={isNewGrid}
           />
         </FormField>
+        <label
+          id='newGridIsLLSDLabel'
+          title={'Most grids will support LLSD based logins.\r\n' +
+            "Only un-check if grid doesn't support it!"}
+        >
+          <Input
+            id='newGridIsLLSD'
+            type='checkbox'
+            checked={this.state.newGridIsLLSD}
+            onChange={event => {
+              this.setState({
+                newGridIsLLSD: event.target.checked
+              })
+            }}
+          />
+          Grid uses LLSD login
+        </label>
       </NewGridLine>
 
       <SaveNew>
