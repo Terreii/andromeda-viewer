@@ -14,10 +14,6 @@ const Container = styled.form`
   }
 `
 
-const FormElement = styled(FormField)`
-  display: ${props => props.show ? 'flex' : 'none'};
-`
-
 const ButtonsContainer = styled.div`
   flex: auto;
   display: flex;
@@ -86,7 +82,7 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
 
   return <Popup title={isSignUp ? 'Sign up' : 'Sign in'} onClose={onCancel}>
     <Container className={isSignUp ? 'SignUp' : ''}>
-      <FormElement show>
+      <FormField>
         <label htmlFor='username'>
           Username / email:
         </label>
@@ -110,9 +106,9 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
         {isSignUp && <Help id='mainHelp'>
           Must be an email. We'll never share your email with anyone else.
         </Help>}
-      </FormElement>
+      </FormField>
 
-      <FormElement show>
+      <FormField>
         <label htmlFor='password'>
           Password:
         </label>
@@ -141,9 +137,9 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
           </a>
           {' is recommended.'}
         </Help>}
-      </FormElement>
+      </FormField>
 
-      {isSignUp && <FormElement show>
+      {isSignUp && <FormField>
         <label htmlFor='password2'>
           Repeat password:
         </label>
@@ -165,9 +161,9 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
         >
           Password doesn't match!
         </Help>
-      </FormElement>}
+      </FormField>}
 
-      <FormElement show>
+      <FormField>
         <label htmlFor='cryptoPassword'>
           Encryption password:
         </label>
@@ -191,9 +187,9 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
           <br />
           This password will <b>never</b> be saved or leave your machine!
         </Help>}
-      </FormElement>
+      </FormField>
 
-      {isSignUp && <FormElement show>
+      {isSignUp && <FormField>
         <label htmlFor='cryptoPassword2'>
           Repeat encryption password:
         </label>
@@ -214,7 +210,7 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
         >
           Encryption password doesn't match!
         </Help>
-      </FormElement>}
+      </FormField>}
 
       {error && <Help className='Error' role='alert'>
         {error}
