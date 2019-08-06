@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import PropTypes from 'prop-types'
 
 import Popup from './popup'
 import { Button, FormField, Input, Help } from '../formElements'
@@ -141,10 +140,4 @@ export default function UnlockDialog ({ onUnlock, onSignOut, onForgottenPassword
       </ButtonsRow>
     </Content>
   </Popup>
-}
-
-UnlockDialog.propTypes = {
-  onUnlock: PropTypes.func.isRequired,
-  onSignOut: PropTypes.func.isRequired,
-  onForgottenPassword: PropTypes.func.isRequired
 }
