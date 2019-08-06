@@ -14,11 +14,13 @@ function getDefault () {
     savedGrids: [
       {
         name: 'Second Life',
-        loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
+        loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi',
+        isLoginLLSD: true
       },
       {
         name: 'Second Life Beta',
-        loginURL: 'https://login.aditi.lindenlab.com/cgi-bin/login.cgi'
+        loginURL: 'https://login.aditi.lindenlab.com/cgi-bin/login.cgi',
+        isLoginLLSD: true
       },
       {
         name: 'OS Grid',

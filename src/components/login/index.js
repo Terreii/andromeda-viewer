@@ -32,11 +32,13 @@ const Main = styled.div`
   }
 `
 
-const ErrorOut = styled.p`
+const ErrorOut = styled.div`
   background-color: rgb(215, 0, 0);
   border-radius: 0.3em;
   margin-top: 0.3em;
-  padding: 0.3em;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0.3em 1em;
   display: ${props => props.show ? '' : 'none'};
 `
 
@@ -68,7 +70,7 @@ export default class LoginForm extends React.Component {
     super()
     this.state = {
       selected: 'new',
-      errorMessage: '',
+      errorMessage: null,
       isLoggingIn: false
     }
 
@@ -113,16 +115,12 @@ export default class LoginForm extends React.Component {
   async _login (name, password, gridName, save, isNew) {
     try {
       if (name.length === 0) {
-        this.setState({
-          errorMessage: 'Please enter a name!'
-        })
+        this._setError('No name!', 'Please enter a name!')
         return
       }
 
       if (password.length === 0) {
-        this.setState({
-          errorMessage: 'Please enter a password!'
-        })
+        this._setError('No password!', 'Please enter a password!')
         return
       }
 
@@ -130,13 +128,12 @@ export default class LoginForm extends React.Component {
         ? this.props.grids.find(grid => grid.name === gridName)
         : gridName
       if (grid == null) {
-        this.setState({
-          errorMessage: `Unknown Grid! The Grid ${gridName} isn't in the grid-list!`
-        })
+        this._setError('Unknown Grid!', `The Grid ${gridName} isn't in the grid-list!`)
         return
       }
 
       const gridData = {
+        isLoginLLSD: grid.isLoginLLSD || false,
         name: grid.name,
         url: grid.url || grid.loginURL
       }
@@ -151,9 +148,59 @@ export default class LoginForm extends React.Component {
       console.error(err)
       // Displays the error message from the server
       this.setState({
-        isLoggingIn: false,
-        errorMessage: err.message
+        isLoggingIn: false
       })
+      this._parseErrorMessage(err)
+    }
+  }
+
+  _setError (title, body) {
+    if (title == null || body == null) {
+      this.setState({ errorMessage: null })
+      return
+    }
+    this.setState({
+      errorMessage: {
+        title,
+        body
+      }
+    })
+  }
+
+  _parseErrorMessage (error) {
+    try {
+      const parser = new window.DOMParser()
+      const errorBody = parser.parseFromString(error.message, 'text/html')
+
+      const hasTitle = errorBody.body.children.length > 1 || [
+        'H1',
+        'H2',
+        'H3',
+        'H4',
+        'H5',
+        'H6',
+        'H7'
+      ].includes(errorBody.body.firstChild.nodeName)
+
+      const title = hasTitle
+        ? errorBody.body.firstChild.textContent
+        : ''
+
+      const messageElements = Array.prototype.slice.call(
+        errorBody.body.childNodes,
+        hasTitle ? 1 : 0
+      )
+      const body = messageElements.reduce((body, element, index) => {
+        const textContent = element.textContent.trim()
+        if (textContent.length === 0) return body
+
+        return body + (index === 0 ? '' : '\n') + element.textContent
+      }, '')
+
+      this._setError(title, body)
+    } catch (parseError) {
+      console.error(parseError)
+      this._setError('Login failed!', error.message)
     }
   }
 
@@ -187,9 +234,15 @@ export default class LoginForm extends React.Component {
           />)}
         </AvatarsList>
 
-        <ErrorOut show={this.state.errorMessage.length !== 0}>
-          {this.state.errorMessage}
-        </ErrorOut>
+        {this.state.errorMessage && <ErrorOut show>
+          {this.state.errorMessage.title.length > 0 && <h4>{this.state.errorMessage.title}</h4>}
+          <p>
+            {this.state.errorMessage.body.split('\n').map((line, index) => <span key={index}>
+              {line}
+              <br />
+            </span>)}
+          </p>
+        </ErrorOut>}
       </Main>
     </Container>
   }
