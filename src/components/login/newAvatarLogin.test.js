@@ -1,6 +1,6 @@
 import { axe } from 'jest-axe'
 import React from 'react'
-import { shallow } from 'enzyme'
+import { shallow, mount } from 'enzyme'
 
 import NewAvatarLogin from './newAvatarLogin'
 
@@ -40,7 +40,7 @@ test('not signed in login works', () => {
 
   const loginData = []
 
-  const rendered = shallow(<NewAvatarLogin
+  const rendered = mount(<NewAvatarLogin
     grids={grids}
     isSignedIn={false}
     onLogin={(name, password, grid, save) => {
@@ -56,9 +56,9 @@ test('not signed in login works', () => {
   />)
 
   const nameInput = rendered.find('[type="text"]').first()
-  const passwordInput = rendered.find('[type="password"]')
+  const passwordInput = rendered.find('[type="password"]').first()
   const saveCheckbox = rendered.find('#saveNewAvatarButton')
-  const loginButton = rendered.children().last()
+  const loginButton = rendered.find('#newAvatarLoginButton').first()
 
   nameInput.simulate('change', {
     target: {
@@ -129,7 +129,7 @@ test('signed in login works', () => {
 
   const loginData = []
 
-  const rendered = shallow(<NewAvatarLogin
+  const rendered = mount(<NewAvatarLogin
     grids={grids}
     isSignedIn
     onLogin={(name, password, grid, save) => {
@@ -145,9 +145,9 @@ test('signed in login works', () => {
   />)
 
   const nameInput = rendered.find('[type="text"]').first()
-  const passwordInput = rendered.find('[type="password"]')
+  const passwordInput = rendered.find('[type="password"]').first()
   const saveCheckbox = rendered.find('#saveNewAvatarButton')
-  const loginButton = rendered.children().last()
+  const loginButton = rendered.find('#newAvatarLoginButton').first()
 
   nameInput.simulate('change', {
     target: {
@@ -222,7 +222,7 @@ test('adding new grid', () => {
 
   const loginData = []
 
-  const rendered = shallow(<NewAvatarLogin
+  const rendered = mount(<NewAvatarLogin
     grids={grids}
     isSignedIn
     onLogin={(name, password, grid, save) => {
@@ -237,10 +237,7 @@ test('adding new grid', () => {
     isSelected
   />)
 
-  const gridSelect = rendered.find('#newAvatarGridSelection')
-  const gridName = rendered.find('#newGridNameInput')
-  const gridURL = rendered.find('#newGridUrlInput')
-  const gridIsLLSD = rendered.find('#newGridIsLLSD')
+  const gridSelect = rendered.find('#newAvatarGridSelection').first()
 
   gridSelect.simulate('change', {
     target: {
@@ -250,6 +247,10 @@ test('adding new grid', () => {
       }
     }
   })
+
+  const gridName = rendered.find('#newGridNameInput').first()
+  const gridURL = rendered.find('#newGridUrlInput').first()
+  const gridIsLLSD = rendered.find('#newGridIsLLSD').first()
 
   gridName.simulate('change', {
     target: {
@@ -275,7 +276,7 @@ test('adding new grid', () => {
 
   const nameInput = rendered.find('#newAvatarNameInput').first()
   const passwordInput = rendered.find('#newAvatarPasswordInput').first()
-  const loginButton = rendered.children().last()
+  const loginButton = rendered.find('#newAvatarLoginButton').first()
 
   nameInput.simulate('change', {
     target: {
