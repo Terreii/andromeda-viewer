@@ -2,6 +2,14 @@
 
 const fetch = require('node-fetch')
 
+module.exports = function httpProxy (server) {
+  server.route({
+    method: 'POST',
+    path: '/proxy',
+    handler: proxy
+  })
+}
+
 function proxy (request, reply) {
   const fetchOptions = {
     method: request.headers['x-andromeda-fetch-method'] || 'GET',
@@ -32,13 +40,5 @@ function proxy (request, reply) {
     })
   }).catch(err => {
     reply(err)
-  })
-}
-
-exports.init = function httpProxy (server) {
-  server.route({
-    method: 'POST',
-    path: '/proxy',
-    handler: proxy
   })
 }

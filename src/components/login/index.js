@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 
 import LoginNewAvatar from './newAvatarLogin'
@@ -32,11 +32,13 @@ const Main = styled.div`
   }
 `
 
-const ErrorOut = styled.p`
+const ErrorOut = styled.div`
   background-color: rgb(215, 0, 0);
   border-radius: 0.3em;
   margin-top: 0.3em;
-  padding: 0.3em;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0.3em 1em;
   display: ${props => props.show ? '' : 'none'};
 `
 
@@ -63,134 +65,154 @@ const AvatarsList = styled.div`
   }
 `
 
-export default class LoginForm extends React.Component {
-  constructor () {
-    super()
-    this.state = {
-      selected: 'new',
-      errorMessage: '',
-      isLoggingIn: false
+export default function LoginForm ({ isSignedIn, avatars, grids, login, showSignInPopup }) {
+  const [selected, setSelected] = useState(() => avatars.length === 0
+    ? 'new'
+    : avatars[0].avatarIdentifier
+  )
+  useEffect(() => {
+    if (avatars.length > 0 && selected === 'new') {
+      setSelected(avatars[0].avatarIdentifier)
+    } else if (avatars.length === 0) {
+      setSelected('new')
     }
+    // only call effect on mount and if avatars switch between having some and none.
+    // eslint-disable-next-line
+  }, [avatars.length > 0])
 
-    this._boundSetSelected = this._setSelected.bind(this)
-    this._boundLoginAnonymously = this._loginAnonymously.bind(this)
-    this._boundLoginWithSavedAvatar = this._loginWithSavedAvatar.bind(this)
-  }
-
-  componentWillMount () {
-    if (this.props.avatars.length > 0) {
-      this._setSelected(this.props.avatars[0].avatarIdentifier)
-    }
-  }
-
-  componentWillReceiveProps (nextProps) {
-    if (this.props.avatars.length === 0 && nextProps.avatars.length > 0) {
-      this._setSelected(nextProps.avatars[0].avatarIdentifier)
-    } else if (this.props.avatars.length > 0 && nextProps.avatars.length === 0) {
-      this._setSelected('new')
+  const [errorMessage, setErrorMessageState] = useState(null)
+  const setErrorMessage = (title, body) => {
+    if (title == null || body == null) {
+      setErrorMessageState(null)
+    } else {
+      setErrorMessageState({ title, body })
     }
   }
+  const [isLoggingIn, setIsLoggingIn] = useState(null)
 
-  _setSelected (avatarIdentifier) {
-    this.setState({
-      selected: avatarIdentifier
-    })
+  const parseErrorMessage = error => {
+    try {
+      const parser = new window.DOMParser()
+      const errorBody = parser.parseFromString(error.message, 'text/html')
+
+      const hasTitle = errorBody.body.children.length > 1 || [
+        'H1',
+        'H2',
+        'H3',
+        'H4',
+        'H5',
+        'H6',
+        'H7'
+      ].includes(errorBody.body.firstChild.nodeName)
+
+      const title = hasTitle
+        ? errorBody.body.firstChild.textContent
+        : ''
+
+      const messageElements = Array.prototype.slice.call(
+        errorBody.body.childNodes,
+        hasTitle ? 1 : 0
+      )
+      const body = messageElements.reduce((body, element, index) => {
+        const textContent = element.textContent.trim()
+        if (textContent.length === 0) return body
+
+        return body + (index === 0 ? '' : '\n') + element.textContent
+      }, '')
+
+      setErrorMessage(title, body)
+    } catch (parseError) {
+      console.error(parseError)
+      setErrorMessage('Login failed!', error.message)
+    }
   }
 
-  // Login with new or an anonym avatar.
-  _loginAnonymously (name, password, gridName, save) {
-    this._login(name, password, gridName, save, true)
-  }
-
-  // Login with an already saved avatar.
-  _loginWithSavedAvatar (avatar, password) {
-    const name = avatar.name
-    const gridName = avatar.grid
-
-    this._login(name, password, gridName, true, false)
-  }
-
-  async _login (name, password, gridName, save, isNew) {
+  const doLogin = async (name, password, gridName, save, isNew) => {
     try {
       if (name.length === 0) {
-        this.setState({
-          errorMessage: 'Please enter a name!'
-        })
+        setErrorMessage('No name!', 'Please enter a name!')
         return
       }
 
       if (password.length === 0) {
-        this.setState({
-          errorMessage: 'Please enter a password!'
-        })
+        setErrorMessage('No password!', 'Please enter a password!')
         return
       }
 
       const grid = typeof gridName === 'string'
-        ? this.props.grids.find(grid => grid.name === gridName)
+        ? grids.find(grid => grid.name === gridName)
         : gridName
       if (grid == null) {
-        this.setState({
-          errorMessage: `Unknown Grid! The Grid ${gridName} isn't in the grid-list!`
-        })
+        setErrorMessage('Unknown Grid!', `The Grid ${gridName} isn't in the grid-list!`)
         return
       }
 
       const gridData = {
+        isLoginLLSD: grid.isLoginLLSD || false,
         name: grid.name,
         url: grid.url || grid.loginURL
       }
 
       const avatarName = new AvatarName(name)
-      this.setState({
-        isLoggingIn: name
-      })
+      setIsLoggingIn(name)
 
-      await this.props.login(avatarName, password, gridData, save, isNew)
+      await login(avatarName, password, gridData, save, isNew)
     } catch (err) {
       console.error(err)
       // Displays the error message from the server
-      this.setState({
-        isLoggingIn: false,
-        errorMessage: err.message
-      })
+      setIsLoggingIn(null)
+      parseErrorMessage(err)
     }
   }
 
-  render () {
-    const signInDialog = this.props.isSignedIn
-      ? null
-      : <SignIn showSignInPopup={this.props.showSignInPopup} />
-
-    return <Container>
-      <Main>
-        <AvatarsList>
-          <LoginNewAvatar
-            grids={this.props.grids}
-            isSignedIn={this.props.isSignedIn}
-            onLogin={this._boundLoginAnonymously}
-            isLoggingIn={this.state.isLoggingIn}
-            isSelected={this.state.selected === 'new'}
-            onSelect={this._boundSetSelected}
-          />
-
-          {signInDialog}
-
-          {this.props.avatars.map(avatar => <AvatarLogin
-            key={avatar._id}
-            avatar={avatar}
-            grid={this.props.grids.find(grid => grid.name === avatar.grid)}
-            onLogin={this._boundLoginWithSavedAvatar}
-            isLoggingIn={this.state.isLoggingIn}
-            isSelected={this.state.selected === avatar.avatarIdentifier}
-            onSelect={this._boundSetSelected}
-          />)}
-        </AvatarsList>
-
-        <ErrorOut show={this.state.errorMessage.length !== 0}>
-          {this.state.errorMessage}
-        </ErrorOut>
-      </Main>
-    </Container>
+  // Login with new or an anonym avatar.
+  const loginAnonymously = (name, password, gridName, save) => {
+    doLogin(name, password, gridName, save, true)
   }
+
+  const loginWithSavedAvatar = (avatar, password) => {
+    const name = avatar.name
+    const gridName = avatar.grid
+
+    doLogin(name, password, gridName, true, false)
+  }
+
+  return <Container>
+    <Main>
+      <AvatarsList>
+        <LoginNewAvatar
+          grids={grids}
+          isSignedIn={isSignedIn}
+          onLogin={loginAnonymously}
+          isLoggingIn={isLoggingIn}
+          isSelected={selected === 'new'}
+          onSelect={setSelected}
+        />
+
+        {isSignedIn
+          ? null
+          : <SignIn showSignInPopup={showSignInPopup} />}
+
+        {avatars.map(avatar => <AvatarLogin
+          key={avatar._id}
+          avatar={avatar}
+          grid={grids.find(grid => grid.name === avatar.grid)}
+          onLogin={loginWithSavedAvatar}
+          isLoggingIn={isLoggingIn}
+          isSelected={selected === avatar.avatarIdentifier}
+          onSelect={setSelected}
+        />)}
+      </AvatarsList>
+
+      {errorMessage && <ErrorOut show>
+        {errorMessage.title.length > 0 && <h4>{errorMessage.title}</h4>}
+        <p>
+          {errorMessage.body.split('\n').map((line, index) => <span key={index}>
+            {line}
+            <br />
+          </span>)}
+        </p>
+      </ErrorOut>}
+    </Main>
+  </Container>
 }
