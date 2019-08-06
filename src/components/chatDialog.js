@@ -2,8 +2,7 @@
  * Displays a single conversation/dialog. Also the input
  */
 
-import React from 'react'
-import PropTypes from 'prop-types'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 
 import ChatMessagesList from './chatMessagesList'
@@ -30,95 +29,53 @@ const TextBox = styled(Input)`
   margin-right: 0.5em;
 `
 
-export default class ChatDialog extends React.Component {
-  constructor () {
-    super()
-    this.state = {
-      text: ''
-    }
-    this._boundChange = this._onChange.bind(this)
-    this._boundKeyDown = this._onKeyDown.bind(this)
-    this._boundClickSend = this._send.bind(this)
-    this._boundLoadHistory = this._loadHistory.bind(this)
-  }
+export default function ChatDialog ({ isIM = false, data = [], names, sendTo, loadHistory }) {
+  const [text, setText] = useState('')
 
-  componentDidMount () {
-    this._loadHistory()
-  }
+  const messages = isIM ? data.messages : data
 
-  _loadHistory () {
-    const isIM = this.props.isIM
-    const data = this.props.data
-    if (isIM && !data.didLoadHistory && !data.isLoadingHistory) {
-      this.props.loadHistory(data.chatUUID, data.saveId)
-    }
-  }
-
-  _onChange (event, value) {
-    this.setState({
-      text: event.target.value
-    })
-  }
-
-  _onKeyDown (event) {
-    if (event.keyCode === 13) {
-      this._send(event)
-    }
-  }
-
-  _send (event) {
+  const send = event => {
     event.preventDefault()
-    const text = this.state.text.trim()
-    if (text) {
-      this.props.sendTo(text)
+    const textTrimmed = text.trim()
+    if (textTrimmed) {
+      sendTo(textTrimmed)
+      setText('')
     }
-    this.setState({
-      text: ''
-    })
   }
 
-  render () {
-    const messages = this.props.isIM ? this.props.data.messages : this.props.data
+  const doLoadHistory = () => {
+    if (isIM && !data.didLoadHistory && !data.isLoadingHistory && loadHistory) {
+      loadHistory(data.chatUUID, data.saveId)
+    }
+  }
+  useEffect(doLoadHistory, [isIM, data.chatUUID])
 
-    const placeholderText = `Send ${this.props.isIM ? 'Instant Message' : 'to local chat'}`
+  const placeholderText = `Send ${isIM ? 'Instant Message' : 'to local chat'}`
 
-    return <Main>
-      <ChatMessagesList
-        messages={messages}
-        isIM={this.props.isIM}
-        names={this.props.names}
-        onScrolledTop={this._boundLoadHistory}
+  return <Main>
+    <ChatMessagesList
+      messages={messages}
+      isIM={isIM}
+      names={names}
+      onScrolledTop={doLoadHistory}
+    />
+    <ChatTextSend>
+      <TextBox
+        type='text'
+        name='chatInput'
+        placeholder={placeholderText}
+        aria-label={placeholderText}
+        value={text}
+        onChange={event => { setText(event.target.value) }}
+        onKeyDown={event => {
+          if (event.keyCode === 13) {
+            send(event)
+          }
+        }}
       />
-      <ChatTextSend>
-        <TextBox
-          type='text'
-          name='chatInput'
-          placeholder={placeholderText}
-          aria-label={placeholderText}
-          value={this.state.text}
-          onChange={this._boundChange}
-          onKeyDown={this._boundKeyDown}
-        />
-        <SendButton className='primary' onClick={this._boundClickSend}>
-          send
-        </SendButton>
-      </ChatTextSend>
-    </Main>
-  }
-}
-
-ChatDialog.displayName = 'ChatDialog'
-// https://facebook.github.io/react/docs/typechecking-with-proptypes.html
-ChatDialog.propTypes = {
-  data: PropTypes.oneOfType([
-    PropTypes.array,
-    PropTypes.object
-  ]).isRequired,
-  names: PropTypes.object.isRequired,
-  sendTo: PropTypes.func.isRequired,
-  isIM: PropTypes.bool
-}
-ChatDialog.defaultProps = {
-  isIM: false,
-  data: []
+      <SendButton className='primary' onClick={send}>
+        send
+      </SendButton>
+    </ChatTextSend>
+  </Main>
 }

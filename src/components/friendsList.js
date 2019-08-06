@@ -1,5 +1,4 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import styled from 'styled-components'
 
 import chatBubble from '../icons/chat_bubble.svg'
@@ -140,11 +139,4 @@ export default function FriendsList ({ friends, names, updateRights, startNewIMC
     <List>{list}</List>
     <div id='skip-friends-list-content' />
   </Outer>
-}
-
-FriendsList.displayName = 'FriendsList'
-
-FriendsList.propTypes = {
-  names: PropTypes.object.isRequired,
-  friends: PropTypes.arrayOf(PropTypes.object).isRequired
 }
