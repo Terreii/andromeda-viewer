@@ -20,7 +20,7 @@ export const Fixed = new MessageDataType('Fixed', (value = [], length) => {
     buffy.write(value.substr(0, length))
   } else {
     for (let i = 0; i < length; ++i) {
-      let v = (i < value.length) ? +value[i] : 0
+      const v = (i < value.length) ? +value[i] : 0
       buffy.writeUInt8(v, i)
     }
   }

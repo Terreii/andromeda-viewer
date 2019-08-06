@@ -47,9 +47,10 @@ const GandalfImg = styled.img`
 export default function ResetKeysPopup ({ resetKeys, onClose }) {
   const [fileURL, setFileURL] = useState('')
   useEffect(() => {
-    const fileText = resetKeys.reduce((sum, key) => `${sum}\r\n${key}`) + '\r\n'
-
-    const blob = new window.Blob([fileText], { type: 'text/plain' })
+    const blob = new window.Blob(
+      resetKeys.map(key => key + '\r\n'),
+      { type: 'text/plain' }
+    )
     const objURL = window.URL.createObjectURL(blob)
 
     setFileURL(objURL)

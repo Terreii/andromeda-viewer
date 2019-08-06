@@ -1,6 +1,6 @@
 'use strict'
 
-let storeData = {}
+const storeData = {}
 
 const hoodie = {
   account: {

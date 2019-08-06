@@ -32,11 +32,13 @@ const Main = styled.div`
   }
 `
 
-const ErrorOut = styled.p`
+const ErrorOut = styled.div`
   background-color: rgb(215, 0, 0);
   border-radius: 0.3em;
   margin-top: 0.3em;
-  padding: 0.3em;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0.3em 1em;
   display: ${props => props.show ? '' : 'none'};
 `
 
@@ -78,18 +80,62 @@ export default function LoginForm ({ isSignedIn, avatars, grids, login, showSign
     // eslint-disable-next-line
   }, [avatars.length > 0])
 
-  const [errorMessage, setErrorMessage] = useState('')
+  const [errorMessage, setErrorMessageState] = useState(null)
+  const setErrorMessage = (title, body) => {
+    if (title == null || body == null) {
+      setErrorMessageState(null)
+    } else {
+      setErrorMessageState({ title, body })
+    }
+  }
   const [isLoggingIn, setIsLoggingIn] = useState(null)
+
+  const parseErrorMessage = error => {
+    try {
+      const parser = new window.DOMParser()
+      const errorBody = parser.parseFromString(error.message, 'text/html')
+
+      const hasTitle = errorBody.body.children.length > 1 || [
+        'H1',
+        'H2',
+        'H3',
+        'H4',
+        'H5',
+        'H6',
+        'H7'
+      ].includes(errorBody.body.firstChild.nodeName)
+
+      const title = hasTitle
+        ? errorBody.body.firstChild.textContent
+        : ''
+
+      const messageElements = Array.prototype.slice.call(
+        errorBody.body.childNodes,
+        hasTitle ? 1 : 0
+      )
+      const body = messageElements.reduce((body, element, index) => {
+        const textContent = element.textContent.trim()
+        if (textContent.length === 0) return body
+
+        return body + (index === 0 ? '' : '\n') + element.textContent
+      }, '')
+
+      setErrorMessage(title, body)
+    } catch (parseError) {
+      console.error(parseError)
+      setErrorMessage('Login failed!', error.message)
+    }
+  }
 
   const doLogin = async (name, password, gridName, save, isNew) => {
     try {
       if (name.length === 0) {
-        setErrorMessage('Please enter a name!')
+        setErrorMessage('No name!', 'Please enter a name!')
         return
       }
 
       if (password.length === 0) {
-        setErrorMessage('Please enter a password!')
+        setErrorMessage('No password!', 'Please enter a password!')
         return
       }
 
@@ -97,11 +143,12 @@ export default function LoginForm ({ isSignedIn, avatars, grids, login, showSign
         ? grids.find(grid => grid.name === gridName)
         : gridName
       if (grid == null) {
-        setErrorMessage(`Unknown Grid! The Grid ${gridName} isn't in the grid-list!`)
+        setErrorMessage('Unknown Grid!', `The Grid ${gridName} isn't in the grid-list!`)
         return
       }
 
       const gridData = {
+        isLoginLLSD: grid.isLoginLLSD || false,
         name: grid.name,
         url: grid.url || grid.loginURL
       }
@@ -114,7 +161,7 @@ export default function LoginForm ({ isSignedIn, avatars, grids, login, showSign
       console.error(err)
       // Displays the error message from the server
       setIsLoggingIn(null)
-      setErrorMessage(err.message || err.toString())
+      parseErrorMessage(err)
     }
   }
 
@@ -157,9 +204,15 @@ export default function LoginForm ({ isSignedIn, avatars, grids, login, showSign
         />)}
       </AvatarsList>
 
-      <ErrorOut show={errorMessage.length !== 0}>
-        {errorMessage}
-      </ErrorOut>
+      {errorMessage && <ErrorOut show>
+        {errorMessage.title.length > 0 && <h4>{errorMessage.title}</h4>}
+        <p>
+          {errorMessage.body.split('\n').map((line, index) => <span key={index}>
+            {line}
+            <br />
+          </span>)}
+        </p>
+      </ErrorOut>}
     </Main>
   </Container>
 }
