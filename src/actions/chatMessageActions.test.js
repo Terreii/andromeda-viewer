@@ -281,6 +281,28 @@ describe('incoming IM handling', () => {
     ])
   })
 
+  it('should handle busy auto responses', () => {
+    const store = mockStore()
+
+    store.dispatch(receiveIM(createImPackage(IMDialog.BusyAutoResponse, {
+      message: "I'm sorry, but I'm busy ..."
+    })))
+
+    expect(store.getActions()).toEqual([
+      {
+        type: 'BUSY_AUTO_RESPONSE_RECEIVED',
+        sessionId: '01234567-8900-0000-0000-009876543210',
+        msg: {
+          _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
+          fromAgentName: 'Tester',
+          fromId: '01234567-8900-0000-0000-000000000000',
+          message: "I'm sorry, but I'm busy ...",
+          time: 1562630524418
+        }
+      }
+    ])
+  })
+
   describe('notifications', () => {
     it('should handle text-only notifications', () => {
       const store = mockStore()
@@ -290,21 +312,40 @@ describe('incoming IM handling', () => {
         message: 'An interesting message'
       })))
 
+      // IMDialog.FromTaskAsAlert
+      store.dispatch(receiveIM(createImPackage(IMDialog.FromTaskAsAlert)))
+
       // IMDialog.MessageFromAgent but with AgentID === '00000000-0000-0000-0000-000000000000'
       store.dispatch(receiveIM(createImPackage(IMDialog.MessageFromAgent, {
         agentId: '00000000-0000-0000-0000-000000000000',
         message: 'An interesting message'
       })))
 
-      const expectedAction = {
-        type: 'NOTIFICATION_RECEIVED',
-        msg: {
-          notificationType: NotificationTypes.TextOnly,
-          text: 'An interesting message'
+      expect(store.getActions()).toEqual([
+        {
+          type: 'NOTIFICATION_RECEIVED',
+          msg: {
+            notificationType: NotificationTypes.TextOnly,
+            fromName: 'Tester',
+            text: 'An interesting message'
+          }
+        },
+        {
+          type: 'NOTIFICATION_RECEIVED',
+          msg: {
+            notificationType: NotificationTypes.TextOnly,
+            fromName: 'Tester',
+            text: 'Hello World!'
+          }
+        },
+        {
+          type: 'NOTIFICATION_RECEIVED',
+          msg: {
+            notificationType: NotificationTypes.System,
+            text: 'An interesting message'
+          }
         }
-      }
-
-      expect(store.getActions()).toEqual([expectedAction, expectedAction])
+      ])
     })
 
     it('should handle notifications in chat', () => {
@@ -328,13 +369,6 @@ describe('incoming IM handling', () => {
         id: '00000000-0000-0000-0000-000000000000'
       })))
 
-      // IMDialog.InventoryAccepted
-      store.dispatch(receiveIM(createImPackage(IMDialog.InventoryAccepted)))
-
-      // IMDialog.InventoryDeclined
-
-      store.dispatch(receiveIM(createImPackage(IMDialog.InventoryDeclined)))
-
       expect(store.getActions()).toEqual([
         {
           type: 'NOTIFICATION_IN_CHAT_ADDED',
@@ -342,7 +376,18 @@ describe('incoming IM handling', () => {
           fromName: 'Tester',
           fromId: '01234567-8900-0000-0000-000000000000',
           time: 1562630524418
-        },
+        }
+      ])
+
+      store.clearActions()
+
+      // IMDialog.InventoryAccepted
+      store.dispatch(receiveIM(createImPackage(IMDialog.InventoryAccepted)))
+
+      // IMDialog.InventoryDeclined
+      store.dispatch(receiveIM(createImPackage(IMDialog.InventoryDeclined)))
+
+      expect(store.getActions()).toEqual([
         {
           type: 'NOTIFICATION_IN_CHAT_ADDED',
           text: 'accepted your inventory offer.',
@@ -358,22 +403,51 @@ describe('incoming IM handling', () => {
           time: 1562630524418
         }
       ])
+
+      store.clearActions()
+
+      // IMDialog.FriendshipAccepted
+      store.dispatch(receiveIM(createImPackage(IMDialog.FriendshipAccepted)))
+
+      // IMDialog.FriendshipDeclined
+      store.dispatch(receiveIM(createImPackage(IMDialog.FriendshipDeclined)))
+
+      expect(store.getActions()).toEqual([
+        {
+          type: 'NOTIFICATION_IN_CHAT_ADDED',
+          text: 'accepted your friendship offer.',
+          fromName: 'Tester',
+          fromId: '01234567-8900-0000-0000-000000000000',
+          time: 1562630524418
+        },
+        {
+          type: 'NOTIFICATION_IN_CHAT_ADDED',
+          text: 'declined your friendship offer.',
+          fromName: 'Tester',
+          fromId: '01234567-8900-0000-0000-000000000000',
+          time: 1562630524418
+        }
+      ])
     })
 
     it('should handle messages from objects', () => {
       const store = mockStore()
 
       // IMDialog.MessageFromObject
-      store.dispatch(receiveIM(createImPackage(IMDialog.MessageFromObject)))
+      store.dispatch(receiveIM(createImPackage(IMDialog.MessageFromObject, {
+        binaryBucket: Buffer.from('slurl://grid/x/y/z', 'ascii')
+      })))
 
       // IMDialog.MessageFromAgent but with FromAgentName === 'Second Life'
       store.dispatch(receiveIM(createImPackage(IMDialog.MessageFromAgent, {
-        fromAgentName: 'Second Life'
+        fromAgentName: 'Second Life',
+        binaryBucket: Buffer.from('slurl://grid/x/y/z', 'ascii')
       })))
 
       // IMDialog.FriendshipOffered but from FromAgentName === 'Second Life'
       store.dispatch(receiveIM(createImPackage(IMDialog.FriendshipOffered, {
-        fromAgentName: 'Second Life'
+        fromAgentName: 'Second Life',
+        binaryBucket: Buffer.from('slurl://grid/x/y/z', 'ascii')
       })))
 
       expect(store.getActions()).toEqual([
@@ -381,21 +455,27 @@ describe('incoming IM handling', () => {
           type: 'NOTIFICATION_IN_CHAT_ADDED',
           text: 'Hello World!',
           fromName: 'Tester',
-          fromId: '01234567-8900-0000-0000-009876543210',
+          ownerId: '01234567-8900-0000-0000-000000000000',
+          objectId: '01234567-8900-0000-0000-009876543210',
+          slurl: 'slurl://grid/x/y/z',
           time: 1562630524418
         },
         {
           type: 'NOTIFICATION_IN_CHAT_ADDED',
           text: 'Hello World!',
           fromName: 'Second Life',
-          fromId: '01234567-8900-0000-0000-009876543210',
+          ownerId: '01234567-8900-0000-0000-000000000000',
+          objectId: '01234567-8900-0000-0000-009876543210',
+          slurl: 'slurl://grid/x/y/z',
           time: 1562630524418
         },
         {
           type: 'NOTIFICATION_IN_CHAT_ADDED',
           text: 'Hello World!',
           fromName: 'Second Life',
-          fromId: '01234567-8900-0000-0000-009876543210',
+          ownerId: '01234567-8900-0000-0000-000000000000',
+          objectId: '01234567-8900-0000-0000-009876543210',
+          slurl: 'slurl://grid/x/y/z',
           time: 1562630524418
         }
       ])
@@ -529,7 +609,7 @@ describe('incoming IM handling', () => {
       const store = mockStore()
 
       store.dispatch(receiveIM(createImPackage(IMDialog.GotoUrl, {
-        binaryBucket: createStringBuffer('http://wiki.secondlife.com/wiki/ImprovedInstantMessage')
+        binaryBucket: Buffer.from('http://wiki.secondlife.com/wiki/ImprovedInstantMessage')
       })))
 
       expect(store.getActions()).toEqual([
@@ -567,7 +647,39 @@ describe('incoming IM handling', () => {
     it('should handle a teleport lure', () => {
       const store = mockStore()
 
-      store.dispatch(receiveIM(createImPackage(IMDialog.TeleportLureOffered)))
+      /**
+       * Create the binaryBucket
+       * @param {number} gX SIM global X
+       * @param {number} gY SIM global Y
+       * @param {number} rX Region X
+       * @param {number} rY Region Y
+       * @param {number} rZ Region Z
+       * @param {number} lX Lock at X
+       * @param {number} lY Lock at Y
+       * @param {number} lZ Lock at Z
+       * @param {string?} maturity Age maturity. Can be 'PG', 'M' or 'A'
+       * @returns {object} binary bucket
+       */
+      const createRegionInfo = (gX, gY, rX, rY, rZ, lX, lY, lZ, maturity = null) => {
+        const coordinates = `${gX}|${gY}|${rX}|${rY}|${rZ}|${lX}|${lY}|${lZ}`
+
+        return Buffer.from(['PG', 'M', 'A'].includes(maturity)
+          ? coordinates + '|' + maturity
+          : coordinates
+        )
+      }
+
+      store.dispatch(receiveIM(createImPackage(IMDialog.TeleportLureOffered, {
+        binaryBucket: createRegionInfo(42, 43, 128, 129, 130, 0, 1, 2)
+      })))
+
+      store.dispatch(receiveIM(createImPackage(IMDialog.TeleportLureOffered, {
+        binaryBucket: createRegionInfo(42, 43, 128, 129, 130, 0, 1, 2, 'A')
+      })))
+
+      store.dispatch(receiveIM(createImPackage(IMDialog.GodLikeTeleportLureOffered, {
+        binaryBucket: createRegionInfo(42, 43, 128, 129, 130, 0, 1, 2)
+      })))
 
       expect(store.getActions()).toEqual([
         {
@@ -578,9 +690,41 @@ describe('incoming IM handling', () => {
             fromId: '01234567-8900-0000-0000-000000000000',
             fromAgentName: 'Tester',
             lureId: '01234567-8900-0000-0000-009876543210',
-            regionId: '00000000-1234-5678-9000-000000000000',
-            position: [1.2, 3.4, 5.6],
-            regionInfo: '' // TODO: find out format of binaryBucket
+            regionId: [42, 43], // TODO: Change to BigInt ((x << 32) | y)
+            position: [128, 129, 130],
+            lockAt: [0, 1, 2],
+            maturity: 'PG',
+            godLike: false
+          }
+        },
+        {
+          type: 'NOTIFICATION_RECEIVED',
+          msg: {
+            notificationType: NotificationTypes.TeleportLure,
+            text: 'Hello World!',
+            fromId: '01234567-8900-0000-0000-000000000000',
+            fromAgentName: 'Tester',
+            lureId: '01234567-8900-0000-0000-009876543210',
+            regionId: [42, 43], // TODO: Change to BigInt ((x << 32) | y)
+            position: [128, 129, 130],
+            lockAt: [0, 1, 2],
+            maturity: 'A',
+            godLike: false
+          }
+        },
+        {
+          type: 'NOTIFICATION_RECEIVED',
+          msg: {
+            notificationType: NotificationTypes.TeleportLure,
+            text: 'Hello World!',
+            fromId: '01234567-8900-0000-0000-000000000000',
+            fromAgentName: 'Tester',
+            lureId: '01234567-8900-0000-0000-009876543210',
+            regionId: [42, 43], // TODO: Change to BigInt ((x << 32) | y)
+            position: [128, 129, 130],
+            lockAt: [0, 1, 2],
+            maturity: 'PG',
+            godLike: true
           }
         }
       ])
@@ -609,10 +753,11 @@ describe('incoming IM handling', () => {
             notificationType: NotificationTypes.InventoryOffered,
             message: 'Hello World!',
             fromObject: false,
+            fromGroup: false,
             fromId: '01234567-8900-0000-0000-000000000000',
             fromName: 'Tester',
             item: {
-              id: '',
+              id: '00010203-0405-0607-0800-0a0b0c0d0e0f',
               type: AssetType.ImageJPEG,
               transactionId: '01234567-8900-0000-0000-009876543210'
             }
@@ -624,6 +769,7 @@ describe('incoming IM handling', () => {
             notificationType: NotificationTypes.InventoryOffered,
             message: 'Hello World!',
             fromObject: true,
+            fromGroup: false,
             fromId: '01234567-8900-0000-0000-000000000000',
             fromName: 'Tester',
             item: {

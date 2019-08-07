@@ -43,6 +43,7 @@ export default function notificationsList ({
             />
 
           case NotificationTypes.TextOnly:
+          case NotificationTypes.System:
           default:
             return <TextNotification
               key={notification.id}

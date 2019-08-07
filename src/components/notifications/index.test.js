@@ -2,6 +2,8 @@ import { axe } from 'jest-axe'
 import React from 'react'
 import { mount } from 'enzyme'
 
+import { NotificationTypes } from '../../types/chat'
+
 import Notifications from './index'
 
 global.Array.prototype.flatMap = jest.fn(function (fn) {
@@ -12,7 +14,7 @@ test('renders without crashing', () => {
   const allNotifications = [
     {
       id: 0,
-      notificationType: 0,
+      notificationType: NotificationTypes.TextOnly,
       text: 'Test',
       callbackId: null
     }
@@ -27,7 +29,8 @@ test('renders a basic MessageBox', () => {
   const allNotifications = [
     {
       id: 4,
-      notificationType: 0,
+      notificationType: NotificationTypes.TextOnly,
+      fromName: 'Tester',
       text: 'Test'
     }
   ]
@@ -39,6 +42,34 @@ test('renders a basic MessageBox', () => {
     onClose={onClose}
   />)
 
+  expect(rendered).toContainReact(<h4>Tester</h4>)
+  expect(rendered.find('p').text()).toBe('Test')
+
+  const buttons = rendered.find('button')
+  expect(buttons.length).toBe(1)
+  buttons.at(0).simulate('click')
+
+  expect(onClose.mock.calls.length).toBe(1)
+  expect(onClose.mock.calls[0][0]).toBe(4)
+})
+
+test('renders a system MessageBox', () => {
+  const allNotifications = [
+    {
+      id: 4,
+      notificationType: NotificationTypes.System,
+      text: 'Test'
+    }
+  ]
+
+  const onClose = jest.fn()
+
+  const rendered = mount(<Notifications
+    notifications={allNotifications}
+    onClose={onClose}
+  />)
+
+  expect(rendered).toContainReact(<h4>System Notification</h4>)
   expect(rendered.find('p').text()).toBe('Test')
 
   const buttons = rendered.find('button')
@@ -55,7 +86,7 @@ test('renders a friendship request', () => {
   const allNotifications = [
     {
       id: 4,
-      notificationType: 1,
+      notificationType: NotificationTypes.FriendshipOffer,
       text: 'I would like to by your friend!',
       fromId,
       fromAgentName: 'Testy Tester',
@@ -110,7 +141,7 @@ test('should pass aXe', async () => {
   const allNotifications = [
     {
       id: 0,
-      notificationType: 0,
+      notificationType: NotificationTypes.TextOnly,
       text: 'Test',
       callbackId: null
     }

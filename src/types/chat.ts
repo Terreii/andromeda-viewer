@@ -324,6 +324,10 @@ export enum NotificationTypes {
    */
   TextOnly = 0,
   /**
+   * Like {@link NotificationTypes.TextOnly} but from the System (Grid).
+   */
+  System,
+  /**
    * This notification represents a friendship offer.
    * 
    * It has the avatar name, their message and accept and decline buttons.
