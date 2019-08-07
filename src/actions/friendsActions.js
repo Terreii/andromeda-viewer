@@ -1,8 +1,11 @@
 import { fetchLLSD } from './llsd'
 
-import { getAgentId, getSessionId } from '../selectors/session'
-import { getFriends, getFriendById } from '../selectors/people'
+import { getFolderForAssetType } from '../selectors/inventory'
 import { getNames, getDisplayNamesURL } from '../selectors/names'
+import { getFriends, getFriendById } from '../selectors/people'
+import { getAgentId, getSessionId } from '../selectors/session'
+
+import { AssetType } from '../types/inventory'
 
 function sendUUIDNameRequest (ids) {
   return (dispatch, getState, { circuit }) => {
@@ -127,7 +130,9 @@ export function acceptFriendshipOffer (agentId, sessionId) {
         { TransactionID: sessionId }
       ],
       FolderData: [
-        // TODO add folderId { FolderID: '' }
+        {
+          FolderID: getFolderForAssetType(state, AssetType.CallingCard).folderId
+        }
       ]
     }, true)
 
