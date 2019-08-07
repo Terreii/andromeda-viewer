@@ -40,22 +40,14 @@ function mapReactors (reactors) {
 }
 
 function reacting (dispatch, state, reactors) {
-  let action = null
+  for (const reactor of reactors) {
+    const action = reactor(state)
 
-  const shouldDispatch = reactors.some(reactor => {
-    const result = reactor(state)
-
-    if (result != null) {
-      action = result
-      return true
-    } else {
-      return false
+    if (action != null) {
+      requestIdleCallback(() => {
+        dispatch(action)
+      })
+      return
     }
-  })
-
-  if (shouldDispatch) {
-    requestIdleCallback(() => {
-      dispatch(action)
-    })
   }
 }
