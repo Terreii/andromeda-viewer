@@ -45,7 +45,7 @@ describe('incoming IM handling', () => {
       return state
     })
 
-    uuid.mockReturnValue('abcdef')
+    uuid.mockReturnValueOnce('abcdef')
 
     store.dispatch(receiveIM(messageData))
 
@@ -75,7 +75,7 @@ describe('incoming IM handling', () => {
   })
 
   it("shouldn't create a new chat if a new message for it is received", () => {
-    uuid.mockReturnValue('abcdef')
+    uuid.mockReturnValueOnce('abcdef')
 
     const messageData = createImPackage(IMDialog.MessageFromAgent)
 
@@ -223,7 +223,7 @@ describe('incoming IM handling', () => {
       return state
     })
 
-    uuid.mockReturnValue('abcdef')
+    uuid.mockReturnValueOnce('abcdef')
 
     // IMDialog.SessionSend
     store.dispatch(receiveIM(messageData))
@@ -523,11 +523,12 @@ describe('incoming IM handling', () => {
           msg: {
             notificationType: NotificationTypes.GroupInvitation,
             text: 'Hello World!',
-            cost: 1000,
-            roleId: '00010203-0405-4607-8809-0a0b0c0d0e0f',
+            fee: 1000,
+            roleId: '00010203-0405-0607-0809-0a0b0c0d0e0f',
             groupId: '01234567-8900-0000-0000-000000000000',
-            transactionId: '01234567-8900-0000-0000-009876543210',
-            name: 'Tester'
+            transactionId: 'an-id',
+            name: 'Tester',
+            useOfflineCap: false
           }
         }
       ])
@@ -541,14 +542,13 @@ describe('incoming IM handling', () => {
         uuidArray.push(i)
       }
 
-      expect(() => {
+      expect(
         store.dispatch(receiveIM(createImPackage(IMDialog.GroupNotice, {
           message: 'Hello World!|Good news, everybody!',
           binaryBucket: Buffer.from([0, 0])
         })))
-
-        store.clearActions()
-      }).toThrow()
+      ).rejects.toThrow('BinaryBucket of GroupNotice is to small!')
+      store.clearActions()
 
       // Without item
       store.dispatch(receiveIM(createImPackage(IMDialog.GroupNotice, {
@@ -563,7 +563,7 @@ describe('incoming IM handling', () => {
             notificationType: NotificationTypes.GroupNotice,
             title: 'Hello World!',
             text: 'Good news, everybody!',
-            groupId: '00010203-0405-4607-8809-0a0b0c0d0e0f',
+            groupId: '00010203-0405-0607-0809-0a0b0c0d0e0f',
             senderName: 'Tester',
             senderId: '01234567-8900-0000-0000-000000000000',
             time: 1562630524418,
@@ -591,7 +591,7 @@ describe('incoming IM handling', () => {
             notificationType: NotificationTypes.GroupNotice,
             title: 'Hello World!',
             text: 'Good news, everybody!',
-            groupId: '00010203-0405-4607-8809-0a0b0c0d0e0f',
+            groupId: '00010203-0405-0607-0809-0a0b0c0d0e0f',
             senderName: 'Tester',
             senderId: '01234567-8900-0000-0000-000000000000',
             time: 1562630524418,
@@ -757,7 +757,7 @@ describe('incoming IM handling', () => {
             fromId: '01234567-8900-0000-0000-000000000000',
             fromName: 'Tester',
             item: {
-              id: '00010203-0405-0607-0800-0a0b0c0d0e0f',
+              objectId: '00010203-0405-0607-0809-0a0b0c0d0e0f',
               type: AssetType.ImageJPEG,
               transactionId: '01234567-8900-0000-0000-009876543210'
             }
@@ -773,7 +773,7 @@ describe('incoming IM handling', () => {
             fromId: '01234567-8900-0000-0000-000000000000',
             fromName: 'Tester',
             item: {
-              id: null,
+              objectId: null,
               type: AssetType.ImageJPEG,
               transactionId: '01234567-8900-0000-0000-009876543210'
             }

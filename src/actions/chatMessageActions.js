@@ -248,9 +248,7 @@ export function receiveIM (message) {
         } else if (
           getValueOf(message, 'AgentData', 'AgentID') === '00000000-0000-0000-0000-000000000000'
         ) {
-          dispatch(handleTextOnlyNotification(
-            getStringValueOf(message, 'MessageBlock', 'Message')
-          ))
+          dispatch(handleSystemNotification(message))
         } else if (
           getValueOf(message, 'MessageBlock', 'FromGroup') ||
           getGroupsIDs(state).includes(id)
@@ -278,22 +276,33 @@ export function receiveIM (message) {
         return
 
       case IMDialog.MessageBox:
+      case IMDialog.FromTaskAsAlert:
         dispatch(handleTextOnlyNotification(
-          getStringValueOf(message, 'MessageBlock', 'Message')
+          getStringValueOf(message, 'MessageBlock', 'Message'),
+          getStringValueOf(message, 'MessageBlock', 'FromAgentName')
         ))
         return
 
+      case IMDialog.GotoUrl:
+        dispatch(handleGoToURL(message))
+        return
+
       case IMDialog.TeleportLureOffered:
-        dispatch(handleNotification(message))
-        break
+      case IMDialog.GodLikeTeleportLureOffered:
+        dispatch(handleTeleportOffers(message))
+        return
 
       case IMDialog.RequestTeleportLure:
-        dispatch(handleNotification(message))
-        break
+        dispatch(handleRequestTeleportLure(message))
+        return
 
       case IMDialog.GroupInvitation:
-        dispatch(handleNotification(message))
-        break
+        dispatch(handleGroupInvite(message))
+        return
+
+      case IMDialog.GroupNotice:
+        dispatch(handleGroupNotice(message))
+        return
 
       case IMDialog.FriendshipOffered:
         if (getStringValueOf(message, 'MessageBlock', 'FromAgentName') === 'Second Life') {
@@ -303,29 +312,41 @@ export function receiveIM (message) {
         }
         return
 
-      case IMDialog.InventoryOffered:
-        dispatch(handleNotification(message))
-        break
+      case IMDialog.FriendshipAccepted:
+      case IMDialog.FriendshipDeclined:
+        {
+          const friendName = getStringValueOf(message, 'MessageBlock', 'FromAgentName')
+          const dialog = getValueOf(message, 'MessageBlock', 'Dialog')
+          const acceptedText = dialog === IMDialog.FriendshipAccepted ? 'accepted' : 'declined'
+          dispatch(handleNotificationInChat(
+            `${acceptedText} your friendship offer.`,
+            friendName,
+            getValueOf(message, 'AgentData', 'AgentID')
+          ))
+        }
+        return
 
-      case IMDialog.InventoryAccepted:
-      case IMDialog.InventoryDeclined:
-        const agentName = getStringValueOf(message, 'MessageBlock', 'FromAgentName')
-        const dialog = getValueOf(message, 'MessageBlock', 'Dialog')
-        const acceptedText = dialog === IMDialog.InventoryAccepted ? 'accepted' : 'declined'
-        dispatch(handleNotificationInChat(
-          `${acceptedText} your inventory offer.`,
-          agentName,
-          getValueOf(message, 'AgentData', 'AgentID')
-        ))
+      case IMDialog.InventoryOffered:
+        dispatch(handleInventoryOffer(message))
         return
 
       case IMDialog.TaskInventoryOffered:
-        dispatch(handleNotification(message))
-        break
+        dispatch(handleInventoryOffer(message))
+        return
 
-      case IMDialog.GroupNotice:
-        dispatch(handleNotification(message))
-        break
+      case IMDialog.InventoryAccepted:
+      case IMDialog.InventoryDeclined:
+        {
+          const agentName = getStringValueOf(message, 'MessageBlock', 'FromAgentName')
+          const dialog = getValueOf(message, 'MessageBlock', 'Dialog')
+          const acceptedText = dialog === IMDialog.InventoryAccepted ? 'accepted' : 'declined'
+          dispatch(handleNotificationInChat(
+            `${acceptedText} your inventory offer.`,
+            agentName,
+            getValueOf(message, 'AgentData', 'AgentID')
+          ))
+        }
+        return
 
       default:
         console.log(`Unhandled IM! Dialog: ${getValueOf(message, 'MessageBlock', 'Dialog')}`)
@@ -512,25 +533,41 @@ function handleConferenceIM (msg) {
 function handleIMFromObject (msg) {
   // TODO: add handling of muted objects (+ their owners)
 
-  return handleNotificationInChat(
-    getStringValueOf(msg, 'MessageBlock', 'Message'),
-    getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
-    getValueOf(msg, 'MessageBlock', 'ID')
-  )
+  return {
+    type: 'NOTIFICATION_IN_CHAT_ADDED',
+    text: getStringValueOf(msg, 'MessageBlock', 'Message'),
+    fromName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
+    ownerId: getValueOf(msg, 'AgentData', 'AgentID'),
+    objectId: getValueOf(msg, 'MessageBlock', 'ID'),
+    slurl: getStringValueOf(msg, 'MessageBlock', 'BinaryBucket'),
+    time: Date.now()
+  }
 }
 
 /**
  * Handle text only notifications.
  * @param {string} text Text that should be displayed.
  */
-function handleTextOnlyNotification (text) {
+function handleTextOnlyNotification (text, fromName) {
   return {
     type: 'NOTIFICATION_RECEIVED',
     msg: {
       notificationType: NotificationTypes.TextOnly,
+      fromName: fromName.toString(),
       text: text.toString()
     }
   }
+}
+
+/**
+ * Handle an System message.
+ * @param {object} msg IM from the sim.
+ */
+function handleSystemNotification (msg) {
+  return notificationActionCreator({
+    notificationType: NotificationTypes.System,
+    text: getStringValueOf(msg, 'MessageBlock', 'Message')
+  })
 }
 
 /**
@@ -538,42 +575,165 @@ function handleTextOnlyNotification (text) {
  * @param {object} msg IM Message from the server
  */
 function handleFriendshipOffer (msg) {
-  return {
-    type: 'NOTIFICATION_RECEIVED',
-    msg: {
-      notificationType: NotificationTypes.FriendshipOffer,
-      text: getStringValueOf(msg, 'MessageBlock', 'Message'),
-      fromId: getValueOf(msg, 'AgentData', 'AgentID'),
-      fromAgentName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
-      sessionId: getValueOf(msg, 'MessageBlock', 'ID')
-    }
-  }
+  return notificationActionCreator({
+    notificationType: NotificationTypes.FriendshipOffer,
+    text: getStringValueOf(msg, 'MessageBlock', 'Message'),
+    fromId: getValueOf(msg, 'AgentData', 'AgentID'),
+    fromAgentName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
+    sessionId: getValueOf(msg, 'MessageBlock', 'ID')
+  })
 }
 
 /**
- * Handles messages that are notifications
+ * handles Group invitations.
  * @param {object} msg IM Message from the server
  */
-function handleNotification (msg) {
+function handleGroupInvite (msg) {
+  const id = getValueOf(msg, 'MessageBlock', 'ID')
+  const binaryBucket = getValueOf(msg, 'MessageBlock', 'BinaryBucket')
+
+  return notificationActionCreator({
+    notificationType: NotificationTypes.GroupInvitation,
+    text: getStringValueOf(msg, 'MessageBlock', 'Message'),
+    fee: binaryBucket.readUInt32BE(0),
+    roleId: new LLUUID(Array.from(binaryBucket.slice(4))).toString(),
+    groupId: getValueOf(msg, 'AgentData', 'AgentID'),
+    transactionId: id,
+    name: 'Tester',
+    useOfflineCap: id === '00000000-0000-0000-0000-000000000000' &&
+      !getValueOf(msg, 'MessageBlock', 'Offline')
+  })
+}
+
+/**
+ * Handles group notifications.
+ * @param {object} msg IM Message from the server
+ */
+function handleGroupNotice (msg) {
+  const message = getStringValueOf(msg, 'MessageBlock', 'Message')
+  const sepIndex = message.indexOf('|')
+
+  const binaryBucket = getValueOf(msg, 'MessageBlock', 'BinaryBucket')
+  const hasInventoryOffer = binaryBucket.readUInt8(0) !== 0
+
+  if (binaryBucket.length < 18) throw new Error('BinaryBucket of GroupNotice is to small!')
+  const groupIdBuffer = binaryBucket.slice(2, 18)
+  const groupId = new LLUUID(Array.from(groupIdBuffer)).toString()
+
   const body = {
-    notificationType: NotificationTypes.TextOnly,
-    text: '',
-    msg: null
+    notificationType: NotificationTypes.GroupNotice,
+    title: message.slice(0, sepIndex),
+    text: message.slice(sepIndex + 1),
+    groupId,
+    senderName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
+    senderId: getValueOf(msg, 'AgentData', 'AgentID'),
+    time: Date.now(),
+    item: null
   }
 
-  switch (getValueOf(msg, 'MessageBlock', 'Dialog')) {
-    case IMDialog.MessageBox:
-      body.text = getStringValueOf(msg, 'MessageBlock', 'Message')
-      break
+  if (hasInventoryOffer) {
+    const assetType = binaryBucket.readUInt8(1)
+    const itemName = binaryBucket.slice(18).toString('utf8').replace('\0', '')
+    const id = getValueOf(msg, 'MessageBlock', 'ID')
 
-    default:
-      console.error(new Error('Unknown notification-type received!'), msg)
-      return () => {}
+    body.item = {
+      name: itemName,
+      type: assetType,
+      transactionId: id
+    }
   }
 
+  return notificationActionCreator(body)
+}
+
+/**
+ * Handles GoTo URL notifications.
+ * @param {object} msg IM Message from the server
+ */
+function handleGoToURL (msg) {
+  return notificationActionCreator({
+    notificationType: NotificationTypes.LoadURL,
+    text: getStringValueOf(msg, 'MessageBlock', 'Message'),
+    url: new URL(getStringValueOf(msg, 'MessageBlock', 'BinaryBucket')),
+    fromId: getValueOf(msg, 'AgentData', 'AgentID'),
+    fromAgentName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName')
+  })
+}
+
+/**
+ * Handles an request for to be teleported.
+ * @param {object} msg IM Message from the server
+ */
+function handleRequestTeleportLure (msg) {
+  return notificationActionCreator({
+    notificationType: NotificationTypes.RequestTeleportLure,
+    text: getStringValueOf(msg, 'MessageBlock', 'Message'),
+    fromId: getValueOf(msg, 'AgentData', 'AgentID'),
+    fromAgentName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName')
+  })
+}
+
+/**
+ * Handles TeleportLureOffered and GodLikeTeleportLureOffered.
+ * @param {object} msg IM Message from the server
+ */
+function handleTeleportOffers (msg) {
+  const regionInfo = getStringValueOf(msg, 'MessageBlock', 'BinaryBucket')
+  const [gX, gY, rX, rY, rZ, lX, lY, lZ, maturity = 'PG'] = regionInfo.split('|')
+    // parse coordinates into numbers.
+    // index 8 is maturity everything below is the coordinates
+    .map((value, index) => index < 8
+      ? parseInt(value)
+      : value
+    )
+
+  return notificationActionCreator({
+    notificationType: NotificationTypes.TeleportLure,
+    text: getStringValueOf(msg, 'MessageBlock', 'Message'),
+    fromId: getValueOf(msg, 'AgentData', 'AgentID'),
+    fromAgentName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
+    lureId: getValueOf(msg, 'MessageBlock', 'ID'),
+    regionId: [gX, gY], // TODO: Change to BigInt ((x << 32) | y)
+    position: [rX, rY, rZ],
+    lockAt: [lX, lY, lZ],
+    maturity,
+    godLike: getValueOf(msg, 'MessageBlock', 'Dialog') === IMDialog.GodLikeTeleportLureOffered
+  })
+}
+
+/**
+ * Handles Inventory offers from Avatars and objects.
+ * @param {object} msg IM Message from the server
+ */
+function handleInventoryOffer (msg) {
+  const binaryBucket = getValueOf(msg, 'MessageBlock', 'BinaryBucket')
+  const assetType = binaryBucket.readUInt8(0)
+
+  return notificationActionCreator({
+    notificationType: NotificationTypes.InventoryOffered,
+    message: getStringValueOf(msg, 'MessageBlock', 'Message'),
+    fromObject: getValueOf(msg, 'MessageBlock', 'Dialog') === IMDialog.TaskInventoryOffered,
+    fromGroup: getValueOf(msg, 'MessageBlock', 'FromGroup'),
+    fromId: getValueOf(msg, 'AgentData', 'AgentID'),
+    fromName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
+    item: {
+      objectId: binaryBucket.length > 1
+        ? new LLUUID(Array.from(binaryBucket.slice(1))).toString()
+        : null,
+      type: assetType,
+      transactionId: getValueOf(msg, 'MessageBlock', 'ID')
+    }
+  })
+}
+
+/**
+ * Warp an notification into an action.
+ * @param {object} notification Body of an notification action.
+ */
+function notificationActionCreator (notification) {
   return {
     type: 'NOTIFICATION_RECEIVED',
-    msg: body
+    msg: notification
   }
 }
 
