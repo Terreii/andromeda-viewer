@@ -282,10 +282,47 @@ describe('incoming IM handling', () => {
   })
 
   it('should handle busy auto responses', () => {
-    const store = mockStore()
+    const store = mockStore({
+      account: {
+        savedAvatars: [
+          {
+            avatarIdentifier: 'Tester',
+            dataSaveId: 'saveId'
+          }
+        ]
+      },
+      session: {
+        avatarIdentifier: 'Tester'
+      },
+      groups: [
+        {
+          id: 'some-none-existing-id'
+        }
+      ],
+      IMs: {
+        '01234567-8900-0000-0000-009876543210': {
+          saveId: 'abcdef',
+          chatUUID: '01234567-8900-0000-0000-009876543210',
+          type: 'personal'
+        },
+        'some-none-existing-id': {
+          saveId: 'something',
+          chatUUID: 'some-none-existing-id',
+          type: 'group'
+        }
+      }
+    })
 
     store.dispatch(receiveIM(createImPackage(IMDialog.BusyAutoResponse, {
       message: "I'm sorry, but I'm busy ..."
+    })))
+
+    store.dispatch(receiveIM(createImPackage(IMDialog.BusyAutoResponse, {
+      id: 'some-none-existing-id'
+    })))
+
+    store.dispatch(receiveIM(createImPackage(IMDialog.BusyAutoResponse, {
+      id: 'group-id'
     })))
 
     expect(store.getActions()).toEqual([
@@ -294,8 +331,10 @@ describe('incoming IM handling', () => {
         sessionId: '01234567-8900-0000-0000-009876543210',
         msg: {
           _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
+          chatUUID: '01234567-8900-0000-0000-009876543210',
           fromAgentName: 'Tester',
           fromId: '01234567-8900-0000-0000-000000000000',
+          offline: 0,
           message: "I'm sorry, but I'm busy ...",
           time: 1562630524418
         }

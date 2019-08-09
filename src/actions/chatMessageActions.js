@@ -266,6 +266,10 @@ export function receiveIM (message) {
         }
         return
 
+      case IMDialog.BusyAutoResponse:
+        dispatch(handleBusyAutoResponse(message))
+        return
+
       case IMDialog.MessageFromObject:
         dispatch(handleIMFromObject(message))
         return
@@ -527,6 +531,38 @@ function handleConferenceIM (msg) {
 }
 
 /**
+ * Handles busy auto responses
+ * @param {object} msg IM Message from the server
+ */
+function handleBusyAutoResponse (msg) {
+  return (dispatch, getState) => {
+    const state = getState()
+
+    const id = getValueOf(msg, 'MessageBlock', 'ID')
+
+    const chat = getIMChats(state)[id]
+    if (chat == null || chat.type !== 'personal') return
+
+    const avatarSaveId = getAvatarDataSaveId(state)
+    const time = new Date()
+
+    dispatch({
+      type: 'BUSY_AUTO_RESPONSE_RECEIVED',
+      sessionId: id,
+      msg: {
+        _id: `${avatarSaveId}/imChats/${chat.saveId}/${time.toJSON()}`,
+        chatUUID: id,
+        fromAgentName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
+        fromId: getValueOf(msg, 'AgentData', 'AgentID'),
+        offline: getValueOf(msg, 'MessageBlock', 'Offline'),
+        message: getStringValueOf(msg, 'MessageBlock', 'Message'),
+        time: time.getTime()
+      }
+    })
+  }
+}
+
+/**
  * Handles messages from Objects
  * @param {object} msg IM Message from the server
  */
@@ -549,14 +585,11 @@ function handleIMFromObject (msg) {
  * @param {string} text Text that should be displayed.
  */
 function handleTextOnlyNotification (text, fromName) {
-  return {
-    type: 'NOTIFICATION_RECEIVED',
-    msg: {
-      notificationType: NotificationTypes.TextOnly,
-      fromName: fromName.toString(),
-      text: text.toString()
-    }
-  }
+  return notificationActionCreator({
+    notificationType: NotificationTypes.TextOnly,
+    fromName: fromName.toString(),
+    text: text.toString()
+  })
 }
 
 /**
