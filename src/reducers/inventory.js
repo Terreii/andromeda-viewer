@@ -3,6 +3,12 @@
 export default function inventory (state = { root: null, folders: new Map() }, action) {
   switch (action.type) {
     case 'didLogin':
+      // save guard if the login result has no inventory-skeleton
+      if (!Array.isArray(action.sessionInfo['inventory-skeleton'])) {
+        console.warn("No inventory-skeleton was returned! Inventory won't work!")
+        return state
+      }
+
       const loginFolders = action.sessionInfo['inventory-skeleton'].reduce((all, folder) => {
         all.set(folder.folder_id, {
           name: folder.name,
