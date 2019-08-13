@@ -134,7 +134,7 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
         />
         <small
           className={formStyles.Error}
-          hide={password2.value.length === 0 || password.value === password2.value}
+          data-hide={password2.value.length === 0 || password.value === password2.value}
           role='alert'
         >
           Password doesn't match!
@@ -186,7 +186,7 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
         <small
           className={formStyles.Error}
           role='alert'
-          hide={cryptoPassword2.length === 0 || cryptoPassword.value === cryptoPassword2.value}
+          data-hide={cryptoPassword2.length === 0 || cryptoPassword.value === cryptoPassword2.value}
         >
           Encryption password doesn't match!
         </small>

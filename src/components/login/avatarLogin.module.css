@@ -167,12 +167,9 @@
 
 .NewGridLine {
   grid-area: new-grid;
-  display: none;
+  display: flex;
   flex-direction: row;
   flex-direction: column;
-}
-.NewGridLine[data-show="true"] {
-  display: flex;
 }
 .NewGridLine > div > label {
   color: rgba(255, 255, 255, 0.87);

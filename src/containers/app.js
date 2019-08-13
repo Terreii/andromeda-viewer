@@ -8,7 +8,7 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { AppContainer, LoadableChatComponent } from '../components/main'
 import LoginForm from './loginForm'
-import Popups from './popups'
+import PopupRenderer from './popups'
 import Helmet from './helmet'
 import TopMenuBar from './topMenuBar'
 
@@ -18,6 +18,8 @@ import { getIsSignedIn } from '../selectors/viewer'
 import { getIsLoggedIn } from '../selectors/session'
 
 import 'normalize.css'
+
+const Popups = React.memo(PopupRenderer)
 
 export default function App (props) {
   const isLoggedIn = useSelector(getIsLoggedIn)
