@@ -62,7 +62,7 @@ export default function UnlockDialog ({ onUnlock, onSignOut, onForgottenPassword
           disabled={isUnlocking}
           value={password}
           onChange={event => { setPassword(event.target.value) }}
-          onKeyUp={event => {
+          onKeyDown={event => {
             if (event.keyCode === 13) {
               unlock()
             }
