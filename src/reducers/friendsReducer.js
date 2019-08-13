@@ -13,6 +13,9 @@ function parseRights (rights) {
 export default function friendsReducer (state = [], action) {
   switch (action.type) {
     case 'didLogin':
+      // If a avatar has no buddies, then the buddy-list doesn't exist!
+      if (!Array.isArray(action.sessionInfo['buddy-list'])) return state
+
       return action.sessionInfo['buddy-list'].map(friend => {
         const rightsGiven = friend['buddy_rights_given'] // from me to friend
         const rightsHas = friend['rights_has'] // Friend has given me rights

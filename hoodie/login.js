@@ -2,9 +2,14 @@
 
 const url = require('url')
 const xmlrpc = require('xmlrpc')
+const fetch = require('node-fetch')
 const uuid = require('uuid').v4
 
-exports.init = loginInit
+module.exports = loginInit
+
+const LOGIN_URL_HEADER = 'x-andromeda-login-url'
+const LOGIN_CONTENT_TYPE_HEADER = 'x-andromeda-login-content-type'
+const LOGIN_USER_ID_HEADER = 'x-andromeda-login-user-id'
 
 // SL uses its own tls-certificate
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
@@ -22,53 +27,116 @@ function processLogin (request, reply) {
   getMacAddress(request)
     .then(function (mac) {
       const reqData = request.payload
-      const viewerData = reqData.viewerData // special data for the viewer
-      delete reqData.viewerData // that shouldn't be send to the grid
 
-      let loginURL
-      if (viewerData.grid && typeof viewerData.grid.url === 'string') {
-        loginURL = new url.URL(viewerData.grid.url)
-      } else {
-        loginURL = {
-          host: 'login.agni.lindenlab.com',
-          port: 443,
-          path: '/cgi-bin/login.cgi'
-        }
-      }
+      const reqLoginURL = request.headers[LOGIN_URL_HEADER]
+      const loginURL = reqLoginURL && reqLoginURL.length > 0
+        ? new url.URL(reqLoginURL)
+        : new url.URL('https://login.agni.lindenlab.com:443/cgi-bin/login.cgi')
+
       if (!loginURL || loginURL.host == null) {
-        reply(400)
+        reply(400, { message: 'no grid login url!' })
         return
       }
-      const xmlrpcClient = loginURL.protocol == null || loginURL.protocol === 'https:'
-        ? xmlrpc.createSecureClient(loginURL)
-        : xmlrpc.createClient(loginURL) // osgrid uses http for login ... why??
 
-      reqData.mac = mac // adding the needed mac-address
+      // adding the needed mac-address
+      reqData.mac = mac
+      reqData.id0 = mac
 
-      xmlrpcClient.methodCall('login_to_simulator', [reqData], (err, data) => {
-        if (err) {
-          reply(err)
-        } else {
-          const response = reply(undefined, data)
-          response.type('application/json')
-        }
-      })
+      if (request.headers[LOGIN_CONTENT_TYPE_HEADER] === 'llsd') {
+        handleLLSD(reply, loginURL, reqData)
+      } else {
+        handleXmlRpc(reply, loginURL, reqData)
+      }
     })
     .catch(function (err) {
       reply(err)
     })
 }
 
-async function getMacAddress (request) {
-  const payload = request.payload
-  const viewerData = payload.viewerData
+function handleXmlRpc (reply, loginURL, reqData) {
+  const xmlrpcClient = loginURL.protocol == null || loginURL.protocol === 'https:'
+    ? xmlrpc.createSecureClient(loginURL)
+    : xmlrpc.createClient(loginURL) // osgrid uses http for login ... why??
 
+  xmlrpcClient.methodCall('login_to_simulator', [reqData], (err, data) => {
+    if (err) {
+      const body = err.body != null
+        ? {
+          statusCode: (err.res && err.res.statusCode) || 500,
+          error: 'Login fail',
+          message: err.body
+        }
+        : err
+
+      const response = reply(body)
+      response.type('application/json')
+      response.statusCode = body.statusCode
+    } else {
+      const response = reply(undefined, data)
+      response.type('application/json')
+    }
+  })
+}
+
+async function handleLLSD (reply, loginURL, reqData) {
+  const fetchResult = await fetch(loginURL, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/llsd+xml'
+    },
+    body: `<?xml version="1.0" encoding="UTF-8"?>
+    <llsd>${stringifyLLSD(reqData)}</llsd>
+    `
+  })
+  const body = await fetchResult.text()
+
+  if (fetchResult.statusCode < 300) {
+    const response = reply(undefined, body)
+    response.statusCode = fetchResult.status
+    response.type('application/llsd+xml')
+  } else {
+    const response = reply(body)
+    response.statusCode = fetchResult.status
+    response.type(fetchResult.headers.get('content-type'))
+  }
+}
+
+function stringifyLLSD (value) {
+  switch (typeof value) {
+    case 'boolean':
+      return `<boolean>${value.toString()}</boolean>`
+    case 'number':
+      if ((value << 0) === value) {
+        // is an int
+        return `<integer>${value}</integer>`
+      } else {
+        // is a double
+        return `<real>${value}</real>`
+      }
+    case 'string':
+      return `<string>${value}</string>`
+    case 'object':
+      if (Array.isArray(value)) {
+        return `<array>${value.map(stringifyLLSD).join('')}</array>`
+      } else {
+        const mapBody = Object.keys(value)
+          .map(key => `<key>${key}</key>${stringifyLLSD(value[key])}`)
+        return `<map>${mapBody.join('')}</map>`
+      }
+    case 'undefined':
+    default:
+      return '<undef />'
+  }
+}
+
+async function getMacAddress (request) {
   // If it is a logged in user
-  if ('userId' in viewerData) {
+  if (LOGIN_USER_ID_HEADER in request.headers && request.headers[LOGIN_USER_ID_HEADER].length > 0) {
     const accounts = request.server.plugins.account.api.accounts
+    const userId = request.headers[LOGIN_USER_ID_HEADER]
 
     try {
-      const user = await accounts.find(viewerData.userId, { include: 'profile' })
+      const user = await accounts.find(userId, { include: 'profile' })
 
       if (
         user.profile != null &&
@@ -78,7 +146,7 @@ async function getMacAddress (request) {
         return user.profile.mac
       } else {
         // Add a mac-address to the user
-        const updated = await accounts.update(viewerData.userId, user => {
+        const updated = await accounts.update(userId, user => {
           let mac
 
           do {
@@ -105,7 +173,7 @@ async function getMacAddress (request) {
 }
 
 function generateMacAddress (userId) {
-  // generate a UUID and transfrom it into a "MAC"-address
+  // generate a UUID and transform it into a "MAC"-address
   const num = uuid().replace(/-/g, '').slice(0, 12)
 
   let mac = ''

@@ -6,9 +6,9 @@ const proxy = require('./httpProxy')
 
 exports.register = function (server, options, next) {
   try {
-    login.init(server)
-    bridge.init(server)
-    proxy.init(server)
+    login(server)
+    bridge(server)
+    proxy(server)
     next()
   } catch (err) {
     next(err)

@@ -3,15 +3,15 @@ import React from 'react'
 import closeIcon from '../../icons/icon_close.svg'
 import styles from './popup.module.css'
 
-export default function Popup (props) {
-  const showCloseIcon = typeof props.onClose === 'function'
+export default function Popup ({ children, title, onClose }) {
+  const showCloseIcon = typeof onClose === 'function'
 
   const closeIconInHeader = showCloseIcon
     ? <button
       className={'closePopup ' + styles.CloseButton}
       onClick={event => {
         event.preventDefault()
-        props.onClose()
+        onClose()
       }}
     >
       <img src={closeIcon} alt='close popup' height='32' width='32' />
@@ -22,10 +22,10 @@ export default function Popup (props) {
     <div className={styles.Border}>
       <div className={styles.Header}>
         {closeIconInHeader}
-        <h4 className={styles.Title}>{props.title}</h4>
+        <h4 className={styles.Title}>{title}</h4>
       </div>
       <article className={styles.Content}>
-        {props.children}
+        {children}
       </article>
     </div>
   </div>

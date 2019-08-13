@@ -1,250 +1,222 @@
-import React from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 
 import formElementsStyles from '../formElements.module.css'
 import styles from './avatarLogin.module.css'
 
-export default class NewAvatarLogin extends React.Component {
-  constructor (props) {
-    super(props)
-    this.state = {
-      name: '',
-      password: '',
-      grid: 'Second Life',
-      save: false,
-      newGridName: '',
-      newGridURL: '',
-      valid: {
-        name: false,
-        password: false,
-        grid: false, // is not used
-        newGridName: false,
-        newGridURL: false
-      }
+export default function NewAvatarLogin ({
+  isSelected,
+  isSignedIn,
+  isLoggingIn,
+  grids,
+  onSelect,
+  onLogin
+}) {
+  const [name, isNameValid, onNameChange] = useInput('')
+  const [password, isPwValid, onPasswordChange] = useInput('')
+
+  const [saveAvatar, setSaveAvatar] = useState(isSignedIn)
+  const lastIsSignedIn = useRef(isSignedIn)
+  useEffect(() => {
+    if (isSignedIn !== lastIsSignedIn.current && name.length === 0 && password.length === 0) {
+      setSaveAvatar(isSignedIn)
+      lastIsSignedIn.current = isSignedIn
+    }
+  }, [isSignedIn, lastIsSignedIn, name, password, setSaveAvatar])
+
+  const [selectedGrid, setSelectedGrid] = useState('Second Life')
+  const [gridName, isGridNameValid, onGridNameChange] = useInput('')
+  const [gridUrl, isGridUrlValid, onGridUrlChange] = useInput('')
+  const [isGridLLSD, setIsGridLLSD] = useState(true)
+
+  if (!isSelected) {
+    const onSetActive = event => {
+      event.preventDefault()
+      onSelect('new')
     }
 
-    this._boundName = this._inInputChange.bind(this, 'name')
-    this._boundPassword = this._inInputChange.bind(this, 'password')
-    this._boundGridChange = this._inInputChange.bind(this, 'grid')
-    this._boundSaveChange = this._saveChange.bind(this)
+    return <form
+      className={`${styles.NewAvatarLoginContainer} ${styles['not-selected']}`}
+      onClick={onSetActive}
+      onKeyUp={event => {
+        if (event.keyCode === 13) {
+          onSetActive(event)
+        }
+      }}
+      tabIndex='0'
+    >
+      <h2 className={styles.Title}>Add avatar or login anonymously</h2>
 
-    this._boundNewGridName = this._inInputChange.bind(this, 'newGridName')
-    this._boundNewGridURL = this._inInputChange.bind(this, 'newGridURL')
-
-    this._boundLogin = this._onLogin.bind(this)
-    this._boundKeyUp = this._onKeyUp.bind(this)
+      <span className={styles.ActiveText}>click to add</span>
+    </form>
   }
 
-  componentDidMount () {
-    this.setState({
-      save: this.props.isSignedIn
-    })
-  }
+  const isNewGrid = selectedGrid === ''
 
-  componentWillReceiveProps (nextProps) {
-    if (
-      this.props.isSignedIn !== nextProps.isSignedIn &&
-      this.state.name.length === 0 &&
-      this.state.password.length === 0
-    ) {
-      this.setState({
-        save: nextProps.isSignedIn
-      })
-    }
-  }
+  const gridIsValid = !isNewGrid || (isGridNameValid && isGridUrlValid)
 
-  _inInputChange (key, event) {
-    this.setState({
-      [key]: event.target.value
-    })
+  const isValid = isNameValid && name.length > 1 && isPwValid && gridIsValid
 
-    const valid = event.target.validity.valid
-
-    if (this.state.valid[key] !== valid) {
-      const newValidState = Object.assign({}, this.state.valid, {
-        [key]: valid
-      })
-
-      // setState collects all changes and applies it after this function call ends
-      this.setState({
-        valid: newValidState
-      })
-    }
-  }
-
-  _saveChange (event) {
-    this.setState({
-      save: event.target.checked
-    })
-  }
-
-  _onLogin (event) {
+  const doLogin = event => {
     if (event && event.preventDefault) {
       event.preventDefault()
     }
 
-    const name = this.state.name
-    const password = this.state.password
-    const grid = this.state.grid !== ''
-      ? this.state.grid
+    if (!isValid) return
+
+    const grid = selectedGrid !== ''
+      ? selectedGrid
       : {
-        name: this.state.newGridName,
-        url: this.state.newGridURL
+        name: gridName,
+        url: gridUrl,
+        isLoginLLSD: isGridLLSD
       }
-    const save = this.state.save && this.props.isSignedIn
+    const save = saveAvatar && isSignedIn
 
-    this.props.onLogin(name, password, grid, save)
+    onLogin(name, password, grid, save)
   }
 
-  _onKeyUp (event) {
+  const onKeyUp = event => {
     if (event.keyCode === 13) {
-      this._onLogin(event)
+      doLogin(event)
     }
   }
 
-  render () {
-    if (!this.props.isSelected) {
-      const onSetActive = event => {
-        event.preventDefault()
-        this.props.onSelect('new')
-      }
+  return <form className={styles.NewAvatarLoginContainer}>
+    <h2 className={styles.Title}>
+      {isSignedIn ? 'Add avatar or ' : ''}
+      login anonymously
+    </h2>
 
-      return <form
-        className={`${styles.NewAvatarLoginContainer} ${styles['not-selected']}`}
-        onClick={onSetActive}
-        onKeyUp={event => {
-          if (event.keyCode === 13) {
-            onSetActive(event)
-          }
-        }}
-        tabIndex='0'
-      >
-        <h2 className={styles.Title}>Add avatar or login anonymously</h2>
+    <label className={styles.NewName} htmlFor='newAvatarNameInput'>Avatar:</label>
+    <input
+      id='newAvatarNameInput'
+      type='text'
+      className={styles.NewNameInput}
+      value={name}
+      onChange={onNameChange}
+      onKeyUp={onKeyUp}
+      disabled={isLoggingIn}
+      minLength='1'
+      required
+      autoFocus
+      onFocus={event => {
+        const target = event.target
 
-        <span className={styles.ActiveText}>click to add</span>
-      </form>
-    }
+        setTimeout(() => {
+          if (target == null) return
 
-    const grids = this.props.grids.map(grid => <option key={grid.name} value={grid.name}>
-      {grid.name}
-    </option>)
+          target.parentElement.scrollIntoView(true)
+        }, 16)
+      }}
+    />
 
-    const isNewGrid = this.state.grid === ''
+    <label className={styles.NewPassword} htmlFor='newAvatarPasswordInput'>Password:</label>
+    <input
+      id='newAvatarPasswordInput'
+      type='password'
+      className={styles.PasswordInput}
+      value={password}
+      onChange={onPasswordChange}
+      onKeyUp={onKeyUp}
+      disabled={isLoggingIn}
+      minLength='2'
+      required
+    />
 
-    const gridIsValid = !isNewGrid ||
-      (this.state.valid.newGridName && this.state.valid.newGridURL)
+    <label className={styles.Grid} htmlFor='newAvatarGridSelection'>Grid:</label>
+    <select
+      id='newAvatarGridSelection'
+      className={styles.GridSelection}
+      value={selectedGrid}
+      onChange={event => { setSelectedGrid(event.target.value) }}
+    >
+      {grids.map(grid => <option key={grid.name} value={grid.name}>
+        {grid.name}
+      </option>)}
 
-    const isValid = this.state.valid.name && this.state.name.length > 1 &&
-      this.state.valid.password &&
-      gridIsValid
+      <option value=''>+ Add new Grid</option>
+    </select>
 
-    return <form className={styles.NewAvatarLoginContainer}>
-      <h2 className={styles.Title}>
-        {this.props.isSignedIn ? 'Add avatar or ' : ''}
-        login anonymously
-      </h2>
+    {isNewGrid && <fieldset className={styles.NewGridLine}>
+      <legend>Add a new Grid</legend>
 
-      <label className={styles.NewName} htmlFor='newAvatarNameInput'>Avatar:</label>
-      <input
-        id='newAvatarNameInput'
-        type='text'
-        className={styles.NewNameInput}
-        value={this.state.name}
-        onChange={this._boundName}
-        onKeyUp={this._boundKeyUp}
-        disabled={this.props.isLoggingIn}
-        minLength='1'
-        required
-        autoFocus
-        onFocus={event => {
-          const target = event.target
-
-          setTimeout(() => {
-            if (target == null) return
-
-            target.parentElement.scrollIntoView(true)
-          }, 16)
-        }}
-      />
-
-      <label className={styles.NewPassword} htmlFor='newAvatarPasswordInput'>Password:</label>
-      <input
-        id='newAvatarPasswordInput'
-        type='password'
-        className={styles.PasswordInput}
-        value={this.state.password}
-        onChange={this._boundPassword}
-        onKeyUp={this._boundKeyUp}
-        disabled={this.props.isLoggingIn}
-        minLength='2'
-        required
-      />
-
-      <label className={styles.Grid} htmlFor='newAvatarGridSelection'>Grid:</label>
-      <select
-        id='newAvatarGridSelection'
-        className={styles.GridSelection}
-        value={this.state.grid}
-        onChange={this._boundGridChange}
-      >
-        {grids}
-        <option value=''>+ Add new Grid</option>
-      </select>
-
-      <fieldset className={styles.NewGridLine} data-show={isNewGrid}>
-        <legend>Add a new Grid</legend>
-
-        <div className={formElementsStyles.FormField}>
-          <label htmlFor='newGridNameInput'>Name</label>
-          <input
-            id='newGridNameInput'
-            type='text'
-            className={formElementsStyles.Input}
-            value={this.state.newGridName}
-            onChange={this._boundNewGridName}
-            onKeyUp={this._boundKeyUp}
-            minLength='1'
-            required={isNewGrid}
-          />
-        </div>
-        <div className={formElementsStyles.FormField}>
-          <label htmlFor='newGridUrlInput'>URL</label>
-          <input
-            id='newGridUrlInput'
-            type='url'
-            className={formElementsStyles.Input}
-            placeholder='https://example.com/login'
-            value={this.state.newGridURL}
-            onChange={this._boundNewGridURL}
-            onKeyUp={this._boundKeyUp}
-            required={isNewGrid}
-          />
-        </div>
-      </fieldset>
-
-      <div className={styles.SaveNew}>
+      <div className={formElementsStyles.FormField}>
+        <label htmlFor='newGridNameInput'>Name</label>
         <input
-          id='saveNewAvatarButton'
-          type='checkbox'
-          onChange={this._boundSaveChange}
-          checked={this.state.save}
-          disabled={!this.props.isSignedIn || this.props.isLoggingIn}
-          aria-describedby='saveNewAvatarHelp'
+          id='newGridNameInput'
+          type='text'
+          className={formElementsStyles.Input}
+          value={gridName}
+          onChange={onGridNameChange}
+          onKeyUp={onKeyUp}
+          minLength='1'
+          required
         />
-        <label htmlFor='saveNewAvatarButton'>Save / Add</label>
-        <br />
-        <small id='saveNewAvatarHelp' className={styles.SaveHelp}>
-          Save and sync this avatar and it's chats,
-          <br />
-          after the first successful login.
-        </small>
       </div>
-      <button
-        className={styles.LoginButton}
-        onClick={this._boundLogin}
-        disabled={this.props.isLoggingIn || !isValid}
+      <div className={formElementsStyles.FormField}>
+        <label htmlFor='newGridUrlInput'>URL</label>
+        <input
+          id='newGridUrlInput'
+          type='url'
+          className={formElementsStyles.Input}
+          placeholder='https://example.com/login'
+          value={gridUrl}
+          onChange={onGridUrlChange}
+          onKeyUp={onKeyUp}
+          required
+        />
+      </div>
+      <label
+        id='newGridIsLLSDLabel'
+        title={'Most grids will support LLSD based logins.\r\n' +
+          "Only un-check if grid doesn't support it!"}
       >
-        {this.props.isLoggingIn === this.state.name ? 'Connecting ...' : 'Login'}
-      </button>
-    </form>
-  }
+        <input
+          id='newGridIsLLSD'
+          type='checkbox'
+          checked={isGridLLSD}
+          onChange={event => { setIsGridLLSD(event.target.checked) }}
+        />
+        Grid uses LLSD login
+      </label>
+    </fieldset>}
+
+    <div className={styles.SaveNew}>
+      <input
+        id='saveNewAvatarButton'
+        type='checkbox'
+        onChange={event => { setSaveAvatar(event.target.checked) }}
+        checked={saveAvatar}
+        disabled={!isSignedIn || isLoggingIn}
+        aria-describedby='saveNewAvatarHelp'
+      />
+      <label htmlFor='saveNewAvatarButton'>Save / Add</label>
+      <br />
+      <small id='saveNewAvatarHelp' className={styles.SaveHelp}>
+        Save and sync this avatar and it's chats,
+        <br />
+        after the first successful login.
+      </small>
+    </div>
+    <button
+      id='newAvatarLoginButton'
+      className={styles.LoginButton}
+      onClick={doLogin}
+      disabled={isLoggingIn || !isValid}
+    >
+      {isLoggingIn === name ? 'Connecting ...' : 'Login'}
+    </button>
+  </form>
+}
+
+function useInput (defaultValue) {
+  const [value, setValue] = useState(defaultValue)
+  const [isValid, setIsValid] = useState(false)
+
+  const onChange = useCallback(event => {
+    setValue(event.target.value)
+    setIsValid(event.target.validity.valid)
+  }, [setValue, setIsValid])
+
+  return [value, isValid, onChange]
 }

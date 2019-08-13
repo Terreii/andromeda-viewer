@@ -1,5 +1,6 @@
 import { axe } from 'jest-axe'
 import React from 'react'
+import { act } from 'react-dom/test-utils'
 import { shallow, mount } from 'enzyme'
 
 import SignInPopup from './signInPopup'
@@ -50,9 +51,15 @@ test('click actions', async () => {
 
     sendCallCount += 1
 
-    return new Promise((resolve, reject) => {
-      rejectLast = reject
-    })
+    return {
+      catch: (errFn) => {
+        rejectLast = err => {
+          act(() => {
+            errFn(err)
+          })
+        }
+      }
+    }
   }
 
   const onCancel = event => {
@@ -100,12 +107,15 @@ test('click actions', async () => {
         }
       })
     }
-    addPassword('password', 'secretPassword')
-    addPassword('cryptoPassword', 'encrypted')
     if (isSignUp) {
       popup.find('button').last().simulate('click')
+      addPassword('password', 'secretPassword')
       addPassword('password2', 'secretPassword')
+      addPassword('cryptoPassword', 'encrypted')
       addPassword('cryptoPassword2', 'encrypted')
+    } else {
+      addPassword('password', 'secretPassword')
+      addPassword('cryptoPassword', 'encrypted')
     }
 
     shouldCallSend = true
@@ -124,7 +134,7 @@ test('click actions', async () => {
 
     rejectLast(new Error('test error')) // false sign in
 
-    await new Promise(resolve => { setTimeout(resolve, 5) })
+    await new Promise(resolve => { setTimeout(resolve, 20) })
     popup.update()
 
     popup.find('input').forEach(input => {

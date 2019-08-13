@@ -1,5 +1,4 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 
 import styles from './friendsAndGroupsList.module.css'
 import chatBubble from '../icons/chat_bubble.svg'
@@ -87,11 +86,4 @@ export default function FriendsList ({ friends, names, updateRights, startNewIMC
     <ul className={styles.List}>{list}</ul>
     <div id='skip-friends-list-content' />
   </main>
-}
-
-FriendsList.displayName = 'FriendsList'
-
-FriendsList.propTypes = {
-  names: PropTypes.object.isRequired,
-  friends: PropTypes.arrayOf(PropTypes.object).isRequired
 }

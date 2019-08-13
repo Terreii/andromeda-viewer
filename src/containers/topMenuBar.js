@@ -1,5 +1,5 @@
 import React from 'react'
-import { connect } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { action as toggleMenu } from 'redux-burger-menu'
 
 import TopBar from '../components/topBar'
@@ -11,67 +11,46 @@ import { getIsSignedIn, getUserName } from '../selectors/viewer'
 import { getIsLoggedIn } from '../selectors/session'
 import { getOwnAvatarName } from '../selectors/names'
 
-class TopBarContainer extends React.Component {
-  constructor () {
-    super()
-    this._boundLogout = this._logout.bind(this)
-    this._boundSignOut = this._logoutFromViewer.bind(this)
-    this._boundSignIn = this._showSignInPopup.bind(this)
-    this._boundSignUp = this._showSignUpPopup.bind(this)
-  }
+export default function TopBarContainer (props) {
+  const isSignedIn = useSelector(getIsSignedIn)
+  const userName = useSelector(getUserName)
+  const isLoggedIn = useSelector(getIsLoggedIn)
+  const avatarName = useSelector(getOwnAvatarName)
 
-  _showSignInPopup (event) {
+  const dispatch = useDispatch()
+
+  const doLogout = event => {
     event.preventDefault()
-    this.props.toggleMenu(false)
-    this.props.showSignInPopup()
+    dispatch(toggleMenu(false))
+    dispatch(logout())
   }
 
-  _showSignUpPopup (event) {
+  const doSignOutFromViewer = event => {
     event.preventDefault()
-    this.props.toggleMenu(false)
-    this.props.showSignInPopup('signUp')
+    dispatch(toggleMenu(false))
+    dispatch(showSignOutPopup())
   }
 
-  _logout (event) {
+  const doShowSignUpPopup = event => {
     event.preventDefault()
-    this.props.toggleMenu(false)
-    this.props.logout()
+    dispatch(toggleMenu(false))
+    dispatch(showSignInPopup('signUp'))
   }
 
-  _logoutFromViewer (event) {
+  const doShowSignInPopup = event => {
     event.preventDefault()
-    this.props.toggleMenu(false)
-    this.props.showSignOutPopup()
+    dispatch(toggleMenu(false))
+    dispatch(showSignInPopup())
   }
 
-  render () {
-    return <TopBar
-      isSignedIn={this.props.isSignedIn}
-      userName={this.props.userName}
-      isLoggedIn={this.props.isLoggedIn}
-      avatarName={this.props.avatarName}
-      signIn={this._boundSignIn}
-      signUp={this._boundSignUp}
-      signOut={this._boundSignOut}
-      logout={this._boundLogout}
-    />
-  }
+  return <TopBar
+    isSignedIn={isSignedIn}
+    userName={userName}
+    isLoggedIn={isLoggedIn}
+    avatarName={avatarName}
+    signIn={doShowSignInPopup}
+    signUp={doShowSignUpPopup}
+    signOut={doSignOutFromViewer}
+    logout={doLogout}
+  />
 }
-
-const mapStateToProps = state => {
-  return {
-    isSignedIn: getIsSignedIn(state),
-    userName: getUserName(state),
-    isLoggedIn: getIsLoggedIn(state),
-    avatarName: getOwnAvatarName(state)
-  }
-}
-
-const mapDispatchToProps = {
-  logout,
-  showSignOutPopup,
-  showSignInPopup,
-  toggleMenu
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(TopBarContainer)

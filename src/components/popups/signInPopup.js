@@ -1,275 +1,245 @@
-import React from 'react'
+import React, { useState, useCallback } from 'react'
 
 import Popup from './popup'
 
 import styles from './signInPopup.module.css'
 import formStyles from '../formElements.module.css'
 
-export default class SignInPopup extends React.Component {
-  constructor () {
-    super()
-    this.state = {
-      username: '',
-      usernameValid: false,
-      password: '',
-      password2: '',
-      cryptoPassword: '',
-      cryptoPassword2: '',
-      isSigningIn: false,
-      error: null
-    }
+export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
+  const [username, setUsername] = useState('')
+  const [usernameValid, setUsernameValid] = useState(false)
 
-    this._boundInputChange = this._inputChange.bind(this)
-    this._boundSend = this._send.bind(this)
-    this._boundKeyPress = this._onKeyPress.bind(this)
-  }
+  const password = useFormInput('')
+  const password2 = useFormInput('')
 
-  _inputChange (event) {
-    const id = event.target.id
-    const value = event.target.value
-    this.setState({
-      usernameValid: id === 'username' ? event.target.validity.valid : this.state.usernameValid,
-      [id]: value
-    })
-  }
+  const cryptoPassword = useFormInput('')
+  const cryptoPassword2 = useFormInput('')
 
-  async _send (event) {
-    event.preventDefault()
-    if (!this._isInputValid()) {
-      return
-    }
+  const [isSigningIn, setIsSigningIn] = useState(false)
+  const [error, setError] = useState(null)
 
-    this.setState({
-      isSigningIn: true
-    })
-
-    const type = this.props.isSignUp ? 'signUp' : 'signIn'
-    try {
-      await this.props.onSend(
-        this.state.username,
-        this.state.password,
-        this.state.cryptoPassword,
-        type
-      )
-    } catch (err) {
-      this.setState({
-        isSigningIn: false,
-        error: err.message || err.toString()
-      })
-    }
-  }
-
-  _onFocus (event) {
-    const target = event.target
-
-    setTimeout(() => {
-      if (target == null) return
-
-      target.scrollIntoView({ block: 'center' })
-    }, 16)
-  }
-
-  _isInputValid () {
-    const username = this.state.username
-    const password = this.state.password
-    const password2 = this.state.password2
-    const cryptoPassword = this.state.cryptoPassword
-    const cryptoPassword2 = this.state.cryptoPassword2
-    const isSignUp = this.props.isSignUp
-
-    if ([password, cryptoPassword].some((s, i) => s.length < 8)) {
+  const isValid = (() => {
+    if ([password.value, cryptoPassword.value].some((s, i) => s.length < 8)) {
       return false
     }
 
     // this also checks length of password2 and cryptoPassword2
-    if (isSignUp && (password !== password2 || cryptoPassword !== cryptoPassword2)) {
+    if (isSignUp && (
+      password.value !== password2.value || cryptoPassword.value !== cryptoPassword2.value
+    )) {
       return false
     }
 
-    return username.length > 4 && this.state.usernameValid
+    return username.length > 4 && usernameValid
+  })()
+
+  const send = event => {
+    event.preventDefault()
+    if (!isValid) {
+      return
+    }
+
+    setIsSigningIn(true)
+
+    const type = isSignUp ? 'signUp' : 'signIn'
+    onSend(username, password.value, cryptoPassword.value, type)
+      .catch(err => {
+        setIsSigningIn(false)
+        setError(err.message || err.toString())
+      })
   }
 
-  _onKeyPress (event) {
+  const onKeyPress = event => {
     if (event.key === 'Enter') {
-      event.preventDefault()
-
-      this._send(event)
+      send(event)
     }
   }
 
-  render () {
-    const title = this.props.isSignUp ? 'Sign up' : 'Sign in'
+  return <Popup title={isSignUp ? 'Sign up' : 'Sign in'} onClose={onCancel}>
+    <form className={styles.Container}>
+      <div className={formStyles.FormField}>
+        <label htmlFor='username'>
+          Username / email:
+        </label>
+        <input
+          id='username'
+          type='email'
+          className={formStyles.Input}
+          autoComplete='email'
+          value={username}
+          onChange={event => {
+            setUsername(event.target.value)
+            setUsernameValid(event.target.validity.valid)
+          }}
+          onKeyPress={onKeyPress}
+          placeholder='me-avatar@example.com'
+          autoFocus
+          required
+          aria-describedby={isSignUp && 'mainHelp'}
+          disabled={isSigningIn}
+          onFocus={onFocusScrollIntoView}
+        />
+        {isSignUp && <small id='mainHelp' className={formStyles.Help}>
+          Must be an email. We'll never share your email with anyone else.
+        </small>}
+      </div>
 
-    return <Popup title={title} onClose={this.props.onCancel}>
-      <form className={styles.Container}>
-        <div className={formStyles.FormField}>
-          <label htmlFor='username'>
-            Username / email:
-          </label>
-          <input
-            id='username'
-            type='email'
-            className={formStyles.Input}
-            value={this.state.username}
-            autoComplete='email'
-            onChange={this._boundInputChange}
-            onKeyPress={this._boundKeyPress}
-            placeholder='me-avatar@example.com'
-            autoFocus
-            required
-            aria-describedby='mainHelp'
-            disabled={this.state.isSigningIn}
-            onFocus={this._onFocus}
-          />
-          <small id='mainHelp' className={formStyles.Help} data-hide={!this.props.isSignUp}>
-            Must be an email. We'll never share your email with anyone else.
-          </small>
-        </div>
-
-        <div className={formStyles.FormField}>
-          <label htmlFor='password'>
-            Password:
-          </label>
-          <input
-            id='password'
-            type='password'
-            className={formStyles.Input}
-            value={this.state.password}
-            autoComplete={this.props.isSignUp ? 'new-password' : 'current-password'}
-            onChange={this._boundInputChange}
-            onKeyPress={this._boundKeyPress}
-            required
-            minLength='8'
-            aria-describedby='passwordHelp'
-            disabled={this.state.isSigningIn}
-            onFocus={this._onFocus}
-          />
-          <small id='passwordHelp' className={formStyles.Help} data-hide={!this.props.isSignUp}>
-            Please use a strong and unique password!<br />
-            Minimal length: 8 characters!<br />
-            {'A '}
-            <a
-              href='https://en.wikipedia.org/wiki/List_of_password_managers'
-              target='_blank'
-              rel='noopener noreferrer'
-            >
-              Password Manager
-            </a>
-            {' is recommended.'}
-          </small>
-        </div>
-
-        {this.props.isSignUp
-          ? <div className={formStyles.FormField}>
-            <label htmlFor='password2'>
-              Repeat password:
-            </label>
-            <input
-              id='password2'
-              type='password'
-              className={formStyles.Input}
-              value={this.state.password2}
-              autoComplete='new-password'
-              onChange={this._boundInputChange}
-              onKeyPress={this._boundKeyPress}
-              required={this.props.isSignUp}
-              minLength='8'
-              disabled={this.state.isSigningIn}
-              onFocus={this._onFocus}
-            />
-            <small
-              className={formStyles.Error}
-              data-hide={this.state.password2.length === 0 ||
-                this.state.password === this.state.password2}
-              role='alert'
-            >
-              Password doesn't match!
-            </small>
-          </div>
-          : null}
-
-        <div className={formStyles.FormField}>
-          <label htmlFor='cryptoPassword'>
-            Encryption password:
-          </label>
-          <input
-            id='cryptoPassword'
-            type='password'
-            className={formStyles.Input}
-            value={this.state.cryptoPassword}
-            onChange={this._boundInputChange}
-            onKeyPress={this._boundKeyPress}
-            required
-            minLength='8'
-            aria-describedby='cryptoPwHelp'
-            disabled={this.state.isSigningIn}
-            onFocus={this._onFocus}
-          />
-          <small id='cryptoPwHelp' className={formStyles.Help} data-hide={!this.props.isSignUp}>
-            Minimal length: 8 characters!<br />
-            This password is used to encrypt your personal data.<br />
-            This includes: <i>Avatar login-info</i>, <i>grids</i>, and <i>chat-logs</i>.<br />
-            <b>Your personal data is encrypted on your machine.<br />
-            and will never leave it un-encrypted!</b>
-            <br />
-            This password will <b>never</b> be saved or leave your machine!
-          </small>
-        </div>
-
-        {this.props.isSignUp
-          ? <div className={formStyles.FormField}>
-            <label htmlFor='cryptoPassword2'>
-              Repeat encryption password:
-            </label>
-            <input
-              id='cryptoPassword2'
-              type='password'
-              className={formStyles.Input}
-              value={this.state.cryptoPassword2}
-              onChange={this._boundInputChange}
-              onKeyPress={this._boundKeyPress}
-              required={this.props.isSignUp}
-              minLength='8'
-              disabled={this.state.isSigningIn}
-              onFocus={this._onFocus}
-            />
-            <small
-              className={formStyles.Error}
-              role='alert'
-              data-hide={this.state.cryptoPassword2.length === 0 ||
-                this.state.cryptoPassword === this.state.cryptoPassword2
-              }
-            >
-              Encryption password doesn't match!
-            </small>
-          </div>
-          : null}
-
-        {this.state.error == null
-          ? null
-          : <small className={formStyles.Error} data-hide={this.state.error == null} role='alert'>
-            {this.state.error}
-          </small>}
-
-        <div className={styles.ButtonsContainer}>
-          <button
-            className={formStyles.SecondaryButton}
-            onClick={this.props.onCancel}
-            disabled={this.state.isSigningIn}
-            onFocus={this._onFocus}
+      <div className={formStyles.FormField}>
+        <label htmlFor='password'>
+          Password:
+        </label>
+        <input
+          {...password}
+          id='password'
+          type='password'
+          className={formStyles.Input}
+          autoComplete={isSignUp ? 'new-password' : 'current-password'}
+          onKeyPress={onKeyPress}
+          required
+          minLength='8'
+          aria-describedby={isSignUp && 'passwordHelp'}
+          disabled={isSigningIn}
+          onFocus={onFocusScrollIntoView}
+        />
+        {isSignUp && <small id='passwordHelp' className={formStyles.Help}>
+          Please use a strong and unique password!<br />
+          Minimal length: 8 characters!<br />
+          {'A '}
+          <a
+            href='https://en.wikipedia.org/wiki/List_of_password_managers'
+            target='_blank'
+            rel='noopener noreferrer'
           >
-            cancel
-          </button>
-          <button
-            className={formStyles.OkButton}
-            onClick={this._boundSend}
-            disabled={!this._isInputValid() || this.state.isSigningIn}
-            onFocus={this._onFocus}
-          >
-            {this.props.isSignUp ? 'sign up' : 'sign in'}
-          </button>
-        </div>
-      </form>
-    </Popup>
+            Password Manager
+          </a>
+          {' is recommended.'}
+        </small>}
+      </div>
+
+      {isSignUp && <div className={formStyles.FormField}>
+        <label htmlFor='password2'>
+          Repeat password:
+        </label>
+        <input
+          {...password2}
+          id='password2'
+          type='password'
+          className={formStyles.Input}
+          autoComplete='new-password'
+          onKeyPress={onKeyPress}
+          required
+          minLength='8'
+          disabled={isSigningIn}
+          onFocus={onFocusScrollIntoView}
+        />
+        <small
+          className={formStyles.Error}
+          hide={password2.value.length === 0 || password.value === password2.value}
+          role='alert'
+        >
+          Password doesn't match!
+        </small>
+      </div>}
+
+      <div className={formStyles.FormField}>
+        <label htmlFor='cryptoPassword'>
+          Encryption password:
+        </label>
+        <input
+          {...cryptoPassword}
+          id='cryptoPassword'
+          type='password'
+          className={formStyles.Input}
+          onKeyPress={onKeyPress}
+          required
+          minLength='8'
+          aria-describedby={isSignUp && 'cryptoPwHelp'}
+          disabled={isSigningIn}
+          onFocus={onFocusScrollIntoView}
+        />
+        {isSignUp && <small id='cryptoPwHelp' className={formStyles.Help}>
+          Minimal length: 8 characters!<br />
+          This password is used to encrypt your personal data.<br />
+          This includes: <i>Avatar login-info</i>, <i>grids</i>, and <i>chat-logs</i>.<br />
+          <b>Your personal data is encrypted on your machine.<br />
+          and will never leave it un-encrypted!</b>
+          <br />
+          This password will <b>never</b> be saved or leave your machine!
+        </small>}
+      </div>
+
+      {isSignUp && <div className={formStyles.FormField}>
+        <label htmlFor='cryptoPassword2'>
+          Repeat encryption password:
+        </label>
+        <input
+          {...cryptoPassword2}
+          id='cryptoPassword2'
+          type='password'
+          className={formStyles.Input}
+          onKeyPress={onKeyPress}
+          required
+          minLength='8'
+          disabled={isSigningIn}
+          onFocus={onFocusScrollIntoView}
+        />
+        <small
+          className={formStyles.Error}
+          role='alert'
+          hide={cryptoPassword2.length === 0 || cryptoPassword.value === cryptoPassword2.value}
+        >
+          Encryption password doesn't match!
+        </small>
+      </div>}
+
+      {error && <small className={formStyles.Error} role='alert'>
+        {error}
+      </small>}
+
+      <div className={styles.ButtonsContainer}>
+        <button
+          className={formStyles.SecondaryButton}
+          onClick={onCancel}
+          disabled={isSigningIn}
+          onFocus={onFocusScrollIntoView}
+        >
+          cancel
+        </button>
+        <button
+          className={formStyles.OkButton}
+          onClick={send}
+          disabled={!isValid || isSigningIn}
+          onFocus={onFocusScrollIntoView}
+        >
+          {isSignUp ? 'sign up' : 'sign in'}
+        </button>
+      </div>
+    </form>
+  </Popup>
+}
+
+function onFocusScrollIntoView (event) {
+  const target = event.target
+
+  setTimeout(() => {
+    if (target == null) return
+
+    target.scrollIntoView({ block: 'center' })
+  }, 16)
+}
+
+function useFormInput (initialValue) {
+  const [value, setValue] = useState(initialValue)
+
+  const eventHandler = useCallback(event => {
+    const nextValue = typeof event === 'string'
+      ? event
+      : event.target.value
+    setValue(nextValue)
+  }, [setValue])
+
+  return {
+    value,
+    onChange: eventHandler
   }
 }
