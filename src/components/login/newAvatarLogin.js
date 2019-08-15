@@ -177,7 +177,7 @@ export default function NewAvatarLogin ({
           checked={isGridLLSD}
           onChange={event => { setIsGridLLSD(event.target.checked) }}
         />
-        Grid uses LLSD login
+        {' Grid uses LLSD login'}
       </label>
     </fieldset>}
 
@@ -190,7 +190,7 @@ export default function NewAvatarLogin ({
         disabled={!isSignedIn || isLoggingIn}
         aria-describedby='saveNewAvatarHelp'
       />
-      <label htmlFor='saveNewAvatarButton'>Save / Add</label>
+      <label htmlFor='saveNewAvatarButton'> Save / Add</label>
       <br />
       <small id='saveNewAvatarHelp' className={styles.SaveHelp}>
         Save and sync this avatar and it's chats,
