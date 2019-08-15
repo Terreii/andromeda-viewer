@@ -33,6 +33,13 @@
 
 .NewAvatarLoginContainer {
   composes: Container;
+  grid-row: 1 / 3;
+}
+.NewAvatarLoginContainer.high {
+  grid-row: 1 / 4;
+}
+.NewAvatarLoginContainer.not-selected {
+  grid-row: auto;
 }
 .NewAvatarLoginContainer > span,
 .NewAvatarLoginContainer > div {

@@ -147,10 +147,10 @@ export default function LoginForm ({ isSignedIn, avatars, grids, login, showSign
       {errorMessage && <div className={styles.ErrorOut}>
         {errorMessage.title.length > 0 && <h4>{errorMessage.title}</h4>}
         <p>
-          {errorMessage.body.split('\n').map((line, index) => <span key={index}>
+          {errorMessage.body.split('\n').map((line, index) => <React.Fragment key={index}>
             {line}
             <br />
-          </span>)}
+          </React.Fragment>)}
         </p>
       </div>}
     </main>

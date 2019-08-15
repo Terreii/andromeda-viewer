@@ -18,34 +18,23 @@ export default function BurgerMenu ({
   signOut
 }) {
   return <SlideMenu>
-    {isLoggedIn
-      ? <span className={styles.BurgerMenuItem}>{`Hello ${avatarName}`}</span>
-      : null}
+    {isLoggedIn && <span className={styles.BurgerMenuItem}>{`Hello ${avatarName}`}</span>}
 
     {isSignedIn
       ? <span className={styles.BurgerMenuItem}>{`Hello ${userName}`}</span>
       : <button className={styles.BurgerMenuItem} onClick={signIn}>Sign into Andromeda</button>
     }
 
-    {isSignedIn
-      ? null
-      : <button className={'menu-item ' + styles.BurgerMenuItem} onClick={signUp}>
-        Sign up to Andromeda
-      </button>
-    }
+    {!isSignedIn && <button className={'menu-item ' + styles.BurgerMenuItem} onClick={signUp}>
+      Sign up to Andromeda
+    </button>}
 
-    {isLoggedIn
-      ? <button className={'menu-item ' + styles.BurgerMenuLogout} onClick={logout}>
-        log out
-      </button>
-      : null
-    }
+    {isLoggedIn && <button className={'menu-item ' + styles.BurgerMenuLogout} onClick={logout}>
+      log out
+    </button>}
 
-    {isSignedIn
-      ? <button className={'menu-item ' + styles.BurgerMenuLogout} onClick={signOut}>
-        Log out from Viewer
-      </button>
-      : null
-    }
+    {isSignedIn && <button className={'menu-item ' + styles.BurgerMenuLogout} onClick={signOut}>
+      Log out from Viewer
+    </button>}
   </SlideMenu>
 }

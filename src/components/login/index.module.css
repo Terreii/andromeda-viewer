@@ -9,11 +9,8 @@
 .Main {
   display: flex;
   flex-direction: column;
-  background-color: rgb(77, 80, 85);
   color: rgb(255, 255, 255);
   color: var(--dialog-color-active);
-  border-radius: 1em;
-  padding: 0.8em;
   max-width: 75vw;
   margin-top: 2em;
   margin-left: auto;
@@ -41,9 +38,6 @@
 
 @media (max-width: 750px) {
   .Main {
-    background-color: rgba(0, 0, 0, 0);
-    color: #000;
-    color: var(--main-color);
     margin-top: 0;
     padding-top: 0;
   }

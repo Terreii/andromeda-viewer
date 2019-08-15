@@ -81,7 +81,7 @@ export default function NewAvatarLogin ({
     }
   }
 
-  return <form className={styles.NewAvatarLoginContainer}>
+  return <form className={styles.NewAvatarLoginContainer + (isNewGrid ? ' ' + styles.high : '')}>
     <h2 className={styles.Title}>
       {isSignedIn ? 'Add avatar or ' : ''}
       login anonymously
