@@ -1,0 +1,50 @@
+:root, body {
+  margin: 0px;
+  padding: 0px;
+  background-color: var(--main-background);
+}
+
+.AppContainer {
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  padding: 0px;
+  padding-top: 2.5rem;
+  margin: 0px;
+  font-family: Helvetica, Arial, sans-serif;
+  font-family: var(--font-family);
+}
+
+.LoadingView {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* Themes */
+
+/* Default */
+body {
+  --main-background: white;
+  --main-color: black;
+  --font-family: Helvetica, Arial, sans-serif;
+
+  --top-bar-background: rgb(77, 80, 85);
+  --top-bar-color: rgb(211, 211, 211);
+  --burger-menu-background: #373a47;
+  --burger-menu-color: #b8b7ad;
+  --burger-menu-color-hover: #c94e50;
+
+  --dialog-background: rgb(95, 95, 95);
+  --dialog-color: white;
+  --dialog-background-active: rgb(110, 110, 110);
+  --dialog-color-active: white;
+
+  --modal-background: rgb(255, 250, 250);
+  --modal-color: black;
+
+  --button-border-width: 0px;
+  --button-border: var(--button-border-width) solid var(--main-color);
+}

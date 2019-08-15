@@ -1,125 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import styled from 'styled-components'
-import { Button, Input, FormField, Help } from '../formElements'
 
-const Container = styled.form`
-  display: flex;
-  flex-direction: column;
-  background-color: rgb(110, 110, 110);
-  margin: 1em;
-  padding: 1em;
-  max-width: calc(100vw - 2em);
-  border-radius: .5em;
-  box-shadow: 0.2em 0.2em 0.4em 0.1em black;
-
-  & > span, & > div {
-    margin-top: .7em;
-  }
-
-  @supports (display: grid) {
-    display: grid;
-    grid-template-areas:
-      "title title title"
-      "name name-input name-input"
-      "password password-input password-input"
-      "grid grid-select grid-select"
-      "new-grid new-grid new-grid"
-      "save save login";
-    grid-gap: .5em;
-    text-align: left;
-
-    & > span, & > div {
-      margin-top: 0em;
-    }
-  }
-
-  &.not-selected {
-    cursor: pointer;
-    background-color: rgb(95, 95, 95);
-    box-shadow: 0.1em 0.1em 0.3em 0px black;
-  }
-
-  &.not-selected:focus {
-    outline: 2px solid highlight;
-  }
-
-  & input:invalid {
-    outline: 1px solid red;
-  }
-`
-
-const Title = styled.h2`
-  grid-area: title;
-  margin: .3em;
-  text-align: center;
-  white-space: nowrap;
-  font-size: 120%;
-
-  @media (max-width: 450px) {
-    white-space: normal;
-  }
-`
-
-const ActiveText = styled.span`
-  grid-area: password / password / password-input-end / password-input-end;
-  text-align: center;
-  color: rgba(255, 255, 255, .7);
-`
-
-const Name = styled.label`
-  grid-area: name;
-`
-
-const NameInput = styled(Input)`
-  grid-area: name-input;
-`
-
-const Password = styled.label`
-  grid-area: password;
-`
-
-const PasswordInput = styled(Input)`
-  grid-area: password-input;
-`
-
-const Grid = styled.label`
-  grid-area: grid;
-`
-
-const GridSelect = styled(Input.withComponent('select'))`
-  grid-area: grid-select;
-`
-
-const SaveNew = styled.div`
-  grid-area: save;
-`
-
-const LoginButton = styled(Button)`
-  grid-area: login;
-`
-
-const NewGridLine = styled.fieldset`
-  grid-area: new-grid;
-  display: ${props => props.show ? 'flex' : 'none'};
-  flex-direction: row;
-  flex-direction: column;
-
-  & > div > label {
-    color: rgba(255, 255, 255, 0.87);
-  }
-
-  & > div {
-    flex: auto;
-  }
-
-  & > #newGridIsLLSDLabel {
-    margin-top: 0.3em;
-  }
-`
-
-const SaveHelp = styled(Help)`
-  color: white;
-`
+import formElementsStyles from '../formElements.module.css'
+import styles from './avatarLogin.module.css'
 
 export default function NewAvatarLogin ({
   isSelected,
@@ -152,20 +34,20 @@ export default function NewAvatarLogin ({
       onSelect('new')
     }
 
-    return <Container
+    return <form
+      className={`${styles.NewAvatarLoginContainer} ${styles['not-selected']}`}
       onClick={onSetActive}
       onKeyUp={event => {
         if (event.keyCode === 13) {
           onSetActive(event)
         }
       }}
-      className='not-selected'
       tabIndex='0'
     >
-      <Title>Add avatar or login anonymously</Title>
+      <h2 className={styles.Title}>Add avatar or login anonymously</h2>
 
-      <ActiveText>click to add</ActiveText>
-    </Container>
+      <span className={styles.ActiveText}>click to add</span>
+    </form>
   }
 
   const isNewGrid = selectedGrid === ''
@@ -199,17 +81,17 @@ export default function NewAvatarLogin ({
     }
   }
 
-  return <Container>
-    <Title>
+  return <form className={styles.NewAvatarLoginContainer + (isNewGrid ? ' ' + styles.high : '')}>
+    <h2 className={styles.Title}>
       {isSignedIn ? 'Add avatar or ' : ''}
       login anonymously
-    </Title>
+    </h2>
 
-    <Name htmlFor='newAvatarNameInput'>Avatar:</Name>
-    <NameInput
+    <label className={styles.NewName} htmlFor='newAvatarNameInput'>Avatar:</label>
+    <input
       id='newAvatarNameInput'
       type='text'
-      className='medium'
+      className={styles.NewNameInput}
       value={name}
       onChange={onNameChange}
       onKeyUp={onKeyUp}
@@ -228,11 +110,11 @@ export default function NewAvatarLogin ({
       }}
     />
 
-    <Password htmlFor='newAvatarPasswordInput'>Password:</Password>
-    <PasswordInput
+    <label className={styles.NewPassword} htmlFor='newAvatarPasswordInput'>Password:</label>
+    <input
       id='newAvatarPasswordInput'
       type='password'
-      className='medium'
+      className={styles.PasswordInput}
       value={password}
       onChange={onPasswordChange}
       onKeyUp={onKeyUp}
@@ -241,10 +123,10 @@ export default function NewAvatarLogin ({
       required
     />
 
-    <Grid htmlFor='newAvatarGridSelection'>Grid:</Grid>
-    <GridSelect
+    <label className={styles.Grid} htmlFor='newAvatarGridSelection'>Grid:</label>
+    <select
       id='newAvatarGridSelection'
-      className='medium'
+      className={styles.GridSelection}
       value={selectedGrid}
       onChange={event => { setSelectedGrid(event.target.value) }}
     >
@@ -253,51 +135,53 @@ export default function NewAvatarLogin ({
       </option>)}
 
       <option value=''>+ Add new Grid</option>
-    </GridSelect>
+    </select>
 
-    {isNewGrid && <NewGridLine show>
+    {isNewGrid && <fieldset className={styles.NewGridLine}>
       <legend>Add a new Grid</legend>
 
-      <FormField>
+      <div className={formElementsStyles.FormField}>
         <label htmlFor='newGridNameInput'>Name</label>
-        <Input
+        <input
           id='newGridNameInput'
           type='text'
+          className={formElementsStyles.Input}
           value={gridName}
           onChange={onGridNameChange}
           onKeyUp={onKeyUp}
           minLength='1'
           required
         />
-      </FormField>
-      <FormField>
+      </div>
+      <div className={formElementsStyles.FormField}>
         <label htmlFor='newGridUrlInput'>URL</label>
-        <Input
+        <input
           id='newGridUrlInput'
           type='url'
+          className={formElementsStyles.Input}
           placeholder='https://example.com/login'
           value={gridUrl}
           onChange={onGridUrlChange}
           onKeyUp={onKeyUp}
           required
         />
-      </FormField>
+      </div>
       <label
         id='newGridIsLLSDLabel'
         title={'Most grids will support LLSD based logins.\r\n' +
           "Only un-check if grid doesn't support it!"}
       >
-        <Input
+        <input
           id='newGridIsLLSD'
           type='checkbox'
           checked={isGridLLSD}
           onChange={event => { setIsGridLLSD(event.target.checked) }}
         />
-        Grid uses LLSD login
+        {' Grid uses LLSD login'}
       </label>
-    </NewGridLine>}
+    </fieldset>}
 
-    <SaveNew>
+    <div className={styles.SaveNew}>
       <input
         id='saveNewAvatarButton'
         type='checkbox'
@@ -306,22 +190,23 @@ export default function NewAvatarLogin ({
         disabled={!isSignedIn || isLoggingIn}
         aria-describedby='saveNewAvatarHelp'
       />
-      <label htmlFor='saveNewAvatarButton'>Save / Add</label>
+      <label htmlFor='saveNewAvatarButton'> Save / Add</label>
       <br />
-      <SaveHelp id='saveNewAvatarHelp'>
+      <small id='saveNewAvatarHelp' className={styles.SaveHelp}>
         Save and sync this avatar and it's chats,
         <br />
         after the first successful login.
-      </SaveHelp>
-    </SaveNew>
-    <LoginButton
+      </small>
+    </div>
+    <button
       id='newAvatarLoginButton'
+      className={styles.LoginButton}
       onClick={doLogin}
       disabled={isLoggingIn || !isValid}
     >
       {isLoggingIn === name ? 'Connecting ...' : 'Login'}
-    </LoginButton>
-  </Container>
+    </button>
+  </form>
 }
 
 function useInput (defaultValue) {

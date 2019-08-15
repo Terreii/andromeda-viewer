@@ -34,7 +34,6 @@ test('renders welcome message', () => {
 
   const header = aPopup.find('h4')
   expect(header.text()).toBe('Welcome')
-  expect(header).toHaveStyleRule('margin-left', '1.3em')
 
   expect(aPopup).toContainReact(<span>Hello World!</span>)
 })

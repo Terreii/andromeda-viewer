@@ -1,25 +1,7 @@
 import React from 'react'
-import styled from 'styled-components'
 import autoscroll from 'autoscroll-react'
 
-const MessageList = styled.div`
-  flex: 1 1 100%;
-  overflow-y: scroll;
-  max-height: calc(100vh - 8.7em);
-`
-
-const Message = styled.div`
-  & > span {
-    padding-right: 0.3em;
-    font-size: 120%;
-  }
-`
-
-const AvatarName = styled.span`
-  :after {
-    content: ":";
-  }
-`
+import styles from './chatMessagesList.module.css'
 
 // Adds to all Numbers a leading zero if it has only one digit
 function leadingZero (num) {
@@ -35,7 +17,7 @@ class ChatList extends React.Component {
       const fromId = isIM ? msg.fromId : msg.sourceID
       const name = names[fromId] || msg[isIM ? 'fromAgentName' : 'fromName'] || ''
 
-      return <Message key={msg._id}>
+      return <div key={msg._id} className={styles.Message}>
         <span className='time'>
           {leadingZero(time.getHours())}
           :
@@ -43,14 +25,14 @@ class ChatList extends React.Component {
           :
           {leadingZero(time.getSeconds())}
         </span>
-        <AvatarName>{name.toString()}</AvatarName>
+        <span className={styles.AvatarName}>{name.toString()}</span>
         <span className='messageText'>{msg.message}</span>
-      </Message>
+      </div>
     })
 
-    return <MessageList {...props}>
+    return <div className={styles.List} {...props}>
       {messagesLines}
-    </MessageList>
+    </div>
   }
 }
 
