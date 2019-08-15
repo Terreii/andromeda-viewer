@@ -1,6 +1,6 @@
 import React from 'react'
 
-import styles from './friendsAndGroupsList.module.css'
+import styles from './infoList.module.css'
 import chatBubble from '../icons/chat_bubble.svg'
 
 /*
@@ -66,24 +66,23 @@ function FriendRow ({ friend, name, skipLink, onRightsChanged, startNewIMChat })
 }
 
 export default function FriendsList ({ friends, names, updateRights, startNewIMChat }) {
-  const list = friends.map((friend, index, all) => {
-    const name = friend.id in names ? names[friend.id].getDisplayName() : friend.id
+  return <main className={styles.Container} aria-label='Friends'>
+    <ul className={styles.List}>
+      {friends.map((friend, index, all) => {
+        const name = friend.id in names ? names[friend.id].getDisplayName() : friend.id
 
-    return <FriendRow
-      key={friend.id}
-      skipLink={index + 1 < all.length
-        ? '#friends_list_' + all[index + 1].id
-        : '#skip-friends-list-content'}
-      friend={friend}
-      name={name}
-      onRightsChanged={updateRights}
-      startNewIMChat={startNewIMChat}
-    />
-  })
-
-  return <main className={styles.Container}>
-    <h3 className={styles.Title}>Friends</h3>
-    <ul className={styles.List}>{list}</ul>
+        return <FriendRow
+          key={friend.id}
+          skipLink={index + 1 < all.length
+            ? '#friends_list_' + all[index + 1].id
+            : '#skip-friends-list-content'}
+          friend={friend}
+          name={name}
+          onRightsChanged={updateRights}
+          startNewIMChat={startNewIMChat}
+        />
+      })}
+    </ul>
     <div id='skip-friends-list-content' />
   </main>
 }

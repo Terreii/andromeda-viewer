@@ -2,12 +2,6 @@
   padding: 1em;
 }
 
-.Title {
-  font-size: 120%;
-  border-bottom: 1px solid grey;
-  margin: 0px;
-}
-
 .List {
   list-style: none;
   padding-left: 1em;

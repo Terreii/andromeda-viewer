@@ -1,6 +1,6 @@
 import React from 'react'
 
-import styles from './friendsAndGroupsList.module.css'
+import styles from './infoList.module.css'
 import chatBubble from '../icons/chat_bubble.svg'
 
 function GroupRow ({ group, startNewIMChat }) {
@@ -22,8 +22,7 @@ function GroupRow ({ group, startNewIMChat }) {
 }
 
 export default function GroupsList ({ groups, startNewIMChat }) {
-  return <main className={styles.Container}>
-    <h3 className={styles.Title}>Groups</h3>
+  return <main className={styles.Container} aria-label='Groups'>
     <ul className={styles.List}>
       {groups.map(group => <GroupRow
         key={group.id}
