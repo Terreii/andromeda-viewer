@@ -88,12 +88,6 @@
   }
 }
 
-/*
-.Container input:invalid {
-  outline: 1px solid red;
-}
-*/
-
 .ActiveText {
   grid-area: password / password / password-input-end / password-input-end;
   text-align: center;
