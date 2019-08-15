@@ -24,7 +24,8 @@
   box-shadow: 0.1em 0.1em 0.3em 0px black;
 }
 .Container.not-selected:focus {
-  outline: 2px solid highlight;
+  border: 2px solid highlight;
+  outline: none;
 }
 
 .AvatarLoginContainer {
@@ -87,9 +88,11 @@
   }
 }
 
+/*
 .Container input:invalid {
   outline: 1px solid red;
 }
+*/
 
 .ActiveText {
   grid-area: password / password / password-input-end / password-input-end;
