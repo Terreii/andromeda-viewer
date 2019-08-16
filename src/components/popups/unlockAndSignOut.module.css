@@ -1,0 +1,43 @@
+/*
+ * Styles for unlockDialog, signOutPopup and resetPasswordDialog
+ */
+
+.Content {
+  display: flex;
+  flex-direction: column;
+}
+
+.LockItem {
+  position: relative;
+  left: -10%;
+  margin: 0px;
+  margin-right: 0.3em;
+}
+
+.PasswordRow {
+  composes: FormField from "../formElements.module.css";
+  margin-top: 0.75em;
+}
+
+.ButtonsRow {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  margin-top: .7em;
+  padding: .25em 0em;
+}
+.ButtonsRow > button + button {
+  margin-right: 2.75em;
+}
+
+.ResetButton {
+  border: 0px;
+  background: none;
+  color: blue;
+  text-decoration: underline;
+  display: inline;
+  padding: 0;
+  padding-left: 1em;
+  margin: 0;
+  cursor: pointer;
+}

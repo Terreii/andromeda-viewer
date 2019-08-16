@@ -51,7 +51,7 @@ test('unlock with return key', () => {
     'If you did forget your encryption-password?Reset password'
   )
 
-  pwInput.simulate('keyUp', {
+  pwInput.simulate('keyDown', {
     keyCode: 13
   })
   expect(unlockEvents.count).toBe(0) // empty input doesn't unlock
@@ -63,7 +63,7 @@ test('unlock with return key', () => {
     }
   })
 
-  pwInput.simulate('keyUp', {
+  pwInput.simulate('keyDown', {
     keyCode: 13
   })
   expect(unlockEvents).toEqual({

@@ -1,48 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import styled from 'styled-components'
 
 import Popup from './popup'
-import { Button } from '../formElements'
 
+import styles from './resetKeysPopup.module.css'
+import formStyles from '../formElements.module.css'
 import keepItSecret from '../../icons/keepitsecret.png'
-
-const Container = styled.form`
-  display: flex;
-  flex-direction: column;
-  text-align: center;
-`
-
-const Text = styled.p`
-  line-height: 1.5;
-`
-
-const KeysList = styled.ul`
-  font-family: monospace;
-  list-style: none;
-  padding: 0px;
-
-  & > li {
-    line-height: 2;
-
-    & > span {
-      padding: .3em;
-      background-color: rgba(0, 0, 0, .1);
-      border-radius: .3em;
-    }
-  }
-`
-
-const DownloadLink = styled(Button)`
-  display: block;
-  text-decoration: none;
-  margin-bottom: 1em;
-`
-
-const GandalfImg = styled.img`
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 1em;
-`
 
 export default function ResetKeysPopup ({ resetKeys, onClose }) {
   const [fileURL, setFileURL] = useState('')
@@ -60,44 +22,40 @@ export default function ResetKeysPopup ({ resetKeys, onClose }) {
   }, [resetKeys])
 
   return <Popup title='Password reset keys' onClose={onClose}>
-    <Container>
-      <Text>
+    <form className={styles.Container}>
+      <p>
         Those are your <b>encryption reset-keys</b>.<br />
         You need them, when you did forget your encryption-password!<br />
         <b>Please save them!</b><br />
         <b>Save them some where secure!</b><br />
         There is no other way to get your data back!
-      </Text>
+      </p>
 
-      <KeysList>
+      <ul className={styles.KeysList}>
         {resetKeys.map((key, index) => <li key={`reset-key-${index}`}>
           <span>{key}</span>
         </li>)}
-      </KeysList>
+      </ul>
 
       <p>You can also download them:</p>
 
-      <DownloadLink
-        className='primary'
-        as='a'
-        href={fileURL}
-        download='andromeda-viewer-reset-keys.txt'
-      >
+      <a className={styles.DownloadLink} href={fileURL} download='andromeda-viewer-reset-keys.txt'>
         Download as a file
-      </DownloadLink>
+      </a>
 
-      <GandalfImg
+      <img
+        className={styles.Gandalf}
         src={keepItSecret}
         height='200'
         width='200'
         alt='Gandalf saying: Keep it secret, keep it safe!'
       />
 
-      <Text>
+      <p>
         Remember: If you lose your encryption password and the reset-keys, you lose your data!
-      </Text>
+      </p>
 
-      <Button className='ok' onClick={onClose}>OK, I did save them!</Button>
-    </Container>
+      <button className={formStyles.OkButton} onClick={onClose}>OK, I did save them!</button>
+    </form>
   </Popup>
 }

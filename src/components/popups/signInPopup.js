@@ -1,34 +1,9 @@
 import React, { useState, useCallback } from 'react'
-import styled from 'styled-components'
 
 import Popup from './popup'
-import { Button, Input, FormField, Help } from '../formElements'
 
-const Container = styled.form`
-  display: flex;
-  flex-direction: column;
-  font-family: Helvetica, Arial, sans-serif;
-
-  & > * {
-    flex-shrink: 0;
-  }
-`
-
-const ButtonsContainer = styled.div`
-  flex: auto;
-  display: flex;
-  flex-direction: row;
-  margin-top: 0.3em;
-  padding: 0 0.3em;
-
-  & > button {
-    margin-top: .5rem;
-  }
-
-  & > button + button {
-    margin-left: 0.55em;
-  }
-`
+import styles from './signInPopup.module.css'
+import formStyles from '../formElements.module.css'
 
 export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
   const [username, setUsername] = useState('')
@@ -81,14 +56,15 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
   }
 
   return <Popup title={isSignUp ? 'Sign up' : 'Sign in'} onClose={onCancel}>
-    <Container className={isSignUp ? 'SignUp' : ''}>
-      <FormField>
+    <form className={styles.Container}>
+      <div className={formStyles.FormField}>
         <label htmlFor='username'>
           Username / email:
         </label>
-        <Input
+        <input
           id='username'
           type='email'
+          className={formStyles.Input}
           autoComplete='email'
           value={username}
           onChange={event => {
@@ -103,19 +79,20 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
           disabled={isSigningIn}
           onFocus={onFocusScrollIntoView}
         />
-        {isSignUp && <Help id='mainHelp'>
+        {isSignUp && <small id='mainHelp' className={formStyles.Help}>
           Must be an email. We'll never share your email with anyone else.
-        </Help>}
-      </FormField>
+        </small>}
+      </div>
 
-      <FormField>
+      <div className={formStyles.FormField}>
         <label htmlFor='password'>
           Password:
         </label>
-        <Input
+        <input
           {...password}
           id='password'
           type='password'
+          className={formStyles.Input}
           autoComplete={isSignUp ? 'new-password' : 'current-password'}
           onKeyPress={onKeyPress}
           required
@@ -124,7 +101,7 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
           disabled={isSigningIn}
           onFocus={onFocusScrollIntoView}
         />
-        {isSignUp && <Help id='passwordHelp'>
+        {isSignUp && <small id='passwordHelp' className={formStyles.Help}>
           Please use a strong and unique password!<br />
           Minimal length: 8 characters!<br />
           {'A '}
@@ -136,17 +113,18 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
             Password Manager
           </a>
           {' is recommended.'}
-        </Help>}
-      </FormField>
+        </small>}
+      </div>
 
-      {isSignUp && <FormField>
+      {isSignUp && <div className={formStyles.FormField}>
         <label htmlFor='password2'>
           Repeat password:
         </label>
-        <Input
+        <input
           {...password2}
           id='password2'
           type='password'
+          className={formStyles.Input}
           autoComplete='new-password'
           onKeyPress={onKeyPress}
           required
@@ -154,23 +132,24 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
           disabled={isSigningIn}
           onFocus={onFocusScrollIntoView}
         />
-        <Help
-          className='Error'
-          hide={password2.value.length === 0 || password.value === password2.value}
+        <small
+          className={formStyles.Error}
+          data-hide={password2.value.length === 0 || password.value === password2.value}
           role='alert'
         >
           Password doesn't match!
-        </Help>
-      </FormField>}
+        </small>
+      </div>}
 
-      <FormField>
+      <div className={formStyles.FormField}>
         <label htmlFor='cryptoPassword'>
           Encryption password:
         </label>
-        <Input
+        <input
           {...cryptoPassword}
           id='cryptoPassword'
           type='password'
+          className={formStyles.Input}
           onKeyPress={onKeyPress}
           required
           minLength='8'
@@ -178,7 +157,7 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
           disabled={isSigningIn}
           onFocus={onFocusScrollIntoView}
         />
-        {isSignUp && <Help id='cryptoPwHelp'>
+        {isSignUp && <small id='cryptoPwHelp' className={formStyles.Help}>
           Minimal length: 8 characters!<br />
           This password is used to encrypt your personal data.<br />
           This includes: <i>Avatar login-info</i>, <i>grids</i>, and <i>chat-logs</i>.<br />
@@ -186,54 +165,56 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
           and will never leave it un-encrypted!</b>
           <br />
           This password will <b>never</b> be saved or leave your machine!
-        </Help>}
-      </FormField>
+        </small>}
+      </div>
 
-      {isSignUp && <FormField>
+      {isSignUp && <div className={formStyles.FormField}>
         <label htmlFor='cryptoPassword2'>
           Repeat encryption password:
         </label>
-        <Input
+        <input
           {...cryptoPassword2}
           id='cryptoPassword2'
           type='password'
+          className={formStyles.Input}
           onKeyPress={onKeyPress}
           required
           minLength='8'
           disabled={isSigningIn}
           onFocus={onFocusScrollIntoView}
         />
-        <Help
-          className='Error'
+        <small
+          className={formStyles.Error}
           role='alert'
-          hide={cryptoPassword2.length === 0 || cryptoPassword.value === cryptoPassword2.value}
+          data-hide={cryptoPassword2.length === 0 || cryptoPassword.value === cryptoPassword2.value}
         >
           Encryption password doesn't match!
-        </Help>
-      </FormField>}
+        </small>
+      </div>}
 
-      {error && <Help className='Error' role='alert'>
+      {error && <small className={formStyles.Error} role='alert'>
         {error}
-      </Help>}
+      </small>}
 
-      <ButtonsContainer>
-        <Button
+      <div className={styles.ButtonsContainer}>
+        <button
+          className={formStyles.SecondaryButton}
           onClick={onCancel}
           disabled={isSigningIn}
           onFocus={onFocusScrollIntoView}
         >
           cancel
-        </Button>
-        <Button
-          className='ok'
+        </button>
+        <button
+          className={formStyles.OkButton}
           onClick={send}
           disabled={!isValid || isSigningIn}
           onFocus={onFocusScrollIntoView}
         >
           {isSignUp ? 'sign up' : 'sign in'}
-        </Button>
-      </ButtonsContainer>
-    </Container>
+        </button>
+      </div>
+    </form>
   </Popup>
 }
 

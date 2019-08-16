@@ -3,31 +3,10 @@
  */
 
 import React, { useState, useEffect } from 'react'
-import styled from 'styled-components'
 
 import ChatMessagesList from './chatMessagesList'
-import { Button, Input } from './formElements'
 
-const Main = styled.div`
-  margin: 0.3em;
-  display: flex;
-  flex-direction: column;
-`
-
-const ChatTextSend = styled.div`
-  margin: .4em;
-  display: flex;
-  flex-direction: row;
-`
-
-const SendButton = styled(Button)`
-  flex: 1 0 auto;
-`
-
-const TextBox = styled(Input)`
-  flex: 4 0 auto;
-  margin-right: 0.5em;
-`
+import styles from './chatDialog.module.css'
 
 export default function ChatDialog ({ isIM = false, data = [], names, sendTo, loadHistory }) {
   const [text, setText] = useState('')
@@ -52,16 +31,17 @@ export default function ChatDialog ({ isIM = false, data = [], names, sendTo, lo
 
   const placeholderText = `Send ${isIM ? 'Instant Message' : 'to local chat'}`
 
-  return <Main>
+  return <div className={styles.Container}>
     <ChatMessagesList
       messages={messages}
       isIM={isIM}
       names={names}
       onScrolledTop={doLoadHistory}
     />
-    <ChatTextSend>
-      <TextBox
+    <div className={styles.InputRow}>
+      <input
         type='text'
+        className={styles.TextBox}
         name='chatInput'
         placeholder={placeholderText}
         aria-label={placeholderText}
@@ -73,9 +53,9 @@ export default function ChatDialog ({ isIM = false, data = [], names, sendTo, lo
           }
         }}
       />
-      <SendButton className='primary' onClick={send}>
+      <button className={styles.SendButton} onClick={send}>
         send
-      </SendButton>
-    </ChatTextSend>
-  </Main>
+      </button>
+    </div>
+  </div>
 }

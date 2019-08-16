@@ -1,0 +1,23 @@
+/**/
+
+.Container {
+  display: flex;
+  flex-direction: column;
+}
+.Container > * {
+  flex-shrink: 0;
+}
+
+.ButtonsContainer {
+  flex: auto;
+  display: flex;
+  flex-direction: row;
+  margin-top: 0.3em;
+  padding: 0 0.3em;
+}
+.ButtonsContainer > button {
+  margin-top: .5rem;
+}
+.ButtonsContainer > button + button {
+  margin-left: 0.55em;
+}

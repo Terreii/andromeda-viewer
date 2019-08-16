@@ -13,6 +13,7 @@ import GroupsList from './groupsList'
 import NotificationsContainer from '../containers/notificationsContainer'
 
 import 'rc-tabs/assets/index.css'
+import './chatBox.css'
 
 const Notifications = React.memo(NotificationsContainer)
 

@@ -1,69 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import styled from 'styled-components'
 
 import LoginNewAvatar from './newAvatarLogin'
 import AvatarLogin from './avatarLogin'
 import SignIn from './signIn'
 import AvatarName from '../../avatarName'
 
-const Container = styled.div`
-  overflow: scroll;
-`
-
-const Main = styled.div`
-  background-color: rgb(77, 80, 85);
-  color: rgb(255, 255, 255);
-  border-radius: 1em;
-  padding: 0.8em;
-  max-width: 75vw;
-  margin-top: 2em;
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 0.5em;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-
-  @media (max-width: 750px) {
-    background-color: rgba(0, 0, 0, 0);
-    color: #000;
-    margin-top: 0;
-    padding-top: 0;
-  }
-`
-
-const ErrorOut = styled.div`
-  background-color: rgb(215, 0, 0);
-  border-radius: 0.3em;
-  margin-top: 0.3em;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 0.3em 1em;
-  display: ${props => props.show ? '' : 'none'};
-`
-
-const AvatarsList = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: #fff;
-
-  & > div {
-    flex: fit-content;
-  }
-
-  @media (min-width: 750px) {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: start;
-  }
-
-  @supports (display: grid) {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, 25em);
-  }
-`
+import styles from './index.module.css'
 
 export default function LoginForm ({ isSignedIn, avatars, grids, login, showSignInPopup }) {
   const [selected, setSelected] = useState(() => avatars.length === 0
@@ -177,9 +119,9 @@ export default function LoginForm ({ isSignedIn, avatars, grids, login, showSign
     doLogin(name, password, gridName, true, false)
   }
 
-  return <Container>
-    <Main>
-      <AvatarsList>
+  return <div className={styles.Container}>
+    <main className={styles.Main}>
+      <div className={styles.AvatarList}>
         <LoginNewAvatar
           grids={grids}
           isSignedIn={isSignedIn}
@@ -189,9 +131,7 @@ export default function LoginForm ({ isSignedIn, avatars, grids, login, showSign
           onSelect={setSelected}
         />
 
-        {isSignedIn
-          ? null
-          : <SignIn showSignInPopup={showSignInPopup} />}
+        {!isSignedIn && <SignIn showSignInPopup={showSignInPopup} />}
 
         {avatars.map(avatar => <AvatarLogin
           key={avatar._id}
@@ -202,17 +142,17 @@ export default function LoginForm ({ isSignedIn, avatars, grids, login, showSign
           isSelected={selected === avatar.avatarIdentifier}
           onSelect={setSelected}
         />)}
-      </AvatarsList>
+      </div>
 
-      {errorMessage && <ErrorOut show>
+      {errorMessage && <div className={styles.ErrorOut}>
         {errorMessage.title.length > 0 && <h4>{errorMessage.title}</h4>}
         <p>
-          {errorMessage.body.split('\n').map((line, index) => <span key={index}>
+          {errorMessage.body.split('\n').map((line, index) => <React.Fragment key={index}>
             {line}
             <br />
-          </span>)}
+          </React.Fragment>)}
         </p>
-      </ErrorOut>}
-    </Main>
-  </Container>
+      </div>}
+    </main>
+  </div>
 }

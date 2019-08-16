@@ -1,67 +1,12 @@
 import React from 'react'
-import styled from 'styled-components'
 
+import styles from './infoList.module.css'
 import chatBubble from '../icons/chat_bubble.svg'
 
 /*
  * A List of Friends
  * Does start a new IM-Chat
  */
-
-const Outer = styled.main`
-  padding: 1em;
-`
-
-const ListTitle = styled.div`
-  font-size: 120%;
-  border-bottom: 1px solid grey;
-`
-
-const List = styled.ul`
-  list-style: none;
-  padding-left: 1em;
-  max-width: 15cm;
-  margin-left: auto;
-  margin-right: auto;
-`
-
-const ListItem = styled.li`
-  display: flex;
-  flex-direction: row;
-  padding: 0.2em;
-  border-radius: 0.2em;
-
-  &:nth-child(even) {
-    background-color: rgb(173, 173, 173);
-  }
-`
-
-const NameCell = styled.div`
-  flex: auto;
-`
-
-const ListItemInput = styled.input`
-  flex: 20px 0 0;
-  border: 0px;
-  background: none;
-`
-
-const ListItemButton = ListItemInput.withComponent('button')
-
-const SkipContent = styled.a`
-  display: block;
-  position: absolute;
-  left: -999px;
-  top: -999px;
-
-  &:focus {
-    position: static;
-    padding: 3px;
-    background: #ffc;
-    border:1px solid #900;
-  }
-`
-
 const titles = {
   rightsGiven: {
     canSeeOnline: "Friend can see when you're online",
@@ -85,9 +30,10 @@ function FriendRow ({ friend, name, skipLink, onRightsChanged, startNewIMChat })
         // there in the official viewer
       }
 
-      const ele = <ListItemInput
+      const ele = <input
         key={`friend-${friend.id}-${key}-${rightName}`}
         type='checkbox'
+        className={styles.ListItemInput}
         disabled={key === 'rightsHas'} // on the rights friend has given me
         checked={rightsMap[rightName]}
         title={titles[key][rightName]}
@@ -103,40 +49,40 @@ function FriendRow ({ friend, name, skipLink, onRightsChanged, startNewIMChat })
     })
   })
 
-  return <ListItem id={'friends_list_' + friend.id}>
-    <NameCell>{name}</NameCell>
-    <SkipContent href={skipLink}>{`Skip ${name}`}</SkipContent>
-    <ListItemButton
+  return <li id={'friends_list_' + friend.id} className={styles.Item}>
+    <div className={styles.Name}>{name}</div>
+    <a className={styles.SkipToContentLink} href={skipLink}>{`Skip ${name}`}</a>
+    <button
+      className={styles.ListItemInput}
       onClick={event => {
         event.preventDefault()
         startNewIMChat(0, friend.id, name, true)
           .then(chatUUID => console.log(chatUUID)) // TODO: switch to tap
       }}>
       <img src={chatBubble} height='20' width='20' alt={`Start new chat with ${name}`} />
-    </ListItemButton>
+    </button>
     {rights}
-  </ListItem>
+  </li>
 }
 
 export default function FriendsList ({ friends, names, updateRights, startNewIMChat }) {
-  const list = friends.map((friend, index, all) => {
-    const name = friend.id in names ? names[friend.id].getDisplayName() : friend.id
+  return <main className={styles.Container} aria-label='Friends'>
+    <ul className={styles.List}>
+      {friends.map((friend, index, all) => {
+        const name = friend.id in names ? names[friend.id].getDisplayName() : friend.id
 
-    return <FriendRow
-      key={friend.id}
-      skipLink={index + 1 < all.length
-        ? '#friends_list_' + all[index + 1].id
-        : '#skip-friends-list-content'}
-      friend={friend}
-      name={name}
-      onRightsChanged={updateRights}
-      startNewIMChat={startNewIMChat}
-    />
-  })
-
-  return <Outer>
-    <ListTitle>Friends</ListTitle>
-    <List>{list}</List>
+        return <FriendRow
+          key={friend.id}
+          skipLink={index + 1 < all.length
+            ? '#friends_list_' + all[index + 1].id
+            : '#skip-friends-list-content'}
+          friend={friend}
+          name={name}
+          onRightsChanged={updateRights}
+          startNewIMChat={startNewIMChat}
+        />
+      })}
+    </ul>
     <div id='skip-friends-list-content' />
-  </Outer>
+  </main>
 }

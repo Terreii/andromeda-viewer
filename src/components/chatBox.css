@@ -1,0 +1,7 @@
+/*
+ * style the imported classes
+ */
+div.rc-tabs.rc-tabs-top {
+  height: calc(100vh - 3rem);
+  margin-top: 0.5rem; 
+}

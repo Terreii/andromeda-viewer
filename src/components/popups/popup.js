@@ -1,104 +1,32 @@
 import React from 'react'
-import styled from 'styled-components'
 
 import closeIcon from '../../icons/icon_close.svg'
-
-const Background = styled.div`
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-
-  @media (max-width: 750px) {
-    height: 100%;
-    overflow: auto;
-    -webkit-overflow-scrolling: scroll;
-  }
-`
-
-const CloseButton = styled.button`
-  display: ${props => props.show ? '' : 'none'};
-  padding: 0px;
-  background: none;
-  border: 0px;
-
-  &:focus {
-    outline: 2px solid highlight;
-  }
-`
-
-const Border = styled.div`
-  position: relative;
-  background-color: rgb(255, 250, 250);
-  border-radius: 1em;
-  max-height: 100vh;
-  max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-  display: flex;
-  flex-direction: column;
-`
-
-const Header = styled.div`
-  border-bottom: 1px solid black;
-  flex: 0 0 2em;
-  display: flex;
-  flex-direction: row-reverse;
-  justify-content: space-between;
-  margin: .2em;
-  margin-bottom: 0em;
-`
-
-const PopupTitle = styled.h4`
-  margin-left: 1.3em;
-  margin-right: 1.3em;
-  margin-bottom: .3em;
-  margin-top: .5em;
-`
-
-const Content = styled.article`
-  position: relative;
-  margin: 1em;
-  overflow-y: scroll;
-  overscroll-behavior-y: contain;
-  display: flex;
-  flex-direction: column;
-
-  & > * {
-    flex-shrink: 0;
-  }
-`
+import styles from './popup.module.css'
 
 export default function Popup ({ children, title, onClose }) {
   const showCloseIcon = typeof onClose === 'function'
 
   const closeIconInHeader = showCloseIcon
-    ? <CloseButton
-      className='closePopup'
-      show={showCloseIcon}
+    ? <button
+      className={'closePopup ' + styles.CloseButton}
       onClick={event => {
         event.preventDefault()
         onClose()
       }}
     >
       <img src={closeIcon} alt='close popup' height='32' width='32' />
-    </CloseButton>
+    </button>
     : <span />
 
-  return <Background>
-    <Border>
-      <Header>
+  return <div className={styles.Background}>
+    <div className={styles.Border}>
+      <div className={styles.Header}>
         {closeIconInHeader}
-        <PopupTitle>{title}</PopupTitle>
-      </Header>
-      <Content>
+        <h4 className={styles.Title}>{title}</h4>
+      </div>
+      <article className={styles.Content}>
         {children}
-      </Content>
-    </Border>
-  </Background>
+      </article>
+    </div>
+  </div>
 }
