@@ -62,12 +62,12 @@ export default function ChatBox (props) {
       />
     </TabPane>
 
-    {props.shouldDisplayNotifications
-      ? <TabPane tab='Notifications' key='notifications'>
-        <Notifications />
-      </TabPane>
-      : null
-    }
+    {props.shouldDisplayNotifications && <TabPane
+      tab='Notifications'
+      key='notifications'
+    >
+      <Notifications />
+    </TabPane>}
 
     <TabPane tab='Local' key='local'>
       <ChatDialog

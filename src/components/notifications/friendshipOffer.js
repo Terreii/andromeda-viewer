@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Text } from './utils'
+import { Container, Text } from './utils'
 
 import formStyles from '../formElements.module.css'
 import styles from './notifications.module.css'
@@ -16,9 +16,7 @@ export default function FriendshipOffer ({ data, onAccept, onDecline, onClose })
     onClose(data.id)
   }
 
-  return <div className={styles.Border}>
-    <h4>{`${data.fromAgentName} has offered you friendship.`}</h4>
-
+  return <Container title={`${data.fromAgentName} has offered you friendship.`}>
     <Text text={data.text} />
 
     <div className={styles.ButtonsRow}>
@@ -30,5 +28,5 @@ export default function FriendshipOffer ({ data, onAccept, onDecline, onClose })
         Decline
       </button>
     </div>
-  </div>
+  </Container>
 }

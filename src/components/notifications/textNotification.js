@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Text } from './utils'
+import { Container, Text } from './utils'
 
 import { NotificationTypes } from '../../types/chat'
 
@@ -8,14 +8,11 @@ import formStyles from '../formElements.module.css'
 import styles from './notifications.module.css'
 
 export default function TextNotification ({ data, onClose }) {
-  return <div className={styles.Border}>
-    {data.notificationType === NotificationTypes.System
-      ? <h4>
-        System Notification
-      </h4>
-      : (data.fromName && <h4>{data.fromName}</h4>)
-    }
+  const title = data.notificationType === NotificationTypes.System
+    ? 'System Notification'
+    : data.fromName
 
+  return <Container title={title}>
     <Text text={data.text} />
 
     <div className={styles.ButtonsRow}>
@@ -23,5 +20,5 @@ export default function TextNotification ({ data, onClose }) {
         OK
       </button>
     </div>
-  </div>
+  </Container>
 }
