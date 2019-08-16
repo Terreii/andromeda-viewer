@@ -1,12 +1,14 @@
 import React from 'react'
 
-import { Button } from '../formElements'
-import { NotificationBorder, Text, ButtonsRow } from './utils'
+import { Text } from './utils'
 
 import { NotificationTypes } from '../../types/chat'
 
+import formStyles from '../formElements.module.css'
+import styles from './notifications.module.css'
+
 export default function TextNotification ({ data, onClose }) {
-  return <NotificationBorder>
+  return <div className={styles.Border}>
     {data.notificationType === NotificationTypes.System
       ? <h4>
         System Notification
@@ -16,10 +18,10 @@ export default function TextNotification ({ data, onClose }) {
 
     <Text text={data.text} />
 
-    <ButtonsRow>
-      <Button className='primary' onClick={() => { onClose(data.id) }}>
+    <div className={styles.ButtonsRow}>
+      <button className={formStyles.PrimaryButton} onClick={() => { onClose(data.id) }}>
         OK
-      </Button>
-    </ButtonsRow>
-  </NotificationBorder>
+      </button>
+    </div>
+  </div>
 }

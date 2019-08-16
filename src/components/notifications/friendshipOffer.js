@@ -1,7 +1,9 @@
 import React from 'react'
 
-import { Button } from '../formElements'
-import { NotificationBorder, Text, ButtonsRow } from './utils'
+import { Text } from './utils'
+
+import formStyles from '../formElements.module.css'
+import styles from './notifications.module.css'
 
 export default function FriendshipOffer ({ data, onAccept, onDecline, onClose }) {
   const onAcceptFriendship = () => {
@@ -14,19 +16,19 @@ export default function FriendshipOffer ({ data, onAccept, onDecline, onClose })
     onClose(data.id)
   }
 
-  return <NotificationBorder>
+  return <div className={styles.Border}>
     <h4>{`${data.fromAgentName} has offered you friendship.`}</h4>
 
     <Text text={data.text} />
 
-    <ButtonsRow>
-      <Button className='ok' onClick={onAcceptFriendship}>
+    <div className={styles.ButtonsRow}>
+      <button className={formStyles.OkButton} onClick={onAcceptFriendship}>
         Accept
-      </Button>
+      </button>
 
-      <Button className='danger' onClick={onDeclineFriendship}>
+      <button className={formStyles.DangerButton} onClick={onDeclineFriendship}>
         Decline
-      </Button>
-    </ButtonsRow>
-  </NotificationBorder>
+      </button>
+    </div>
+  </div>
 }

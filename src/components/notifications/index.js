@@ -1,26 +1,11 @@
 import React from 'react'
-import styled from 'styled-components'
 
 import TextNotification from './textNotification'
 import FriendshipOffer from './friendshipOffer'
 
 import { NotificationTypes } from '../../types/chat'
 
-const Outer = styled.main`
-  padding: 1em;
-`
-
-const ListTitle = styled.div`
-  font-size: 120%;
-  border-bottom: 1px solid grey;
-`
-
-const Content = styled.div`
-  max-width: 15cm;
-  margin-top: .5em;
-  margin-left: auto;
-  margin-right: auto;
-`
+import infoListStyles from '../infoList.module.css'
 
 export default function notificationsList ({
   notifications,
@@ -28,9 +13,8 @@ export default function notificationsList ({
   declineFriendship,
   onClose
 }) {
-  return <Outer>
-    <ListTitle>Notifications</ListTitle>
-    <Content>
+  return <main className={infoListStyles.Container} aria-label='Notifications'>
+    <div className={infoListStyles.NotificationList}>
       {notifications.map(notification => {
         switch (notification.notificationType) {
           case NotificationTypes.FriendshipOffer:
@@ -52,6 +36,6 @@ export default function notificationsList ({
             />
         }
       })}
-    </Content>
-  </Outer>
+    </div>
+  </main>
 }
