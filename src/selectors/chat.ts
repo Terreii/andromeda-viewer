@@ -4,7 +4,7 @@ import { createSelector } from 'reselect'
 
 import { getIsSignedIn, getShouldSync } from './viewer'
 
-import { LocalChatMessage, IMChat } from '../types/chat'
+import { LocalChatMessage, IMChat, Notification } from '../types/chat'
 
 export const getActiveTab = (state: any): string => state.session.activeChatTab
 
@@ -28,7 +28,7 @@ export const getShouldSaveChat = createSelector(
   (sync, isSignedIn) => sync && isSignedIn
 )
 
-export const getNotifications = (state: any): any[] => state.session.notifications
+export const getNotifications = (state: any): Notification[] => state.session.notifications
 
 export const getShouldDisplayNotifications = createSelector(
   [

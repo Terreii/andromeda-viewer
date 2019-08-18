@@ -5,6 +5,7 @@ import mockdate from 'mockdate'
 
 import { receiveIM } from './chatMessageActions'
 
+import { Maturity } from '../types/viewer'
 import { IMDialog, NotificationTypes } from '../types/chat'
 import { AssetType } from '../types/inventory'
 
@@ -732,7 +733,7 @@ describe('incoming IM handling', () => {
             regionId: [42, 43], // TODO: Change to BigInt ((x << 32) | y)
             position: [128, 129, 130],
             lockAt: [0, 1, 2],
-            maturity: 'PG',
+            maturity: Maturity.General,
             godLike: false
           }
         },
@@ -747,7 +748,7 @@ describe('incoming IM handling', () => {
             regionId: [42, 43], // TODO: Change to BigInt ((x << 32) | y)
             position: [128, 129, 130],
             lockAt: [0, 1, 2],
-            maturity: 'A',
+            maturity: Maturity.Adult,
             godLike: false
           }
         },
@@ -762,7 +763,7 @@ describe('incoming IM handling', () => {
             regionId: [42, 43], // TODO: Change to BigInt ((x << 32) | y)
             position: [128, 129, 130],
             lockAt: [0, 1, 2],
-            maturity: 'PG',
+            maturity: Maturity.General,
             godLike: true
           }
         }
@@ -790,7 +791,7 @@ describe('incoming IM handling', () => {
           type: 'NOTIFICATION_RECEIVED',
           msg: {
             notificationType: NotificationTypes.InventoryOffered,
-            message: 'Hello World!',
+            text: 'Hello World!',
             fromObject: false,
             fromGroup: false,
             fromId: '01234567-8900-0000-0000-000000000000',
@@ -806,7 +807,7 @@ describe('incoming IM handling', () => {
           type: 'NOTIFICATION_RECEIVED',
           msg: {
             notificationType: NotificationTypes.InventoryOffered,
-            message: 'Hello World!',
+            text: 'Hello World!',
             fromObject: true,
             fromGroup: false,
             fromId: '01234567-8900-0000-0000-000000000000',

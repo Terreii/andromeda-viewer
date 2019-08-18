@@ -14,6 +14,7 @@ import { getAvatarNameById, getOwnAvatarName } from '../selectors/names'
 import { getGroupsIDs } from '../selectors/groups'
 import { getRegionId, getParentEstateID, getPosition } from '../selectors/region'
 
+import { Maturity } from '../types/viewer'
 import { IMDialog, NotificationTypes } from '../types/chat'
 
 export function changeTab (newTab) {
@@ -720,6 +721,22 @@ function handleTeleportOffers (msg) {
       : value
     )
 
+  let parsedMaturity
+  switch (maturity.toUpperCase()) {
+    case 'A':
+      parsedMaturity = Maturity.Adult
+      break
+
+    case 'M':
+      parsedMaturity = Maturity.Moderate
+      break
+
+    case 'PG':
+    default:
+      parsedMaturity = Maturity.General
+      break
+  }
+
   return notificationActionCreator({
     notificationType: NotificationTypes.TeleportLure,
     text: getStringValueOf(msg, 'MessageBlock', 'Message'),
@@ -729,7 +746,7 @@ function handleTeleportOffers (msg) {
     regionId: [gX, gY], // TODO: Change to BigInt ((x << 32) | y)
     position: [rX, rY, rZ],
     lockAt: [lX, lY, lZ],
-    maturity,
+    maturity: parsedMaturity,
     godLike: getValueOf(msg, 'MessageBlock', 'Dialog') === IMDialog.GodLikeTeleportLureOffered
   })
 }
@@ -744,7 +761,7 @@ function handleInventoryOffer (msg) {
 
   return notificationActionCreator({
     notificationType: NotificationTypes.InventoryOffered,
-    message: getStringValueOf(msg, 'MessageBlock', 'Message'),
+    text: getStringValueOf(msg, 'MessageBlock', 'Message'),
     fromObject: getValueOf(msg, 'MessageBlock', 'Dialog') === IMDialog.TaskInventoryOffered,
     fromGroup: getValueOf(msg, 'MessageBlock', 'FromGroup'),
     fromId: getValueOf(msg, 'AgentData', 'AgentID'),

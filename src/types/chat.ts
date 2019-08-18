@@ -1,6 +1,7 @@
 // Types for chat
 
-import { HoodieObject } from './viewer'
+import { HoodieObject, Maturity } from './viewer'
+import { AssetType } from './inventory'
 
 // Local chat
 export enum LocalChatSourceType {
@@ -317,6 +318,110 @@ export interface InstantMessage extends HoodieObject {
   time: number
   binaryBucket?: Buffer
 }
+
+export interface NotificationBase {
+  notificationType: NotificationTypes
+  id?: number
+  text: string
+}
+
+export interface TextNotification extends NotificationBase {
+  notificationType: NotificationTypes.TextOnly
+  fromName: string
+}
+
+export interface SystemNotification extends NotificationBase {
+  notificationType: NotificationTypes.System
+}
+
+export interface FriendshipOfferNotification extends NotificationBase {
+  notificationType: NotificationTypes.FriendshipOffer
+  fromId: string
+  fromAgentName: string
+  sessionId: string
+}
+
+export interface GroupInvitationNotification extends NotificationBase {
+  notificationType: NotificationTypes.GroupInvitation
+  transactionId: string
+  groupId: string
+  roleId: string
+  fee: number
+  name: string
+  useOfflineCap: boolean
+}
+
+export interface GroupNoticeNotification extends NotificationBase {
+  notificationType: NotificationTypes.GroupNotice
+  title: string
+  groupId: string
+  senderName: string
+  senderId: string
+  time: number
+  item?: {
+    name: string
+    type: AssetType
+    transactionId: string
+  }
+}
+
+export interface LoadURLNotification extends NotificationBase {
+  notificationType: NotificationTypes.LoadURL
+  url: URL
+  fromId: string
+  fromAgentName: string
+}
+
+export interface RequestTeleportLureNotification extends NotificationBase {
+  notificationType: NotificationTypes.RequestTeleportLure
+  fromId: string
+  fromAgentName: string
+}
+
+export interface TeleportLure extends NotificationBase {
+  notificationType: NotificationTypes.TeleportLure
+  fromId: string
+  fromAgentName: string
+  lureId: string
+  regionId: [number, number]
+  position: [number, number, number]
+  lockAt: [number, number, number]
+  maturity: Maturity
+  godLike: boolean
+}
+
+export interface InventoryOfferedNotification extends NotificationBase {
+  notificationType: NotificationTypes.InventoryOffered
+  fromObject: boolean
+  fromGroup: boolean
+  fromId: string
+  fromName: string
+  item: {
+    objectId: string
+    type: AssetType
+    transactionId: string
+  }
+}
+
+export interface ScriptDialogNotification extends NotificationBase {
+  notificationType: NotificationTypes.ScriptDialog
+}
+
+export interface PermissionsNotification extends NotificationBase {
+  notificationType: NotificationTypes.Permissions
+}
+
+export type Notification = TextNotification |
+  SystemNotification |
+  FriendshipOfferNotification |
+  GroupInvitationNotification |
+  GroupNoticeNotification |
+  LoadURLNotification |
+  RequestTeleportLureNotification |
+  TeleportLure |
+  InventoryOfferedNotification |
+  ScriptDialogNotification |
+  PermissionsNotification
 
 export enum NotificationTypes {
   /**
