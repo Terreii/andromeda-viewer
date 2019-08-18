@@ -319,21 +319,51 @@ export interface InstantMessage extends HoodieObject {
   binaryBucket?: Buffer
 }
 
+/**
+ * Abstract base interface for notifications.
+ */
 export interface NotificationBase {
+  /**
+   * Type to differentiate the notification types.
+   * 
+   * Every notification will have a specific type.
+   */
   notificationType: NotificationTypes
+  /**
+   * Will be set in the reducer/store.
+   * 
+   * It is a avatar-session unique Id.
+   */
   id?: number
+  /**
+   * Message send with the notification.
+   */
   text: string
 }
 
+/**
+ * A notification that will only show text.
+ */
 export interface TextNotification extends NotificationBase {
   notificationType: NotificationTypes.TextOnly
+  /**
+   * Who did send the Notification. This can also be an Object.
+   */
   fromName: string
 }
 
+/**
+ * A system notification.
+ * 
+ * Similarly to {@link TextNotification}.
+ */
 export interface SystemNotification extends NotificationBase {
   notificationType: NotificationTypes.System
 }
 
+/**
+ * A friendship offer.
+ */
 export interface FriendshipOfferNotification extends NotificationBase {
   notificationType: NotificationTypes.FriendshipOffer
   fromId: string
@@ -341,8 +371,20 @@ export interface FriendshipOfferNotification extends NotificationBase {
   sessionId: string
 }
 
+/**
+ * A group invitation.
+ * 
+ * It contains fee, roleId infos.
+ * 
+ * Answers are send to groupId with and the sessionId set to transactionId.
+ */
 export interface GroupInvitationNotification extends NotificationBase {
   notificationType: NotificationTypes.GroupInvitation
+  /**
+   * Id to track the invitation.
+   * 
+   * This will be the sessionId of the answer.
+   */
   transactionId: string
   groupId: string
   roleId: string
@@ -351,6 +393,11 @@ export interface GroupInvitationNotification extends NotificationBase {
   useOfflineCap: boolean
 }
 
+/**
+ * Notification of a group.
+ * 
+ * This can contain an object.
+ */
 export interface GroupNoticeNotification extends NotificationBase {
   notificationType: NotificationTypes.GroupNotice
   title: string
@@ -365,6 +412,11 @@ export interface GroupNoticeNotification extends NotificationBase {
   }
 }
 
+/**
+ * Notification to share an URL.
+ * 
+ * It will display an <a>.
+ */
 export interface LoadURLNotification extends NotificationBase {
   notificationType: NotificationTypes.LoadURL
   url: URL
@@ -372,17 +424,30 @@ export interface LoadURLNotification extends NotificationBase {
   fromAgentName: string
 }
 
+/**
+ * Request that a Teleportation lure will be send.
+ * 
+ * Answer is a {@link NotificationTypes.TeleportLure}.
+ */
 export interface RequestTeleportLureNotification extends NotificationBase {
   notificationType: NotificationTypes.RequestTeleportLure
   fromId: string
   fromAgentName: string
 }
 
+/**
+ * In invitation to teleport to ones location.
+ */
 export interface TeleportLure extends NotificationBase {
   notificationType: NotificationTypes.TeleportLure
   fromId: string
   fromAgentName: string
   lureId: string
+  /**
+   * Id of the region.
+   * 
+   * TODO: Change it to a 64bit BigInt.
+   */
   regionId: [number, number]
   position: [number, number, number]
   lockAt: [number, number, number]
@@ -390,6 +455,9 @@ export interface TeleportLure extends NotificationBase {
   godLike: boolean
 }
 
+/**
+ * Inventory offer.
+ */
 export interface InventoryOfferedNotification extends NotificationBase {
   notificationType: NotificationTypes.InventoryOffered
   fromObject: boolean
@@ -403,14 +471,31 @@ export interface InventoryOfferedNotification extends NotificationBase {
   }
 }
 
+/**
+ * Dialog of a script.
+ * 
+ * It can contain multiple buttons.
+ * 
+ * TODO: implement actions, tests and find out the interface.
+ */
 export interface ScriptDialogNotification extends NotificationBase {
   notificationType: NotificationTypes.ScriptDialog
 }
 
+/**
+ * A request for permission. Send if a script wants to control the avatar.
+ * 
+ * TODO: implement actions, tests and find out the interface.
+ */
 export interface PermissionsNotification extends NotificationBase {
   notificationType: NotificationTypes.Permissions
 }
 
+/**
+ * Collection of all Notification interfaces.
+ * 
+ * It is used in places where every type is possible.
+ */
 export type Notification = TextNotification |
   SystemNotification |
   FriendshipOfferNotification |

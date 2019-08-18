@@ -5,6 +5,12 @@
   background-color: lightgrey;
   padding: 1em;
 }
+.Border + .Border {
+  margin-top: 1em;
+}
+.Border:last-of-type {
+  margin-bottom: 0.5em;
+}
 
 .ButtonsRow {
   display: flex;
@@ -17,4 +23,8 @@
 }
 .ButtonsRow > button + button {
   margin-left: 1.75em;
+}
+
+.Fee {
+  font-weight: bolder;
 }

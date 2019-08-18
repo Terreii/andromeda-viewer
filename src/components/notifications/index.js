@@ -2,6 +2,7 @@ import React from 'react'
 
 import TextNotification from './textNotification'
 import FriendshipOffer from './friendshipOffer'
+import GroupInvitation from './groupInvitation'
 
 import { NotificationTypes } from '../../types/chat'
 
@@ -11,6 +12,8 @@ export default function notificationsList ({
   notifications,
   acceptFriendship,
   declineFriendship,
+  acceptGroupInvite,
+  declineGroupInvite,
   onClose
 }) {
   return <main className={infoListStyles.Container} aria-label='Notifications'>
@@ -23,6 +26,15 @@ export default function notificationsList ({
               data={notification}
               onAccept={acceptFriendship}
               onDecline={declineFriendship}
+              onClose={onClose}
+            />
+
+          case NotificationTypes.GroupInvitation:
+            return <GroupInvitation
+              key={notification.id}
+              data={notification}
+              onAccept={acceptGroupInvite}
+              onDecline={declineGroupInvite}
               onClose={onClose}
             />
 

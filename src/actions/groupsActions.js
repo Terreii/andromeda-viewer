@@ -6,6 +6,8 @@ import { getAgentId, getSessionId } from '../selectors/session'
 import { getOwnAvatarName } from '../selectors/names'
 import { getPosition } from '../selectors/region'
 
+import { IMDialog } from '../types/chat'
+
 export function startGroupChat (groups) {
   return (dispatch, getState, { circuit }) => {
     const activeState = getState()
@@ -18,7 +20,6 @@ export function startGroupChat (groups) {
     ]
     const position = getPosition(activeState)
     const agentName = getOwnAvatarName(activeState).getFullName()
-    const binaryBucket = Buffer.from([])
     const time = new Date()
 
     groups.forEach(group => {
@@ -26,18 +27,12 @@ export function startGroupChat (groups) {
         AgentData,
         MessageBlock: [
           {
-            FromGroup: false,
             ToAgentID: group.id,
-            ParentEstateID: 0,
-            RegionID: '00000000-0000-0000-0000-000000000000',
             Position: position,
-            Offline: 0,
-            Dialog: 15,
+            Dialog: IMDialog.SessionGroupStart,
             ID: group.id,
             Timestamp: Math.floor(time.getTime() / 1000),
-            FromAgentName: agentName,
-            Message: Buffer.from([]),
-            BinaryBucket: binaryBucket
+            FromAgentName: agentName
           }
         ]
       }, true)
@@ -49,5 +44,53 @@ export function startGroupChat (groups) {
       type: 'ChatSessionsStarted',
       chatUUIDs: groups.map(group => group.id)
     })
+  }
+}
+
+export function acceptGroupInvitation (transactionId, groupId) {
+  return (dispatch, getState, { circuit }) => {
+    const activeState = getState()
+
+    circuit.send('ImprovedInstantMessage', {
+      AgentData: [
+        {
+          AgentID: getAgentId(activeState),
+          SessionID: getSessionId(activeState)
+        }
+      ],
+      MessageBlock: [
+        {
+          ToAgentID: groupId,
+          Dialog: IMDialog.GroupInvitationAccept,
+          ID: transactionId,
+          Timestamp: Math.floor(Date.now() / 1000),
+          FromAgentName: getOwnAvatarName(activeState).getFullName()
+        }
+      ]
+    }, true)
+  }
+}
+
+export function declineGroupInvitation (transactionId, groupId) {
+  return (dispatch, getState, { circuit }) => {
+    const activeState = getState()
+
+    circuit.send('ImprovedInstantMessage', {
+      AgentData: [
+        {
+          AgentID: getAgentId(activeState),
+          SessionID: getSessionId(activeState)
+        }
+      ],
+      MessageBlock: [
+        {
+          ToAgentID: groupId,
+          Dialog: IMDialog.GroupInvitationDecline,
+          ID: transactionId,
+          Timestamp: Math.floor(Date.now() / 1000),
+          FromAgentName: getOwnAvatarName(activeState).getFullName()
+        }
+      ]
+    }, true)
   }
 }

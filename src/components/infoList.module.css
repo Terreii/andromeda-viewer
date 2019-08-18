@@ -1,6 +1,8 @@
 .Container {
   padding: 1em;
   line-height: 1.5;
+  overflow-y: scroll;
+  max-height: calc(100vh - 7.6em);
 }
 
 .List {
