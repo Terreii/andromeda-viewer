@@ -3,8 +3,10 @@ import React from 'react'
 import TextNotification from './textNotification'
 import FriendshipOffer from './friendshipOffer'
 import GroupInvitation from './groupInvitation'
+import GroupNotice from './groupNotice'
 
 import { NotificationTypes, Notification } from '../../types/chat'
+import { AssetType } from '../../types/inventory'
 
 import infoListStyles from '../infoList.module.css'
 
@@ -14,6 +16,8 @@ interface NotificationArgs {
   declineFriendship: (fromId: string, sessionId: string) => void
   acceptGroupInvite: (transactionId: string, groupId: string) => void
   declineGroupInvite: (transactionId: string, groupId: string) => void
+  acceptGroupNoticeItem: (target: string, transactionId: string, assetType: AssetType) => void
+  declineGroupNoticeItem: (target: string, transactionId: string) => void
   onClose: (id: number) => void
 }
 
@@ -23,6 +27,8 @@ export default function notificationsList ({
   declineFriendship,
   acceptGroupInvite,
   declineGroupInvite,
+  acceptGroupNoticeItem,
+  declineGroupNoticeItem,
   onClose
 }: NotificationArgs) {
   return <main className={infoListStyles.Container} aria-label='Notifications'>
@@ -54,6 +60,15 @@ export default function notificationsList ({
               data={notification}
               onAccept={acceptGroupInvite}
               onDecline={declineGroupInvite}
+              onClose={doClose}
+            />
+
+          case NotificationTypes.GroupNotice:
+            return <GroupNotice
+              key={notification.id}
+              data={notification}
+              onAccept={acceptGroupNoticeItem}
+              onDecline={declineGroupNoticeItem}
               onClose={doClose}
             />
 

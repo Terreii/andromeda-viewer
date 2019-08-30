@@ -4,7 +4,7 @@ import styles from './notifications.module.css'
 
 interface ContainerArgs {
   title: string,
-  children: JSX.Element[] | JSX.Element
+  children: (JSX.Element | undefined)[] | JSX.Element | null
 }
 
 export function Container ({ title, children }: ContainerArgs) {
