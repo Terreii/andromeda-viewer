@@ -4,9 +4,18 @@ import TextNotification from './textNotification'
 import FriendshipOffer from './friendshipOffer'
 import GroupInvitation from './groupInvitation'
 
-import { NotificationTypes } from '../../types/chat'
+import { NotificationTypes, Notification } from '../../types/chat'
 
 import infoListStyles from '../infoList.module.css'
+
+interface NotificationArgs {
+  notifications: Notification[]
+  acceptFriendship: (fromId: string, sessionId: string) => void
+  declineFriendship: (fromId: string, sessionId: string) => void
+  acceptGroupInvite: (transactionId: string, groupId: string) => void
+  declineGroupInvite: (transactionId: string, groupId: string) => void
+  onClose: (id: number) => void
+}
 
 export default function notificationsList ({
   notifications,
@@ -15,18 +24,28 @@ export default function notificationsList ({
   acceptGroupInvite,
   declineGroupInvite,
   onClose
-}) {
+}: NotificationArgs) {
   return <main className={infoListStyles.Container} aria-label='Notifications'>
     <div className={infoListStyles.NotificationList}>
       {notifications.map(notification => {
+        const doClose = () => onClose(notification.id!)
+
         switch (notification.notificationType) {
+          case NotificationTypes.TextOnly:
+          case NotificationTypes.System:
+            return <TextNotification
+              key={notification.id}
+              data={notification}
+              onClose={doClose}
+            />
+
           case NotificationTypes.FriendshipOffer:
             return <FriendshipOffer
               key={notification.id}
               data={notification}
               onAccept={acceptFriendship}
               onDecline={declineFriendship}
-              onClose={onClose}
+              onClose={doClose}
             />
 
           case NotificationTypes.GroupInvitation:
@@ -35,16 +54,19 @@ export default function notificationsList ({
               data={notification}
               onAccept={acceptGroupInvite}
               onDecline={declineGroupInvite}
-              onClose={onClose}
+              onClose={doClose}
             />
 
-          case NotificationTypes.TextOnly:
-          case NotificationTypes.System:
           default:
             return <TextNotification
               key={notification.id}
-              data={notification}
-              onClose={onClose}
+              data={{
+                id: notification.id,
+                notificationType: NotificationTypes.TextOnly,
+                text: notification.text,
+                fromName: 'Unknown'
+              }}
+              onClose={doClose}
             />
         }
       })}

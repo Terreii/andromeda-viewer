@@ -2,18 +2,27 @@ import React from 'react'
 
 import { Container, Text } from './utils'
 
+import { FriendshipOfferNotification } from '../../types/chat'
+
 import formStyles from '../formElements.module.css'
 import styles from './notifications.module.css'
 
-export default function FriendshipOffer ({ data, onAccept, onDecline, onClose }) {
+interface NotificationArgs {
+  data: FriendshipOfferNotification
+  onAccept: (fromId: string, sessionId: string) => void
+  onDecline: (fromId: string, sessionId: string) => void
+  onClose: () => void
+}
+
+export default function FriendshipOffer ({ data, onAccept, onDecline, onClose }: NotificationArgs) {
   const onAcceptFriendship = () => {
     onAccept(data.fromId, data.sessionId)
-    onClose(data.id)
+    onClose()
   }
 
   const onDeclineFriendship = () => {
     onDecline(data.fromId, data.sessionId)
-    onClose(data.id)
+    onClose()
   }
 
   return <Container title={`${data.fromAgentName} has offered you friendship.`}>

@@ -2,16 +2,26 @@ import React from 'react'
 
 import { Container, Text } from './utils'
 
+import { GroupInvitationNotification } from '../../types/chat'
+
 import formStyles from '../formElements.module.css'
 import styles from './notifications.module.css'
 
 const numberFormater = Intl && Intl.NumberFormat
   ? Intl.NumberFormat()
   : {
-    format: number => number.toString()
+    format: (number: Number) => number.toString()
   }
 
-export default function GroupInvitation ({ data, onAccept, onDecline, onClose }) {
+interface NotificationArgs {
+  data: GroupInvitationNotification
+  onAccept: (transactionId: string, groupId: string) => void
+  onDecline: (transactionId: string, groupId: string) => void
+  onClose: () => void
+}
+  
+  
+export default function GroupInvitation ({ data, onAccept, onDecline, onClose }: NotificationArgs) {
   const fee = numberFormater.format(data.fee)
 
   return <Container title={'Invitation to join a group'}>
@@ -30,7 +40,7 @@ export default function GroupInvitation ({ data, onAccept, onDecline, onClose })
         className={formStyles.OkButton}
         onClick={() => {
           onAccept(data.transactionId, data.groupId)
-          onClose(data.id)
+          onClose()
         }}
       >
         Accept
@@ -40,7 +50,7 @@ export default function GroupInvitation ({ data, onAccept, onDecline, onClose })
         className={formStyles.DangerButton}
         onClick={() => {
           onDecline(data.transactionId, data.groupId)
-          onClose(data.id)
+          onClose()
         }}
       >
         Decline
