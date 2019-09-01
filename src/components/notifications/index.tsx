@@ -4,6 +4,7 @@ import TextNotification from './textNotification'
 import FriendshipOffer from './friendshipOffer'
 import GroupInvitation from './groupInvitation'
 import GroupNotice from './groupNotice'
+import LoadURL from './loadURL'
 
 import { NotificationTypes, Notification } from '../../types/chat'
 import { AssetType } from '../../types/inventory'
@@ -69,6 +70,13 @@ export default function notificationsList ({
               data={notification}
               onAccept={acceptGroupNoticeItem}
               onDecline={declineGroupNoticeItem}
+              onClose={doClose}
+            />
+
+          case NotificationTypes.LoadURL:
+            return <LoadURL
+              key={notification.id}
+              data={notification}
               onClose={doClose}
             />
 

@@ -298,6 +298,37 @@ test('renders a group notice', () => {
   expect(onClose.mock.calls[2][0]).toBe(4)
 })
 
+test('renders an open URL', () => {
+  const href = 'https://secondlife.com/support/downloads/'
+  const onClose = jest.fn()
+
+  const rendered = mount(<Notifications
+    notifications={[
+      {
+        id: 1,
+        notificationType: NotificationTypes.LoadURL,
+        text: 'Please go to this URL',
+        url: href,
+        fromId: 'Abcd',
+        fromAgentName: 'Tester'
+      }
+    ]}
+    onClose={onClose}
+  />)
+
+  expect(rendered).toContainReact(<a href={href} target='_blank' rel='noopener noreferrer'>
+    {href}
+  </a>)
+
+  const button = rendered.find('button')
+  expect(button.length).toBe(1)
+
+  button.at(0).simulate('click')
+
+  expect(onClose.mock.calls.length).toBe(1)
+  expect(onClose.mock.calls[0][0]).toBe(1)
+})
+
 test('should pass aXe', async () => {
   const allNotifications = [
     {
@@ -355,6 +386,14 @@ test('should pass aXe', async () => {
       senderId: 'dcba',
       time: Date.now(),
       item: null
+    },
+    {
+      id: 6,
+      notificationType: NotificationTypes.LoadURL,
+      text: 'Please go to this URL',
+      url: 'https://secondlife.com/support/downloads/',
+      fromId: 'Abcd',
+      fromAgentName: 'Tester'
     }
   ]
 
