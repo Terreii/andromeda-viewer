@@ -165,3 +165,36 @@ export function declineFriendshipOffer (agentId, sessionId) {
     })
   }
 }
+
+/**
+ * Send a Teleport offer to an avatar.
+ * @param {string} target UUID of the avatar that the offer should be send to.
+ * @param {string?} message Optional message to be displayed.
+ */
+export function offerTeleportLure (target, message = null) {
+  return (dispatch, getState, { circuit }) => {
+    const activeState = getState()
+
+    const text = message || 'Join me'
+
+    circuit.send('StartLure', {
+      AgentData: [
+        {
+          AgentID: getAgentId(activeState),
+          SessionID: getSessionId(activeState)
+        }
+      ],
+      Info: [
+        {
+          LureType: 0,
+          Message: text
+        }
+      ],
+      TargetData: [
+        {
+          TargetID: target
+        }
+      ]
+    }, true)
+  }
+}

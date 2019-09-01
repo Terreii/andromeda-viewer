@@ -3,7 +3,11 @@ import { bindActionCreators } from 'redux'
 import { useSelector, useDispatch } from 'react-redux'
 
 import { closeNotification } from '../actions/chatMessageActions'
-import { acceptFriendshipOffer, declineFriendshipOffer } from '../actions/friendsActions'
+import {
+  acceptFriendshipOffer,
+  declineFriendshipOffer,
+  offerTeleportLure
+} from '../actions/friendsActions'
 import {
   acceptGroupInvitation,
   declineGroupInvitation,
@@ -26,7 +30,8 @@ export default function NotificationsContainer (props) {
     acceptGroupInvitation,
     declineGroupInvitation,
     acceptGroupNoticeItem,
-    declineGroupNoticeItem
+    declineGroupNoticeItem,
+    offerTeleport: offerTeleportLure
   }, dispatch)
 
   return <NotificationsView
@@ -37,6 +42,7 @@ export default function NotificationsContainer (props) {
     declineGroupInvite={actions.declineGroupInvitation}
     acceptGroupNoticeItem={actions.acceptGroupNoticeItem}
     declineGroupNoticeItem={actions.declineGroupNoticeItem}
+    offerTeleport={actions.offerTeleport}
     onClose={actions.closeNotification}
   />
 }

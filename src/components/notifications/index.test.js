@@ -329,6 +329,51 @@ test('renders an open URL', () => {
   expect(onClose.mock.calls[0][0]).toBe(1)
 })
 
+test('renders a request teleport lure', () => {
+  const agentName = 'Tester'
+  const senderId = '1234567890'
+  const onAccept = jest.fn()
+  const onClose = jest.fn()
+
+  const rendered = mount(<Notifications
+    notifications={[
+      {
+        id: 1,
+        notificationType: NotificationTypes.RequestTeleportLure,
+        text: 'Please teleport me to you.',
+        fromId: senderId,
+        fromAgentName: agentName
+      }
+    ]}
+    offerTeleport={onAccept}
+    onClose={onClose}
+  />)
+
+  expect(rendered).toIncludeText(agentName + ' is requesting to be teleported to your location.')
+
+  const buttons = rendered.find('button')
+  expect(buttons.length).toBe(2)
+
+  // Accept
+  buttons.at(0).simulate('click')
+
+  expect(onAccept.mock.calls.length).toBe(1)
+  expect(onAccept.mock.calls[0]).toEqual([
+    senderId
+  ])
+
+  expect(onClose.mock.calls.length).toBe(1)
+  expect(onClose.mock.calls[0][0]).toBe(1)
+
+  // Decline
+  buttons.at(1).simulate('click')
+
+  expect(onAccept.mock.calls.length).toBe(1)
+
+  expect(onClose.mock.calls.length).toBe(2)
+  expect(onClose.mock.calls[1][0]).toBe(1)
+})
+
 test('should pass aXe', async () => {
   const allNotifications = [
     {
@@ -393,6 +438,13 @@ test('should pass aXe', async () => {
       text: 'Please go to this URL',
       url: 'https://secondlife.com/support/downloads/',
       fromId: 'Abcd',
+      fromAgentName: 'Tester'
+    },
+    {
+      id: 7,
+      notificationType: NotificationTypes.RequestTeleportLure,
+      text: 'Please teleport me to you.',
+      fromId: 'abcd',
       fromAgentName: 'Tester'
     }
   ]
