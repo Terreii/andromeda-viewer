@@ -79,7 +79,7 @@ test('not signed in login works', () => {
   })
 
   rendered.update()
-  loginButton.simulate('click')
+  loginButton.simulate('submit')
 
   expect(loginData.length).toBe(1)
   expect(loginData[0]).toEqual({
@@ -92,13 +92,9 @@ test('not signed in login works', () => {
   expect(saveCheckbox.prop('disabled')).toBe(true)
   expect(saveCheckbox.prop('checked')).toBe(false)
 
-  nameInput.simulate('keyUp', {
-    keyCode: 13
-  })
+  nameInput.simulate('submit')
 
-  passwordInput.simulate('keyUp', {
-    keyCode: 13
-  })
+  passwordInput.simulate('submit')
 
   expect(loginData.length).toBe(3)
   expect(loginData[1]).toEqual({
@@ -168,7 +164,7 @@ test('signed in login works', () => {
   })
 
   rendered.update()
-  loginButton.simulate('click')
+  loginButton.simulate('submit')
 
   expect(loginData.length).toBe(1)
   expect(loginData[0]).toEqual({
@@ -185,13 +181,9 @@ test('signed in login works', () => {
     }
   })
 
-  nameInput.simulate('keyUp', {
-    keyCode: 13
-  })
+  nameInput.simulate('submit')
 
-  passwordInput.simulate('keyUp', {
-    keyCode: 13
-  })
+  passwordInput.simulate('submit')
 
   expect(loginData.length).toBe(3)
   expect(loginData[1]).toEqual({
@@ -296,7 +288,7 @@ test('adding new grid', () => {
     }
   })
 
-  loginButton.simulate('click')
+  loginButton.simulate('submit')
 
   expect(loginData.length).toBe(1)
   expect(loginData[0]).toEqual({
@@ -317,7 +309,7 @@ test('adding new grid', () => {
     }
   })
   rendered.update()
-  loginButton.simulate('click')
+  loginButton.simulate('submit')
 
   expect(loginData.length).toBe(2)
   expect(loginData[1]).toEqual({

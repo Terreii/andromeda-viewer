@@ -56,6 +56,10 @@
 .SecondaryButton:hover, .SecondaryButton:focus {
   background: #868686;
 }
+.TransparentButton {
+  background: none;
+  border: none;
+}
 
 /* Input */
 

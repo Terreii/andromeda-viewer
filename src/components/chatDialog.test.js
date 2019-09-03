@@ -47,7 +47,7 @@ test('renders local chat', () => {
       value: 'Hello World!'
     }
   })
-  sendButton.simulate('click')
+  sendButton.simulate('submit')
 
   expect(sendData.text).toBe('Hello World!')
   expect(sendData.count).toBe(1)
@@ -99,7 +99,7 @@ test('renders IM chat', () => {
       value: 'Hello World!'
     }
   })
-  sendButton.simulate('click')
+  sendButton.simulate('submit')
 
   expect(sendData.text).toBe('Hello World!')
   expect(sendData.count).toBe(1)

@@ -12,9 +12,7 @@ export default function UnlockDialog ({ onUnlock, onSignOut, onForgottenPassword
   const [errorText, setErrorText] = useState(null)
 
   const unlock = async event => {
-    if (event && typeof event.preventDefault === 'function') {
-      event.preventDefault()
-    }
+    event.preventDefault()
 
     if (password.length === 0) {
       setErrorText('No password was entered jet!')
@@ -48,7 +46,7 @@ export default function UnlockDialog ({ onUnlock, onSignOut, onForgottenPassword
   </span>
 
   return <Popup title={title}>
-    <form className={styles.Content}>
+    <form className={styles.Content} onSubmit={unlock}>
       <span>Please enter your <i>Encryption-Password</i> to unlock this app!</span>
 
       <div className={styles.PasswordRow}>
@@ -62,19 +60,18 @@ export default function UnlockDialog ({ onUnlock, onSignOut, onForgottenPassword
           disabled={isUnlocking}
           value={password}
           onChange={event => { setPassword(event.target.value) }}
-          onKeyDown={event => {
-            if (event.keyCode === 13) {
-              unlock()
-            }
-          }}
           aria-describedby='resetPassword'
         />
         <small id='resetPassword' className={formStyles.Help}>
           If you did forget your encryption-password?
           <button
             id='resetPasswordButton'
+            type='button'
             className={styles.ResetButton}
-            onClick={() => { onForgottenPassword('encryption') }}
+            onClick={event => {
+              event.preventDefault()
+              onForgottenPassword('encryption')
+            }}
           >
             Reset password
           </button>
@@ -92,15 +89,18 @@ export default function UnlockDialog ({ onUnlock, onSignOut, onForgottenPassword
         <button
           id='unlockButton'
           className={formStyles.PrimaryButton}
-          onClick={unlock}
           disabled={isUnlocking}
         >
           Unlock
         </button>
         <button
           id='signOutButton'
+          type='button'
           className={formStyles.DangerButton}
-          onClick={onSignOut}
+          onClick={event => {
+            event.preventDefault()
+            onSignOut()
+          }}
           disabled={isUnlocking}
         >
           Sign out

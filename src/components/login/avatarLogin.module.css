@@ -17,14 +17,30 @@
   box-shadow: 0.2em 0.2em 0.4em 0.1em black;
 }
 .Container.not-selected {
-  cursor: pointer;
   background-color: rgb(95, 95, 95);
   background-color: var(--dialog-background);
   color: var(--dialog-color);
   box-shadow: 0.1em 0.1em 0.3em 0px black;
+  border: 2px solid rgb(95, 95, 95);
+  border: 2px solid var(--dialog-background);
 }
-.Container.not-selected:focus {
-  border: 2px solid highlight;
+.Container.not-selected:focus-within {
+  border-color: highlight;
+  outline: none;
+}
+.Container.not-selected:hover {
+  box-shadow: 0.2em 0.2em 0.6em 0em black;
+}
+
+.HiddenButton {
+  display: flex;
+  flex-direction: column;
+  background: none;
+  border: none;
+  color: var(--dialog-color);
+}
+.HiddenButton:focus {
+  border: none;
   outline: none;
 }
 
@@ -48,7 +64,7 @@
 }
 
 @supports (display: grid) {
-  .AvatarLoginContainer {
+  .AvatarLoginContainer, .HiddenButton {
     display: grid;
     grid-template-areas:
       "name name grid-name"
@@ -85,6 +101,10 @@
   .NewAvatarLoginContainer > span,
   .NewAvatarLoginContainer > div {
     margin-top: 0em;
+  }
+
+  .AvatarLoginContainer.not-selected, .NewAvatarLoginContainer.not-selected {
+    display: flex;
   }
 }
 
@@ -143,6 +163,9 @@
   text-align: center;
   white-space: nowrap;
   font-size: 120%;
+}
+.not-selected .Title {
+  grid-area: name;
 }
 
 @media (max-width: 450px) {

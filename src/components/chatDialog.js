@@ -38,7 +38,7 @@ export default function ChatDialog ({ isIM = false, data = [], names, sendTo, lo
       names={names}
       onScrolledTop={doLoadHistory}
     />
-    <div className={styles.InputRow}>
+    <form className={styles.InputRow} onSubmit={send}>
       <input
         type='text'
         className={styles.TextBox}
@@ -47,15 +47,8 @@ export default function ChatDialog ({ isIM = false, data = [], names, sendTo, lo
         aria-label={placeholderText}
         value={text}
         onChange={event => { setText(event.target.value) }}
-        onKeyDown={event => {
-          if (event.keyCode === 13) {
-            send(event)
-          }
-        }}
       />
-      <button className={styles.SendButton} onClick={send}>
-        send
-      </button>
-    </div>
+      <button className={styles.SendButton}>send</button>
+    </form>
   </div>
 }
