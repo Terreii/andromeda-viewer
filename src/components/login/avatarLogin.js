@@ -33,7 +33,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
     </form>
   }
 
-  const onClick = event => {
+  const onSubmit = event => {
     event.preventDefault()
 
     if (password.length > 0) {
@@ -41,16 +41,10 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
     }
   }
 
-  const onKeyUp = event => {
-    if (event.keyCode === 13) {
-      onClick(event)
-    }
-  }
-
   const avatarName = new AvatarName(avatar.name).getDisplayName()
   const passwordInputId = `passwordFor${avatar.avatarIdentifier}`
 
-  return <form className={styles.AvatarLoginContainer}>
+  return <form className={styles.AvatarLoginContainer} onSubmit={onSubmit}>
     <h2 className={styles.Name}>{avatarName}</h2>
     <span className={styles.Grid}>@{grid.name}</span>
 
@@ -61,7 +55,6 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
       className={styles.PasswordInput}
       value={password}
       onChange={event => { setPassword(event.target.value) }}
-      onKeyUp={onKeyUp}
       required
       autoFocus
       disabled={isLoggingIn}
@@ -77,11 +70,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
       }}
     />
 
-    <button
-      className={styles.LoginButton}
-      onClick={onClick}
-      disabled={isLoggingIn || password.length === 0}
-    >
+    <button className={styles.LoginButton} disabled={isLoggingIn || password.length === 0}>
       {isLoggingIn === avatar.name ? 'Connecting ...' : 'Login'}
     </button>
   </form>

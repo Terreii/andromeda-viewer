@@ -57,9 +57,7 @@ export default function NewAvatarLogin ({
   const isValid = isNameValid && name.length > 1 && isPwValid && gridIsValid
 
   const doLogin = event => {
-    if (event && event.preventDefault) {
-      event.preventDefault()
-    }
+    event.preventDefault()
 
     if (!isValid) return
 
@@ -75,13 +73,10 @@ export default function NewAvatarLogin ({
     onLogin(name, password, grid, save)
   }
 
-  const onKeyUp = event => {
-    if (event.keyCode === 13) {
-      doLogin(event)
-    }
-  }
-
-  return <form className={styles.NewAvatarLoginContainer + (isNewGrid ? ' ' + styles.high : '')}>
+  return <form
+    className={styles.NewAvatarLoginContainer + (isNewGrid ? ' ' + styles.high : '')}
+    onSubmit={doLogin}
+  >
     <h2 className={styles.Title}>
       {isSignedIn ? 'Add avatar or ' : ''}
       login anonymously
@@ -94,7 +89,6 @@ export default function NewAvatarLogin ({
       className={styles.NewNameInput}
       value={name}
       onChange={onNameChange}
-      onKeyUp={onKeyUp}
       disabled={isLoggingIn}
       minLength='1'
       required
@@ -117,7 +111,6 @@ export default function NewAvatarLogin ({
       className={styles.PasswordInput}
       value={password}
       onChange={onPasswordChange}
-      onKeyUp={onKeyUp}
       disabled={isLoggingIn}
       minLength='2'
       required
@@ -148,7 +141,6 @@ export default function NewAvatarLogin ({
           className={formElementsStyles.Input}
           value={gridName}
           onChange={onGridNameChange}
-          onKeyUp={onKeyUp}
           minLength='1'
           required
         />
@@ -162,7 +154,6 @@ export default function NewAvatarLogin ({
           placeholder='https://example.com/login'
           value={gridUrl}
           onChange={onGridUrlChange}
-          onKeyUp={onKeyUp}
           required
         />
       </div>
@@ -201,7 +192,6 @@ export default function NewAvatarLogin ({
     <button
       id='newAvatarLoginButton'
       className={styles.LoginButton}
-      onClick={doLogin}
       disabled={isLoggingIn || !isValid}
     >
       {isLoggingIn === name ? 'Connecting ...' : 'Login'}

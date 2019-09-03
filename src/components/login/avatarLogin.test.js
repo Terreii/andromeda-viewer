@@ -60,9 +60,7 @@ test('login works', () => {
   const input = rendered.find('input')
   const button = rendered.find('button')
 
-  input.simulate('keyUp', {
-    keyCode: 13
-  })
+  input.simulate('submit')
 
   // no password
   expect(button.prop('disabled')).toBeTruthy()
@@ -74,7 +72,7 @@ test('login works', () => {
     }
   })
 
-  button.simulate('click')
+  button.simulate('submit')
 
   expect(loginInfo.count).toBe(1)
   expect(loginInfo.avatar).toBe(avatar)
@@ -83,9 +81,7 @@ test('login works', () => {
   loginInfo.avatar = null
   loginInfo.password = null
 
-  input.simulate('keyUp', {
-    keyCode: 13
-  })
+  input.simulate('submit')
 
   expect(loginInfo.count).toBe(2)
   expect(loginInfo.avatar).toBe(avatar)
