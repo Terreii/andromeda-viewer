@@ -11,25 +11,19 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
   }, [isSelected])
 
   if (!isSelected) {
-    const onSetActive = event => {
-      event.preventDefault()
-      onSelect(avatar.avatarIdentifier)
-    }
-
     return <form
       className={`${styles.AvatarLoginContainer} ${styles['not-selected']}`}
-      onClick={onSetActive}
-      onKeyUp={event => {
-        if (event.keyCode === 13) {
-          onSetActive(event)
-        }
+      onSubmit={event => {
+        event.preventDefault()
+        onSelect(avatar.avatarIdentifier)
       }}
-      tabIndex='0'
     >
-      <span className={styles.Name}>{new AvatarName(avatar.name).getDisplayName()}</span>
-      <span className={styles.Grid}>@{grid.name}</span>
+      <button className={styles.HiddenButton}>
+        <span className={styles.Name}>{new AvatarName(avatar.name).getDisplayName()}</span>
+        <span className={styles.Grid}>@{grid.name}</span>
 
-      <span className={styles.ActiveText}>click to login</span>
+        <span className={styles.ActiveText}>click to login</span>
+      </button>
     </form>
   }
 

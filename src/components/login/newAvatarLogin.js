@@ -29,24 +29,18 @@ export default function NewAvatarLogin ({
   const [isGridLLSD, setIsGridLLSD] = useState(true)
 
   if (!isSelected) {
-    const onSetActive = event => {
-      event.preventDefault()
-      onSelect('new')
-    }
-
     return <form
       className={`${styles.NewAvatarLoginContainer} ${styles['not-selected']}`}
-      onClick={onSetActive}
-      onKeyUp={event => {
-        if (event.keyCode === 13) {
-          onSetActive(event)
-        }
+      onSubmit={event => {
+        event.preventDefault()
+        onSelect('new')
       }}
-      tabIndex='0'
     >
-      <h2 className={styles.Title}>Add avatar or login anonymously</h2>
+      <button className={styles.HiddenButton}>
+        <h2 className={styles.Title}>Add avatar or login anonymously</h2>
 
-      <span className={styles.ActiveText}>click to add</span>
+        <span className={styles.ActiveText}>click to add</span>
+      </button>
     </form>
   }
 
