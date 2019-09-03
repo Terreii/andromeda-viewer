@@ -51,9 +51,7 @@ test('unlock with return key', () => {
     'If you did forget your encryption-password?Reset password'
   )
 
-  pwInput.simulate('keyDown', {
-    keyCode: 13
-  })
+  pwInput.simulate('submit')
   expect(unlockEvents.count).toBe(0) // empty input doesn't unlock
   expect(rendered.find('small').at(1).text()).toBe('No password was entered jet!')
 
@@ -63,9 +61,7 @@ test('unlock with return key', () => {
     }
   })
 
-  pwInput.simulate('keyDown', {
-    keyCode: 13
-  })
+  pwInput.simulate('submit')
   expect(unlockEvents).toEqual({
     count: 1,
     lastPassword: 'aPassword',
@@ -117,7 +113,7 @@ test('unlock with button', () => {
     'If you did forget your encryption-password?Reset password'
   )
 
-  unlockButton.simulate('click')
+  unlockButton.simulate('submit')
   expect(unlockEvents.count).toBe(0) // empty input doesn't unlock
   expect(rendered.find('small').at(1).text()).toBe('No password was entered jet!')
 
@@ -126,7 +122,7 @@ test('unlock with button', () => {
       value: 'aPassword'
     }
   })
-  unlockButton.simulate('click')
+  unlockButton.simulate('submit')
   expect(unlockEvents).toEqual({
     count: 1,
     lastPassword: 'aPassword',
