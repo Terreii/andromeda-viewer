@@ -115,7 +115,7 @@ test('should call onChangePassword only if the input is valid', () => {
   updateInputs('2309ab6d30b8f201cd20fa9edead0b20', 'password', 'password')
   expect(getChangePwButton().prop('disabled')).toBe(false)
 
-  getChangePwButton().simulate('click')
+  getChangePwButton().simulate('submit')
   expect(cancelCount).toBe(0)
   expect(signOutCount).toBe(0)
   expect(changePwCount).toBe(1)
