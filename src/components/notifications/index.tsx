@@ -6,6 +6,7 @@ import GroupInvitation from './groupInvitation'
 import GroupNotice from './groupNotice'
 import LoadURL from './loadURL'
 import RequestTeleportLure from './requestTeleportLure'
+import TeleportLure from './teleportLure'
 
 import { NotificationTypes, Notification } from '../../types/chat'
 import { AssetType } from '../../types/inventory'
@@ -21,6 +22,8 @@ interface NotificationArgs {
   acceptGroupNoticeItem: (target: string, transactionId: string, assetType: AssetType) => void
   declineGroupNoticeItem: (target: string, transactionId: string) => void
   offerTeleport: (target: string) => void
+  acceptTeleportLure: (fromId: string, sessionId: string) => void
+  declineTeleportLure: (fromId: string, sessionId: string) => void
   onClose: (id: number) => void
 }
 
@@ -33,6 +36,8 @@ export default function notificationsList ({
   acceptGroupNoticeItem,
   declineGroupNoticeItem,
   offerTeleport,
+  acceptTeleportLure,
+  declineTeleportLure,
   onClose
 }: NotificationArgs) {
   return <main className={infoListStyles.Container} aria-label='Notifications'>
@@ -88,6 +93,15 @@ export default function notificationsList ({
               key={notification.id}
               data={notification}
               onAccept={offerTeleport}
+              onClose={doClose}
+            />
+
+          case NotificationTypes.TeleportLure:
+            return <TeleportLure
+              key={notification.id}
+              data={notification}
+              onAccept={acceptTeleportLure}
+              onDecline={declineTeleportLure}
               onClose={doClose}
             />
 

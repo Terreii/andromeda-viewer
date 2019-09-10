@@ -6,7 +6,9 @@ import { closeNotification } from '../actions/chatMessageActions'
 import {
   acceptFriendshipOffer,
   declineFriendshipOffer,
-  offerTeleportLure
+  offerTeleportLure,
+  acceptTeleportLure,
+  declineTeleportLure
 } from '../actions/friendsActions'
 import {
   acceptGroupInvitation,
@@ -31,7 +33,9 @@ export default function NotificationsContainer (props) {
     declineGroupInvitation,
     acceptGroupNoticeItem,
     declineGroupNoticeItem,
-    offerTeleport: offerTeleportLure
+    offerTeleport: offerTeleportLure,
+    acceptTeleportLure,
+    declineTeleportLure
   }, dispatch)
 
   return <NotificationsView
@@ -43,6 +47,8 @@ export default function NotificationsContainer (props) {
     acceptGroupNoticeItem={actions.acceptGroupNoticeItem}
     declineGroupNoticeItem={actions.declineGroupNoticeItem}
     offerTeleport={actions.offerTeleport}
+    acceptTeleportLure={actions.acceptTeleportLure}
+    declineTeleportLure={actions.declineTeleportLure}
     onClose={actions.closeNotification}
   />
 }

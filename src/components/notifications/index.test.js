@@ -4,6 +4,7 @@ import { mount } from 'enzyme'
 
 import { NotificationTypes } from '../../types/chat'
 import { AssetType } from '../../types/inventory'
+import { Maturity } from '../../types/viewer'
 
 import Notifications from './index'
 
@@ -374,6 +375,72 @@ test('renders a request teleport lure', () => {
   expect(onClose.mock.calls[1][0]).toBe(1)
 })
 
+test('renders a teleport lure', () => {
+  const onAccept = jest.fn()
+  const onDecline = jest.fn()
+  const onClose = jest.fn()
+
+  const agentName = 'Tester MacTestface'
+  const senderId = 'abcdef'
+  const lureId = 'fedcba'
+
+  const rendered = mount(<Notifications
+    notifications={[
+      {
+        id: 1,
+        notificationType: NotificationTypes.TeleportLure,
+        text: 'Join me at my location!',
+        fromId: senderId,
+        fromAgentName: agentName,
+        lureId,
+        regionId: [123, 123],
+        position: [28, 29, 30],
+        lockAt: [0, 1, 2],
+        maturity: Maturity.General,
+        godLike: false
+      }
+    ]}
+    acceptTeleportLure={onAccept}
+    declineTeleportLure={onDecline}
+    onClose={onClose}
+  />)
+
+  expect(rendered).toIncludeText(`${agentName} has offered to teleport you to their location.`)
+
+  const buttons = rendered.find('button')
+  expect(buttons.length).toBe(2)
+
+  // Accept
+  buttons.at(0).simulate('click')
+  expect(buttons.at(0)).toIncludeText('Accept (not jet implemented)')
+  expect(buttons.at(0).prop('disabled')).toBeTruthy()
+
+  expect(onAccept.mock.calls.length).toBe(0)
+  // expect(onAccept.mock.calls[0]).toEqual([
+  //   senderId,
+  //   lureId
+  // ])
+
+  expect(onDecline.mock.calls.length).toBe(0)
+
+  expect(onClose.mock.calls.length).toBe(0)
+
+  // Decline
+  buttons.at(1).simulate('click')
+  expect(buttons.at(1)).toIncludeText('Decline')
+
+  expect(onAccept.mock.calls.length).toBe(0)
+
+  expect(onDecline.mock.calls.length).toBe(1)
+  expect(onDecline.mock.calls[0]).toEqual([
+    senderId,
+    lureId
+  ])
+
+  expect(onClose.mock.calls.length).toBe(1)
+  expect(onClose.mock.calls[0][0]).toBe(1)
+})
+
 test('should pass aXe', async () => {
   const allNotifications = [
     {
@@ -446,6 +513,19 @@ test('should pass aXe', async () => {
       text: 'Please teleport me to you.',
       fromId: 'abcd',
       fromAgentName: 'Tester'
+    },
+    {
+      id: 8,
+      notificationType: NotificationTypes.TeleportLure,
+      text: 'Join me at my location!',
+      fromId: 'abcdef',
+      fromAgentName: 'Tester MacTestface',
+      lureId: 'fedcba',
+      regionId: [123, 123],
+      position: [28, 29, 30],
+      lockAt: [0, 1, 2],
+      maturity: Maturity.General,
+      godLike: false
     }
   ]
 

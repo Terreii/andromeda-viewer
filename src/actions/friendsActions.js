@@ -1,11 +1,13 @@
 import { fetchLLSD } from './llsd'
 
 import { getFolderForAssetType } from '../selectors/inventory'
-import { getNames, getDisplayNamesURL } from '../selectors/names'
+import { getNames, getDisplayNamesURL, getOwnAvatarName } from '../selectors/names'
 import { getFriends, getFriendById } from '../selectors/people'
 import { getAgentId, getSessionId } from '../selectors/session'
 
+import { IMDialog } from '../types/chat'
 import { AssetType } from '../types/inventory'
+import { TeleportFlags } from '../types/people'
 
 function sendUUIDNameRequest (ids) {
   return (dispatch, getState, { circuit }) => {
@@ -193,6 +195,46 @@ export function offerTeleportLure (target, message = null) {
       TargetData: [
         {
           TargetID: target
+        }
+      ]
+    }, true)
+  }
+}
+
+export function acceptTeleportLure (targetId, lureId) {
+  return (dispatch, getState, { circuit }) => {
+    const activeState = getState()
+
+    circuit.send('TeleportLureRequest', {
+      Info: [
+        {
+          AgentID: getAgentId(activeState),
+          SessionID: getSessionId(activeState),
+          LureID: lureId,
+          TeleportFlags: TeleportFlags.viaLure
+        }
+      ]
+    }, true)
+  }
+}
+
+export function declineTeleportLure (targetId, lureId) {
+  return (dispatch, getState, { circuit }) => {
+    const activeState = getState()
+
+    circuit.send('ImprovedInstantMessage', {
+      AgentData: [
+        {
+          AgentID: getAgentId(activeState),
+          SessionID: getSessionId(activeState)
+        }
+      ],
+      MessageBlock: [
+        {
+          FromAgentName: getOwnAvatarName(activeState).getFullName(),
+          ToAgentID: targetId,
+          ID: lureId,
+          Dialog: IMDialog.DenyTeleport
         }
       ]
     }, true)

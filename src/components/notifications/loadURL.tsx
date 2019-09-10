@@ -13,7 +13,7 @@ interface NotificationArgs {
 }
 
 export default function LoadURL ({ data, onClose }: NotificationArgs) {
-  const href = data.url.toString().replace(/^javascript\:/i, '')
+  const href = data.url.toString().replace(/^javascript:/i, '')
 
   return <Container title={`${data.fromAgentName} did send you and URL`}>
     <Text text={data.text} />

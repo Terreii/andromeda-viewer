@@ -13,3 +13,40 @@ export interface Friend {
   // Friend has given me rights
   rightsHas: FriendRights
 }
+
+export enum TeleportFlags {
+  /** No flags set, or teleport failed */
+  default = 0,
+  /** Set when a newbie leaves help island for the first time */
+  setHomeToTarget = 1 << 0,
+  /** Unknown */
+  setLastToTarget = 1 << 1,
+  viaLure = 1 << 2,
+  viaLandmark = 1 << 3,
+  viaLocation = 1 << 4,
+  viaHome = 1 << 5,
+  viaTelehub = 1 << 6,
+  viaLogin = 1 << 7,
+  /** Linden did send a lure */
+  viaGodLikeLure = 1 << 8,
+  /** Linden forced teleport */
+  godLike = 1 << 9,
+  nineOneOne = 1 << 10,
+  /** A script did teleport the agent hone */
+  disableCancel = 1 << 11,
+  viaRegionId = 1 << 12,
+  isFlying = 1 << 13,
+  resetHome = 1 << 14,
+  /** 
+   * Forced to a new location.
+   * 
+   * This can happen for example if the avatar is banned or ejected.
+   */
+  forceRedirect = 1 << 15,
+  /** Teleport did finish via a lure. */
+  finishedViaLure = 1 << 26,
+  /** Finished and Sim was changed. */
+  finishedViaNewSim = 1 << 28,
+  /** Finished and Sim was not changed. */
+  finishedViaSameSim = 1 << 29
+}
