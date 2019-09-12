@@ -11,29 +11,23 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
   }, [isSelected])
 
   if (!isSelected) {
-    const onSetActive = event => {
-      event.preventDefault()
-      onSelect(avatar.avatarIdentifier)
-    }
-
     return <form
       className={`${styles.AvatarLoginContainer} ${styles['not-selected']}`}
-      onClick={onSetActive}
-      onKeyUp={event => {
-        if (event.keyCode === 13 || event.keyCode === 32) {
-          onSetActive(event)
-        }
+      onSubmit={event => {
+        event.preventDefault()
+        onSelect(avatar.avatarIdentifier)
       }}
-      tabIndex='0'
     >
-      <span className={styles.Name}>{new AvatarName(avatar.name).getDisplayName()}</span>
-      <span className={styles.Grid}>@{grid.name}</span>
+      <button className={styles.HiddenButton}>
+        <span className={styles.Name}>{new AvatarName(avatar.name).getDisplayName()}</span>
+        <span className={styles.Grid}>@{grid.name}</span>
 
-      <span className={styles.ActiveText}>click to login</span>
+        <span className={styles.ActiveText}>click to login</span>
+      </button>
     </form>
   }
 
-  const onClick = event => {
+  const onSubmit = event => {
     event.preventDefault()
 
     if (password.length > 0) {
@@ -41,16 +35,10 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
     }
   }
 
-  const onKeyUp = event => {
-    if (event.keyCode === 13) {
-      onClick(event)
-    }
-  }
-
   const avatarName = new AvatarName(avatar.name).getDisplayName()
   const passwordInputId = `passwordFor${avatar.avatarIdentifier}`
 
-  return <form className={styles.AvatarLoginContainer}>
+  return <form className={styles.AvatarLoginContainer} onSubmit={onSubmit}>
     <h2 className={styles.Name}>{avatarName}</h2>
     <span className={styles.Grid}>@{grid.name}</span>
 
@@ -61,7 +49,6 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
       className={styles.PasswordInput}
       value={password}
       onChange={event => { setPassword(event.target.value) }}
-      onKeyUp={onKeyUp}
       required
       autoFocus
       disabled={isLoggingIn}
@@ -77,11 +64,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
       }}
     />
 
-    <button
-      className={styles.LoginButton}
-      onClick={onClick}
-      disabled={isLoggingIn || password.length === 0}
-    >
+    <button className={styles.LoginButton} disabled={isLoggingIn || password.length === 0}>
       {isLoggingIn === avatar.name ? 'Connecting ...' : 'Login'}
     </button>
   </form>

@@ -119,7 +119,7 @@ test('click actions', async () => {
     }
 
     shouldCallSend = true
-    popup.find('button').last().simulate('click')
+    popup.find('button').last().simulate('submit')
 
     popup.update()
 

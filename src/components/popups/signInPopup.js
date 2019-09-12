@@ -49,14 +49,8 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
       })
   }
 
-  const onKeyPress = event => {
-    if (event.key === 'Enter') {
-      send(event)
-    }
-  }
-
   return <Popup title={isSignUp ? 'Sign up' : 'Sign in'} onClose={onCancel}>
-    <form className={styles.Container}>
+    <form className={styles.Container} onSubmit={send}>
       <div className={formStyles.FormField}>
         <label htmlFor='username'>
           Username / email:
@@ -71,7 +65,6 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
             setUsername(event.target.value)
             setUsernameValid(event.target.validity.valid)
           }}
-          onKeyPress={onKeyPress}
           placeholder='me-avatar@example.com'
           autoFocus
           required
@@ -94,7 +87,6 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
           type='password'
           className={formStyles.Input}
           autoComplete={isSignUp ? 'new-password' : 'current-password'}
-          onKeyPress={onKeyPress}
           required
           minLength='8'
           aria-describedby={isSignUp && 'passwordHelp'}
@@ -126,7 +118,6 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
           type='password'
           className={formStyles.Input}
           autoComplete='new-password'
-          onKeyPress={onKeyPress}
           required
           minLength='8'
           disabled={isSigningIn}
@@ -150,7 +141,6 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
           id='cryptoPassword'
           type='password'
           className={formStyles.Input}
-          onKeyPress={onKeyPress}
           required
           minLength='8'
           aria-describedby={isSignUp && 'cryptoPwHelp'}
@@ -177,7 +167,6 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
           id='cryptoPassword2'
           type='password'
           className={formStyles.Input}
-          onKeyPress={onKeyPress}
           required
           minLength='8'
           disabled={isSigningIn}
@@ -198,6 +187,7 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
 
       <div className={styles.ButtonsContainer}>
         <button
+          type='button'
           className={formStyles.SecondaryButton}
           onClick={onCancel}
           disabled={isSigningIn}
@@ -207,7 +197,6 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
         </button>
         <button
           className={formStyles.OkButton}
-          onClick={send}
           disabled={!isValid || isSigningIn}
           onFocus={onFocusScrollIntoView}
         >
