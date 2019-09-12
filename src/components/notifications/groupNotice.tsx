@@ -2,6 +2,8 @@ import React from 'react'
 
 import { Container, Text } from './utils'
 
+import { useName, useGroupName } from '../../hooks/names'
+
 import { GroupNoticeNotification } from '../../types/chat'
 import { AssetType, getItemTypeName } from '../../types/inventory'
 
@@ -25,7 +27,12 @@ interface NotificationArgs {
 }
 
 export default function GroupNotice ({ data, onAccept, onDecline, onClose }: NotificationArgs) {
-  return <Container title={data.title}>
+  const name = useName(data.senderId) || ''
+  const groupName = useGroupName(data.groupId)
+
+  return <Container title={`Group Notice from ${groupName} - ${data.title}`}>
+    <small>send by {name.toString()}</small>
+
     <Text text={data.text} />
 
     {data.item && <div>

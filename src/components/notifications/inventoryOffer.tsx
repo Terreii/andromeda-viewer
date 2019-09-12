@@ -2,6 +2,8 @@ import React from 'react'
 
 import { Container, Text } from './utils'
 
+import { useName } from '../../hooks/names'
+
 import { InventoryOfferedNotification } from '../../types/chat'
 import { AssetType, getItemTypeName } from '../../types/inventory'
 
@@ -39,9 +41,9 @@ export default function InventoryOffer ({ data, onAccept, onDecline, onClose }: 
   const itemTypeName = getItemTypeName(data.item.type)
   const a = ['a', 'e', 'i', 'o', 'u'].includes(itemTypeName.charAt(0).toLowerCase()) ? 'an' : 'a'
 
-  return <Container
-    title={`${data.fromName} did offer you ${a} ${itemTypeName} item.`}
-  >
+  const name = useName(data.fromId)
+
+  return <Container title={`${name} did offer you ${a} ${itemTypeName} item.`}>
     <Text text={data.text} />
 
     <div className={styles.ButtonsRow}>

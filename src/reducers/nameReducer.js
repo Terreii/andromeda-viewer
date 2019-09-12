@@ -5,6 +5,8 @@
 import AvatarName from '../avatarName'
 import { mapBlockOf } from '../network/msgGetters'
 
+import { NotificationTypes } from '../types/chat'
+
 // Only adds a Name to names if it is new or did change
 function addName (state, uuid, name) {
   const updated = new AvatarName(name)
@@ -120,6 +122,36 @@ function namesReducer (state = {}, action) {
         return names
       }, { ...state })
 
+    case 'NOTIFICATION_RECEIVED':
+      if ([
+        NotificationTypes.FriendshipOfferNotification,
+        NotificationTypes.GroupNoticeNotification,
+        NotificationTypes.LoadURL,
+        NotificationTypes.RequestTeleportLure,
+        NotificationTypes.TeleportLure,
+        NotificationTypes.InventoryOffered
+      ].some(type => type === action.msg.notificationType)) {
+        const notification = action.msg
+        const type = notification.notificationType
+
+        const id = type === NotificationTypes.GroupNotice
+          ? notification.senderId
+          : notification.fromId
+
+        let name
+        if (type === NotificationTypes.InventoryOffered) {
+          name = notification.fromName
+        } else if (type === NotificationTypes.GroupNotice) {
+          name = notification.senderName
+        } else {
+          name = notification.fromAgentName
+        }
+
+        return addName(state, id, name)
+      } else {
+        return state
+      }
+
     default:
       return state
   }
@@ -139,9 +171,13 @@ export default function namesCoreReducer (state = { names: {}, getDisplayNamesUR
     case 'IMHistoryLoaded':
     case 'DisplayNamesStartLoading':
     case 'DisplayNamesLoaded':
+    case 'NOTIFICATION_RECEIVED':
+      const updated = namesReducer(state.names, action)
+      if (updated === state.names) return state
+
       return {
         ...state,
-        names: namesReducer(state.names, action)
+        names: updated
       }
 
     case 'SeedCapabilitiesLoaded':

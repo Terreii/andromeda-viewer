@@ -2,6 +2,8 @@ import React from 'react'
 
 import { Container, Text } from './utils'
 
+import { useName } from '../../hooks/names'
+
 import { FriendshipOfferNotification } from '../../types/chat'
 
 import formStyles from '../formElements.module.css'
@@ -25,7 +27,9 @@ export default function FriendshipOffer ({ data, onAccept, onDecline, onClose }:
     onClose()
   }
 
-  return <Container title={`${data.fromAgentName} has offered you friendship.`}>
+  const name = useName(data.fromId)
+
+  return <Container title={`${name} has offered you friendship.`}>
     <Text text={data.text} />
 
     <div className={styles.ButtonsRow}>

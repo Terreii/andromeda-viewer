@@ -2,6 +2,8 @@ import React from 'react'
 
 import { Container, Text } from './utils'
 
+import { useName } from '../../hooks/names'
+
 import { LoadURLNotification } from '../../types/chat'
 
 import formStyles from '../formElements.module.css'
@@ -15,7 +17,9 @@ interface NotificationArgs {
 export default function LoadURL ({ data, onClose }: NotificationArgs) {
   const href = data.url.toString().replace(/^javascript:/i, '')
 
-  return <Container title={`${data.fromAgentName} did send you an URL`}>
+  const name = useName(data.fromId)
+
+  return <Container title={`${name} did send you an URL`}>
     <Text text={data.text} />
 
     <div>

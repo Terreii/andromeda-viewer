@@ -2,6 +2,8 @@ import React from 'react'
 
 import { Container, Text } from './utils'
 
+import { useName } from '../../hooks/names'
+
 import { RequestTeleportLureNotification } from '../../types/chat'
 
 import formStyles from '../formElements.module.css'
@@ -13,14 +15,10 @@ interface NotificationArgs {
   onClose: () => void
 }
 
-export default function RequestTeleportLure ({
-  data,
-  onAccept,
-  onClose
-}: NotificationArgs) {
-  return <Container
-    title={data.fromAgentName + ' is requesting to be teleported to your location.'}
-  >
+export default function RequestTeleportLure ({ data, onAccept, onClose }: NotificationArgs) {
+  const name = useName(data.fromId)
+
+  return <Container title={`${name} is requesting to be teleported to your location.`}>
     <Text text={data.text} />
 
     <div className={styles.ButtonsRow}>

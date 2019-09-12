@@ -2,6 +2,9 @@ import { axe } from 'jest-axe'
 import React from 'react'
 import { mount } from 'enzyme'
 
+import AvatarName from '../../avatarName'
+import { useName, useGroupName } from '../../hooks/names'
+
 import { NotificationTypes } from '../../types/chat'
 import { AssetType } from '../../types/inventory'
 import { Maturity } from '../../types/viewer'
@@ -10,6 +13,12 @@ import Notifications from './index'
 
 global.Array.prototype.flatMap = jest.fn(function (fn) {
   return [].concat(this.map(fn))
+})
+
+jest.mock('../../hooks/names')
+const mockedName = 'Tester Mactestface'
+beforeEach(() => {
+  useName.mockReturnValueOnce(new AvatarName(mockedName))
 })
 
 test('renders without crashing', () => {
@@ -91,7 +100,7 @@ test('renders a friendship request', () => {
       notificationType: NotificationTypes.FriendshipOffer,
       text: 'I would like to by your friend!',
       fromId,
-      fromAgentName: 'Testy Tester',
+      fromAgentName: mockedName,
       sessionId
     }
   ]
@@ -201,6 +210,8 @@ test('renders a group invitation', () => {
 })
 
 test('renders a group notice', () => {
+  useGroupName.mockReturnValueOnce('Tester Group')
+
   const transactionId = 'transactionId'
   const groupId = 'group id'
   const senderId = 'dcba'
@@ -212,7 +223,7 @@ test('renders a group notice', () => {
       title: 'New stuff',
       text: 'Changes in this group:\n- a\n- b',
       groupId,
-      senderName: 'Tester',
+      senderName: mockedName,
       senderId,
       time: Date.now(),
       item: {
@@ -230,7 +241,7 @@ test('renders a group notice', () => {
       title: 'New stuff',
       text: 'Changes in this group:\n- a\n- b',
       groupId,
-      senderName: 'Tester',
+      senderName: mockedName,
       senderId,
       time: Date.now(),
       item: null
@@ -248,7 +259,7 @@ test('renders a group notice', () => {
     onClose={onClose}
   />)
 
-  expect(withItemRendered.find('h4').text()).toBe('New stuff')
+  expect(withItemRendered.find('h4').text()).toBe('Group Notice from Tester Group - New stuff')
   expect(withItemRendered.find('p').text()).toBe('Changes in this group:- a- b')
 
   const buttons = withItemRendered.find('button')
@@ -333,7 +344,6 @@ test('renders an open URL', () => {
 })
 
 test('renders a request teleport lure', () => {
-  const agentName = 'Tester'
   const senderId = '1234567890'
   const onAccept = jest.fn()
   const onClose = jest.fn()
@@ -345,14 +355,14 @@ test('renders a request teleport lure', () => {
         notificationType: NotificationTypes.RequestTeleportLure,
         text: 'Please teleport me to you.',
         fromId: senderId,
-        fromAgentName: agentName
+        fromAgentName: mockedName
       }
     ]}
     offerTeleport={onAccept}
     onClose={onClose}
   />)
 
-  expect(rendered).toIncludeText(agentName + ' is requesting to be teleported to your location.')
+  expect(rendered).toIncludeText(mockedName + ' is requesting to be teleported to your location.')
 
   const buttons = rendered.find('button')
   expect(buttons.length).toBe(2)
@@ -382,7 +392,6 @@ test('renders a teleport lure', () => {
   const onDecline = jest.fn()
   const onClose = jest.fn()
 
-  const agentName = 'Tester MacTestface'
   const senderId = 'abcdef'
   const lureId = 'fedcba'
 
@@ -393,7 +402,7 @@ test('renders a teleport lure', () => {
         notificationType: NotificationTypes.TeleportLure,
         text: 'Join me at my location!',
         fromId: senderId,
-        fromAgentName: agentName,
+        fromAgentName: mockedName,
         lureId,
         regionId: [123, 123],
         position: [28, 29, 30],
@@ -407,7 +416,7 @@ test('renders a teleport lure', () => {
     onClose={onClose}
   />)
 
-  expect(rendered).toIncludeText(`${agentName} has offered to teleport you to their location.`)
+  expect(rendered).toIncludeText(`${mockedName} has offered to teleport you to their location.`)
 
   const buttons = rendered.find('button')
   expect(buttons.length).toBe(2)
@@ -455,7 +464,7 @@ test('renders a inventory offer', () => {
       fromObject: false,
       fromGroup: false,
       fromId,
-      fromName: 'Tester MacTestface',
+      fromName: mockedName,
       item: {
         objectId: 'fedcba',
         type: AssetType.ImageJPEG,
