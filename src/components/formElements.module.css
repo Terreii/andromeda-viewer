@@ -19,6 +19,9 @@
   box-shadow: 0px 0px 0px 3px highlight;
   outline: none;
 }
+.Button:active {
+  background: #aeb0b3;
+}
 .Button:disabled {
   opacity: 0.65;
 }
@@ -31,6 +34,9 @@
 .DangerButton:hover, .DangerButton:focus {
   background: #c82333;
 }
+.DangerButton:active {
+  background: #b72332;
+}
 
 .OkButton {
   composes: Button;
@@ -39,6 +45,9 @@
 }
 .OkButton:hover, .OkButton:focus {
   background: #218838;
+}
+.OkButton:active {
+  background: #1f8235;
 }
 
 .PrimaryButton {
@@ -49,6 +58,9 @@
 .PrimaryButton:hover, .PrimaryButton:focus {
   background: #0c5a93;
 }
+.PrimaryButton:active {
+  background: #04497b;
+}
 
 .SecondaryButton {
   composes: Button;
@@ -57,6 +69,10 @@
 .SecondaryButton:hover, .SecondaryButton:focus {
   background: #868686;
 }
+.SecondaryButton:active {
+  background: #777676;
+}
+
 .TransparentButton {
   background: none;
   border: none;
