@@ -243,8 +243,8 @@ test('renders a group notice', () => {
 
   const withItemRendered = mount(<Notifications
     notifications={dataWithItem}
-    acceptGroupNoticeItem={onAccept}
-    declineGroupNoticeItem={onDecline}
+    acceptInventoryOffer={onAccept}
+    declineInventoryOffer={onDecline}
     onClose={onClose}
   />)
 
@@ -262,7 +262,8 @@ test('renders a group notice', () => {
   expect(onAccept.mock.calls[0]).toEqual([
     senderId,
     transactionId,
-    AssetType.ImageJPEG
+    AssetType.ImageJPEG,
+    true
   ])
 
   expect(onClose.mock.calls.length).toBe(1)
@@ -275,7 +276,8 @@ test('renders a group notice', () => {
   expect(onDecline.mock.calls.length).toBe(1)
   expect(onDecline.mock.calls[0]).toEqual([
     senderId,
-    transactionId
+    transactionId,
+    true
   ])
 
   expect(onClose.mock.calls.length).toBe(2)
@@ -441,6 +443,75 @@ test('renders a teleport lure', () => {
   expect(onClose.mock.calls[0][0]).toBe(1)
 })
 
+test('renders a inventory offer', () => {
+  const transactionId = 'transactionId'
+  const fromId = '5df644f5-8b12-4caf-8e91-d7cae057e5f2'
+
+  const allNotifications = [
+    {
+      id: 4,
+      notificationType: NotificationTypes.InventoryOffered,
+      text: 'Here is my offer!',
+      fromObject: false,
+      fromGroup: false,
+      fromId,
+      fromName: 'Tester MacTestface',
+      item: {
+        objectId: 'fedcba',
+        type: AssetType.ImageJPEG,
+        transactionId
+      }
+    }
+  ]
+
+  const onAccept = jest.fn()
+  const onDecline = jest.fn()
+  const onClose = jest.fn()
+
+  const rendered = mount(<Notifications
+    notifications={allNotifications}
+    acceptInventoryOffer={onAccept}
+    declineInventoryOffer={onDecline}
+    onClose={onClose}
+  />)
+
+  expect(rendered.find('p').text()).toBe('Here is my offer!')
+
+  const buttons = rendered.find('button')
+  expect(buttons.length).toBe(2)
+
+  // Accept
+  buttons.at(0).simulate('click')
+
+  expect(onAccept.mock.calls.length).toBe(1)
+  expect(onDecline.mock.calls.length).toBe(0)
+  expect(onAccept.mock.calls[0]).toEqual([
+    fromId,
+    transactionId,
+    AssetType.ImageJPEG,
+    false,
+    false
+  ])
+
+  expect(onClose.mock.calls.length).toBe(1)
+  expect(onClose.mock.calls[0][0]).toBe(4)
+
+  // Decline
+  buttons.at(1).simulate('click')
+
+  expect(onAccept.mock.calls.length).toBe(1)
+  expect(onDecline.mock.calls.length).toBe(1)
+  expect(onDecline.mock.calls[0]).toEqual([
+    fromId,
+    transactionId,
+    false,
+    false
+  ])
+
+  expect(onClose.mock.calls.length).toBe(2)
+  expect(onClose.mock.calls[1][0]).toBe(4)
+})
+
 test('should pass aXe', async () => {
   const allNotifications = [
     {
@@ -480,7 +551,7 @@ test('should pass aXe', async () => {
       text: 'Changes in this group:\n- a\n- b',
       groupId: 'abcd',
       senderName: 'Tester',
-      senderId: 'dcba',
+      senderId: '5df644f5-8b12-4caf-8e91-d7cae057e5f2',
       time: Date.now(),
       item: {
         name: 'itemName',
@@ -495,7 +566,7 @@ test('should pass aXe', async () => {
       text: 'Changes in this group:\n- a\n- b',
       groupId: 'abcd',
       senderName: 'Tester',
-      senderId: 'dcba',
+      senderId: '5df644f5-8b12-4caf-8e91-d7cae057e5f2',
       time: Date.now(),
       item: null
     },
@@ -511,14 +582,14 @@ test('should pass aXe', async () => {
       id: 7,
       notificationType: NotificationTypes.RequestTeleportLure,
       text: 'Please teleport me to you.',
-      fromId: 'abcd',
+      fromId: '5df644f5-8b12-4caf-8e91-d7cae057e5f2',
       fromAgentName: 'Tester'
     },
     {
       id: 8,
       notificationType: NotificationTypes.TeleportLure,
       text: 'Join me at my location!',
-      fromId: 'abcdef',
+      fromId: '5df644f5-8b12-4caf-8e91-d7cae057e5f2',
       fromAgentName: 'Tester MacTestface',
       lureId: 'fedcba',
       regionId: [123, 123],
@@ -526,6 +597,20 @@ test('should pass aXe', async () => {
       lockAt: [0, 1, 2],
       maturity: Maturity.General,
       godLike: false
+    },
+    {
+      id: 9,
+      notificationType: NotificationTypes.InventoryOffered,
+      text: 'Here is my offer!',
+      fromObject: false,
+      fromGroup: false,
+      fromId: '5df644f5-8b12-4caf-8e91-d7cae057e5f2',
+      fromName: 'Tester MacTestface',
+      item: {
+        objectId: 'fedcba',
+        type: AssetType.ImageJPEG,
+        transactionId: 'xyz'
+      }
     }
   ]
 

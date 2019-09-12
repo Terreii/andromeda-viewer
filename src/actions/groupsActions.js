@@ -1,10 +1,8 @@
 // All group related actions
 
 import { startNewIMChat } from './chatMessageActions'
-import { UUID as LLUUID } from '../llsd'
 
 import { getAgentId, getSessionId } from '../selectors/session'
-import { getFolderForAssetType } from '../selectors/inventory'
 import { getOwnAvatarName } from '../selectors/names'
 import { getPosition } from '../selectors/region'
 
@@ -88,58 +86,6 @@ export function declineGroupInvitation (transactionId, groupId) {
         {
           ToAgentID: groupId,
           Dialog: IMDialog.GroupInvitationDecline,
-          ID: transactionId,
-          Timestamp: Math.floor(Date.now() / 1000),
-          FromAgentName: getOwnAvatarName(activeState).getFullName()
-        }
-      ]
-    }, true)
-  }
-}
-
-export function acceptGroupNoticeItem (target, transactionId, assetType) {
-  return (dispatch, getState, { circuit }) => {
-    const activeState = getState()
-
-    const folderId = getFolderForAssetType(activeState, assetType)
-    const bucket = new LLUUID(folderId).getOctets()
-
-    circuit.send('ImprovedInstantMessage', {
-      AgentData: [
-        {
-          AgentID: getAgentId(activeState),
-          SessionID: getSessionId(activeState)
-        }
-      ],
-      MessageBlock: [
-        {
-          ToAgentID: target,
-          Dialog: IMDialog.GroupNoticeInventoryAccepted,
-          ID: transactionId,
-          Timestamp: Math.floor(Date.now() / 1000),
-          FromAgentName: getOwnAvatarName(activeState).getFullName(),
-          BinaryBucket: bucket
-        }
-      ]
-    }, true)
-  }
-}
-
-export function declineGroupNoticeItem (target, transactionId) {
-  return (dispatch, getState, { circuit }) => {
-    const activeState = getState()
-
-    circuit.send('ImprovedInstantMessage', {
-      AgentData: [
-        {
-          AgentID: getAgentId(activeState),
-          SessionID: getSessionId(activeState)
-        }
-      ],
-      MessageBlock: [
-        {
-          ToAgentID: target,
-          Dialog: IMDialog.GroupNoticeInventoryDeclined,
           ID: transactionId,
           Timestamp: Math.floor(Date.now() / 1000),
           FromAgentName: getOwnAvatarName(activeState).getFullName()

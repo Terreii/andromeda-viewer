@@ -7,6 +7,7 @@ import GroupNotice from './groupNotice'
 import LoadURL from './loadURL'
 import RequestTeleportLure from './requestTeleportLure'
 import TeleportLure from './teleportLure'
+import InventoryOffer from './inventoryOffer'
 
 import { NotificationTypes, Notification } from '../../types/chat'
 import { AssetType } from '../../types/inventory'
@@ -19,11 +20,22 @@ interface NotificationArgs {
   declineFriendship: (fromId: string, sessionId: string) => void
   acceptGroupInvite: (transactionId: string, groupId: string) => void
   declineGroupInvite: (transactionId: string, groupId: string) => void
-  acceptGroupNoticeItem: (target: string, transactionId: string, assetType: AssetType) => void
-  declineGroupNoticeItem: (target: string, transactionId: string) => void
   offerTeleport: (target: string) => void
   acceptTeleportLure: (fromId: string, sessionId: string) => void
   declineTeleportLure: (fromId: string, sessionId: string) => void
+  acceptInventoryOffer: (
+    fromId: string,
+    transactionId: string,
+    assetType: AssetType,
+    isFromGroup?: boolean,
+    isFromObject?: boolean
+  ) => void,
+  declineInventoryOffer: (
+    fromId: string,
+    transactionId: string,
+    isFromGroup?: boolean,
+    isFromObject?: boolean
+  ) => void
   onClose: (id: number) => void
 }
 
@@ -33,11 +45,11 @@ export default function notificationsList ({
   declineFriendship,
   acceptGroupInvite,
   declineGroupInvite,
-  acceptGroupNoticeItem,
-  declineGroupNoticeItem,
   offerTeleport,
   acceptTeleportLure,
   declineTeleportLure,
+  acceptInventoryOffer,
+  declineInventoryOffer,
   onClose
 }: NotificationArgs) {
   return <main className={infoListStyles.Container} aria-label='Notifications'>
@@ -76,8 +88,8 @@ export default function notificationsList ({
             return <GroupNotice
               key={notification.id}
               data={notification}
-              onAccept={acceptGroupNoticeItem}
-              onDecline={declineGroupNoticeItem}
+              onAccept={acceptInventoryOffer}
+              onDecline={declineInventoryOffer}
               onClose={doClose}
             />
 
@@ -105,7 +117,17 @@ export default function notificationsList ({
               onClose={doClose}
             />
 
-          default:
+          case NotificationTypes.InventoryOffered:
+            return <InventoryOffer
+              key={notification.id}
+              data={notification}
+              onAccept={acceptInventoryOffer}
+              onDecline={declineInventoryOffer}
+              onClose={doClose}
+            />
+
+          case NotificationTypes.ScriptDialog:
+          case NotificationTypes.Permissions:
             return <TextNotification
               key={notification.id}
               data={{
@@ -116,6 +138,9 @@ export default function notificationsList ({
               }}
               onClose={doClose}
             />
+
+          default:
+            throw new TypeError('unknown NotificationType')
         }
       })}
     </div>

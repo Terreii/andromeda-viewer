@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { bindActionCreators } from 'redux'
 import { useSelector, useDispatch } from 'react-redux'
 
@@ -10,33 +10,29 @@ import {
   acceptTeleportLure,
   declineTeleportLure
 } from '../actions/friendsActions'
-import {
-  acceptGroupInvitation,
-  declineGroupInvitation,
-  acceptGroupNoticeItem,
-  declineGroupNoticeItem
-} from '../actions/groupsActions'
+import { acceptGroupInvitation, declineGroupInvitation } from '../actions/groupsActions'
+import { acceptInventoryOffer, declineInventoryOffer } from '../actions/inventory'
 
 import { getNotifications } from '../selectors/chat'
 
 import NotificationsView from '../components/notifications'
 
-export default function NotificationsContainer (props) {
+export default function NotificationsContainer () {
   const notifications = useSelector(getNotifications)
   const dispatch = useDispatch()
 
-  const actions = bindActionCreators({
+  const actions = useMemo(() => bindActionCreators({
     closeNotification,
     acceptFriendshipOffer,
     declineFriendshipOffer,
     acceptGroupInvitation,
     declineGroupInvitation,
-    acceptGroupNoticeItem,
-    declineGroupNoticeItem,
+    acceptInventoryOffer,
+    declineInventoryOffer,
     offerTeleport: offerTeleportLure,
     acceptTeleportLure,
     declineTeleportLure
-  }, dispatch)
+  }, dispatch), [dispatch])
 
   return <NotificationsView
     notifications={notifications}
@@ -44,8 +40,8 @@ export default function NotificationsContainer (props) {
     declineFriendship={actions.declineFriendshipOffer}
     acceptGroupInvite={actions.acceptGroupInvitation}
     declineGroupInvite={actions.declineGroupInvitation}
-    acceptGroupNoticeItem={actions.acceptGroupNoticeItem}
-    declineGroupNoticeItem={actions.declineGroupNoticeItem}
+    acceptInventoryOffer={actions.acceptInventoryOffer}
+    declineInventoryOffer={actions.declineInventoryOffer}
     offerTeleport={actions.offerTeleport}
     acceptTeleportLure={actions.acceptTeleportLure}
     declineTeleportLure={actions.declineTeleportLure}

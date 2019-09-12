@@ -103,6 +103,29 @@ export enum AssetType {
   Mesh = 49
 }
 
+export function getItemTypeName (type: AssetType): string {
+  switch (type) {
+    case AssetType.ImageJPEG:
+    case AssetType.ImageTGA:
+      return 'Image'
+
+    case AssetType.TextureTGA:
+      return 'Texture'
+
+    case AssetType.LSLByteCode:
+    case AssetType.LSLText:
+    case AssetType.ObsoleteScript:
+      return 'LSL'
+
+    case AssetType.Sound:
+    case AssetType.SoundWAV:
+      return 'Sound'
+  
+    default:
+      return AssetType[type]
+  }
+}
+
 export enum FolderType {
   /**
    * None folder.

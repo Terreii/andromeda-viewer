@@ -3,39 +3,25 @@ import React from 'react'
 import { Container, Text } from './utils'
 
 import { GroupNoticeNotification } from '../../types/chat'
-import { AssetType } from '../../types/inventory'
+import { AssetType, getItemTypeName } from '../../types/inventory'
 
 import formStyles from '../formElements.module.css'
 import styles from './notifications.module.css'
 
 interface NotificationArgs {
   data: GroupNoticeNotification
-  onAccept: (target: string, transactionId: string, assetType: AssetType) => void
-  onDecline: (target: string, transactionId: string) => void
+  onAccept: (
+    fromId: string,
+    transactionId: string,
+    assetType: AssetType,
+    isFromGroup: boolean
+  ) => void
+  onDecline: (
+    fromId: string,
+    transactionId: string,
+    isFromGroup: boolean
+  ) => void
   onClose: () => void
-}
-
-function getItemTypeName (type: AssetType): string {
-  switch (type) {
-    case AssetType.ImageJPEG:
-    case AssetType.ImageTGA:
-      return 'Image'
-
-    case AssetType.TextureTGA:
-      return 'Texture'
-
-    case AssetType.LSLByteCode:
-    case AssetType.LSLText:
-    case AssetType.ObsoleteScript:
-      return 'LSL'
-
-    case AssetType.Sound:
-    case AssetType.SoundWAV:
-      return 'Sound'
-  
-    default:
-      return AssetType[type]
-  }
 }
 
 export default function GroupNotice ({ data, onAccept, onDecline, onClose }: NotificationArgs) {
@@ -53,7 +39,7 @@ export default function GroupNotice ({ data, onAccept, onDecline, onClose }: Not
       {data.item && <button
         className={formStyles.OkButton}
         onClick={() => {
-          onAccept(data.senderId, data.item!.transactionId, data.item!.type)
+          onAccept(data.senderId, data.item!.transactionId, data.item!.type, true)
           onClose()
         }}
       >
@@ -63,7 +49,7 @@ export default function GroupNotice ({ data, onAccept, onDecline, onClose }: Not
       {data.item && <button
         className={formStyles.DangerButton}
         onClick={() => {
-          onDecline(data.senderId, data.item!.transactionId)
+          onDecline(data.senderId, data.item!.transactionId, true)
           onClose()
         }}
       >
