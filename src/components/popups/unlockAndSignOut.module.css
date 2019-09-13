@@ -24,7 +24,7 @@
   flex-direction: row-reverse;
   justify-content: space-between;
   margin-top: .7em;
-  padding: .25em 0em;
+  padding: .25em 0.2em;
 }
 .ButtonsRow > button + button {
   margin-right: 2.75em;
