@@ -15,7 +15,7 @@ import { getGroupsIDs } from '../selectors/groups'
 import { getRegionId, getParentEstateID, getPosition } from '../selectors/region'
 
 import { Maturity } from '../types/viewer'
-import { IMDialog, NotificationTypes } from '../types/chat'
+import { IMDialog, IMChatType, NotificationTypes } from '../types/chat'
 
 export function changeTab (newTab) {
   return {
@@ -231,10 +231,14 @@ export function deleteOldLocalChat () {
 export function receiveIM (message) {
   return async (dispatch, getState) => {
     const state = getState()
+    const id = getValueOf(message, 'MessageBlock', 'ID')
+    const dialog = getValueOf(message, 'MessageBlock', 'Dialog')
+    const fromAgentName = getStringValueOf(message, 'MessageBlock', 'FromAgentName')
+    const fromId = getValueOf(message, 'AgentData', 'AgentID')
 
-    switch (getValueOf(message, 'MessageBlock', 'Dialog')) {
+    switch (dialog) {
       case IMDialog.SessionSend:
-        if (getGroupsIDs(state).includes(getValueOf(message, 'MessageBlock', 'ID'))) {
+        if (getGroupsIDs(state).includes(id)) {
           dispatch(handleGroupIM(message))
         } else {
           dispatch(handleConferenceIM(message))
@@ -242,13 +246,9 @@ export function receiveIM (message) {
         return
 
       case IMDialog.MessageFromAgent:
-        const id = getValueOf(message, 'MessageBlock', 'ID')
-
-        if (getStringValueOf(message, 'MessageBlock', 'FromAgentName') === 'Second Life') {
+        if (fromAgentName === 'Second Life') {
           dispatch(handleIMFromObject(message))
-        } else if (
-          getValueOf(message, 'AgentData', 'AgentID') === '00000000-0000-0000-0000-000000000000'
-        ) {
+        } else if (fromId === LLUUID.zero) {
           dispatch(handleSystemNotification(message))
         } else if (
           getValueOf(message, 'MessageBlock', 'FromGroup') ||
@@ -257,10 +257,8 @@ export function receiveIM (message) {
           dispatch(handleGroupIM(message))
         } else if (getValueOf(message, 'MessageBlock', 'BinaryBucket').length > 1) {
           dispatch(handleConferenceIM(message))
-        } else if (id === '00000000-0000-0000-0000-000000000000') {
+        } else if (id === LLUUID.zero) {
           const text = getStringValueOf(message, 'MessageBlock', 'Message')
-          const fromId = getValueOf(message, 'AgentData', 'AgentID')
-          const fromAgentName = getStringValueOf(message, 'MessageBlock', 'FromAgentName')
           dispatch(handleNotificationInChat(text, fromAgentName, fromId))
         } else {
           dispatch(handleIM(message))
@@ -284,7 +282,7 @@ export function receiveIM (message) {
       case IMDialog.FromTaskAsAlert:
         dispatch(handleTextOnlyNotification(
           getStringValueOf(message, 'MessageBlock', 'Message'),
-          getStringValueOf(message, 'MessageBlock', 'FromAgentName')
+          fromAgentName
         ))
         return
 
@@ -310,7 +308,7 @@ export function receiveIM (message) {
         return
 
       case IMDialog.FriendshipOffered:
-        if (getStringValueOf(message, 'MessageBlock', 'FromAgentName') === 'Second Life') {
+        if (fromAgentName === 'Second Life') {
           dispatch(handleIMFromObject(message))
         } else {
           dispatch(handleFriendshipOffer(message))
@@ -320,13 +318,11 @@ export function receiveIM (message) {
       case IMDialog.FriendshipAccepted:
       case IMDialog.FriendshipDeclined:
         {
-          const friendName = getStringValueOf(message, 'MessageBlock', 'FromAgentName')
-          const dialog = getValueOf(message, 'MessageBlock', 'Dialog')
           const acceptedText = dialog === IMDialog.FriendshipAccepted ? 'accepted' : 'declined'
           dispatch(handleNotificationInChat(
             `${acceptedText} your friendship offer.`,
-            friendName,
-            getValueOf(message, 'AgentData', 'AgentID')
+            fromAgentName,
+            fromId
           ))
         }
         return
@@ -342,13 +338,11 @@ export function receiveIM (message) {
       case IMDialog.InventoryAccepted:
       case IMDialog.InventoryDeclined:
         {
-          const agentName = getStringValueOf(message, 'MessageBlock', 'FromAgentName')
-          const dialog = getValueOf(message, 'MessageBlock', 'Dialog')
           const acceptedText = dialog === IMDialog.InventoryAccepted ? 'accepted' : 'declined'
           dispatch(handleNotificationInChat(
             `${acceptedText} your inventory offer.`,
-            agentName,
-            getValueOf(message, 'AgentData', 'AgentID')
+            fromAgentName,
+            fromId
           ))
         }
         return
@@ -358,10 +352,7 @@ export function receiveIM (message) {
     }
 
     const toAgentID = getValueOf(message, 'MessageBlock', 'ToAgentID')
-    const fromId = getValueOf(message, 'AgentData', 'AgentID')
     const time = getValueOf(message, 'MessageBlock', 'Timestamp')
-    const dialog = getValueOf(message, 'MessageBlock', 'Dialog')
-    const fromAgentName = getStringValueOf(message, 'MessageBlock', 'FromAgentName')
     const fromGroup = getValueOf(message, 'MessageBlock', 'FromGroup')
 
     const IMmsg = {
@@ -432,7 +423,7 @@ function handleIM (msg) {
       dispatch({
         type: 'CreateNewIMChat',
         _id: `${avatarSaveId}/imChatsInfos/${saveId}`,
-        chatType: 'personal',
+        chatType: IMChatType.personal,
         chatUUID: id,
         saveId,
         target: fromAgentId,
@@ -507,7 +498,7 @@ function handleConferenceIM (msg) {
       dispatch({
         type: 'CreateNewIMChat',
         _id: `${avatarSaveId}/imChatsInfos/${saveId}`,
-        chatType: 'conference',
+        chatType: IMChatType.conference,
         chatUUID: id,
         saveId,
         target: id,
@@ -542,7 +533,7 @@ function handleBusyAutoResponse (msg) {
     const id = getValueOf(msg, 'MessageBlock', 'ID')
 
     const chat = getIMChats(state)[id]
-    if (chat == null || chat.type !== 'personal') return
+    if (chat == null || chat.type !== IMChatType.personal) return
 
     const avatarSaveId = getAvatarDataSaveId(state)
     const time = new Date()
@@ -634,8 +625,7 @@ function handleGroupInvite (msg) {
     groupId: getValueOf(msg, 'AgentData', 'AgentID'),
     transactionId: id,
     name: 'Tester',
-    useOfflineCap: id === '00000000-0000-0000-0000-000000000000' &&
-      !getValueOf(msg, 'MessageBlock', 'Offline')
+    useOfflineCap: id === LLUUID.zero && !getValueOf(msg, 'MessageBlock', 'Offline')
   })
 }
 
@@ -949,7 +939,7 @@ export function startNewIMChat (dialog, targetId, name, activate = false) {
     const chatType = getIMChatTypeOfDialog(dialog)
     const chatUUID = calcChatUUID(chatType, targetId, getAgentId(getState()))
 
-    if (chatType === 'personal') {
+    if (chatType === IMChatType.personal) {
       try {
         name = getAvatarNameById(getState(), targetId.toString()).getName()
       } catch (error) {
@@ -1181,12 +1171,16 @@ function uuidXOR (idIn1, idIn2, correct = false) {
 
 // Create a new chatUUID from type, target-UUID & agentUUID
 function calcChatUUID (type, targetId, agentId) {
-  if (type === 'personal') {
-    return uuidXOR(agentId, targetId)
-  } else if (type === 'group' || type === 'conference') {
-    return targetId
-  } else {
-    throw new Error(`Chat type '${type}' not jet supported!`)
+  switch (type) {
+    case IMChatType.personal:
+      return uuidXOR(agentId, targetId)
+
+    case IMChatType.group:
+    case IMChatType.conference:
+      return targetId
+
+    default:
+      throw new Error(`Chat type '${type}' not jet supported!`)
   }
 }
 
@@ -1194,14 +1188,14 @@ function calcChatUUID (type, targetId, agentId) {
 export function getIMChatTypeOfDialog (dialog) {
   switch (dialog) {
     case 0:
-      return 'personal'
+      return IMChatType.personal
     case 15:
-      return 'group' // session with a group
+      return IMChatType.group
     case 13:
     case 14:
     case 16:
     case 17:
-      return 'conference' // session with multiple people
+      return IMChatType.conference
     default:
       return undefined
   }

@@ -1,12 +1,13 @@
 import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
 import { v4 as uuid } from 'uuid'
+import { UUID as LLUUID } from '../llsd'
 import mockdate from 'mockdate'
 
 import { receiveIM } from './chatMessageActions'
 
 import { Maturity } from '../types/viewer'
-import { IMDialog, NotificationTypes } from '../types/chat'
+import { IMDialog, IMChatType, NotificationTypes } from '../types/chat'
 import { AssetType } from '../types/inventory'
 
 const mockStore = configureMockStore([thunk])
@@ -54,7 +55,7 @@ describe('incoming IM handling', () => {
       {
         type: 'CreateNewIMChat',
         _id: 'saveId/imChatsInfos/abcdef',
-        chatType: 'personal',
+        chatType: IMChatType.personal,
         chatUUID: messageData.MessageBlock[0].ID,
         saveId: 'abcdef',
         target: messageData.AgentData[0].AgentID,
@@ -238,7 +239,7 @@ describe('incoming IM handling', () => {
     const createAction = {
       type: 'CreateNewIMChat',
       _id: 'saveId/imChatsInfos/abcdef',
-      chatType: 'conference',
+      chatType: IMChatType.conference,
       chatUUID: id,
       saveId: 'abcdef',
       target: id,
@@ -304,12 +305,12 @@ describe('incoming IM handling', () => {
         '01234567-8900-0000-0000-009876543210': {
           saveId: 'abcdef',
           chatUUID: '01234567-8900-0000-0000-009876543210',
-          type: 'personal'
+          type: IMChatType.personal
         },
         'some-none-existing-id': {
           saveId: 'something',
           chatUUID: 'some-none-existing-id',
-          type: 'group'
+          type: IMChatType.group
         }
       }
     })
@@ -357,7 +358,7 @@ describe('incoming IM handling', () => {
 
       // IMDialog.MessageFromAgent but with AgentID === '00000000-0000-0000-0000-000000000000'
       store.dispatch(receiveIM(createImPackage(IMDialog.MessageFromAgent, {
-        agentId: '00000000-0000-0000-0000-000000000000',
+        agentId: LLUUID.zero,
         message: 'An interesting message'
       })))
 
@@ -406,7 +407,7 @@ describe('incoming IM handling', () => {
 
       // IMDialog.MessageFromAgent with id === UUID.zero
       store.dispatch(receiveIM(createImPackage(IMDialog.MessageFromAgent, {
-        id: '00000000-0000-0000-0000-000000000000'
+        id: LLUUID.zero
       })))
 
       expect(store.getActions()).toEqual([
@@ -849,7 +850,7 @@ function createImPackage (dialog, data = {}) {
     AgentData: [
       {
         AgentID: data.agentId || '01234567-8900-0000-0000-000000000000',
-        SessionID: data.sessionId || '00000000-0000-0000-0000-000000000000'
+        SessionID: data.sessionId || LLUUID.zero
       }
     ],
     MessageBlock: [

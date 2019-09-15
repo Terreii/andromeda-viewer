@@ -2,25 +2,51 @@
  * Reduces all IM-Chats and IM-Messages
  */
 
-function imChat (state = {}, action) {
+import { IMChatType } from '../types/chat'
+
+function getDefaultImChat () {
+  return {
+    _id: null,
+    chatUUID: null,
+    saveId: null,
+    type: IMChatType.personal,
+    withId: null,
+    name: null,
+
+    didSaveChatInfo: false,
+    didLoadHistory: false,
+    isLoadingHistory: false,
+    active: false,
+    hasUnsavedMSG: false,
+    areTyping: new Set(),
+    messages: []
+  }
+}
+
+function imChat (state = getDefaultImChat(), action) {
   switch (action.type) {
     case 'CreateNewIMChat':
     case 'IMChatInfosLoaded':
       return {
         ...state,
-        _id: '_id' in state ? state._id : action._id,
+        _id: state._id || action._id,
         didSaveChatInfo: action.type === 'IMChatInfosLoaded',
         chatUUID: action.chatUUID,
         saveId: action.saveId,
         type: action.chatType,
         withId: action.target,
-        name: action.name,
-        didLoadHistory: state.didLoadHistory || false,
-        isLoadingHistory: state.isLoadingHistory || false,
-        active: state.active || false,
-        hasUnsavedMSG: state.hasUnsavedMSG || false,
-        areTyping: new Set(),
-        messages: 'messages' in state ? state.messages : []
+        name: action.name
+      }
+
+    case 'GROUP_CHAT_SESSIONS_STARTED':
+      return {
+        ...state,
+        _id: state._id || `${action.avatarDataSaveId}/imChatsInfos/${action.saveId}`,
+        chatUUID: state.chatUUID || action.id,
+        saveId: state.saveId || action.saveId,
+        type: IMChatType.group,
+        withId: action.id,
+        name: action.name
       }
 
     case 'startSavingIMChatInfo':
@@ -176,6 +202,16 @@ export default function IMReducer (state = {}, action) {
         const updatedChat = imChat(state[chat.chatUUID], innerAction)
         state[chat.chatUUID] = updatedChat
 
+        return state
+      }, { ...state })
+
+    case 'GROUP_CHAT_SESSIONS_STARTED':
+      return Object.keys(action.groups).reduce((state, groupId) => {
+        const chat = imChat(state[groupId], {
+          ...action,
+          ...action.groups[groupId]
+        })
+        state[groupId] = chat
         return state
       }, { ...state })
 

@@ -1,8 +1,7 @@
 // All group related actions
+import { v4 as uuid } from 'uuid'
 
-import { startNewIMChat } from './chatMessageActions'
-
-import { getAgentId, getSessionId } from '../selectors/session'
+import { getAgentId, getSessionId, getAvatarDataSaveId } from '../selectors/session'
 import { getOwnAvatarName } from '../selectors/names'
 import { getPosition } from '../selectors/region'
 
@@ -36,13 +35,20 @@ export function startGroupChat (groups) {
           }
         ]
       }, true)
-
-      dispatch(startNewIMChat(15, group.id, group.name))
     })
 
     dispatch({
-      type: 'ChatSessionsStarted',
-      chatUUIDs: groups.map(group => group.id)
+      type: 'GROUP_CHAT_SESSIONS_STARTED',
+      avatarDataSaveId: getAvatarDataSaveId(activeState),
+
+      groups: groups.reduce((obj, group) => {
+        obj[group.id] = {
+          id: group.id,
+          saveId: uuid(),
+          name: group.name
+        }
+        return obj
+      }, {})
     })
   }
 }

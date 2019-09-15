@@ -105,6 +105,13 @@ export interface LocalChatMessage extends HoodieObject {
 }
 
 // IMs
+
+export enum IMChatType {
+  personal,
+  group,
+  conference
+}
+
 /**
  * Represents a conversation.
  * 
@@ -114,7 +121,7 @@ export interface IMChat extends HoodieObject {
   didSaveChatInfo: boolean
   chatUUID: string
   saveId: string
-  type: 'personal' | 'group' | 'conference'
+  type: IMChatType
   withId: string
   name: string
   didLoadHistory: boolean
@@ -318,6 +325,8 @@ export interface InstantMessage extends HoodieObject {
   time: number
   binaryBucket?: Buffer
 }
+
+// Notifications
 
 /**
  * Abstract base interface for notifications.

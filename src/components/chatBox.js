@@ -12,6 +12,8 @@ import FriendsList from './friendsList'
 import GroupsList from './groupsList'
 import NotificationsContainer from '../containers/notificationsContainer'
 
+import { IMChatType, IMDialog } from '../types/chat'
+
 import 'rc-tabs/assets/index.css'
 import './chatBox.css'
 
@@ -24,7 +26,7 @@ export default function ChatBox (props) {
     const id = chat.chatUUID
     const target = chat.withId
     const type = chat.type
-    const name = type === 'personal'
+    const name = type === IMChatType.personal
       ? (target in names ? names[target].getName() : chat.name)
       : chat.name
 
@@ -32,7 +34,12 @@ export default function ChatBox (props) {
       <ChatDialog
         data={chat}
         isIM
-        sendTo={text => props.sendInstantMessage(text, target, id, type === 'personal' ? 0 : 17)}
+        sendTo={text => props.sendInstantMessage(
+          text,
+          target,
+          id,
+          type === IMChatType.personal ? IMDialog.MessageFromAgent : IMDialog.SessionSend
+        )}
         names={names}
         type={type}
         loadHistory={props.getIMHistory}

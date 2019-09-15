@@ -23,8 +23,8 @@ export default function groupsReducer (state = [], action) {
         listInProfile: udpListInProfile
       }))
 
-    case 'ChatSessionsStarted':
-      return state.map(group => action.chatUUIDs.includes(group.id)
+    case 'GROUP_CHAT_SESSIONS_STARTED':
+      return state.map(group => group.id in action.groups
         ? {
           ...group,
           sessionStarted: true
