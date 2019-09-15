@@ -53,76 +53,56 @@ export function sendLocalChatMessage (text, type, channel) {
   }
 }
 
-export function sendInstantMessage (text, to, id, dialog = 0) {
+export function sendInstantMessage (text, to, id, dialog = IMDialog.MessageFromAgent) {
   return async (dispatch, getState, { circuit }) => {
-    try {
-      const activeState = getState()
+    const activeState = getState()
 
-      const chat = getIMChats(activeState)[id]
+    const { name, type } = getIMChats(activeState)[id]
 
-      const agentID = getAgentId(activeState)
-      const sessionID = getSessionId(activeState)
-      const parentEstateID = getParentEstateID(activeState)
-      const regionID = getRegionId(activeState)
-      const position = getPosition(activeState)
-      const fromAgentName = getOwnAvatarName(activeState).getFullName()
-      const binaryBucket = dialog === 17
-        ? chat.name
-        : Buffer.from([])
-      const time = new Date()
+    const msg = {
+      AgentData: [
+        {
+          AgentID: getAgentId(activeState),
+          SessionID: getSessionId(activeState)
+        }
+      ],
+      MessageBlock: [
+        {
+          FromGroup: false,
+          ToAgentID: to,
+          ParentEstateID: getParentEstateID(activeState),
+          RegionID: getRegionId(activeState),
+          Position: getPosition(activeState),
+          Offline: 0,
+          Dialog: dialog,
+          ID: id,
+          Timestamp: Math.floor(Date.now() / 1000),
+          FromAgentName: getOwnAvatarName(activeState).getFullName(),
+          Message: text,
+          BinaryBucket: dialog === IMDialog.SessionSend
+            ? name
+            : Buffer.from([])
+        }
+      ]
+    }
 
-      circuit.send('ImprovedInstantMessage', {
-        AgentData: [
-          {
-            AgentID: agentID,
-            SessionID: sessionID
-          }
-        ],
-        MessageBlock: [
-          {
-            FromGroup: false,
-            ToAgentID: to,
-            ParentEstateID: parentEstateID,
-            RegionID: regionID,
-            Position: position,
-            Offline: 0,
-            Dialog: dialog,
-            ID: id,
-            Timestamp: Math.floor(time.getTime() / 1000),
-            FromAgentName: fromAgentName,
-            Message: text,
-            BinaryBucket: binaryBucket
-          }
-        ]
-      }, true)
+    await circuit.send('ImprovedInstantMessage', msg, true)
 
-      const chatSaveId = getIMChats(activeState)[id].saveId
-      const msg = {
-        _id: `${getAvatarDataSaveId(activeState)}/imChats/${chatSaveId}/${time.toJSON()}`,
-        chatUUID: id,
-        sessionID,
-        fromId: agentID,
-        fromGroup: false,
-        toAgentID: to,
-        parentEstateID,
-        regionID,
-        position,
-        offline: 0,
-        dialog: dialog,
-        id,
-        fromAgentName,
-        message: text,
-        binaryBucket,
-        time: time.getTime()
-      }
-      const actionData = {
-        type: 'SelfSendImprovedInstantMessage',
-        msg
-      }
+    switch (type) {
+      case IMChatType.personal:
+        dispatch(handleIM(msg))
+        break
 
-      dispatch(actionData)
-    } catch (e) {
-      console.error(e)
+      case IMChatType.group:
+        dispatch(handleGroupIM(msg))
+        break
+
+      case IMChatType.conference:
+        dispatch(handleConferenceIM(msg))
+        break
+
+      default:
+        throw new TypeError('Unknown chat type!')
     }
   }
 }

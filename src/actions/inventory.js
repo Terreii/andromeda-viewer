@@ -36,8 +36,8 @@ function handleInventoryOffer (
 
     let bucket
     if (isAccept) {
-      const folderId = getFolderForAssetType(activeState, assetType)
-      bucket = new LLUUID(folderId).getOctets()
+      const folder = getFolderForAssetType(activeState, assetType)
+      bucket = new LLUUID(folder.folderId).getOctets()
     } else {
       bucket = []
     }

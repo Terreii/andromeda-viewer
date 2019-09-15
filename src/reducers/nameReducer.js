@@ -20,16 +20,6 @@ function addName (state, uuid, name) {
   }
 }
 
-// Adds the names of the sending Avatar/Agent from IMs
-function addNameFromIM (state, msg) {
-  if (msg.dialog === 9) {
-    return state
-  }
-  const id = msg.fromId
-  const name = msg.fromAgentName
-  return addName(state, id, name)
-}
-
 // Adds the names of the sending Avatar/Agent from the local Chat
 function addNameFromLocalChat (state, msg) {
   if (msg.sourceType === 1) {
@@ -47,13 +37,12 @@ function namesReducer (state = {}, action) {
         ? state
         : addNameFromLocalChat(state, action.msg)
 
-    case 'ImprovedInstantMessage':
     case 'PERSONAL_IM_RECEIVED':
     case 'GROUP_IM_RECEIVED':
     case 'CONFERENCE_IM_RECEIVED':
       return action.msg.fromId in state
         ? state
-        : addNameFromIM(state, action.msg)
+        : addName(state, action.msg.fromId, action.msg.fromAgentName)
 
     case 'didLogin':
       const selfName = addName(state, action.uuid, action.name)
@@ -124,8 +113,8 @@ function namesReducer (state = {}, action) {
 
     case 'NOTIFICATION_RECEIVED':
       if ([
-        NotificationTypes.FriendshipOfferNotification,
-        NotificationTypes.GroupNoticeNotification,
+        NotificationTypes.FriendshipOffer,
+        NotificationTypes.GroupNotice,
         NotificationTypes.LoadURL,
         NotificationTypes.RequestTeleportLure,
         NotificationTypes.TeleportLure,
@@ -161,7 +150,6 @@ export default function namesCoreReducer (state = { names: {}, getDisplayNamesUR
   switch (action.type) {
     case '@@INIT':
     case 'ChatFromSimulator':
-    case 'ImprovedInstantMessage':
     case 'PERSONAL_IM_RECEIVED':
     case 'GROUP_IM_RECEIVED':
     case 'CONFERENCE_IM_RECEIVED':

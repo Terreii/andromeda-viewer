@@ -67,7 +67,6 @@ function imChat (state = getDefaultImChat(), action) {
       }
 
     case 'ImprovedInstantMessage':
-    case 'SelfSendImprovedInstantMessage':
     case 'PERSONAL_IM_RECEIVED':
     case 'GROUP_IM_RECEIVED':
     case 'CONFERENCE_IM_RECEIVED':
@@ -232,7 +231,6 @@ export default function IMReducer (state = {}, action) {
         }, { ...state })
 
     case 'ImprovedInstantMessage':
-    case 'SelfSendImprovedInstantMessage':
     case 'PERSONAL_IM_RECEIVED':
       // filter start/end typing
       if (action.msg.dialog === 41 || action.msg.dialog === 42) return state
