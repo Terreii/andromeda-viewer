@@ -25,7 +25,7 @@ function getDefaultImChat () {
 
 function imChat (state = getDefaultImChat(), action) {
   switch (action.type) {
-    case 'CreateNewIMChat':
+    case 'IM_CHAT_CREATED':
     case 'IMChatInfosLoaded':
       return {
         ...state,
@@ -66,7 +66,6 @@ function imChat (state = getDefaultImChat(), action) {
         active: true
       }
 
-    case 'ImprovedInstantMessage':
     case 'PERSONAL_IM_RECEIVED':
     case 'GROUP_IM_RECEIVED':
     case 'CONFERENCE_IM_RECEIVED':
@@ -185,7 +184,7 @@ function imChat (state = getDefaultImChat(), action) {
 
 export default function IMReducer (state = {}, action) {
   switch (action.type) {
-    case 'CreateNewIMChat':
+    case 'IM_CHAT_CREATED':
     case 'ActivateIMChat':
       return {
         ...state,
@@ -230,11 +229,7 @@ export default function IMReducer (state = {}, action) {
           return state
         }, { ...state })
 
-    case 'ImprovedInstantMessage':
     case 'PERSONAL_IM_RECEIVED':
-      // filter start/end typing
-      if (action.msg.dialog === 41 || action.msg.dialog === 42) return state
-
       const oldChat = state[action.msg.chatUUID]
       const updatedChat = imChat(oldChat, action)
 

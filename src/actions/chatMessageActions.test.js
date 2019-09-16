@@ -53,7 +53,7 @@ describe('incoming IM handling', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'CreateNewIMChat',
+        type: 'IM_CHAT_CREATED',
         _id: 'saveId/imChatsInfos/abcdef',
         chatType: IMChatType.personal,
         chatUUID: messageData.MessageBlock[0].ID,
@@ -237,7 +237,7 @@ describe('incoming IM handling', () => {
     })))
 
     const createAction = {
-      type: 'CreateNewIMChat',
+      type: 'IM_CHAT_CREATED',
       _id: 'saveId/imChatsInfos/abcdef',
       chatType: IMChatType.conference,
       chatUUID: id,
