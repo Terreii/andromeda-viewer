@@ -69,15 +69,12 @@ function imChat (state = getDefaultImChat(), action) {
     case 'PERSONAL_IM_RECEIVED':
     case 'GROUP_IM_RECEIVED':
     case 'CONFERENCE_IM_RECEIVED':
-      const msg = {
-        ...action.msg,
-        didSave: false
-      }
-      const messages = 'messages' in state ? state.messages : []
-      const nextMessages = messages.concat([msg])
       return {
         ...state,
-        messages: nextMessages,
+        messages: state.messages.concat([{
+          ...action.msg,
+          didSave: false
+        }]),
         active: true,
         hasUnsavedMSG: true
       }
@@ -115,7 +112,7 @@ function imChat (state = getDefaultImChat(), action) {
         didLoadHistory: action.didLoadAll
       }
 
-    case 'StartSavingIMMessages':
+    case 'INSTANT_MESSAGE_START_SAVING':
       let stillHasUnsaved = false
       const thisChat = action.chats[state.chatUUID]
 
@@ -137,7 +134,7 @@ function imChat (state = getDefaultImChat(), action) {
         hasUnsavedMSG: stillHasUnsaved
       }
 
-    case 'didSaveIMMessages':
+    case 'INSTANT_MESSAGE_DID_SAVE':
       const thisChatDidSave = action.chats[state.chatUUID]
       let stillHasUnsavedAfterSave = false
       const didSave = thisChatDidSave.saved.reduce((all, msg) => {
@@ -230,30 +227,23 @@ export default function IMReducer (state = {}, action) {
         }, { ...state })
 
     case 'PERSONAL_IM_RECEIVED':
-      const oldChat = state[action.msg.chatUUID]
+    case 'GROUP_IM_RECEIVED':
+    case 'CONFERENCE_IM_RECEIVED':
+      const idKey = {
+        PERSONAL_IM_RECEIVED: 'chatUUID',
+        GROUP_IM_RECEIVED: 'groupId',
+        CONFERENCE_IM_RECEIVED: 'conferenceId'
+      }[action.type]
+      const id = action[idKey]
+
+      const oldChat = state[id]
       const updatedChat = imChat(oldChat, action)
 
       return oldChat === updatedChat
         ? state
         : {
           ...state,
-          [action.msg.chatUUID]: updatedChat
-        }
-
-    case 'GROUP_IM_RECEIVED':
-    case 'CONFERENCE_IM_RECEIVED':
-      const id = action.type === 'GROUP_IM_RECEIVED'
-        ? action.groupId
-        : action.conferenceId
-
-      const oldChatData = state[id]
-      const updatedChatData = imChat(oldChatData, action)
-
-      return oldChatData === updatedChatData
-        ? state
-        : {
-          ...state,
-          [id]: updatedChatData
+          [id]: updatedChat
         }
 
     case 'IM_START_TYPING':
@@ -269,8 +259,8 @@ export default function IMReducer (state = {}, action) {
           [action.chatUUID]: newIMChatData
         }
 
-    case 'StartSavingIMMessages':
-    case 'didSaveIMMessages':
+    case 'INSTANT_MESSAGE_START_SAVING':
+    case 'INSTANT_MESSAGE_DID_SAVE':
       return Object.keys(action.chats).reduce((state, key) => {
         const newChatData = imChat(state[key], action)
         state[key] = newChatData

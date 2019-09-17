@@ -63,9 +63,9 @@ describe('incoming IM handling', () => {
       },
       {
         type: 'PERSONAL_IM_RECEIVED',
+        chatUUID: messageData.MessageBlock[0].ID,
         msg: {
           _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
-          chatUUID: messageData.MessageBlock[0].ID,
           fromAgentName: 'Tester',
           fromId: messageData.AgentData[0].AgentID,
           offline: 0,
@@ -107,9 +107,9 @@ describe('incoming IM handling', () => {
     expect(store.getActions()).toEqual([
       {
         type: 'PERSONAL_IM_RECEIVED',
+        chatUUID: messageData.MessageBlock[0].ID,
         msg: {
           _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
-          chatUUID: messageData.MessageBlock[0].ID,
           fromAgentName: 'Tester',
           fromId: messageData.AgentData[0].AgentID,
           offline: 0,

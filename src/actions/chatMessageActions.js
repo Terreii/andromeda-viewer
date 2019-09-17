@@ -362,9 +362,9 @@ function handleIM (msg) {
 
     dispatch({
       type: 'PERSONAL_IM_RECEIVED',
+      chatUUID: id,
       msg: {
         _id: `${avatarSaveId}/imChats/${chat.saveId}/${time.toJSON()}`,
-        chatUUID: id,
         fromAgentName,
         fromId: fromAgentId,
         offline: getValueOf(msg, 'MessageBlock', 'Offline'),
@@ -752,70 +752,37 @@ export function saveIMChatMessages () {
   return async (dispatch, getState, { hoodie }) => {
     const unsavedChats = Object.values(getIMChats(getState())).filter(chat => chat.hasUnsavedMSG)
 
-    const chatsToSave = []
     const savingIds = {}
-    const saveIdToChatId = {}
+    const idToChatId = new Map()
 
-    unsavedChats.forEach((chat, key) => {
-      const messages = chat.messages
-
+    const chatsToSave = unsavedChats.flatMap(chat => {
       const ids = []
       savingIds[chat.chatUUID] = ids
-      saveIdToChatId[chat.saveId] = chat.chatUUID
 
-      const toSaveMsg = messages.filter(msg => !msg.didSave).map(msg => {
-        ids.push(msg._id) // side-effect!
-
-        const dialog = msg.dialog
-
-        let binaryBucket
-        switch (dialog) {
-          case 0:
-          case 13:
-          case 14:
-          case 15:
-          case 16:
-          case 17:
-          case 18:
-            binaryBucket = undefined
-            break
-
-          default:
-            const theBucket = msg.binaryBucket
-            binaryBucket = theBucket != null && theBucket.toJSON().data.length > 1
-              ? theBucket
-              : undefined
-            break
-        }
+      return chat.messages.filter(msg => !msg.didSave).map(msg => {
+        // side-effects!
+        ids.push(msg._id)
+        idToChatId.set(msg._id, chat.chatUUID)
 
         return {
-          _id: msg._id,
-          _rev: msg._rev,
-          hoodie: msg.hoodie,
-          dialog,
-          fromId: msg.fromId,
-          fromAgentName: msg.fromAgentName,
-          message: msg.message,
-          time: msg.time,
-          binaryBucket
+          ...msg,
+          // add all fields that shouldn't be saved
+          didSave: undefined
         }
       })
-
-      chatsToSave.push(...toSaveMsg)
     })
 
     if (chatsToSave.length === 0) return
 
     dispatch({
-      type: 'StartSavingIMMessages',
+      type: 'INSTANT_MESSAGE_START_SAVING',
       chats: savingIds
     })
 
     const saved = await hoodie.cryptoStore.updateOrAdd(chatsToSave)
 
     const results = saved.reduce((all, msg, index) => {
-      const chatSaveId = chatsToSave[index]._id.split('/')[2]
-      const chatUUID = saveIdToChatId[chatSaveId]
+      const chatUUID = idToChatId.get(chatsToSave[index]._id) // use chatsToSave for errors
 
       let chat = all[chatUUID]
 
@@ -837,7 +804,7 @@ export function saveIMChatMessages () {
     }, {})
 
     dispatch({
-      type: 'didSaveIMMessages',
+      type: 'INSTANT_MESSAGE_DID_SAVE',
       chats: results
     })
   }

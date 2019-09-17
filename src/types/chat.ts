@@ -318,12 +318,12 @@ export enum IMDialog {
 }
 
 export interface InstantMessage extends HoodieObject {
-  dialog: IMDialog
   fromId: string
   fromAgentName: string
   message: string
   time: number
-  binaryBucket?: Buffer
+  didSave: boolean
+  offline?: number
 }
 
 // Notifications
