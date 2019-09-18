@@ -5,7 +5,7 @@
 import AvatarName from '../avatarName'
 import { mapBlockOf } from '../network/msgGetters'
 
-import { NotificationTypes } from '../types/chat'
+import { LocalChatSourceType, NotificationTypes } from '../types/chat'
 
 // Only adds a Name to names if it is new or did change
 function addName (state, uuid, name) {
@@ -22,8 +22,8 @@ function addName (state, uuid, name) {
 
 // Adds the names of the sending Avatar/Agent from the local Chat
 function addNameFromLocalChat (state, msg) {
-  if (msg.sourceType === 1) {
-    const id = msg.sourceID
+  if (msg.sourceType === LocalChatSourceType.Agent) {
+    const id = msg.fromId
     const name = msg.fromName
     return addName(state, id, name)
   }
@@ -32,7 +32,7 @@ function addNameFromLocalChat (state, msg) {
 
 function namesReducer (state = {}, action) {
   switch (action.type) {
-    case 'ChatFromSimulator':
+    case 'CHAT_FROM_SIMULATOR_RECEIVED':
       return action.msg.sourceID in state
         ? state
         : addNameFromLocalChat(state, action.msg)
@@ -42,7 +42,7 @@ function namesReducer (state = {}, action) {
     case 'CONFERENCE_IM_RECEIVED':
       return action.msg.fromId in state
         ? state
-        : addName(state, action.msg.fromId, action.msg.fromAgentName)
+        : addName(state, action.msg.fromId, action.msg.fromName)
 
     case 'didLogin':
       const selfName = addName(state, action.uuid, action.name)
@@ -77,14 +77,14 @@ function namesReducer (state = {}, action) {
         if (msg.fromId in oldState) return oldState
 
         if (didChange) {
-          oldState[msg.fromId] = new AvatarName(msg.fromAgentName)
+          oldState[msg.fromId] = new AvatarName(msg.fromName)
           return oldState
         }
 
         didChange = true
         return {
           ...oldState,
-          [msg.fromId]: new AvatarName(msg.fromAgentName)
+          [msg.fromId]: new AvatarName(msg.fromName)
         }
       }, state)
 
@@ -149,7 +149,7 @@ function namesReducer (state = {}, action) {
 export default function namesCoreReducer (state = { names: {}, getDisplayNamesURL: '' }, action) {
   switch (action.type) {
     case '@@INIT':
-    case 'ChatFromSimulator':
+    case 'CHAT_FROM_SIMULATOR_RECEIVED':
     case 'PERSONAL_IM_RECEIVED':
     case 'GROUP_IM_RECEIVED':
     case 'CONFERENCE_IM_RECEIVED':

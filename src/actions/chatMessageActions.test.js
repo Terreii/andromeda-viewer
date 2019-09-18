@@ -66,7 +66,7 @@ describe('incoming IM handling', () => {
         chatUUID: messageData.MessageBlock[0].ID,
         msg: {
           _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
-          fromAgentName: 'Tester',
+          fromName: 'Tester',
           fromId: messageData.AgentData[0].AgentID,
           offline: 0,
           message: 'Hello World!',
@@ -110,7 +110,7 @@ describe('incoming IM handling', () => {
         chatUUID: messageData.MessageBlock[0].ID,
         msg: {
           _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
-          fromAgentName: 'Tester',
+          fromName: 'Tester',
           fromId: messageData.AgentData[0].AgentID,
           offline: 0,
           message: 'Hello World!',
@@ -169,7 +169,7 @@ describe('incoming IM handling', () => {
         groupId,
         msg: {
           _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
-          fromAgentName: 'Tester',
+          fromName: 'Tester',
           fromId: '01234567-8900-0000-0000-000000000000',
           message: 'Hello World!',
           time: 1562630524418
@@ -180,7 +180,7 @@ describe('incoming IM handling', () => {
         groupId,
         msg: {
           _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
-          fromAgentName: 'Tester',
+          fromName: 'Tester',
           fromId: '01234567-8900-0000-0000-000000000000',
           message: 'Hello World!',
           time: 1562630524418
@@ -250,7 +250,7 @@ describe('incoming IM handling', () => {
       conferenceId: id,
       msg: {
         _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
-        fromAgentName: 'Tester',
+        fromName: 'Tester',
         fromId: '01234567-8900-0000-0000-000000000000',
         message: 'Hello World!',
         time: 1562630524418

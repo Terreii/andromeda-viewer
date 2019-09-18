@@ -2,14 +2,19 @@
  * Stores all LocalChat-Messages
  */
 
+import { LocalChatAudible, LocalChatSourceType, LocalChatType } from '../types/chat'
+
 export default function localChatReducer (state = [], action) {
   switch (action.type) {
-    case 'ChatFromSimulator':
+    case 'CHAT_FROM_SIMULATOR_RECEIVED':
       // filter out start typing and end typing
-      if (action.msg.chatType === 4 || action.msg.chatType === 5) return state
-      return state.concat([
-        action.msg
-      ])
+      return action.msg.chatType === LocalChatType.StartTyping ||
+        action.msg.chatType === LocalChatType.StopTyping
+        ? state
+        : state.concat([{
+          ...action.msg,
+          didSave: false
+        }])
 
     case 'didLogin':
       const chat = action.localChatHistory.map(msg => ({
@@ -19,10 +24,10 @@ export default function localChatReducer (state = [], action) {
       chat.push({
         _id: 'messageOfTheDay',
         fromName: 'Message of the Day',
-        sourceID: 'messageOfTheDay',
-        sourceType: 0,
-        chatType: 8,
-        audible: 1,
+        fromId: 'messageOfTheDay',
+        sourceType: LocalChatSourceType.System,
+        chatType: LocalChatType.OwnerSay,
+        audible: LocalChatAudible.Fully,
         position: [0, 0, 0],
         message: action.sessionInfo.message,
         time: action.sessionInfo.seconds_since_epoch * 1000,
@@ -32,12 +37,12 @@ export default function localChatReducer (state = [], action) {
 
     case 'NOTIFICATION_IN_CHAT_ADDED':
       return state.concat([{
-        _id: 'notification_' + state.size,
+        _id: 'notification_' + state.length,
         fromName: action.fromName,
-        sourceID: action.fromId || 'object',
-        sourceType: 2,
-        chatType: 8,
-        audible: 1,
+        fromId: action.fromId || 'object',
+        sourceType: LocalChatSourceType.Object,
+        chatType: LocalChatType.OwnerSay,
+        audible: LocalChatAudible.Fully,
         position: [0, 0, 0],
         message: action.text,
         time: action.time,

@@ -118,13 +118,13 @@ export function receiveChatFromSimulator (msg) {
     const time = new Date()
 
     dispatch({
-      type: msg.name,
+      type: 'CHAT_FROM_SIMULATOR_RECEIVED',
       msg: {
         _id: `${getAvatarDataSaveId(getState())}/localchat/${time.toJSON()}`,
 
         fromName: getStringValueOf(msg, 'ChatData', 'FromName'),
-        sourceID: getValueOf(msg, 'ChatData', 'SourceID'),
-        ownerID: getValueOf(msg, 'ChatData', 'OwnerID'),
+        fromId: getValueOf(msg, 'ChatData', 'SourceID'),
+        ownerId: getValueOf(msg, 'ChatData', 'OwnerID'),
         sourceType: getValueOf(msg, 'ChatData', 'SourceType'),
         chatType: getValueOf(msg, 'ChatData', 'ChatType'),
         audible: getValueOf(msg, 'ChatData', 'Audible'),
@@ -147,15 +147,17 @@ export function saveLocalChatMessages () {
       if (msg.didSave) {
         break
       } else {
-        const toSave = Object.assign({}, msg)
-        delete toSave.didSave
-        delete toSave.position
-        if (toSave.ownerID === toSave.sourceID) {
-          // ownerID and source is the same (by normal messages)
-          // ownerID is for objects
-          delete toSave.ownerID
-        }
-        messagesToSave.push(toSave)
+        messagesToSave.push({
+          ...msg,
+          // ownerId and sourceId (fromId) is the same (by normal messages)
+          // ownerId is for objects
+          ownerId: msg.ownerId === msg.fromId
+            ? undefined // remove ownerId if the msg is from an avatar
+            : msg.ownerId,
+          // add all fields that shouldn't be saved
+          didSave: undefined,
+          position: undefined
+        })
       }
     }
 
@@ -170,12 +172,11 @@ export function saveLocalChatMessages () {
 
     const didError = []
 
-    for (let i = 0; i < saved.length; i += 1) {
-      const msg = saved[i]
+    saved.forEach((msg, index) => {
       if (msg instanceof Error) {
-        didError.push(messagesToSave[i]._id)
+        didError.push(messagesToSave[index]._id)
       }
-    }
+    })
 
     dispatch({
       type: 'didSaveLocalChatMessage',
@@ -365,7 +366,7 @@ function handleIM (msg) {
       chatUUID: id,
       msg: {
         _id: `${avatarSaveId}/imChats/${chat.saveId}/${time.toJSON()}`,
-        fromAgentName,
+        fromName: fromAgentName,
         fromId: fromAgentId,
         offline: getValueOf(msg, 'MessageBlock', 'Offline'),
         message: getStringValueOf(msg, 'MessageBlock', 'Message'),
@@ -397,7 +398,7 @@ function handleGroupIM (msg) {
       groupId: id,
       msg: {
         _id: `${getAvatarDataSaveId(state)}/imChats/${chat.saveId}/${time.toJSON()}`,
-        fromAgentName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
+        fromName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
         fromId: getValueOf(msg, 'AgentData', 'AgentID'),
         message: getStringValueOf(msg, 'MessageBlock', 'Message'),
         time: time.getTime()
@@ -435,7 +436,7 @@ function handleConferenceIM (msg) {
       conferenceId: id,
       msg: {
         _id: `${avatarSaveId}/imChats/${chat.saveId}/${time.toJSON()}`,
-        fromAgentName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
+        fromName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
         fromId: getValueOf(msg, 'AgentData', 'AgentID'),
         message: getStringValueOf(msg, 'MessageBlock', 'Message'),
         time: time.getTime()

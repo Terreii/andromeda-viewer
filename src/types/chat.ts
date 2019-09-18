@@ -3,6 +3,32 @@
 import { HoodieObject, Maturity } from './viewer'
 import { AssetType } from './inventory'
 
+/**
+ * This is a abstract base interface for LocalChat and IM
+ */
+export interface AbstractChatMessage extends HoodieObject {
+  /**
+   * UUID from the sending avatar or object.
+   */
+  fromId: string
+  /**
+   * Name from the sender.
+   */
+  fromName: string
+  /**
+   * The message.
+   */
+  message: string
+  /**
+   * When it was send/received. It is a Date number.
+   */
+  time: number
+  /**
+   * Was it saved?
+   */
+  didSave: boolean
+}
+
 // Local chat
 export enum LocalChatSourceType {
   /**
@@ -84,24 +110,25 @@ export enum LocalChatAudible {
  * 
  * It can be from an Avatar, the system or an object.
  */
-export interface LocalChatMessage extends HoodieObject {
-  fromName: string
-  /**
-   * UUID from the sending avatar or object.
-   */
-  sourceID: string
+export interface LocalChatMessage extends AbstractChatMessage {
   sourceType: LocalChatSourceType
   chatType: LocalChatType
   audible: LocalChatAudible
   /**
+   * Id of the owner of the sending Object.
+   * 
+   * It is the save as sourceId/fromId if it is a avatar.
+   * Then it will be removed while saving.
+   */
+  ownerId?: string
+  /**
    * Position of the avatar.
    * 
    * This is never read in the official viewer.
+   * 
+   * It will be removed while saving.
    */
-  position: [number, number, number]
-  message: string
-  time: number
-  didSave: boolean
+  position?: [number, number, number]
 }
 
 // IMs
@@ -317,12 +344,7 @@ export enum IMDialog {
   StopTyping = 42,
 }
 
-export interface InstantMessage extends HoodieObject {
-  fromId: string
-  fromAgentName: string
-  message: string
-  time: number
-  didSave: boolean
+export interface InstantMessage extends AbstractChatMessage {
   offline?: number
 }
 
