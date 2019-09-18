@@ -154,7 +154,7 @@ export function saveLocalChatMessages () {
           ownerId: msg.ownerId === msg.fromId
             ? undefined // remove ownerId if the msg is from an avatar
             : msg.ownerId,
-          // add all fields that shouldn't be saved
+          // add all fields that shouldn't be saved after this line
           didSave: undefined,
           position: undefined
         })
@@ -229,7 +229,7 @@ export function receiveIM (message) {
       case IMDialog.MessageFromAgent:
         if (fromAgentName === 'Second Life') {
           dispatch(handleIMFromObject(message))
-        } else if (fromId === LLUUID.zero) {
+        } else if (fromId === LLUUID.nil) {
           dispatch(handleSystemNotification(message))
         } else if (
           getValueOf(message, 'MessageBlock', 'FromGroup') ||
@@ -238,7 +238,7 @@ export function receiveIM (message) {
           dispatch(handleGroupIM(message))
         } else if (getValueOf(message, 'MessageBlock', 'BinaryBucket').length > 1) {
           dispatch(handleConferenceIM(message))
-        } else if (id === LLUUID.zero) {
+        } else if (id === LLUUID.nil) {
           const text = getStringValueOf(message, 'MessageBlock', 'Message')
           dispatch(handleNotificationInChat(text, fromAgentName, fromId))
         } else {
@@ -548,7 +548,7 @@ function handleGroupInvite (msg) {
     groupId: getValueOf(msg, 'AgentData', 'AgentID'),
     transactionId: id,
     name: 'Tester',
-    useOfflineCap: id === LLUUID.zero && !getValueOf(msg, 'MessageBlock', 'Offline')
+    useOfflineCap: id === LLUUID.nil && !getValueOf(msg, 'MessageBlock', 'Offline')
   })
 }
 
@@ -767,7 +767,7 @@ export function saveIMChatMessages () {
 
         return {
           ...msg,
-          // add all fields that shouldn't be saved
+          // add all fields that shouldn't be saved after this line
           didSave: undefined
         }
       })

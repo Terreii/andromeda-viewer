@@ -4,16 +4,154 @@ import { v4 as uuid } from 'uuid'
 import { UUID as LLUUID } from '../llsd'
 import mockdate from 'mockdate'
 
-import { receiveIM } from './chatMessageActions'
+import {
+  receiveChatFromSimulator,
+  sendLocalChatMessage,
+  receiveIM
+} from './chatMessageActions'
 
 import { Maturity } from '../types/viewer'
-import { IMDialog, IMChatType, NotificationTypes } from '../types/chat'
+import {
+  LocalChatSourceType,
+  LocalChatType,
+  LocalChatAudible,
+  IMDialog,
+  IMChatType,
+  NotificationTypes
+} from '../types/chat'
 import { AssetType } from '../types/inventory'
 
 const mockStore = configureMockStore([thunk])
 
 jest.mock('uuid')
 mockdate.set(1562630524418)
+
+describe('local chat', () => {
+  test('receiving local chat', () => {
+    const store = mockStore({
+      account: {
+        savedAvatars: [
+          {
+            avatarIdentifier: 'Tester',
+            dataSaveId: 'saveId'
+          }
+        ]
+      },
+      session: {
+        avatarIdentifier: 'Tester'
+      }
+    })
+
+    store.dispatch(receiveChatFromSimulator(createChatFromSimulator()))
+
+    store.dispatch(receiveChatFromSimulator(createChatFromSimulator({
+      fromObject: true
+    })))
+
+    expect(store.getActions()).toEqual([
+      {
+        type: 'CHAT_FROM_SIMULATOR_RECEIVED',
+        msg: {
+          _id: 'saveId/localchat/2019-07-09T00:02:04.418Z',
+          fromName: 'Tester MacTestface',
+          fromId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+          ownerId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+          sourceType: LocalChatSourceType.Agent,
+          chatType: LocalChatType.Normal,
+          audible: LocalChatAudible.Fully,
+          position: [0, 0, 0],
+          message: 'Hello Tests. I hope you pass!',
+          time: 1562630524418
+        }
+      },
+      {
+        type: 'CHAT_FROM_SIMULATOR_RECEIVED',
+        msg: {
+          _id: 'saveId/localchat/2019-07-09T00:02:04.418Z',
+          fromName: 'Tester MacTestface',
+          fromId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+          ownerId: 'f2373437-a2ef-4435-82b9-68d283538bb2',
+          sourceType: LocalChatSourceType.Object,
+          chatType: LocalChatType.Normal,
+          audible: LocalChatAudible.Fully,
+          position: [0, 0, 0],
+          message: 'Hello Tests. I hope you pass!',
+          time: 1562630524418
+        }
+      }
+    ])
+  })
+
+  test('sending local chat', () => {
+    const send = jest.fn()
+
+    const store = configureMockStore([
+      thunk.withExtraArgument({ circuit: { send } })
+    ])({
+      session: {
+        agentId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+        sessionId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9'
+      }
+    })
+
+    store.dispatch(
+      sendLocalChatMessage('Hello darkness, my old friend', LocalChatType.Normal, 0)
+    )
+
+    expect(send.mock.calls[0]).toEqual([
+      'ChatFromViewer',
+      {
+        AgentData: [
+          {
+            AgentID: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+            SessionID: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9'
+          }
+        ],
+        ChatData: [
+          {
+            Message: 'Hello darkness, my old friend',
+            Type: LocalChatType.Normal,
+            Channel: 0
+          }
+        ]
+      },
+      true
+    ])
+
+    expect(store.getActions()).toEqual([])
+  })
+
+  /**
+   * Helper function to create an ChatFromSimulator
+   * @param {object} options Arguments
+   * @param {string?} options.fromName A name.
+   * @param {boolean?} options.fromObject Is message from an object?
+   * @param {LocalChatSourceType?} options.sourceType Type of the sender.
+   * @param {LocalChatType?} options.chatType Type of the chat message.
+   * @param {LocalChatAudible?} options.audible How good can it be heard?
+   * @param {string?} options.message Test send.
+   */
+  function createChatFromSimulator (options = {}) {
+    return {
+      ChatData: [
+        {
+          FromName: createStringBuffer(options.fromName || 'Tester MacTestface'),
+          SourceID: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+          OwnerID: options.fromObject
+            ? 'f2373437-a2ef-4435-82b9-68d283538bb2'
+            : '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+          SourceType: options.sourceType || (options.fromObject
+            ? LocalChatSourceType.Object
+            : LocalChatSourceType.Agent),
+          ChatType: options.chatType == null ? LocalChatType.Normal : options.chatType,
+          Audible: options.audible == null ? LocalChatAudible.Fully : options.audible,
+          Position: [0, 0, 0],
+          Message: createStringBuffer(options.message || 'Hello Tests. I hope you pass!')
+        }
+      ]
+    }
+  }
+})
 
 describe('incoming IM handling', () => {
   test('it should create a private chat and dispatch a private IM', () => {
@@ -358,7 +496,7 @@ describe('incoming IM handling', () => {
 
       // IMDialog.MessageFromAgent but with AgentID === '00000000-0000-0000-0000-000000000000'
       store.dispatch(receiveIM(createImPackage(IMDialog.MessageFromAgent, {
-        agentId: LLUUID.zero,
+        agentId: LLUUID.nil,
         message: 'An interesting message'
       })))
 
@@ -405,9 +543,9 @@ describe('incoming IM handling', () => {
         groups: []
       })
 
-      // IMDialog.MessageFromAgent with id === UUID.zero
+      // IMDialog.MessageFromAgent with id === UUID.nil
       store.dispatch(receiveIM(createImPackage(IMDialog.MessageFromAgent, {
-        id: LLUUID.zero
+        id: LLUUID.nil
       })))
 
       expect(store.getActions()).toEqual([
@@ -850,7 +988,7 @@ function createImPackage (dialog, data = {}) {
     AgentData: [
       {
         AgentID: data.agentId || '01234567-8900-0000-0000-000000000000',
-        SessionID: data.sessionId || LLUUID.zero
+        SessionID: data.sessionId || LLUUID.nil
       }
     ],
     MessageBlock: [

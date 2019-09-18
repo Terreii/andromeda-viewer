@@ -121,7 +121,7 @@ export var LLSD, URI, UUID, Binary;
       return octets
     }
 
-    UUID.zero = '00000000-0000-0000-0000-000000000000'
+    UUID.nil = '00000000-0000-0000-0000-000000000000'
   }
 
   // Browser compatibility shims
