@@ -49,7 +49,7 @@ export default function localChatReducer (state = [], action) {
         didSave: false
       }])
 
-    case 'StartSavingLocalChatMessages':
+    case 'SAVING_LOCAL_CHAT_MESSAGES_START':
       if (action.saving.length === 0) return state
 
       return state.map(msg => {
@@ -61,7 +61,7 @@ export default function localChatReducer (state = [], action) {
         }
       })
 
-    case 'didSaveLocalChatMessage':
+    case 'DID_SAVE_LOCAL_CHAT_MESSAGE':
       if (action.didError.length === 0 && action.saved.length === 0) return state
 
       const ids = action.saved.map(msg => msg._id)

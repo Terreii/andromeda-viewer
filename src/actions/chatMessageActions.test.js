@@ -7,6 +7,8 @@ import mockdate from 'mockdate'
 import {
   receiveChatFromSimulator,
   sendLocalChatMessage,
+  saveLocalChatMessages,
+  deleteOldLocalChat,
   receiveIM
 } from './chatMessageActions'
 
@@ -119,6 +121,187 @@ describe('local chat', () => {
     ])
 
     expect(store.getActions()).toEqual([])
+  })
+
+  test('saving local chat messages', async () => {
+    const updateOrAdd = jest.fn(([shouldPass, shouldFail]) => {
+      const passingResult = JSON.parse(JSON.stringify({
+        ...shouldPass,
+        _rev: '1-a_hash'
+      }))
+
+      const errorResult = new Error('Did fail')
+
+      return Promise.resolve([passingResult, errorResult])
+    })
+
+    const localChat = [
+      {
+        _id: 'saveId/localchat/2019-07-09T00:01:04.418Z',
+        fromName: 'Tester MacTestface',
+        fromId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+        ownerId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+        sourceType: LocalChatSourceType.Agent,
+        chatType: LocalChatType.Normal,
+        audible: LocalChatAudible.Fully,
+        position: [0, 0, 0],
+        message: 'This should not be saved',
+        time: 1562630524418,
+        didSave: true
+      },
+      {
+        _id: 'saveId/localchat/2019-07-09T00:02:04.418Z',
+        fromName: 'Tester MacTestface',
+        fromId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+        ownerId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+        sourceType: LocalChatSourceType.Agent,
+        chatType: LocalChatType.Normal,
+        audible: LocalChatAudible.Fully,
+        position: [0, 0, 0],
+        message: 'Hello Tests. I hope you pass!',
+        time: 1562630524418,
+        didSave: false
+      },
+      {
+        _id: 'saveId/localchat/2019-07-09T00:03:04.418Z',
+        fromName: 'Tester MacTestface',
+        fromId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+        ownerId: 'f2373437-a2ef-4435-82b9-68d283538bb2',
+        sourceType: LocalChatSourceType.Object,
+        chatType: LocalChatType.Normal,
+        audible: LocalChatAudible.Fully,
+        position: [0, 0, 0],
+        message: 'Hello Tests. I hope you pass!',
+        time: 1562630524418,
+        didSave: false
+      }
+    ]
+
+    const store = configureMockStore([
+      thunk.withExtraArgument({
+        hoodie: {
+          cryptoStore: {
+            updateOrAdd
+          }
+        }
+      })
+    ])({
+      session: {
+        agentId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+        sessionId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9'
+      },
+      localChat
+    })
+
+    const didFinish = store.dispatch(saveLocalChatMessages())
+
+    expect(store.getActions()).toEqual([
+      {
+        type: 'SAVING_LOCAL_CHAT_MESSAGES_START',
+        saving: [
+          'saveId/localchat/2019-07-09T00:03:04.418Z',
+          'saveId/localchat/2019-07-09T00:02:04.418Z'
+        ]
+      }
+    ])
+
+    store.clearActions()
+
+    await didFinish
+
+    expect(updateOrAdd.mock.calls[0]).toEqual([
+      [
+        {
+          ...localChat[2],
+          sourceType: 'object',
+          chatType: 'normal',
+          audible: 'fully',
+          position: undefined,
+          didSave: undefined
+        },
+        {
+          ...localChat[1],
+          sourceType: 'agent',
+          chatType: 'normal',
+          audible: 'fully',
+          ownerId: undefined,
+          position: undefined,
+          didSave: undefined
+        }
+      ]
+    ])
+
+    const eventObject = {
+      ...localChat[2],
+      _rev: '1-a_hash'
+    }
+    delete eventObject.position
+    delete eventObject.didSave
+
+    expect(store.getActions()).toEqual([
+      {
+        type: 'DID_SAVE_LOCAL_CHAT_MESSAGE',
+        saved: [eventObject],
+        didError: [
+          'saveId/localchat/2019-07-09T00:02:04.418Z'
+        ]
+      }
+    ])
+  })
+
+  test('deleting old local chat', async () => {
+    const removeFn = jest.fn(docs => Promise.resolve(docs))
+
+    const localChat = [
+      {
+        _id: 'messageOfTheDay',
+        message: 'The cake is a lie!'
+      }
+    ]
+
+    const account = {
+      sync: true,
+      loggedIn: true
+    }
+
+    for (let i = 0; i < 250; ++i) {
+      localChat.push({
+        _id: 'anId_' + i,
+        _rev: '1-a_hash',
+        message: `I can count to ${i}!`
+      })
+    }
+
+    const storeWithToMuch = configureMockStore([
+      thunk.withExtraArgument({
+        hoodie: {
+          cryptoStore: {
+            remove: removeFn
+          }
+        }
+      })
+    ])({ account, localChat })
+
+    await storeWithToMuch.dispatch(deleteOldLocalChat())
+
+    expect(removeFn.mock.calls[0][0].length).toBe(50)
+    expect(removeFn.mock.calls[0][0][0]).toBe('anId_0')
+    expect(removeFn.mock.calls[0][0][49]).toBe('anId_49')
+    expect(removeFn.mock.calls[0][0].includes('messageOfTheDay')).toBeFalsy()
+
+    const storeWithLess = configureMockStore([
+      thunk.withExtraArgument({
+        hoodie: {
+          cryptoStore: {
+            remove: removeFn
+          }
+        }
+      })
+    ])({ account, localChat: localChat.slice(0, 200) })
+
+    await storeWithLess.dispatch(deleteOldLocalChat())
+
+    expect(removeFn.mock.calls.length).toBe(1)
   })
 
   /**

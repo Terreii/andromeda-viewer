@@ -15,7 +15,14 @@ import { getGroupsIDs } from '../selectors/groups'
 import { getRegionId, getParentEstateID, getPosition } from '../selectors/region'
 
 import { Maturity } from '../types/viewer'
-import { IMDialog, IMChatType, NotificationTypes } from '../types/chat'
+import {
+  IMDialog,
+  IMChatType,
+  NotificationTypes,
+  LocalChatSourceType,
+  LocalChatType,
+  LocalChatAudible
+} from '../types/chat'
 
 export function changeTab (newTab) {
   return {
@@ -149,6 +156,10 @@ export function saveLocalChatMessages () {
       } else {
         messagesToSave.push({
           ...msg,
+          // Save as text. Because text has meaning.
+          sourceType: LocalChatSourceType[msg.sourceType].toLowerCase(),
+          chatType: LocalChatType[msg.chatType].toLowerCase(),
+          audible: LocalChatAudible[msg.audible].toLowerCase(),
           // ownerId and sourceId (fromId) is the same (by normal messages)
           // ownerId is for objects
           ownerId: msg.ownerId === msg.fromId
@@ -164,23 +175,33 @@ export function saveLocalChatMessages () {
     if (messagesToSave.length === 0) return
 
     dispatch({
-      type: 'StartSavingLocalChatMessages',
+      type: 'SAVING_LOCAL_CHAT_MESSAGES_START',
       saving: messagesToSave.map(msg => msg._id)
     })
 
     const saved = await hoodie.cryptoStore.updateOrAdd(messagesToSave)
 
+    const didSave = []
     const didError = []
+
+    const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1)
 
     saved.forEach((msg, index) => {
       if (msg instanceof Error) {
         didError.push(messagesToSave[index]._id)
+      } else {
+        // Transform text form back to int/enum
+        msg.chatType = LocalChatType[capitalize(msg.chatType)]
+        msg.sourceType = LocalChatSourceType[capitalize(msg.sourceType)]
+        msg.audible = LocalChatAudible[capitalize(msg.audible)]
+
+        didSave.push(msg)
       }
     })
 
     dispatch({
-      type: 'didSaveLocalChatMessage',
-      saved: saved.filter(msg => !didError.includes(msg._id)),
+      type: 'DID_SAVE_LOCAL_CHAT_MESSAGE',
+      saved: didSave,
       didError
     })
   }
