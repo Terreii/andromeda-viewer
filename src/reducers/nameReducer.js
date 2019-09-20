@@ -59,7 +59,7 @@ function namesReducer (state = {}, action) {
         return addName(state, id, firstName + ' ' + lastName)
       }, state)
 
-    case 'IMChatInfosLoaded':
+    case 'IM_CHAT_INFOS_LOADED':
       return {
         ...state,
         ...action.chats.reduce((all, chat) => {
@@ -155,7 +155,7 @@ export default function namesCoreReducer (state = { names: {}, getDisplayNamesUR
     case 'CONFERENCE_IM_RECEIVED':
     case 'didLogin':
     case 'UUIDNameReply':
-    case 'IMChatInfosLoaded':
+    case 'IM_CHAT_INFOS_LOADED':
     case 'IMHistoryLoaded':
     case 'DisplayNamesStartLoading':
     case 'DisplayNamesLoaded':

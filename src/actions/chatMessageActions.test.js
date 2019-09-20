@@ -9,7 +9,9 @@ import {
   sendLocalChatMessage,
   saveLocalChatMessages,
   deleteOldLocalChat,
-  receiveIM
+  receiveIM,
+  saveIMChatInfos,
+  loadIMChats
 } from './chatMessageActions'
 
 import { Maturity } from '../types/viewer'
@@ -334,6 +336,231 @@ describe('local chat', () => {
       ]
     }
   }
+})
+
+describe('save and loading IMs', () => {
+  test('saving IM chat infos', async () => {
+    const findOrAdd = jest.fn(docs => Promise.resolve([
+      {
+        ...docs[0],
+        _rev: '1-1234567890'
+      },
+      new Error('did fail to save')
+    ]))
+
+    const store = configureMockStore([thunk.withExtraArgument({
+      hoodie: {
+        cryptoStore: {
+          findOrAdd
+        }
+      }
+    })])({
+      IMs: {
+        abcd: {
+          _id: 'an-id',
+          chatUUID: 'abcd',
+          saveId: 'dcba',
+          type: IMChatType.personal,
+          target: 'f2373437-a2ef-4435-82b9-68d283538bb2',
+          name: 'Tester MacTestface',
+
+          didSaveChatInfo: false,
+          didLoadHistory: false,
+          isLoadingHistory: false,
+          active: false,
+          hasUnsavedMSG: false,
+          areTyping: new Set(),
+          messages: []
+        },
+        willError: {
+          _id: 'an-id-too',
+          chatUUID: 'willError',
+          saveId: 'xyz',
+          type: IMChatType.group,
+          target: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+          name: 'Great group',
+
+          didSaveChatInfo: false,
+          didLoadHistory: false,
+          isLoadingHistory: false,
+          active: false,
+          hasUnsavedMSG: false,
+          areTyping: new Set(),
+          messages: []
+        },
+        12345: {
+          _id: 'another-id',
+          chatUUID: '12345',
+          saveId: '67890',
+          type: IMChatType.personal,
+          target: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+          name: 'New Person',
+
+          didSaveChatInfo: true,
+          didLoadHistory: false,
+          isLoadingHistory: false,
+          active: false,
+          hasUnsavedMSG: false,
+          areTyping: new Set(),
+          messages: []
+        }
+      }
+    })
+
+    const didFinish = store.dispatch(saveIMChatInfos())
+
+    expect(store.getActions()).toEqual([
+      {
+        type: 'SAVING_IM_CHAT_INFO_STARTED',
+        chatUUIDs: ['abcd', 'willError']
+      }
+    ])
+
+    store.clearActions()
+
+    await didFinish
+
+    expect(store.getActions()).toEqual([
+      {
+        type: 'SAVING_IM_CHAT_INFO_FINISHED',
+        didError: ['willError']
+      }
+    ])
+
+    expect(findOrAdd.mock.calls[0][0]).toEqual([
+      {
+        _id: 'an-id',
+        chatUUID: 'abcd',
+        saveId: 'dcba',
+        chatType: 'personal',
+        target: 'f2373437-a2ef-4435-82b9-68d283538bb2',
+        name: 'Tester MacTestface'
+      },
+      {
+        _id: 'an-id-too',
+        chatUUID: 'willError',
+        saveId: 'xyz',
+        chatType: 'group',
+        target: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+        name: 'Great group'
+      }
+    ])
+  })
+
+  test('loading IM Chat infos', () => {
+    const docA = {
+      _id: 'an-id',
+      chatUUID: 'abcd',
+      saveId: 'dcba',
+      chatType: 'personal',
+      target: 'f2373437-a2ef-4435-82b9-68d283538bb2',
+      name: 'Tester MacTestface'
+    }
+    const docB = {
+      _id: 'an-id-too',
+      chatUUID: '1234567',
+      saveId: 'xyz',
+      chatType: 'group',
+      target: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+      name: 'Great group'
+    }
+
+    const hoodieEventCallbacks = []
+    const hoodieOneEvent = jest.fn((_, callback) => { hoodieEventCallbacks.push(callback) })
+
+    const callbacks = []
+    const storeOn = jest.fn((_, callback) => { callbacks.push(callback) })
+    const storeOff = jest.fn()
+    const storeFindAll = jest.fn(() => {
+      return {
+        then: (fn) => fn([docA, docB])
+      }
+    })
+
+    const withIdPrefix = jest.fn(() => ({
+      findAll: storeFindAll,
+      on: storeOn,
+      off: storeOff
+    }))
+
+    const store = configureMockStore([thunk.withExtraArgument({
+      hoodie: {
+        one: hoodieOneEvent,
+        cryptoStore: {
+          withIdPrefix
+        }
+      }
+    })])({
+      account: {
+        loggedIn: true,
+        savedAvatars: [
+          {
+            avatarIdentifier: 1,
+            dataSaveId: 'an-id'
+          }
+        ]
+      },
+      session: {
+        avatarIdentifier: 1
+      }
+    })
+
+    store.dispatch(loadIMChats())
+
+    expect(store.getActions()).toEqual([
+      {
+        type: 'IM_CHAT_INFOS_LOADED',
+        chats: [
+          {
+            ...docA,
+            chatType: IMChatType.personal
+          },
+          {
+            ...docB,
+            chatType: IMChatType.group
+          }
+        ]
+      }
+    ])
+
+    store.clearActions()
+
+    expect(callbacks.length).toBe(1)
+    expect(storeOn.mock.calls[0][0]).toBe('add')
+    expect(typeof storeOn.mock.calls[0][1]).toBe('function')
+
+    expect(storeOff.mock.calls.length).toBe(0)
+
+    expect(hoodieEventCallbacks.length).toBe(1)
+    expect(hoodieOneEvent.mock.calls[0][0]).toBe('avatarDidLogout')
+    expect(typeof hoodieOneEvent.mock.calls[0][1]).toBe('function')
+
+    const doc = {
+      _id: 'another-id',
+      chatUUID: '12345',
+      saveId: '67890',
+      chatType: 'personal',
+      target: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+      name: 'New Person'
+    }
+    callbacks[0](doc)
+
+    expect(store.getActions()).toEqual([
+      {
+        type: 'IM_CHAT_INFOS_LOADED',
+        chats: [{
+          ...doc,
+          chatType: IMChatType.personal
+        }]
+      }
+    ])
+
+    hoodieEventCallbacks[0]()
+
+    expect(storeOff.mock.calls.length).toBe(1)
+    expect(storeOff.mock.calls[0][0]).toBe('add')
+    expect(storeOff.mock.calls[0][1]).toBe(callbacks[0])
+  })
 })
 
 describe('incoming IM handling', () => {

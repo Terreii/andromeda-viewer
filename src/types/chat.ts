@@ -149,7 +149,7 @@ export interface IMChat extends HoodieObject {
   chatUUID: string
   saveId: string
   type: IMChatType
-  withId: string
+  target: string
   name: string
   didLoadHistory: boolean
   isLoadingHistory: boolean

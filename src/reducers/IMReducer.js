@@ -10,7 +10,7 @@ function getDefaultImChat () {
     chatUUID: null,
     saveId: null,
     type: IMChatType.personal,
-    withId: null,
+    target: null,
     name: null,
 
     didSaveChatInfo: false,
@@ -26,15 +26,15 @@ function getDefaultImChat () {
 function imChat (state = getDefaultImChat(), action) {
   switch (action.type) {
     case 'IM_CHAT_CREATED':
-    case 'IMChatInfosLoaded':
+    case 'IM_CHAT_INFOS_LOADED':
       return {
         ...state,
         _id: state._id || action._id,
-        didSaveChatInfo: action.type === 'IMChatInfosLoaded',
+        didSaveChatInfo: action.type === 'IM_CHAT_INFOS_LOADED',
         chatUUID: action.chatUUID,
         saveId: action.saveId,
         type: action.chatType,
-        withId: action.target,
+        target: action.target,
         name: action.name
       }
 
@@ -45,16 +45,16 @@ function imChat (state = getDefaultImChat(), action) {
         chatUUID: state.chatUUID || action.id,
         saveId: state.saveId || action.saveId,
         type: IMChatType.group,
-        withId: action.id,
+        target: action.id,
         name: action.name
       }
 
-    case 'startSavingIMChatInfo':
-    case 'didSaveIMChatInfo':
+    case 'SAVING_IM_CHAT_INFO_STARTED':
+    case 'SAVING_IM_CHAT_INFO_FINISHED':
       if (action.chatUUIDs.includes(state.chatUUID)) {
         return {
           ...state,
-          didSaveChatInfo: action.type === 'startSavingIMChatInfo'
+          didSaveChatInfo: action.type === 'SAVING_IM_CHAT_INFO_STARTED'
         }
       } else {
         return state
@@ -188,7 +188,7 @@ export default function IMReducer (state = {}, action) {
         [action.chatUUID]: imChat(state[action.chatUUID], action)
       }
 
-    case 'IMChatInfosLoaded':
+    case 'IM_CHAT_INFOS_LOADED':
       return action.chats.reduce((state, chat) => {
         const innerAction = Object.assign({}, chat, {
           type: action.type
@@ -210,14 +210,14 @@ export default function IMReducer (state = {}, action) {
         return state
       }, { ...state })
 
-    case 'startSavingIMChatInfo':
+    case 'SAVING_IM_CHAT_INFO_STARTED':
       return action.chatUUIDs.reduce((state, id) => {
         const updatedChat = imChat(state[id], action)
         state[id] = updatedChat
         return state
       }, { ...state })
 
-    case 'didSaveIMChatInfo':
+    case 'SAVING_IM_CHAT_INFO_FINISHED':
       return action.didError.length === 0
         ? state
         : action.didError.reduce((state, id) => {

@@ -911,17 +911,17 @@ export function saveIMChatInfos () {
       .filter(chat => !chat.didSaveChatInfo)
       .map(chat => ({
         _id: chat._id,
-        chatType: chat.type,
+        chatType: IMChatType[chat.type],
         chatUUID: chat.chatUUID,
         saveId: chat.saveId,
-        target: chat.withId,
+        target: chat.target,
         name: chat.name
       }))
 
     if (chatInfosToSave.length === 0) return
 
     dispatch({
-      type: 'startSavingIMChatInfo',
+      type: 'SAVING_IM_CHAT_INFO_STARTED',
       chatUUIDs: chatInfosToSave.map(chat => chat.chatUUID)
     })
 
@@ -935,7 +935,7 @@ export function saveIMChatInfos () {
     })
 
     dispatch({
-      type: 'didSaveIMChatInfo',
+      type: 'SAVING_IM_CHAT_INFO_FINISHED',
       didError
     })
   }
@@ -952,16 +952,16 @@ export function loadIMChats () {
     const store = hoodie.cryptoStore.withIdPrefix(`${avatarDataSaveId}/imChatsInfos/`)
     store.findAll().then(result => {
       dispatch({
-        type: 'IMChatInfosLoaded',
-        chats: result
+        type: 'IM_CHAT_INFOS_LOADED',
+        chats: result.map(parseIMChatInfo)
       })
     })
 
     // if the syncing didn't finish and new chat infos are loaded
     const handler = doc => {
       dispatch({
-        type: 'IMChatInfosLoaded',
-        chats: [doc]
+        type: 'IM_CHAT_INFOS_LOADED',
+        chats: [parseIMChatInfo(doc)]
       })
     }
     store.on('add', handler)
@@ -969,6 +969,11 @@ export function loadIMChats () {
       store.off('add', handler)
     })
   }
+}
+
+function parseIMChatInfo (doc) {
+  doc.chatType = IMChatType[doc.chatType]
+  return doc
 }
 
 // Loads messages of an IM Chat.
