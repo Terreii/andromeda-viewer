@@ -881,11 +881,64 @@ describe('incoming IM handling', () => {
         sessionId: '01234567-8900-0000-0000-009876543210',
         msg: {
           _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
-          sessionId: '01234567-8900-0000-0000-009876543210',
-          fromAgentName: 'Tester',
+          fromName: 'Tester',
           fromId: '01234567-8900-0000-0000-000000000000',
           offline: 0,
           message: "I'm sorry, but I'm busy ...",
+          time: 1562630524418
+        }
+      }
+    ])
+  })
+
+  it('should handle system messages to IM chats', () => {
+    const store = mockStore({
+      account: {
+        savedAvatars: [
+          {
+            avatarIdentifier: 'Tester',
+            dataSaveId: 'saveId'
+          }
+        ]
+      },
+      session: {
+        avatarIdentifier: 'Tester'
+      },
+      groups: [
+        {
+          id: 'some-none-existing-id'
+        }
+      ],
+      IMs: {
+        '01234567-8900-0000-0000-009876543210': {
+          saveId: 'abcdef',
+          sessionId: '01234567-8900-0000-0000-009876543210',
+          type: IMChatType.personal
+        },
+        'some-none-existing-id': {
+          saveId: 'something',
+          sessionId: 'some-none-existing-id',
+          type: IMChatType.group
+        }
+      }
+    })
+
+    store.dispatch(receiveIM(createImPackage(IMDialog.MessageFromAgent, {
+      id: '01234567-8900-0000-0000-009876543210',
+      fromAgentName: 'Second Life',
+      message: 'User not online - message will be stored and delivered later.'
+    })))
+
+    expect(store.getActions()).toEqual([
+      {
+        type: 'SYSTEM_IM_RECEIVED',
+        sessionId: '01234567-8900-0000-0000-009876543210',
+        msg: {
+          _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
+          fromName: 'Second Life',
+          fromId: LLUUID.nil,
+          offline: 0,
+          message: 'User not online - message will be stored and delivered later.',
           time: 1562630524418
         }
       }
@@ -1020,7 +1073,9 @@ describe('incoming IM handling', () => {
     })
 
     it('should handle messages from objects', () => {
-      const store = mockStore()
+      const store = mockStore({
+        IMs: {}
+      })
 
       // IMDialog.MessageFromObject
       store.dispatch(receiveIM(createImPackage(IMDialog.MessageFromObject, {
@@ -1382,6 +1437,24 @@ function createStringBuffer (data) {
   ])
 }
 
+/**
+ * Create a IM message/package.
+ * @param {IMDialog}       dialog              Dialog the IM package should have.
+ * @param {object}         data                Data that isn't the default value.
+ * @param {string?}        data.id             SessionId. Is a UUID.
+ * @param {string|Buffer?} data.message        Message body of the package.
+ * @param {string?}        data.toAgentId      ID the message was send to.
+ * @param {string?}        data.agentId        Id of the sender.
+ * @param {string?}        data.sessionId      Id of the Grid Session.
+ * @param {string|Buffer?} data.fromAgentName  Name of the sender.
+ * @param {boolean?}       data.fromGroup      Is it from a group?
+ * @param {number?}        data.offline        Was it a offline message?
+ * @param {string|Buffer?} data.binaryBucket   Data in the binary bucket.
+ * @param {number?}        data.parentEstateId Id of the estate it was send from.
+ * @param {string?}        data.regionId       Id of the region it was send from.
+ * @param {number[]?}      data.position       Position the message was send from.
+ * @param {number?}        data.timestamp       Unix time stamp of when the message was send.
+ */
 function createImPackage (dialog, data = {}) {
   const getValue = (key, defaultValue) => {
     const value = data[key] || defaultValue

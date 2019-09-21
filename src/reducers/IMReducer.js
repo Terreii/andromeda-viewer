@@ -69,6 +69,8 @@ function imChat (state = getDefaultImChat(), action) {
     case 'PERSONAL_IM_RECEIVED':
     case 'GROUP_IM_RECEIVED':
     case 'CONFERENCE_IM_RECEIVED':
+    case 'BUSY_AUTO_RESPONSE_RECEIVED':
+    case 'SYSTEM_IM_RECEIVED':
       return {
         ...state,
         messages: state.messages.concat([{
@@ -229,10 +231,14 @@ export default function IMReducer (state = {}, action) {
     case 'PERSONAL_IM_RECEIVED':
     case 'GROUP_IM_RECEIVED':
     case 'CONFERENCE_IM_RECEIVED':
+    case 'BUSY_AUTO_RESPONSE_RECEIVED':
+    case 'SYSTEM_IM_RECEIVED':
       const idKey = {
         PERSONAL_IM_RECEIVED: 'sessionId',
         GROUP_IM_RECEIVED: 'groupId',
-        CONFERENCE_IM_RECEIVED: 'conferenceId'
+        CONFERENCE_IM_RECEIVED: 'conferenceId',
+        BUSY_AUTO_RESPONSE_RECEIVED: 'sessionId',
+        SYSTEM_IM_RECEIVED: 'sessionId'
       }[action.type]
       const id = action[idKey]
 

@@ -248,7 +248,9 @@ export function receiveIM (message) {
         break
 
       case IMDialog.MessageFromAgent:
-        if (fromAgentName === 'Second Life') {
+        if (fromAgentName === 'Second Life' && id in getIMChats(state)) {
+          dispatch(handleSystemMessageToIM(message))
+        } else if (fromAgentName === 'Second Life') {
           dispatch(handleIMFromObject(message))
         } else if (fromId === LLUUID.nil) {
           dispatch(handleSystemNotification(message))
@@ -487,9 +489,38 @@ function handleBusyAutoResponse (msg) {
       sessionId: id,
       msg: {
         _id: `${avatarSaveId}/imChats/${chat.saveId}/${time.toJSON()}`,
-        sessionId: id,
-        fromAgentName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
+        fromName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
         fromId: getValueOf(msg, 'AgentData', 'AgentID'),
+        offline: getValueOf(msg, 'MessageBlock', 'Offline'),
+        message: getStringValueOf(msg, 'MessageBlock', 'Message'),
+        time: time.getTime()
+      }
+    })
+  }
+}
+
+/**
+ * Handle Messages from the system to a IM session.
+ * @param {object} msg IM Message from the server
+ */
+function handleSystemMessageToIM (msg) {
+  return (dispatch, getState) => {
+    const state = getState()
+
+    const id = getValueOf(msg, 'MessageBlock', 'ID')
+
+    const chat = getIMChats(state)[id]
+    if (chat == null) return
+
+    const time = new Date()
+
+    dispatch({
+      type: 'SYSTEM_IM_RECEIVED',
+      sessionId: id,
+      msg: {
+        _id: `${getAvatarDataSaveId(state)}/imChats/${chat.saveId}/${time.toJSON()}`,
+        fromName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName') || 'Second Life',
+        fromId: LLUUID.nil,
         offline: getValueOf(msg, 'MessageBlock', 'Offline'),
         message: getStringValueOf(msg, 'MessageBlock', 'Message'),
         time: time.getTime()
