@@ -7,7 +7,7 @@ import { IMChatType } from '../types/chat'
 function getDefaultImChat () {
   return {
     _id: null,
-    chatUUID: null,
+    sessionId: null,
     saveId: null,
     type: IMChatType.personal,
     target: null,
@@ -31,7 +31,7 @@ function imChat (state = getDefaultImChat(), action) {
         ...state,
         _id: state._id || action._id,
         didSaveChatInfo: action.type === 'IM_CHAT_INFOS_LOADED',
-        chatUUID: action.chatUUID,
+        sessionId: action.sessionId,
         saveId: action.saveId,
         type: action.chatType,
         target: action.target,
@@ -42,7 +42,7 @@ function imChat (state = getDefaultImChat(), action) {
       return {
         ...state,
         _id: state._id || `${action.avatarDataSaveId}/imChatsInfos/${action.saveId}`,
-        chatUUID: state.chatUUID || action.id,
+        sessionId: state.sessionId || action.id,
         saveId: state.saveId || action.saveId,
         type: IMChatType.group,
         target: action.id,
@@ -51,7 +51,7 @@ function imChat (state = getDefaultImChat(), action) {
 
     case 'SAVING_IM_CHAT_INFO_STARTED':
     case 'SAVING_IM_CHAT_INFO_FINISHED':
-      if (action.chatUUIDs.includes(state.chatUUID)) {
+      if (action.sessionIds.includes(state.sessionId)) {
         return {
           ...state,
           didSaveChatInfo: action.type === 'SAVING_IM_CHAT_INFO_STARTED'
@@ -60,7 +60,7 @@ function imChat (state = getDefaultImChat(), action) {
         return state
       }
 
-    case 'ActivateIMChat':
+    case 'IM_CHAT_ACTIVATED':
       return {
         ...state,
         active: true
@@ -114,7 +114,7 @@ function imChat (state = getDefaultImChat(), action) {
 
     case 'INSTANT_MESSAGE_START_SAVING':
       let stillHasUnsaved = false
-      const thisChat = action.chats[state.chatUUID]
+      const thisChat = action.chats[state.sessionId]
 
       return {
         ...state,
@@ -135,7 +135,7 @@ function imChat (state = getDefaultImChat(), action) {
       }
 
     case 'INSTANT_MESSAGE_DID_SAVE':
-      const thisChatDidSave = action.chats[state.chatUUID]
+      const thisChatDidSave = action.chats[state.sessionId]
       let stillHasUnsavedAfterSave = false
       const didSave = thisChatDidSave.saved.reduce((all, msg) => {
         all[msg._id] = msg
@@ -182,10 +182,10 @@ function imChat (state = getDefaultImChat(), action) {
 export default function IMReducer (state = {}, action) {
   switch (action.type) {
     case 'IM_CHAT_CREATED':
-    case 'ActivateIMChat':
+    case 'IM_CHAT_ACTIVATED':
       return {
         ...state,
-        [action.chatUUID]: imChat(state[action.chatUUID], action)
+        [action.sessionId]: imChat(state[action.sessionId], action)
       }
 
     case 'IM_CHAT_INFOS_LOADED':
@@ -194,8 +194,8 @@ export default function IMReducer (state = {}, action) {
           type: action.type
         })
 
-        const updatedChat = imChat(state[chat.chatUUID], innerAction)
-        state[chat.chatUUID] = updatedChat
+        const updatedChat = imChat(state[chat.sessionId], innerAction)
+        state[chat.sessionId] = updatedChat
 
         return state
       }, { ...state })
@@ -211,7 +211,7 @@ export default function IMReducer (state = {}, action) {
       }, { ...state })
 
     case 'SAVING_IM_CHAT_INFO_STARTED':
-      return action.chatUUIDs.reduce((state, id) => {
+      return action.sessionIds.reduce((state, id) => {
         const updatedChat = imChat(state[id], action)
         state[id] = updatedChat
         return state
@@ -230,7 +230,7 @@ export default function IMReducer (state = {}, action) {
     case 'GROUP_IM_RECEIVED':
     case 'CONFERENCE_IM_RECEIVED':
       const idKey = {
-        PERSONAL_IM_RECEIVED: 'chatUUID',
+        PERSONAL_IM_RECEIVED: 'sessionId',
         GROUP_IM_RECEIVED: 'groupId',
         CONFERENCE_IM_RECEIVED: 'conferenceId'
       }[action.type]
@@ -248,7 +248,7 @@ export default function IMReducer (state = {}, action) {
 
     case 'IM_START_TYPING':
     case 'IM_STOP_TYPING':
-      const oldIMChatData = state[action.chatUUID]
+      const oldIMChatData = state[action.sessionId]
       if (oldIMChatData == null) return state
 
       const newIMChatData = imChat(oldIMChatData, action)
@@ -256,7 +256,7 @@ export default function IMReducer (state = {}, action) {
         ? state
         : {
           ...state,
-          [action.chatUUID]: newIMChatData
+          [action.sessionId]: newIMChatData
         }
 
     case 'INSTANT_MESSAGE_START_SAVING':
@@ -271,7 +271,7 @@ export default function IMReducer (state = {}, action) {
     case 'IMHistoryLoaded':
       return {
         ...state,
-        [action.chatUUID]: imChat(state[action.chatUUID], action)
+        [action.sessionId]: imChat(state[action.sessionId], action)
       }
 
     case 'DidLogout':

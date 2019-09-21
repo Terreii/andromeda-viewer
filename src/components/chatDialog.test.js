@@ -59,7 +59,7 @@ test('renders IM chat', () => {
   }
 
   const imData = {
-    chatUUID: 'abc',
+    sessionId: 'abc',
     saveId: 'def',
     messages: []
   }
@@ -137,7 +137,7 @@ test('IM chat should pass aXe', async () => {
   }
 
   const imData = {
-    chatUUID: 'abc',
+    sessionId: 'abc',
     saveId: 'def',
     messages: []
   }

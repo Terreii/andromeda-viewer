@@ -358,7 +358,7 @@ describe('save and loading IMs', () => {
       IMs: {
         abcd: {
           _id: 'an-id',
-          chatUUID: 'abcd',
+          sessionId: 'abcd',
           saveId: 'dcba',
           type: IMChatType.personal,
           target: 'f2373437-a2ef-4435-82b9-68d283538bb2',
@@ -374,7 +374,7 @@ describe('save and loading IMs', () => {
         },
         willError: {
           _id: 'an-id-too',
-          chatUUID: 'willError',
+          sessionId: 'willError',
           saveId: 'xyz',
           type: IMChatType.group,
           target: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
@@ -390,7 +390,7 @@ describe('save and loading IMs', () => {
         },
         12345: {
           _id: 'another-id',
-          chatUUID: '12345',
+          sessionId: '12345',
           saveId: '67890',
           type: IMChatType.personal,
           target: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
@@ -412,7 +412,7 @@ describe('save and loading IMs', () => {
     expect(store.getActions()).toEqual([
       {
         type: 'SAVING_IM_CHAT_INFO_STARTED',
-        chatUUIDs: ['abcd', 'willError']
+        sessionIds: ['abcd', 'willError']
       }
     ])
 
@@ -430,7 +430,7 @@ describe('save and loading IMs', () => {
     expect(findOrAdd.mock.calls[0][0]).toEqual([
       {
         _id: 'an-id',
-        chatUUID: 'abcd',
+        sessionId: 'abcd',
         saveId: 'dcba',
         chatType: 'personal',
         target: 'f2373437-a2ef-4435-82b9-68d283538bb2',
@@ -438,7 +438,7 @@ describe('save and loading IMs', () => {
       },
       {
         _id: 'an-id-too',
-        chatUUID: 'willError',
+        sessionId: 'willError',
         saveId: 'xyz',
         chatType: 'group',
         target: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
@@ -450,7 +450,7 @@ describe('save and loading IMs', () => {
   test('loading IM Chat infos', () => {
     const docA = {
       _id: 'an-id',
-      chatUUID: 'abcd',
+      sessionId: 'abcd',
       saveId: 'dcba',
       chatType: 'personal',
       target: 'f2373437-a2ef-4435-82b9-68d283538bb2',
@@ -458,7 +458,7 @@ describe('save and loading IMs', () => {
     }
     const docB = {
       _id: 'an-id-too',
-      chatUUID: '1234567',
+      sessionId: '1234567',
       saveId: 'xyz',
       chatType: 'group',
       target: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
@@ -537,7 +537,7 @@ describe('save and loading IMs', () => {
 
     const doc = {
       _id: 'another-id',
-      chatUUID: '12345',
+      sessionId: '12345',
       saveId: '67890',
       chatType: 'personal',
       target: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
@@ -604,14 +604,14 @@ describe('incoming IM handling', () => {
         type: 'IM_CHAT_CREATED',
         _id: 'saveId/imChatsInfos/abcdef',
         chatType: IMChatType.personal,
-        chatUUID: messageData.MessageBlock[0].ID,
+        sessionId: messageData.MessageBlock[0].ID,
         saveId: 'abcdef',
         target: messageData.AgentData[0].AgentID,
         name: 'Tester'
       },
       {
         type: 'PERSONAL_IM_RECEIVED',
-        chatUUID: messageData.MessageBlock[0].ID,
+        sessionId: messageData.MessageBlock[0].ID,
         msg: {
           _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
           fromName: 'Tester',
@@ -655,7 +655,7 @@ describe('incoming IM handling', () => {
     expect(store.getActions()).toEqual([
       {
         type: 'PERSONAL_IM_RECEIVED',
-        chatUUID: messageData.MessageBlock[0].ID,
+        sessionId: messageData.MessageBlock[0].ID,
         msg: {
           _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
           fromName: 'Tester',
@@ -788,7 +788,7 @@ describe('incoming IM handling', () => {
       type: 'IM_CHAT_CREATED',
       _id: 'saveId/imChatsInfos/abcdef',
       chatType: IMChatType.conference,
-      chatUUID: id,
+      sessionId: id,
       saveId: 'abcdef',
       target: id,
       name: 'A conference'
@@ -820,12 +820,12 @@ describe('incoming IM handling', () => {
     expect(store.getActions()).toEqual([
       {
         type: 'IM_START_TYPING',
-        chatUUID: '01234567-8900-0000-0000-009876543210',
+        sessionId: '01234567-8900-0000-0000-009876543210',
         agentId: '01234567-8900-0000-0000-000000000000'
       },
       {
         type: 'IM_STOP_TYPING',
-        chatUUID: '01234567-8900-0000-0000-009876543210',
+        sessionId: '01234567-8900-0000-0000-009876543210',
         agentId: '01234567-8900-0000-0000-000000000000'
       }
     ])
@@ -852,12 +852,12 @@ describe('incoming IM handling', () => {
       IMs: {
         '01234567-8900-0000-0000-009876543210': {
           saveId: 'abcdef',
-          chatUUID: '01234567-8900-0000-0000-009876543210',
+          sessionId: '01234567-8900-0000-0000-009876543210',
           type: IMChatType.personal
         },
         'some-none-existing-id': {
           saveId: 'something',
-          chatUUID: 'some-none-existing-id',
+          sessionId: 'some-none-existing-id',
           type: IMChatType.group
         }
       }
@@ -881,7 +881,7 @@ describe('incoming IM handling', () => {
         sessionId: '01234567-8900-0000-0000-009876543210',
         msg: {
           _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
-          chatUUID: '01234567-8900-0000-0000-009876543210',
+          sessionId: '01234567-8900-0000-0000-009876543210',
           fromAgentName: 'Tester',
           fromId: '01234567-8900-0000-0000-000000000000',
           offline: 0,

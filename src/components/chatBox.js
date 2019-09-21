@@ -23,7 +23,7 @@ export default function ChatBox (props) {
   const names = props.names
 
   const panels = props.IMs.map(chat => {
-    const id = chat.chatUUID
+    const id = chat.sessionId
     const target = chat.target
     const type = chat.type
     const name = type === IMChatType.personal

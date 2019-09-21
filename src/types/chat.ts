@@ -146,7 +146,7 @@ export enum IMChatType {
  */
 export interface IMChat extends HoodieObject {
   didSaveChatInfo: boolean
-  chatUUID: string
+  sessionId: string
   saveId: string
   type: IMChatType
   target: string
