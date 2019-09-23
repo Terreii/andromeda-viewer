@@ -8,12 +8,19 @@ import {
   receiveChatFromSimulator,
   sendLocalChatMessage,
   saveLocalChatMessages,
+  getLocalChatHistory,
   deleteOldLocalChat,
+  sendInstantMessage,
   retrieveInstantMessages,
   receiveIM,
   saveIMChatInfos,
-  loadIMChats
+  loadIMChats,
+  startNewIMChat,
+  activateIMChat,
+  getIMHistory
 } from './chatMessageActions'
+
+import AvatarName from '../avatarName'
 
 import { Maturity } from '../types/viewer'
 import {
@@ -32,7 +39,7 @@ jest.mock('uuid')
 mockdate.set(1562630524418)
 
 describe('local chat', () => {
-  test('receiving local chat', () => {
+  it('should handle receiving local chat', () => {
     const store = mockStore({
       account: {
         savedAvatars: [
@@ -87,7 +94,7 @@ describe('local chat', () => {
     ])
   })
 
-  test('sending local chat', () => {
+  it('should send local chat', () => {
     const send = jest.fn()
 
     const store = configureMockStore([
@@ -126,7 +133,7 @@ describe('local chat', () => {
     expect(store.getActions()).toEqual([])
   })
 
-  test('saving local chat messages', async () => {
+  it('should save local chat messages', async () => {
     const updateOrAdd = jest.fn(([shouldPass, shouldFail]) => {
       const passingResult = JSON.parse(JSON.stringify({
         ...shouldPass,
@@ -252,7 +259,40 @@ describe('local chat', () => {
     ])
   })
 
-  test('deleting old local chat', async () => {
+  it('should load local chat', async () => {
+    const findAll = jest.fn(() => Promise.resolve([
+      {
+        _id: '1',
+        data: 1
+      }
+    ]))
+    const withIdPrefix = jest.fn(() => ({ findAll }))
+
+    const store = configureMockStore([thunk.withExtraArgument({
+      hoodie: {
+        cryptoStore: {
+          withIdPrefix
+        }
+      }
+    })])()
+
+    const result = await store.dispatch(getLocalChatHistory('anAvatar'))
+
+    expect(withIdPrefix.mock.calls).toEqual([
+      [
+        'anAvatar/localchat/'
+      ]
+    ])
+    expect(findAll.mock.calls.length).toBe(1)
+    expect(result).toEqual([
+      {
+        _id: '1',
+        data: 1
+      }
+    ])
+  })
+
+  it('should deleting old local chat', async () => {
     const removeFn = jest.fn(docs => Promise.resolve(docs))
 
     const localChat = [
@@ -339,8 +379,8 @@ describe('local chat', () => {
   }
 })
 
-describe('save and loading IMs', () => {
-  test('saving IM chat infos', async () => {
+describe('save, loading and sending IMs', () => {
+  it('should handle saving IM chat infos', async () => {
     const findOrAdd = jest.fn(docs => Promise.resolve([
       {
         ...docs[0],
@@ -448,7 +488,7 @@ describe('save and loading IMs', () => {
     ])
   })
 
-  test('loading IM Chat infos', () => {
+  it('should load IM Chat infos', () => {
     const docA = {
       _id: 'an-id',
       sessionId: 'abcd',
@@ -562,10 +602,504 @@ describe('save and loading IMs', () => {
     expect(storeOff.mock.calls[0][0]).toBe('add')
     expect(storeOff.mock.calls[0][1]).toBe(callbacks[0])
   })
+
+  it('should load IM chat history', async () => {
+    const shouldResolveWith = {
+      error: null,
+      value: null
+    }
+    let findResult = null
+
+    const allDocs = jest.fn(() => {
+      if (shouldResolveWith.error != null) {
+        return Promise.reject(shouldResolveWith.error)
+      }
+      return Promise.resolve(shouldResolveWith.value)
+    })
+
+    const find = jest.fn(() => Promise.resolve(findResult))
+
+    const findAll = jest.fn(() => Promise.resolve(findResult))
+    const withIdPrefix = jest.fn(() => ({ findAll }))
+
+    const store = configureMockStore([thunk.withExtraArgument({
+      hoodie: {
+        store: {
+          db: { allDocs }
+        },
+        cryptoStore: {
+          find,
+          withIdPrefix
+        }
+      }
+    })])({
+      account: {
+        savedAvatars: [
+          {
+            avatarIdentifier: 'test@sl',
+            dataSaveId: 'saveId'
+          }
+        ]
+      },
+      session: {
+        agentId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+        sessionId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9',
+        avatarIdentifier: 'test@sl'
+      },
+      IMs: {
+        '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25': {
+          name: 'Buddy',
+          target: 'f2373437-a2ef-4435-82b9-68d283538bb2',
+          saveId: 'abcd',
+          type: IMChatType.personal,
+          messages: [
+            { _id: 'saveId/imChats/abcd/2019-07-09T00:02:04.000Z' }
+          ]
+        },
+        'da4bf092-5e29-4577-a662-171bd57915f8': {
+          name: 'Best group',
+          target: 'da4bf092-5e29-4577-a662-171bd57915f8',
+          saveId: 'efgh',
+          type: IMChatType.group,
+          messages: []
+        }
+      }
+    })
+
+    // Can access PouchDb instance & load all
+
+    shouldResolveWith.value = {
+      rows: [
+        { id: 'saveId/imChats/abcd/2019-07-07T00:02:04.000Z' },
+        { id: 'saveId/imChats/abcd/2019-07-08T00:02:04.000Z' },
+        { id: 'saveId/imChats/abcd/2019-07-09T00:02:04.000Z' }
+      ]
+    }
+    findResult = [
+      { _id: 'saveId/imChats/abcd/2019-07-08T00:02:04.000Z', message: 'Hello' },
+      { _id: 'saveId/imChats/abcd/2019-07-07T00:02:04.000Z', message: 'Hello' }
+    ]
+    await store.dispatch(getIMHistory('5657e9ca-315c-47e3-bfde-7bfe2e5b7e25', 'abcd'))
+
+    expect(allDocs.mock.calls.length).toBe(1)
+    expect(allDocs.mock.calls[0]).toEqual([
+      {
+        startkey: 'saveId/imChats/abcd/2019-07-09T00:02:04.000Z',
+        endkey: 'saveId/imChats/abcd',
+        limit: 101,
+        descending: true
+      }
+    ])
+
+    expect(find.mock.calls.length).toBe(1)
+    expect(find.mock.calls[0]).toEqual([
+      [
+        'saveId/imChats/abcd/2019-07-08T00:02:04.000Z',
+        'saveId/imChats/abcd/2019-07-07T00:02:04.000Z'
+      ]
+    ])
+
+    expect(store.getActions()).toEqual([
+      {
+        type: 'IM_HISTORY_LOADING_STARTED',
+        sessionId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25'
+      },
+      {
+        type: 'IM_HISTORY_LOADING_FINISHED',
+        sessionId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+        messages: findResult,
+        didLoadAll: true
+      }
+    ])
+
+    shouldResolveWith.value = null
+    findResult = null
+    store.clearActions()
+
+    // can access PouchDb & loads all but no message
+
+    shouldResolveWith.value = {
+      rows: [
+        { id: 'saveId/imChats/efgh/2019-07-07T00:02:04.000Z' },
+        { id: 'saveId/imChats/efgh/2019-07-08T00:02:04.000Z' },
+        { id: 'saveId/imChats/efgh/2019-07-09T00:02:04.000Z' }
+      ]
+    }
+    findResult = [
+      { _id: 'saveId/imChats/efgh/2019-07-09T00:02:04.000Z', message: 'Hello' },
+      { _id: 'saveId/imChats/efgh/2019-07-08T00:02:04.000Z', message: 'Hello' },
+      { _id: 'saveId/imChats/efgh/2019-07-07T00:02:04.000Z', message: 'Hello' }
+    ]
+    await store.dispatch(getIMHistory('da4bf092-5e29-4577-a662-171bd57915f8', 'efgh'))
+
+    expect(allDocs.mock.calls.length).toBe(2)
+    expect(allDocs.mock.calls[1]).toEqual([
+      {
+        startkey: 'saveId/imChats/efgh/\uffff',
+        endkey: 'saveId/imChats/efgh',
+        limit: 100,
+        descending: true
+      }
+    ])
+
+    expect(find.mock.calls.length).toBe(2)
+    expect(find.mock.calls[1]).toEqual([
+      [
+        'saveId/imChats/efgh/2019-07-09T00:02:04.000Z',
+        'saveId/imChats/efgh/2019-07-08T00:02:04.000Z',
+        'saveId/imChats/efgh/2019-07-07T00:02:04.000Z'
+      ]
+    ])
+
+    expect(store.getActions()).toEqual([
+      {
+        type: 'IM_HISTORY_LOADING_STARTED',
+        sessionId: 'da4bf092-5e29-4577-a662-171bd57915f8'
+      },
+      {
+        type: 'IM_HISTORY_LOADING_FINISHED',
+        sessionId: 'da4bf092-5e29-4577-a662-171bd57915f8',
+        messages: findResult,
+        didLoadAll: true
+      }
+    ])
+
+    shouldResolveWith.value = null
+    findResult = null
+    store.clearActions()
+
+    // No access to PouchDb
+
+    shouldResolveWith.error = new Error('database is destroyed')
+    findResult = [
+      { _id: 'saveId/imChats/abcd/2019-07-07T00:02:04.000Z', message: 'Hello' },
+      { _id: 'saveId/imChats/abcd/2019-07-08T00:02:04.000Z', message: 'Hello' },
+      { _id: 'saveId/imChats/abcd/2019-07-09T00:02:04.000Z', message: 'Hello' }
+    ]
+
+    await store.dispatch(getIMHistory('5657e9ca-315c-47e3-bfde-7bfe2e5b7e25', 'abcd'))
+
+    expect(withIdPrefix.mock.calls.length).toBe(1)
+    expect(withIdPrefix.mock.calls[0]).toEqual(['saveId/imChats/abcd'])
+
+    expect(findAll.mock.calls.length).toBe(1)
+
+    expect(store.getActions()).toEqual([
+      {
+        type: 'IM_HISTORY_LOADING_STARTED',
+        sessionId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25'
+      },
+      {
+        type: 'IM_HISTORY_LOADING_FINISHED',
+        sessionId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+        messages: [
+          { _id: 'saveId/imChats/abcd/2019-07-07T00:02:04.000Z', message: 'Hello' },
+          { _id: 'saveId/imChats/abcd/2019-07-08T00:02:04.000Z', message: 'Hello' }
+        ],
+        didLoadAll: false
+      }
+    ])
+  })
+
+  it('should send a instant message', async () => {
+    const send = jest.fn(() => { Promise.resolve() })
+
+    const store = configureMockStore([thunk.withExtraArgument({
+      circuit: { send }
+    })])({
+      account: {
+        savedAvatars: [
+          {
+            avatarIdentifier: 'test@sl',
+            dataSaveId: 'saveId'
+          }
+        ]
+      },
+      session: {
+        agentId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+        sessionId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9',
+        avatarIdentifier: 'test@sl',
+        position: {
+          position: [0, 0, 0]
+        },
+        regionInfo: {
+          parentEstateID: 1,
+          regionID: 'f276f0f0-a843-46fd-bf4e-7aa3a5deea38'
+        }
+      },
+      names: {
+        names: {
+          'e0f1adac-d250-4d71-b4e4-10e0ee855d0e': new AvatarName('Tester MacTestface')
+        }
+      },
+      IMs: {
+        '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25': {
+          name: 'Buddy',
+          target: 'f2373437-a2ef-4435-82b9-68d283538bb2',
+          saveId: 'abcd',
+          type: IMChatType.personal
+        },
+        'da4bf092-5e29-4577-a662-171bd57915f8': {
+          name: 'Best group',
+          target: 'da4bf092-5e29-4577-a662-171bd57915f8',
+          saveId: 'efgh',
+          type: IMChatType.group
+        },
+        'ee6af506-fa78-408d-869f-78305b3889c3': {
+          name: 'Dr. Evil Inc.',
+          target: 'ee6af506-fa78-408d-869f-78305b3889c3',
+          saveId: 'ijkl',
+          type: IMChatType.conference
+        }
+      }
+    })
+
+    // Persional
+    await store.dispatch(sendInstantMessage(
+      'Hello world!',
+      'f2373437-a2ef-4435-82b9-68d283538bb2',
+      '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+      IMDialog.MessageFromAgent
+    ))
+
+    // Group
+    await store.dispatch(sendInstantMessage(
+      'Hello world!',
+      'da4bf092-5e29-4577-a662-171bd57915f8',
+      'da4bf092-5e29-4577-a662-171bd57915f8',
+      IMDialog.SessionSend
+    ))
+
+    // Conference
+    await store.dispatch(sendInstantMessage(
+      'Hello world!',
+      'ee6af506-fa78-408d-869f-78305b3889c3',
+      'ee6af506-fa78-408d-869f-78305b3889c3',
+      IMDialog.SessionSend
+    ))
+
+    expect(send.mock.calls.length).toBe(3)
+    expect(send.mock.calls[0]).toEqual([
+      'ImprovedInstantMessage',
+      {
+        AgentData: [
+          {
+            AgentID: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+            SessionID: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9'
+          }
+        ],
+        MessageBlock: [
+          {
+            FromGroup: false,
+            ToAgentID: 'f2373437-a2ef-4435-82b9-68d283538bb2',
+            ParentEstateID: 1,
+            RegionID: 'f276f0f0-a843-46fd-bf4e-7aa3a5deea38',
+            Position: [0, 0, 0],
+            Offline: 0,
+            Dialog: IMDialog.MessageFromAgent,
+            ID: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+            Timestamp: 1562630524,
+            FromAgentName: 'Tester Mactestface',
+            Message: 'Hello world!',
+            BinaryBucket: Buffer.from([])
+          }
+        ]
+      },
+      true
+    ])
+
+    expect(send.mock.calls[1]).toEqual([
+      'ImprovedInstantMessage',
+      {
+        AgentData: [
+          {
+            AgentID: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+            SessionID: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9'
+          }
+        ],
+        MessageBlock: [
+          {
+            FromGroup: false,
+            ToAgentID: 'da4bf092-5e29-4577-a662-171bd57915f8',
+            ParentEstateID: 1,
+            RegionID: 'f276f0f0-a843-46fd-bf4e-7aa3a5deea38',
+            Position: [0, 0, 0],
+            Offline: 0,
+            Dialog: IMDialog.SessionSend,
+            ID: 'da4bf092-5e29-4577-a662-171bd57915f8',
+            Timestamp: 1562630524,
+            FromAgentName: 'Tester Mactestface',
+            Message: 'Hello world!',
+            BinaryBucket: 'Best group'
+          }
+        ]
+      },
+      true
+    ])
+
+    expect(send.mock.calls[2]).toEqual([
+      'ImprovedInstantMessage',
+      {
+        AgentData: [
+          {
+            AgentID: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+            SessionID: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9'
+          }
+        ],
+        MessageBlock: [
+          {
+            FromGroup: false,
+            ToAgentID: 'ee6af506-fa78-408d-869f-78305b3889c3',
+            ParentEstateID: 1,
+            RegionID: 'f276f0f0-a843-46fd-bf4e-7aa3a5deea38',
+            Position: [0, 0, 0],
+            Offline: 0,
+            Dialog: IMDialog.SessionSend,
+            ID: 'ee6af506-fa78-408d-869f-78305b3889c3',
+            Timestamp: 1562630524,
+            FromAgentName: 'Tester Mactestface',
+            Message: 'Hello world!',
+            BinaryBucket: 'Dr. Evil Inc.'
+          }
+        ]
+      },
+      true
+    ])
+
+    expect(store.getActions()).toEqual([
+      {
+        type: 'PERSONAL_IM_RECEIVED',
+        sessionId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+        msg: {
+          _id: 'saveId/imChats/abcd/2019-07-09T00:02:04.000Z',
+          fromId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+          fromName: 'Tester Mactestface',
+          message: 'Hello world!',
+          offline: 0,
+          time: 1562630524000
+        }
+      },
+      {
+        type: 'GROUP_IM_RECEIVED',
+        groupId: 'da4bf092-5e29-4577-a662-171bd57915f8',
+        msg: {
+          _id: 'saveId/imChats/efgh/2019-07-09T00:02:04.000Z',
+          fromId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+          fromName: 'Tester Mactestface',
+          message: 'Hello world!',
+          time: 1562630524000
+        }
+      },
+      {
+        type: 'CONFERENCE_IM_RECEIVED',
+        conferenceId: 'ee6af506-fa78-408d-869f-78305b3889c3',
+        msg: {
+          _id: 'saveId/imChats/ijkl/2019-07-09T00:02:04.000Z',
+          fromId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+          fromName: 'Tester Mactestface',
+          message: 'Hello world!',
+          time: 1562630524000
+        }
+      }
+    ])
+  })
+
+  it('should handle creation of new chats', () => {
+    const store = mockStore({
+      account: {
+        savedAvatars: [
+          {
+            avatarIdentifier: 'test@sl',
+            dataSaveId: 'saveId'
+          }
+        ]
+      },
+      session: {
+        agentId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+        sessionId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9',
+        avatarIdentifier: 'test@sl'
+      },
+      IMs: {},
+      names: {
+        names: {
+          'f2373437-a2ef-4435-82b9-68d283538bb2': new AvatarName('Tester Furry')
+        }
+      }
+    })
+
+    uuid.mockReturnValueOnce('da4bf092-5e29-4577-a662-171bd57915f8')
+
+    store.dispatch(startNewIMChat(
+      IMChatType.personal,
+      'f2373437-a2ef-4435-82b9-68d283538bb2',
+      'Tester FuryTest'
+    ))
+
+    uuid.mockReturnValueOnce('5657e9ca-315c-47e3-bfde-7bfe2e5b7e25')
+
+    store.dispatch(startNewIMChat(
+      IMChatType.conference,
+      'ee6af506-fa78-408d-869f-78305b3889c3',
+      'Conference Chat 1234'
+    ))
+
+    expect(store.getActions()).toEqual([
+      // Personal
+      {
+        type: 'IM_CHAT_CREATED',
+        _id: 'saveId/imChatsInfos/da4bf092-5e29-4577-a662-171bd57915f8',
+        chatType: IMChatType.personal,
+        sessionId: '12c6999b-70bf-0944-365d-78326dd6d6bc',
+        saveId: 'da4bf092-5e29-4577-a662-171bd57915f8',
+        target: 'f2373437-a2ef-4435-82b9-68d283538bb2',
+        name: 'Tester Furry'
+      },
+      {
+        type: 'IM_CHAT_ACTIVATED',
+        sessionId: '12c6999b-70bf-0944-365d-78326dd6d6bc'
+      },
+      {
+        type: 'CHAT_TAB_CHANGED',
+        key: '12c6999b-70bf-0944-365d-78326dd6d6bc'
+      },
+
+      // Conference
+      {
+        type: 'IM_CHAT_CREATED',
+        _id: 'saveId/imChatsInfos/5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+        chatType: IMChatType.conference,
+        sessionId: 'ee6af506-fa78-408d-869f-78305b3889c3',
+        saveId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+        target: 'ee6af506-fa78-408d-869f-78305b3889c3',
+        name: 'Conference Chat 1234'
+      },
+      {
+        type: 'IM_CHAT_ACTIVATED',
+        sessionId: 'ee6af506-fa78-408d-869f-78305b3889c3'
+      },
+      {
+        type: 'CHAT_TAB_CHANGED',
+        key: 'ee6af506-fa78-408d-869f-78305b3889c3'
+      }
+    ])
+  })
+
+  it('should activate chats', () => {
+    const store = mockStore()
+
+    store.dispatch(activateIMChat('ee6af506-fa78-408d-869f-78305b3889c3'))
+
+    expect(store.getActions()).toEqual([
+      {
+        type: 'IM_CHAT_ACTIVATED',
+        sessionId: 'ee6af506-fa78-408d-869f-78305b3889c3'
+      }
+    ])
+  })
 })
 
 describe('incoming IM handling', () => {
-  test('it should send a retrieveInstantMessages packet', () => {
+  it('should send a retrieveInstantMessages packet', () => {
     const send = jest.fn()
 
     const store = configureMockStore([thunk.withExtraArgument({
@@ -596,7 +1130,7 @@ describe('incoming IM handling', () => {
     ])
   })
 
-  test('it should create a private chat and dispatch a private IM', () => {
+  it('should create a private chat and dispatch a private IM', () => {
     const messageData = createImPackage(IMDialog.MessageFromAgent)
 
     const store = mockStore(actions => {

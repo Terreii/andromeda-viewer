@@ -71,7 +71,7 @@ function namesReducer (state = {}, action) {
         }, {})
       }
 
-    case 'IMHistoryLoaded':
+    case 'IM_HISTORY_LOADING_FINISHED':
       let didChange = false
       return action.messages.reduce((oldState, msg) => {
         if (msg.fromId in oldState) return oldState
@@ -151,7 +151,7 @@ export default function namesCoreReducer (state = { names: {}, getDisplayNamesUR
     case 'didLogin':
     case 'UUIDNameReply':
     case 'IM_CHAT_INFOS_LOADED':
-    case 'IMHistoryLoaded':
+    case 'IM_HISTORY_LOADING_FINISHED':
     case 'DisplayNamesStartLoading':
     case 'DisplayNamesLoaded':
     case 'NOTIFICATION_RECEIVED':

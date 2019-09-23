@@ -81,7 +81,7 @@ function imChat (state = getDefaultImChat(), action) {
         hasUnsavedMSG: true
       }
 
-    case 'IMHistoryStartLoading':
+    case 'IM_HISTORY_LOADING_STARTED':
       return {
         ...state,
         isLoadingHistory: true
@@ -102,7 +102,7 @@ function imChat (state = getDefaultImChat(), action) {
         areTyping: newTyper
       }
 
-    case 'IMHistoryLoaded':
+    case 'IM_HISTORY_LOADING_FINISHED':
       const historyMsg = action.messages.map(msg => ({
         ...msg,
         didSave: true
@@ -273,8 +273,8 @@ export default function IMReducer (state = {}, action) {
         return state
       }, { ...state })
 
-    case 'IMHistoryStartLoading':
-    case 'IMHistoryLoaded':
+    case 'IM_HISTORY_LOADING_STARTED':
+    case 'IM_HISTORY_LOADING_FINISHED':
       return {
         ...state,
         [action.sessionId]: imChat(state[action.sessionId], action)

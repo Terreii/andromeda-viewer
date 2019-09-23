@@ -60,6 +60,14 @@ export function sendLocalChatMessage (text, type, channel) {
   }
 }
 
+/**
+ * Send a InstantMessage.
+ * This can be to a personal, group or conference session.
+ * @param {string} text Message body to send.
+ * @param {string} to ID of the receiver.
+ * @param {string} id ID of the session.
+ * @param {IMDialog} dialog Type of the message.
+ */
 export function sendInstantMessage (text, to, id, dialog = IMDialog.MessageFromAgent) {
   return async (dispatch, getState, { circuit }) => {
     const activeState = getState()
@@ -428,6 +436,10 @@ function handleGroupIM (msg) {
 
     const id = getValueOf(msg, 'MessageBlock', 'ID')
     const time = new Date()
+    const timeStamp = +getValueOf(msg, 'MessageBlock', 'Timestamp')
+    if (timeStamp !== 0) {
+      time.setTime(timeStamp * 1000)
+    }
     const chat = getIMChats(state)[id]
 
     // Group chat will be started by the group reactors.
@@ -460,6 +472,10 @@ function handleConferenceIM (msg) {
     const id = getValueOf(msg, 'MessageBlock', 'ID')
     const avatarSaveId = getAvatarDataSaveId(state)
     const time = new Date()
+    const timeStamp = +getValueOf(msg, 'MessageBlock', 'Timestamp')
+    if (timeStamp !== 0) {
+      time.setTime(timeStamp * 1000)
+    }
 
     let chat = getIMChats(state)[id]
     if (chat == null) {
@@ -1030,7 +1046,7 @@ function parseIMChatInfo (doc) {
 export function getIMHistory (sessionId, chatSaveId) {
   return async (dispatch, getState, { hoodie }) => {
     dispatch({
-      type: 'IMHistoryStartLoading',
+      type: 'IM_HISTORY_LOADING_STARTED',
       sessionId
     })
 
@@ -1060,7 +1076,7 @@ export function getIMHistory (sessionId, chatSaveId) {
 
       if (ids.length === 0) {
         dispatch({
-          type: 'IMHistoryLoaded',
+          type: 'IM_HISTORY_LOADING_FINISHED',
           sessionId,
           messages: [],
           didLoadAll: true
@@ -1071,7 +1087,7 @@ export function getIMHistory (sessionId, chatSaveId) {
       const messages = await hoodie.cryptoStore.find(ids)
 
       dispatch({
-        type: 'IMHistoryLoaded',
+        type: 'IM_HISTORY_LOADING_FINISHED',
         sessionId,
         messages,
         didLoadAll: messages.length < 100
@@ -1089,14 +1105,14 @@ export function getIMHistory (sessionId, chatSaveId) {
         const messages = docs.slice(startIndex, endIndex)
 
         dispatch({
-          type: 'IMHistoryLoaded',
+          type: 'IM_HISTORY_LOADING_FINISHED',
           sessionId,
           messages,
           didLoadAll: messages.length === 0
         })
       } else {
         dispatch({
-          type: 'IMHistoryLoaded',
+          type: 'IM_HISTORY_LOADING_FINISHED',
           sessionId,
           message: [],
           didLoadAll: false

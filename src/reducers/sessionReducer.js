@@ -1,6 +1,6 @@
 // Reducer for general session info.
 
-import { getValueOf, getValuesOf } from '../network/msgGetters'
+import { getValueOf, getValuesOf, getStringValueOf } from '../network/msgGetters'
 
 export default function sessionReducer (state = {
   avatarIdentifier: null,
@@ -47,7 +47,7 @@ export default function sessionReducer (state = {
         ...sessionInfo
       }
 
-    case 'AgentMovementComplete':
+    case 'UDPAgentMovementComplete':
       return {
         ...state,
         position: {
@@ -57,14 +57,21 @@ export default function sessionReducer (state = {
         }
       }
 
-    case 'RegionInfo':
+    case 'UDPRegionInfo':
+      const newRegionInfo = {
+        ...getValuesOf(action, 'RegionInfo', 0, []),
+        ...getValuesOf(action, 'RegionInfo2', 0, []),
+        SimName: getStringValueOf(action, 'RegionInfo', 0, 'SimName'),
+        ProductSKU: getStringValueOf(action, 'RegionInfo2', 0, 'ProductSKU'),
+        ProductName: getStringValueOf(action, 'RegionInfo2', 0, 'ProductName')
+      }
       return {
         ...state,
-        regionInfo: Object.assign(
-          {},
-          getValuesOf(action, 'RegionInfo', 0, []),
-          getValuesOf(action, 'RegionInfo2', 0, [])
-        )
+        regionInfo: Object.entries(newRegionInfo).reduce((all, [key, value]) => {
+          const newKey = key.charAt(0).toLowerCase() + key.slice(1)
+          all[newKey] = value
+          return all
+        }, { ...state.regionInfo })
       }
 
     case 'RegionHandshake':
