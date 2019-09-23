@@ -1,6 +1,33 @@
 // Types for chat
 
-import { HoodieObject } from './viewer'
+import { HoodieObject, Maturity } from './viewer'
+import { AssetType } from './inventory'
+
+/**
+ * This is a abstract base interface for LocalChat and IM
+ */
+export interface AbstractChatMessage extends HoodieObject {
+  /**
+   * UUID from the sending avatar or object.
+   */
+  fromId: string
+  /**
+   * Name from the sender.
+   */
+  fromName: string
+  /**
+   * The message.
+   */
+  message: string
+  /**
+   * When it was send/received. It is a Date number.
+   */
+  time: number
+  /**
+   * Was it saved?
+   */
+  didSave: boolean
+}
 
 // Local chat
 export enum LocalChatSourceType {
@@ -83,27 +110,35 @@ export enum LocalChatAudible {
  * 
  * It can be from an Avatar, the system or an object.
  */
-export interface LocalChatMessage extends HoodieObject {
-  fromName: string
-  /**
-   * UUID from the sending avatar or object.
-   */
-  sourceID: string
+export interface LocalChatMessage extends AbstractChatMessage {
   sourceType: LocalChatSourceType
   chatType: LocalChatType
   audible: LocalChatAudible
   /**
+   * Id of the owner of the sending Object.
+   * 
+   * It is the save as sourceId/fromId if it is a avatar.
+   * Then it will be removed while saving.
+   */
+  ownerId?: string
+  /**
    * Position of the avatar.
    * 
    * This is never read in the official viewer.
+   * 
+   * It will be removed while saving.
    */
-  position: [number, number, number]
-  message: string
-  time: number
-  didSave: boolean
+  position?: [number, number, number]
 }
 
 // IMs
+
+export enum IMChatType {
+  personal,
+  group,
+  conference
+}
+
 /**
  * Represents a conversation.
  * 
@@ -111,16 +146,16 @@ export interface LocalChatMessage extends HoodieObject {
  */
 export interface IMChat extends HoodieObject {
   didSaveChatInfo: boolean
-  chatUUID: string
+  sessionId: string
   saveId: string
-  type: 'personal' | 'group' | 'conference'
-  withId: string
+  type: IMChatType
+  target: string
   name: string
   didLoadHistory: boolean
   isLoadingHistory: boolean
   active: boolean
   hasUnsavedMSG: boolean
-  messages: InstanceMessage[]
+  messages: InstantMessage[]
 }
 
 export enum IMDialog {
@@ -228,23 +263,23 @@ export enum IMDialog {
   /**
    * Send a teleport lure.
    */
-  RequestTeleport = 22,
+  TeleportLureOffered = 22,
   /**
-   * Accept a teleport lure.
+   * Accept {@link IMDialog.TeleportLureOffered}.
    */
   AcceptTeleport = 23,
   /**
-   * Deny a teleport lure.
+   * Deny {@link IMDialog.TeleportLureOffered}.
    */
   DenyTeleport = 24,
   /**
    * A linden will teleport you.
    */
-  GodLikeRequestTeleport = 25,
+  GodLikeTeleportLureOffered = 25,
   /**
-   * Request a teleport lure {@link IMDialog.RequestTeleport}.
+   * Request a teleport lure {@link IMDialog.TeleportLureOffered}.
    */
-  RequestLure = 26,
+  RequestTeleportLure = 26,
   /**
    * Notification of a new group election.
    * @deprecated
@@ -309,11 +344,267 @@ export enum IMDialog {
   StopTyping = 42,
 }
 
-export interface InstanceMessage extends HoodieObject {
-  dialog: IMDialog
+export interface InstantMessage extends AbstractChatMessage {
+  offline?: number
+}
+
+// Notifications
+
+/**
+ * Abstract base interface for notifications.
+ */
+export interface NotificationBase {
+  /**
+   * Type to differentiate the notification types.
+   * 
+   * Every notification will have a specific type.
+   */
+  notificationType: NotificationTypes
+  /**
+   * Will be set in the reducer/store.
+   * 
+   * It is a avatar-session unique Id.
+   */
+  id?: number
+  /**
+   * Message send with the notification.
+   */
+  text: string
+}
+
+/**
+ * A notification that will only show text.
+ */
+export interface TextNotification extends NotificationBase {
+  notificationType: NotificationTypes.TextOnly
+  /**
+   * Who did send the Notification. This can also be an Object.
+   */
+  fromName: string
+}
+
+/**
+ * A system notification.
+ * 
+ * Similarly to {@link TextNotification}.
+ */
+export interface SystemNotification extends NotificationBase {
+  notificationType: NotificationTypes.System
+}
+
+/**
+ * A friendship offer.
+ */
+export interface FriendshipOfferNotification extends NotificationBase {
+  notificationType: NotificationTypes.FriendshipOffer
   fromId: string
-  fromAgentName: string
-  message: string
+  fromName: string
+  sessionId: string
+}
+
+/**
+ * A group invitation.
+ * 
+ * It contains fee, roleId infos.
+ * 
+ * Answers are send to groupId with and the sessionId set to transactionId.
+ */
+export interface GroupInvitationNotification extends NotificationBase {
+  notificationType: NotificationTypes.GroupInvitation
+  /**
+   * Id to track the invitation.
+   * 
+   * This will be the sessionId of the answer.
+   */
+  transactionId: string
+  groupId: string
+  roleId: string
+  fee: number
+  name: string
+  useOfflineCap: boolean
+}
+
+/**
+ * Notification of a group.
+ * 
+ * This can contain an object.
+ */
+export interface GroupNoticeNotification extends NotificationBase {
+  notificationType: NotificationTypes.GroupNotice
+  title: string
+  groupId: string
+  senderName: string
+  senderId: string
   time: number
-  binaryBucket?: Buffer
+  item?: {
+    name: string
+    type: AssetType
+    transactionId: string
+  }
+}
+
+/**
+ * Notification to share an URL.
+ * 
+ * It will display an <a>.
+ */
+export interface LoadURLNotification extends NotificationBase {
+  notificationType: NotificationTypes.LoadURL
+  url: URL
+  fromId: string
+  fromName: string
+}
+
+/**
+ * Request that a Teleportation lure will be send.
+ * 
+ * Answer is a {@link NotificationTypes.TeleportLure}.
+ */
+export interface RequestTeleportLureNotification extends NotificationBase {
+  notificationType: NotificationTypes.RequestTeleportLure
+  fromId: string
+  fromName: string
+}
+
+/**
+ * In invitation to teleport to ones location.
+ */
+export interface TeleportLure extends NotificationBase {
+  notificationType: NotificationTypes.TeleportLure
+  fromId: string
+  fromName: string
+  lureId: string
+  /**
+   * Id of the region.
+   * 
+   * TODO: Change it to a 64bit BigInt.
+   */
+  regionId: [number, number]
+  position: [number, number, number]
+  lockAt: [number, number, number]
+  maturity: Maturity
+  godLike: boolean
+}
+
+/**
+ * Inventory offer.
+ */
+export interface InventoryOfferedNotification extends NotificationBase {
+  notificationType: NotificationTypes.InventoryOffered
+  fromObject: boolean
+  fromGroup: boolean
+  fromId: string
+  fromName: string
+  item: {
+    objectId: string
+    type: AssetType
+    transactionId: string
+  }
+}
+
+/**
+ * Dialog of a script.
+ * 
+ * It can contain multiple buttons.
+ * 
+ * TODO: implement actions, tests and find out the interface.
+ */
+export interface ScriptDialogNotification extends NotificationBase {
+  notificationType: NotificationTypes.ScriptDialog
+}
+
+/**
+ * A request for permission. Send if a script wants to control the avatar.
+ * 
+ * TODO: implement actions, tests and find out the interface.
+ */
+export interface PermissionsNotification extends NotificationBase {
+  notificationType: NotificationTypes.Permissions
+}
+
+/**
+ * Collection of all Notification interfaces.
+ * 
+ * It is used in places where every type is possible.
+ */
+export type Notification = TextNotification |
+  SystemNotification |
+  FriendshipOfferNotification |
+  GroupInvitationNotification |
+  GroupNoticeNotification |
+  LoadURLNotification |
+  RequestTeleportLureNotification |
+  TeleportLure |
+  InventoryOfferedNotification |
+  ScriptDialogNotification |
+  PermissionsNotification
+
+export enum NotificationTypes {
+  /**
+   * This notification only has text and an OK-button.
+   */
+  TextOnly = 0,
+  /**
+   * Like {@link NotificationTypes.TextOnly} but from the System (Grid).
+   */
+  System,
+  /**
+   * This notification represents a friendship offer.
+   * 
+   * It has the avatar name, their message and accept and decline buttons.
+   */
+  FriendshipOffer,
+  /**
+   * This notification represents a group incitation.
+   * 
+   * It has the avatar name, their message, the group name and
+   * accept and decline buttons.
+   */
+  GroupInvitation,
+  /**
+   * This notification is to all group members.
+   * 
+   * It can have an inventory item in it.
+   */
+  GroupNotice,
+  /**
+   * A goto url notification.
+   * 
+   * It has the an info text with the avatar name, their message and a link and an OK-Button.
+   * 
+   * The link is: `<a href="link" target='_blank' rel="noopener noreferrer">`
+   */
+  LoadURL,
+  /**
+   * A request that you send a {@link IMDialog.TeleportLureOffered}.
+   * 
+   * It has the avatar info (+ message) and accept and decline buttons.
+   */
+  RequestTeleportLure,
+  /**
+   * A Teleport request. Clicking OK teleports you.
+   * 
+   * It has the avatar info (+ message), location info and accept and decline buttons.
+   */
+  TeleportLure,
+  /**
+   * An inventory item or folder was offered.
+   * 
+   * This can be from an avatar or an object. It will have accept and decline buttons.
+   * 
+   * This is a parsed {@link IMDialog.InventoryOffered} or {@link IMDialog.TaskInventoryOffered}.
+   * It results into {@link IMDialog.InventoryAccepted}, {@link IMDialog.InventoryDeclined},
+   * {@link IMDialog.TaskInventoryAccepted} and {@link IMDialog.TaskInventoryDeclined}.
+   */
+  InventoryOffered,
+  /**
+   * A dialog from a script with buttons.
+   */
+  ScriptDialog,
+  /**
+   * A permission dialog.
+   * 
+   * Can a script have permissions over you?
+   */
+  Permissions,
 }

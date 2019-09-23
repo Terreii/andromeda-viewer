@@ -23,8 +23,8 @@ export default function groupsReducer (state = [], action) {
         listInProfile: udpListInProfile
       }))
 
-    case 'ChatSessionsStarted':
-      return state.map(group => action.chatUUIDs.includes(group.id)
+    case 'GROUP_CHAT_SESSIONS_STARTED':
+      return state.map(group => group.id in action.groups
         ? {
           ...group,
           sessionStarted: true
@@ -35,7 +35,7 @@ export default function groupsReducer (state = [], action) {
     case 'EVENT_QUEUE_AgentGroupDataUpdate':
       // this is OK, because the max number of groups an user can join is 60.
       return action.body.GroupData.reduce((groups, groupData) => {
-        const id = groupData.GroupID.uuid
+        const id = groupData.GroupID.toString()
 
         const index = groups.findIndex(group => group.id === id)
         const isNewGroup = index < 0
@@ -44,7 +44,7 @@ export default function groupsReducer (state = [], action) {
           ...(isNewGroup ? { title: '' } : groups[index]),
           id,
           name: groupData.GroupName,
-          insigniaID: groupData.GroupInsigniaID.uuid,
+          insigniaID: groupData.GroupInsigniaID.toString(),
           acceptNotices: groupData.AcceptNotices,
           powers: Buffer.from(groupData.GroupPowers.octets),
           listInProfile: groupData.ListInProfile

@@ -23,7 +23,7 @@ import 'normalize.css'
 
 const Popups = React.memo(PopupRenderer)
 
-export default function App (props) {
+export default function App () {
   const isLoggedIn = useSelector(getIsLoggedIn)
   const isSignedIn = useSelector(getIsSignedIn)
 

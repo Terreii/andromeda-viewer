@@ -1,5 +1,7 @@
 import React from 'react'
 
+import { IMChatType } from '../types/chat'
+
 import styles from './infoList.module.css'
 import chatBubble from '../icons/chat_bubble.svg'
 
@@ -53,12 +55,10 @@ function FriendRow ({ friend, name, skipLink, onRightsChanged, startNewIMChat })
     <div className={styles.Name}>{name}</div>
     <a className={styles.SkipToContentLink} href={skipLink}>{`Skip ${name}`}</a>
     <button
+      type='button'
       className={styles.ListItemInput}
-      onClick={event => {
-        event.preventDefault()
-        startNewIMChat(0, friend.id, name, true)
-          .then(chatUUID => console.log(chatUUID)) // TODO: switch to tap
-      }}>
+      onClick={event => { startNewIMChat(IMChatType.personal, friend.id, name) }}
+    >
       <img src={chatBubble} height='20' width='20' alt={`Start new chat with ${name}`} />
     </button>
     {rights}

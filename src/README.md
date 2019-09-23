@@ -18,6 +18,7 @@ In this directory are the general and setup modules located. Most of the App is 
 - [`reducers`]('./reducers) update the state by reducing the old state and actions to the new state.
 - [`selectors`](./selectors) contains functions to access and derive state.
 - [`store`](./store) sets up the store.
+- [`types`](./types) TypeScript type declarations that get used in more than one place.
 
 ## Tests
 

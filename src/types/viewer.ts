@@ -74,3 +74,9 @@ export interface Grid extends HoodieObject {
   name: string
   loginURL: string
 }
+
+export enum Maturity {
+  General,
+  Moderate,
+  Adult,
+}

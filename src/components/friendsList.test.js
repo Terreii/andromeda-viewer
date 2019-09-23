@@ -5,6 +5,8 @@ import { mount } from 'enzyme'
 import FriendsList from './friendsList'
 import AvatarName from '../avatarName'
 
+import { IMChatType } from '../types/chat'
+
 test('renders without crashing', () => {
   const friends = [
     {
@@ -140,6 +142,46 @@ test('event handling/changing rights', () => {
     canSeeOnMap: 1,
     canModifyObjects: 1
   })
+})
+
+test('should handle creating a new chat', () => {
+  const friends = [
+    {
+      id: 'first',
+      rightsGiven: {
+        canSeeOnline: false,
+        canSeeOnMap: false,
+        canModifyObjects: false
+      },
+      rightsHas: {
+        canSeeOnline: false,
+        canSeeOnMap: false,
+        canModifyObjects: false
+      }
+    }
+  ]
+
+  const names = {
+    first: new AvatarName('Testery MacTestface')
+  }
+
+  const startNewIMChat = jest.fn()
+
+  const rendered = mount(<FriendsList
+    friends={friends}
+    names={names}
+    startNewIMChat={startNewIMChat}
+  />)
+
+  const newChatButton = rendered.find('button')
+  newChatButton.simulate('click')
+
+  expect(startNewIMChat.mock.calls.length).toBe(1)
+  expect(startNewIMChat.mock.calls[0]).toEqual([
+    IMChatType.personal,
+    'first',
+    'Testery Mactestface'
+  ])
 })
 
 test('should pass aXe', async () => {

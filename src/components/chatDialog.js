@@ -24,10 +24,10 @@ export default function ChatDialog ({ isIM = false, data = [], names, sendTo, lo
 
   const doLoadHistory = () => {
     if (isIM && !data.didLoadHistory && !data.isLoadingHistory && loadHistory) {
-      loadHistory(data.chatUUID, data.saveId)
+      loadHistory(data.sessionId, data.saveId)
     }
   }
-  useEffect(doLoadHistory, [isIM, data.chatUUID])
+  useEffect(doLoadHistory, [isIM, data.sessionId])
 
   const placeholderText = `Send ${isIM ? 'Instant Message' : 'to local chat'}`
 

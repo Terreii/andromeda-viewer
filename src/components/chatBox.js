@@ -10,18 +10,23 @@ import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar'
 import ChatDialog from './chatDialog'
 import FriendsList from './friendsList'
 import GroupsList from './groupsList'
+import NotificationsContainer from '../containers/notificationsContainer'
+
+import { IMChatType, IMDialog } from '../types/chat'
 
 import 'rc-tabs/assets/index.css'
 import './chatBox.css'
+
+const Notifications = React.memo(NotificationsContainer)
 
 export default function ChatBox (props) {
   const names = props.names
 
   const panels = props.IMs.map(chat => {
-    const id = chat.chatUUID
-    const target = chat.withId
+    const id = chat.sessionId
+    const target = chat.target
     const type = chat.type
-    const name = type === 'personal'
+    const name = type === IMChatType.personal
       ? (target in names ? names[target].getName() : chat.name)
       : chat.name
 
@@ -29,7 +34,12 @@ export default function ChatBox (props) {
       <ChatDialog
         data={chat}
         isIM
-        sendTo={text => props.sendInstantMessage(text, target, id, type === 'personal' ? 0 : 17)}
+        sendTo={text => props.sendInstantMessage(
+          text,
+          target,
+          id,
+          type === IMChatType.personal ? IMDialog.MessageFromAgent : IMDialog.SessionSend
+        )}
         names={names}
         type={type}
         loadHistory={props.getIMHistory}
@@ -38,7 +48,8 @@ export default function ChatBox (props) {
   })
 
   return <Tabs
-    defaultActiveKey='local'
+    activeKey={props.activeTab}
+    onChange={props.changeTab}
     renderTabBar={() => <ScrollableInkTabBar />}
     renderTabContent={() => <TabContent />}
   >
@@ -57,6 +68,13 @@ export default function ChatBox (props) {
         startNewIMChat={props.startNewIMChat}
       />
     </TabPane>
+
+    {props.shouldDisplayNotifications && <TabPane
+      tab='Notifications'
+      key='notifications'
+    >
+      <Notifications />
+    </TabPane>}
 
     <TabPane tab='Local' key='local'>
       <ChatDialog

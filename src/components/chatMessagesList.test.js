@@ -9,13 +9,13 @@ test('renders local chat without crashing', () => {
   const messages = [
     {
       _id: 'first',
-      sourceID: 'ABCB',
+      fromId: 'ABCB',
       message: 'Hello world!',
       time: '2018-08-10T11:03:00.000Z'
     },
     {
       _id: 'second',
-      sourceID: '1234',
+      fromId: '1234',
       message: 'How are you?',
       time: '2018-08-10T11:03:32.734Z'
     }
@@ -33,7 +33,7 @@ test('renders local chat without crashing', () => {
 
   expect(rendered.find('div').length).toBe(3)
 
-  const timeElements = rendered.find('span.time')
+  const timeElements = rendered.find('time')
   expect(timeElements.length).toBe(2)
   timeElements.forEach(element => {
     const text = element.text()
@@ -77,7 +77,7 @@ test('renders IM chat without crashing', () => {
 
   expect(rendered.find('div').length).toBe(3)
 
-  const timeElements = rendered.find('span.time')
+  const timeElements = rendered.find('time')
   expect(timeElements.length).toBe(2)
   timeElements.forEach(element => {
     const text = element.text()
@@ -96,13 +96,13 @@ test('Local chat should pass aXe', async () => {
   const messages = [
     {
       _id: 'first',
-      sourceID: 'ABCB',
+      fromId: 'ABCB',
       message: 'Hello world!',
       time: '2018-08-10T11:03:00.000Z'
     },
     {
       _id: 'second',
-      sourceID: '1234',
+      fromId: '1234',
       message: 'How are you?',
       time: '2018-08-10T11:03:32.734Z'
     }

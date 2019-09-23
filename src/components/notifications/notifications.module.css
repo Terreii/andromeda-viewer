@@ -1,0 +1,30 @@
+/* Styles for notifications */
+
+.Border {
+  border-radius: 5px;
+  background-color: lightgrey;
+  padding: 1em;
+}
+.Border + .Border {
+  margin-top: 1em;
+}
+.Border:last-of-type {
+  margin-bottom: 0.5em;
+}
+
+.ButtonsRow {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+.ButtonsRow > button {
+  flex: 0 0 auto;
+  min-width: 5em;
+}
+.ButtonsRow > button + button {
+  margin-left: 1.75em;
+}
+
+.Fee {
+  font-weight: bolder;
+}

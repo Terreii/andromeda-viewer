@@ -44,7 +44,7 @@ var ArrayBuffer, Uint8Array, DataView // typedarray.js
 //
 
 var LL_LEGACY // Set to true to enable notation formatting
-var LLSD, URI, UUID, Binary;
+export var LLSD, URI, UUID, Binary;
 
 (function () {
 //
@@ -120,6 +120,8 @@ var LLSD, URI, UUID, Binary;
       }
       return octets
     }
+
+    UUID.nil = '00000000-0000-0000-0000-000000000000'
   }
 
   // Browser compatibility shims

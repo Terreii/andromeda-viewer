@@ -1,8 +1,14 @@
 // Reducer for general session info.
 
-import { getValueOf, getValuesOf } from '../network/msgGetters'
+import { getValueOf, getValuesOf, getStringValueOf } from '../network/msgGetters'
 
-export default function sessionReducer (state = { avatarIdentifier: null, error: null }, action) {
+export default function sessionReducer (state = {
+  avatarIdentifier: null,
+  activeChatTab: 'local',
+  notifications: [],
+  notificationId: 0,
+  error: null
+}, action) {
   switch (action.type) {
     case 'didLogin':
       const sessionInfo = Object.keys(action.sessionInfo).reduce((info, key) => {
@@ -41,7 +47,7 @@ export default function sessionReducer (state = { avatarIdentifier: null, error:
         ...sessionInfo
       }
 
-    case 'AgentMovementComplete':
+    case 'UDPAgentMovementComplete':
       return {
         ...state,
         position: {
@@ -51,14 +57,21 @@ export default function sessionReducer (state = { avatarIdentifier: null, error:
         }
       }
 
-    case 'RegionInfo':
+    case 'UDPRegionInfo':
+      const newRegionInfo = {
+        ...getValuesOf(action, 'RegionInfo', 0, []),
+        ...getValuesOf(action, 'RegionInfo2', 0, []),
+        SimName: getStringValueOf(action, 'RegionInfo', 0, 'SimName'),
+        ProductSKU: getStringValueOf(action, 'RegionInfo2', 0, 'ProductSKU'),
+        ProductName: getStringValueOf(action, 'RegionInfo2', 0, 'ProductName')
+      }
       return {
         ...state,
-        regionInfo: Object.assign(
-          {},
-          getValuesOf(action, 'RegionInfo', 0, []),
-          getValuesOf(action, 'RegionInfo2', 0, [])
-        )
+        regionInfo: Object.entries(newRegionInfo).reduce((all, [key, value]) => {
+          const newKey = key.charAt(0).toLowerCase() + key.slice(1)
+          all[newKey] = value
+          return all
+        }, { ...state.regionInfo })
       }
 
     case 'RegionHandshake':
@@ -71,10 +84,35 @@ export default function sessionReducer (state = { avatarIdentifier: null, error:
         }
       }
 
+    case 'CHAT_TAB_CHANGED':
+      return {
+        ...state,
+        activeChatTab: action.key
+      }
+
+    case 'NOTIFICATION_RECEIVED':
+      return {
+        ...state,
+        notifications: state.notifications.concat([{
+          ...action.msg,
+          id: state.notificationId
+        }]),
+        notificationId: state.notificationId + 1
+      }
+
+    case 'NOTIFICATION_CLOSED':
+      return {
+        ...state,
+        notifications: state.notifications.filter(notification => action.id !== notification.id)
+      }
+
     case 'DidLogout':
     case 'UserWasKicked':
       return {
         avatarIdentifier: null,
+        activeChatTab: 'local',
+        notifications: [],
+        notificationId: 0,
         error: action.type === 'UserWasKicked' ? action.reason : null
       }
 

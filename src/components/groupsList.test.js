@@ -5,6 +5,8 @@ import { v4 as uuid } from 'uuid'
 
 import GroupsList from './groupsList'
 
+import { IMChatType } from '../types/chat'
+
 test('renders without crashing', () => {
   const groups = [
     {
@@ -66,29 +68,22 @@ test('start chat', () => {
       powers: [0, 0]
     }
   ]
-
-  const actions = []
+  const startNewIMChat = jest.fn()
 
   const rendered = mount(<GroupsList
     groups={groups}
-    startNewIMChat={(dialog, targetId, name, activate) => {
-      actions.push({ dialog, targetId, name, activate })
-      return Promise.resolve(targetId)
-    }}
+    startNewIMChat={startNewIMChat}
   />)
 
   const newChatButton = rendered.find('button')
-  newChatButton.simulate('click', {
-    preventDefault: () => {}
-  })
+  newChatButton.simulate('click')
 
-  expect(actions.length).toBe(1)
-  expect(actions[0]).toEqual({
-    dialog: 15,
-    targetId: groups[0].id,
-    name: 'Test Group',
-    activate: true
-  })
+  expect(startNewIMChat.mock.calls.length).toBe(1)
+  expect(startNewIMChat.mock.calls[0]).toEqual([
+    IMChatType.group,
+    groups[0].id,
+    'Test Group'
+  ])
 })
 
 test('should pass aXe', async () => {

@@ -1,5 +1,8 @@
 .Container {
   padding: 1em;
+  line-height: 1.5;
+  overflow-y: scroll;
+  max-height: calc(100vh - 7.6em);
 }
 
 .List {
@@ -8,6 +11,12 @@
   max-width: 15cm;
   margin-left: auto;
   margin-right: auto;
+}
+
+.NotificationList {
+  composes: List;
+  margin-top: .5em;
+  padding-left: initial;
 }
 
 .Item {

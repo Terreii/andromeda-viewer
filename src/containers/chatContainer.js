@@ -1,6 +1,7 @@
 import { connect } from 'react-redux'
 
 import {
+  changeTab,
   sendLocalChatMessage,
   sendInstantMessage,
   startNewIMChat,
@@ -8,7 +9,12 @@ import {
 } from '../actions/chatMessageActions'
 import { updateRights } from '../actions/friendsActions'
 
-import { getLocalChat, getActiveIMChats } from '../selectors/chat'
+import {
+  getActiveTab,
+  getLocalChat,
+  getActiveIMChats,
+  getShouldDisplayNotifications
+} from '../selectors/chat'
 import { getNames } from '../selectors/names'
 import { getFriends } from '../selectors/people'
 import { getGroups } from '../selectors/groups'
@@ -17,8 +23,10 @@ import ChatBox from '../components/chatBox'
 
 const mapStateToProps = state => {
   return {
+    activeTab: getActiveTab(state),
     localChat: getLocalChat(state),
     IMs: getActiveIMChats(state),
+    shouldDisplayNotifications: getShouldDisplayNotifications(state),
     groups: getGroups(state),
     names: getNames(state),
     friends: getFriends(state)
@@ -26,6 +34,7 @@ const mapStateToProps = state => {
 }
 
 const mapDispatchToProps = {
+  changeTab,
   sendLocalChatMessage: text => sendLocalChatMessage(text, 1, 0),
   sendInstantMessage,
   startNewIMChat,

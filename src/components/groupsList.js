@@ -1,5 +1,7 @@
 import React from 'react'
 
+import { IMChatType } from '../types/chat'
+
 import styles from './infoList.module.css'
 import chatBubble from '../icons/chat_bubble.svg'
 
@@ -9,13 +11,10 @@ function GroupRow ({ group, startNewIMChat }) {
   return <li className={styles.Item}>
     <div className={styles.Name}>{name}</div>
     <button
+      type='button'
       className={styles.ListItemInput}
-      onClick={event => {
-        event.preventDefault()
-        startNewIMChat(15, group.id, name, true)
-        // TODO: switch to tap
-        // .then(chatUUID => console.log(`activate group chat ${name} ${chatUUID}`))
-      }}>
+      onClick={event => { startNewIMChat(IMChatType.group, group.id, name) }}
+    >
       <img src={chatBubble} height='20' width='20' alt={`Start new chat with ${name}`} />
     </button>
   </li>

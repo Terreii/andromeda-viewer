@@ -12,7 +12,7 @@ test('renders without crashing', () => {
 
   const im = [
     {
-      chatUUID: '2345',
+      sessionId: '2345',
       withId: 'first',
       isIM: true,
       messages: []
@@ -44,7 +44,7 @@ test('should pass aXe', async () => {
 
   const im = [
     {
-      chatUUID: '2345',
+      sessionId: '2345',
       withId: 'first',
       isIM: true,
       messages: []

@@ -5,6 +5,8 @@
 import AvatarName from '../avatarName'
 import { mapBlockOf } from '../network/msgGetters'
 
+import { LocalChatSourceType, NotificationTypes } from '../types/chat'
+
 // Only adds a Name to names if it is new or did change
 function addName (state, uuid, name) {
   const updated = new AvatarName(name)
@@ -18,20 +20,10 @@ function addName (state, uuid, name) {
   }
 }
 
-// Adds the names of the sending Avatar/Agent from IMs
-function addNameFromIM (state, msg) {
-  if (msg.dialog === 9) {
-    return state
-  }
-  const id = msg.fromId
-  const name = msg.fromAgentName
-  return addName(state, id, name)
-}
-
 // Adds the names of the sending Avatar/Agent from the local Chat
 function addNameFromLocalChat (state, msg) {
-  if (msg.sourceType === 1) {
-    const id = msg.sourceID
+  if (msg.sourceType === LocalChatSourceType.Agent) {
+    const id = msg.fromId
     const name = msg.fromName
     return addName(state, id, name)
   }
@@ -40,15 +32,17 @@ function addNameFromLocalChat (state, msg) {
 
 function namesReducer (state = {}, action) {
   switch (action.type) {
-    case 'ChatFromSimulator':
-      return action.msg.sourceID in state
+    case 'CHAT_FROM_SIMULATOR_RECEIVED':
+      return action.msg.fromId in state
         ? state
         : addNameFromLocalChat(state, action.msg)
 
-    case 'ImprovedInstantMessage':
+    case 'PERSONAL_IM_RECEIVED':
+    case 'GROUP_IM_RECEIVED':
+    case 'CONFERENCE_IM_RECEIVED':
       return action.msg.fromId in state
         ? state
-        : addNameFromIM(state, action.msg)
+        : addName(state, action.msg.fromId, action.msg.fromName)
 
     case 'didLogin':
       const selfName = addName(state, action.uuid, action.name)
@@ -65,7 +59,7 @@ function namesReducer (state = {}, action) {
         return addName(state, id, firstName + ' ' + lastName)
       }, state)
 
-    case 'IMChatInfosLoaded':
+    case 'IM_CHAT_INFOS_LOADED':
       return {
         ...state,
         ...action.chats.reduce((all, chat) => {
@@ -77,20 +71,20 @@ function namesReducer (state = {}, action) {
         }, {})
       }
 
-    case 'IMHistoryLoaded':
+    case 'IM_HISTORY_LOADING_FINISHED':
       let didChange = false
       return action.messages.reduce((oldState, msg) => {
         if (msg.fromId in oldState) return oldState
 
         if (didChange) {
-          oldState[msg.fromId] = new AvatarName(msg.fromAgentName)
+          oldState[msg.fromId] = new AvatarName(msg.fromName)
           return oldState
         }
 
         didChange = true
         return {
           ...oldState,
-          [msg.fromId]: new AvatarName(msg.fromAgentName)
+          [msg.fromId]: new AvatarName(msg.fromName)
         }
       }, state)
 
@@ -117,6 +111,31 @@ function namesReducer (state = {}, action) {
         return names
       }, { ...state })
 
+    case 'NOTIFICATION_RECEIVED':
+      if ([
+        NotificationTypes.FriendshipOffer,
+        NotificationTypes.GroupNotice,
+        NotificationTypes.LoadURL,
+        NotificationTypes.RequestTeleportLure,
+        NotificationTypes.TeleportLure,
+        NotificationTypes.InventoryOffered
+      ].some(type => type === action.msg.notificationType)) {
+        const notification = action.msg
+        const type = notification.notificationType
+
+        const id = type === NotificationTypes.GroupNotice
+          ? notification.senderId
+          : notification.fromId
+
+        const name = type === NotificationTypes.GroupNotice
+          ? notification.senderName
+          : notification.fromName
+
+        return addName(state, id, name)
+      } else {
+        return state
+      }
+
     default:
       return state
   }
@@ -125,17 +144,23 @@ function namesReducer (state = {}, action) {
 export default function namesCoreReducer (state = { names: {}, getDisplayNamesURL: '' }, action) {
   switch (action.type) {
     case '@@INIT':
-    case 'ChatFromSimulator':
-    case 'ImprovedInstantMessage':
+    case 'CHAT_FROM_SIMULATOR_RECEIVED':
+    case 'PERSONAL_IM_RECEIVED':
+    case 'GROUP_IM_RECEIVED':
+    case 'CONFERENCE_IM_RECEIVED':
     case 'didLogin':
     case 'UUIDNameReply':
-    case 'IMChatInfosLoaded':
-    case 'IMHistoryLoaded':
+    case 'IM_CHAT_INFOS_LOADED':
+    case 'IM_HISTORY_LOADING_FINISHED':
     case 'DisplayNamesStartLoading':
     case 'DisplayNamesLoaded':
+    case 'NOTIFICATION_RECEIVED':
+      const updated = namesReducer(state.names, action)
+      if (updated === state.names) return state
+
       return {
         ...state,
-        names: namesReducer(state.names, action)
+        names: updated
       }
 
     case 'SeedCapabilitiesLoaded':

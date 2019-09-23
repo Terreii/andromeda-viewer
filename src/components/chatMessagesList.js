@@ -14,17 +14,15 @@ class ChatList extends React.Component {
 
     const messagesLines = messages.map(msg => {
       const time = new Date(msg.time)
-      const fromId = isIM ? msg.fromId : msg.sourceID
-      const name = names[fromId] || msg[isIM ? 'fromAgentName' : 'fromName'] || ''
-
+      const name = names[msg.fromId] || msg.fromName || ''
       return <div key={msg._id} className={styles.Message}>
-        <span className='time'>
+        <time dateTime={time.toISOString()}>
           {leadingZero(time.getHours())}
           :
           {leadingZero(time.getMinutes())}
           :
           {leadingZero(time.getSeconds())}
-        </span>
+        </time>
         <span className={styles.AvatarName}>{name.toString()}</span>
         <span className='messageText'>{msg.message}</span>
       </div>
