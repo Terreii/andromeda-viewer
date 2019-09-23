@@ -7,6 +7,7 @@ import { getFolderForAssetType } from '../selectors/inventory'
 import { getOwnAvatarName } from '../selectors/names'
 
 import { IMDialog } from '../types/chat'
+import { AssetType } from '../types/inventory'
 
 function handleInventoryOffer (
   isAccept,
@@ -20,7 +21,7 @@ function handleInventoryOffer (
     const activeState = getState()
 
     let dialog
-    if (isFromObject) {
+    if (isFromGroup) {
       dialog = isAccept
         ? IMDialog.GroupNoticeInventoryAccepted
         : IMDialog.GroupNoticeInventoryDeclined
@@ -63,14 +64,29 @@ function handleInventoryOffer (
   }
 }
 
+/**
+ * Accept an inventory offer.
+ * @param {string} targetId Id of the offer sender.
+ * @param {string} transactionId Id of the transaction.
+ * @param {AssetType} assetType Type of the asset.
+ * @param {boolean} isFromGroup Is the offer from a group notice?
+ * @param {boolean} isFromObject Is the offer from an object?
+ */
 export const acceptInventoryOffer = (
   targetId,
   transactionId,
-  assetType,
+  assetType = AssetType.Unknown,
   isFromGroup = false,
   isFromObject = false
 ) => handleInventoryOffer(true, targetId, transactionId, assetType, isFromGroup, isFromObject)
 
+/**
+ * Decline an inventory offer.
+ * @param {string} targetId Id of the offer sender.
+ * @param {string} transactionId Id of the transaction.
+ * @param {boolean} isFromGroup Is the offer from a group notice?
+ * @param {boolean} isFromObject Is the offer from an object?
+ */
 export const declineInventoryOffer = (
   targetId,
   transactionId,
