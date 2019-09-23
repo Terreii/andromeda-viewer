@@ -33,7 +33,7 @@ function addNameFromLocalChat (state, msg) {
 function namesReducer (state = {}, action) {
   switch (action.type) {
     case 'CHAT_FROM_SIMULATOR_RECEIVED':
-      return action.msg.sourceID in state
+      return action.msg.fromId in state
         ? state
         : addNameFromLocalChat(state, action.msg)
 
