@@ -230,8 +230,27 @@ export function deleteOldLocalChat () {
   }
 }
 
+/**
+ * Send a request to retrieve instant messages (IM) that
+ * where send while the avatar was offline.
+ */
+export function retrieveInstantMessages () {
+  return (dispatch, getState, { circuit }) => {
+    const state = getState()
+
+    circuit.send('RetrieveInstantMessages', {
+      AgentData: [
+        {
+          AgentID: getAgentId(state),
+          SessionID: getSessionId(state)
+        }
+      ]
+    }, true)
+  }
+}
+
 export function receiveIM (message) {
-  return async (dispatch, getState) => {
+  return (dispatch, getState) => {
     const state = getState()
     const id = getValueOf(message, 'MessageBlock', 'ID')
     const dialog = getValueOf(message, 'MessageBlock', 'Dialog')

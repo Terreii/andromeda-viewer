@@ -9,6 +9,7 @@ import {
   sendLocalChatMessage,
   saveLocalChatMessages,
   deleteOldLocalChat,
+  retrieveInstantMessages,
   receiveIM,
   saveIMChatInfos,
   loadIMChats
@@ -564,6 +565,37 @@ describe('save and loading IMs', () => {
 })
 
 describe('incoming IM handling', () => {
+  test('it should send a retrieveInstantMessages packet', () => {
+    const send = jest.fn()
+
+    const store = configureMockStore([thunk.withExtraArgument({
+      circuit: {
+        send
+      }
+    })])({
+      session: {
+        agentId: 'f2373437-a2ef-4435-82b9-68d283538bb2',
+        sessionId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e'
+      }
+    })
+
+    store.dispatch(retrieveInstantMessages())
+
+    expect(send.mock.calls.length).toBe(1)
+    expect(send.mock.calls[0]).toEqual([
+      'RetrieveInstantMessages',
+      {
+        AgentData: [
+          {
+            AgentID: 'f2373437-a2ef-4435-82b9-68d283538bb2',
+            SessionID: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e'
+          }
+        ]
+      },
+      true
+    ])
+  })
+
   test('it should create a private chat and dispatch a private IM', () => {
     const messageData = createImPackage(IMDialog.MessageFromAgent)
 
@@ -1186,12 +1218,12 @@ describe('incoming IM handling', () => {
         uuidArray.push(i)
       }
 
-      expect(
+      expect(() => {
         store.dispatch(receiveIM(createImPackage(IMDialog.GroupNotice, {
           message: 'Hello World!|Good news, everybody!',
           binaryBucket: Buffer.from([0, 0])
         })))
-      ).rejects.toThrow('BinaryBucket of GroupNotice is to small!')
+      }).toThrow('BinaryBucket of GroupNotice is to small!')
       store.clearActions()
 
       // Without item

@@ -5,7 +5,12 @@ import { viewerName, viewerVersion, viewerPlatform, viewerPlatformVersion } from
 import { getValueOf, getStringValueOf } from '../network/msgGetters'
 
 import { saveAvatar, saveGrid } from './viewerAccount'
-import { getLocalChatHistory, loadIMChats, deleteOldLocalChat } from './chatMessageActions'
+import {
+  getLocalChatHistory,
+  loadIMChats,
+  deleteOldLocalChat,
+  retrieveInstantMessages
+} from './chatMessageActions'
 import { getAllFriendsDisplayNames } from './friendsActions'
 import { fetchSeedCapabilities } from './llsd'
 import LLSD from '../llsd'
@@ -311,6 +316,8 @@ function connectToSim (sessionInfo, circuit) {
       }, true)
 
       dispatch(requestAvatarProperties(agentId))
+
+      dispatch(retrieveInstantMessages())
     }, 100)
   }
 }
