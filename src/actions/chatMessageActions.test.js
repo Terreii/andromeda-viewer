@@ -1139,7 +1139,7 @@ describe('incoming IM handling', () => {
             notificationType: NotificationTypes.FriendshipOffer,
             text: 'Friends?',
             fromId: '01234567-8900-0000-0000-000000000000',
-            fromAgentName: 'Tester',
+            fromName: 'Tester',
             sessionId: '01234567-8900-0000-0000-009876543210'
           }
         }
@@ -1264,7 +1264,7 @@ describe('incoming IM handling', () => {
             text: 'Hello World!',
             url: new window.URL('http://wiki.secondlife.com/wiki/ImprovedInstantMessage'),
             fromId: '01234567-8900-0000-0000-000000000000',
-            fromAgentName: 'Tester'
+            fromName: 'Tester'
           }
         }
       ])
@@ -1282,7 +1282,7 @@ describe('incoming IM handling', () => {
             notificationType: NotificationTypes.RequestTeleportLure,
             text: 'Hello World!',
             fromId: '01234567-8900-0000-0000-000000000000',
-            fromAgentName: 'Tester'
+            fromName: 'Tester'
           }
         }
       ])
@@ -1332,7 +1332,7 @@ describe('incoming IM handling', () => {
             notificationType: NotificationTypes.TeleportLure,
             text: 'Hello World!',
             fromId: '01234567-8900-0000-0000-000000000000',
-            fromAgentName: 'Tester',
+            fromName: 'Tester',
             lureId: '01234567-8900-0000-0000-009876543210',
             regionId: [42, 43], // TODO: Change to BigInt ((x << 32) | y)
             position: [128, 129, 130],
@@ -1347,7 +1347,7 @@ describe('incoming IM handling', () => {
             notificationType: NotificationTypes.TeleportLure,
             text: 'Hello World!',
             fromId: '01234567-8900-0000-0000-000000000000',
-            fromAgentName: 'Tester',
+            fromName: 'Tester',
             lureId: '01234567-8900-0000-0000-009876543210',
             regionId: [42, 43], // TODO: Change to BigInt ((x << 32) | y)
             position: [128, 129, 130],
@@ -1362,7 +1362,7 @@ describe('incoming IM handling', () => {
             notificationType: NotificationTypes.TeleportLure,
             text: 'Hello World!',
             fromId: '01234567-8900-0000-0000-000000000000',
-            fromAgentName: 'Tester',
+            fromName: 'Tester',
             lureId: '01234567-8900-0000-0000-009876543210',
             regionId: [42, 43], // TODO: Change to BigInt ((x << 32) | y)
             position: [128, 129, 130],

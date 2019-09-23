@@ -579,7 +579,7 @@ function handleFriendshipOffer (msg) {
     notificationType: NotificationTypes.FriendshipOffer,
     text: getStringValueOf(msg, 'MessageBlock', 'Message'),
     fromId: getValueOf(msg, 'AgentData', 'AgentID'),
-    fromAgentName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
+    fromName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
     sessionId: getValueOf(msg, 'MessageBlock', 'ID')
   })
 }
@@ -655,7 +655,7 @@ function handleGoToURL (msg) {
     text: getStringValueOf(msg, 'MessageBlock', 'Message'),
     url: new URL(getStringValueOf(msg, 'MessageBlock', 'BinaryBucket')),
     fromId: getValueOf(msg, 'AgentData', 'AgentID'),
-    fromAgentName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName')
+    fromName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName')
   })
 }
 
@@ -668,7 +668,7 @@ function handleRequestTeleportLure (msg) {
     notificationType: NotificationTypes.RequestTeleportLure,
     text: getStringValueOf(msg, 'MessageBlock', 'Message'),
     fromId: getValueOf(msg, 'AgentData', 'AgentID'),
-    fromAgentName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName')
+    fromName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName')
   })
 }
 
@@ -706,7 +706,7 @@ function handleTeleportOffers (msg) {
     notificationType: NotificationTypes.TeleportLure,
     text: getStringValueOf(msg, 'MessageBlock', 'Message'),
     fromId: getValueOf(msg, 'AgentData', 'AgentID'),
-    fromAgentName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
+    fromName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
     lureId: getValueOf(msg, 'MessageBlock', 'ID'),
     regionId: [gX, gY], // TODO: Change to BigInt ((x << 32) | y)
     position: [rX, rY, rZ],

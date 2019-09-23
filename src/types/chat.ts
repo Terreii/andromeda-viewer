@@ -398,7 +398,7 @@ export interface SystemNotification extends NotificationBase {
 export interface FriendshipOfferNotification extends NotificationBase {
   notificationType: NotificationTypes.FriendshipOffer
   fromId: string
-  fromAgentName: string
+  fromName: string
   sessionId: string
 }
 
@@ -452,7 +452,7 @@ export interface LoadURLNotification extends NotificationBase {
   notificationType: NotificationTypes.LoadURL
   url: URL
   fromId: string
-  fromAgentName: string
+  fromName: string
 }
 
 /**
@@ -463,7 +463,7 @@ export interface LoadURLNotification extends NotificationBase {
 export interface RequestTeleportLureNotification extends NotificationBase {
   notificationType: NotificationTypes.RequestTeleportLure
   fromId: string
-  fromAgentName: string
+  fromName: string
 }
 
 /**
@@ -472,7 +472,7 @@ export interface RequestTeleportLureNotification extends NotificationBase {
 export interface TeleportLure extends NotificationBase {
   notificationType: NotificationTypes.TeleportLure
   fromId: string
-  fromAgentName: string
+  fromName: string
   lureId: string
   /**
    * Id of the region.

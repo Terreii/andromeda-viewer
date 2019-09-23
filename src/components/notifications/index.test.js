@@ -100,7 +100,7 @@ test('renders a friendship request', () => {
       notificationType: NotificationTypes.FriendshipOffer,
       text: 'I would like to by your friend!',
       fromId,
-      fromAgentName: mockedName,
+      fromName: mockedName,
       sessionId
     }
   ]
@@ -324,7 +324,7 @@ test('renders an open URL', () => {
         text: 'Please go to this URL',
         url: href,
         fromId: 'Abcd',
-        fromAgentName: 'Tester'
+        fromName: 'Tester'
       }
     ]}
     onClose={onClose}
@@ -355,7 +355,7 @@ test('renders a request teleport lure', () => {
         notificationType: NotificationTypes.RequestTeleportLure,
         text: 'Please teleport me to you.',
         fromId: senderId,
-        fromAgentName: mockedName
+        fromName: mockedName
       }
     ]}
     offerTeleport={onAccept}
@@ -402,7 +402,7 @@ test('renders a teleport lure', () => {
         notificationType: NotificationTypes.TeleportLure,
         text: 'Join me at my location!',
         fromId: senderId,
-        fromAgentName: mockedName,
+        fromName: mockedName,
         lureId,
         regionId: [123, 123],
         position: [28, 29, 30],
@@ -539,7 +539,7 @@ test('should pass aXe', async () => {
       notificationType: NotificationTypes.FriendshipOffer,
       text: 'I would like to by your friend!',
       fromId: '5df644f5-8b12-4caf-8e91-d7cae057e5f2',
-      fromAgentName: 'Testy Tester',
+      fromName: 'Testy Tester',
       sessionId: '84bcf978-fbb1-4fe8-b3fa-9d00e01a11d9'
     },
     {
@@ -585,21 +585,21 @@ test('should pass aXe', async () => {
       text: 'Please go to this URL',
       url: 'https://secondlife.com/support/downloads/',
       fromId: 'Abcd',
-      fromAgentName: 'Tester'
+      fromName: 'Tester'
     },
     {
       id: 7,
       notificationType: NotificationTypes.RequestTeleportLure,
       text: 'Please teleport me to you.',
       fromId: '5df644f5-8b12-4caf-8e91-d7cae057e5f2',
-      fromAgentName: 'Tester'
+      fromName: 'Tester'
     },
     {
       id: 8,
       notificationType: NotificationTypes.TeleportLure,
       text: 'Join me at my location!',
       fromId: '5df644f5-8b12-4caf-8e91-d7cae057e5f2',
-      fromAgentName: 'Tester MacTestface',
+      fromName: 'Tester MacTestface',
       lureId: 'fedcba',
       regionId: [123, 123],
       position: [28, 29, 30],

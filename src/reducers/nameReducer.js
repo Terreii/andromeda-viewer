@@ -127,14 +127,9 @@ function namesReducer (state = {}, action) {
           ? notification.senderId
           : notification.fromId
 
-        let name
-        if (type === NotificationTypes.InventoryOffered) {
-          name = notification.fromName
-        } else if (type === NotificationTypes.GroupNotice) {
-          name = notification.senderName
-        } else {
-          name = notification.fromAgentName
-        }
+        const name = type === NotificationTypes.GroupNotice
+          ? notification.senderName
+          : notification.fromName
 
         return addName(state, id, name)
       } else {
