@@ -13,6 +13,7 @@ export default function TopBar ({
   signIn,
   signUp,
   signOut,
+  showAccountDialog,
   logout
 }) {
   return <div className={styles.Container}>
@@ -24,6 +25,7 @@ export default function TopBar ({
       signIn={signIn}
       signUp={signUp}
       signOut={signOut}
+      showAccountDialog={showAccountDialog}
       logout={logout}
     />
     {isLoggedIn

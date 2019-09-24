@@ -14,6 +14,7 @@ export default function BurgerMenu ({
   avatarName,
   signIn,
   signUp,
+  showAccountDialog,
   logout,
   signOut
 }) {
@@ -21,7 +22,11 @@ export default function BurgerMenu ({
     {isLoggedIn && <span className={styles.BurgerMenuItem}>{`Hello ${avatarName}`}</span>}
 
     {isSignedIn
-      ? <span className={styles.BurgerMenuItem}>{`Hello ${userName}`}</span>
+      ? <button type='button' className={styles.BurgerMenuItem} onClick={showAccountDialog}>
+        Signed in as
+        <br />
+        {userName}
+      </button>
       : <button className={styles.BurgerMenuItem} onClick={signIn}>Sign into Andromeda</button>
     }
 

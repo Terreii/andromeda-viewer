@@ -43,6 +43,7 @@
 }
 
 .bm-item-list button, .bm-item-list span {
+  text-align: start;
   padding: 0.8em 0em 0.8em 0em;
   font-weight: 700;
 }

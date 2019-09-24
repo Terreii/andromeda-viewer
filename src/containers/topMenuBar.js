@@ -5,7 +5,7 @@ import { action as toggleMenu } from 'redux-burger-menu'
 import TopBar from '../components/topBar'
 
 import { logout } from '../actions/sessionActions'
-import { showSignOutPopup, showSignInPopup } from '../actions/viewerAccount'
+import { showSignOutPopup, showSignInPopup, showAccountDialog } from '../actions/viewerAccount'
 
 import { getIsSignedIn, getUserName } from '../selectors/viewer'
 import { getIsLoggedIn } from '../selectors/session'
@@ -43,6 +43,12 @@ export default function TopBarContainer (props) {
     dispatch(showSignInPopup())
   }
 
+  const doShowAccountDialog = event => {
+    event.preventDefault()
+    dispatch(toggleMenu(false))
+    dispatch(showAccountDialog())
+  }
+
   return <TopBar
     isSignedIn={isSignedIn}
     userName={userName}
@@ -51,6 +57,7 @@ export default function TopBarContainer (props) {
     signIn={doShowSignInPopup}
     signUp={doShowSignUpPopup}
     signOut={doSignOutFromViewer}
+    showAccountDialog={doShowAccountDialog}
     logout={doLogout}
   />
 }

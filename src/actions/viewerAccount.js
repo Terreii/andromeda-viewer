@@ -42,6 +42,12 @@ export function showResetPassword (type) {
   }
 }
 
+export function showAccountDialog () {
+  return {
+    type: 'SHOW_ACCOUNT_DIALOG'
+  }
+}
+
 function showResetKeys (resetKeys) {
   return {
     type: 'DISPLAY_VIEWER_ACCOUNT_RESET_KEYS',
