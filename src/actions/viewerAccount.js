@@ -203,6 +203,13 @@ function gridsDidChange (type, grid) {
   }
 }
 
+function accountDidUpdate (changes) {
+  return {
+    type: 'VIEWER_ACCOUNT_DID_UPDATE',
+    changes
+  }
+}
+
 export function isSignedIn () {
   return async (dispatch, getState, { hoodie }) => {
     const properties = await hoodie.account.get(['session', 'username'])
@@ -210,6 +217,9 @@ export function isSignedIn () {
     const username = properties != null ? properties.username : undefined
     const action = didSignIn(isLoggedIn, null, username)
     dispatch(action)
+
+    hoodie.account.on('update', changes => { dispatch(accountDidUpdate(changes)) })
+
     return isLoggedIn
   }
 }

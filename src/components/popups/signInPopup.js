@@ -1,9 +1,11 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState } from 'react'
 
 import Popup from './popup'
 
 import styles from './signInPopup.module.css'
 import formStyles from '../formElements.module.css'
+
+import { useFormInput } from '../../hooks/utils'
 
 export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
   const [username, setUsername] = useState('')
@@ -215,20 +217,4 @@ function onFocusScrollIntoView (event) {
 
     target.scrollIntoView({ block: 'center' })
   }, 16)
-}
-
-function useFormInput (initialValue) {
-  const [value, setValue] = useState(initialValue)
-
-  const eventHandler = useCallback(event => {
-    const nextValue = typeof event === 'string'
-      ? event
-      : event.target.value
-    setValue(nextValue)
-  }, [setValue])
-
-  return {
-    value,
-    onChange: eventHandler
-  }
 }
