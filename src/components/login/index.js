@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useHistory } from 'react-router-dom'
 
 import LoginNewAvatar from './newAvatarLogin'
 import AvatarLogin from './avatarLogin'
@@ -8,6 +9,8 @@ import AvatarName from '../../avatarName'
 import styles from './index.module.css'
 
 export default function LoginForm ({ isSignedIn, avatars, grids, login, showSignInPopup }) {
+  const history = useHistory()
+
   const [selected, setSelected] = useState(() => avatars.length === 0
     ? 'new'
     : avatars[0].avatarIdentifier
@@ -99,6 +102,7 @@ export default function LoginForm ({ isSignedIn, avatars, grids, login, showSign
       setIsLoggingIn(name)
 
       await login(avatarName, password, gridData, save, isNew)
+      history.push('/session')
     } catch (err) {
       console.error(err)
       // Displays the error message from the server

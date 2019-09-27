@@ -5,6 +5,7 @@
 
 import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+import { Route, Switch } from 'react-router-dom'
 
 import { viewerName } from '../viewerInfo'
 
@@ -24,7 +25,6 @@ import 'normalize.css'
 const Popups = React.memo(PopupRenderer)
 
 export default function App () {
-  const isLoggedIn = useSelector(getIsLoggedIn)
   const isSignedIn = useSelector(getIsSignedIn)
 
   const dispatch = useDispatch()
@@ -42,10 +42,14 @@ export default function App () {
   useDocumentTitle()
 
   return <AppContainer>
-    {isLoggedIn
-      ? <LoadableChatComponent />
-      : <LoginForm isSignedIn={isSignedIn} />
-    }
+    <Switch>
+      <Route exact path='/'>
+        <LoginForm isSignedIn={isSignedIn} />
+      </Route>
+      <Route path='/session'>
+        <LoadableChatComponent />
+      </Route>
+    </Switch>
     <TopMenuBar />
     <Popups />
   </AppContainer>
