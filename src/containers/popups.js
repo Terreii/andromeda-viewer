@@ -8,7 +8,6 @@ import SignOutPopup from '../components/popups/signOutPopup'
 import UnlockDialog from '../components/popups/unlockDialog'
 import ResetKeysPopup from '../components/popups/resetKeysPopup'
 import ResetPasswordDialog from '../components/popups/resetPasswordDialog'
-import AccountDialog from '../components/popups/accountDialog'
 
 import {
   closePopup,
@@ -83,11 +82,6 @@ export default (props) => {
           onSignOut={doSignOut}
           type={data}
         />
-      </Portal>
-
-    case 'accountDialog':
-      return <Portal>
-        <AccountDialog onClose={doClosePopup} />
       </Portal>
 
     default:

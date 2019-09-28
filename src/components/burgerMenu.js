@@ -1,6 +1,11 @@
 import React from 'react'
 import Menu from 'react-burger-menu/lib/menus/slide'
-import { decorator as reduxBurgerMenu } from 'redux-burger-menu'
+import {
+  decorator as reduxBurgerMenu,
+  action as toggleMenu
+} from 'redux-burger-menu'
+import { NavLink } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
 
 import styles from './topBar.module.css'
 import './burgerMenu.css'
@@ -14,31 +19,69 @@ export default function BurgerMenu ({
   avatarName,
   signIn,
   signUp,
-  showAccountDialog,
   logout,
   signOut
 }) {
-  return <SlideMenu>
-    {isLoggedIn && <span className={styles.BurgerMenuItem}>{`Hello ${avatarName}`}</span>}
+  const dispatch = useDispatch()
+  const doClose = () => {
+    dispatch(toggleMenu(false))
+  }
 
+  return <SlideMenu>
     {isSignedIn
-      ? <button type='button' className={styles.BurgerMenuItem} onClick={showAccountDialog}>
+      ? <NavLink className={styles.BurgerMenuItem} to='/profile' onClick={doClose}>
         Signed in as
         <br />
-        {userName}
+        <small>{userName}</small>
+      </NavLink>
+      : <button
+        id='burgerMenuSignIn'
+        className={styles.BurgerMenuItem}
+        onClick={signIn}
+      >
+        Sign into Andromeda
       </button>
-      : <button className={styles.BurgerMenuItem} onClick={signIn}>Sign into Andromeda</button>
     }
 
-    {!isSignedIn && <button className={'menu-item ' + styles.BurgerMenuItem} onClick={signUp}>
+    {!isSignedIn && <button
+      id='burgerMenuSignUp'
+      className={'menu-item ' + styles.BurgerMenuItem}
+      onClick={signUp}
+    >
       Sign up to Andromeda
     </button>}
 
-    {isLoggedIn && <button className={'menu-item ' + styles.BurgerMenuLogout} onClick={logout}>
+    <hr />
+
+    {!isLoggedIn && <NavLink className={styles.BurgerMenuItem} exact to='/' onClick={doClose}>
+      Avatar List
+    </NavLink>}
+
+    {isLoggedIn && <span className={styles.BurgerMenuItem}>
+      Current Avatar:
+      <br />
+      {avatarName.toString()}
+    </span>}
+
+    {isLoggedIn && <NavLink className={styles.BurgerMenuItem} to='/session' onClick={doClose}>
+      Chat
+    </NavLink>}
+
+    <hr />
+
+    {isLoggedIn && <button
+      id='sidebarAvatarLogout'
+      className={'menu-item ' + styles.BurgerMenuLogout}
+      onClick={logout}
+    >
       log out
     </button>}
 
-    {isSignedIn && <button className={'menu-item ' + styles.BurgerMenuLogout} onClick={signOut}>
+    {isSignedIn && <button
+      id='sidebarSignOut'
+      className={'menu-item ' + styles.BurgerMenuLogout}
+      onClick={signOut}
+    >
       Log out from Viewer
     </button>}
   </SlideMenu>

@@ -13,6 +13,7 @@ import { AppContainer, LoadableChatComponent } from '../components/main'
 import LoginForm from './loginForm'
 import PopupRenderer from './popups'
 import TopMenuBar from './topMenuBar'
+import ProfileContainer from '../components/accountDialog'
 
 import { isSignedIn as doGetIsSignedIn } from '../actions/viewerAccount'
 
@@ -48,6 +49,9 @@ export default function App () {
       </Route>
       <Route path='/session'>
         <LoadableChatComponent />
+      </Route>
+      <Route path='/profile'>
+        <ProfileContainer />
       </Route>
     </Switch>
     <TopMenuBar />

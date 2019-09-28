@@ -102,12 +102,6 @@ export default function accountReducer (state = getDefault(), action) {
         popupData: action.resetKeys
       }
 
-    case 'SHOW_ACCOUNT_DIALOG':
-      return {
-        ...state,
-        signInPopup: 'accountDialog'
-      }
-
     case 'VIEWER_ACCOUNT_DID_UPDATE':
       return Object.entries(action.changes)
         .filter(([key]) => key !== 'id')
