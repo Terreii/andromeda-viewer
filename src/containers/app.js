@@ -50,9 +50,9 @@ export default function App () {
       <Route path='/session'>
         <LoadableChatComponent />
       </Route>
-      <Route path='/profile'>
+      {isSignedIn && <Route path='/profile'>
         <ProfileContainer />
-      </Route>
+      </Route>}
     </Switch>
     <TopMenuBar />
     <Popups />

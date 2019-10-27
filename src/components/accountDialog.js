@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux'
 
+import { viewerName } from '../viewerInfo'
+
+import { updateAccount, deleteAccount } from '../actions/viewerAccount'
+
 import style from './accountDialog.module.css'
 import formStyles from './formElements.module.css'
 
-import { useAccount } from '../hooks/hoodie'
-import { useFormInput } from '../hooks/utils'
+import { useFormInput, useAutoFocus } from '../hooks/utils'
 import { getUserName } from '../selectors/viewer'
 
 export default function AccountPanel () {
-  const account = useAccount()
   const username = useSelector(getUserName)
 
   const changedUsername = useFormInput(username)
@@ -48,8 +50,14 @@ export default function AccountPanel () {
     resetPw()
   }
 
-  const onSubmit = event => {
+  const onSubmit = async event => {
     event.preventDefault()
+
+    const option = {}
+
+    if (changedUsername.value !== username) {
+      option.nextUsername = changedUsername.value
+    }
 
     if (passwordRequired) {
       if (
@@ -60,28 +68,37 @@ export default function AccountPanel () {
         return
       }
 
-      account.signIn({
-        username,
-        password: oldPassword.value
-      })
-        .then(properties => {
-          return account.update({
-            username: changedUsername.value,
-            password: newPassword.value
-          })
-        })
-        .then(() => { resetPw() })
-        .catch(err => { setError(err.toString()) })
-    } else {
-      account.update({ username: changedUsername.value })
-        .catch(err => { setError(err.toString()) })
+      option.password = oldPassword
+      option.nextPassword = newPassword
+    }
+
+    try {
+      await updateAccount(option)
+      resetPw()
+    } catch (err) {
+      setError(err.toString())
     }
   }
+
+  const doDeleteAccount = event => {
+    event.preventDefault()
+
+    const doIt = window.confirm(`
+Do you want to delete your account for ${viewerName} and all your data?
+
+'This is permanent and can not be undone!`)
+
+    if (doIt) {
+      deleteAccount()
+    }
+  }
+
+  const autoFocusRef = useAutoFocus()
 
   return <form className={style.Container} onSubmit={onSubmit}>
     <h3>Update your account</h3>
     <div className={formStyles.FormField}>
-      <label htmlFor='usernameChange'>Username</label>
+      <label htmlFor='usernameChange'>Username / Mail</label>
       <input
         {...changedUsername}
         id='usernameChange'
@@ -89,6 +106,7 @@ export default function AccountPanel () {
         className={formStyles.Input}
         autoFocus
         required
+        ref={autoFocusRef}
       />
     </div>
 
@@ -171,5 +189,11 @@ export default function AccountPanel () {
         reset
       </button>
     </div>
+
+    <hr className={style.Separator} />
+
+    <button className={formStyles.DangerButton} type='button' onClick={doDeleteAccount}>
+      Delete your {viewerName} account
+    </button>
   </form>
 }

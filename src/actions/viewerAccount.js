@@ -286,6 +286,46 @@ export function signUp (username, password, cryptoPassword) {
 }
 
 /**
+ * Update the Viewer Account (using hoodie).
+ * @param {object} options Object containing optional params.
+ * @param {string?} options.nextUsername If the username should be updated, then this is it.
+ * @param {string?} options.password If the password should be updated, then this is the
+ *                                   current password
+ * @param {string?} options.nextPassword If the password should be updated, then this is the new one
+ */
+export function updateAccount ({ nextUsername, password, nextPassword }) {
+  const mailReg = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/i
+
+  const shouldUpdateUsername = nextUsername.length > 0
+  const shouldUpdatePassword = password != null && password.length > 0 &&
+    nextPassword != null && nextPassword.length > 0
+
+  return async (dispatch, getState, { hoodie }) => {
+    if (shouldUpdateUsername && !mailReg.test(nextUsername)) {
+      throw new TypeError('Username must be a valid e-mail address!')
+    }
+    if (shouldUpdatePassword && nextPassword.length < 8) {
+      throw new Error('Password must have 8 characters or more!')
+    }
+
+    const username = await hoodie.account.get('username')
+
+    const options = {
+      username: shouldUpdateUsername ? nextUsername : username
+    }
+
+    // check if old password is correct
+    if (shouldUpdatePassword) {
+      await hoodie.account.signIn({ username, password }) // will reject if password is wrong
+
+      options.password = nextPassword
+    }
+
+    return hoodie.account.update(options)
+  }
+}
+
+/**
  * Changes the encryption-password and unlocks the viewer.
  * @param {string} resetKey One of the 10 reset-keys
  * @param {string} newPassword The new encryption password
@@ -311,11 +351,7 @@ export function changeEncryptionPassword (resetKey, newPassword) {
 export function signOut () {
   return async (dispatch, getState, { hoodie }) => {
     dispatch(closePopup())
-    if (getIsLoggedIn(getState())) {
-      // logout if an avatar is still logged in
-      const { logout } = await import('./sessionActions')
-      await dispatch(logout())
-    }
+    await dispatch(logoutAvatar())
 
     try {
       await hoodie.account.signOut()
@@ -325,6 +361,27 @@ export function signOut () {
       })
     } catch (err) {
       console.error(err)
+    }
+  }
+}
+
+export function deleteAccount () {
+  return async (dispatch, getState, { hoodie }) => {
+    await dispatch(logoutAvatar())
+
+    const results = await hoodie.account.destroy()
+    dispatch({ type: 'ViewerAccountSignOut', results })
+  }
+}
+
+/**
+ * Logout an avatar if one is still logged in.
+ */
+function logoutAvatar () {
+  return async (dispatch, getState) => {
+    if (getIsLoggedIn(getState())) {
+      const { logout } = await import('./sessionActions')
+      await dispatch(logout())
     }
   }
 }

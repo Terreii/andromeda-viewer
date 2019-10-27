@@ -14,3 +14,8 @@
 .ButtonRow > button + button {
   margin-left: 0.6em;
 }
+
+.Separator {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
