@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 
 import { viewerName } from '../viewerInfo'
 
@@ -12,7 +12,9 @@ import { useFormInput, useAutoFocus } from '../hooks/utils'
 import { getUserName } from '../selectors/viewer'
 
 export default function AccountPanel () {
+  const dispatch = useDispatch()
   const username = useSelector(getUserName)
+  const [isUpdating, setIsUpdating] = useState(false)
 
   const changedUsername = useFormInput(username)
 
@@ -72,11 +74,15 @@ export default function AccountPanel () {
       option.nextPassword = newPassword
     }
 
+    setIsUpdating(true)
+
     try {
-      await updateAccount(option)
+      await dispatch(updateAccount(option))
       resetPw()
     } catch (err) {
       setError(err.toString())
+    } finally {
+      setIsUpdating(false)
     }
   }
 
@@ -86,7 +92,7 @@ export default function AccountPanel () {
     const doIt = window.confirm(`
 Do you want to delete your account for ${viewerName} and all your data?
 
-'This is permanent and can not be undone!`)
+This is permanent and can not be undone!`)
 
     if (doIt) {
       deleteAccount()
@@ -104,6 +110,7 @@ Do you want to delete your account for ${viewerName} and all your data?
         id='usernameChange'
         type='email'
         className={formStyles.Input}
+        disabled={isUpdating}
         autoFocus
         required
         ref={autoFocusRef}
@@ -127,6 +134,7 @@ Do you want to delete your account for ${viewerName} and all your data?
           autoComplete='current-password'
           minLength='8'
           required={passwordRequired}
+          disabled={isUpdating}
         />
       </div>
 
@@ -141,6 +149,7 @@ Do you want to delete your account for ${viewerName} and all your data?
           minLength='8'
           required={passwordRequired}
           aria-describedby='passwordHelp'
+          disabled={isUpdating}
         />
         <small
           id='password2Help'
@@ -163,6 +172,7 @@ Do you want to delete your account for ${viewerName} and all your data?
           minLength='8'
           required={passwordRequired}
           aria-describedby='password2Help'
+          disabled={isUpdating}
         />
         <small
           id='password2Help'
@@ -180,19 +190,29 @@ Do you want to delete your account for ${viewerName} and all your data?
     <div className={style.ButtonRow}>
       <button
         className={formStyles.OkButton}
-        disabled={!passwordRequired && changedUsername.value === username}
+        disabled={isUpdating || (!passwordRequired && changedUsername.value === username)}
       >
         update
       </button>
 
-      <button type='reset' onClick={resetAll} className={formStyles.SecondaryButton}>
+      <button
+        type='reset'
+        onClick={resetAll}
+        className={formStyles.SecondaryButton}
+        disabled={isUpdating}
+      >
         reset
       </button>
     </div>
 
     <hr className={style.Separator} />
 
-    <button className={formStyles.DangerButton} type='button' onClick={doDeleteAccount}>
+    <button
+      type='button'
+      className={formStyles.DangerButton}
+      onClick={doDeleteAccount}
+      disabled={isUpdating}
+    >
       Delete your {viewerName} account
     </button>
   </form>
