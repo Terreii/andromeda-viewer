@@ -89,7 +89,7 @@
   },
   "dependencies": {
     "hoodie": "^28.2.9",
-    "hoodie-plugin-store-crypto": "^2.3.0",
+    "hoodie-plugin-store-crypto": "^3.0.0",
     "node-fetch": "^2.6.0",
     "uuid": "^3.3.3",
     "ws": "^7.2.0",
