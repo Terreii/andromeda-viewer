@@ -19,7 +19,6 @@
   "EstateAccess",
   "EstateChangeInfo",
   "EventQueueGet",
-  "FacebookConnect",
   "FlickrConnect",
   "TwitterConnect",
   "FetchLib2",
