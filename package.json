@@ -2,6 +2,7 @@
   "name": "andromeda-viewer",
   "version": "0.0.1",
   "description": "Small web-client for connecting to the virtual world of Second Life.",
+  "private": true,
   "scripts": {
     "prebuild": "npm run build-messages",
     "build": "react-scripts build",
