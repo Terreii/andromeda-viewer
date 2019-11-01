@@ -32,7 +32,7 @@ const path = require('path')
 //   }
 // ]
 
-const templatePath = path.resolve('tools', 'master_message_template.msg')
+const templatePath = path.resolve('tools', 'message_template.msg')
 const messageTemplateData = fs.readFileSync(templatePath, 'utf8')
 
 const parsedTemplateString = parseMessageTemplate(messageTemplateData)

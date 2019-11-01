@@ -2,6 +2,7 @@
   "name": "andromeda-viewer",
   "version": "0.0.1",
   "description": "Small web-client for connecting to the virtual world of Second Life.",
+  "private": true,
   "scripts": {
     "prebuild": "npm run build-messages",
     "build": "react-scripts build",
@@ -19,7 +20,7 @@
     "open-type-docs": "open-cli ./docs/types/index.html",
     "update-coc": "weallbehave -o . && git add CODE_OF_CONDUCT.md && git commit -m 'docs(coc): update CODE_OF_CONDUCT.md'",
     "update-contrib": "weallcontribute -o . && git add CONTRIBUTING.md && git commit -m 'docs(contributing): update CONTRIBUTING.md'",
-    "update-caps": "node tools/updateCaps.js",
+    "update-files": "node tools/updateFiles.js",
     "startDev": "concurrently -n \"hoodie,build\" \"hoodie --inMemory --public build\" \"npm run watch\"",
     "start": "hoodie --public build"
   },
