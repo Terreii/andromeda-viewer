@@ -8,8 +8,15 @@ export const viewerPlatform = (() => {
   if (typeof window !== 'undefined') {
     switch (window.navigator.platform) {
       case 'MacIntel':
+      case 'iPhone':
+      case 'iPhone Simulator':
+      case 'iPod':
+      case 'iPod Simulator':
+      case 'iPad':
+      case 'iPad Simulator':
         return 'Mac'
       case 'Win32':
+      case 'WinCE':
         return 'Win'
       default:
         return 'Lin'

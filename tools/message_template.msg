@@ -4,11 +4,11 @@ version 2.0
 
 // The Version 2.0 template requires preservation of message
 // numbers. Each message must be numbered relative to the
-// other messages of that type. The current highest number
+// other messages of that type. The current highest number 
 // for each type is listed below:
 // Low: 423
 // Medium: 18
-// High: 29
+// High: 30
 // PLEASE UPDATE THIS WHEN YOU ADD A NEW MESSAGE!
 
 
@@ -45,7 +45,7 @@ version 2.0
 {
 	PacketAck Fixed 0xFFFFFFFB NotTrusted Unencoded
 	{
-		Packets			Variable
+		Packets			Variable		
 		{	ID			U32	}
 	}
 }
@@ -342,7 +342,7 @@ version 2.0
 		{	Message				Variable	1	}
 	}
 }
-
+ 
 
 // ****************************************************************************
 // Simulator to dataserver messages
@@ -624,7 +624,7 @@ version 2.0
 }
 
 // DirFindQuery viewer->sim
-// Message to start asking questions for the directory
+// Message to start asking questions for the directory 
 {
 	DirFindQuery Low 31 NotTrusted Zerocoded
 	{
@@ -984,7 +984,7 @@ version 2.0
 
 // ClassifiedGodDelete
 // Delete a classified from the database.
-// QueryID is needed so database can send a repeat list of
+// QueryID is needed so database can send a repeat list of 
 // classified.
 // viewer -> simulator -> dataserver
 // reliable
@@ -1258,7 +1258,7 @@ version 2.0
 }
 
 // GroupNoticeAdd
-// Add a group notice.
+// Add a group notice. 
 // simulator -> dataserver
 // reliable
 {
@@ -1282,11 +1282,11 @@ version 2.0
 // ****************************************************************************
 // Teleport messages
 //
-// The teleport messages are numerous, so I have attempted to give them a
+// The teleport messages are numerous, so I have attempted to give them a 
 // consistent naming convention. Since there is a bit of glob pattern
 // aliasing, the rules are applied in order.
 //
-// Teleport* - viewer->sim or sim->viewer message which announces a
+// Teleport* - viewer->sim or sim->viewer message which announces a 
 //             teleportation request, progrees, start, or end.
 // Data* - sim->data or data->sim trusted message.
 // Space* - sim->space or space->sim trusted messaging
@@ -1375,7 +1375,7 @@ version 2.0
 }
 
 // DataHomeLocationRequest sim->data
-// Request
+// Request 
 {
 	DataHomeLocationRequest Low 67 Trusted Zerocoded
 	{
@@ -1404,7 +1404,7 @@ version 2.0
 
 
 // TeleportFinish sim->viewer
-// called when all of the information has been collected and readied for
+// called when all of the information has been collected and readied for 
 // the agent.
 {
 	TeleportFinish Low 69 Trusted Unencoded UDPBlackListed
@@ -1422,12 +1422,12 @@ version 2.0
 }
 
 // StartLure viewer->sim
-// Sent from viewer to the local simulator to lure target id to near
-// agent id. This will generate an instant message that will be routed
-// through the space server and out to the userserver. When that IM
-// goes through the userserver and the TargetID is online, the
+// Sent from viewer to the local simulator to lure target id to near 
+// agent id. This will generate an instant message that will be routed 
+// through the space server and out to the userserver. When that IM 
+// goes through the userserver and the TargetID is online, the 
 // userserver will send an InitializeLure to the spaceserver. When that
-// packet is acked, the original instant message is finally forwarded to
+// packet is acked, the original instant message is finally forwarded to 
 // TargetID.
 {
 	StartLure	Low	70 NotTrusted Unencoded
@@ -1448,7 +1448,7 @@ version 2.0
 }
 
 // TeleportLureRequest viewer->sim
-// Message from target of lure to begin the teleport process on the
+// Message from target of lure to begin the teleport process on the 
 // local simulator.
 {
 	TeleportLureRequest	Low	71 NotTrusted Unencoded
@@ -1574,8 +1574,8 @@ version 2.0
 // State data is temporary, indicates current behavior state:
 //	0 = walking
 //  1 = mouselook
-//  2 = typing
-//
+//  2 = typing 
+//  
 // Center is region local (JNC 8.16.2001)
 // Camera center is region local (JNC 8.29.2001)
 {
@@ -1598,7 +1598,7 @@ version 2.0
 }
 
 // ChatFromViewer
-// Specifies the text to be said and the "type",
+// Specifies the text to be said and the "type", 
 // normal speech, shout, whisper.
 // with the specified radius
 {
@@ -1818,7 +1818,7 @@ version 2.0
 //
 // If only one ImageID is sent for an object type that has more than
 // one face, the same image is repeated on each subsequent face.
-//
+// 
 // Data field is opaque type-specific data for this object
 {
 	ObjectAdd Medium 1 NotTrusted Zerocoded
@@ -1946,7 +1946,7 @@ version 2.0
 		{	SessionID		LLUUID	}
 	}
 	{
-		ObjectData		Variable
+		ObjectData		Variable 
 		{	ObjectLocalID	U32		}
 		{   Type			U8		}
 		{	Data			Variable	1	}	// custom type
@@ -1971,7 +1971,7 @@ version 2.0
 		{	SessionID		LLUUID	}
 	}
 	{
-		ObjectData	Variable
+		ObjectData	Variable 
 		{	CacheMissType	U8	}
 		{	ID				U32	}
 	}
@@ -2060,6 +2060,15 @@ version 2.0
 		{	IsTemporary		BOOL	}
 		{	IsPhantom		BOOL	}
 		{	CastsShadows	BOOL	}
+	}
+    {
+		ExtraPhysics        Variable
+		{   PhysicsShapeType U8     }
+        {   Density          F32    }
+        {   Friction         F32    }
+        {   Restitution      F32    }
+        {   GravityMultiplier    F32    }
+
 	}
 }
 
@@ -2502,7 +2511,7 @@ version 2.0
 }
 
 
-// ObjectDeGrab
+// ObjectDeGrab				
 {
 	ObjectDeGrab Low 119 NotTrusted Unencoded
 	{
@@ -2706,7 +2715,7 @@ version 2.0
 
 
 // Track agent - this information is used when sending out the
-// coarse location update so that we know who you are tracking.
+// coarse location update so that we know who you are tracking. 
 // To stop tracking - send a null uuid as the prey.
 {
 	TrackAgent		Low	130 	NotTrusted Unencoded
@@ -2759,7 +2768,7 @@ version 2.0
                {       Savings                 U32       }
        }
 
-       {
+       {       
                FailStats                       Single
                {       SendPacket              U32       }
                {       Dropped                 U32       }
@@ -2775,7 +2784,7 @@ version 2.0
                {       Value                   F64       }
        }
 }
-
+		
 // ScriptAnswerYes
 // reliable
 {
@@ -2784,7 +2793,7 @@ version 2.0
 		AgentData		Single
 		{	AgentID		LLUUID	}
 		{	SessionID	LLUUID	}
-	}
+	}			   
 	{
 		Data	Single
 		{	TaskID			LLUUID	}
@@ -2930,6 +2939,10 @@ version 2.0
 		PidStat Single
 		{	PID					S32				}
 	}
+	{
+		RegionInfo Variable
+		{	RegionFlagsExtended	U64				}
+	}
 }
 
 // viewer -> sim
@@ -2966,7 +2979,7 @@ version 2.0
 		{	BillableFactor		F32			}
 		{	ObjectBonusFactor 	F32			}
 		{	WaterHeight			F32			}
-		{   TerrainRaiseLimit	F32 		}
+		{	TerrainRaiseLimit	F32 		}
 		{	TerrainLowerLimit	F32 		}
 		{	PricePerMeter 		S32			}
 		{	RedirectGridX 		S32			}
@@ -2981,6 +2994,10 @@ version 2.0
 		{	MaxAgents32			U32			}	// Identical to RegionInfo.MaxAgents but allows greater range
 		{	HardMaxAgents		U32			}
 		{	HardMaxObjects		U32			}
+	}
+	{
+		RegionInfo3		Variable
+		{	RegionFlagsExtended	U64			}
 	}
 }
 
@@ -3006,6 +3023,10 @@ version 2.0
 		{	PricePerMeter 		S32			}
 		{	RedirectGridX 		S32			}
 		{	RedirectGridY 		S32			}
+	}
+	{
+		RegionInfo2	Variable
+		{	RegionFlagsExtended	U64			}
 	}
 }
 
@@ -3107,6 +3128,11 @@ version 2.0
 		{	ProductSKU				Variable	1	}	// string
 		{	ProductName				Variable	1	}	// string
 	}
+	{
+		RegionInfo4		Variable
+		{	RegionFlagsExtended	U64			}
+		{	RegionProtocols		U64			}
+	}
 }
 
 // RegionHandshakeReply
@@ -3130,9 +3156,9 @@ version 2.0
 	}
 }
 
-// The CoarseLocationUpdate message is sent to notify the viewer of
+// The CoarseLocationUpdate message is sent to notify the viewer of 
 // the location of mappable objects in the region. 1 meter resolution is
-// sufficient for this. The index block is used to show where you are,
+// sufficient for this. The index block is used to show where you are, 
 // and where someone you are tracking is located. They are -1 if not
 // applicable.
 {
@@ -3154,7 +3180,7 @@ version 2.0
     }
 }
 
-// ImageData - sent to viewer to transmit information about an image
+// ImageData - sent to viewer to transmit information about an image 
 {
 	ImageData High 9 Trusted Unencoded
 	{
@@ -3170,7 +3196,7 @@ version 2.0
 	}
 }
 
-// ImagePacket - follow on image data for images having > 1 packet of data
+// ImagePacket - follow on image data for images having > 1 packet of data 
 {
 	ImagePacket High 10 Trusted Unencoded
 	{
@@ -3203,7 +3229,7 @@ version 2.0
 //
 // If only one ImageID is sent for an object type that has more than
 // one face, the same image is repeated on each subsequent face.
-//
+// 
 // NameValue is a list of name-value strings, separated by \n characters,
 // terminated by \0
 //
@@ -3261,10 +3287,10 @@ version 2.0
 
 		// Info for particle systems
 		{	PSBlock			Variable	1	}
-
+		
 		// Extra parameters
 		{	ExtraParams		Variable	1	}
-
+		
 		// info for looped attached sounds
         // because these are almost always all zero
 		// the hit after zero-coding is only 2 bytes
@@ -3341,7 +3367,7 @@ version 2.0
 }
 
 
-// CrossedRegion - new way to tell a viewer it has gone across a region
+// CrossedRegion - new way to tell a viewer it has gone across a region 
 // boundary
 {
 	CrossedRegion Medium 7 Trusted Unencoded UDPBlackListed
@@ -3483,7 +3509,7 @@ version 2.0
 	}
 }
 
-// SendXferPacket - send an additional packet of an arbitrary xfer from sim -> viewer
+// SendXferPacket - send an additional packet of an arbitrary xfer from sim -> viewer 
 {
 	SendXferPacket High 18 NotTrusted Unencoded
 	{
@@ -3523,7 +3549,7 @@ version 2.0
 
 
 // AvatarAnimation - Update animation state
-// simulator --> viewer
+// simulator --> viewer 
 {
 	AvatarAnimation High 20 Trusted Unencoded
 	{
@@ -3545,7 +3571,6 @@ version 2.0
 	}
 
 }
-
 // AvatarAppearance - Update visual params
 {
 	AvatarAppearance Low 158 Trusted Zerocoded
@@ -3554,13 +3579,23 @@ version 2.0
 		{	ID				LLUUID	}
 		{	IsTrial			BOOL    }
 	}
-	{
+	{	
 		ObjectData			Single
 		{	TextureEntry	Variable	2	}
 	}
 	{
 		VisualParam			Variable
 		{	ParamValue		U8	}
+	}
+	{
+		AppearanceData		Variable
+		{	AppearanceVersion	U8	}
+		{	CofVersion			S32	}
+		{	Flags				U32	}
+	}
+	{
+		AppearanceHover		Variable
+		{	HoverHeight	LLVector3	}
 	}
 }
 
@@ -3583,7 +3618,7 @@ version 2.0
 }
 
 // SetFollowCamProperties
-{
+{ 
 	SetFollowCamProperties		Low	159 Trusted	Unencoded
 	{
 		ObjectData			Single
@@ -3698,7 +3733,7 @@ version 2.0
 	}
 	{
 		ButtonData		Variable
-
+		
 		{	PayButton	S32	}
 	}
 }
@@ -3930,7 +3965,7 @@ version 2.0
 		{	WantToText		Variable	1	}	// string
 		{	SkillsMask		U32				}
 		{	SkillsText		Variable	1	}	// string
-		{	LanguagesText	Variable	1	}	// string
+		{	LanguagesText	Variable	1	}	// string	
 	}
 }
 
@@ -4178,7 +4213,7 @@ version 2.0
 
 // PickGodDelete
 // Delete a pick from the database.
-// QueryID is needed so database can send a repeat list of
+// QueryID is needed so database can send a repeat list of 
 // picks.
 // viewer -> simulator -> dataserver
 // reliable
@@ -4208,6 +4243,10 @@ version 2.0
 		{	ObjectName		Variable	1	}
 		{	ObjectOwner		Variable	1	}
 		{	Questions		S32	}
+	}
+	{
+		Experience	Single
+		{	ExperienceID	LLUUID	}
 	}
 }
 
@@ -4241,6 +4280,10 @@ version 2.0
 	{
 		Buttons	Variable
 		{	ButtonLabel		Variable	1	}
+	}
+	{
+		OwnerData Variable
+		{	OwnerID		LLUUID	}
 	}
 }
 
@@ -4455,6 +4498,10 @@ version 2.0
 		AgeVerificationBlock Single
 		{   RegionDenyAgeUnverified BOOL    }
 	}
+    {
+        RegionAllowAccessBlock Single
+        {   RegionAllowAccessOverride BOOL  }  
+    }
 }
 
 // ParcelPropertiesUpdate
@@ -4898,7 +4945,7 @@ version 2.0
 // sim -> dataserver
 // This message is used to check if a user can buy a parcel. If
 // successful, the transaction is approved through a money balance reply
-// with the same transaction id.
+// with the same transaction id. 
 {
 	RequestParcelTransfer	Low	220 Trusted Zerocoded
 	{
@@ -5059,7 +5106,7 @@ version 2.0
 }
 
 // sim -> dataserver
-// Once all of the data has been gathered,
+// Once all of the data has been gathered, 
 {
 	StartAuction	Low 229 Trusted Unencoded
 	{
@@ -5163,7 +5210,7 @@ version 2.0
 // Translate a UUID into a group name
 {
 	UUIDGroupNameReply Low 238 Trusted Unencoded
-	{
+	{ 
 		UUIDNameBlock	Variable
 		{	ID			LLUUID	}
 		{	GroupName	Variable	1	}
@@ -5225,7 +5272,7 @@ version 2.0
 // Can't send viewer IP and port between simulators -- the port may get remapped
 // if the viewer is behind a Network Address Translation (NAT) box.
 //
-// Note: some of the fields of this message really only need to be sent when an
+// Note: some of the fields of this message really only need to be sent when an 
 // agent crosses a region boundary and changes from a child to a main agent
 // (such as Head/BodyRotation, ControlFlags, Animations etc)
 // simulator -> simulator
@@ -5234,12 +5281,12 @@ version 2.0
 	ChildAgentUpdate High 25 Trusted Zerocoded
 	{
 		AgentData				Single
-
+		
 		{	RegionHandle		U64	}
 		{	ViewerCircuitCode	U32	}
 		{	AgentID							LLUUID	}
 		{	SessionID						LLUUID	}
-
+		
 		{	AgentPos			LLVector3	}
 		{	AgentVel			LLVector3	}
 		{	Center				LLVector3	}
@@ -5248,7 +5295,7 @@ version 2.0
 		{	LeftAxis			LLVector3	}
 		{	UpAxis				LLVector3	}
 		{	ChangedGrid			BOOL	}	// BOOL
-
+		 
 		{	Far					F32	}
 		{	Aspect				F32	}
 		{	Throttles			Variable 1	}
@@ -5262,7 +5309,7 @@ version 2.0
 		{	PreyAgent						LLUUID	}
 		{	AgentAccess		U8	}
 		{	AgentTextures		Variable	2	}
-		{	ActiveGroupID	        LLUUID	}
+		{	ActiveGroupID	        LLUUID	}	
 	}
 	{
 		GroupData			Variable
@@ -5270,7 +5317,7 @@ version 2.0
 		{	GroupPowers			U64		}
 		{	AcceptNotices		BOOL	}
 	}
-	{
+	{	
 		AnimationData			Variable
 		{	Animation			LLUUID	}
 		{	ObjectID			LLUUID	}
@@ -5779,8 +5826,8 @@ version 2.0
 }
 
 
-//
-// Inventory update messages
+// 
+// Inventory update messages 
 // UDP DEPRECATED - Now a viewer capability.
 
 {
@@ -5819,7 +5866,7 @@ version 2.0
 		{	ItemID			LLUUID	}
 		{	FolderID		LLUUID	}
 		{	CallbackID		U32		} // Async Response
-
+		
 		{	CreatorID		LLUUID	}	// permissions
 		{	OwnerID			LLUUID	}	// permissions
 		{	GroupID			LLUUID	}	// permissions
@@ -5900,7 +5947,7 @@ version 2.0
 	}
 }
 
-// copy inventory item by item id to specified destination folder,
+// copy inventory item by item id to specified destination folder, 
 // send out bulk inventory update when done.
 //
 // Inventory items are only unique for {agent, inv_id} pairs;
@@ -6046,7 +6093,7 @@ version 2.0
 	}
 }
 
-// return inventory segment.
+// return inventory segment. 
 // *NOTE: This could be compressed more since we already know the
 // parent_id for folders and the folder_id for items, but this is
 // reasonable until we heve server side inventory.
@@ -6343,11 +6390,11 @@ version 2.0
 }
 
 // These messages are viewer->simulator requests regarding objects
-// which are currently being simulated. The viewer will get an
+// which are currently being simulated. The viewer will get an 
 // UpdateInventoryItem response if a DeRez succeeds, and the object
 // will appear if a RezObject succeeds.
 // The Destination field tells where the derez should wind up, and the
-// meaning of DestinationID depends on it. For example, if the
+// meaning of DestinationID depends on it. For example, if the 
 // destination is a category, then the destination is the category id. If
 // the destination is a task inventory, then the destination id is the
 // task id.
@@ -6373,7 +6420,7 @@ version 2.0
 	}
 	{
 		ObjectData		Variable
-		{  ObjectLocalID	U32	}   // object id in world
+		{  ObjectLocalID	U32	}   // object id in world 
 	}
 }
 
@@ -6621,7 +6668,7 @@ version 2.0
 	}
 	{
 		UpdateBlock			Single
-		{  ObjectLocalID	U32	}   // object id in world
+		{  ObjectLocalID	U32	}   // object id in world 
 		{  Enabled			BOOL	}	// is script rezzed in enabled?
 	}
 	{
@@ -6658,7 +6705,7 @@ version 2.0
 		{	AgentID		LLUUID		}
 		{	SessionID	LLUUID		}
 	}
-	{
+	{	
 		InventoryBlock		Single
 		{	CallbackID	U32			} // Async Response
 		{	FolderID		LLUUID	}
@@ -6684,7 +6731,7 @@ version 2.0
 		EventData		Single
 		{	EventID		U32		}
 	}
-	{
+	{	
 		InventoryBlock		Single
 		{	FolderID		LLUUID	}
 		{	Name			Variable	1	}
@@ -6740,7 +6787,7 @@ version 2.0
 // simulator, the dataserver will actually do the work. Dataserver
 // generates a MoneyBalance message in reply.  The simulator
 // will generate a MoneyTransferBackend in response to this.
-// viewer -> simulator -> dataserver
+// viewer -> simulator -> dataserver 
 {
 	MoneyTransferRequest Low 311 NotTrusted Zerocoded
 	{
@@ -6762,6 +6809,8 @@ version 2.0
 }
 
 // And, the money transfer
+// *NOTE: Unused as of 2010-04-06, because all back-end money transactions
+// are done with web services via L$ API.  JC
 {
 	MoneyTransferBackend Low 312 Trusted Zerocoded
 	{
@@ -6812,6 +6861,19 @@ version 2.0
 		{	SquareMetersCommitted	S32	}
 		{	Description			Variable 1	}	// string
 	}
+	// For replies that are part of a transaction (buying something) provide
+	// metadata for localization.  If TransactionType is 0, the message is
+	// purely a balance update.  Added for server 1.40 and viewer 2.1.  JC
+	{
+		TransactionInfo		Single
+		{	TransactionType			S32			}	// lltransactiontype.h
+		{	SourceID				LLUUID		}
+		{	IsSourceGroup			BOOL		}
+		{	DestID					LLUUID		}
+		{	IsDestGroup				BOOL		}
+		{	Amount					S32			}
+		{	ItemDescription			Variable 1	}	// string
+	}
 }
 
 
@@ -6837,6 +6899,17 @@ version 2.0
 		{	SquareMetersCredit	S32	}
 		{	SquareMetersCommitted	S32	}
 		{	Description			Variable 1	}	// string
+	}
+	// See MoneyBalanceReply above.
+	{
+		TransactionInfo		Single
+		{	TransactionType			S32			}	// lltransactiontype.h
+		{	SourceID				LLUUID		}
+		{	IsSourceGroup			BOOL		}
+		{	DestID					LLUUID		}
+		{	IsDestGroup				BOOL		}
+		{	Amount					S32			}
+		{	ItemDescription			Variable 1	}	// string
 	}
 }
 
@@ -6959,7 +7032,7 @@ version 2.0
 	}
 }
 
-// notification for login and logout.
+// notification for login and logout. 
 // source_sim -> dest_viewer
 {
 	OnlineNotification Low 322 Trusted Unencoded
@@ -6978,9 +7051,9 @@ version 2.0
 
 
 // SetStartLocationRequest
-// viewer -> sim
-// failure checked at sim and triggers ImprovedInstantMessage
-// success triggers SetStartLocation
+// viewer -> sim 
+// failure checked at sim and triggers ImprovedInstantMessage 
+// success triggers SetStartLocation 
 {
 	SetStartLocationRequest Low 324 NotTrusted Zerocoded
 	{
@@ -7091,7 +7164,7 @@ version 2.0
 // ***************************************************************************
 
 //
-// Simulator informs Dataserver of new attachment or attachment asset update
+// Simulator informs Dataserver of new attachment or attachment asset update 
 // DO NOT ALLOW THIS FROM THE VIEWER
 //
 {
@@ -7212,6 +7285,29 @@ version 2.0
 
 
 // *************************************************************************
+// Object animation messages
+// *************************************************************************
+
+// Note this is basically identical to AvatarAnimation.
+// Needs to be a different message because existing viewers
+// have insufficiently smart handler functions.
+
+// ObjectAnimation - Update animation state
+// simulator --> viewer
+{
+        ObjectAnimation High 30 Trusted Unencoded
+        {
+                Sender                  Single
+                {       ID                      LLUUID  }
+        }
+        {
+                AnimationList Variable
+                { AnimID                LLUUID }
+                { AnimSequenceID S32 }
+        }
+}
+
+// *************************************************************************
 // Asset storage messages
 // *************************************************************************
 
@@ -7279,7 +7375,7 @@ version 2.0
 	}
 }
 
-// Script on simulator asks dataserver for information
+// Script on simulator asks dataserver for information 
 {
 	ScriptDataRequest Low 337 Trusted Unencoded
 	{
@@ -7295,7 +7391,7 @@ version 2.0
 	ScriptDataReply Low 338 Trusted Unencoded
 	{
 		DataBlock			Variable
-		{	Hash			U64				}
+		{	Hash			U64				}		
 		{	Reply			Variable	2	}
 	}
 }
@@ -7322,7 +7418,7 @@ version 2.0
 		{	Charter			Variable	2	}	// string
 		{	ShowInList		BOOL	}
 		{	InsigniaID		LLUUID	}
-		{	MembershipFee	S32				}	// S32
+		{	MembershipFee	S32				}	// S32		
 		{	OpenEnrollment	BOOL			}   // BOOL (U8)
 		{	AllowPublish	BOOL		}	// whether profile is externally visible or not
 		{	MaturePublish	BOOL		}	// profile is "mature"
@@ -8098,7 +8194,7 @@ version 2.0
 		{	UpdateType	U8		}
 	}
 }
-
+			
 
 
 // Request the members of the live help group needed for requesting agent.
@@ -8180,7 +8276,7 @@ version 2.0
 		{	WearableType	U8	}
 	}
 }
-
+		
 
 // AgentCachedTexture
 // viewer queries for cached textures on dataserver (via simulator)
@@ -8266,7 +8362,7 @@ version 2.0
 }
 
 // AgentGroupDataUpdate
-// Updates a viewer or simulator's impression of the groups an agent is in.
+// Updates a viewer or simulator's impression of the groups an agent is in. 
 // dataserver -> simulator -> viewer
 // reliable
 {
@@ -8278,7 +8374,7 @@ version 2.0
 	{
 		GroupData			Variable
 		{	GroupID				LLUUID	}
-		{	GroupPowers			U64		}
+		{	GroupPowers			U64		}	
 		{	AcceptNotices		BOOL	}
 		{	GroupInsigniaID		LLUUID	}
 		{	Contribution		S32		}
@@ -8401,7 +8497,7 @@ version 2.0
 		AgentData			Single
 		{	AgentID			LLUUID	}
 		{	SessionID		LLUUID	}
-	}
+	}	
 	{
 		HeaderData			Single
 		{	CompoundMsgID			LLUUID  }	// All messages a single "compound msg" must have the same id
@@ -8634,7 +8730,7 @@ version 2.0
 		{	AgentID		LLUUID	}
 		{	Flags		U32		}
 	}
-	{
+	{	
 		Data			Variable
 		{	X			U16				}	// in region-widths
 		{	Y			U16				}	// in region-widths
@@ -8681,7 +8777,7 @@ version 2.0
 		RequestData		Single
 		{	ItemType	U32		}
 	}
-	{
+	{	
 		Data			Variable
 		{	X			U32				}	// global position
 		{	Y			U32				}	// global position
@@ -8774,7 +8870,7 @@ version 2.0
 		{	ChannelID	LLUUID }
 		{	IntValue	U32 }
 		{	StringValue Variable 2 } // string
-	}
+	}	
 }
 
 // simulator -> rpcserver
@@ -8866,7 +8962,7 @@ version 2.0
 		{	RequestFlags		U32				}
 		{	TotalObjectCount	U32				}
 	}
-	{
+	{	
 		ReportData	Variable
 		{	TaskLocalID			U32				}
 		{	TaskID				LLUUID			}
@@ -8882,7 +8978,7 @@ version 2.0
 // Generic Error -- this is used for sending an error message
 // to a UDP recipient. The lowest common denominator is to at least
 // log the message. More sophisticated receivers can do something
-// smarter, for example, a money transaction failure can put up a
+// smarter, for example, a money transaction failure can put up a 
 // more user visible UI widget.
 {
 	Error Low 423 NotTrusted Zerocoded
@@ -8975,3 +9071,4 @@ version 2.0
 
 	}
 }
+

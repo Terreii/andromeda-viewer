@@ -57,7 +57,7 @@ command | what it does
 `npm run test:docs` | Runs [textlint](https://textlint.github.io/) and [alex.js](https://alexjs.com/) for catching misspelled, insensitive, inconsiderate writing in the documentation.
 `npm run build:type-docs` | Builds and opens the type documentation.
 `npm run open-type-docs` | Opens the existing type documentation.
-`npm run update-caps` | Updates all [capabilities names](http://wiki.secondlife.com/wiki/Category:Capabilities).
+`npm run update-files` | Updates all [capabilities names](http://wiki.secondlife.com/wiki/Category:Capabilities) and [UDP-Messages](http://wiki.secondlife.com/wiki/Category:Messages).
 `npm run update-coc` | Updates the CODE_OF_CONDUCT.md
 `npm run update-contrib` | Updates the CONTRIBUTING.md
 `npm run fix:docs` | Runs `textlint --fix`.
