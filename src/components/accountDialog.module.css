@@ -12,6 +12,7 @@
 .ButtonRow {
   margin-top: 0.6em;
 }
+.ButtonRow > button + a,
 .ButtonRow > button + button {
   margin-left: 0.6em;
 }

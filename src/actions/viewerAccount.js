@@ -365,6 +365,52 @@ export function signOut () {
   }
 }
 
+/**
+ * Fetch all data of the user and process it into a formated JSON (row data).
+ * @returns {object} JSON data.
+ */
+export function downloadAccountData () {
+  return async (dispatch, getState, { hoodie }) => {
+    const allAvatars = await hoodie.cryptoStore.withIdPrefix('avatars/').findAll()
+
+    const avatarData = await Promise.all(allAvatars.map(async avatar => {
+      const avatarStore = hoodie.cryptoStore.withIdPrefix(avatar.dataSaveId + '/')
+
+      const [localChat, imChatsInfos] = await Promise.all([
+        avatarStore.withIdPrefix('localchat').findAll(),
+        avatarStore.withIdPrefix('imChatsInfos/').findAll()
+      ])
+
+      const imChats = await Promise.all(imChatsInfos.map(async info => {
+        return {
+          info,
+          messages: await avatarStore.withIdPrefix(`imChats/${info.saveId}`).findAll()
+        }
+      }))
+
+      return {
+        info: avatar,
+        localChat,
+        imChats
+      }
+    }))
+
+    // Get other data
+    const [grids, account, profile] = await Promise.all([
+      hoodie.cryptoStore.withIdPrefix('grids/').findAll(),
+      hoodie.account.get(),
+      hoodie.account.profile.get()
+    ])
+
+    return {
+      account,
+      profile,
+      grids,
+      avatars: avatarData
+    }
+  }
+}
+
 export function deleteAccount () {
   return async (dispatch, getState, { hoodie }) => {
     await dispatch(logoutAvatar())

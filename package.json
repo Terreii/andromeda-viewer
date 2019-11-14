@@ -61,6 +61,7 @@
     "http-proxy-middleware": "^0.20.0",
     "jest-axe": "^3.2.0",
     "jest-enzyme": "^7.1.2",
+    "jszip": "^3.2.2",
     "markdown-chalk": "^2.1.0",
     "mockdate": "^2.0.5",
     "normalize.css": "^8.0.1",

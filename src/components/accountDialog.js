@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { viewerName } from '../viewerInfo'
 
-import { updateAccount, deleteAccount } from '../actions/viewerAccount'
+import { downloadAccountData, updateAccount, deleteAccount } from '../actions/viewerAccount'
 
 import style from './accountDialog.module.css'
 import formStyles from './formElements.module.css'
@@ -207,6 +207,10 @@ This is permanent and can not be undone!`)
 
     <hr className={style.Separator} />
 
+    <AccountDataDownload />
+
+    <hr className={style.Separator} />
+
     <button
       type='button'
       className={formStyles.DangerButton}
@@ -216,4 +220,66 @@ This is permanent and can not be undone!`)
       Delete your {viewerName} account
     </button>
   </form>
+}
+
+function AccountDataDownload () {
+  const dispatch = useDispatch()
+
+  const [isDownloading, setIsDownloading] = useState(false)
+  const [error, setError] = useState(null)
+  const data = useRef(null)
+
+  useEffect(() => {
+    return () => {
+      if (data.current !== null) {
+        URL.revokeObjectURL(data.current)
+      }
+    }
+  }, [])
+
+  const doStartDownload = async () => {
+    try {
+      setIsDownloading(true)
+      setError(null)
+
+      const result = await dispatch(downloadAccountData())
+
+      const JSZip = (await import('jszip')).default
+      const zip = new JSZip()
+      zip.file('raw_data.json', JSON.stringify(result, null, 2) + '\n')
+
+      const file = await zip.generateAsync({ type: 'blob' })
+      data.current = URL.createObjectURL(file)
+    } catch (err) {
+      setError(err.toString())
+    } finally {
+      setIsDownloading(false)
+    }
+  }
+
+  return <div className={style.ButtonRow}>
+    <button
+      type='button'
+      className={formStyles.PrimaryButton}
+      onClick={doStartDownload}
+      disabled={isDownloading}
+    >
+      Prepare your data to download.
+    </button>
+
+    {error && <small className={formStyles.Error} role='alert'>
+      {error}
+    </small>}
+
+    {data.current && <a
+      href={data.current}
+      target='_blank'
+      rel='noopener noreferrer'
+      className={formStyles.OkButton}
+      download={`${viewerName}_user_data.zip`}
+      role='alert'
+    >
+      Download your data.
+    </a>}
+  </div>
 }
