@@ -227,29 +227,33 @@ function AccountDataDownload () {
 
   const [isDownloading, setIsDownloading] = useState(false)
   const [error, setError] = useState(null)
-  const data = useRef(null)
+  const [url, setUrl] = useState(null)
 
   useEffect(() => {
     return () => {
-      if (data.current !== null) {
-        URL.revokeObjectURL(data.current)
+      if (url != null) {
+        URL.revokeObjectURL(url)
       }
     }
-  }, [])
+  }, [url])
 
   const doStartDownload = async () => {
     try {
       setIsDownloading(true)
       setError(null)
 
-      const result = await dispatch(downloadAccountData())
+      const { raw, files } = await dispatch(downloadAccountData())
 
       const JSZip = (await import('jszip')).default
       const zip = new JSZip()
-      zip.file('raw_data.json', JSON.stringify(result, null, 2) + '\n')
+      zip.file('raw_data.json', JSON.stringify(raw, null, 2) + '\n')
+
+      files.forEach(file => {
+        zip.file(file.name, file.data)
+      })
 
       const file = await zip.generateAsync({ type: 'blob' })
-      data.current = URL.createObjectURL(file)
+      setUrl(URL.createObjectURL(file))
     } catch (err) {
       setError(err.toString())
     } finally {
@@ -264,22 +268,22 @@ function AccountDataDownload () {
       onClick={doStartDownload}
       disabled={isDownloading}
     >
-      Prepare your data to download.
+      Prepare your data to download
     </button>
 
     {error && <small className={formStyles.Error} role='alert'>
       {error}
     </small>}
 
-    {data.current && <a
-      href={data.current}
+    {url && <a
+      href={url}
       target='_blank'
       rel='noopener noreferrer'
       className={formStyles.OkButton}
       download={`${viewerName}_user_data.zip`}
       role='alert'
     >
-      Download your data.
+      Download your data
     </a>}
   </div>
 }

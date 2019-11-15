@@ -12,6 +12,8 @@ import {
 } from '../selectors/viewer'
 import { getIsLoggedIn } from '../selectors/session'
 
+import { IMChatType } from '../types/chat'
+
 export function didSignIn (did, isUnlocked, username = '') {
   const isLoggedIn = Boolean(did)
   return {
@@ -366,8 +368,9 @@ export function signOut () {
 }
 
 /**
- * Fetch all data of the user and process it into a formated JSON (row data).
- * @returns {object} JSON data.
+ * Fetch all data of the user and process it into a formated JSON (row data)
+ * and Second Life viewers files format.
+ * @returns {object} JSON data and array of files (text).
  */
 export function downloadAccountData () {
   return async (dispatch, getState, { hoodie }) => {
@@ -402,13 +405,83 @@ export function downloadAccountData () {
       hoodie.account.profile.get()
     ])
 
-    return {
+    const raw = {
       account,
       profile,
       grids,
       avatars: avatarData
     }
+
+    const files = avatarData.flatMap(generateExportFiles)
+
+    return { raw, files }
   }
+}
+
+function generateExportFiles (avatar) {
+  const avatarPart = avatar.info.name.toLowerCase().replace(/\s/, '_')
+  const gridPart = avatar.info.grid === 'Second Life'
+    ? ''
+    : `.${avatar.info.grid.toLowerCase()}`
+  const folderName = `${avatarPart}${gridPart}/`
+
+  const avatarFiles = []
+  let conversationLog = ''
+
+  for (const chat of avatar.imChats) {
+    const name = chat.info.chatType === 'personal'
+      ? chat.info.name.toLowerCase().replace(/\s/, '_')
+      : chat.info.name
+
+    const messagesCount = chat.messages.length
+    if (messagesCount === 0) {
+      continue
+    }
+
+    // generate im chat log
+    avatarFiles.push({
+      name: `${folderName}${name}.txt`,
+      data: chat.messages.reduce(reduceExportChatLines, '')
+    })
+
+    // generate line in conversation.log
+    const time = Math.floor(chat.messages[messagesCount - 1].time / 1000)
+
+    const typeNum = IMChatType[chat.info.chatType]
+    const hasOffline = 0 // does it have offline messages?
+
+    const display = chat.info.name
+    const targetId = chat.info.target
+    const chatId = chat.info.sessionId
+
+    const file = encodeURI(name)
+
+    const line = `[${time}] ${typeNum} 0 ${hasOffline} ${display}| ${targetId} ${chatId} ${file}|\n`
+    conversationLog += line
+  }
+
+  avatarFiles.push({
+    name: folderName + 'conversation.log',
+    data: conversationLog
+  })
+
+  avatarFiles.push({
+    name: folderName + 'chat.txt',
+    data: avatar.localChat.reduce(reduceExportChatLines, '')
+  })
+
+  return avatarFiles
+}
+
+function reduceExportChatLines (file, line) {
+  const time = new Date(line.time)
+  const year = time.getFullYear()
+  const month = time.getMonth().toString().padStart(2, '0')
+  const day = time.getDate().toString().padStart(2, '0')
+  const hours = time.getHours().toString().padStart(2, '0')
+  const min = time.getMinutes().toString().padStart(2, '0')
+
+  return `${file}[${year}/${month}/${day} ${hours}:${min}]  ${line.fromName}: ${line.message}\n`
 }
 
 export function deleteAccount () {
