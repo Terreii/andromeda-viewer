@@ -125,10 +125,10 @@ This is permanent and can not be undone!`)
       </small>
 
       <div className={formStyles.FormField}>
-        <label htmlFor='passwordChange'>Old password</label>
+        <label htmlFor='passwordChangeOld'>Old password</label>
         <input
           {...oldPassword}
-          id='passwordChange'
+          id='passwordChangeOld'
           type='password'
           className={formStyles.Input}
           autoComplete='current-password'
@@ -139,10 +139,10 @@ This is permanent and can not be undone!`)
       </div>
 
       <div className={formStyles.FormField}>
-        <label htmlFor='passwordChange'>New password</label>
+        <label htmlFor='passwordChangeNew'>New password</label>
         <input
           {...newPassword}
-          id='passwordChange'
+          id='passwordChangeNew'
           type='password'
           className={formStyles.Input}
           autoComplete='new-password'
@@ -162,10 +162,10 @@ This is permanent and can not be undone!`)
       </div>
 
       <div className={formStyles.FormField}>
-        <label htmlFor='passwordChange'>Repeat password</label>
+        <label htmlFor='passwordChangeNew2'>Repeat password</label>
         <input
           {...newPassword2}
-          id='passwordChange'
+          id='passwordChangeNew2'
           type='password'
           className={formStyles.Input}
           autoComplete='new-password'
