@@ -12,12 +12,16 @@ export default function (preloadedState) {
         hoodie: window.hoodie,
         circuit: null // will be set on login
       }
-    }
+    },
+    // This check is disabled because Uint8Arrays are not serializable!
+    serializableCheck: false
   })
 
   const store = configureStore({
     reducer: rootReducer,
     middleware,
+    // enable devTools in development. Please use the Redux DevTools Extension
+    // http://extension.remotedev.io/
     devTools: process.env.NODE_ENV !== 'production',
     preloadedState
   })
@@ -29,7 +33,6 @@ export default function (preloadedState) {
         store.replaceReducer(rootReducer)
       })
     }
-    window.devStore = store
   }
 
   configureReactors(store)

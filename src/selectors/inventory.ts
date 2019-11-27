@@ -2,9 +2,9 @@
 
 import { Folder, AssetType, FolderType } from '../types/inventory'
 
-export const getFolders = (state: any): Map<string, Folder> => state.inventory.folders
+export const getFolders = (state: any): { [key: string]: Folder } => state.inventory.folders
 
-export const getFolderById = (state: any, id: string) => getFolders(state).get(id)
+export const getFolderById = (state: any, id: string) => getFolders(state)[id]
 
 export const getInventoryRootId = (state: any): string => state.inventory.root
 
@@ -30,7 +30,7 @@ export const getFolderForAssetType = (state: any, type: AssetType) => {
   const folders = getFolders(state)
 
   for (const folderId of rootFolder.children) {
-    const folder = folders.get(folderId)
+    const folder = folders[folderId]
 
     if (folder == null) {
       console.error(new Error('Missing child folder. ID: ' + folderId))
