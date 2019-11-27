@@ -1,29 +1,26 @@
-import { createStore, applyMiddleware, compose } from 'redux'
-import thunkMiddleware from 'redux-thunk'
+import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit'
 
 import rootReducer from '../reducers'
 import configureReactors from './configureReactors'
 
 // Create Redux-Store with Hoodie
-const configureStore = preloadedState => {
-  const middleware = applyMiddleware(
-    thunkMiddleware.withExtraArgument({
-      hoodie: window.hoodie,
-      circuit: null // will be set on login
-    })
-  )
+export default function (preloadedState) {
+  // Bind Hoodie to the store
+  const middleware = getDefaultMiddleware({
+    thunk: {
+      extraArgument: {
+        hoodie: window.hoodie,
+        circuit: null // will be set on login
+      }
+    }
+  })
 
-  // For development
-  // use with https://github.com/zalmoxisus/redux-devtools-extension
-  const enhancers = process.env.NODE_ENV !== 'production'
-    ? (window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose)(middleware)
-    : middleware
-
-  const store = createStore(
-    rootReducer,
-    preloadedState,
-    enhancers
-  )
+  const store = configureStore({
+    reducer: rootReducer,
+    middleware,
+    devTools: process.env.NODE_ENV !== 'production',
+    preloadedState
+  })
 
   if (process.env.NODE_ENV !== 'production') {
     if (module.hot) {
@@ -39,5 +36,3 @@ const configureStore = preloadedState => {
 
   return store
 }
-
-export default configureStore
