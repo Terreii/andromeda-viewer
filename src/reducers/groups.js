@@ -1,16 +1,15 @@
 // Groups of the avatar
 
+import { createReducer } from '@reduxjs/toolkit'
+
 import { getValueOf, mapBlockOf } from '../network/msgGetters'
 
-export default function groupsReducer (state = [], action) {
-  switch (action.type) {
-    case 'UDPAvatarGroupsReply':
-      if (
-        getValueOf(action, 'AgentData', 0, 'AgentID') !==
-        getValueOf(action, 'AgentData', 0, 'AvatarID')
-      ) {
-        return state
-      }
+export default createReducer([], {
+  UDPAvatarGroupsReply (state, action) {
+    if (
+      getValueOf(action, 'AgentData', 0, 'AgentID') ===
+      getValueOf(action, 'AgentData', 0, 'AvatarID')
+    ) {
       const udpListInProfile = getValueOf(action, 'NewGroupData', 'ListInProfile')
 
       return mapBlockOf(action, 'GroupData', getValue => ({
@@ -22,48 +21,46 @@ export default function groupsReducer (state = [], action) {
         powers: getValue('GroupPowers'),
         listInProfile: udpListInProfile
       }))
-
-    case 'GROUP_CHAT_SESSIONS_STARTED':
-      return state.map(group => group.id in action.groups
-        ? {
-          ...group,
-          sessionStarted: true
-        }
-        : group
-      )
-
-    case 'EVENT_QUEUE_AgentGroupDataUpdate':
-      // this is OK, because the max number of groups an user can join is 60.
-      return action.body.GroupData.reduce((groups, groupData) => {
-        const id = groupData.GroupID
-
-        const index = groups.findIndex(group => group.id === id)
-        const isNewGroup = index < 0
-
-        const newGroupData = {
-          ...(isNewGroup ? { title: '' } : groups[index]),
-          id,
-          name: groupData.GroupName,
-          insigniaID: groupData.GroupInsigniaID,
-          acceptNotices: groupData.AcceptNotices,
-          powers: Buffer.from(groupData.GroupPowers),
-          listInProfile: groupData.ListInProfile
-        }
-
-        return isNewGroup
-          ? groups.concat([newGroupData])
-          : [
-            ...groups.slice(0, index),
-            newGroupData,
-            ...groups.slice(index + 1)
-          ]
-      }, state)
-
-    case 'DidLogout':
-    case 'UserWasKicked':
-      return []
-
-    default:
+    } else {
       return state
-  }
-}
+    }
+  },
+
+  GROUP_CHAT_SESSIONS_STARTED (state, action) {
+    for (const group of state) {
+      if (group.id in action.groups) {
+        group.sessionStarted = true
+      }
+    }
+  },
+
+  EVENT_QUEUE_AgentGroupDataUpdate (state, action) {
+    // this is OK, because the max number of groups an user can join is 60.
+    for (const groupData of action.body.GroupData) {
+      const id = groupData.GroupID
+
+      const index = state.findIndex(group => group.id === id)
+      const isNewGroup = index < 0
+
+      const group = isNewGroup
+        ? {
+          id,
+          title: ''
+        }
+        : state[index]
+
+      group.name = groupData.GroupName
+      group.insigniaID = groupData.GroupInsigniaID
+      group.acceptNotices = groupData.AcceptNotices
+      group.powers = Buffer.from(groupData.GroupPowers)
+      group.listInProfile = groupData.ListInProfile
+
+      if (isNewGroup) {
+        state.push(group)
+      }
+    }
+  },
+
+  DidLogout: () => [],
+  UserWasKicked: () => []
+})
