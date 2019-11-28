@@ -18,7 +18,7 @@ function getDefaultImChat () {
     isLoadingHistory: false,
     active: false,
     hasUnsavedMSG: false,
-    areTyping: new Set(),
+    areTyping: [],
     messages: []
   }
 }
@@ -99,7 +99,7 @@ function imChat (state = getDefaultImChat(), action) {
 
       return {
         ...state,
-        areTyping: newTyper
+        areTyping: Array.from(newTyper)
       }
 
     case 'IM_HISTORY_LOADING_FINISHED':

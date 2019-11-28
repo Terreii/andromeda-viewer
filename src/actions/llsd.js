@@ -1,4 +1,4 @@
-import LLSD from '../llsd'
+import LLSD, { Binary, URI, UUID } from '../llsd'
 import caps from './capabilities.json'
 
 import { getAvatarIdentifier } from '../selectors/session'
@@ -103,6 +103,7 @@ function activateEventQueue () {
     for await (const eventQueueEvents of eventQueueGet(getState)) {
       for (const event of eventQueueEvents) {
         try {
+          toJSON(event.body)
           dispatch({
             type: 'EVENT_QUEUE_' + event.message,
             message: event.message,
@@ -112,6 +113,24 @@ function activateEventQueue () {
           console.error(err)
         }
       }
+    }
+  }
+}
+
+/**
+ * This function checks all values of LLSD data for non JSON data modifies them.
+ * @param {object|object[]} object A LLSD Object or Array.
+ */
+export function toJSON (object) {
+  for (const [key, value] of Object.entries(object)) {
+    if (value instanceof Date) {
+      object[key] = value.getTime()
+    } else if (value instanceof Binary) {
+      object[key] = value.toArray()
+    } else if (value instanceof URI || value instanceof UUID) {
+      object[key] = value.toString()
+    } else if (typeof object === 'object') { // Objects and Arrays
+      toJSON(value)
     }
   }
 }

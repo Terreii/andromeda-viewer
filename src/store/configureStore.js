@@ -1,7 +1,9 @@
-import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit'
+import { configureStore, getDefaultMiddleware, isPlain } from '@reduxjs/toolkit'
 
 import rootReducer from '../reducers'
 import configureReactors from './configureReactors'
+
+import AvatarName from '../avatarName'
 
 // Create Redux-Store with Hoodie
 export default function (preloadedState) {
@@ -13,8 +15,12 @@ export default function (preloadedState) {
         circuit: null // will be set on login
       }
     },
-    // This check is disabled because Uint8Arrays are not serializable!
-    serializableCheck: false
+    // Allow Uint8Array (Buffer) and AvatarName to be in actions and the state.
+    serializableCheck: {
+      isSerializable: value => isPlain(value) ||
+        value instanceof Uint8Array ||
+        value instanceof AvatarName
+    }
   })
 
   const store = configureStore({

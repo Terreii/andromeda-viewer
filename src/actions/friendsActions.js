@@ -43,6 +43,11 @@ function loadDisplayNames (idsArray) {
       const badIDs = result['bad_ids'] || []
       dispatch(sendUUIDNameRequest(badIDs)) // Try again
 
+      result.agents.forEach(agent => {
+        agent.display_name_next_update = agent.display_name_next_update.getTime()
+        agent.id = agent.id.toString()
+      })
+
       dispatch({
         type: 'DisplayNamesLoaded',
         agents: result.agents,
