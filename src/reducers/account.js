@@ -1,3 +1,5 @@
+import { createReducer } from '@reduxjs/toolkit'
+
 // Reducer for viewer-account and state
 
 function getDefault () {
@@ -32,162 +34,113 @@ function getDefault () {
   return defaultData
 }
 
-export default function accountReducer (state = getDefault(), action) {
-  switch (action.type) {
-    case 'didLogin':
-      if (action.save) {
-        return {
-          ...state,
-          sync: action.save
-        }
-      } else { // Anonym
-        return {
-          ...state,
-          sync: action.save,
-          anonymAvatarData: {
-            grid: action.grid.name,
-            name: action.name.getFullName(),
-            avatarIdentifier: action.avatarIdentifier,
-            dataSaveId: action.dataSaveId
-          }
-        }
+export default createReducer(getDefault(), {
+  didLogin (state, action) {
+    if (action.save) {
+      state.sync = action.save
+    } else { // Anonym
+      state.sync = action.save
+      state.anonymAvatarData = {
+        grid: action.grid.name,
+        name: action.name.getFullName(),
+        avatarIdentifier: action.avatarIdentifier,
+        dataSaveId: action.dataSaveId
       }
+    }
+  },
 
-    case 'loginDidFail':
-      return {
-        ...state,
-        sync: false
-      }
+  loginDidFail (state) {
+    state.sync = false
+  },
 
-    case 'ViewerAccountLogInStatus':
-      return {
-        ...state,
-        unlocked: action.isUnlocked == null ? state.unlocked : action.isUnlocked,
-        loggedIn: action.isLoggedIn,
-        username: action.username
-      }
+  ViewerAccountLogInStatus (state, action) {
+    if (action.isUnlocked != null) {
+      state.unlocked = action.isUnlocked
+    }
+    state.loggedIn = action.isLoggedIn
+    state.username = action.username
+  },
 
-    case 'ViewerAccountSignOut':
-      return getDefault()
+  ViewerAccountSignOut: getDefault,
 
-    case 'ViewerAccountUnlocked':
-      return {
-        ...state,
-        unlocked: true
-      }
+  ViewerAccountUnlocked (state) {
+    state.unlocked = true
+  },
 
-    case 'ShowSignInPopup':
-      return {
-        ...state,
-        signInPopup: action.popup
-      }
+  ShowSignInPopup (state, action) {
+    state.signInPopup = action.popup
+  },
 
-    case 'ShowSignOutPopup':
-      return {
-        ...state,
-        signInPopup: 'signOut'
-      }
+  ShowSignOutPopup (state, action) {
+    state.signInPopup = 'signOut'
+  },
 
-    case 'SHOW_PASSWORD_RESET':
-      return {
-        ...state,
-        signInPopup: 'resetPassword',
-        popupData: action.passwordType
-      }
+  SHOW_PASSWORD_RESET (state, action) {
+    state.signInPopup = 'resetPassword'
+    state.popupData = action.passwordType
+  },
 
-    case 'DISPLAY_VIEWER_ACCOUNT_RESET_KEYS':
-      return {
-        ...state,
-        signInPopup: 'resetKeys',
-        popupData: action.resetKeys
-      }
+  DISPLAY_VIEWER_ACCOUNT_RESET_KEYS (state, action) {
+    state.signInPopup = 'resetKeys'
+    state.popupData = action.resetKeys
+  },
 
-    case 'ClosePopup':
-      return {
-        ...state,
-        signInPopup: '',
-        popupData: null
-      }
+  ClosePopup (state, action) {
+    state.signInPopup = ''
+    state.popupData = null
+  },
 
-    case 'AvatarSaved':
-      return {
-        ...state,
-        savedAvatars: state.savedAvatars.concat([
-          action.avatar
-        ])
-      }
+  AvatarSaved (state, action) {
+    state.savedAvatars.push(action.avatar)
+  },
 
-    case 'AvatarsLoaded':
-      return {
-        ...state,
-        savedAvatars: action.avatars,
-        savedAvatarsLoaded: true
-      }
+  AvatarsLoaded (state, action) {
+    state.savedAvatars = action.avatars
+    state.savedAvatarsLoaded = true
+  },
 
-    case 'SavedAvatarUpdated':
-      return {
-        ...state,
-        savedAvatars: state.savedAvatars.map(avatar => avatar._id === action.avatar._id
-          ? action.avatar
-          : avatar
-        )
-      }
+  SavedAvatarUpdated (state, action) {
+    const index = state.savedAvatars.findIndex(avatar => avatar._id === action.avatar._id)
+    if (index >= 0) {
+      state.savedAvatars[index] = action.avatar
+    }
+  },
 
-    case 'SavedAvatarRemoved':
-      return {
-        ...state,
-        savedAvatars: state.savedAvatars.filter(avatar => avatar._id !== action.avatar._id)
-      }
+  SavedAvatarRemoved (state, action) {
+    state.savedAvatars = state.savedAvatars.filter(avatar => avatar._id !== action.avatar._id)
+  },
 
-    case 'GridAdded':
-      return {
-        ...state,
-        savedGrids: state.savedGrids.concat([
-          action.grid
-        ])
-      }
+  GridAdded (state, action) {
+    state.savedGrids.push(action.grid)
+  },
 
-    case 'GridsLoaded':
-      return {
-        ...state,
-        savedGrids: state.savedGrids.concat(action.grids),
-        savedGridsLoaded: true
-      }
+  GridsLoaded (state, action) {
+    state.savedGrids.push(...action.grids)
+    state.savedGridsLoaded = true
+  },
 
-    case 'SavedGridDidChanged':
-      return {
-        ...state,
-        savedGrids: state.savedGrids.map(grid => {
-          if (grid._id != null) { // If grid has an id
-            return grid._id === action.grid._id
-              ? action.grid
-              : grid
-          } else {
-            return grid.name === action.grid.name
-              ? action.grid
-              : grid
-          }
-        })
-      }
+  SavedGridDidChanged (state, action) {
+    const index = state.savedGrids.findIndex(grid => {
+      return grid._id != null // If grid has an id
+        ? grid._id === action.grid._id
+        : grid.name === action.grid.name
+    })
 
-    case 'SavedGridRemoved':
-      return {
-        ...state,
-        savedGrids: state.savedGrids.filter(grid => grid._id != null
-          ? grid._id !== action.grid._id
-          : grid.name !== action.grid.name
-        )
-      }
+    state.savedGrids[index] = action.grid
+  },
 
-    case 'DidLogout':
-    case 'UserWasKicked':
-      return {
-        ...state,
-        anonymAvatarData: null,
-        sync: false
-      }
+  SavedGridRemoved (state, action) {
+    state.savedGrids = state.savedGrids.filter(grid => grid._id != null
+      ? grid._id !== action.grid._id
+      : grid.name !== action.grid.name
+    )
+  },
 
-    default:
-      return state
-  }
+  DidLogout: onLogout,
+  UserWasKicked: onLogout
+})
+
+function onLogout (state) {
+  state.anonymAvatarData = null
+  state.sync = false
 }
