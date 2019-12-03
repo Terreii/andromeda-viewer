@@ -2,6 +2,8 @@
  * Reduces all IM-Chats and IM-Messages
  */
 
+import { createReducer } from '@reduxjs/toolkit'
+
 import { IMChatType } from '../types/chat'
 
 function getDefaultImChat () {
@@ -23,268 +25,217 @@ function getDefaultImChat () {
   }
 }
 
-function imChat (state = getDefaultImChat(), action) {
-  switch (action.type) {
-    case 'IM_CHAT_CREATED':
-    case 'IM_CHAT_INFOS_LOADED':
-      return {
-        ...state,
-        _id: state._id || action._id,
-        didSaveChatInfo: action.type === 'IM_CHAT_INFOS_LOADED',
-        sessionId: action.sessionId,
-        saveId: action.saveId,
-        type: action.chatType,
-        target: action.target,
-        name: action.name
+export default createReducer({}, {
+  IM_CHAT_CREATED (state, action) {
+    if (action.sessionId in state) return
+
+    const chat = getDefaultImChat()
+    chat._id = action._id
+    chat.didSaveChatInfo = false
+    chat.sessionId = action.sessionId
+    chat.saveId = action.saveId
+    chat.type = action.chatType
+    chat.target = action.target
+    chat.name = action.name
+    state[action.sessionId] = chat
+  },
+
+  IM_CHAT_INFOS_LOADED (state, action) {
+    for (const chat of action.chats) {
+      if (!(chat.sessionId in state)) {
+        state[chat.sessionId] = getDefaultImChat()
+      }
+      const chatData = state[chat.sessionId]
+
+      if (chatData._id == null) {
+        chatData._id = chat._id
       }
 
-    case 'GROUP_CHAT_SESSIONS_STARTED':
-      return {
-        ...state,
-        _id: state._id || `${action.avatarDataSaveId}/imChatsInfos/${action.saveId}`,
-        sessionId: state.sessionId || action.id,
-        saveId: state.saveId || action.saveId,
-        type: IMChatType.group,
-        target: action.id,
-        name: action.name
+      chatData.didSaveChatInfo = true
+      chatData.sessionId = chat.sessionId
+      chatData.saveId = chat.saveId
+      chatData.type = chat.chatType
+      chatData.target = chat.target
+      chatData.name = chat.name
+    }
+  },
+
+  GROUP_CHAT_SESSIONS_STARTED (state, action) {
+    for (const [groupId, data] of Object.entries(action.groups)) {
+      if (!(groupId in state)) {
+        state[groupId] = getDefaultImChat()
+      }
+      const chatData = state[groupId]
+
+      if (chatData._id == null) {
+        chatData._id = `${action.avatarDataSaveId}/imChatsInfos/${data.saveId}`
+        chatData.sessionId = data.id
+        chatData.saveId = data.saveId
       }
 
-    case 'SAVING_IM_CHAT_INFO_STARTED':
-    case 'SAVING_IM_CHAT_INFO_FINISHED':
-      if (action.sessionIds.includes(state.sessionId)) {
-        return {
-          ...state,
-          didSaveChatInfo: action.type === 'SAVING_IM_CHAT_INFO_STARTED'
-        }
-      } else {
-        return state
-      }
+      chatData.type = IMChatType.group
+      chatData.target = data.id
+      chatData.name = data.name
+    }
+  },
 
-    case 'IM_CHAT_ACTIVATED':
-      return {
-        ...state,
-        active: true
-      }
+  IM_CHAT_ACTIVATED (state, action) {
+    state[action.sessionId].active = true
+  },
 
-    case 'PERSONAL_IM_RECEIVED':
-    case 'GROUP_IM_RECEIVED':
-    case 'CONFERENCE_IM_RECEIVED':
-    case 'BUSY_AUTO_RESPONSE_RECEIVED':
-    case 'SYSTEM_IM_RECEIVED':
-      return {
-        ...state,
-        messages: state.messages.concat([{
-          ...action.msg,
-          didSave: false
-        }]),
-        active: true,
-        hasUnsavedMSG: true
-      }
+  SAVING_IM_CHAT_INFO_STARTED (state, action) {
+    for (const id of action.sessionIds) {
+      state[id].didSaveChatInfo = true
+    }
+  },
 
-    case 'IM_HISTORY_LOADING_STARTED':
-      return {
-        ...state,
-        isLoadingHistory: true
-      }
+  SAVING_IM_CHAT_INFO_FINISHED (state, action) {
+    for (const id of action.didError) {
+      state[id].didSaveChatInfo = false
+    }
+  },
 
-    case 'IM_START_TYPING':
-    case 'IM_STOP_TYPING':
-      const newTyper = new Set(state.areTyping)
+  PERSONAL_IM_RECEIVED (state, action) {
+    if (!(action.sessionId in state)) return
 
-      if (action.type === 'IM_START_TYPING') {
-        newTyper.add(action.agentId)
-      } else {
-        newTyper.delete(action.agentId)
-      }
+    const chat = state[action.sessionId]
+    chat.messages.push({
+      ...action.msg,
+      didSave: false
+    })
+    chat.active = true
+    chat.hasUnsavedMSG = true
+  },
 
-      return {
-        ...state,
-        areTyping: Array.from(newTyper)
-      }
+  GROUP_IM_RECEIVED (state, action) {
+    if (!(action.groupId in state)) return
 
-    case 'IM_HISTORY_LOADING_FINISHED':
-      const historyMsg = action.messages.map(msg => ({
-        ...msg,
-        didSave: true
-      }))
-      return {
-        ...state,
-        messages: historyMsg.concat(state.messages),
-        isLoadingHistory: false,
-        didLoadHistory: action.didLoadAll
-      }
+    const chat = state[action.groupId]
+    chat.messages.push({
+      ...action.msg,
+      didSave: false
+    })
+    chat.active = true
+    chat.hasUnsavedMSG = true
+  },
 
-    case 'INSTANT_MESSAGE_START_SAVING':
+  CONFERENCE_IM_RECEIVED (state, action) {
+    if (!(action.conferenceId in state)) return
+
+    const chat = state[action.conferenceId]
+    chat.messages.push({
+      ...action.msg,
+      didSave: false
+    })
+    chat.active = true
+    chat.hasUnsavedMSG = true
+  },
+
+  BUSY_AUTO_RESPONSE_RECEIVED (state, action) {
+    if (!(action.sessionId in state)) return
+
+    const chat = state[action.sessionId]
+    chat.messages.push({
+      ...action.msg,
+      didSave: false
+    })
+    chat.active = true
+    chat.hasUnsavedMSG = true
+  },
+
+  SYSTEM_IM_RECEIVED (state, action) {
+    if (!(action.sessionId in state)) return
+
+    const chat = state[action.sessionId]
+    chat.messages.push({
+      ...action.msg,
+      didSave: false
+    })
+    chat.active = true
+    chat.hasUnsavedMSG = true
+  },
+
+  IM_START_TYPING (state, action) {
+    const chat = state[action.sessionId]
+
+    if (!chat.areTyping.includes(action.agentId)) {
+      chat.areTyping.push(action.agentId)
+    }
+  },
+
+  IM_STOP_TYPING (state, action) {
+    const chat = state[action.sessionId]
+
+    chat.areTyping = chat.areTyping.filter(agentId => agentId !== action.agentId)
+  },
+
+  INSTANT_MESSAGE_START_SAVING (state, action) {
+    for (const [id, savingIds] of Object.entries(action.chats)) {
+      const chat = state[id]
       let stillHasUnsaved = false
-      const thisChat = action.chats[state.sessionId]
 
-      return {
-        ...state,
-        messages: state.messages.map(msg => {
-          if (!thisChat.includes(msg._id)) {
-            if (!msg.didSave) {
-              stillHasUnsaved = true // side effect
-            }
-            return msg
-          }
-
-          return {
-            ...msg,
-            didSave: true
-          }
-        }),
-        hasUnsavedMSG: stillHasUnsaved
+      for (const msg of chat.messages) {
+        if (!msg.didSave && !savingIds.includes(msg._id)) {
+          stillHasUnsaved = true
+        } else {
+          msg.didSave = true
+        }
       }
 
-    case 'INSTANT_MESSAGE_DID_SAVE':
-      const thisChatDidSave = action.chats[state.sessionId]
-      let stillHasUnsavedAfterSave = false
-      const didSave = thisChatDidSave.saved.reduce((all, msg) => {
-        all[msg._id] = msg
-        return all
-      }, {})
+      chat.hasUnsavedMSG = stillHasUnsaved
+    }
+  },
 
-      const newMessages = state.messages.map(msg => {
-        // if it did error
-        if (thisChatDidSave.didError.includes(msg._id)) {
-          stillHasUnsavedAfterSave = true // side effect
-          return {
-            ...msg,
-            didSave: false
-          }
-        }
+  INSTANT_MESSAGE_DID_SAVE (state, action) {
+    for (const [id, data] of Object.entries(action.chats)) {
+      const chat = state[id]
+      let stillHasUnsavedMsg = false
 
-        // did save
-        if (didSave[msg._id] != null) {
-          return {
-            ...msg,
-            ...didSave[msg._id]
-          }
-        }
-
-        // didn't save yet.
-        if (!msg.didSave) {
-          stillHasUnsaved = true // side effect
-        }
-
-        return msg
-      })
-
-      return {
-        ...state,
-        messages: newMessages,
-        hasUnsavedMSG: stillHasUnsavedAfterSave
+      const didSave = new Map()
+      for (const msg of data.saved) {
+        didSave.set(msg._id, msg)
       }
 
-    default:
-      return state
+      const didError = new Set(data.didError)
+
+      for (const msg of chat.messages) {
+        if (didError.has(msg._id)) {
+          stillHasUnsavedMsg = true
+          msg.didSave = false
+        } else if (didSave.has(msg._id)) {
+          // write all data to msg object
+          Object.assign(msg, didSave.get(msg._id))
+        } else if (!msg.didSave) {
+          stillHasUnsavedMsg = true
+        }
+      }
+
+      chat.hasUnsavedMSG = stillHasUnsavedMsg
+    }
+  },
+
+  IM_HISTORY_LOADING_STARTED (state, action) {
+    state[action.sessionId].isLoadingHistory = true
+  },
+
+  IM_HISTORY_LOADING_FINISHED (state, action) {
+    const chat = state[action.sessionId]
+
+    const historyMsg = action.messages.map(msg => ({
+      ...msg,
+      didSave: true
+    }))
+
+    chat.messages.splice(0, 0, ...historyMsg)
+    chat.isLoadingHistory = false
+    chat.didLoadHistory = action.didLoadAll
+  },
+
+  DidLogout () {
+    return {}
+  },
+
+  UserWasKicked () {
+    return {}
   }
-}
-
-export default function IMReducer (state = {}, action) {
-  switch (action.type) {
-    case 'IM_CHAT_CREATED':
-    case 'IM_CHAT_ACTIVATED':
-      return {
-        ...state,
-        [action.sessionId]: imChat(state[action.sessionId], action)
-      }
-
-    case 'IM_CHAT_INFOS_LOADED':
-      return action.chats.reduce((state, chat) => {
-        const innerAction = Object.assign({}, chat, {
-          type: action.type
-        })
-
-        const updatedChat = imChat(state[chat.sessionId], innerAction)
-        state[chat.sessionId] = updatedChat
-
-        return state
-      }, { ...state })
-
-    case 'GROUP_CHAT_SESSIONS_STARTED':
-      return Object.keys(action.groups).reduce((state, groupId) => {
-        const chat = imChat(state[groupId], {
-          ...action,
-          ...action.groups[groupId]
-        })
-        state[groupId] = chat
-        return state
-      }, { ...state })
-
-    case 'SAVING_IM_CHAT_INFO_STARTED':
-      return action.sessionIds.reduce((state, id) => {
-        const updatedChat = imChat(state[id], action)
-        state[id] = updatedChat
-        return state
-      }, { ...state })
-
-    case 'SAVING_IM_CHAT_INFO_FINISHED':
-      return action.didError.length === 0
-        ? state
-        : action.didError.reduce((state, id) => {
-          const updatedChat = imChat(state[id], action)
-          state[id] = updatedChat
-          return state
-        }, { ...state })
-
-    case 'PERSONAL_IM_RECEIVED':
-    case 'GROUP_IM_RECEIVED':
-    case 'CONFERENCE_IM_RECEIVED':
-    case 'BUSY_AUTO_RESPONSE_RECEIVED':
-    case 'SYSTEM_IM_RECEIVED':
-      const idKey = {
-        PERSONAL_IM_RECEIVED: 'sessionId',
-        GROUP_IM_RECEIVED: 'groupId',
-        CONFERENCE_IM_RECEIVED: 'conferenceId',
-        BUSY_AUTO_RESPONSE_RECEIVED: 'sessionId',
-        SYSTEM_IM_RECEIVED: 'sessionId'
-      }[action.type]
-      const id = action[idKey]
-
-      const oldChat = state[id]
-      const updatedChat = imChat(oldChat, action)
-
-      return oldChat === updatedChat
-        ? state
-        : {
-          ...state,
-          [id]: updatedChat
-        }
-
-    case 'IM_START_TYPING':
-    case 'IM_STOP_TYPING':
-      const oldIMChatData = state[action.sessionId]
-      if (oldIMChatData == null) return state
-
-      const newIMChatData = imChat(oldIMChatData, action)
-      return newIMChatData === oldIMChatData
-        ? state
-        : {
-          ...state,
-          [action.sessionId]: newIMChatData
-        }
-
-    case 'INSTANT_MESSAGE_START_SAVING':
-    case 'INSTANT_MESSAGE_DID_SAVE':
-      return Object.keys(action.chats).reduce((state, key) => {
-        const newChatData = imChat(state[key], action)
-        state[key] = newChatData
-        return state
-      }, { ...state })
-
-    case 'IM_HISTORY_LOADING_STARTED':
-    case 'IM_HISTORY_LOADING_FINISHED':
-      return {
-        ...state,
-        [action.sessionId]: imChat(state[action.sessionId], action)
-      }
-
-    case 'DidLogout':
-    case 'UserWasKicked':
-      return {}
-
-    default:
-      return state
-  }
-}
+})

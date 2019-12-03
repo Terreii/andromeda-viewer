@@ -155,6 +155,7 @@ export function saveLocalChatMessages () {
   return async (dispatch, getState, { hoodie }) => {
     const localChat = getLocalChat(getState())
     const messagesToSave = []
+    const toLowerCase = s => s.charAt(0).toLowerCase() + s.slice(1)
 
     for (let i = localChat.length - 1; i >= 0; i -= 1) {
       const msg = localChat[i]
@@ -165,9 +166,9 @@ export function saveLocalChatMessages () {
         messagesToSave.push({
           ...msg,
           // Save as text. Because text has meaning.
-          sourceType: LocalChatSourceType[msg.sourceType].toLowerCase(),
-          chatType: LocalChatType[msg.chatType].toLowerCase(),
-          audible: LocalChatAudible[msg.audible].toLowerCase(),
+          sourceType: toLowerCase(LocalChatSourceType[msg.sourceType]),
+          chatType: toLowerCase(LocalChatType[msg.chatType]),
+          audible: toLowerCase(LocalChatAudible[msg.audible]),
           // ownerId and sourceId (fromId) is the same (by normal messages)
           // ownerId is for objects
           ownerId: msg.ownerId === msg.fromId

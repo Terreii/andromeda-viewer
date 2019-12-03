@@ -1,134 +1,114 @@
 // Reducer for general session info.
 
+import { createReducer } from '@reduxjs/toolkit'
+
 import { getValueOf, getValuesOf, getStringValueOf } from '../network/msgGetters'
 
-export default function sessionReducer (state = {
-  avatarIdentifier: null,
-  activeChatTab: 'local',
-  notifications: [],
-  notificationId: 0,
-  error: null
-}, action) {
-  switch (action.type) {
-    case 'didLogin':
-      const sessionInfo = Object.keys(action.sessionInfo).reduce((info, key) => {
-        // transform keys from session_id to sessionId
-        const keyFixed = key.split('_').map((part, index) => index === 0
-          ? part
-          : part.charAt(0).toUpperCase() + part.slice(1)
-        ).join('')
-
-        // Remove data that is stored somewhere else
-        switch (keyFixed) {
-          case 'buddy-list':
-          case 'inventory-root':
-          case 'inventory-skeleton':
-          case 'login':
-          case 'seedCapability':
-          case 'firstName':
-          case 'lastName':
-          case 'lookAt':
-          case 'message':
-            return info
-
-          default:
-            info[keyFixed] = action.sessionInfo[key]
-            return info
-        }
-      }, {})
-      sessionInfo.avatarIdentifier = action.avatarIdentifier
-      sessionInfo.position = {
-        position: [],
-        lookAt: JSON.parse(action.sessionInfo.look_at.replace(/r/gi, ''))
-      }
-      sessionInfo.regionInfo = {}
-      return {
-        ...state,
-        ...sessionInfo
-      }
-
-    case 'UDPAgentMovementComplete':
-      return {
-        ...state,
-        position: {
-          ...state.position,
-          position: getValueOf(action, 'Data', 'Position'),
-          lookAt: getValueOf(action, 'Data', 'LookAt')
-        }
-      }
-
-    case 'UDPRegionInfo':
-      const newRegionInfo = {
-        ...getValuesOf(action, 'RegionInfo', 0, []),
-        ...getValuesOf(action, 'RegionInfo2', 0, []),
-        SimName: getStringValueOf(action, 'RegionInfo', 0, 'SimName'),
-        ProductSKU: getStringValueOf(action, 'RegionInfo2', 0, 'ProductSKU'),
-        ProductName: getStringValueOf(action, 'RegionInfo2', 0, 'ProductName')
-      }
-      return {
-        ...state,
-        regionInfo: Object.entries(newRegionInfo).reduce((all, [key, value]) => {
-          const newKey = key.charAt(0).toLowerCase() + key.slice(1)
-          all[newKey] = value
-          return all
-        }, { ...state.regionInfo })
-      }
-
-    case 'RegionHandshake':
-      return {
-        ...state,
-        regionInfo: {
-          ...state.regionInfo,
-          regionID: action.regionID,
-          flags: action.flags
-        }
-      }
-
-    case 'CHAT_TAB_CHANGED':
-      return {
-        ...state,
-        activeChatTab: action.key
-      }
-
-    case 'NOTIFICATION_RECEIVED':
-      return {
-        ...state,
-        notifications: state.notifications.concat([{
-          ...action.msg,
-          id: state.notificationId
-        }]),
-        notificationId: state.notificationId + 1
-      }
-
-    case 'NOTIFICATION_CLOSED':
-      return {
-        ...state,
-        notifications: state.notifications.filter(notification => action.id !== notification.id)
-      }
-
-    case 'DidLogout':
-    case 'UserWasKicked':
-      return {
-        avatarIdentifier: null,
-        activeChatTab: 'local',
-        notifications: [],
-        notificationId: 0,
-        error: action.type === 'UserWasKicked' ? action.reason : null
-      }
-
-    case 'ClosePopup':
-      return {
-        ...state,
-        error: null
-      }
-
-    case 'SeedCapabilitiesLoaded':
-      return {
-        ...state,
-        eventQueueGetUrl: action.capabilities.EventQueueGet
-      }
-
-    default:
-      return state
+function getDefaultState () {
+  return {
+    avatarIdentifier: null,
+    position: {
+      position: [],
+      lookAt: []
+    },
+    regionInfo: {},
+    activeChatTab: 'local',
+    notifications: [],
+    notificationId: 0,
+    error: null
   }
 }
+
+export default createReducer(getDefaultState(), {
+  didLogin (state, action) {
+    for (const [keyRaw, value] of Object.entries(action.sessionInfo)) {
+      // transform keys from session_id to sessionId
+      const key = keyRaw.split('_').map((part, index) => index === 0
+        ? part
+        : part.charAt(0).toUpperCase() + part.slice(1)
+      ).join('')
+
+      if ([
+        'buddy-list',
+        'inventory-root',
+        'inventory-skeleton',
+        'login',
+        'seedCapability',
+        'firstName',
+        'lastName',
+        'lookAt',
+        'message'
+      ].includes(key)) {
+        // Remove data that is stored somewhere else
+        continue
+      }
+
+      state[key] = value
+    }
+    state.avatarIdentifier = action.avatarIdentifier
+
+    state.position = {
+      position: [],
+      lookAt: JSON.parse(action.sessionInfo.look_at.replace(/r/gi, ''))
+    }
+    state.regionInfo = {}
+  },
+
+  UDPAgentMovementComplete (state, action) {
+    state.position.position = getValueOf(action, 'Data', 'Position')
+    state.position.lookAt = getValueOf(action, 'Data', 'LookAt')
+  },
+
+  UDPRegionInfo (state, action) {
+    const newRegionInfo = {
+      ...getValuesOf(action, 'RegionInfo', 0, []),
+      ...getValuesOf(action, 'RegionInfo2', 0, []),
+      SimName: getStringValueOf(action, 'RegionInfo', 0, 'SimName'),
+      ProductSKU: getStringValueOf(action, 'RegionInfo2', 0, 'ProductSKU'),
+      ProductName: getStringValueOf(action, 'RegionInfo2', 0, 'ProductName')
+    }
+
+    for (const [key, value] of Object.entries(newRegionInfo)) {
+      const newKey = key.charAt(0).toLowerCase() + key.slice(1)
+
+      state.regionInfo[newKey] = value
+    }
+  },
+
+  RegionHandshake (state, action) {
+    state.regionInfo.regionID = action.regionID
+    state.regionInfo.flags = action.flags
+  },
+
+  CHAT_TAB_CHANGED (state, action) {
+    state.activeChatTab = action.key
+  },
+
+  NOTIFICATION_RECEIVED (state, action) {
+    state.notifications.push({
+      ...action.msg,
+      id: state.notificationId
+    })
+    state.notificationId += 1
+  },
+
+  NOTIFICATION_CLOSED (state, action) {
+    state.notifications = state.notifications.filter(notification => action.id !== notification.id)
+  },
+
+  DidLogout: getDefaultState,
+
+  UserWasKicked (oldState, action) {
+    const state = getDefaultState()
+    state.error = action.reason
+    return state
+  },
+
+  ClosePopup (state, action) {
+    state.error = null
+  },
+
+  SeedCapabilitiesLoaded (state, action) {
+    state.eventQueueGetUrl = action.capabilities.EventQueueGet
+  }
+})

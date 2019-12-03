@@ -1,47 +1,48 @@
 // For the inventory
 
-export default function inventory (state = { root: null, folders: {} }, action) {
-  switch (action.type) {
-    case 'didLogin':
-      // save guard if the login result has no inventory-skeleton
-      if (!Array.isArray(action.sessionInfo['inventory-skeleton'])) {
-        console.warn("No inventory-skeleton was returned! Inventory won't work!")
-        return state
+import { createReducer } from '@reduxjs/toolkit'
+
+export default createReducer({ root: null, folders: {} }, {
+  didLogin (state, action) {
+    // save guard if the login result has no inventory-skeleton
+    if (!Array.isArray(action.sessionInfo['inventory-skeleton'])) {
+      console.warn("No inventory-skeleton was returned! Inventory won't work!")
+      return
+    }
+
+    for (const folder of action.sessionInfo['inventory-skeleton']) {
+      state.folders[folder.folder_id] = {
+        name: folder.name,
+        folderId: folder.folder_id,
+        version: folder.version,
+        typeDefault: folder.type_default,
+        parentId: folder.parent_id,
+        children: []
       }
+    }
 
-      const loginFolders = action.sessionInfo['inventory-skeleton'].reduce((all, folder) => {
-        all[folder.folder_id] = {
-          name: folder.name,
-          folderId: folder.folder_id,
-          version: folder.version,
-          typeDefault: folder.type_default,
-          parentId: folder.parent_id,
-          children: []
-        }
-        return all
-      }, {})
+    for (const folder of action.sessionInfo['inventory-skeleton']) {
+      const parentId = folder.parent_id
 
-      action.sessionInfo['inventory-skeleton'].forEach(folder => {
-        const parentId = folder.parent_id
-
-        if (parentId !== '00000000-0000-0000-0000-000000000000' && parentId in loginFolders) {
-          loginFolders[parentId].children.push(folder.folder_id)
-        }
-      })
-
-      return {
-        root: action.sessionInfo['inventory-root'][0].folder_id,
-        folders: loginFolders
+      if (parentId !== '00000000-0000-0000-0000-000000000000' && parentId in state.folders) {
+        state.folders[parentId].children.push(folder.folder_id)
       }
+    }
 
-    case 'DidLogout':
-    case 'UserWasKicked':
-      return {
-        root: null,
-        folders: {}
-      }
+    state.root = action.sessionInfo['inventory-root'][0].folder_id
+  },
 
-    default:
-      return state
+  DidLogout () {
+    return {
+      root: null,
+      folders: {}
+    }
+  },
+
+  UserWasKicked () {
+    return {
+      root: null,
+      folders: {}
+    }
   }
-}
+})

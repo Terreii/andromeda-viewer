@@ -2,93 +2,96 @@
  * Stores all LocalChat-Messages
  */
 
+import { createReducer } from '@reduxjs/toolkit'
+
 import { LocalChatAudible, LocalChatSourceType, LocalChatType } from '../types/chat'
 
-export default function localChatReducer (state = [], action) {
-  switch (action.type) {
-    case 'CHAT_FROM_SIMULATOR_RECEIVED':
-      // filter out start typing and end typing
-      return action.msg.chatType === LocalChatType.StartTyping ||
-        action.msg.chatType === LocalChatType.StopTyping
-        ? state
-        : state.concat([{
-          ...action.msg,
-          didSave: false
-        }])
+const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1)
 
-    case 'didLogin':
-      const chat = action.localChatHistory.map(msg => ({
-        ...msg,
-        didSave: true
-      }))
-      chat.push({
-        _id: 'messageOfTheDay',
-        fromName: 'Message of the Day',
-        fromId: 'messageOfTheDay',
-        sourceType: LocalChatSourceType.System,
-        chatType: LocalChatType.OwnerSay,
-        audible: LocalChatAudible.Fully,
-        position: [0, 0, 0],
-        message: action.sessionInfo.message,
-        time: action.sessionInfo.seconds_since_epoch * 1000,
-        didSave: true
-      })
-      return state.concat(chat).sort((a, b) => a.time - b.time)
+export default createReducer([], {
+  CHAT_FROM_SIMULATOR_RECEIVED (state, action) {
+    // filter out start typing and end typing
+    if (action.msg.chatType === LocalChatType.StartTyping ||
+      action.msg.chatType === LocalChatType.StopTyping
+    ) {
+      return
+    }
 
-    case 'NOTIFICATION_IN_CHAT_ADDED':
-      return state.concat([{
-        _id: 'notification_' + state.length,
-        fromName: action.fromName,
-        fromId: action.fromId || 'object',
-        sourceType: LocalChatSourceType.Object,
-        chatType: LocalChatType.OwnerSay,
-        audible: LocalChatAudible.Fully,
-        position: [0, 0, 0],
-        message: action.text,
-        time: action.time,
-        didSave: false
-      }])
+    state.push({
+      ...action.msg,
+      didSave: false
+    })
+  },
 
-    case 'SAVING_LOCAL_CHAT_MESSAGES_START':
-      if (action.saving.length === 0) return state
+  didLogin (state, action) {
+    state.push(...action.localChatHistory.map(msg => ({
+      ...msg,
+      chatType: LocalChatType[capitalize(msg.chatType)],
+      sourceType: LocalChatSourceType[capitalize(msg.sourceType)],
+      audible: LocalChatAudible[capitalize(msg.audible)],
+      didSave: true
+    })))
 
-      return state.map(msg => {
-        if (!action.saving.includes(msg._id)) return msg
+    state.push({
+      _id: 'messageOfTheDay',
+      fromName: 'Message of the Day',
+      fromId: 'messageOfTheDay',
+      sourceType: LocalChatSourceType.System,
+      chatType: LocalChatType.OwnerSay,
+      audible: LocalChatAudible.Fully,
+      position: [0, 0, 0],
+      message: action.sessionInfo.message,
+      time: action.sessionInfo.seconds_since_epoch * 1000,
+      didSave: true
+    })
+  },
 
-        return {
-          ...msg,
-          didSave: true
-        }
-      })
+  NOTIFICATION_IN_CHAT_ADDED (state, action) {
+    state.push({
+      _id: 'notification_' + state.length,
+      fromName: action.fromName,
+      fromId: action.fromId || 'object',
+      sourceType: LocalChatSourceType.Object,
+      chatType: LocalChatType.OwnerSay,
+      audible: LocalChatAudible.Fully,
+      position: [0, 0, 0],
+      message: action.text,
+      time: action.time,
+      didSave: false
+    })
+  },
 
-    case 'DID_SAVE_LOCAL_CHAT_MESSAGE':
-      if (action.didError.length === 0 && action.saved.length === 0) return state
+  SAVING_LOCAL_CHAT_MESSAGES_START (state, action) {
+    if (action.saving.length === 0) return
 
-      const ids = action.saved.map(msg => msg._id)
-      return state.map(msg => {
-        if (action.didError.includes(msg._id)) {
-          return {
-            ...msg,
-            didSave: false
-          }
-        }
+    for (const msg of state) {
+      if (action.saving.includes(msg._id)) {
+        msg.didSave = true
+      }
+    }
+  },
 
-        const index = ids.indexOf(msg._id)
-        if (index >= 0) {
-          return {
-            ...msg,
-            ...action.saved[index]
-          }
-        }
+  DID_SAVE_LOCAL_CHAT_MESSAGE (state, action) {
+    if (action.didError.length === 0 && action.saved.length === 0) return
 
-        return msg
-      })
+    const ids = action.saved.map(msg => msg._id)
 
-    case 'DidLogout':
-    case 'UserWasKicked':
-      return []
+    for (const msg of state) {
+      const index = ids.indexOf(msg._id)
+      if (index >= 0) {
+        // write all data to msg object
+        Object.assign(msg, action.saved[index])
+      } else if (action.didError.includes(msg._id)) {
+        msg.didSave = false
+      }
+    }
+  },
 
-    default:
-      return state
+  DidLogout () {
+    return []
+  },
+
+  UserWasKicked () {
+    return []
   }
-}
+})

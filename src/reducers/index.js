@@ -1,4 +1,4 @@
-import { combineReducers } from 'redux'
+import { combineReducers } from '@reduxjs/toolkit'
 import { reducer as burgerMenu } from 'redux-burger-menu'
 
 import account from './account'
