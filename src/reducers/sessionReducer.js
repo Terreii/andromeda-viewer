@@ -13,8 +13,6 @@ function getDefaultState () {
     },
     regionInfo: {},
     activeChatTab: 'local',
-    notifications: [],
-    notificationId: 0,
     error: null
   }
 }
@@ -82,18 +80,6 @@ export default createReducer(getDefaultState(), {
 
   CHAT_TAB_CHANGED (state, action) {
     state.activeChatTab = action.key
-  },
-
-  NOTIFICATION_RECEIVED (state, action) {
-    state.notifications.push({
-      ...action.msg,
-      id: state.notificationId
-    })
-    state.notificationId += 1
-  },
-
-  NOTIFICATION_CLOSED (state, action) {
-    state.notifications = state.notifications.filter(notification => action.id !== notification.id)
   },
 
   DidLogout: getDefaultState,

@@ -9,12 +9,8 @@ import {
 } from '../actions/chatMessageActions'
 import { updateRights } from '../actions/friendsActions'
 
-import {
-  getActiveTab,
-  getLocalChat,
-  getActiveIMChats,
-  getShouldDisplayNotifications
-} from '../selectors/chat'
+import { getActiveTab, getLocalChat, getActiveIMChats } from '../selectors/chat'
+import { selectShouldDisplayNotifications } from '../reducers/notifications'
 import { getNames } from '../selectors/names'
 import { getFriends } from '../selectors/people'
 import { getGroups } from '../selectors/groups'
@@ -26,7 +22,7 @@ const mapStateToProps = state => {
     activeTab: getActiveTab(state),
     localChat: getLocalChat(state),
     IMs: getActiveIMChats(state),
-    shouldDisplayNotifications: getShouldDisplayNotifications(state),
+    shouldDisplayNotifications: selectShouldDisplayNotifications(state),
     groups: getGroups(state),
     names: getNames(state),
     friends: getFriends(state)

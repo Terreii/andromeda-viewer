@@ -1531,24 +1531,24 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.TextOnly,
             fromName: 'Tester',
             text: 'An interesting message'
           }
         },
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.TextOnly,
             fromName: 'Tester',
             text: 'Hello World!'
           }
         },
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.System,
             text: 'An interesting message'
           }
@@ -1700,8 +1700,8 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.FriendshipOffer,
             text: 'Friends?',
             fromId: '01234567-8900-0000-0000-000000000000',
@@ -1729,8 +1729,8 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.GroupInvitation,
             text: 'Hello World!',
             fee: 1000,
@@ -1768,8 +1768,8 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.GroupNotice,
             title: 'Hello World!',
             text: 'Good news, everybody!',
@@ -1796,8 +1796,8 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.GroupNotice,
             title: 'Hello World!',
             text: 'Good news, everybody!',
@@ -1824,8 +1824,8 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.LoadURL,
             text: 'Hello World!',
             url: new window.URL('http://wiki.secondlife.com/wiki/ImprovedInstantMessage'),
@@ -1843,8 +1843,8 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.RequestTeleportLure,
             text: 'Hello World!',
             fromId: '01234567-8900-0000-0000-000000000000',
@@ -1893,8 +1893,8 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.TeleportLure,
             text: 'Hello World!',
             fromId: '01234567-8900-0000-0000-000000000000',
@@ -1908,8 +1908,8 @@ describe('incoming IM handling', () => {
           }
         },
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.TeleportLure,
             text: 'Hello World!',
             fromId: '01234567-8900-0000-0000-000000000000',
@@ -1923,8 +1923,8 @@ describe('incoming IM handling', () => {
           }
         },
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.TeleportLure,
             text: 'Hello World!',
             fromId: '01234567-8900-0000-0000-000000000000',
@@ -1958,8 +1958,8 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.InventoryOffered,
             text: 'Hello World!',
             fromObject: false,
@@ -1974,8 +1974,8 @@ describe('incoming IM handling', () => {
           }
         },
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.InventoryOffered,
             text: 'Hello World!',
             fromObject: true,

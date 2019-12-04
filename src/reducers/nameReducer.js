@@ -7,6 +7,8 @@ import { createReducer } from '@reduxjs/toolkit'
 import AvatarName from '../avatarName'
 import { mapBlockOf } from '../network/msgGetters'
 
+import { receive as notificationReceive } from './notifications'
+
 import { LocalChatSourceType, NotificationTypes } from '../types/chat'
 
 export default createReducer({ names: {}, getDisplayNamesURL: '' }, {
@@ -102,7 +104,10 @@ export default createReducer({ names: {}, getDisplayNamesURL: '' }, {
     }
   },
 
-  NOTIFICATION_RECEIVED (state, action) {
+  [notificationReceive.type]: (state, action) => {
+    const notification = action.payload
+    const type = notification.notificationType
+
     if ([
       NotificationTypes.FriendshipOffer,
       NotificationTypes.GroupNotice,
@@ -110,10 +115,7 @@ export default createReducer({ names: {}, getDisplayNamesURL: '' }, {
       NotificationTypes.RequestTeleportLure,
       NotificationTypes.TeleportLure,
       NotificationTypes.InventoryOffered
-    ].some(type => type === action.msg.notificationType)) {
-      const notification = action.msg
-      const type = notification.notificationType
-
+    ].some(notificationType => notificationType === type)) {
       const id = type === NotificationTypes.GroupNotice
         ? notification.senderId
         : notification.fromId

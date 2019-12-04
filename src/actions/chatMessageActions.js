@@ -7,6 +7,8 @@ import { v4 as uuid } from 'uuid'
 import { UUID as LLUUID } from '../llsd'
 import { getValueOf, getStringValueOf } from '../network/msgGetters'
 
+import { receive as notificationActionCreator } from '../reducers/notifications'
+
 import { getShouldSaveChat, getLocalChat, getIMChats } from '../selectors/chat'
 import { getIsSignedIn } from '../selectors/viewer'
 import { getAvatarDataSaveId, getAgentId, getSessionId } from '../selectors/session'
@@ -778,17 +780,6 @@ function handleInventoryOffer (msg) {
 }
 
 /**
- * Warp an notification into an action.
- * @param {object} notification Body of an notification action.
- */
-function notificationActionCreator (notification) {
-  return {
-    type: 'NOTIFICATION_RECEIVED',
-    msg: notification
-  }
-}
-
-/**
  * Handles messages that are notifications, but should be displayed in local chat.
  * @param {string} text Text of the Notification that should be displayed.
  * @param {string} [fromName=""] Displayed name of the sender.
@@ -827,13 +818,6 @@ function handleIMTypingEvent (msg) {
       : 'IM_STOP_TYPING',
     sessionId: getValueOf(msg, 'MessageBlock', 'ID'),
     agentId: getValueOf(msg, 'AgentData', 'AgentID')
-  }
-}
-
-export function closeNotification (id) {
-  return {
-    type: 'NOTIFICATION_CLOSED',
-    id
   }
 }
 

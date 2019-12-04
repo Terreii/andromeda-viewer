@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 import { bindActionCreators } from 'redux'
 import { useSelector, useDispatch } from 'react-redux'
 
-import { closeNotification } from '../actions/chatMessageActions'
+import { close as closeNotification, selectNotifications } from '../reducers/notifications'
 import {
   acceptFriendshipOffer,
   declineFriendshipOffer,
@@ -13,12 +13,10 @@ import {
 import { acceptGroupInvitation, declineGroupInvitation } from '../actions/groupsActions'
 import { acceptInventoryOffer, declineInventoryOffer } from '../actions/inventory'
 
-import { getNotifications } from '../selectors/chat'
-
 import NotificationsView from '../components/notifications'
 
 export default function NotificationsContainer () {
-  const notifications = useSelector(getNotifications)
+  const notifications = useSelector(selectNotifications)
   const dispatch = useDispatch()
 
   const actions = useMemo(() => bindActionCreators({
