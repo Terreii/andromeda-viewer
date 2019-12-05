@@ -815,17 +815,17 @@ describe('save, loading and sending IMs', () => {
           }
         ]
       },
+      region: {
+        position: [0, 0, 0],
+        region: {
+          id: 'f276f0f0-a843-46fd-bf4e-7aa3a5deea38',
+          parentEstateID: 1
+        }
+      },
       session: {
         agentId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
         sessionId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9',
-        avatarIdentifier: 'test@sl',
-        position: {
-          position: [0, 0, 0]
-        },
-        regionInfo: {
-          parentEstateID: 1,
-          regionID: 'f276f0f0-a843-46fd-bf4e-7aa3a5deea38'
-        }
+        avatarIdentifier: 'test@sl'
       },
       names: {
         names: {

@@ -80,3 +80,16 @@ export enum Maturity {
   Moderate,
   Adult,
 }
+export const parseMaturity = (arg: string) => {
+  switch (arg) {
+    case 'A':
+      return Maturity.Adult
+
+    case 'M':
+      return Maturity.Moderate
+
+    case 'PG':
+    default:
+      return Maturity.General
+  }
+}

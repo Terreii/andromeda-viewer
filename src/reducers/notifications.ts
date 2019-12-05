@@ -1,5 +1,6 @@
 import { createSlice, createSelector, PayloadAction } from '@reduxjs/toolkit'
 
+import { getActiveTab } from '../selectors/chat'
 import { Notification } from '../types/chat'
 
 const notificationSlice = createSlice({
@@ -46,7 +47,7 @@ export const selectNotifications = (state: any): Notification[] => state.notific
 export const selectShouldDisplayNotifications = createSelector(
   [
     selectNotifications,
-    (state: any): string => state.session.activeChatTab
+    getActiveTab
   ],
   (notifications, activeTab) => notifications.length > 0 || activeTab === 'notifications'
 )

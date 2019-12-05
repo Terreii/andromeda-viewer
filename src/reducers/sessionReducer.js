@@ -2,16 +2,9 @@
 
 import { createReducer } from '@reduxjs/toolkit'
 
-import { getValueOf, getValuesOf, getStringValueOf } from '../network/msgGetters'
-
 function getDefaultState () {
   return {
     avatarIdentifier: null,
-    position: {
-      position: [],
-      lookAt: []
-    },
-    regionInfo: {},
     activeChatTab: 'local',
     error: null
   }
@@ -31,7 +24,12 @@ export default createReducer(getDefaultState(), {
         'inventory-root',
         'inventory-skeleton',
         'login',
+        'regionX',
+        'regionY',
+        'simIp',
+        'simPort',
         'seedCapability',
+        'circuitCode',
         'firstName',
         'lastName',
         'lookAt',
@@ -44,38 +42,6 @@ export default createReducer(getDefaultState(), {
       state[key] = value
     }
     state.avatarIdentifier = action.avatarIdentifier
-
-    state.position = {
-      position: [],
-      lookAt: JSON.parse(action.sessionInfo.look_at.replace(/r/gi, ''))
-    }
-    state.regionInfo = {}
-  },
-
-  UDPAgentMovementComplete (state, action) {
-    state.position.position = getValueOf(action, 'Data', 'Position')
-    state.position.lookAt = getValueOf(action, 'Data', 'LookAt')
-  },
-
-  UDPRegionInfo (state, action) {
-    const newRegionInfo = {
-      ...getValuesOf(action, 'RegionInfo', 0, []),
-      ...getValuesOf(action, 'RegionInfo2', 0, []),
-      SimName: getStringValueOf(action, 'RegionInfo', 0, 'SimName'),
-      ProductSKU: getStringValueOf(action, 'RegionInfo2', 0, 'ProductSKU'),
-      ProductName: getStringValueOf(action, 'RegionInfo2', 0, 'ProductName')
-    }
-
-    for (const [key, value] of Object.entries(newRegionInfo)) {
-      const newKey = key.charAt(0).toLowerCase() + key.slice(1)
-
-      state.regionInfo[newKey] = value
-    }
-  },
-
-  RegionHandshake (state, action) {
-    state.regionInfo.regionID = action.regionID
-    state.regionInfo.flags = action.flags
   },
 
   CHAT_TAB_CHANGED (state, action) {
@@ -92,9 +58,5 @@ export default createReducer(getDefaultState(), {
 
   ClosePopup (state, action) {
     state.error = null
-  },
-
-  SeedCapabilitiesLoaded (state, action) {
-    state.eventQueueGetUrl = action.capabilities.EventQueueGet
   }
 })

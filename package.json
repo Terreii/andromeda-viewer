@@ -47,7 +47,7 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "@reduxjs/toolkit": "^1.0.4",
+    "@reduxjs/toolkit": "^1.1.0",
     "@types/jest": "^24.0.23",
     "@types/node": "^12.12.14",
     "@types/react": "^16.9.14",
@@ -83,7 +83,7 @@
     "textlint-rule-common-misspellings": "^1.0.1",
     "textlint-rule-rousseau": "^1.4.6",
     "typedoc": "^0.15.3",
-    "typescript": "^3.7.2",
+    "typescript": "^3.7.3",
     "weallbehave": "^1.2.0",
     "weallcontribute": "^1.0.9"
   },

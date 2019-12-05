@@ -9,6 +9,7 @@ import inventory from './inventory'
 import localChatReducer from './localChatReducer'
 import namesCoreReducer from './nameReducer'
 import notifications from './notifications'
+import region from './region'
 import sessionReducer from './sessionReducer'
 
 const rootReducer = combineReducers({
@@ -21,6 +22,7 @@ const rootReducer = combineReducers({
   localChat: localChatReducer,
   names: namesCoreReducer,
   notifications,
+  region,
   session: sessionReducer
 })
 

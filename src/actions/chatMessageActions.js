@@ -14,7 +14,7 @@ import { getIsSignedIn } from '../selectors/viewer'
 import { getAvatarDataSaveId, getAgentId, getSessionId } from '../selectors/session'
 import { getAvatarNameById, getOwnAvatarName } from '../selectors/names'
 import { getGroupsIDs } from '../selectors/groups'
-import { getRegionId, getParentEstateID, getPosition } from '../selectors/region'
+import { selectRegionId, selectParentEstateID, selectPosition } from '../reducers/region'
 
 import { Maturity } from '../types/viewer'
 import {
@@ -87,9 +87,9 @@ export function sendInstantMessage (text, to, id, dialog = IMDialog.MessageFromA
         {
           FromGroup: false,
           ToAgentID: to,
-          ParentEstateID: getParentEstateID(activeState),
-          RegionID: getRegionId(activeState),
-          Position: getPosition(activeState),
+          ParentEstateID: selectParentEstateID(activeState),
+          RegionID: selectRegionId(activeState),
+          Position: selectPosition(activeState),
           Offline: 0,
           Dialog: dialog,
           ID: id,

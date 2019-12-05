@@ -3,7 +3,7 @@ import { v4 as uuid } from 'uuid'
 
 import { getAgentId, getSessionId, getAvatarDataSaveId } from '../selectors/session'
 import { getOwnAvatarName } from '../selectors/names'
-import { getPosition } from '../selectors/region'
+import { selectPosition } from '../reducers/region'
 
 import { IMDialog } from '../types/chat'
 
@@ -17,7 +17,7 @@ export function startGroupChat (groups) {
         SessionID: getSessionId(activeState)
       }
     ]
-    const position = getPosition(activeState)
+    const position = selectPosition(activeState)
     const agentName = getOwnAvatarName(activeState).getFullName()
     const time = new Date()
 
