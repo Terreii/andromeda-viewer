@@ -1,19 +1,28 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 
-export function useFormInput (initialValue) {
+export function useFormInput (initialValue, checkValidity = false) {
   const [value, setValue] = useState(initialValue)
+  const [isValid, setIsValid] = useState(true)
 
   const eventHandler = useCallback(event => {
-    const nextValue = typeof event === 'string'
-      ? event
-      : event.target.value
-    setValue(nextValue)
-  }, [setValue])
+    if (typeof event === 'string') {
+      setValue(event)
+    } else {
+      setValue(event.target.value)
+      if (checkValidity) {
+        setIsValid(event.target.validity.valid)
+      }
+    }
+  }, [checkValidity])
 
-  return {
+  const returnValue = {
     value,
     onChange: eventHandler
   }
+  if (checkValidity) {
+    returnValue.isValid = isValid
+  }
+  return returnValue
 }
 
 export function useAutoFocus () {

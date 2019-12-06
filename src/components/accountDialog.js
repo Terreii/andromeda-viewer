@@ -16,7 +16,7 @@ export default function AccountPanel () {
   const username = useSelector(getUserName)
   const [isUpdating, setIsUpdating] = useState(false)
 
-  const changedUsername = useFormInput(username)
+  const { isValid: usernameIsValid, ...changedUsername } = useFormInput(username, true)
 
   // for reset
   const usernameRef = useRef(username)
@@ -31,11 +31,13 @@ export default function AccountPanel () {
 
   const [error, setError] = useState(null)
 
-  const oldPassword = useFormInput('')
-  const newPassword = useFormInput('')
-  const newPassword2 = useFormInput('')
+  const { isValid: oldPasswordIsValid, ...oldPassword } = useFormInput('', true)
+  const { isValid: newPasswordIsValid, ...newPassword } = useFormInput('', true)
+  const { isValid: newPassword2IsValid, ...newPassword2 } = useFormInput('', true)
 
   const passwordRequired = [oldPassword, newPassword, newPassword2].some(p => p.value.length > 0)
+  const passwordsAreValid = oldPasswordIsValid && newPasswordIsValid && newPassword2IsValid &&
+    newPassword.value === newPassword2.value && newPassword.value.length > 0
 
   const resetPw = () => {
     oldPassword.onChange('')
@@ -55,6 +57,13 @@ export default function AccountPanel () {
   const onSubmit = async event => {
     event.preventDefault()
 
+    if (
+      (username !== changedUsername.value && !usernameIsValid) ||
+      (changedUsername.value === username && !passwordRequired)
+    ) {
+      return
+    }
+
     const option = {}
 
     if (changedUsername.value !== username) {
@@ -62,16 +71,12 @@ export default function AccountPanel () {
     }
 
     if (passwordRequired) {
-      if (
-        newPassword.value.length < 8 ||
-        newPassword.value !== newPassword2.value ||
-        oldPassword.value.length < 8
-      ) {
+      if (!passwordsAreValid) {
         return
       }
 
-      option.password = oldPassword
-      option.nextPassword = newPassword
+      option.password = oldPassword.value
+      option.nextPassword = newPassword.value
     }
 
     setIsUpdating(true)
@@ -152,7 +157,7 @@ This is permanent and can not be undone!`)
           disabled={isUpdating}
         />
         <small
-          id='password2Help'
+          id='passwordHelp'
           className={formStyles.Error}
           data-hide={!passwordRequired || newPassword.value.length >= 8}
           role='alert'
@@ -189,14 +194,20 @@ This is permanent and can not be undone!`)
 
     <div className={style.ButtonRow}>
       <button
+        id='updateAccountData'
         className={formStyles.OkButton}
-        disabled={isUpdating || (!passwordRequired && changedUsername.value === username)}
+        disabled={isUpdating ||
+          (passwordRequired && !passwordsAreValid) || // password did change but not valid
+          (changedUsername.value !== username && !usernameIsValid) || // username did change
+          (changedUsername.value === username && !passwordRequired) // nothing did change
+        }
       >
         update
       </button>
 
       <button
         type='reset'
+        id='accountDataReset'
         onClick={resetAll}
         className={formStyles.SecondaryButton}
         disabled={isUpdating}
