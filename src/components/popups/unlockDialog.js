@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 
 import Popup from './popup'
 
+import { useAutoFocus } from '../../hooks/utils'
+
 import styles from './unlockAndSignOut.module.css'
 import formStyles from '../formElements.module.css'
 import lockIcon from '../../icons/black_lock.svg'
@@ -10,6 +12,8 @@ export default function UnlockDialog ({ onUnlock, onSignOut, onForgottenPassword
   const [password, setPassword] = useState('')
   const [isUnlocking, setIsUnlocking] = useState(false)
   const [errorText, setErrorText] = useState(null)
+
+  const doAutoFocus = useAutoFocus()
 
   const unlock = async event => {
     event.preventDefault()
@@ -57,6 +61,7 @@ export default function UnlockDialog ({ onUnlock, onSignOut, onForgottenPassword
           className={formStyles.Input}
           autoComplete='current-password'
           autoFocus
+          ref={doAutoFocus}
           disabled={isUnlocking}
           value={password}
           onChange={event => { setPassword(event.target.value) }}
@@ -87,13 +92,6 @@ export default function UnlockDialog ({ onUnlock, onSignOut, onForgottenPassword
       </div>
       <div className={styles.ButtonsRow}>
         <button
-          id='unlockButton'
-          className={formStyles.PrimaryButton}
-          disabled={isUnlocking}
-        >
-          Unlock
-        </button>
-        <button
           id='signOutButton'
           type='button'
           className={formStyles.DangerButton}
@@ -104,6 +102,14 @@ export default function UnlockDialog ({ onUnlock, onSignOut, onForgottenPassword
           disabled={isUnlocking}
         >
           Sign out
+        </button>
+
+        <button
+          id='unlockButton'
+          className={formStyles.PrimaryButton}
+          disabled={isUnlocking}
+        >
+          Unlock
         </button>
       </div>
     </form>

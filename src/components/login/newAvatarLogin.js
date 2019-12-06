@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 
+import { useAutoFocus } from '../../hooks/utils'
+
 import formElementsStyles from '../formElements.module.css'
 import styles from './avatarLogin.module.css'
 
@@ -27,6 +29,8 @@ export default function NewAvatarLogin ({
   const [gridName, isGridNameValid, onGridNameChange] = useInput('')
   const [gridUrl, isGridUrlValid, onGridUrlChange] = useInput('')
   const [isGridLLSD, setIsGridLLSD] = useState(true)
+
+  const doAutoFocus = useAutoFocus()
 
   if (!isSelected) {
     return <form
@@ -87,6 +91,7 @@ export default function NewAvatarLogin ({
       minLength='1'
       required
       autoFocus
+      ref={doAutoFocus}
       onFocus={event => {
         const target = event.target
 

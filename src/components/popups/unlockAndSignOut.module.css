@@ -21,13 +21,13 @@
 
 .ButtonsRow {
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: reverse;
   justify-content: space-between;
   margin-top: .7em;
   padding: .25em 0.2em;
 }
 .ButtonsRow > button + button {
-  margin-right: 2.75em;
+  margin-left: 2.75em;
 }
 
 .ResetButton {

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 
 import Popup from './popup'
 
+import { useAutoFocus } from '../../hooks/utils'
+
 import styles from './resetKeysPopup.module.css'
 import formStyles from '../formElements.module.css'
 import keepItSecret from '../../icons/keepitsecret.png'
@@ -21,6 +23,8 @@ export default function ResetKeysPopup ({ resetKeys, onClose }) {
     }
   }, [resetKeys])
 
+  const doAutoFocus = useAutoFocus()
+
   return <Popup title='Password reset keys' onClose={onClose}>
     <form className={styles.Container}>
       <p>
@@ -39,7 +43,14 @@ export default function ResetKeysPopup ({ resetKeys, onClose }) {
 
       <p>You can also download them:</p>
 
-      <a className={styles.DownloadLink} href={fileURL} download='andromeda-viewer-reset-keys.txt'>
+      <a
+        className={styles.DownloadLink}
+        href={fileURL}
+        target='_blank'
+        rel='noopener noreferrer'
+        download='andromeda-viewer-reset-keys.txt'
+        ref={doAutoFocus}
+      >
         Download as a file
       </a>
 
