@@ -14,12 +14,12 @@ import { getIsLoggedIn } from '../selectors/session'
 
 import { IMChatType } from '../types/chat'
 
-export function didSignIn (did, isUnlocked, username = '') {
-  const isLoggedIn = Boolean(did)
+export function didSignIn (isSignedIn, isUnlocked, username = '') {
+  const isLoggedIn = Boolean(isSignedIn)
   return {
     type: 'ViewerAccountLogInStatus',
     isLoggedIn,
-    isUnlocked,
+    isUnlocked: Boolean(isUnlocked),
     username: isLoggedIn ? username : ''
   }
 }
@@ -220,10 +220,22 @@ export function isSignedIn () {
     const action = didSignIn(isLoggedIn, null, username)
     dispatch(action)
 
-    hoodie.account.on('update', changes => { dispatch(accountDidUpdate(changes)) })
+    if (isLoggedIn) {
+      listenToAccountChanges(hoodie.account, dispatch)
+    }
 
     return isLoggedIn
   }
+}
+
+function listenToAccountChanges (account, dispatch) {
+  const handler = changes => {
+    dispatch(accountDidUpdate(changes))
+  }
+  account.on('update', handler)
+  account.one('signout', () => {
+    account.off('update', handler)
+  })
 }
 
 export function unlock (cryptoPassword) {
@@ -239,12 +251,10 @@ export function unlock (cryptoPassword) {
 
     await hoodie.cryptoStore.unlock(cryptoPassword)
 
-    dispatch({
-      type: 'ViewerAccountUnlocked'
-    })
+    dispatch({ type: 'ViewerAccountUnlocked' })
 
     await dispatch(loadSavedGrids())
-    dispatch(loadSavedAvatars())
+    await dispatch(loadSavedAvatars())
   }
 }
 
@@ -256,6 +266,8 @@ export function signIn (username, password, cryptoPassword) {
 
       dispatch(closePopup())
       dispatch(didSignIn(true, true, accountProperties.username))
+
+      listenToAccountChanges(hoodie.account, dispatch)
 
       await dispatch(loadSavedGrids())
       dispatch(loadSavedAvatars())
@@ -298,7 +310,7 @@ export function signUp (username, password, cryptoPassword) {
 export function updateAccount ({ nextUsername, password, nextPassword }) {
   const mailReg = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/i
 
-  const shouldUpdateUsername = nextUsername.length > 0
+  const shouldUpdateUsername = nextUsername != null && nextUsername.length > 0
   const shouldUpdatePassword = password != null && password.length > 0 &&
     nextPassword != null && nextPassword.length > 0
 

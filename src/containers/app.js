@@ -5,7 +5,7 @@
 
 import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { Route, Switch } from 'react-router-dom'
+import { Route, Switch, Redirect } from 'react-router-dom'
 
 import { viewerName } from '../viewerInfo'
 
@@ -50,9 +50,12 @@ export default function App () {
       <Route path='/session'>
         <LoadableChatComponent />
       </Route>
-      {isSignedIn && <Route path='/profile'>
-        <AccountDialog />
-      </Route>}
+      <Route path='/profile'>
+        {isSignedIn
+          ? <AccountDialog />
+          : <Redirect push to='/' />
+        }
+      </Route>
     </Switch>
     <TopMenuBar />
     <Popups />
