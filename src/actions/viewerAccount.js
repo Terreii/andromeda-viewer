@@ -12,12 +12,14 @@ import {
 } from '../selectors/viewer'
 import { getIsLoggedIn } from '../selectors/session'
 
-export function didSignIn (did, isUnlocked, username = '') {
-  const isLoggedIn = Boolean(did)
+import { IMChatType } from '../types/chat'
+
+export function didSignIn (isSignedIn, isUnlocked, username = '') {
+  const isLoggedIn = Boolean(isSignedIn)
   return {
     type: 'ViewerAccountLogInStatus',
     isLoggedIn,
-    isUnlocked,
+    isUnlocked: Boolean(isUnlocked),
     username: isLoggedIn ? username : ''
   }
 }
@@ -203,6 +205,13 @@ function gridsDidChange (type, grid) {
   }
 }
 
+function accountDidUpdate (changes) {
+  return {
+    type: 'VIEWER_ACCOUNT_DID_UPDATE',
+    changes
+  }
+}
+
 export function isSignedIn () {
   return async (dispatch, getState, { hoodie }) => {
     const properties = await hoodie.account.get(['session', 'username'])
@@ -210,8 +219,23 @@ export function isSignedIn () {
     const username = properties != null ? properties.username : undefined
     const action = didSignIn(isLoggedIn, null, username)
     dispatch(action)
+
+    if (isLoggedIn) {
+      listenToAccountChanges(hoodie.account, dispatch)
+    }
+
     return isLoggedIn
   }
+}
+
+function listenToAccountChanges (account, dispatch) {
+  const handler = changes => {
+    dispatch(accountDidUpdate(changes))
+  }
+  account.on('update', handler)
+  account.one('signout', () => {
+    account.off('update', handler)
+  })
 }
 
 export function unlock (cryptoPassword) {
@@ -227,12 +251,10 @@ export function unlock (cryptoPassword) {
 
     await hoodie.cryptoStore.unlock(cryptoPassword)
 
-    dispatch({
-      type: 'ViewerAccountUnlocked'
-    })
+    dispatch({ type: 'ViewerAccountUnlocked' })
 
     await dispatch(loadSavedGrids())
-    dispatch(loadSavedAvatars())
+    await dispatch(loadSavedAvatars())
   }
 }
 
@@ -244,6 +266,8 @@ export function signIn (username, password, cryptoPassword) {
 
       dispatch(closePopup())
       dispatch(didSignIn(true, true, accountProperties.username))
+
+      listenToAccountChanges(hoodie.account, dispatch)
 
       await dispatch(loadSavedGrids())
       dispatch(loadSavedAvatars())
@@ -276,6 +300,46 @@ export function signUp (username, password, cryptoPassword) {
 }
 
 /**
+ * Update the Viewer Account (using hoodie).
+ * @param {object} options Object containing optional params.
+ * @param {string?} options.nextUsername If the username should be updated, then this is it.
+ * @param {string?} options.password If the password should be updated, then this is the
+ *                                   current password
+ * @param {string?} options.nextPassword If the password should be updated, then this is the new one
+ */
+export function updateAccount ({ nextUsername, password, nextPassword }) {
+  const mailReg = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/i
+
+  const shouldUpdateUsername = nextUsername != null && nextUsername.length > 0
+  const shouldUpdatePassword = password != null && password.length > 0 &&
+    nextPassword != null && nextPassword.length > 0
+
+  return async (dispatch, getState, { hoodie }) => {
+    if (shouldUpdateUsername && !mailReg.test(nextUsername)) {
+      throw new TypeError('Username must be a valid e-mail address!')
+    }
+    if (shouldUpdatePassword && nextPassword.length < 8) {
+      throw new Error('Password must have 8 characters or more!')
+    }
+
+    const username = await hoodie.account.get('username')
+
+    const options = {
+      username: shouldUpdateUsername ? nextUsername : username
+    }
+
+    // check if old password is correct
+    if (shouldUpdatePassword) {
+      await hoodie.account.signIn({ username, password }) // will reject if password is wrong
+
+      options.password = nextPassword
+    }
+
+    return hoodie.account.update(options)
+  }
+}
+
+/**
  * Changes the encryption-password and unlocks the viewer.
  * @param {string} resetKey One of the 10 reset-keys
  * @param {string} newPassword The new encryption password
@@ -301,11 +365,7 @@ export function changeEncryptionPassword (resetKey, newPassword) {
 export function signOut () {
   return async (dispatch, getState, { hoodie }) => {
     dispatch(closePopup())
-    if (getIsLoggedIn(getState())) {
-      // logout if an avatar is still logged in
-      const { logout } = await import('./sessionActions')
-      await dispatch(logout())
-    }
+    await dispatch(logoutAvatar())
 
     try {
       await hoodie.account.signOut()
@@ -315,6 +375,144 @@ export function signOut () {
       })
     } catch (err) {
       console.error(err)
+    }
+  }
+}
+
+/**
+ * Fetch all data of the user and process it into a formated JSON (row data)
+ * and Second Life viewers files format.
+ * @returns {object} JSON data and array of files (text).
+ */
+export function downloadAccountData () {
+  return async (dispatch, getState, { hoodie }) => {
+    const allAvatars = await hoodie.cryptoStore.withIdPrefix('avatars/').findAll()
+
+    const avatarData = await Promise.all(allAvatars.map(async avatar => {
+      const avatarStore = hoodie.cryptoStore.withIdPrefix(avatar.dataSaveId + '/')
+
+      const [localChat, imChatsInfos] = await Promise.all([
+        avatarStore.withIdPrefix('localchat').findAll(),
+        avatarStore.withIdPrefix('imChatsInfos/').findAll()
+      ])
+
+      const imChats = await Promise.all(imChatsInfos.map(async info => {
+        return {
+          info,
+          messages: await avatarStore.withIdPrefix(`imChats/${info.saveId}`).findAll()
+        }
+      }))
+
+      return {
+        info: avatar,
+        localChat,
+        imChats
+      }
+    }))
+
+    // Get other data
+    const [grids, account, profile] = await Promise.all([
+      hoodie.cryptoStore.withIdPrefix('grids/').findAll(),
+      hoodie.account.get(),
+      hoodie.account.profile.get()
+    ])
+
+    const raw = {
+      account,
+      profile,
+      grids,
+      avatars: avatarData
+    }
+
+    const files = avatarData.flatMap(generateExportFiles)
+
+    return { raw, files }
+  }
+}
+
+function generateExportFiles (avatar) {
+  const avatarPart = avatar.info.name.toLowerCase().replace(/\s/, '_')
+  const gridPart = avatar.info.grid === 'Second Life'
+    ? ''
+    : `.${avatar.info.grid.toLowerCase()}`
+  const folderName = `${avatarPart}${gridPart}/`
+
+  const avatarFiles = []
+  let conversationLog = ''
+
+  for (const chat of avatar.imChats) {
+    const name = chat.info.chatType === 'personal'
+      ? chat.info.name.toLowerCase().replace(/\s/, '_')
+      : chat.info.name
+
+    const messagesCount = chat.messages.length
+    if (messagesCount === 0) {
+      continue
+    }
+
+    // generate im chat log
+    avatarFiles.push({
+      name: `${folderName}${name}.txt`,
+      data: chat.messages.reduce(reduceExportChatLines, '')
+    })
+
+    // generate line in conversation.log
+    const time = Math.floor(chat.messages[messagesCount - 1].time / 1000)
+
+    const typeNum = IMChatType[chat.info.chatType]
+    const hasOffline = 0 // does it have offline messages?
+
+    const display = chat.info.name
+    const targetId = chat.info.target
+    const chatId = chat.info.sessionId
+
+    const file = encodeURI(name)
+
+    const line = `[${time}] ${typeNum} 0 ${hasOffline} ${display}| ${targetId} ${chatId} ${file}|\n`
+    conversationLog += line
+  }
+
+  avatarFiles.push({
+    name: folderName + 'conversation.log',
+    data: conversationLog
+  })
+
+  avatarFiles.push({
+    name: folderName + 'chat.txt',
+    data: avatar.localChat.reduce(reduceExportChatLines, '')
+  })
+
+  return avatarFiles
+}
+
+function reduceExportChatLines (file, line) {
+  const time = new Date(line.time)
+  const year = time.getFullYear()
+  const month = time.getMonth().toString().padStart(2, '0')
+  const day = time.getDate().toString().padStart(2, '0')
+  const hours = time.getHours().toString().padStart(2, '0')
+  const min = time.getMinutes().toString().padStart(2, '0')
+
+  return `${file}[${year}/${month}/${day} ${hours}:${min}]  ${line.fromName}: ${line.message}\n`
+}
+
+export function deleteAccount () {
+  return async (dispatch, getState, { hoodie }) => {
+    await dispatch(logoutAvatar())
+
+    const results = await hoodie.account.destroy()
+    dispatch({ type: 'ViewerAccountSignOut', results })
+  }
+}
+
+/**
+ * Logout an avatar if one is still logged in.
+ */
+function logoutAvatar () {
+  return async (dispatch, getState) => {
+    if (getIsLoggedIn(getState())) {
+      const { logout } = await import('./sessionActions')
+      await dispatch(logout())
     }
   }
 }

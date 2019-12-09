@@ -102,6 +102,17 @@ export default function accountReducer (state = getDefault(), action) {
         popupData: action.resetKeys
       }
 
+    case 'VIEWER_ACCOUNT_DID_UPDATE':
+      return Object.entries(action.changes)
+        .filter(([key]) => key !== 'id')
+        .reduce(
+          (state, [key, value]) => {
+            state[key] = value
+            return state
+          },
+          { ...state }
+        )
+
     case 'ClosePopup':
       return {
         ...state,

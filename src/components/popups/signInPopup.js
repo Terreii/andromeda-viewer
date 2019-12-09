@@ -1,9 +1,11 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState } from 'react'
 
 import Popup from './popup'
 
 import styles from './signInPopup.module.css'
 import formStyles from '../formElements.module.css'
+
+import { useFormInput, useAutoFocus } from '../../hooks/utils'
 
 export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
   const [username, setUsername] = useState('')
@@ -17,6 +19,8 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
 
   const [isSigningIn, setIsSigningIn] = useState(false)
   const [error, setError] = useState(null)
+
+  const doAutoFocus = useAutoFocus()
 
   const isValid = (() => {
     if ([password.value, cryptoPassword.value].some((s, i) => s.length < 8)) {
@@ -68,6 +72,7 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
           placeholder='me-avatar@example.com'
           autoFocus
           required
+          ref={doAutoFocus}
           aria-describedby={isSignUp && 'mainHelp'}
           disabled={isSigningIn}
           onFocus={onFocusScrollIntoView}
@@ -215,20 +220,4 @@ function onFocusScrollIntoView (event) {
 
     target.scrollIntoView({ block: 'center' })
   }, 16)
-}
-
-function useFormInput (initialValue) {
-  const [value, setValue] = useState(initialValue)
-
-  const eventHandler = useCallback(event => {
-    const nextValue = typeof event === 'string'
-      ? event
-      : event.target.value
-    setValue(nextValue)
-  }, [setValue])
-
-  return {
-    value,
-    onChange: eventHandler
-  }
 }

@@ -1,6 +1,7 @@
 import { axe } from 'jest-axe'
 import React from 'react'
 import { shallow } from 'enzyme'
+import { MemoryRouter } from 'react-router-dom'
 
 import Login from './index'
 
@@ -20,10 +21,12 @@ test('renders without crashing', () => {
     }
   ]
 
-  shallow(<Login
-    avatars={[]}
-    grids={grids}
-  />)
+  shallow(<MemoryRouter>
+    <Login
+      avatars={[]}
+      grids={grids}
+    />
+  </MemoryRouter>)
 })
 
 test('renders with avatars', () => {
@@ -50,10 +53,12 @@ test('renders with avatars', () => {
     }
   ]
 
-  shallow(<Login
-    grids={grids}
-    avatars={avatars}
-  />)
+  shallow(<MemoryRouter>
+    <Login
+      grids={grids}
+      avatars={avatars}
+    />
+  </MemoryRouter>)
 })
 
 test('should pass aXe', async () => {
@@ -80,15 +85,19 @@ test('should pass aXe', async () => {
     }
   ]
 
-  const rendered = shallow(<Login
-    grids={grids}
-    avatars={avatars}
-  />)
+  const rendered = shallow(<MemoryRouter>
+    <Login
+      grids={grids}
+      avatars={avatars}
+    />
+  </MemoryRouter>)
 
-  const renderedNewUser = shallow(<Login
-    grids={grids}
-    avatars={[]}
-  />)
+  const renderedNewUser = shallow(<MemoryRouter>
+    <Login
+      grids={grids}
+      avatars={[]}
+    />
+  </MemoryRouter>)
 
   expect(await axe(rendered.html())).toHaveNoViolations()
 

@@ -40,7 +40,7 @@
 
 .OkButton {
   composes: Button;
-  color: #fff;
+  color: #000;
   background: #28a745;
 }
 .OkButton:hover, .OkButton:focus {

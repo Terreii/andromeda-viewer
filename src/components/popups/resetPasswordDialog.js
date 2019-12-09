@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 
 import Popup from './popup'
 
+import { useAutoFocus } from '../../hooks/utils'
+
 import styles from './unlockAndSignOut.module.css'
 import formStyles from '../formElements.module.css'
 
@@ -34,6 +36,8 @@ export default function ResetPasswordDialog ({ type, onChangePassword, onSignOut
     }
   }
 
+  const doAutoFocus = useAutoFocus()
+
   return <Popup title='Reset password' onClose={onCancel}>
     <form onSubmit={onSubmit}>
       <div className={formStyles.FormField}>
@@ -45,6 +49,7 @@ export default function ResetPasswordDialog ({ type, onChangePassword, onSignOut
           value={resetKey}
           onChange={event => { setResetKey(event.target.value) }}
           autoFocus
+          ref={doAutoFocus}
           required
           disabled={isChanging}
         />
