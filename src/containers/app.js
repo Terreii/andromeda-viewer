@@ -53,8 +53,11 @@ export default function App () {
       <Route path='/profile'>
         {isSignedIn
           ? <AccountDialog />
-          : <Redirect push to='/' />
+          : <Redirect to='/' />
         }
+      </Route>
+      <Route path='*'>
+        <NoMatchRedirect />
       </Route>
     </Switch>
     <TopMenuBar />
@@ -71,4 +74,10 @@ function useDocumentTitle () {
       ? `${selfName.getName()} - ${viewerName}`
       : viewerName
   }, [isLoggedIn, selfName])
+}
+
+function NoMatchRedirect () {
+  const isLoggedIn = useSelector(getIsLoggedIn)
+
+  return <Redirect to={isLoggedIn ? '/session' : '/'} />
 }
