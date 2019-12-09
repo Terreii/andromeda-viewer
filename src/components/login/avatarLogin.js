@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 
 import AvatarName from '../../avatarName'
 
+import { useAutoFocus } from '../../hooks/utils'
+
 import styles from './avatarLogin.module.css'
 
 export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSelected, onSelect }) {
@@ -9,6 +11,8 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
   useEffect(() => {
     setPassword('')
   }, [isSelected])
+
+  const doAutoFocus = useAutoFocus()
 
   if (!isSelected) {
     return <form
@@ -51,6 +55,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
       onChange={event => { setPassword(event.target.value) }}
       required
       autoFocus
+      ref={doAutoFocus}
       disabled={isLoggingIn}
       aria-label={'password for ' + avatarName}
       onFocus={event => {

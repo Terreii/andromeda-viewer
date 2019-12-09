@@ -85,6 +85,14 @@ export default createReducer(getDefault(), {
     state.popupData = action.resetKeys
   },
 
+  VIEWER_ACCOUNT_DID_UPDATE (state, action) {
+    Object.entries(action.changes)
+      .filter(([key]) => key !== 'id')
+      .forEach(([key, value]) => {
+        state[key] = value
+      })
+  },
+
   ClosePopup (state, action) {
     state.signInPopup = ''
     state.popupData = null

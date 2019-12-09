@@ -18,8 +18,8 @@ test('renders title and buttons', () => {
   const buttons = popup.find('button')
 
   expect(buttons.length).toBe(3)
-  expect(buttons.at(1).text()).toBe('cancel')
-  expect(buttons.last().text()).toBe('sign out')
+  expect(buttons.at(2).text()).toBe('cancel')
+  expect(buttons.at(1).text()).toBe('sign out')
 })
 
 test('event handling', () => {
