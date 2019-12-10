@@ -8,11 +8,11 @@ import { UUID as LLUUID } from '../llsd'
 import { getValueOf, getStringValueOf } from '../network/msgGetters'
 
 import { receive as notificationActionCreator } from '../reducers/notifications'
+import { selectAvatarNameById, selectOwnAvatarName } from '../reducers/names'
 
 import { getShouldSaveChat, getLocalChat, getIMChats } from '../selectors/chat'
 import { getIsSignedIn } from '../selectors/viewer'
 import { getAvatarDataSaveId, getAgentId, getSessionId } from '../selectors/session'
-import { getAvatarNameById, getOwnAvatarName } from '../selectors/names'
 import { getGroupsIDs } from '../selectors/groups'
 import { selectRegionId, selectParentEstateID, selectPosition } from '../reducers/region'
 
@@ -94,7 +94,7 @@ export function sendInstantMessage (text, to, id, dialog = IMDialog.MessageFromA
           Dialog: dialog,
           ID: id,
           Timestamp: Math.floor(Date.now() / 1000),
-          FromAgentName: getOwnAvatarName(activeState).getFullName(),
+          FromAgentName: selectOwnAvatarName(activeState).getFullName(),
           Message: text,
           BinaryBucket: dialog === IMDialog.SessionSend
             ? name
@@ -907,7 +907,7 @@ export function startNewIMChat (chatType, targetId, name) {
 
     if (chatType === IMChatType.personal) {
       try {
-        name = getAvatarNameById(getState(), targetId.toString()).getName()
+        name = selectAvatarNameById(getState(), targetId.toString()).getName()
       } catch (error) {
         console.error(error)
       }

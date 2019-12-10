@@ -19,7 +19,7 @@ import { isSignedIn as doGetIsSignedIn } from '../actions/viewerAccount'
 
 import { getIsSignedIn } from '../selectors/viewer'
 import { getIsLoggedIn } from '../selectors/session'
-import { getOwnAvatarName } from '../selectors/names'
+import { selectOwnAvatarName } from '../reducers/names'
 
 import 'normalize.css'
 
@@ -66,7 +66,7 @@ export default function App () {
 }
 
 function useDocumentTitle () {
-  const selfName = useSelector(getOwnAvatarName)
+  const selfName = useSelector(selectOwnAvatarName)
   const isLoggedIn = useSelector(getIsLoggedIn)
 
   useEffect(() => {

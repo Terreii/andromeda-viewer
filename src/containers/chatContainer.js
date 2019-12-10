@@ -11,7 +11,7 @@ import { updateRights } from '../actions/friendsActions'
 
 import { getActiveTab, getLocalChat, getActiveIMChats } from '../selectors/chat'
 import { selectShouldDisplayNotifications } from '../reducers/notifications'
-import { getNames } from '../selectors/names'
+import { selectNames } from '../reducers/names'
 import { getFriends } from '../selectors/people'
 import { getGroups } from '../selectors/groups'
 
@@ -24,7 +24,7 @@ const mapStateToProps = state => {
     IMs: getActiveIMChats(state),
     shouldDisplayNotifications: selectShouldDisplayNotifications(state),
     groups: getGroups(state),
-    names: getNames(state),
+    names: selectNames(state),
     friends: getFriends(state)
   }
 }

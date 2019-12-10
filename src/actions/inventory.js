@@ -4,7 +4,7 @@ import { UUID as LLUUID } from '../llsd'
 
 import { getAgentId, getSessionId } from '../selectors/session'
 import { getFolderForAssetType } from '../selectors/inventory'
-import { getOwnAvatarName } from '../selectors/names'
+import { selectOwnAvatarName } from '../reducers/names'
 
 import { IMDialog } from '../types/chat'
 import { AssetType } from '../types/inventory'
@@ -52,7 +52,7 @@ function handleInventoryOffer (
       ],
       MessageBlock: [
         {
-          FromAgentName: getOwnAvatarName(activeState).getFullName(),
+          FromAgentName: selectOwnAvatarName(activeState).getFullName(),
           ToAgentID: targetId,
           ID: transactionId,
           Dialog: dialog,

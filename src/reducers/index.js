@@ -7,7 +7,7 @@ import groups from './groups'
 import IMReducer from './IMReducer'
 import inventory from './inventory'
 import localChatReducer from './localChatReducer'
-import namesCoreReducer from './nameReducer'
+import names from './names'
 import notifications from './notifications'
 import region from './region'
 import sessionReducer from './sessionReducer'
@@ -20,7 +20,7 @@ const rootReducer = combineReducers({
   IMs: IMReducer,
   inventory,
   localChat: localChatReducer,
-  names: namesCoreReducer,
+  names,
   notifications,
   region,
   session: sessionReducer

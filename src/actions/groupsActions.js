@@ -2,7 +2,7 @@
 import { v4 as uuid } from 'uuid'
 
 import { getAgentId, getSessionId, getAvatarDataSaveId } from '../selectors/session'
-import { getOwnAvatarName } from '../selectors/names'
+import { selectOwnAvatarName } from '../reducers/names'
 import { selectPosition } from '../reducers/region'
 
 import { IMDialog } from '../types/chat'
@@ -18,7 +18,7 @@ export function startGroupChat (groups) {
       }
     ]
     const position = selectPosition(activeState)
-    const agentName = getOwnAvatarName(activeState).getFullName()
+    const agentName = selectOwnAvatarName(activeState).getFullName()
     const time = new Date()
 
     groups.forEach(group => {
@@ -70,7 +70,7 @@ export function acceptGroupInvitation (transactionId, groupId) {
           Dialog: IMDialog.GroupInvitationAccept,
           ID: transactionId,
           Timestamp: Math.floor(Date.now() / 1000),
-          FromAgentName: getOwnAvatarName(activeState).getFullName()
+          FromAgentName: selectOwnAvatarName(activeState).getFullName()
         }
       ]
     }, true)
@@ -94,7 +94,7 @@ export function declineGroupInvitation (transactionId, groupId) {
           Dialog: IMDialog.GroupInvitationDecline,
           ID: transactionId,
           Timestamp: Math.floor(Date.now() / 1000),
-          FromAgentName: getOwnAvatarName(activeState).getFullName()
+          FromAgentName: selectOwnAvatarName(activeState).getFullName()
         }
       ]
     }, true)

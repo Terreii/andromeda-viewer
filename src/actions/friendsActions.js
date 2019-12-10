@@ -1,7 +1,14 @@
 import { fetchLLSD } from './llsd'
 
+import {
+  displayNamesStartLoading,
+  displayNamesLoaded,
+  selectNames,
+  selectDisplayNamesURL,
+  selectOwnAvatarName
+} from '../reducers/names'
+
 import { getFolderForAssetType } from '../selectors/inventory'
-import { getNames, getDisplayNamesURL, getOwnAvatarName } from '../selectors/names'
 import { getFriends, getFriendById } from '../selectors/people'
 import { getAgentId, getSessionId } from '../selectors/session'
 
@@ -28,16 +35,13 @@ function loadDisplayNames (idsArray) {
   return (dispatch, getState) => {
     if (ids.length === 0) return
 
-    const fetchUrlString = getDisplayNamesURL(getState())
+    const fetchUrlString = selectDisplayNamesURL(getState())
     if (fetchUrlString.length === 0) return // Not jet loaded
 
     const fetchUrl = new window.URL(fetchUrlString)
     ids.forEach(id => fetchUrl.searchParams.append('ids', id))
 
-    dispatch({
-      type: 'DisplayNamesStartLoading',
-      ids
-    })
+    dispatch(displayNamesStartLoading(ids))
 
     fetchLLSD('GET', fetchUrl.href).then(result => {
       const badIDs = result['bad_ids'] || []
@@ -48,19 +52,14 @@ function loadDisplayNames (idsArray) {
         agent.id = agent.id.toString()
       })
 
-      dispatch({
-        type: 'DisplayNamesLoaded',
-        agents: result.agents,
-        badIDs,
-        badNames: result['bad_usernames'] || []
-      })
+      dispatch(displayNamesLoaded(result.agents, badIDs, result['bad_usernames'] || []))
     })
   }
 }
 
 export function getDisplayName () {
   return (dispatch, getState) => {
-    const names = getNames(getState())
+    const names = selectNames(getState())
 
     const toLoad = Object.keys(names).filter(id => !names[id].willHaveDisplayName())
 
@@ -74,7 +73,7 @@ export function getAllFriendsDisplayNames () {
   return (dispatch, getState) => {
     const state = getState()
 
-    const names = getNames(state)
+    const names = selectNames(state)
     const friendsIds = getFriends(state)
       .map(friend => friend.id)
       .concat([getAgentId(state)]) // Add self
@@ -236,7 +235,7 @@ export function declineTeleportLure (targetId, lureId) {
       ],
       MessageBlock: [
         {
-          FromAgentName: getOwnAvatarName(activeState).getFullName(),
+          FromAgentName: selectOwnAvatarName(activeState).getFullName(),
           ToAgentID: targetId,
           ID: lureId,
           Dialog: IMDialog.DenyTeleport
