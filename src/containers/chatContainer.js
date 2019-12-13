@@ -9,10 +9,11 @@ import {
 } from '../actions/chatMessageActions'
 import { updateRights } from '../actions/friendsActions'
 
-import { getActiveTab, getLocalChat, getActiveIMChats } from '../selectors/chat'
-import { selectShouldDisplayNotifications } from '../reducers/notifications'
+import { selectFriends } from '../reducers/friends'
 import { selectNames } from '../reducers/names'
-import { getFriends } from '../selectors/people'
+import { selectShouldDisplayNotifications } from '../reducers/notifications'
+
+import { getActiveTab, getLocalChat, getActiveIMChats } from '../selectors/chat'
 import { getGroups } from '../selectors/groups'
 
 import ChatBox from '../components/chatBox'
@@ -20,12 +21,12 @@ import ChatBox from '../components/chatBox'
 const mapStateToProps = state => {
   return {
     activeTab: getActiveTab(state),
-    localChat: getLocalChat(state),
-    IMs: getActiveIMChats(state),
-    shouldDisplayNotifications: selectShouldDisplayNotifications(state),
+    friends: selectFriends(state),
     groups: getGroups(state),
+    IMs: getActiveIMChats(state),
+    localChat: getLocalChat(state),
     names: selectNames(state),
-    friends: getFriends(state)
+    shouldDisplayNotifications: selectShouldDisplayNotifications(state)
   }
 }
 

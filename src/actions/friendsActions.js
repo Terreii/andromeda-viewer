@@ -1,5 +1,7 @@
 import { fetchLLSD } from './llsd'
 
+import { selectFriends, selectFriendById } from '../reducers/friends'
+import { selectFolderForAssetType } from '../reducers/inventory'
 import {
   displayNamesStartLoading,
   displayNamesLoaded,
@@ -8,8 +10,6 @@ import {
   selectOwnAvatarName
 } from '../reducers/names'
 
-import { getFolderForAssetType } from '../selectors/inventory'
-import { getFriends, getFriendById } from '../selectors/people'
 import { getAgentId, getSessionId } from '../selectors/session'
 
 import { IMDialog } from '../types/chat'
@@ -74,7 +74,7 @@ export function getAllFriendsDisplayNames () {
     const state = getState()
 
     const names = selectNames(state)
-    const friendsIds = getFriends(state)
+    const friendsIds = selectFriends(state)
       .map(friend => friend.id)
       .concat([getAgentId(state)]) // Add self
       .filter(id => !(id in names) || !names[id].willHaveDisplayName()) // unknown only
@@ -90,7 +90,7 @@ export function updateRights (friendUUID, changedRights) {
     const state = getState()
 
     // Get friend
-    const friend = getFriendById(state, id)
+    const friend = selectFriendById(state, id)
     if (friend == null) return
 
     const getRight = name => changedRights[name] == null
@@ -137,7 +137,7 @@ export function acceptFriendshipOffer (agentId, sessionId) {
       ],
       FolderData: [
         {
-          FolderID: getFolderForAssetType(state, AssetType.CallingCard).folderId
+          FolderID: selectFolderForAssetType(state, AssetType.CallingCard).folderId
         }
       ]
     }, true)

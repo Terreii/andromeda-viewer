@@ -2,7 +2,7 @@ import { combineReducers } from '@reduxjs/toolkit'
 import { reducer as burgerMenu } from 'redux-burger-menu'
 
 import account from './account'
-import friendsReducer from './friendsReducer'
+import friends from './friends'
 import groups from './groups'
 import IMReducer from './IMReducer'
 import inventory from './inventory'
@@ -15,7 +15,7 @@ import sessionReducer from './sessionReducer'
 const rootReducer = combineReducers({
   account,
   burgerMenu,
-  friends: friendsReducer,
+  friends,
   groups,
   IMs: IMReducer,
   inventory,

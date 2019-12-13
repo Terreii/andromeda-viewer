@@ -1,6 +1,7 @@
 import { receiveChatFromSimulator, receiveIM } from './chatMessageActions'
-import { getValueOf, mapBlockOf } from '../network/msgGetters'
+import { getValueOf } from '../network/msgGetters'
 
+import { changeRights } from '../reducers/friends'
 import { getAgentId, getSessionId } from '../selectors/session'
 
 // Gets all messages from the SIM and filters them, and if needed: calls their own actions.
@@ -43,18 +44,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 function parseUserRights (message) {
   return (dispatch, getState) => {
-    const rights = mapBlockOf(message, 'Rights', getValue => {
-      return {
-        agentId: getValue('AgentRelated'),
-        rights: getValue('RelatedRights')
-      }
-    })
-    dispatch({
-      type: 'ChangeUserRights',
-      ownId: getAgentId(getState()),
-      fromId: getValueOf(message, 'AgentData', 'AgentID'),
-      userRights: rights
-    })
+    dispatch(changeRights(message, getAgentId(getState())))
   }
 }
 

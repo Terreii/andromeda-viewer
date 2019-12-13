@@ -2,9 +2,9 @@
 
 import { UUID as LLUUID } from '../llsd'
 
-import { getAgentId, getSessionId } from '../selectors/session'
-import { getFolderForAssetType } from '../selectors/inventory'
+import { selectFolderForAssetType } from '../reducers/inventory'
 import { selectOwnAvatarName } from '../reducers/names'
+import { getAgentId, getSessionId } from '../selectors/session'
 
 import { IMDialog } from '../types/chat'
 import { AssetType } from '../types/inventory'
@@ -37,7 +37,7 @@ function handleInventoryOffer (
 
     let bucket
     if (isAccept) {
-      const folder = getFolderForAssetType(activeState, assetType)
+      const folder = selectFolderForAssetType(activeState, assetType)
       bucket = new LLUUID(folder.folderId).getOctets()
     } else {
       bucket = []
