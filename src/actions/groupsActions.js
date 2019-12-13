@@ -1,9 +1,8 @@
 // All group related actions
-import { v4 as uuid } from 'uuid'
-
-import { getAgentId, getSessionId, getAvatarDataSaveId } from '../selectors/session'
+import { chatSessionStarted } from '../reducers/groups'
 import { selectOwnAvatarName } from '../reducers/names'
 import { selectPosition } from '../reducers/region'
+import { getAgentId, getSessionId, getAvatarDataSaveId } from '../selectors/session'
 
 import { IMDialog } from '../types/chat'
 
@@ -37,19 +36,7 @@ export function startGroupChat (groups) {
       }, true)
     })
 
-    dispatch({
-      type: 'GROUP_CHAT_SESSIONS_STARTED',
-      avatarDataSaveId: getAvatarDataSaveId(activeState),
-
-      groups: groups.reduce((obj, group) => {
-        obj[group.id] = {
-          id: group.id,
-          saveId: uuid(),
-          name: group.name
-        }
-        return obj
-      }, {})
-    })
+    dispatch(chatSessionStarted(groups, getAvatarDataSaveId(activeState)))
   }
 }
 

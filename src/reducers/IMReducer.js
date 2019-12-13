@@ -4,6 +4,8 @@
 
 import { createReducer } from '@reduxjs/toolkit'
 
+import { chatSessionStarted } from './groups'
+
 import { IMChatType } from '../types/chat'
 
 function getDefaultImChat () {
@@ -60,15 +62,15 @@ export default createReducer({}, {
     }
   },
 
-  GROUP_CHAT_SESSIONS_STARTED (state, action) {
-    for (const [groupId, data] of Object.entries(action.groups)) {
+  [chatSessionStarted.type]: (state, action) => {
+    for (const [groupId, data] of Object.entries(action.payload)) {
       if (!(groupId in state)) {
         state[groupId] = getDefaultImChat()
       }
       const chatData = state[groupId]
 
       if (chatData._id == null) {
-        chatData._id = `${action.avatarDataSaveId}/imChatsInfos/${data.saveId}`
+        chatData._id = `${action.meta.avatarDataSaveId}/imChatsInfos/${data.saveId}`
         chatData.sessionId = data.id
         chatData.saveId = data.saveId
       }

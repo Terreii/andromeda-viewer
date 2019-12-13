@@ -2,7 +2,7 @@ import { useMemo, useCallback } from 'react'
 import { useSelector } from 'react-redux'
 
 import { selectNames, selectAvatarNameById } from '../reducers/names'
-import { getGroups } from '../selectors/groups'
+import { selectGroups } from '../reducers/groups'
 
 export function useNames (...ids: string[]) {
   const names = useSelector(selectNames)
@@ -18,7 +18,7 @@ export function useName (id: string) {
 }
 
 export function useGroupName (id: string) {
-  const groups = useSelector(getGroups)
+  const groups = useSelector(selectGroups)
 
   const group = groups.find(group => group.id === id) || { name: id }
 

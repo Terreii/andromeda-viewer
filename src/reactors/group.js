@@ -2,11 +2,11 @@ import { createSelector } from 'reselect'
 
 import { startGroupChat } from '../actions/groupsActions'
 
-import { getGroupsWithNoActiveChat } from '../selectors/groups'
+import { selectGroupsWithNoActiveChat } from '../reducers/groups'
 
 export const groupsDidLoad = createSelector(
   [
-    getGroupsWithNoActiveChat
+    selectGroupsWithNoActiveChat
   ],
   groupsWithNoImSession => groupsWithNoImSession.length !== 0
     ? startGroupChat(groupsWithNoImSession)

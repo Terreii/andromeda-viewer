@@ -7,13 +7,13 @@ import { v4 as uuid } from 'uuid'
 import { UUID as LLUUID } from '../llsd'
 import { getValueOf, getStringValueOf } from '../network/msgGetters'
 
+import { selectGroupsIDs } from '../reducers/groups'
 import { receive as notificationActionCreator } from '../reducers/notifications'
 import { selectAvatarNameById, selectOwnAvatarName } from '../reducers/names'
 
 import { getShouldSaveChat, getLocalChat, getIMChats } from '../selectors/chat'
 import { getIsSignedIn } from '../selectors/viewer'
 import { getAvatarDataSaveId, getAgentId, getSessionId } from '../selectors/session'
-import { getGroupsIDs } from '../selectors/groups'
 import { selectRegionId, selectParentEstateID, selectPosition } from '../reducers/region'
 
 import { Maturity } from '../types/viewer'
@@ -270,7 +270,7 @@ export function receiveIM (message) {
 
     switch (dialog) {
       case IMDialog.SessionSend:
-        if (getGroupsIDs(state).includes(id)) {
+        if (selectGroupsIDs(state).includes(id)) {
           dispatch(handleGroupIM(message))
         } else {
           dispatch(handleConferenceIM(message))
@@ -286,7 +286,7 @@ export function receiveIM (message) {
           dispatch(handleSystemNotification(message))
         } else if (
           getValueOf(message, 'MessageBlock', 'FromGroup') ||
-          getGroupsIDs(state).includes(id)
+          selectGroupsIDs(state).includes(id)
         ) {
           dispatch(handleGroupIM(message))
         } else if (getValueOf(message, 'MessageBlock', 'BinaryBucket').length > 1) {
