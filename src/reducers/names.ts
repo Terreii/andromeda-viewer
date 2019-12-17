@@ -7,10 +7,11 @@ import { createSlice, createSelector, PayloadAction } from '@reduxjs/toolkit'
 import AvatarName from '../avatarName'
 import { mapBlockOf } from '../network/msgGetters'
 
+import { received as localChatReceived } from './localChat'
 import { receive as notificationReceive } from './notifications'
 import { getIsLoggedIn, getAgentId } from '../selectors/session'
 
-import { LocalChatSourceType, NotificationTypes } from '../types/chat'
+import { LocalChatMessage, LocalChatSourceType, NotificationTypes } from '../types/chat'
 
 const nameSlice = createSlice({
   name: 'names',
@@ -67,11 +68,11 @@ const nameSlice = createSlice({
       state.getDisplayNamesURL = action.capabilities.GetDisplayNames
     },
 
-    CHAT_FROM_SIMULATOR_RECEIVED (state, action) {
-      if (!(action.msg.fromId in state.names) &&
-        action.msg.sourceType === LocalChatSourceType.Agent
+    [localChatReceived.type] (state, action: PayloadAction<LocalChatMessage>) {
+      if (!(action.payload.fromId in state.names) &&
+        action.payload.sourceType === LocalChatSourceType.Agent
       ) {
-        addName(state.names, action.msg.fromId, action.msg.fromName)
+        addName(state.names, action.payload.fromId, action.payload.fromName)
       }
     },
 

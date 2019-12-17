@@ -62,8 +62,8 @@ describe('local chat', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'CHAT_FROM_SIMULATOR_RECEIVED',
-        msg: {
+        type: 'localChat/received',
+        payload: {
           _id: 'saveId/localchat/2019-07-09T00:02:04.418Z',
           fromName: 'Tester MacTestface',
           fromId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
@@ -77,8 +77,8 @@ describe('local chat', () => {
         }
       },
       {
-        type: 'CHAT_FROM_SIMULATOR_RECEIVED',
-        msg: {
+        type: 'localChat/received',
+        payload: {
           _id: 'saveId/localchat/2019-07-09T00:02:04.418Z',
           fromName: 'Tester MacTestface',
           fromId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
@@ -207,8 +207,8 @@ describe('local chat', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'SAVING_LOCAL_CHAT_MESSAGES_START',
-        saving: [
+        type: 'localChat/savingStarted',
+        payload: [
           'saveId/localchat/2019-07-09T00:03:04.418Z',
           'saveId/localchat/2019-07-09T00:02:04.418Z'
         ]
@@ -250,11 +250,13 @@ describe('local chat', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'DID_SAVE_LOCAL_CHAT_MESSAGE',
-        saved: [eventObject],
-        didError: [
-          'saveId/localchat/2019-07-09T00:02:04.418Z'
-        ]
+        type: 'localChat/savingFinished',
+        payload: {
+          saved: [eventObject],
+          didError: [
+            'saveId/localchat/2019-07-09T00:02:04.418Z'
+          ]
+        }
       }
     ])
   })
@@ -1579,11 +1581,13 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_IN_CHAT_ADDED',
-          text: 'Hello World!',
-          fromName: 'Tester',
-          fromId: '01234567-8900-0000-0000-000000000000',
-          time: 1562630524418
+          type: 'localChat/notificationInChatAdded',
+          payload: {
+            text: 'Hello World!',
+            fromName: 'Tester',
+            fromId: '01234567-8900-0000-0000-000000000000',
+            time: 1562630524418
+          }
         }
       ])
 
@@ -1597,18 +1601,22 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_IN_CHAT_ADDED',
-          text: 'accepted your inventory offer.',
-          fromName: 'Tester',
-          fromId: '01234567-8900-0000-0000-000000000000',
-          time: 1562630524418
+          type: 'localChat/notificationInChatAdded',
+          payload: {
+            text: 'accepted your inventory offer.',
+            fromName: 'Tester',
+            fromId: '01234567-8900-0000-0000-000000000000',
+            time: 1562630524418
+          }
         },
         {
-          type: 'NOTIFICATION_IN_CHAT_ADDED',
-          text: 'declined your inventory offer.',
-          fromName: 'Tester',
-          fromId: '01234567-8900-0000-0000-000000000000',
-          time: 1562630524418
+          type: 'localChat/notificationInChatAdded',
+          payload: {
+            text: 'declined your inventory offer.',
+            fromName: 'Tester',
+            fromId: '01234567-8900-0000-0000-000000000000',
+            time: 1562630524418
+          }
         }
       ])
 
@@ -1622,18 +1630,22 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_IN_CHAT_ADDED',
-          text: 'accepted your friendship offer.',
-          fromName: 'Tester',
-          fromId: '01234567-8900-0000-0000-000000000000',
-          time: 1562630524418
+          type: 'localChat/notificationInChatAdded',
+          payload: {
+            text: 'accepted your friendship offer.',
+            fromName: 'Tester',
+            fromId: '01234567-8900-0000-0000-000000000000',
+            time: 1562630524418
+          }
         },
         {
-          type: 'NOTIFICATION_IN_CHAT_ADDED',
-          text: 'declined your friendship offer.',
-          fromName: 'Tester',
-          fromId: '01234567-8900-0000-0000-000000000000',
-          time: 1562630524418
+          type: 'localChat/notificationInChatAdded',
+          payload: {
+            text: 'declined your friendship offer.',
+            fromName: 'Tester',
+            fromId: '01234567-8900-0000-0000-000000000000',
+            time: 1562630524418
+          }
         }
       ])
     })

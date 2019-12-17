@@ -6,7 +6,7 @@ import friends from './friends'
 import groups from './groups'
 import IMReducer from './IMReducer'
 import inventory from './inventory'
-import localChatReducer from './localChatReducer'
+import localChat from './localChat'
 import names from './names'
 import notifications from './notifications'
 import region from './region'
@@ -19,7 +19,7 @@ const rootReducer = combineReducers({
   groups,
   IMs: IMReducer,
   inventory,
-  localChat: localChatReducer,
+  localChat,
   names,
   notifications,
   region,

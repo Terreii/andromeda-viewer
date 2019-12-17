@@ -8,10 +8,17 @@ import { UUID as LLUUID } from '../llsd'
 import { getValueOf, getStringValueOf } from '../network/msgGetters'
 
 import { selectGroupsIDs } from '../reducers/groups'
-import { receive as notificationActionCreator } from '../reducers/notifications'
+import {
+  received as localChatReceived,
+  notificationInChatAdded,
+  savingStarted as localChatSavingStarted,
+  savingFinished as localChatSavingFinished,
+  selectLocalChat
+} from '../reducers/localChat'
 import { selectAvatarNameById, selectOwnAvatarName } from '../reducers/names'
+import { receive as notificationActionCreator } from '../reducers/notifications'
 
-import { getShouldSaveChat, getLocalChat, getIMChats } from '../selectors/chat'
+import { getShouldSaveChat, getIMChats } from '../selectors/chat'
 import { getIsSignedIn } from '../selectors/viewer'
 import { getAvatarDataSaveId, getAgentId, getSessionId } from '../selectors/session'
 import { selectRegionId, selectParentEstateID, selectPosition } from '../reducers/region'
@@ -134,28 +141,25 @@ export function receiveChatFromSimulator (msg) {
   return (dispatch, getState) => {
     const time = new Date()
 
-    dispatch({
-      type: 'CHAT_FROM_SIMULATOR_RECEIVED',
-      msg: {
-        _id: `${getAvatarDataSaveId(getState())}/localchat/${time.toJSON()}`,
+    dispatch(localChatReceived({
+      _id: `${getAvatarDataSaveId(getState())}/localchat/${time.toJSON()}`,
 
-        fromName: getStringValueOf(msg, 'ChatData', 'FromName'),
-        fromId: getValueOf(msg, 'ChatData', 'SourceID'),
-        ownerId: getValueOf(msg, 'ChatData', 'OwnerID'),
-        sourceType: getValueOf(msg, 'ChatData', 'SourceType'),
-        chatType: getValueOf(msg, 'ChatData', 'ChatType'),
-        audible: getValueOf(msg, 'ChatData', 'Audible'),
-        position: getValueOf(msg, 'ChatData', 'Position'),
-        message: getStringValueOf(msg, 'ChatData', 'Message'),
-        time: time.getTime()
-      }
-    })
+      fromName: getStringValueOf(msg, 'ChatData', 'FromName'),
+      fromId: getValueOf(msg, 'ChatData', 'SourceID'),
+      ownerId: getValueOf(msg, 'ChatData', 'OwnerID'),
+      sourceType: getValueOf(msg, 'ChatData', 'SourceType'),
+      chatType: getValueOf(msg, 'ChatData', 'ChatType'),
+      audible: getValueOf(msg, 'ChatData', 'Audible'),
+      position: getValueOf(msg, 'ChatData', 'Position'),
+      message: getStringValueOf(msg, 'ChatData', 'Message'),
+      time: time.getTime()
+    }))
   }
 }
 
 export function saveLocalChatMessages () {
   return async (dispatch, getState, { hoodie }) => {
-    const localChat = getLocalChat(getState())
+    const localChat = selectLocalChat(getState())
     const messagesToSave = []
     const toLowerCase = s => s.charAt(0).toLowerCase() + s.slice(1)
 
@@ -185,10 +189,7 @@ export function saveLocalChatMessages () {
 
     if (messagesToSave.length === 0) return
 
-    dispatch({
-      type: 'SAVING_LOCAL_CHAT_MESSAGES_START',
-      saving: messagesToSave.map(msg => msg._id)
-    })
+    dispatch(localChatSavingStarted(messagesToSave.map(msg => msg._id)))
 
     const saved = await hoodie.cryptoStore.updateOrAdd(messagesToSave)
 
@@ -210,11 +211,10 @@ export function saveLocalChatMessages () {
       }
     })
 
-    dispatch({
-      type: 'DID_SAVE_LOCAL_CHAT_MESSAGE',
+    dispatch(localChatSavingFinished({
       saved: didSave,
       didError
-    })
+    }))
   }
 }
 
@@ -225,7 +225,7 @@ export function deleteOldLocalChat () {
     const activeState = getState()
     if (!getShouldSaveChat(activeState)) return Promise.resolve()
 
-    const localChat = getLocalChat(activeState)
+    const localChat = selectLocalChat(activeState)
     if (localChat.length <= maxLocalChatHistory) return Promise.resolve()
 
     const toDeleteIds = []
@@ -293,7 +293,7 @@ export function receiveIM (message) {
           dispatch(handleConferenceIM(message))
         } else if (id === LLUUID.nil) {
           const text = getStringValueOf(message, 'MessageBlock', 'Message')
-          dispatch(handleNotificationInChat(text, fromAgentName, fromId))
+          dispatch(notificationInChatAdded(text, fromAgentName, fromId))
         } else {
           dispatch(handleIM(message))
         }
@@ -353,7 +353,7 @@ export function receiveIM (message) {
       case IMDialog.FriendshipDeclined:
         {
           const acceptedText = dialog === IMDialog.FriendshipAccepted ? 'accepted' : 'declined'
-          dispatch(handleNotificationInChat(
+          dispatch(notificationInChatAdded(
             `${acceptedText} your friendship offer.`,
             fromAgentName,
             fromId
@@ -373,7 +373,7 @@ export function receiveIM (message) {
       case IMDialog.InventoryDeclined:
         {
           const acceptedText = dialog === IMDialog.InventoryAccepted ? 'accepted' : 'declined'
-          dispatch(handleNotificationInChat(
+          dispatch(notificationInChatAdded(
             `${acceptedText} your inventory offer.`,
             fromAgentName,
             fromId
@@ -777,28 +777,6 @@ function handleInventoryOffer (msg) {
       transactionId: getValueOf(msg, 'MessageBlock', 'ID')
     }
   })
-}
-
-/**
- * Handles messages that are notifications, but should be displayed in local chat.
- * @param {string} text Text of the Notification that should be displayed.
- * @param {string} [fromName=""] Displayed name of the sender.
- * @param {string|object} [fromId] Optional UUID of the sender.
- */
-function handleNotificationInChat (text, fromName = '', fromId) {
-  if (text == null) {
-    throw new TypeError("handleNotificationInChat must receive a message! It didn't!")
-  }
-
-  return {
-    type: 'NOTIFICATION_IN_CHAT_ADDED',
-    text: text.toString(),
-    fromName: fromName.toString(),
-    fromId: typeof fromId === 'string'
-      ? fromId
-      : (fromId != null && fromId instanceof LLUUID ? fromId.toString() : null),
-    time: Date.now()
-  }
 }
 
 /**

@@ -6,11 +6,13 @@ import {
   saveIMChatMessages
 } from '../actions/chatMessageActions'
 
-import { getLocalChat, getIMChats, getShouldSaveChat } from '../selectors/chat'
+import { selectLocalChat } from '../reducers/localChat'
+
+import { getIMChats, getShouldSaveChat } from '../selectors/chat'
 
 export const saveLocalChat = createSelector(
   [
-    getLocalChat,
+    selectLocalChat,
     getShouldSaveChat
   ],
   (localChat, shouldSaveChat) => {
