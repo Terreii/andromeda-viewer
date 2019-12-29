@@ -8,7 +8,8 @@ import {
 
 import { selectLocalChat } from '../reducers/localChat'
 
-import { getIMChats, getShouldSaveChat } from '../selectors/chat'
+import { getShouldSaveChat } from '../selectors/chat'
+import { selectIMChats } from '../reducers/imChat'
 
 export const saveLocalChat = createSelector(
   [
@@ -38,7 +39,7 @@ export const saveLocalChat = createSelector(
 
 export const saveIMChatInfo = createSelector(
   [
-    getIMChats,
+    selectIMChats,
     getShouldSaveChat
   ],
   (ims, shouldSaveChat) => {
@@ -50,7 +51,7 @@ export const saveIMChatInfo = createSelector(
 
 export const saveIMChat = createSelector(
   [
-    getIMChats,
+    selectIMChats,
     getShouldSaveChat
   ],
   (ims, shouldSaveChat) => {

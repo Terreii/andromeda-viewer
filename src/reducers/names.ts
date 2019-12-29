@@ -7,18 +7,33 @@ import { createSlice, createSelector, PayloadAction } from '@reduxjs/toolkit'
 import AvatarName from '../avatarName'
 import { mapBlockOf } from '../network/msgGetters'
 
+import {
+  received as imReceived,
+  infosLoaded as imInfosLoaded,
+  historyLoadingFinished as imHistoryLoadingFinished,
+  NewChatActionPayload
+} from './imChat'
 import { received as localChatReceived } from './localChat'
 import { receive as notificationReceive } from './notifications'
 import { getIsLoggedIn, getAgentId } from '../selectors/session'
 
-import { LocalChatMessage, LocalChatSourceType, NotificationTypes } from '../types/chat'
+import {
+  LocalChatMessage,
+  LocalChatSourceType,
+  IMChatType,
+  InstantMessage,
+  NotificationTypes
+} from '../types/chat'
 
 const nameSlice = createSlice({
   name: 'names',
 
   initialState: {
-    names: {} as { [key: string]: AvatarName },
+    names: {},
     getDisplayNamesURL: ''
+  } as {
+    names: { [key: string]: AvatarName }
+    getDisplayNamesURL: string
   },
 
   reducers: {
@@ -76,21 +91,13 @@ const nameSlice = createSlice({
       }
     },
 
-    PERSONAL_IM_RECEIVED (state, action) {
-      if (!(action.msg.fromId in state.names)) {
-        addName(state.names, action.msg.fromId, action.msg.fromName)
-      }
-    },
-
-    GROUP_IM_RECEIVED (state, action) {
-      if (!(action.msg.fromId in state.names)) {
-        addName(state.names, action.msg.fromId, action.msg.fromName)
-      }
-    },
-
-    CONFERENCE_IM_RECEIVED (state, action) {
-      if (!(action.msg.fromId in state.names)) {
-        addName(state.names, action.msg.fromId, action.msg.fromName)
+    [imReceived.type] (
+      state,
+      action: PayloadAction<{ chatType: IMChatType, session: string, msg: InstantMessage }>
+    ) {
+      const msg = action.payload.msg
+      if (!(action.payload.msg.fromId in state.names)) {
+        addName(state.names, msg.fromId, msg.fromName)
       }
     },
 
@@ -108,17 +115,20 @@ const nameSlice = createSlice({
       }
     },
 
-    IM_CHAT_INFOS_LOADED (state, action) {
-      for (const chat of action.chats) {
+    [imInfosLoaded.type] (state, action: PayloadAction<NewChatActionPayload[]>) {
+      for (const chat of action.payload) {
         const avatarId = chat.target
-        if (chat.chatType !== 'personal' || avatarId in state.names) continue
+        if (chat.chatType !== IMChatType.personal || avatarId in state.names) continue
 
         state.names[avatarId] = new AvatarName(chat.name)
       }
     },
 
-    IM_HISTORY_LOADING_FINISHED (state, action) {
-      for (const msg of action.messages) {
+    [imHistoryLoadingFinished.type] (
+      state,
+      action: PayloadAction<{ sessionId: string, messages: InstantMessage[], didLoadAll: boolean }>
+    ) {
+      for (const msg of action.payload.messages) {
         if (msg.fromId in state.names) continue
 
         state.names[msg.fromId] = new AvatarName(msg.fromName)

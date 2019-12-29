@@ -155,6 +155,7 @@ export interface IMChat extends HoodieObject {
   isLoadingHistory: boolean
   active: boolean
   hasUnsavedMSG: boolean
+  areTyping: string[]
   messages: InstantMessage[]
 }
 
