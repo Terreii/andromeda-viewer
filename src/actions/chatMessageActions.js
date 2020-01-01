@@ -7,6 +7,7 @@ import { v4 as uuid } from 'uuid'
 import { UUID as LLUUID } from '../llsd'
 import { getValueOf, getStringValueOf } from '../network/msgGetters'
 
+import { selectIsSignedIn } from '../reducers/account'
 import { selectGroupsIDs } from '../reducers/groups'
 import {
   create as createIMChat,
@@ -35,7 +36,6 @@ import { selectAvatarNameById, selectOwnAvatarName } from '../reducers/names'
 import { receive as notificationActionCreator } from '../reducers/notifications'
 
 import { getShouldSaveChat } from '../selectors/chat'
-import { getIsSignedIn } from '../selectors/viewer'
 import { getAvatarDataSaveId, getAgentId, getSessionId } from '../selectors/session'
 import { selectRegionId, selectParentEstateID, selectPosition } from '../reducers/region'
 
@@ -975,7 +975,7 @@ export function loadIMChats () {
   return (dispatch, getState, { hoodie }) => {
     const activeState = getState()
     // Only load the history if the user is logged into a viewer-account.
-    if (!getIsSignedIn(activeState)) return
+    if (!selectIsSignedIn(activeState)) return
 
     const avatarDataSaveId = getAvatarDataSaveId(activeState)
     const store = hoodie.cryptoStore.withIdPrefix(`${avatarDataSaveId}/imChatsInfos/`)

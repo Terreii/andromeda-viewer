@@ -73,6 +73,7 @@ export interface SavedAvatarData extends AvatarData, HoodieObject {}
 export interface Grid extends HoodieObject {
   name: string
   loginURL: string
+  isLLSDLogin: boolean
 }
 
 export enum Maturity {

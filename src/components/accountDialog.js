@@ -8,12 +8,12 @@ import { downloadAccountData, updateAccount, deleteAccount } from '../actions/vi
 import style from './accountDialog.module.css'
 import formStyles from './formElements.module.css'
 
+import { selectUserName } from '../reducers/account'
 import { useFormInput, useAutoFocus } from '../hooks/utils'
-import { getUserName } from '../selectors/viewer'
 
 export default function AccountPanel () {
   const dispatch = useDispatch()
-  const username = useSelector(getUserName)
+  const username = useSelector(selectUserName)
   const [isUpdating, setIsUpdating] = useState(false)
 
   const { isValid: usernameIsValid, ...changedUsername } = useFormInput(username, true)

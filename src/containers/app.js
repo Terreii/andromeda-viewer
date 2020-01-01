@@ -15,9 +15,9 @@ import PopupRenderer from './popups'
 import TopMenuBar from './topMenuBar'
 import AccountDialog from '../components/accountDialog'
 
-import { isSignedIn as doGetIsSignedIn } from '../actions/viewerAccount'
+import { isSignedIn as getIsSignedIn } from '../actions/viewerAccount'
 
-import { getIsSignedIn } from '../selectors/viewer'
+import { selectIsSignedIn } from '../reducers/account'
 import { getIsLoggedIn } from '../selectors/session'
 import { selectOwnAvatarName } from '../reducers/names'
 
@@ -26,7 +26,7 @@ import 'normalize.css'
 const Popups = React.memo(PopupRenderer)
 
 export default function App () {
-  const isSignedIn = useSelector(getIsSignedIn)
+  const isSignedIn = useSelector(selectIsSignedIn)
 
   const dispatch = useDispatch()
 
@@ -35,7 +35,7 @@ export default function App () {
       return // component was hot reloaded
     }
 
-    dispatch(doGetIsSignedIn())
+    dispatch(getIsSignedIn())
     // it will only be called once!
     // eslint-disable-next-line
   }, [])

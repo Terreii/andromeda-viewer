@@ -2,15 +2,15 @@
 
 import { createSelector } from 'reselect'
 
-import { getIsSignedIn, getShouldSync } from './viewer'
+import { selectIsSignedIn, selectShouldSync } from '../reducers/account'
 
 export const getActiveTab = (state: any): string => state.session.activeChatTab
 
 // checks if the chat history should be saved and synced
 export const getShouldSaveChat = createSelector(
   [
-    getShouldSync,
-    getIsSignedIn
+    selectShouldSync,
+    selectIsSignedIn
   ],
   (sync, isSignedIn) => sync && isSignedIn
 )

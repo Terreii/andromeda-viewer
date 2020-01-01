@@ -6,11 +6,11 @@ import Login from '../components/login/'
 import { login } from '../actions/sessionActions'
 import { showSignInPopup } from '../actions/viewerAccount'
 
-import { getSavedAvatars, getSavedGrids } from '../selectors/viewer'
+import { selectSavedAvatars, selectSavedGrids } from '../reducers/account'
 
 export default function LoginFrom ({ isSignedIn }) {
-  const avatars = useSelector(getSavedAvatars)
-  const grids = useSelector(getSavedGrids)
+  const avatars = useSelector(selectSavedAvatars)
+  const grids = useSelector(selectSavedGrids)
 
   const dispatch = useDispatch()
   const doLogin = (avatarName, password, grid, save, isNew) => dispatch(

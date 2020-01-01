@@ -3,58 +3,42 @@
 import { v4 as uuid } from 'uuid'
 
 import {
-  getIsSignedIn,
-  getIsUnlocked,
-  getSavedAvatars,
-  getSavedAvatarsAreLoaded,
-  getSavedGrids,
-  getSavedGridsAreLoaded
-} from '../selectors/viewer'
+  signInStatus,
+  signOut as accountDidSignOut,
+  unlocked,
+  showPopup,
+  displayResetKeys,
+  didUpdate as accountDidUpdate,
+  closePopup,
+  avatarSaved,
+  avatarsLoaded,
+  savedAvatarUpdated,
+  savedAvatarRemoved,
+  gridAdded,
+  gridsLoaded,
+  savedGridDidChanged,
+  savedGridRemoved,
+
+  selectIsSignedIn,
+  selectIsUnlocked,
+  selectSavedAvatars,
+  selectSavedAvatarsAreLoaded,
+  selectSavedGrids,
+  selectSavedGridsAreLoaded
+} from '../reducers/account'
 import { getIsLoggedIn } from '../selectors/session'
 
 import { IMChatType } from '../types/chat'
 
-export function didSignIn (isSignedIn, isUnlocked, username = '') {
-  const isLoggedIn = Boolean(isSignedIn)
-  return {
-    type: 'ViewerAccountLogInStatus',
-    isLoggedIn,
-    isUnlocked: Boolean(isUnlocked),
-    username: isLoggedIn ? username : ''
-  }
-}
-
-export function showSignInPopup (popup = 'signIn') {
-  return {
-    type: 'ShowSignInPopup',
-    popup
-  }
-}
+export {
+  signInStatus as didSignIn,
+  showPasswordReset as showResetPassword,
+  showPopup as showSignInPopup,
+  closePopup
+} from '../reducers/account'
 
 export function showSignOutPopup () {
-  return {
-    type: 'ShowSignOutPopup'
-  }
-}
-
-export function showResetPassword (type) {
-  return {
-    type: 'SHOW_PASSWORD_RESET',
-    passwordType: type
-  }
-}
-
-function showResetKeys (resetKeys) {
-  return {
-    type: 'DISPLAY_VIEWER_ACCOUNT_RESET_KEYS',
-    resetKeys
-  }
-}
-
-export function closePopup () {
-  return {
-    type: 'ClosePopup'
-  }
+  return showPopup('signOut')
 }
 
 export function saveAvatar (name, agentId, grid) {
@@ -63,7 +47,7 @@ export function saveAvatar (name, agentId, grid) {
 
     const avatarIdentifier = `${agentId}@${gridName}`
 
-    if (getSavedAvatars(getState()).some(avatar => {
+    if (selectSavedAvatars(getState()).some(avatar => {
       return avatar.avatarIdentifier === avatarIdentifier
     })) {
       return Promise.reject(new Error('Avatar already exist!'))
@@ -82,11 +66,11 @@ export function loadSavedAvatars () {
   return async (dispatch, getState, { hoodie }) => {
     const activeState = getState()
 
-    if (!getIsSignedIn(activeState)) {
+    if (!selectIsSignedIn(activeState)) {
       throw new Error('Not signed in to Viewer!')
     }
 
-    if (getSavedAvatarsAreLoaded(activeState)) return
+    if (selectSavedAvatarsAreLoaded(activeState)) return
 
     const avatarsStore = hoodie.cryptoStore.withIdPrefix('avatars/')
 
@@ -110,30 +94,18 @@ export function loadSavedAvatars () {
       return 0
     })
 
-    dispatch({
-      type: 'AvatarsLoaded',
-      avatars
-    })
+    dispatch(avatarsLoaded(avatars))
   }
 }
 
 function avatarsDidChange (type, doc) {
   switch (type) {
     case 'add':
-      return {
-        type: 'AvatarSaved',
-        avatar: doc
-      }
+      return avatarSaved(doc)
     case 'update':
-      return {
-        type: 'SavedAvatarUpdated',
-        avatar: doc
-      }
+      return savedAvatarUpdated(doc)
     case 'remove':
-      return {
-        type: 'SavedAvatarRemoved',
-        avatar: doc
-      }
+      return savedAvatarRemoved(doc)
     default:
       return () => {} // Do nothing
   }
@@ -143,13 +115,14 @@ export function saveGrid (newGrid) {
   return (dispatch, getState, { hoodie }) => {
     const name = newGrid.name.trim()
 
-    if (getSavedGrids(getState()).some(grid => grid.name === name)) {
+    if (selectSavedGrids(getState()).some(grid => grid.name === name)) {
       return Promise.reject(new Error('Grid already exist!'))
     }
 
     return hoodie.cryptoStore.withIdPrefix('grids/').add({
       name,
-      loginURL: newGrid.url
+      loginURL: newGrid.url,
+      isLLSDLogin: false
     })
   }
 }
@@ -158,11 +131,11 @@ export function loadSavedGrids () {
   return async (dispatch, getState, { hoodie }) => {
     const activeState = getState()
 
-    if (!getIsSignedIn(activeState)) {
+    if (!selectIsSignedIn(activeState)) {
       throw new Error('Not signed in to Viewer!')
     }
 
-    if (getSavedGridsAreLoaded(activeState)) return
+    if (selectSavedGridsAreLoaded(activeState)) return
 
     const gridsStore = hoodie.cryptoStore.withIdPrefix('grids/')
 
@@ -176,39 +149,20 @@ export function loadSavedGrids () {
     })
 
     const grids = await gridsStore.findAll()
-    dispatch({
-      type: 'GridsLoaded',
-      grids
-    })
+    dispatch(gridsLoaded(grids))
   }
 }
 
 function gridsDidChange (type, grid) {
   switch (type) {
     case 'add':
-      return {
-        type: 'GridAdded',
-        grid
-      }
+      return gridAdded(grid)
     case 'update':
-      return {
-        type: 'SavedGridDidChanged',
-        grid
-      }
+      return savedGridDidChanged(grid)
     case 'remove':
-      return {
-        type: 'SavedGridRemoved',
-        grid
-      }
+      return savedGridRemoved(grid)
     default:
       return () => {} // Do nothing
-  }
-}
-
-function accountDidUpdate (changes) {
-  return {
-    type: 'VIEWER_ACCOUNT_DID_UPDATE',
-    changes
   }
 }
 
@@ -217,8 +171,7 @@ export function isSignedIn () {
     const properties = await hoodie.account.get(['session', 'username'])
     const isLoggedIn = properties.session != null
     const username = properties != null ? properties.username : undefined
-    const action = didSignIn(isLoggedIn, null, username)
-    dispatch(action)
+    dispatch(signInStatus(isLoggedIn, null, username))
 
     if (isLoggedIn) {
       listenToAccountChanges(hoodie.account, dispatch)
@@ -241,17 +194,17 @@ function listenToAccountChanges (account, dispatch) {
 export function unlock (cryptoPassword) {
   return async (dispatch, getState, { hoodie }) => {
     const activeState = getState()
-    if (getIsUnlocked(activeState)) {
+    if (selectIsUnlocked(activeState)) {
       return
     }
 
-    if (!getIsSignedIn(activeState)) {
+    if (!selectIsSignedIn(activeState)) {
       throw new Error('Not signed in!')
     }
 
     await hoodie.cryptoStore.unlock(cryptoPassword)
 
-    dispatch({ type: 'ViewerAccountUnlocked' })
+    dispatch(unlocked())
 
     await dispatch(loadSavedGrids())
     await dispatch(loadSavedAvatars())
@@ -265,7 +218,7 @@ export function signIn (username, password, cryptoPassword) {
       await hoodie.cryptoStore.unlock(cryptoPassword)
 
       dispatch(closePopup())
-      dispatch(didSignIn(true, true, accountProperties.username))
+      dispatch(signInStatus(true, true, accountProperties.username))
 
       listenToAccountChanges(hoodie.account, dispatch)
 
@@ -295,7 +248,7 @@ export function signUp (username, password, cryptoPassword) {
       signIn(username, password, cryptoPassword)
     )
 
-    dispatch(showResetKeys(resetKeys))
+    dispatch(displayResetKeys(resetKeys))
   }
 }
 
@@ -350,12 +303,10 @@ export function changeEncryptionPassword (resetKey, newPassword) {
     await hoodie.store.sync()
     const result = await hoodie.cryptoStore.resetPassword(resetKey, newPassword)
 
-    dispatch({
-      type: 'ViewerAccountUnlocked'
-    })
+    dispatch(unlocked())
     dispatch(closePopup())
 
-    dispatch(showResetKeys(result.resetKeys))
+    dispatch(displayResetKeys(result.resetKeys))
 
     await dispatch(loadSavedGrids())
     dispatch(loadSavedAvatars())
@@ -370,9 +321,7 @@ export function signOut () {
     try {
       await hoodie.account.signOut()
 
-      dispatch({
-        type: 'ViewerAccountSignOut'
-      })
+      dispatch(accountDidSignOut())
     } catch (err) {
       console.error(err)
     }

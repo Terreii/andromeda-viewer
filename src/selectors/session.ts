@@ -2,14 +2,14 @@
 
 import { createSelector } from 'reselect'
 
-import { getSavedAvatars, getAnonymAvatarData } from './viewer'
+import { selectSavedAvatars, selectAnonymAvatarData } from '../reducers/account'
 
 export const getAvatarIdentifier = (state: any): string => state.session.avatarIdentifier
 
 export const getCurrentAvatarData = createSelector(
   [
-    getSavedAvatars,
-    getAnonymAvatarData,
+    selectSavedAvatars,
+    selectAnonymAvatarData,
     getAvatarIdentifier
   ],
   (savedAvatars, anonymAvatarData, avatarIdentifier) => anonymAvatarData != null

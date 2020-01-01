@@ -93,7 +93,7 @@ export default function LoginForm ({ isSignedIn, avatars, grids, login, showSign
       }
 
       const gridData = {
-        isLoginLLSD: grid.isLoginLLSD || false,
+        isLLSDLogin: grid.isLLSDLogin || false,
         name: grid.name,
         url: grid.url || grid.loginURL
       }

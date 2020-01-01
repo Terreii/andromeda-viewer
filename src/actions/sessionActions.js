@@ -16,7 +16,7 @@ import { fetchSeedCapabilities } from './llsd'
 import LLSD from '../llsd'
 import connectCircuit from './connectCircuit'
 
-import { getSavedAvatars, getSavedGrids } from '../selectors/viewer'
+import { selectSavedAvatars, selectSavedGrids } from '../reducers/account'
 import { getIsLoggedIn, getAgentId, getSessionId } from '../selectors/session'
 
 // Actions for the session of an avatar
@@ -49,7 +49,7 @@ export function login (avatarName, password, grid, save, isNew) {
 
     const circuit = import('../network/circuit')
 
-    const body = grid.isLoginLLSD
+    const body = grid.isLLSDLogin
       ? await loginWithLLSD(viewerData, avatarName.first, avatarName.last, finalPassword)
       : await loginWithXmlRpc(viewerData, avatarName.first, avatarName.last, finalPassword)
 
@@ -59,7 +59,7 @@ export function login (avatarName, password, grid, save, isNew) {
     }
 
     // save grid if it is new (do not save if login did fail)
-    const gridExists = getSavedGrids(getState()).some(savedGrid => savedGrid.name === grid.name)
+    const gridExists = selectSavedGrids(getState()).some(savedGrid => savedGrid.name === grid.name)
     if (save && isNew && !gridExists) {
       await dispatch(saveGrid(grid))
     }
@@ -68,7 +68,7 @@ export function login (avatarName, password, grid, save, isNew) {
 
     const avatarData = save && isNew
       ? await dispatch(saveAvatar(avatarName, body.agent_id, grid.name)) // adding new avatars
-      : getSavedAvatars(getState()).reduce((last, avatar) => { // for saved avatars
+      : selectSavedAvatars(getState()).reduce((last, avatar) => { // for saved avatars
         if (last != null) return last
 
         return avatar.avatarIdentifier === avatarIdentifier
