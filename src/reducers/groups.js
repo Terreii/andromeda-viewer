@@ -3,6 +3,8 @@
 import { createSlice, createSelector } from '@reduxjs/toolkit'
 import { v4 as uuid } from 'uuid'
 
+import { logout, userWasKicked } from './session'
+
 import { getValueOf, mapBlockOf } from '../network/msgGetters'
 
 const groupSlice = createSlice({
@@ -94,8 +96,8 @@ const groupSlice = createSlice({
       }
     },
 
-    DidLogout: getInitialState,
-    UserWasKicked: getInitialState
+    [logout.type]: getInitialState,
+    [userWasKicked.type]: getInitialState
   }
 })
 

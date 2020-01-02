@@ -5,6 +5,7 @@
 import { createSlice, createSelector, PayloadAction } from '@reduxjs/toolkit'
 
 import { chatSessionStarted } from './groups'
+import { logout, userWasKicked } from './session'
 
 import { IMChatType, IMChat, InstantMessage } from '../types/chat'
 
@@ -198,11 +199,11 @@ const imSlice = createSlice({
       }
     },
   
-    DidLogout () {
+    [logout.type] () {
       return {}
     },
   
-    UserWasKicked () {
+    [userWasKicked.type] () {
       return {}
     }
   }

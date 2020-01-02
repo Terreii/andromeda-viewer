@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect'
 
 import { selectIsSignedIn, selectIsUnlocked } from '../reducers/account'
-import { getErrorMessage } from './session'
+import { selectErrorMessage } from '../reducers/session'
 
 type SignInPopup = 'signUp' | 'signIn' | 'signOut' | 'resetPassword' | 'resetKeys' | null
 
@@ -12,7 +12,7 @@ export const selectPopup = createSelector(
     selectIsSignedIn,
     selectIsUnlocked,
     (state: any): SignInPopup => state.account.signInPopup,
-    getErrorMessage
+    selectErrorMessage
   ],
   (isSignedIn, isUnlocked, signInPopup, sessionError) => {
     const popup = signInPopup || sessionError

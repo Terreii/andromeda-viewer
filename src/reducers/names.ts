@@ -15,7 +15,14 @@ import {
 } from './imChat'
 import { received as localChatReceived } from './localChat'
 import { receive as notificationReceive } from './notifications'
-import { getIsLoggedIn, getAgentId } from '../selectors/session'
+import {
+  selectIsLoggedIn,
+  selectAgentId,
+  login,
+  logout,
+  userWasKicked,
+  LoginAction
+} from './session'
 
 import {
   LocalChatMessage,
@@ -71,10 +78,10 @@ const nameSlice = createSlice({
   },
 
   extraReducers: {
-    didLogin (state, action) {
-      state.names[action.uuid] = action.name
+    [login.type] (state, action: PayloadAction<LoginAction>) {
+      state.names[action.payload.uuid] = action.payload.name
 
-      for (const msg of action.localChatHistory) {
+      for (const msg of action.payload.localChatHistory) {
         addName(state.names, msg.fromId, msg.fromName)
       }
     },
@@ -159,14 +166,14 @@ const nameSlice = createSlice({
       }
     },
 
-    DidLogout () {
+    [logout.type] () {
       return {
         names: {},
         getDisplayNamesURL: ''
       }
     },
 
-    UserWasKicked () {
+    [userWasKicked.type] () {
       return {
         names: {},
         getDisplayNamesURL: ''
@@ -192,8 +199,8 @@ export const selectDisplayNamesURL = (state: any): string => state.names.getDisp
 
 export const selectOwnAvatarName = createSelector(
   [
-    getIsLoggedIn,
-    getAgentId,
+    selectIsLoggedIn,
+    selectAgentId,
     selectNames
   ],
   (isLoggedIn, agentId, names) => isLoggedIn

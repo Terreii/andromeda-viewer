@@ -18,8 +18,8 @@ import AccountDialog from '../components/accountDialog'
 import { isSignedIn as getIsSignedIn } from '../actions/viewerAccount'
 
 import { selectIsSignedIn } from '../reducers/account'
-import { getIsLoggedIn } from '../selectors/session'
 import { selectOwnAvatarName } from '../reducers/names'
+import { selectIsLoggedIn } from '../reducers/session'
 
 import 'normalize.css'
 
@@ -67,7 +67,7 @@ export default function App () {
 
 function useDocumentTitle () {
   const selfName = useSelector(selectOwnAvatarName)
-  const isLoggedIn = useSelector(getIsLoggedIn)
+  const isLoggedIn = useSelector(selectIsLoggedIn)
 
   useEffect(() => {
     document.title = isLoggedIn
@@ -77,7 +77,7 @@ function useDocumentTitle () {
 }
 
 function NoMatchRedirect () {
-  const isLoggedIn = useSelector(getIsLoggedIn)
+  const isLoggedIn = useSelector(selectIsLoggedIn)
 
   return <Redirect to={isLoggedIn ? '/session' : '/'} />
 }

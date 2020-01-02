@@ -5,6 +5,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 import { UUID as LLUUID } from '../llsd'
+import { login, logout, userWasKicked, LoginAction } from './session'
 
 import {
   LocalChatMessage,
@@ -102,8 +103,8 @@ const chatSlice = createSlice({
   },
 
   extraReducers: {
-    didLogin (state, action) {
-      state.push(...action.localChatHistory.map((msg: any) => ({
+    [login.type] (state, action: PayloadAction<LoginAction>) {
+      state.push(...action.payload.localChatHistory.map((msg: any) => ({
         ...msg,
         chatType: LocalChatType[capitalize(msg.chatType) as any],
         sourceType: LocalChatSourceType[capitalize(msg.sourceType) as any],
@@ -119,17 +120,17 @@ const chatSlice = createSlice({
         chatType: LocalChatType.OwnerSay,
         audible: LocalChatAudible.Fully,
         position: [0, 0, 0],
-        message: action.sessionInfo.message,
-        time: action.sessionInfo.seconds_since_epoch * 1000,
+        message: action.payload.sessionInfo.message,
+        time: action.payload.sessionInfo.seconds_since_epoch * 1000,
         didSave: true
       })
     },
 
-    DidLogout () {
+    [logout.type] () {
       return []
     },
   
-    UserWasKicked () {
+    [userWasKicked.type] () {
       return []
     }
   }

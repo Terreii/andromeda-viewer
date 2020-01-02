@@ -304,8 +304,11 @@ describe('local chat', () => {
     ]
 
     const account = {
-      sync: true,
       loggedIn: true
+    }
+
+    const session = {
+      sync: true
     }
 
     for (let i = 0; i < 250; ++i) {
@@ -324,7 +327,7 @@ describe('local chat', () => {
           }
         }
       })
-    ])({ account, localChat })
+    ])({ account, session, localChat })
 
     await storeWithToMuch.dispatch(deleteOldLocalChat())
 
@@ -341,7 +344,7 @@ describe('local chat', () => {
           }
         }
       })
-    ])({ account, localChat: localChat.slice(0, 200) })
+    ])({ account, session, localChat: localChat.slice(0, 200) })
 
     await storeWithLess.dispatch(deleteOldLocalChat())
 

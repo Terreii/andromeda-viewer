@@ -4,6 +4,8 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
+import { login, logout, userWasKicked, LoginAction } from './session'
+
 import { getValueOf, mapBlockOf } from '../network/msgGetters'
 
 import { Friend } from '../types/people'
@@ -56,13 +58,13 @@ const friendsSlice = createSlice({
   },
 
   extraReducers: {
-    didLogin (state, action) {
+    [login.type] (state, action: PayloadAction<LoginAction>) {
       // If a avatar has no buddies, then the buddy-list doesn't exist!
-      if (!Array.isArray(action.sessionInfo['buddy-list'])) return state
+      if (!Array.isArray(action.payload.sessionInfo['buddy-list'])) return state
   
-      return action.sessionInfo['buddy-list'].map(friend => {
+      return action.payload.sessionInfo['buddy-list'].map(friend => {
         const rightsGiven = friend.buddy_rights_given // from me to friend
-        const rightsHas = friend.rights_has // Friend has given me rights
+        const rightsHas = friend.buddy_rights_has // Friend has given me rights
   
         return {
           id: friend.buddy_id,
@@ -72,8 +74,8 @@ const friendsSlice = createSlice({
       })
     },
 
-    DidLogout: () => [],
-    UserWasKicked: () => []
+    [logout.type]: () => [],
+    [userWasKicked.type]: () => []
   }
 })
 

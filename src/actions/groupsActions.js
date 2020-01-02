@@ -2,7 +2,7 @@
 import { chatSessionStarted } from '../reducers/groups'
 import { selectOwnAvatarName } from '../reducers/names'
 import { selectPosition } from '../reducers/region'
-import { getAgentId, getSessionId, getAvatarDataSaveId } from '../selectors/session'
+import { selectAgentId, selectSessionId, selectAvatarDataSaveId } from '../reducers/session'
 
 import { IMDialog } from '../types/chat'
 
@@ -12,8 +12,8 @@ export function startGroupChat (groups) {
 
     const AgentData = [
       {
-        AgentID: getAgentId(activeState),
-        SessionID: getSessionId(activeState)
+        AgentID: selectAgentId(activeState),
+        SessionID: selectSessionId(activeState)
       }
     ]
     const position = selectPosition(activeState)
@@ -36,7 +36,7 @@ export function startGroupChat (groups) {
       }, true)
     })
 
-    dispatch(chatSessionStarted(groups, getAvatarDataSaveId(activeState)))
+    dispatch(chatSessionStarted(groups, selectAvatarDataSaveId(activeState)))
   }
 }
 
@@ -47,8 +47,8 @@ export function acceptGroupInvitation (transactionId, groupId) {
     circuit.send('ImprovedInstantMessage', {
       AgentData: [
         {
-          AgentID: getAgentId(activeState),
-          SessionID: getSessionId(activeState)
+          AgentID: selectAgentId(activeState),
+          SessionID: selectSessionId(activeState)
         }
       ],
       MessageBlock: [
@@ -71,8 +71,8 @@ export function declineGroupInvitation (transactionId, groupId) {
     circuit.send('ImprovedInstantMessage', {
       AgentData: [
         {
-          AgentID: getAgentId(activeState),
-          SessionID: getSessionId(activeState)
+          AgentID: selectAgentId(activeState),
+          SessionID: selectSessionId(activeState)
         }
       ],
       MessageBlock: [

@@ -1,6 +1,7 @@
 import { createSlice, createSelector, PayloadAction } from '@reduxjs/toolkit'
 
-import { getActiveTab } from '../selectors/chat'
+import { logout, userWasKicked, selectActiveTab } from './session'
+
 import { Notification } from '../types/chat'
 
 const notificationSlice = createSlice({
@@ -26,12 +27,12 @@ const notificationSlice = createSlice({
   },
 
   extraReducers: {
-    DidLogout (state) {
+    [logout.type] (state) {
       state.active = []
       state.index = 0
     },
 
-    UserWasKicked (state) {
+    [userWasKicked.type] (state) {
       state.active = []
       state.index = 0
     }
@@ -47,7 +48,7 @@ export const selectNotifications = (state: any): Notification[] => state.notific
 export const selectShouldDisplayNotifications = createSelector(
   [
     selectNotifications,
-    getActiveTab
+    selectActiveTab
   ],
   (notifications, activeTab) => notifications.length > 0 || activeTab === 'notifications'
 )

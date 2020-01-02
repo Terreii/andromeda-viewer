@@ -10,7 +10,7 @@ import localChat from './localChat'
 import names from './names'
 import notifications from './notifications'
 import region from './region'
-import sessionReducer from './sessionReducer'
+import session from './session'
 
 const rootReducer = combineReducers({
   account,
@@ -23,7 +23,7 @@ const rootReducer = combineReducers({
   names,
   notifications,
   region,
-  session: sessionReducer
+  session
 })
 
 export default rootReducer

@@ -1,4 +1,6 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+
+import { login, logout, userWasKicked, LoginAction } from './session'
 
 import { getValueOf, getStringValueOf } from '../network/msgGetters'
 
@@ -55,19 +57,19 @@ const regionSlice = createSlice({
   reducers: {},
 
   extraReducers: {
-    didLogin (state, action: any) {
+    [login.type] (state, action: PayloadAction<LoginAction>) {
       state.position = []
-      state.lookAt = JSON.parse(action.sessionInfo.look_at.replace(/r/gi, '')) as number[]
+      state.lookAt = JSON.parse(action.payload.sessionInfo.look_at.replace(/r/gi, '')) as number[]
 
-      state.region.position.x = action.sessionInfo.region_x as number
-      state.region.position.y = action.sessionInfo.region_y as number
+      state.region.position.x = action.payload.sessionInfo.region_x
+      state.region.position.y = action.payload.sessionInfo.region_y
 
-      state.sim.ip = action.sessionInfo.sim_ip as string
-      state.sim.port = action.sessionInfo.sim_port as number
-      state.sim.seedCapability = action.sessionInfo.seed_capability as string
-      state.circuitCode = action.sessionInfo.circuit_code as number
+      state.sim.ip = action.payload.sessionInfo.sim_ip
+      state.sim.port = action.payload.sessionInfo.sim_port
+      state.sim.seedCapability = action.payload.sessionInfo.seed_capability
+      state.circuitCode = action.payload.sessionInfo.circuit_code
 
-      state.region.access = parseMaturity(action.sessionInfo.agent_region_access)
+      state.region.access = parseMaturity(action.payload.sessionInfo.agent_region_access)
     },
 
     RegionHandshake (state, action: any) {
@@ -112,10 +114,10 @@ const regionSlice = createSlice({
       state.sim.eventQueueGetUrl = action.capabilities.EventQueueGet
     },
 
-    DidLogout () {
+    [logout.type] () {
       return getInitialState()
     },
-    UserWasKicked () {
+    [userWasKicked.type] () {
       return getInitialState()
     }
   }

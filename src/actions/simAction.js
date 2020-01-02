@@ -2,7 +2,7 @@ import { receiveChatFromSimulator, receiveIM } from './chatMessageActions'
 import { getValueOf } from '../network/msgGetters'
 
 import { changeRights } from '../reducers/friends'
-import { getAgentId, getSessionId } from '../selectors/session'
+import { selectAgentId, selectSessionId } from '../reducers/session'
 
 // Gets all messages from the SIM and filters them, and if needed: calls their own actions.
 function simActionFilter (msg) {
@@ -44,7 +44,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 function parseUserRights (message) {
   return (dispatch, getState) => {
-    dispatch(changeRights(message, getAgentId(getState())))
+    dispatch(changeRights(message, selectAgentId(getState())))
   }
 }
 
@@ -58,8 +58,8 @@ function sendRegionHandshakeReply (RegionHandshake) {
     circuit.send('RegionHandshakeReply', {
       AgentData: [
         {
-          AgentID: getAgentId(state),
-          SessionID: getSessionId(state)
+          AgentID: selectAgentId(state),
+          SessionID: selectSessionId(state)
         }
       ],
       RegionInfo: [

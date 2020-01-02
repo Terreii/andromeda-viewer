@@ -15,14 +15,13 @@ import { selectActiveIMChats } from '../reducers/imChat'
 import { selectLocalChat } from '../reducers/localChat'
 import { selectNames } from '../reducers/names'
 import { selectShouldDisplayNotifications } from '../reducers/notifications'
-
-import { getActiveTab } from '../selectors/chat'
+import { selectActiveTab } from '../reducers/session'
 
 import ChatBox from '../components/chatBox'
 
 const mapStateToProps = state => {
   return {
-    activeTab: getActiveTab(state),
+    activeTab: selectActiveTab(state),
     friends: selectFriends(state),
     groups: selectGroups(state),
     IMs: selectActiveIMChats(state),

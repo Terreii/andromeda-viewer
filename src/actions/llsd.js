@@ -1,8 +1,8 @@
 import LLSD, { Binary, URI, UUID } from '../llsd'
 import caps from './capabilities.json'
 
-import { getAvatarIdentifier } from '../selectors/session'
 import { selectEventQueueGetUrl } from '../reducers/region'
+import { selectAvatarIdentifier } from '../reducers/session'
 
 async function parseLLSD (response) {
   const body = await response.text()
@@ -57,10 +57,10 @@ export function fetchSeedCapabilities (url) {
 // http://wiki.secondlife.com/wiki/EventQueueGet
 async function * eventQueueGet (getState) {
   const url = selectEventQueueGetUrl(getState())
-  const avatarIdentifier = getAvatarIdentifier(getState())
+  const avatarIdentifier = selectAvatarIdentifier(getState())
   let ack = 0
 
-  while (getAvatarIdentifier(getState()) === avatarIdentifier) {
+  while (selectAvatarIdentifier(getState()) === avatarIdentifier) {
     let response
     try {
       response = await minimalFetchLLSD('POST', url, { done: false, ack })

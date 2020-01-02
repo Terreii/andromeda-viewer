@@ -26,7 +26,7 @@ import {
   selectSavedGrids,
   selectSavedGridsAreLoaded
 } from '../reducers/account'
-import { getIsLoggedIn } from '../selectors/session'
+import { selectIsLoggedIn } from '../reducers/session'
 
 import { IMChatType } from '../types/chat'
 
@@ -459,7 +459,7 @@ export function deleteAccount () {
  */
 function logoutAvatar () {
   return async (dispatch, getState) => {
-    if (getIsLoggedIn(getState())) {
+    if (selectIsLoggedIn(getState())) {
       const { logout } = await import('./sessionActions')
       await dispatch(logout())
     }

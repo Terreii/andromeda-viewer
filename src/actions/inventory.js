@@ -4,7 +4,7 @@ import { UUID as LLUUID } from '../llsd'
 
 import { selectFolderForAssetType } from '../reducers/inventory'
 import { selectOwnAvatarName } from '../reducers/names'
-import { getAgentId, getSessionId } from '../selectors/session'
+import { selectAgentId, selectSessionId } from '../reducers/session'
 
 import { IMDialog } from '../types/chat'
 import { AssetType } from '../types/inventory'
@@ -46,8 +46,8 @@ function handleInventoryOffer (
     circuit.send('ImprovedInstantMessage', {
       AgentData: [
         {
-          AgentID: getAgentId(activeState),
-          SessionID: getSessionId(activeState)
+          AgentID: selectAgentId(activeState),
+          SessionID: selectSessionId(activeState)
         }
       ],
       MessageBlock: [

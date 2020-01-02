@@ -9,8 +9,7 @@ import {
   selectDisplayNamesURL,
   selectOwnAvatarName
 } from '../reducers/names'
-
-import { getAgentId, getSessionId } from '../selectors/session'
+import { selectAgentId, selectSessionId } from '../reducers/session'
 
 import { IMDialog } from '../types/chat'
 import { AssetType } from '../types/inventory'
@@ -76,7 +75,7 @@ export function getAllFriendsDisplayNames () {
     const names = selectNames(state)
     const friendsIds = selectFriends(state)
       .map(friend => friend.id)
-      .concat([getAgentId(state)]) // Add self
+      .concat([selectAgentId(state)]) // Add self
       .filter(id => !(id in names) || !names[id].willHaveDisplayName()) // unknown only
 
     dispatch(loadDisplayNames(friendsIds))
@@ -107,8 +106,8 @@ export function updateRights (friendUUID, changedRights) {
     circuit.send('GrantUserRights', {
       AgentData: [
         {
-          AgentID: getAgentId(state),
-          SessionID: getSessionId(state)
+          AgentID: selectAgentId(state),
+          SessionID: selectSessionId(state)
         }
       ],
       Rights: [
@@ -128,8 +127,8 @@ export function acceptFriendshipOffer (agentId, sessionId) {
     circuit.send('AcceptFriendship', {
       AgentData: [
         {
-          AgentID: getAgentId(state),
-          SessionID: getSessionId(state)
+          AgentID: selectAgentId(state),
+          SessionID: selectSessionId(state)
         }
       ],
       TransactionBlock: [
@@ -156,8 +155,8 @@ export function declineFriendshipOffer (agentId, sessionId) {
     circuit.send('DeclineFriendship', {
       AgentData: [
         {
-          AgentID: getAgentId(state),
-          SessionID: getSessionId(state)
+          AgentID: selectAgentId(state),
+          SessionID: selectSessionId(state)
         }
       ],
       TransactionBlock: [
@@ -186,8 +185,8 @@ export function offerTeleportLure (target, message = null) {
     circuit.send('StartLure', {
       AgentData: [
         {
-          AgentID: getAgentId(activeState),
-          SessionID: getSessionId(activeState)
+          AgentID: selectAgentId(activeState),
+          SessionID: selectSessionId(activeState)
         }
       ],
       Info: [
@@ -212,8 +211,8 @@ export function acceptTeleportLure (targetId, lureId) {
     circuit.send('TeleportLureRequest', {
       Info: [
         {
-          AgentID: getAgentId(activeState),
-          SessionID: getSessionId(activeState),
+          AgentID: selectAgentId(activeState),
+          SessionID: selectSessionId(activeState),
           LureID: lureId,
           TeleportFlags: TeleportFlags.viaLure
         }
@@ -229,8 +228,8 @@ export function declineTeleportLure (targetId, lureId) {
     circuit.send('ImprovedInstantMessage', {
       AgentData: [
         {
-          AgentID: getAgentId(activeState),
-          SessionID: getSessionId(activeState)
+          AgentID: selectAgentId(activeState),
+          SessionID: selectSessionId(activeState)
         }
       ],
       MessageBlock: [

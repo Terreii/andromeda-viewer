@@ -35,9 +35,13 @@ import {
 import { selectAvatarNameById, selectOwnAvatarName } from '../reducers/names'
 import { receive as notificationActionCreator } from '../reducers/notifications'
 
-import { getShouldSaveChat } from '../selectors/chat'
-import { getAvatarDataSaveId, getAgentId, getSessionId } from '../selectors/session'
 import { selectRegionId, selectParentEstateID, selectPosition } from '../reducers/region'
+import {
+  selectAgentId,
+  selectSessionId,
+  selectAvatarDataSaveId,
+  selectShouldSaveChat
+} from '../reducers/session'
 
 import { Maturity } from '../types/viewer'
 import {
@@ -70,8 +74,8 @@ export function sendLocalChatMessage (text, type, channel) {
     circuit.send('ChatFromViewer', {
       AgentData: [
         {
-          AgentID: getAgentId(activeState),
-          SessionID: getSessionId(activeState)
+          AgentID: selectAgentId(activeState),
+          SessionID: selectSessionId(activeState)
         }
       ],
       ChatData: [
@@ -102,8 +106,8 @@ export function sendInstantMessage (text, to, id, dialog = IMDialog.MessageFromA
     const msg = {
       AgentData: [
         {
-          AgentID: getAgentId(activeState),
-          SessionID: getSessionId(activeState)
+          AgentID: selectAgentId(activeState),
+          SessionID: selectSessionId(activeState)
         }
       ],
       MessageBlock: [
@@ -158,7 +162,7 @@ export function receiveChatFromSimulator (msg) {
     const time = new Date()
 
     dispatch(localChatReceived({
-      _id: `${getAvatarDataSaveId(getState())}/localchat/${time.toJSON()}`,
+      _id: `${selectAvatarDataSaveId(getState())}/localchat/${time.toJSON()}`,
 
       fromName: getStringValueOf(msg, 'ChatData', 'FromName'),
       fromId: getValueOf(msg, 'ChatData', 'SourceID'),
@@ -239,7 +243,7 @@ export function deleteOldLocalChat () {
 
   return (dispatch, getState, { hoodie }) => {
     const activeState = getState()
-    if (!getShouldSaveChat(activeState)) return Promise.resolve()
+    if (!selectShouldSaveChat(activeState)) return Promise.resolve()
 
     const localChat = selectLocalChat(activeState)
     if (localChat.length <= maxLocalChatHistory) return Promise.resolve()
@@ -268,8 +272,8 @@ export function retrieveInstantMessages () {
     circuit.send('RetrieveInstantMessages', {
       AgentData: [
         {
-          AgentID: getAgentId(state),
-          SessionID: getSessionId(state)
+          AgentID: selectAgentId(state),
+          SessionID: selectSessionId(state)
         }
       ]
     }, true)
@@ -415,7 +419,7 @@ function handleIM (msg) {
     const id = getValueOf(msg, 'MessageBlock', 'ID')
     const fromAgentId = getValueOf(msg, 'AgentData', 'AgentID')
     const fromAgentName = getStringValueOf(msg, 'MessageBlock', 'FromAgentName')
-    const avatarSaveId = getAvatarDataSaveId(state)
+    const avatarSaveId = selectAvatarDataSaveId(state)
 
     const time = new Date()
     const timeStamp = +getValueOf(msg, 'MessageBlock', 'Timestamp')
@@ -470,7 +474,7 @@ function handleGroupIM (msg) {
       chatType: IMChatType.group,
       session: id,
       msg: {
-        _id: `${getAvatarDataSaveId(state)}/imChats/${chat.saveId}/${time.toJSON()}`,
+        _id: `${selectAvatarDataSaveId(state)}/imChats/${chat.saveId}/${time.toJSON()}`,
         fromName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
         fromId: getValueOf(msg, 'AgentData', 'AgentID'),
         message: getStringValueOf(msg, 'MessageBlock', 'Message'),
@@ -489,7 +493,7 @@ function handleConferenceIM (msg) {
     const state = getState()
 
     const id = getValueOf(msg, 'MessageBlock', 'ID')
-    const avatarSaveId = getAvatarDataSaveId(state)
+    const avatarSaveId = selectAvatarDataSaveId(state)
     const time = new Date()
     const timeStamp = +getValueOf(msg, 'MessageBlock', 'Timestamp')
     if (timeStamp !== 0) {
@@ -535,7 +539,7 @@ function handleBusyAutoResponse (msg) {
     const chat = selectIMChats(state)[id]
     if (chat == null || chat.type !== IMChatType.personal) return
 
-    const avatarSaveId = getAvatarDataSaveId(state)
+    const avatarSaveId = selectAvatarDataSaveId(state)
     const time = new Date()
 
     dispatch(receivedIM({
@@ -572,7 +576,7 @@ function handleSystemMessageToIM (msg) {
       type: 'SYSTEM_IM_RECEIVED',
       sessionId: id,
       msg: {
-        _id: `${getAvatarDataSaveId(state)}/imChats/${chat.saveId}/${time.toJSON()}`,
+        _id: `${selectAvatarDataSaveId(state)}/imChats/${chat.saveId}/${time.toJSON()}`,
         fromName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName') || 'Second Life',
         fromId: LLUUID.nil,
         offline: getValueOf(msg, 'MessageBlock', 'Offline'),
@@ -893,7 +897,7 @@ export function getLocalChatHistory (avatarDataSaveId) {
  */
 export function startNewIMChat (chatType, targetId, name) {
   return (dispatch, getState) => {
-    const sessionId = calcSessionId(chatType, targetId, getAgentId(getState()))
+    const sessionId = calcSessionId(chatType, targetId, selectAgentId(getState()))
 
     if (chatType === IMChatType.personal) {
       try {
@@ -928,7 +932,7 @@ function createNewIMChat (chatType, sessionId, target, name) {
     const saveId = uuid()
 
     dispatch(createIMChat({
-      _id: `${getAvatarDataSaveId(activeState)}/imChatsInfos/${saveId}`,
+      _id: `${selectAvatarDataSaveId(activeState)}/imChatsInfos/${saveId}`,
       chatType,
       sessionId,
       saveId,
@@ -977,7 +981,7 @@ export function loadIMChats () {
     // Only load the history if the user is logged into a viewer-account.
     if (!selectIsSignedIn(activeState)) return
 
-    const avatarDataSaveId = getAvatarDataSaveId(activeState)
+    const avatarDataSaveId = selectAvatarDataSaveId(activeState)
     const store = hoodie.cryptoStore.withIdPrefix(`${avatarDataSaveId}/imChatsInfos/`)
     store.findAll().then(result => {
       dispatch(imInfosLoaded(
@@ -1009,7 +1013,7 @@ export function getIMHistory (sessionId, chatSaveId) {
     dispatch(imHistoryLoadingStarted({ sessionId }))
 
     const activeState = getState()
-    const chatSavePrefix = `${getAvatarDataSaveId(activeState)}/imChats/${chatSaveId}`
+    const chatSavePrefix = `${selectAvatarDataSaveId(activeState)}/imChats/${chatSaveId}`
 
     const chat = selectIMChats(activeState)[sessionId]
     // get the _id of the oldest loaded msg

@@ -8,13 +8,13 @@ import { logout } from '../actions/sessionActions'
 import { showSignOutPopup, showSignInPopup } from '../actions/viewerAccount'
 
 import { selectIsSignedIn, selectUserName } from '../reducers/account'
-import { getIsLoggedIn } from '../selectors/session'
 import { selectOwnAvatarName } from '../reducers/names'
+import { selectIsLoggedIn } from '../reducers/session'
 
 export default function TopBarContainer (props) {
   const isSignedIn = useSelector(selectIsSignedIn)
   const userName = useSelector(selectUserName)
-  const isLoggedIn = useSelector(getIsLoggedIn)
+  const isLoggedIn = useSelector(selectIsLoggedIn)
   const avatarName = useSelector(selectOwnAvatarName)
 
   const dispatch = useDispatch()
