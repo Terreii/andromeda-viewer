@@ -258,7 +258,7 @@ function createReceivedMessage (
 
   const msg = {
     name: template.name,
-    type: 'UDP' + template.name, // for directly dispatching to redux
+    type: 'udp/' + template.name, // for directly dispatching to redux
     trusted: template.trusted,
     isReliable,
     isResend,

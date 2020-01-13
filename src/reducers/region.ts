@@ -77,13 +77,13 @@ const regionSlice = createSlice({
       state.region.flags = action.flags
     },
 
-    UDPAgentMovementComplete (state, action: any) {
+    'udp/AgentMovementComplete' (state, action: any) {
       state.position = getValueOf(action, 'Data', 'Position') as number[]
       state.lookAt = getValueOf(action, 'Data', 'LookAt') as number[]
       state.region.handle = getValueOf(action, 'Data', 'RegionHandle') as number[]
     },
 
-    UDPRegionInfo (state, action: any) {
+    'udp/RegionInfo' (state, action: any) {
       // TODO: EstateID, ParentEstateID
       state.sim.name = getStringValueOf(action, 'RegionInfo', 0, 'SimName') as string
       state.sim.access = getValueOf(action, 'RegionInfo', 0, 'SimAccess') as number

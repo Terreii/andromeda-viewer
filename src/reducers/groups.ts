@@ -45,7 +45,7 @@ const groupSlice = createSlice({
   },
 
   extraReducers: {
-    UDPAvatarGroupsReply (state, action) {
+    'udp/AvatarGroupsReply' (state, action) {
       if (
         getValueOf(action, 'AgentData', 0, 'AgentID') ===
         getValueOf(action, 'AgentData', 0, 'AvatarID')

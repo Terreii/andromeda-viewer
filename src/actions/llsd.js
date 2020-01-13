@@ -60,7 +60,7 @@ async function * eventQueueGet (getState) {
   const avatarIdentifier = selectAvatarIdentifier(getState())
   let ack = 0
 
-  while (selectAvatarIdentifier(getState()) === avatarIdentifier) {
+  do {
     let response
     try {
       response = await minimalFetchLLSD('POST', url, { done: false, ack })
@@ -94,7 +94,7 @@ async function * eventQueueGet (getState) {
       await new Promise(resolve => { setTimeout(resolve, 200) })
       continue
     }
-  }
+  } while (selectAvatarIdentifier(getState()) === avatarIdentifier)
 
   minimalFetchLLSD('POST', url, { done: true, ack })
     .catch(() => {})
