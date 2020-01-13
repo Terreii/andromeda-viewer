@@ -73,7 +73,9 @@ async function * eventQueueGet (getState) {
     if (response.status >= 200 && response.status < 300) {
       const body = await parseLLSD(response)
       ack = body.id
-      yield body.events
+      for (const event of body.events) {
+        yield event
+      }
     } else if (response.status === 404) { // Session did end
       return []
     } else if (response.status === 502 || response.status === 499) {
@@ -100,18 +102,18 @@ async function * eventQueueGet (getState) {
 
 function activateEventQueue () {
   return async (dispatch, getState) => {
-    for await (const eventQueueEvents of eventQueueGet(getState)) {
-      for (const event of eventQueueEvents) {
-        try {
-          toJSON(event.body)
-          dispatch({
-            type: 'EVENT_QUEUE_' + event.message,
-            message: event.message,
-            body: event.body
-          })
-        } catch (err) {
-          console.error(err)
-        }
+    for await (const event of eventQueueGet(getState)) {
+      try {
+        toJSON(event.body)
+        dispatch({
+          type: 'eventQueue/' + event.message,
+          payload: event.body,
+          meta: {
+            message: event.message
+          }
+        })
+      } catch (err) {
+        console.error(err)
       }
     }
   }

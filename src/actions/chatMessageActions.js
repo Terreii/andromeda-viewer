@@ -40,7 +40,9 @@ import {
   selectAgentId,
   selectSessionId,
   selectAvatarDataSaveId,
-  selectShouldSaveChat
+  selectShouldSaveChat,
+
+  changeChatTab
 } from '../reducers/session'
 
 import { Maturity } from '../types/viewer'
@@ -52,13 +54,6 @@ import {
   LocalChatType,
   LocalChatAudible
 } from '../types/chat'
-
-export function changeTab (newTab) {
-  return {
-    type: 'CHAT_TAB_CHANGED',
-    key: newTab
-  }
-}
 
 /*
  *
@@ -909,7 +904,7 @@ export function startNewIMChat (chatType, targetId, name) {
 
     dispatch(createNewIMChat(chatType, sessionId, targetId, name))
     dispatch(activateIMChat(sessionId))
-    dispatch(changeTab(sessionId))
+    dispatch(changeChatTab(sessionId))
 
     return sessionId
   }

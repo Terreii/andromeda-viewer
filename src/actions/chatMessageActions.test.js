@@ -1088,8 +1088,8 @@ describe('save, loading and sending IMs', () => {
         payload: '12c6999b-70bf-0944-365d-78326dd6d6bc'
       },
       {
-        type: 'CHAT_TAB_CHANGED',
-        key: '12c6999b-70bf-0944-365d-78326dd6d6bc'
+        type: 'session/changeChatTab',
+        payload: '12c6999b-70bf-0944-365d-78326dd6d6bc'
       },
 
       // Conference
@@ -1109,8 +1109,8 @@ describe('save, loading and sending IMs', () => {
         payload: 'ee6af506-fa78-408d-869f-78305b3889c3'
       },
       {
-        type: 'CHAT_TAB_CHANGED',
-        key: 'ee6af506-fa78-408d-869f-78305b3889c3'
+        type: 'session/changeChatTab',
+        payload: 'ee6af506-fa78-408d-869f-78305b3889c3'
       }
     ])
   })

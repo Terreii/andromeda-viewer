@@ -306,12 +306,12 @@ it('saveGrid', async () => {
 
   await expect(store.dispatch(saveGrid({
     name: 'Second Life',
-    url: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
+    loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
   }))).rejects.toThrow('Grid already exist!')
 
   await store.dispatch(saveGrid({
     name: 'AwsomeGrid',
-    url: 'https://login.grid.org/login'
+    loginURL: 'https://login.grid.org/login'
   }))
 
   expect(add.mock.calls.length).toBe(1)

@@ -70,9 +70,9 @@ const groupSlice = createSlice({
       }
     },
 
-    EVENT_QUEUE_AgentGroupDataUpdate (state, action) {
+    'eventQueue/AgentGroupDataUpdate' (state, action: PayloadAction<any>) {
       // this is OK, because the max number of groups an user can join is 60.
-      for (const groupData of action.body.GroupData) {
+      for (const groupData of action.payload.GroupData) {
         const id = groupData.GroupID as string
         const index = state.findIndex(group => group.id === id)
 

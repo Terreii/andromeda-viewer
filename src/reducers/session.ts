@@ -19,6 +19,8 @@ const sessionSlice = createSlice({
   initialState: getDefaultState(),
 
   reducers: {
+    startLogin (state, action: PayloadAction<{ name: AvatarName, grid: Grid, sync: boolean }>) {},
+
     // didLogin
     login (state, action: PayloadAction<LoginAction>) {
       state.avatarIdentifier = action.payload.avatarIdentifier
@@ -82,6 +84,7 @@ const sessionSlice = createSlice({
 export default sessionSlice.reducer
 
 export const {
+  startLogin,
   login,
   loginFailed,
   changeChatTab,

@@ -18,6 +18,7 @@ import connectCircuit from './connectCircuit'
 
 import { selectSavedAvatars, selectSavedGrids } from '../reducers/account'
 import {
+  startLogin,
   login as loginAction,
   loginFailed,
   startLogout,
@@ -36,19 +37,18 @@ export function login (avatarName, password, grid, save, isNew) {
   return async (dispatch, getState, extra) => {
     if (selectIsLoggedIn(getState())) throw new Error('There is already an avatar logged in!')
 
-    dispatch({
-      type: 'startLogin',
+    dispatch(startLogin({
       name: avatarName,
       grid,
       sync: save
-    })
+    }))
 
     const hash = crypto.createHash('md5')
     hash.update(password, 'ascii')
     const finalPassword = '$1$' + hash.digest('hex')
 
     const viewerData = {
-      loginUrl: grid.url,
+      loginUrl: grid.loginURL,
       userId: null
     }
 

@@ -296,7 +296,7 @@ test('adding new grid', () => {
     password: 'secret',
     grid: {
       name: 'Alpha Grid',
-      url: 'https://alpha-grid.com/login',
+      loginUrl: 'https://alpha-grid.com/login',
       isLoginLLSD: true
     },
     save: true
@@ -317,7 +317,7 @@ test('adding new grid', () => {
     password: 'secret',
     grid: {
       name: 'Alpha Grid',
-      url: 'https://alpha-grid.com/login',
+      loginUrl: 'https://alpha-grid.com/login',
       isLoginLLSD: false
     },
     save: true

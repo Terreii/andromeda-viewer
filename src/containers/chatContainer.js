@@ -1,7 +1,6 @@
 import { connect } from 'react-redux'
 
 import {
-  changeTab,
   sendLocalChatMessage,
   sendInstantMessage,
   startNewIMChat,
@@ -15,7 +14,7 @@ import { selectActiveIMChats } from '../reducers/imChat'
 import { selectLocalChat } from '../reducers/localChat'
 import { selectNames } from '../reducers/names'
 import { selectShouldDisplayNotifications } from '../reducers/notifications'
-import { selectActiveTab } from '../reducers/session'
+import { selectActiveTab, changeChatTab } from '../reducers/session'
 
 import ChatBox from '../components/chatBox'
 
@@ -32,7 +31,7 @@ const mapStateToProps = state => {
 }
 
 const mapDispatchToProps = {
-  changeTab,
+  changeTab: changeChatTab,
   sendLocalChatMessage: text => sendLocalChatMessage(text, 1, 0),
   sendInstantMessage,
   startNewIMChat,

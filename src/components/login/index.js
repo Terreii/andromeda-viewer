@@ -92,16 +92,10 @@ export default function LoginForm ({ isSignedIn, avatars, grids, login, showSign
         return
       }
 
-      const gridData = {
-        isLLSDLogin: grid.isLLSDLogin || false,
-        name: grid.name,
-        url: grid.url || grid.loginURL
-      }
-
       const avatarName = new AvatarName(name)
       setIsLoggingIn(name)
 
-      await login(avatarName, password, gridData, save, isNew)
+      await login(avatarName, password, grid, save, isNew)
       history.push('/session')
     } catch (err) {
       console.error(err)

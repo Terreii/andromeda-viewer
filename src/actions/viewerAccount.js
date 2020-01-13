@@ -121,7 +121,7 @@ export function saveGrid (newGrid) {
 
     return hoodie.cryptoStore.withIdPrefix('grids/').add({
       name,
-      loginURL: newGrid.url,
+      loginURL: newGrid.loginURL,
       isLLSDLogin: false
     })
   }

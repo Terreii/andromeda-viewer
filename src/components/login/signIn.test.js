@@ -25,7 +25,7 @@ test('on buttons click', () => {
   })
 
   expect(callbackData).toEqual([
-    undefined, // singIn
+    'signIn',
     'signUp'
   ])
 })
