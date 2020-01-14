@@ -1,8 +1,8 @@
 import { useMemo, useCallback } from 'react'
 import { useSelector } from 'react-redux'
 
-import { selectNames, selectAvatarNameById } from '../reducers/names'
-import { selectGroups } from '../reducers/groups'
+import { selectNames, selectAvatarNameById } from '../bundles/names'
+import { selectGroups } from '../bundles/groups'
 
 export function useNames (...ids: string[]) {
   const names = useSelector(selectNames)

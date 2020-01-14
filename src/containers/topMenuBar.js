@@ -7,9 +7,9 @@ import TopBar from '../components/topBar'
 import { logout } from '../actions/sessionActions'
 import { showSignOutPopup, showSignInPopup } from '../actions/viewerAccount'
 
-import { selectIsSignedIn, selectUserName } from '../reducers/account'
-import { selectOwnAvatarName } from '../reducers/names'
-import { selectIsLoggedIn } from '../reducers/session'
+import { selectIsSignedIn, selectUserName } from '../bundles/account'
+import { selectOwnAvatarName } from '../bundles/names'
+import { selectIsLoggedIn } from '../bundles/session'
 
 export default function TopBarContainer (props) {
   const isSignedIn = useSelector(selectIsSignedIn)

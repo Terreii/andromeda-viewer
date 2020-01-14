@@ -17,9 +17,9 @@ import AccountDialog from '../components/accountDialog'
 
 import { isSignedIn as getIsSignedIn } from '../actions/viewerAccount'
 
-import { selectIsSignedIn } from '../reducers/account'
-import { selectOwnAvatarName } from '../reducers/names'
-import { selectIsLoggedIn } from '../reducers/session'
+import { selectIsSignedIn } from '../bundles/account'
+import { selectOwnAvatarName } from '../bundles/names'
+import { selectIsLoggedIn } from '../bundles/session'
 
 import 'normalize.css'
 

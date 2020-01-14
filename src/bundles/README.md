@@ -1,75 +1,27 @@
+# Bundles
+
+Bundles are the core state management. Export:
+- A [redux reducer](#reducers) ([redux.js.org](https://redux.js.org/)) build by [redux-toolkit](https://redux-toolkit.js.org/)'s [`createSlic`e](https://redux-toolkit.js.org/api/createslice/)
+- [Actions](#actions) to change the state (build by createSlice)
+- [Selectors](#selectors) to access and derive state
+
 ## Reducers
 
 Reducers are at the core of state updates and define how the state changes.
 
 Every reducer is a *pure function*, that takes 2 arguments: the *old state* and an *action* and returns the update state. The updated state __must__ be the same object as the old state, if nothing changed, and a new object, if something did change.
 
+They get created using redux-toolkit's [`createReducer()`](https://redux-toolkit.js.org/api/createReducer) or with [`createSlice()`](https://redux-toolkit.js.org/api/createslice/). 
+
 Creating a new object/array allows later code to check for changes with a `old === new`.
 
-__For a tutorial of reducers (and redux) visit [redux.js.org](https://redux.js.org/).__ Here is a quick overview.
+__For a tutorial of reducers (and redux) visit [redux.js.org](https://redux.js.org/) and [redux-toolkit's quick start](https://redux-toolkit.js.org/introduction/quick-start).__ Here is a quick overview.
 
-### General structure
+Reducers created with `createReducer()` and `createSlice()` (which uses `createReducer()`) are lookup tables. They receive the old state and the action. They can also ["mutate"](https://redux-toolkit.js.org/api/createReducer#direct-state-mutation "documentation about the direct-state mutation") the state, because `createReducer` uses [immer.js](https://immerjs.github.io/immer/docs/introduction "Introduction to Immer").
 
-A reducer is a big switch statement. Where it checks the action type (`switch (action.type) {`). And every branch handles one or more actions. They all must return the old state or an updated version.
+## Actions
 
-There must also be a default-branch. It must return the old state.
-
-#### Actions that are not relevant
-
-If an action is not relevant for that reducer, then the reducer __must__ return the old state.
-
-#### Actions that are relevant
-
-If the action is relevant, for this reducer, the actions data should get used to construct an updated state from the old state. This updated state *must* be a new object/copy.
-
-Arrays should get updated with methods that create a new Array. They are: `concat` (for adding), `map` (for updating), `filter` (for removing) and if needed `reduce`.
-
-```javascript
-function todo (state = [], action) {
-  switch (action.type) {
-    case 'ADD_TODO':
-      return state.concat([ // A new copy of an array must be created
-        action.todo
-      ])
-
-    case 'REMOVE_TODO':
-      return state.filter(todo => todo.id !== action.id)
-
-    default:
-      return state
-  }
-}
-```
-
-Object get also updated with functions that create new Objects. This can be `Object.assign({}, oldState, changes)` or using the spread operator `{ ...oldState, changes }`.
-
-```javascript
-function names (state = {}, action) {
-  switch (action.type) {
-    case 'NEW_NAME':
-      return {
-        ...state,
-        [action.id]: action.name
-      }
-      /*
-       * this can also be:
-       * return Object.assign({}, state, {
-       *   [action.id]: action.name
-       * })
-       */
-
-    case 'REMOVE_NAME':
-      const updated = { ...state }
-      delete updated[action.id]
-      return updated
-
-    default:
-      return state
-  }
-}
-```
-
-If nothing changes (this includes state from sub-reducers), than the old state should get returned.
+The actions exported by the bundles are [action creators](https://redux.js.org/basics/actions#action-creators "Redux tutorial on actions and action creators"). [Thunk actions](https://github.com/reduxjs/redux-thunk "redux-thunk repository") are for now located in [actions](../actions).
 
 ## Selectors
 
@@ -88,7 +40,7 @@ const loggedIn = isLoggedIn(store.getState())
 
 There are 2 types of selectors:
 - Normal pure functions. They return a value in the state, without changing it much.
-- Selectors from [reselect](https://www.npmjs.com/package/reselect) and similar.
+- Selectors from [reselect](https://www.npmjs.com/package/reselect) and similar. Redux-toolkit exports [createSelector](https://redux-toolkit.js.org/api/createSelector). It should get used.
 
 ### Pure function selectors
 
@@ -125,4 +77,3 @@ For example could the map work with following selectors:
 - Get the zoom level.
 - Get the position on the map.
 - Get the img-src array of the displayed area in that zoom level.
-

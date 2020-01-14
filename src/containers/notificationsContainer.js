@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 import { bindActionCreators } from 'redux'
 import { useSelector, useDispatch } from 'react-redux'
 
-import { close as closeNotification, selectNotifications } from '../reducers/notifications'
+import { close as closeNotification, selectNotifications } from '../bundles/notifications'
 import {
   acceptFriendshipOffer,
   declineFriendshipOffer,

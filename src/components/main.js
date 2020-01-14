@@ -2,7 +2,7 @@ import React, { lazy, Suspense } from 'react'
 import { useSelector } from 'react-redux'
 import { Redirect } from 'react-router-dom'
 
-import { selectIsLoggedIn } from '../reducers/session'
+import { selectIsLoggedIn } from '../bundles/session'
 
 import styles from './main.module.css'
 

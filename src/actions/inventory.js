@@ -2,9 +2,9 @@
 
 import { UUID as LLUUID } from '../llsd'
 
-import { selectFolderForAssetType } from '../reducers/inventory'
-import { selectOwnAvatarName } from '../reducers/names'
-import { selectAgentId, selectSessionId } from '../reducers/session'
+import { selectFolderForAssetType } from '../bundles/inventory'
+import { selectOwnAvatarName } from '../bundles/names'
+import { selectAgentId, selectSessionId } from '../bundles/session'
 
 import { IMDialog } from '../types/chat'
 import { AssetType } from '../types/inventory'

@@ -2,7 +2,7 @@ import { createSelector } from 'reselect'
 
 import { startGroupChat } from '../actions/groupsActions'
 
-import { selectGroupsWithNoActiveChat } from '../reducers/groups'
+import { selectGroupsWithNoActiveChat } from '../bundles/groups'
 
 export const groupsDidLoad = createSelector(
   [

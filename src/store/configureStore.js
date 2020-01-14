@@ -1,6 +1,6 @@
 import { configureStore, getDefaultMiddleware, isPlain } from '@reduxjs/toolkit'
 
-import rootReducer from '../reducers'
+import rootReducer from '../bundles'
 import configureReactors from './configureReactors'
 
 import AvatarName from '../avatarName'
@@ -35,7 +35,7 @@ export default function (preloadedState) {
   if (process.env.NODE_ENV !== 'production') {
     if (module.hot) {
       // Enable Webpack hot module replacement for reducers
-      module.hot.accept('../reducers', () => {
+      module.hot.accept('../bundles', () => {
         store.replaceReducer(rootReducer)
       })
     }

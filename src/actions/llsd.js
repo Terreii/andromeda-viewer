@@ -1,8 +1,8 @@
 import LLSD, { Binary, URI, UUID } from '../llsd'
 import caps from './capabilities.json'
 
-import { selectEventQueueGetUrl } from '../reducers/region'
-import { selectAvatarIdentifier } from '../reducers/session'
+import { selectEventQueueGetUrl } from '../bundles/region'
+import { selectAvatarIdentifier } from '../bundles/session'
 
 async function parseLLSD (response) {
   const body = await response.text()

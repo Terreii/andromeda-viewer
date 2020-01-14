@@ -6,7 +6,7 @@ import Login from '../components/login/'
 import { login } from '../actions/sessionActions'
 import { showSignInPopup } from '../actions/viewerAccount'
 
-import { selectSavedAvatars, selectSavedGrids } from '../reducers/account'
+import { selectSavedAvatars, selectSavedGrids } from '../bundles/account'
 
 export default function LoginFrom ({ isSignedIn }) {
   const avatars = useSelector(selectSavedAvatars)

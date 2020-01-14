@@ -1,15 +1,15 @@
 import { fetchLLSD } from './llsd'
 
-import { selectFriends, selectFriendById } from '../reducers/friends'
-import { selectFolderForAssetType } from '../reducers/inventory'
+import { selectFriends, selectFriendById } from '../bundles/friends'
+import { selectFolderForAssetType } from '../bundles/inventory'
 import {
   displayNamesStartLoading,
   displayNamesLoaded,
   selectNames,
   selectDisplayNamesURL,
   selectOwnAvatarName
-} from '../reducers/names'
-import { selectAgentId, selectSessionId } from '../reducers/session'
+} from '../bundles/names'
+import { selectAgentId, selectSessionId } from '../bundles/session'
 
 import { IMDialog } from '../types/chat'
 import { AssetType } from '../types/inventory'

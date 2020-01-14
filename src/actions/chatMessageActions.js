@@ -7,8 +7,8 @@ import { v4 as uuid } from 'uuid'
 import { UUID as LLUUID } from '../llsd'
 import { getValueOf, getStringValueOf } from '../network/msgGetters'
 
-import { selectIsSignedIn } from '../reducers/account'
-import { selectGroupsIDs } from '../reducers/groups'
+import { selectIsSignedIn } from '../bundles/account'
+import { selectGroupsIDs } from '../bundles/groups'
 import {
   create as createIMChat,
   infosLoaded as imInfosLoaded,
@@ -24,18 +24,18 @@ import {
   historyLoadingFinished as imHistoryLoadingFinished,
 
   selectIMChats
-} from '../reducers/imChat'
+} from '../bundles/imChat'
 import {
   received as localChatReceived,
   notificationInChatAdded,
   savingStarted as localChatSavingStarted,
   savingFinished as localChatSavingFinished,
   selectLocalChat
-} from '../reducers/localChat'
-import { selectAvatarNameById, selectOwnAvatarName } from '../reducers/names'
-import { receive as notificationActionCreator } from '../reducers/notifications'
+} from '../bundles/localChat'
+import { selectAvatarNameById, selectOwnAvatarName } from '../bundles/names'
+import { receive as notificationActionCreator } from '../bundles/notifications'
 
-import { selectRegionId, selectParentEstateID, selectPosition } from '../reducers/region'
+import { selectRegionId, selectParentEstateID, selectPosition } from '../bundles/region'
 import {
   selectAgentId,
   selectSessionId,
@@ -43,7 +43,7 @@ import {
   selectShouldSaveChat,
 
   changeChatTab
-} from '../reducers/session'
+} from '../bundles/session'
 
 import { Maturity } from '../types/viewer'
 import {

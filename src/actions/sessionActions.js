@@ -16,7 +16,7 @@ import { fetchSeedCapabilities } from './llsd'
 import LLSD from '../llsd'
 import connectCircuit from './connectCircuit'
 
-import { selectSavedAvatars, selectSavedGrids } from '../reducers/account'
+import { selectSavedAvatars, selectSavedGrids } from '../bundles/account'
 import {
   startLogin,
   login as loginAction,
@@ -28,7 +28,7 @@ import {
   selectAgentId,
   selectSessionId,
   selectIsLoggedIn
-} from '../reducers/session'
+} from '../bundles/session'
 
 // Actions for the session of an avatar
 

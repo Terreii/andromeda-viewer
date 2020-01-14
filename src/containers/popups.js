@@ -19,7 +19,7 @@ import {
   changeEncryptionPassword
 } from '../actions/viewerAccount'
 
-import { selectPopup, selectPopupData } from '../reducers/account'
+import { selectPopup, selectPopupData } from '../bundles/account'
 
 export default (props) => {
   const popup = useSelector(selectPopup)

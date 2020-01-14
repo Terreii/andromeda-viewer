@@ -8,13 +8,13 @@ import {
 } from '../actions/chatMessageActions'
 import { updateRights } from '../actions/friendsActions'
 
-import { selectFriends } from '../reducers/friends'
-import { selectGroups } from '../reducers/groups'
-import { selectActiveIMChats } from '../reducers/imChat'
-import { selectLocalChat } from '../reducers/localChat'
-import { selectNames } from '../reducers/names'
-import { selectShouldDisplayNotifications } from '../reducers/notifications'
-import { selectActiveTab, changeChatTab } from '../reducers/session'
+import { selectFriends } from '../bundles/friends'
+import { selectGroups } from '../bundles/groups'
+import { selectActiveIMChats } from '../bundles/imChat'
+import { selectLocalChat } from '../bundles/localChat'
+import { selectNames } from '../bundles/names'
+import { selectShouldDisplayNotifications } from '../bundles/notifications'
+import { selectActiveTab, changeChatTab } from '../bundles/session'
 
 import ChatBox from '../components/chatBox'
 

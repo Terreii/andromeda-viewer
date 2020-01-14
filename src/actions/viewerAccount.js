@@ -25,8 +25,8 @@ import {
   selectSavedAvatarsAreLoaded,
   selectSavedGrids,
   selectSavedGridsAreLoaded
-} from '../reducers/account'
-import { selectIsLoggedIn } from '../reducers/session'
+} from '../bundles/account'
+import { selectIsLoggedIn } from '../bundles/session'
 
 import { IMChatType } from '../types/chat'
 
@@ -35,7 +35,7 @@ export {
   showPasswordReset as showResetPassword,
   showPopup as showSignInPopup,
   closePopup
-} from '../reducers/account'
+} from '../bundles/account'
 
 export function showSignOutPopup () {
   return showPopup('signOut')

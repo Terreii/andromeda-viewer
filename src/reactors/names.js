@@ -2,7 +2,7 @@ import { createSelector } from 'reselect'
 
 import { getDisplayName } from '../actions/friendsActions'
 
-import { selectNames } from '../reducers/names'
+import { selectNames } from '../bundles/names'
 
 export const loadNames = createSelector(
   [

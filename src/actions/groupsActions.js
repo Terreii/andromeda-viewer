@@ -1,8 +1,8 @@
 // All group related actions
-import { chatSessionStarted } from '../reducers/groups'
-import { selectOwnAvatarName } from '../reducers/names'
-import { selectPosition } from '../reducers/region'
-import { selectAgentId, selectSessionId, selectAvatarDataSaveId } from '../reducers/session'
+import { chatSessionStarted } from '../bundles/groups'
+import { selectOwnAvatarName } from '../bundles/names'
+import { selectPosition } from '../bundles/region'
+import { selectAgentId, selectSessionId, selectAvatarDataSaveId } from '../bundles/session'
 
 import { IMDialog } from '../types/chat'
 

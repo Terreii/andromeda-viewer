@@ -8,7 +8,7 @@ import { downloadAccountData, updateAccount, deleteAccount } from '../actions/vi
 import style from './accountDialog.module.css'
 import formStyles from './formElements.module.css'
 
-import { selectUserName } from '../reducers/account'
+import { selectUserName } from '../bundles/account'
 import { useFormInput, useAutoFocus } from '../hooks/utils'
 
 export default function AccountPanel () {

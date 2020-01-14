@@ -1,8 +1,8 @@
 import { receiveChatFromSimulator, receiveIM } from './chatMessageActions'
 import { getValueOf } from '../network/msgGetters'
 
-import { changeRights } from '../reducers/friends'
-import { selectAgentId, selectSessionId } from '../reducers/session'
+import { changeRights } from '../bundles/friends'
+import { selectAgentId, selectSessionId } from '../bundles/session'
 
 // Gets all messages from the SIM and filters them, and if needed: calls their own actions.
 function simActionFilter (msg) {
