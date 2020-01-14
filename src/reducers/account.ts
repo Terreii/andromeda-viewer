@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, createSelector, PayloadAction } from '@reduxjs/toolkit'
 
 import { AvatarData, SavedAvatarData, Grid, HoodieObject } from '../types/viewer'
 
@@ -176,6 +176,29 @@ export const selectSavedGrids = (state: any): Grid[] => state.account.savedGrids
 
 export const selectSavedGridsAreLoaded = (state: any): boolean => state.account.savedGridsLoaded
 
+// TODO: When #222 Use Reakit lands then Dialogs/Modal (up until now wrongly popup) will be
+// directly used in a component.
+// The last modal that will be controlled by this slice is the unlock modal.
+export const selectPopup = createSelector(
+  [
+    selectIsSignedIn,
+    selectIsUnlocked,
+    (state: any): SignInPopup => state.account.signInPopup,
+    (state: any): string | null => state.session.error
+  ],
+  (isSignedIn, isUnlocked, signInPopup, sessionError) => {
+    const popup = signInPopup || sessionError
+
+    if (popup === 'resetPassword') return popup
+
+    return !isUnlocked && isSignedIn
+      ? 'unlock'
+      : popup
+  }
+)
+
+export const selectPopupData = (state: any): any | null => state.account.popupData
+
 // Helpers
 
 function getDefault () {
@@ -209,3 +232,9 @@ function getDefault () {
   }
   return defaultData
 }
+
+// Types
+
+type SignInPopup = 'signUp' | 'signIn' | 'signOut' | 'resetPassword' | 'resetKeys' | null
+
+export type PopupType = SignInPopup | 'unlock'

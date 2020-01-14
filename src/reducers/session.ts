@@ -7,7 +7,7 @@ import {
   selectSavedAvatars,
   selectAnonymAvatarData,
   closePopup
-} from '../reducers/account'
+} from './account'
 import AvatarName from '../avatarName'
 
 import { LocalChatMessage } from '../types/chat'
