@@ -11,7 +11,8 @@ import {
   LocalChatMessage,
   LocalChatAudible,
   LocalChatSourceType,
-  LocalChatType
+  LocalChatType,
+  NotificationInChat
 } from '../types/chat'
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
@@ -146,12 +147,3 @@ export const {
 } = chatSlice.actions
 
 export const selectLocalChat = (state: any): LocalChatMessage[] => state.localChat
-
-// Types
-
-interface NotificationInChat {
-  text: string
-  fromName: string
-  fromId: string
-  time: number
-}

@@ -77,3 +77,7 @@ For example could the map work with following selectors:
 - Get the zoom level.
 - Get the position on the map.
 - Get the img-src array of the displayed area in that zoom level.
+
+## Types
+
+Types defined in bundles are just for actions and internal usage. Selectors should return a type defined in the `types` directory.

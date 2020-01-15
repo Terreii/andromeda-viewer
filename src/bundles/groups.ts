@@ -7,6 +7,8 @@ import { logout, userWasKicked } from './session'
 
 import { getValueOf, mapBlockOf } from '../network/msgGetters'
 
+import { Group } from '../types/people'
+
 const groupSlice = createSlice({
   name: 'groups',
 
@@ -139,40 +141,3 @@ export const selectGroupsWithNoActiveChat = createSelector(
   ],
   groups => groups.filter(group => !group.sessionStarted)
 )
-
-// Types
-
-interface Group {
-  /**
-  * UUID of the group.
-  */
-  id: string
-  /**
-  * Name of the group.
-  */
-  name: string
-  /**
-  * UUID of the insignia (group picture).
-  */
-  insigniaID: string
-  /**
-  * Current title of the avatar.
-  */
-  title: string
-  /**
-  * Will the avatar receive group notifications.
-  */
-  acceptNotices: boolean
-  /**
-  * Is this group listed in the avatar profile.
-  */
-  listInProfile: boolean
-  /**
-  * 64Uint list of powers the user has. Stored bitwise.
-  */
-  powers: Buffer
-  /**
-  * The group chat session was started.
-  */
-  sessionStarted: boolean
-}

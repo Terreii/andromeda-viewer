@@ -131,6 +131,13 @@ export interface LocalChatMessage extends AbstractChatMessage {
   position?: [number, number, number]
 }
 
+export interface NotificationInChat {
+  text: string
+  fromName: string
+  fromId: string
+  time: number
+}
+
 // IMs
 
 export enum IMChatType {
