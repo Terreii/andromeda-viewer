@@ -4,9 +4,8 @@ import { useSelector, useDispatch } from 'react-redux'
 import Login from '../components/login/'
 
 import { login } from '../actions/sessionActions'
-import { showSignInPopup } from '../actions/viewerAccount'
 
-import { selectSavedAvatars, selectSavedGrids } from '../bundles/account'
+import { selectSavedAvatars, selectSavedGrids, showPopup } from '../bundles/account'
 
 export default function LoginFrom ({ isSignedIn }) {
   const avatars = useSelector(selectSavedAvatars)
@@ -16,7 +15,7 @@ export default function LoginFrom ({ isSignedIn }) {
   const doLogin = (avatarName, password, grid, save, isNew) => dispatch(
     login(avatarName, password, grid, save, isNew)
   )
-  const doShowSignInPopup = type => dispatch(showSignInPopup(type))
+  const doShowSignInPopup = type => dispatch(showPopup(type))
 
   return <Login
     login={doLogin} // login for avatar

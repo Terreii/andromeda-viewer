@@ -30,13 +30,6 @@ import { selectIsLoggedIn } from '../bundles/session'
 
 import { IMChatType } from '../types/chat'
 
-export {
-  signInStatus as didSignIn,
-  showPasswordReset as showResetPassword,
-  showPopup as showSignInPopup,
-  closePopup
-} from '../bundles/account'
-
 export function showSignOutPopup () {
   return showPopup('signOut')
 }

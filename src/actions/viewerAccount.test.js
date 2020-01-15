@@ -2,8 +2,8 @@ import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
 import { v4 } from 'uuid'
 
+import { signInStatus } from '../bundles/account'
 import {
-  didSignIn,
   saveAvatar,
   loadSavedAvatars,
   saveGrid,
@@ -20,17 +20,17 @@ v4.mockReturnValue('b039f51f-41d9-41e7-a4b1-5490fbfd5eb9')
 it('didSignIn', () => {
   const store = configureMockStore([thunk])()
 
-  store.dispatch(didSignIn(true, false))
+  store.dispatch(signInStatus(true, false))
 
-  store.dispatch(didSignIn())
+  store.dispatch(signInStatus())
 
-  store.dispatch(didSignIn(true, true))
+  store.dispatch(signInStatus(true, true))
 
-  store.dispatch(didSignIn(true, true, 'tester.mactestface@viewer.com'))
+  store.dispatch(signInStatus(true, true, 'tester.mactestface@viewer.com'))
 
-  store.dispatch(didSignIn(true, false, 'tester.mactestface@viewer.com'))
+  store.dispatch(signInStatus(true, false, 'tester.mactestface@viewer.com'))
 
-  store.dispatch(didSignIn(false, false, 'tester.mactestface@viewer.com'))
+  store.dispatch(signInStatus(false, false, 'tester.mactestface@viewer.com'))
 
   expect(store.getActions()).toEqual([
     {
