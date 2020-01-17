@@ -17,24 +17,24 @@ const friendsSlice = createSlice({
 
   reducers: {
     changeRights: {
-      reducer (state, action: PayloadAction<ChangedUserRights[], string, ChangedUserRightsMeta>) {
-        type ChangedMap = { [key: string]: ChangedUserRights }
+      reducer (state, action: PayloadAction<ChangedUserRightsAction, string>) {
+        const changed = new Map<string, ChangedUserRights>()
 
-        const changed = action.payload.reduce((all: ChangedMap, user) => {
-          all[user.agentId] = user
-          return all
-        }, {})
+        for (const user of action.payload.changed) {
+          changed.set(user.agentId, user)
+        }
 
         for (const friend of state) {
           // your update the rights
-          if (action.meta.fromId === action.meta.ownId && friend.id in changed) {
-            friend.rightsGiven = parseRights(changed[friend.id].rights)
+          if (action.payload.fromId === action.payload.ownId && changed.has(friend.id)) {
+            friend.rightsGiven = parseRights(changed.get(friend.id)!.rights)
             continue
           }
 
           // your friend updated the rights
-          if (action.meta.fromId === friend.id && action.meta.ownId in changed) {
-            friend.rightsHas = parseRights(changed[action.meta.ownId].rights) // if it is yourself
+          if (action.payload.fromId === friend.id && changed.has(action.payload.ownId)) {
+            // if it is yourself
+            friend.rightsHas = parseRights(changed.get(action.payload.ownId)!.rights)
           }
         }
       },
@@ -47,8 +47,8 @@ const friendsSlice = createSlice({
           }
         })
         return {
-          payload: rights,
-          meta: {
+          payload: {
+            changed: rights as { agentId: string, rights: number }[],
             ownId,
             fromId: getValueOf(message, 'AgentData', 'AgentID') as string
           }
@@ -101,12 +101,13 @@ function parseRights (rights: number) {
 
 // Types
 
-interface ChangedUserRightsMeta {
-  ownId: string,
-  fromId: string
-}
-
 interface ChangedUserRights {
   agentId: string,
   rights: number
+}
+
+interface ChangedUserRightsAction {
+  changed: ChangedUserRights[]
+  ownId: string
+  fromId: string
 }

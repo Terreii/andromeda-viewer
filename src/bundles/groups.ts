@@ -16,31 +16,30 @@ const groupSlice = createSlice({
 
   reducers: {
     chatSessionStarted: {
-      reducer (
-        state,
-        action: PayloadAction<
-          { [key: string]: { id: string, saveId: string, name: string } },
-          string,
-          { avatarDataSaveId: string }
-        >
-      ) {
+      reducer (state, action: PayloadAction<GroupChatStarted>) {
         for (const group of state) {
-          if (group.id in action.payload) {
+          if (group.id in action.payload.groups) {
             group.sessionStarted = true
           }
         }
       },
+
       prepare (groups: Group[], avatarDataSaveId: string) {
+        const groupsMap = new Map<string, { id: string, saveId: string, name: string }>()
+
+        for (const group of groups) {
+          groupsMap.set(group.id, {
+            id: group.id,
+            saveId: uuid(),
+            name: group.name
+          })
+        }
+
         return {
-          payload: groups.reduce((obj, group) => {
-            obj[group.id] = {
-              id: group.id,
-              saveId: uuid(),
-              name: group.name
-            }
-            return obj
-          }, {} as { [key: string]: { id: string, saveId: string, name: string } }),
-          meta: { avatarDataSaveId }
+          payload: {
+            avatarDataSaveId,
+            groups: Object.fromEntries(groupsMap.entries())
+          }
         }
       }
     }
@@ -141,3 +140,10 @@ export const selectGroupsWithNoActiveChat = createSelector(
   ],
   groups => groups.filter(group => !group.sessionStarted)
 )
+
+// Types
+
+interface GroupChatStarted {
+  avatarDataSaveId: string
+  groups: { [key: string]: { id: string, saveId: string, name: string } }
+}
