@@ -6,12 +6,14 @@ import {
   saveIMChatMessages
 } from '../actions/chatMessageActions'
 
-import { getLocalChat, getIMChats, getShouldSaveChat } from '../selectors/chat'
+import { selectLocalChat } from '../bundles/localChat'
+import { selectIMChats } from '../bundles/imChat'
+import { selectShouldSaveChat } from '../bundles/session'
 
 export const saveLocalChat = createSelector(
   [
-    getLocalChat,
-    getShouldSaveChat
+    selectLocalChat,
+    selectShouldSaveChat
   ],
   (localChat, shouldSaveChat) => {
     if (!shouldSaveChat) return null
@@ -36,8 +38,8 @@ export const saveLocalChat = createSelector(
 
 export const saveIMChatInfo = createSelector(
   [
-    getIMChats,
-    getShouldSaveChat
+    selectIMChats,
+    selectShouldSaveChat
   ],
   (ims, shouldSaveChat) => {
     if (!shouldSaveChat || Object.values(ims).every(chat => chat.didSaveChatInfo)) return null
@@ -48,8 +50,8 @@ export const saveIMChatInfo = createSelector(
 
 export const saveIMChat = createSelector(
   [
-    getIMChats,
-    getShouldSaveChat
+    selectIMChats,
+    selectShouldSaveChat
   ],
   (ims, shouldSaveChat) => {
     if (!shouldSaveChat || !Object.values(ims).some(chat => chat.hasUnsavedMSG)) return null

@@ -1,8 +1,8 @@
-import LLSD from '../llsd'
+import LLSD, { Binary, URI, UUID } from '../llsd'
 import caps from './capabilities.json'
 
-import { getAvatarIdentifier } from '../selectors/session'
-import { getEventQueueGetUrl } from '../selectors/region'
+import { selectEventQueueGetUrl } from '../bundles/region'
+import { selectAvatarIdentifier } from '../bundles/session'
 
 async function parseLLSD (response) {
   const body = await response.text()
@@ -56,11 +56,11 @@ export function fetchSeedCapabilities (url) {
 
 // http://wiki.secondlife.com/wiki/EventQueueGet
 async function * eventQueueGet (getState) {
-  const url = getEventQueueGetUrl(getState())
-  const avatarIdentifier = getAvatarIdentifier(getState())
+  const url = selectEventQueueGetUrl(getState())
+  const avatarIdentifier = selectAvatarIdentifier(getState())
   let ack = 0
 
-  while (getAvatarIdentifier(getState()) === avatarIdentifier) {
+  do {
     let response
     try {
       response = await minimalFetchLLSD('POST', url, { done: false, ack })
@@ -73,7 +73,9 @@ async function * eventQueueGet (getState) {
     if (response.status >= 200 && response.status < 300) {
       const body = await parseLLSD(response)
       ack = body.id
-      yield body.events
+      for (const event of body.events) {
+        yield event
+      }
     } else if (response.status === 404) { // Session did end
       return []
     } else if (response.status === 502 || response.status === 499) {
@@ -92,7 +94,7 @@ async function * eventQueueGet (getState) {
       await new Promise(resolve => { setTimeout(resolve, 200) })
       continue
     }
-  }
+  } while (selectAvatarIdentifier(getState()) === avatarIdentifier)
 
   minimalFetchLLSD('POST', url, { done: true, ack })
     .catch(() => {})
@@ -100,18 +102,37 @@ async function * eventQueueGet (getState) {
 
 function activateEventQueue () {
   return async (dispatch, getState) => {
-    for await (const eventQueueEvents of eventQueueGet(getState)) {
-      for (const event of eventQueueEvents) {
-        try {
-          dispatch({
-            type: 'EVENT_QUEUE_' + event.message,
-            message: event.message,
-            body: event.body
-          })
-        } catch (err) {
-          console.error(err)
-        }
+    for await (const event of eventQueueGet(getState)) {
+      try {
+        toJSON(event.body)
+        dispatch({
+          type: 'eventQueue/' + event.message,
+          payload: event.body,
+          meta: {
+            message: event.message
+          }
+        })
+      } catch (err) {
+        console.error(err)
       }
+    }
+  }
+}
+
+/**
+ * This function checks all values of LLSD data for non JSON data modifies them.
+ * @param {object|object[]} object A LLSD Object or Array.
+ */
+export function toJSON (object) {
+  for (const [key, value] of Object.entries(object)) {
+    if (value instanceof Date) {
+      object[key] = value.getTime()
+    } else if (value instanceof Binary) {
+      object[key] = value.toArray()
+    } else if (value instanceof URI || value instanceof UUID) {
+      object[key] = value.toString()
+    } else if (typeof object === 'object') { // Objects and Arrays
+      toJSON(value)
     }
   }
 }

@@ -10,16 +10,14 @@ import ResetKeysPopup from '../components/popups/resetKeysPopup'
 import ResetPasswordDialog from '../components/popups/resetPasswordDialog'
 
 import {
-  closePopup,
   signUp,
   signIn,
   signOut,
   unlock,
-  showResetPassword,
   changeEncryptionPassword
 } from '../actions/viewerAccount'
 
-import { selectPopup, selectPopupData } from '../selectors/popup'
+import { selectPopup, selectPopupData, showPasswordReset, closePopup } from '../bundles/account'
 
 export default (props) => {
   const popup = useSelector(selectPopup)
@@ -37,7 +35,7 @@ export default (props) => {
   )
   const doSignOut = () => dispatch(signOut())
   const doUnlock = cryptoPassword => dispatch(unlock(cryptoPassword))
-  const displayResetPassword = type => dispatch(showResetPassword(type))
+  const displayResetPassword = type => dispatch(showPasswordReset(type))
   const doChangeEncryptionPassword = (resetKey, nextPassword) => dispatch(
     changeEncryptionPassword(resetKey, nextPassword)
   )

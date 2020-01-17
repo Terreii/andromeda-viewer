@@ -295,32 +295,23 @@ describe('inventory offers', () => {
       },
       inventory: {
         root: '1',
-        folders: new Map([
-          [
-            '1',
-            {
-              folderId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-              children: ['2', '3'],
-              typeDefault: AssetType.Folder
-            }
-          ],
-          [
-            '2',
-            {
-              folderId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-              children: [],
-              typeDefault: AssetType.Object
-            }
-          ],
-          [
-            '3',
-            {
-              folderId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-              children: [],
-              typeDefault: AssetType.Notecard
-            }
-          ]
-        ])
+        folders: {
+          1: {
+            folderId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+            children: ['2', '3'],
+            typeDefault: AssetType.Folder
+          },
+          2: {
+            folderId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+            children: [],
+            typeDefault: AssetType.Object
+          },
+          3: {
+            folderId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+            children: [],
+            typeDefault: AssetType.Notecard
+          }
+        }
       }
     }
   }

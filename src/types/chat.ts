@@ -131,6 +131,13 @@ export interface LocalChatMessage extends AbstractChatMessage {
   position?: [number, number, number]
 }
 
+export interface NotificationInChat {
+  text: string
+  fromName: string
+  fromId: string
+  time: number
+}
+
 // IMs
 
 export enum IMChatType {
@@ -155,6 +162,7 @@ export interface IMChat extends HoodieObject {
   isLoadingHistory: boolean
   active: boolean
   hasUnsavedMSG: boolean
+  areTyping: string[]
   messages: InstantMessage[]
 }
 

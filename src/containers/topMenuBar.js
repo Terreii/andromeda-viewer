@@ -5,17 +5,17 @@ import { action as toggleMenu } from 'redux-burger-menu'
 import TopBar from '../components/topBar'
 
 import { logout } from '../actions/sessionActions'
-import { showSignOutPopup, showSignInPopup } from '../actions/viewerAccount'
+import { showSignOutPopup } from '../actions/viewerAccount'
 
-import { getIsSignedIn, getUserName } from '../selectors/viewer'
-import { getIsLoggedIn } from '../selectors/session'
-import { getOwnAvatarName } from '../selectors/names'
+import { selectIsSignedIn, selectUserName, showPopup } from '../bundles/account'
+import { selectOwnAvatarName } from '../bundles/names'
+import { selectIsLoggedIn } from '../bundles/session'
 
 export default function TopBarContainer (props) {
-  const isSignedIn = useSelector(getIsSignedIn)
-  const userName = useSelector(getUserName)
-  const isLoggedIn = useSelector(getIsLoggedIn)
-  const avatarName = useSelector(getOwnAvatarName)
+  const isSignedIn = useSelector(selectIsSignedIn)
+  const userName = useSelector(selectUserName)
+  const isLoggedIn = useSelector(selectIsLoggedIn)
+  const avatarName = useSelector(selectOwnAvatarName)
 
   const dispatch = useDispatch()
 
@@ -34,13 +34,13 @@ export default function TopBarContainer (props) {
   const doShowSignUpPopup = event => {
     event.preventDefault()
     dispatch(toggleMenu(false))
-    dispatch(showSignInPopup('signUp'))
+    dispatch(showPopup('signUp'))
   }
 
   const doShowSignInPopup = event => {
     event.preventDefault()
     dispatch(toggleMenu(false))
-    dispatch(showSignInPopup())
+    dispatch(showPopup('signIn'))
   }
 
   return <TopBar

@@ -50,3 +50,38 @@ export enum TeleportFlags {
   /** Finished and Sim was not changed. */
   finishedViaSameSim = 1 << 29
 }
+
+export interface Group {
+  /**
+  * UUID of the group.
+  */
+  id: string
+  /**
+  * Name of the group.
+  */
+  name: string
+  /**
+  * UUID of the insignia (group picture).
+  */
+  insigniaID: string
+  /**
+  * Current title of the avatar.
+  */
+  title: string
+  /**
+  * Will the avatar receive group notifications.
+  */
+  acceptNotices: boolean
+  /**
+  * Is this group listed in the avatar profile.
+  */
+  listInProfile: boolean
+  /**
+  * 64Uint list of powers the user has. Stored bitwise.
+  */
+  powers: Buffer
+  /**
+  * The group chat session was started.
+  */
+  sessionStarted: boolean
+}

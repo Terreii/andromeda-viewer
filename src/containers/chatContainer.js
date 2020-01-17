@@ -1,7 +1,6 @@
 import { connect } from 'react-redux'
 
 import {
-  changeTab,
   sendLocalChatMessage,
   sendInstantMessage,
   startNewIMChat,
@@ -9,32 +8,30 @@ import {
 } from '../actions/chatMessageActions'
 import { updateRights } from '../actions/friendsActions'
 
-import {
-  getActiveTab,
-  getLocalChat,
-  getActiveIMChats,
-  getShouldDisplayNotifications
-} from '../selectors/chat'
-import { getNames } from '../selectors/names'
-import { getFriends } from '../selectors/people'
-import { getGroups } from '../selectors/groups'
+import { selectFriends } from '../bundles/friends'
+import { selectGroups } from '../bundles/groups'
+import { selectActiveIMChats } from '../bundles/imChat'
+import { selectLocalChat } from '../bundles/localChat'
+import { selectNames } from '../bundles/names'
+import { selectShouldDisplayNotifications } from '../bundles/notifications'
+import { selectActiveTab, changeChatTab } from '../bundles/session'
 
 import ChatBox from '../components/chatBox'
 
 const mapStateToProps = state => {
   return {
-    activeTab: getActiveTab(state),
-    localChat: getLocalChat(state),
-    IMs: getActiveIMChats(state),
-    shouldDisplayNotifications: getShouldDisplayNotifications(state),
-    groups: getGroups(state),
-    names: getNames(state),
-    friends: getFriends(state)
+    activeTab: selectActiveTab(state),
+    friends: selectFriends(state),
+    groups: selectGroups(state),
+    IMs: selectActiveIMChats(state),
+    localChat: selectLocalChat(state),
+    names: selectNames(state),
+    shouldDisplayNotifications: selectShouldDisplayNotifications(state)
   }
 }
 
 const mapDispatchToProps = {
-  changeTab,
+  changeTab: changeChatTab,
   sendLocalChatMessage: text => sendLocalChatMessage(text, 1, 0),
   sendInstantMessage,
   startNewIMChat,

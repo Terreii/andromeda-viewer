@@ -2,9 +2,9 @@
 
 import { UUID as LLUUID } from '../llsd'
 
-import { getAgentId, getSessionId } from '../selectors/session'
-import { getFolderForAssetType } from '../selectors/inventory'
-import { getOwnAvatarName } from '../selectors/names'
+import { selectFolderForAssetType } from '../bundles/inventory'
+import { selectOwnAvatarName } from '../bundles/names'
+import { selectAgentId, selectSessionId } from '../bundles/session'
 
 import { IMDialog } from '../types/chat'
 import { AssetType } from '../types/inventory'
@@ -37,7 +37,7 @@ function handleInventoryOffer (
 
     let bucket
     if (isAccept) {
-      const folder = getFolderForAssetType(activeState, assetType)
+      const folder = selectFolderForAssetType(activeState, assetType)
       bucket = new LLUUID(folder.folderId).getOctets()
     } else {
       bucket = []
@@ -46,13 +46,13 @@ function handleInventoryOffer (
     circuit.send('ImprovedInstantMessage', {
       AgentData: [
         {
-          AgentID: getAgentId(activeState),
-          SessionID: getSessionId(activeState)
+          AgentID: selectAgentId(activeState),
+          SessionID: selectSessionId(activeState)
         }
       ],
       MessageBlock: [
         {
-          FromAgentName: getOwnAvatarName(activeState).getFullName(),
+          FromAgentName: selectOwnAvatarName(activeState).getFullName(),
           ToAgentID: targetId,
           ID: transactionId,
           Dialog: dialog,

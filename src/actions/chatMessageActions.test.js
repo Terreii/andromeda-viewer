@@ -16,7 +16,6 @@ import {
   saveIMChatInfos,
   loadIMChats,
   startNewIMChat,
-  activateIMChat,
   getIMHistory
 } from './chatMessageActions'
 
@@ -62,8 +61,8 @@ describe('local chat', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'CHAT_FROM_SIMULATOR_RECEIVED',
-        msg: {
+        type: 'localChat/received',
+        payload: {
           _id: 'saveId/localchat/2019-07-09T00:02:04.418Z',
           fromName: 'Tester MacTestface',
           fromId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
@@ -77,8 +76,8 @@ describe('local chat', () => {
         }
       },
       {
-        type: 'CHAT_FROM_SIMULATOR_RECEIVED',
-        msg: {
+        type: 'localChat/received',
+        payload: {
           _id: 'saveId/localchat/2019-07-09T00:02:04.418Z',
           fromName: 'Tester MacTestface',
           fromId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
@@ -207,8 +206,8 @@ describe('local chat', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'SAVING_LOCAL_CHAT_MESSAGES_START',
-        saving: [
+        type: 'localChat/savingStarted',
+        payload: [
           'saveId/localchat/2019-07-09T00:03:04.418Z',
           'saveId/localchat/2019-07-09T00:02:04.418Z'
         ]
@@ -250,11 +249,13 @@ describe('local chat', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'DID_SAVE_LOCAL_CHAT_MESSAGE',
-        saved: [eventObject],
-        didError: [
-          'saveId/localchat/2019-07-09T00:02:04.418Z'
-        ]
+        type: 'localChat/savingFinished',
+        payload: {
+          saved: [eventObject],
+          didError: [
+            'saveId/localchat/2019-07-09T00:02:04.418Z'
+          ]
+        }
       }
     ])
   })
@@ -303,8 +304,11 @@ describe('local chat', () => {
     ]
 
     const account = {
-      sync: true,
       loggedIn: true
+    }
+
+    const session = {
+      sync: true
     }
 
     for (let i = 0; i < 250; ++i) {
@@ -323,7 +327,7 @@ describe('local chat', () => {
           }
         }
       })
-    ])({ account, localChat })
+    ])({ account, session, localChat })
 
     await storeWithToMuch.dispatch(deleteOldLocalChat())
 
@@ -340,7 +344,7 @@ describe('local chat', () => {
           }
         }
       })
-    ])({ account, localChat: localChat.slice(0, 200) })
+    ])({ account, session, localChat: localChat.slice(0, 200) })
 
     await storeWithLess.dispatch(deleteOldLocalChat())
 
@@ -452,8 +456,8 @@ describe('save, loading and sending IMs', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'SAVING_IM_CHAT_INFO_STARTED',
-        sessionIds: ['abcd', 'willError']
+        type: 'im/startSavingInfo',
+        payload: ['abcd', 'willError']
       }
     ])
 
@@ -463,8 +467,10 @@ describe('save, loading and sending IMs', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'SAVING_IM_CHAT_INFO_FINISHED',
-        didError: ['willError']
+        type: 'im/finishedSavingInfo',
+        payload: {
+          didError: ['willError']
+        }
       }
     ])
 
@@ -550,8 +556,8 @@ describe('save, loading and sending IMs', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'IM_CHAT_INFOS_LOADED',
-        chats: [
+        type: 'im/infosLoaded',
+        payload: [
           {
             ...docA,
             chatType: IMChatType.personal
@@ -588,8 +594,8 @@ describe('save, loading and sending IMs', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'IM_CHAT_INFOS_LOADED',
-        chats: [{
+        type: 'im/infosLoaded',
+        payload: [{
           ...doc,
           chatType: IMChatType.personal
         }]
@@ -701,14 +707,18 @@ describe('save, loading and sending IMs', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'IM_HISTORY_LOADING_STARTED',
-        sessionId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25'
+        type: 'im/historyLoadingStarted',
+        payload: {
+          sessionId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25'
+        }
       },
       {
-        type: 'IM_HISTORY_LOADING_FINISHED',
-        sessionId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
-        messages: findResult,
-        didLoadAll: true
+        type: 'im/historyLoadingFinished',
+        payload: {
+          sessionId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+          messages: findResult,
+          didLoadAll: true
+        }
       }
     ])
 
@@ -753,14 +763,18 @@ describe('save, loading and sending IMs', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'IM_HISTORY_LOADING_STARTED',
-        sessionId: 'da4bf092-5e29-4577-a662-171bd57915f8'
+        type: 'im/historyLoadingStarted',
+        payload: {
+          sessionId: 'da4bf092-5e29-4577-a662-171bd57915f8'
+        }
       },
       {
-        type: 'IM_HISTORY_LOADING_FINISHED',
-        sessionId: 'da4bf092-5e29-4577-a662-171bd57915f8',
-        messages: findResult,
-        didLoadAll: true
+        type: 'im/historyLoadingFinished',
+        payload: {
+          sessionId: 'da4bf092-5e29-4577-a662-171bd57915f8',
+          messages: findResult,
+          didLoadAll: true
+        }
       }
     ])
 
@@ -786,17 +800,21 @@ describe('save, loading and sending IMs', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'IM_HISTORY_LOADING_STARTED',
-        sessionId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25'
+        type: 'im/historyLoadingStarted',
+        payload: {
+          sessionId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25'
+        }
       },
       {
-        type: 'IM_HISTORY_LOADING_FINISHED',
-        sessionId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
-        messages: [
-          { _id: 'saveId/imChats/abcd/2019-07-07T00:02:04.000Z', message: 'Hello' },
-          { _id: 'saveId/imChats/abcd/2019-07-08T00:02:04.000Z', message: 'Hello' }
-        ],
-        didLoadAll: false
+        type: 'im/historyLoadingFinished',
+        payload: {
+          sessionId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+          messages: [
+            { _id: 'saveId/imChats/abcd/2019-07-07T00:02:04.000Z', message: 'Hello' },
+            { _id: 'saveId/imChats/abcd/2019-07-08T00:02:04.000Z', message: 'Hello' }
+          ],
+          didLoadAll: false
+        }
       }
     ])
   })
@@ -815,17 +833,17 @@ describe('save, loading and sending IMs', () => {
           }
         ]
       },
+      region: {
+        position: [0, 0, 0],
+        region: {
+          id: 'f276f0f0-a843-46fd-bf4e-7aa3a5deea38',
+          parentEstateID: 1
+        }
+      },
       session: {
         agentId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
         sessionId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9',
-        avatarIdentifier: 'test@sl',
-        position: {
-          position: [0, 0, 0]
-        },
-        regionInfo: {
-          parentEstateID: 1,
-          regionID: 'f276f0f0-a843-46fd-bf4e-7aa3a5deea38'
-        }
+        avatarIdentifier: 'test@sl'
       },
       names: {
         names: {
@@ -968,37 +986,46 @@ describe('save, loading and sending IMs', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'PERSONAL_IM_RECEIVED',
-        sessionId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
-        msg: {
-          _id: 'saveId/imChats/abcd/2019-07-09T00:02:04.000Z',
-          fromId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-          fromName: 'Tester Mactestface',
-          message: 'Hello world!',
-          offline: 0,
-          time: 1562630524000
+        type: 'im/received',
+        payload: {
+          chatType: IMChatType.personal,
+          session: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+          msg: {
+            _id: 'saveId/imChats/abcd/2019-07-09T00:02:04.000Z',
+            fromId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+            fromName: 'Tester Mactestface',
+            message: 'Hello world!',
+            offline: 0,
+            time: 1562630524000
+          }
         }
       },
       {
-        type: 'GROUP_IM_RECEIVED',
-        groupId: 'da4bf092-5e29-4577-a662-171bd57915f8',
-        msg: {
-          _id: 'saveId/imChats/efgh/2019-07-09T00:02:04.000Z',
-          fromId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-          fromName: 'Tester Mactestface',
-          message: 'Hello world!',
-          time: 1562630524000
+        type: 'im/received',
+        payload: {
+          chatType: IMChatType.group,
+          session: 'da4bf092-5e29-4577-a662-171bd57915f8',
+          msg: {
+            _id: 'saveId/imChats/efgh/2019-07-09T00:02:04.000Z',
+            fromId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+            fromName: 'Tester Mactestface',
+            message: 'Hello world!',
+            time: 1562630524000
+          }
         }
       },
       {
-        type: 'CONFERENCE_IM_RECEIVED',
-        conferenceId: 'ee6af506-fa78-408d-869f-78305b3889c3',
-        msg: {
-          _id: 'saveId/imChats/ijkl/2019-07-09T00:02:04.000Z',
-          fromId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-          fromName: 'Tester Mactestface',
-          message: 'Hello world!',
-          time: 1562630524000
+        type: 'im/received',
+        payload: {
+          chatType: IMChatType.conference,
+          session: 'ee6af506-fa78-408d-869f-78305b3889c3',
+          msg: {
+            _id: 'saveId/imChats/ijkl/2019-07-09T00:02:04.000Z',
+            fromId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+            fromName: 'Tester Mactestface',
+            message: 'Hello world!',
+            time: 1562630524000
+          }
         }
       }
     ])
@@ -1046,53 +1073,44 @@ describe('save, loading and sending IMs', () => {
     expect(store.getActions()).toEqual([
       // Personal
       {
-        type: 'IM_CHAT_CREATED',
-        _id: 'saveId/imChatsInfos/da4bf092-5e29-4577-a662-171bd57915f8',
-        chatType: IMChatType.personal,
-        sessionId: '12c6999b-70bf-0944-365d-78326dd6d6bc',
-        saveId: 'da4bf092-5e29-4577-a662-171bd57915f8',
-        target: 'f2373437-a2ef-4435-82b9-68d283538bb2',
-        name: 'Tester Furry'
+        type: 'im/create',
+        payload: {
+          _id: 'saveId/imChatsInfos/da4bf092-5e29-4577-a662-171bd57915f8',
+          chatType: IMChatType.personal,
+          sessionId: '12c6999b-70bf-0944-365d-78326dd6d6bc',
+          saveId: 'da4bf092-5e29-4577-a662-171bd57915f8',
+          target: 'f2373437-a2ef-4435-82b9-68d283538bb2',
+          name: 'Tester Furry'
+        }
       },
       {
-        type: 'IM_CHAT_ACTIVATED',
-        sessionId: '12c6999b-70bf-0944-365d-78326dd6d6bc'
+        type: 'im/activateChat',
+        payload: '12c6999b-70bf-0944-365d-78326dd6d6bc'
       },
       {
-        type: 'CHAT_TAB_CHANGED',
-        key: '12c6999b-70bf-0944-365d-78326dd6d6bc'
+        type: 'session/changeChatTab',
+        payload: '12c6999b-70bf-0944-365d-78326dd6d6bc'
       },
 
       // Conference
       {
-        type: 'IM_CHAT_CREATED',
-        _id: 'saveId/imChatsInfos/5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
-        chatType: IMChatType.conference,
-        sessionId: 'ee6af506-fa78-408d-869f-78305b3889c3',
-        saveId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
-        target: 'ee6af506-fa78-408d-869f-78305b3889c3',
-        name: 'Conference Chat 1234'
+        type: 'im/create',
+        payload: {
+          _id: 'saveId/imChatsInfos/5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+          chatType: IMChatType.conference,
+          sessionId: 'ee6af506-fa78-408d-869f-78305b3889c3',
+          saveId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+          target: 'ee6af506-fa78-408d-869f-78305b3889c3',
+          name: 'Conference Chat 1234'
+        }
       },
       {
-        type: 'IM_CHAT_ACTIVATED',
-        sessionId: 'ee6af506-fa78-408d-869f-78305b3889c3'
+        type: 'im/activateChat',
+        payload: 'ee6af506-fa78-408d-869f-78305b3889c3'
       },
       {
-        type: 'CHAT_TAB_CHANGED',
-        key: 'ee6af506-fa78-408d-869f-78305b3889c3'
-      }
-    ])
-  })
-
-  it('should activate chats', () => {
-    const store = mockStore()
-
-    store.dispatch(activateIMChat('ee6af506-fa78-408d-869f-78305b3889c3'))
-
-    expect(store.getActions()).toEqual([
-      {
-        type: 'IM_CHAT_ACTIVATED',
-        sessionId: 'ee6af506-fa78-408d-869f-78305b3889c3'
+        type: 'session/changeChatTab',
+        payload: 'ee6af506-fa78-408d-869f-78305b3889c3'
       }
     ])
   })
@@ -1167,24 +1185,29 @@ describe('incoming IM handling', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'IM_CHAT_CREATED',
-        _id: 'saveId/imChatsInfos/abcdef',
-        chatType: IMChatType.personal,
-        sessionId: messageData.MessageBlock[0].ID,
-        saveId: 'abcdef',
-        target: messageData.AgentData[0].AgentID,
-        name: 'Tester'
+        type: 'im/create',
+        payload: {
+          _id: 'saveId/imChatsInfos/abcdef',
+          chatType: IMChatType.personal,
+          sessionId: messageData.MessageBlock[0].ID,
+          saveId: 'abcdef',
+          target: messageData.AgentData[0].AgentID,
+          name: 'Tester'
+        }
       },
       {
-        type: 'PERSONAL_IM_RECEIVED',
-        sessionId: messageData.MessageBlock[0].ID,
-        msg: {
-          _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
-          fromName: 'Tester',
-          fromId: messageData.AgentData[0].AgentID,
-          offline: 0,
-          message: 'Hello World!',
-          time: 1562630524418
+        type: 'im/received',
+        payload: {
+          chatType: IMChatType.personal,
+          session: messageData.MessageBlock[0].ID,
+          msg: {
+            _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
+            fromName: 'Tester',
+            fromId: messageData.AgentData[0].AgentID,
+            offline: 0,
+            message: 'Hello World!',
+            time: 1562630524418
+          }
         }
       }
     ])
@@ -1220,15 +1243,18 @@ describe('incoming IM handling', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'PERSONAL_IM_RECEIVED',
-        sessionId: messageData.MessageBlock[0].ID,
-        msg: {
-          _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
-          fromName: 'Tester',
-          fromId: messageData.AgentData[0].AgentID,
-          offline: 0,
-          message: 'Hello World!',
-          time: 1562630524418
+        type: 'im/received',
+        payload: {
+          chatType: IMChatType.personal,
+          session: messageData.MessageBlock[0].ID,
+          msg: {
+            _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
+            fromName: 'Tester',
+            fromId: messageData.AgentData[0].AgentID,
+            offline: 0,
+            message: 'Hello World!',
+            time: 1562630524418
+          }
         }
       }
     ])
@@ -1279,25 +1305,31 @@ describe('incoming IM handling', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'GROUP_IM_RECEIVED',
-        groupId,
-        msg: {
-          _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
-          fromName: 'Tester',
-          fromId: '01234567-8900-0000-0000-000000000000',
-          message: 'Hello World!',
-          time: 1562630524418
+        type: 'im/received',
+        payload: {
+          chatType: IMChatType.group,
+          session: groupId,
+          msg: {
+            _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
+            fromName: 'Tester',
+            fromId: '01234567-8900-0000-0000-000000000000',
+            message: 'Hello World!',
+            time: 1562630524418
+          }
         }
       },
       {
-        type: 'GROUP_IM_RECEIVED',
-        groupId,
-        msg: {
-          _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
-          fromName: 'Tester',
-          fromId: '01234567-8900-0000-0000-000000000000',
-          message: 'Hello World!',
-          time: 1562630524418
+        type: 'im/received',
+        payload: {
+          chatType: IMChatType.group,
+          session: groupId,
+          msg: {
+            _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
+            fromName: 'Tester',
+            fromId: '01234567-8900-0000-0000-000000000000',
+            message: 'Hello World!',
+            time: 1562630524418
+          }
         }
       }
     ])
@@ -1351,23 +1383,28 @@ describe('incoming IM handling', () => {
     })))
 
     const createAction = {
-      type: 'IM_CHAT_CREATED',
-      _id: 'saveId/imChatsInfos/abcdef',
-      chatType: IMChatType.conference,
-      sessionId: id,
-      saveId: 'abcdef',
-      target: id,
-      name: 'A conference'
+      type: 'im/create',
+      payload: {
+        _id: 'saveId/imChatsInfos/abcdef',
+        chatType: IMChatType.conference,
+        sessionId: id,
+        saveId: 'abcdef',
+        target: id,
+        name: 'A conference'
+      }
     }
     const messageAction = {
-      type: 'CONFERENCE_IM_RECEIVED',
-      conferenceId: id,
-      msg: {
-        _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
-        fromName: 'Tester',
-        fromId: '01234567-8900-0000-0000-000000000000',
-        message: 'Hello World!',
-        time: 1562630524418
+      type: 'im/received',
+      payload: {
+        chatType: IMChatType.conference,
+        session: id,
+        msg: {
+          _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
+          fromName: 'Tester',
+          fromId: '01234567-8900-0000-0000-000000000000',
+          message: 'Hello World!',
+          time: 1562630524418
+        }
       }
     }
 
@@ -1385,14 +1422,18 @@ describe('incoming IM handling', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'IM_START_TYPING',
-        sessionId: '01234567-8900-0000-0000-009876543210',
-        agentId: '01234567-8900-0000-0000-000000000000'
+        type: 'im/startedTyping',
+        payload: {
+          sessionId: '01234567-8900-0000-0000-009876543210',
+          agentId: '01234567-8900-0000-0000-000000000000'
+        }
       },
       {
-        type: 'IM_STOP_TYPING',
-        sessionId: '01234567-8900-0000-0000-009876543210',
-        agentId: '01234567-8900-0000-0000-000000000000'
+        type: 'im/stoppedTyping',
+        payload: {
+          sessionId: '01234567-8900-0000-0000-009876543210',
+          agentId: '01234567-8900-0000-0000-000000000000'
+        }
       }
     ])
   })
@@ -1443,15 +1484,18 @@ describe('incoming IM handling', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'BUSY_AUTO_RESPONSE_RECEIVED',
-        sessionId: '01234567-8900-0000-0000-009876543210',
-        msg: {
-          _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
-          fromName: 'Tester',
-          fromId: '01234567-8900-0000-0000-000000000000',
-          offline: 0,
-          message: "I'm sorry, but I'm busy ...",
-          time: 1562630524418
+        type: 'im/received',
+        payload: {
+          chatType: IMChatType.personal,
+          session: '01234567-8900-0000-0000-009876543210',
+          msg: {
+            _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
+            fromName: 'Tester',
+            fromId: '01234567-8900-0000-0000-000000000000',
+            offline: 0,
+            message: "I'm sorry, but I'm busy ...",
+            time: 1562630524418
+          }
         }
       }
     ])
@@ -1531,24 +1575,24 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.TextOnly,
             fromName: 'Tester',
             text: 'An interesting message'
           }
         },
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.TextOnly,
             fromName: 'Tester',
             text: 'Hello World!'
           }
         },
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.System,
             text: 'An interesting message'
           }
@@ -1579,11 +1623,13 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_IN_CHAT_ADDED',
-          text: 'Hello World!',
-          fromName: 'Tester',
-          fromId: '01234567-8900-0000-0000-000000000000',
-          time: 1562630524418
+          type: 'localChat/notificationInChatAdded',
+          payload: {
+            text: 'Hello World!',
+            fromName: 'Tester',
+            fromId: '01234567-8900-0000-0000-000000000000',
+            time: 1562630524418
+          }
         }
       ])
 
@@ -1597,18 +1643,22 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_IN_CHAT_ADDED',
-          text: 'accepted your inventory offer.',
-          fromName: 'Tester',
-          fromId: '01234567-8900-0000-0000-000000000000',
-          time: 1562630524418
+          type: 'localChat/notificationInChatAdded',
+          payload: {
+            text: 'accepted your inventory offer.',
+            fromName: 'Tester',
+            fromId: '01234567-8900-0000-0000-000000000000',
+            time: 1562630524418
+          }
         },
         {
-          type: 'NOTIFICATION_IN_CHAT_ADDED',
-          text: 'declined your inventory offer.',
-          fromName: 'Tester',
-          fromId: '01234567-8900-0000-0000-000000000000',
-          time: 1562630524418
+          type: 'localChat/notificationInChatAdded',
+          payload: {
+            text: 'declined your inventory offer.',
+            fromName: 'Tester',
+            fromId: '01234567-8900-0000-0000-000000000000',
+            time: 1562630524418
+          }
         }
       ])
 
@@ -1622,18 +1672,22 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_IN_CHAT_ADDED',
-          text: 'accepted your friendship offer.',
-          fromName: 'Tester',
-          fromId: '01234567-8900-0000-0000-000000000000',
-          time: 1562630524418
+          type: 'localChat/notificationInChatAdded',
+          payload: {
+            text: 'accepted your friendship offer.',
+            fromName: 'Tester',
+            fromId: '01234567-8900-0000-0000-000000000000',
+            time: 1562630524418
+          }
         },
         {
-          type: 'NOTIFICATION_IN_CHAT_ADDED',
-          text: 'declined your friendship offer.',
-          fromName: 'Tester',
-          fromId: '01234567-8900-0000-0000-000000000000',
-          time: 1562630524418
+          type: 'localChat/notificationInChatAdded',
+          payload: {
+            text: 'declined your friendship offer.',
+            fromName: 'Tester',
+            fromId: '01234567-8900-0000-0000-000000000000',
+            time: 1562630524418
+          }
         }
       ])
     })
@@ -1700,8 +1754,8 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.FriendshipOffer,
             text: 'Friends?',
             fromId: '01234567-8900-0000-0000-000000000000',
@@ -1729,8 +1783,8 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.GroupInvitation,
             text: 'Hello World!',
             fee: 1000,
@@ -1768,8 +1822,8 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.GroupNotice,
             title: 'Hello World!',
             text: 'Good news, everybody!',
@@ -1796,8 +1850,8 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.GroupNotice,
             title: 'Hello World!',
             text: 'Good news, everybody!',
@@ -1824,8 +1878,8 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.LoadURL,
             text: 'Hello World!',
             url: new window.URL('http://wiki.secondlife.com/wiki/ImprovedInstantMessage'),
@@ -1843,8 +1897,8 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.RequestTeleportLure,
             text: 'Hello World!',
             fromId: '01234567-8900-0000-0000-000000000000',
@@ -1893,8 +1947,8 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.TeleportLure,
             text: 'Hello World!',
             fromId: '01234567-8900-0000-0000-000000000000',
@@ -1908,8 +1962,8 @@ describe('incoming IM handling', () => {
           }
         },
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.TeleportLure,
             text: 'Hello World!',
             fromId: '01234567-8900-0000-0000-000000000000',
@@ -1923,8 +1977,8 @@ describe('incoming IM handling', () => {
           }
         },
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.TeleportLure,
             text: 'Hello World!',
             fromId: '01234567-8900-0000-0000-000000000000',
@@ -1958,8 +2012,8 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.InventoryOffered,
             text: 'Hello World!',
             fromObject: false,
@@ -1974,8 +2028,8 @@ describe('incoming IM handling', () => {
           }
         },
         {
-          type: 'NOTIFICATION_RECEIVED',
-          msg: {
+          type: 'notifications/receive',
+          payload: {
             notificationType: NotificationTypes.InventoryOffered,
             text: 'Hello World!',
             fromObject: true,

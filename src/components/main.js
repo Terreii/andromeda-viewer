@@ -2,7 +2,7 @@ import React, { lazy, Suspense } from 'react'
 import { useSelector } from 'react-redux'
 import { Redirect } from 'react-router-dom'
 
-import { getIsLoggedIn } from '../selectors/session'
+import { selectIsLoggedIn } from '../bundles/session'
 
 import styles from './main.module.css'
 
@@ -18,7 +18,7 @@ export const AppContainer = ({ children, className, ...props }) => (
 const ChatContainer = lazy(() => import('../containers/chatContainer'))
 
 export function LoadableChatComponent () {
-  const isLoggedIn = useSelector(getIsLoggedIn)
+  const isLoggedIn = useSelector(selectIsLoggedIn)
 
   if (!isLoggedIn) {
     return <Redirect push to='/' />

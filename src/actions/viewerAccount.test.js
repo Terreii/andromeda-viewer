@@ -2,8 +2,8 @@ import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
 import { v4 } from 'uuid'
 
+import { signInStatus } from '../bundles/account'
 import {
-  didSignIn,
   saveAvatar,
   loadSavedAvatars,
   saveGrid,
@@ -20,54 +20,66 @@ v4.mockReturnValue('b039f51f-41d9-41e7-a4b1-5490fbfd5eb9')
 it('didSignIn', () => {
   const store = configureMockStore([thunk])()
 
-  store.dispatch(didSignIn(true, false))
+  store.dispatch(signInStatus(true, false))
 
-  store.dispatch(didSignIn())
+  store.dispatch(signInStatus())
 
-  store.dispatch(didSignIn(true, true))
+  store.dispatch(signInStatus(true, true))
 
-  store.dispatch(didSignIn(true, true, 'tester.mactestface@viewer.com'))
+  store.dispatch(signInStatus(true, true, 'tester.mactestface@viewer.com'))
 
-  store.dispatch(didSignIn(true, false, 'tester.mactestface@viewer.com'))
+  store.dispatch(signInStatus(true, false, 'tester.mactestface@viewer.com'))
 
-  store.dispatch(didSignIn(false, false, 'tester.mactestface@viewer.com'))
+  store.dispatch(signInStatus(false, false, 'tester.mactestface@viewer.com'))
 
   expect(store.getActions()).toEqual([
     {
-      type: 'ViewerAccountLogInStatus',
-      isLoggedIn: true,
-      isUnlocked: false,
-      username: ''
+      type: 'account/signInStatus',
+      payload: {
+        isLoggedIn: true,
+        isUnlocked: false,
+        username: ''
+      }
     },
     {
-      type: 'ViewerAccountLogInStatus',
-      isLoggedIn: false,
-      isUnlocked: false,
-      username: ''
+      type: 'account/signInStatus',
+      payload: {
+        isLoggedIn: false,
+        isUnlocked: undefined,
+        username: ''
+      }
     },
     {
-      type: 'ViewerAccountLogInStatus',
-      isLoggedIn: true,
-      isUnlocked: true,
-      username: ''
+      type: 'account/signInStatus',
+      payload: {
+        isLoggedIn: true,
+        isUnlocked: true,
+        username: ''
+      }
     },
     {
-      type: 'ViewerAccountLogInStatus',
-      isLoggedIn: true,
-      isUnlocked: true,
-      username: 'tester.mactestface@viewer.com'
+      type: 'account/signInStatus',
+      payload: {
+        isLoggedIn: true,
+        isUnlocked: true,
+        username: 'tester.mactestface@viewer.com'
+      }
     },
     {
-      type: 'ViewerAccountLogInStatus',
-      isLoggedIn: true,
-      isUnlocked: false,
-      username: 'tester.mactestface@viewer.com'
+      type: 'account/signInStatus',
+      payload: {
+        isLoggedIn: true,
+        isUnlocked: false,
+        username: 'tester.mactestface@viewer.com'
+      }
     },
     {
-      type: 'ViewerAccountLogInStatus',
-      isLoggedIn: false,
-      isUnlocked: false,
-      username: ''
+      type: 'account/signInStatus',
+      payload: {
+        isLoggedIn: false,
+        isUnlocked: false,
+        username: ''
+      }
     }
   ])
 })
@@ -169,8 +181,8 @@ it('loadSavedAvatars', async () => {
 
   expect(store.getActions()).toEqual([
     {
-      type: 'AvatarsLoaded',
-      avatars: [
+      type: 'account/avatarsLoaded',
+      payload: [
         {
           _id: 'avatars/5e922960-d3f6-451d-9e76-346e4e8a988c',
           _rev: '1-2983e9823',
@@ -230,8 +242,8 @@ it('loadSavedAvatars', async () => {
 
   expect(store.getActions()).toEqual([
     {
-      type: 'AvatarSaved',
-      avatar: {
+      type: 'account/avatarSaved',
+      payload: {
         _id: 'avatars/5e922960-d3f6-451d-9e76-346e4e8a988c',
         _rev: '1-2983e9823',
         hoodie: { createdAt: '2019-12-04T19:10:47.756Z' },
@@ -242,8 +254,8 @@ it('loadSavedAvatars', async () => {
       }
     },
     {
-      type: 'SavedAvatarUpdated',
-      avatar: {
+      type: 'account/savedAvatarUpdated',
+      payload: {
         _id: 'avatars/5e922960-d3f6-451d-9e76-346e4e8a988c',
         _rev: '1-2983e9823',
         hoodie: { createdAt: '2019-12-04T19:10:47.756Z' },
@@ -254,8 +266,8 @@ it('loadSavedAvatars', async () => {
       }
     },
     {
-      type: 'SavedAvatarRemoved',
-      avatar: {
+      type: 'account/savedAvatarRemoved',
+      payload: {
         _id: 'avatars/5e922960-d3f6-451d-9e76-346e4e8a988c',
         _rev: '1-2983e9823',
         hoodie: { createdAt: '2019-12-04T19:10:47.756Z' },
@@ -294,19 +306,20 @@ it('saveGrid', async () => {
 
   await expect(store.dispatch(saveGrid({
     name: 'Second Life',
-    url: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
+    loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
   }))).rejects.toThrow('Grid already exist!')
 
   await store.dispatch(saveGrid({
     name: 'AwsomeGrid',
-    url: 'https://login.grid.org/login'
+    loginURL: 'https://login.grid.org/login'
   }))
 
   expect(add.mock.calls.length).toBe(1)
   expect(add.mock.calls[0]).toEqual([
     {
       name: 'AwsomeGrid',
-      loginURL: 'https://login.grid.org/login'
+      loginURL: 'https://login.grid.org/login',
+      isLLSDLogin: false
     }
   ])
 })
@@ -365,8 +378,8 @@ it('loadSavedGrids', async () => {
 
   expect(store.getActions()).toEqual([
     {
-      type: 'GridsLoaded',
-      grids: [
+      type: 'account/gridsLoaded',
+      payload: [
         {
           _id: 'grids/5e922960-d3f6-451d-9e76-346e4e8a988c',
           _rev: '1-2983e9823',
@@ -420,8 +433,8 @@ it('loadSavedGrids', async () => {
 
   expect(store.getActions()).toEqual([
     {
-      type: 'GridAdded',
-      grid: {
+      type: 'account/gridAdded',
+      payload: {
         _id: 'grids/e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
         _rev: '1-2983e9823',
         hoodie: { createdAt: '2019-12-03T19:10:47.756Z' },
@@ -430,8 +443,8 @@ it('loadSavedGrids', async () => {
       }
     },
     {
-      type: 'SavedGridDidChanged',
-      grid: {
+      type: 'account/savedGridDidChanged',
+      payload: {
         _id: 'grids/e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
         _rev: '1-2983e9823',
         hoodie: { createdAt: '2019-12-03T19:10:47.756Z' },
@@ -440,8 +453,8 @@ it('loadSavedGrids', async () => {
       }
     },
     {
-      type: 'SavedGridRemoved',
-      grid: {
+      type: 'account/savedGridRemoved',
+      payload: {
         _id: 'grids/e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
         _rev: '1-2983e9823',
         hoodie: { createdAt: '2019-12-03T19:10:47.756Z' },
@@ -492,16 +505,20 @@ it('should check sign in status with "isSignedIn"', async () => {
 
   expect(store.getActions()).toEqual([
     {
-      type: 'ViewerAccountLogInStatus',
-      isLoggedIn: false,
-      isUnlocked: false,
-      username: ''
+      type: 'account/signInStatus',
+      payload: {
+        isLoggedIn: false,
+        isUnlocked: null,
+        username: ''
+      }
     },
     {
-      type: 'ViewerAccountLogInStatus',
-      isLoggedIn: true,
-      isUnlocked: false,
-      username: 'tester.mactestface@viewer.com'
+      type: 'account/signInStatus',
+      payload: {
+        isLoggedIn: true,
+        isUnlocked: null,
+        username: 'tester.mactestface@viewer.com'
+      }
     }
   ])
 
@@ -528,8 +545,8 @@ it('should check sign in status with "isSignedIn"', async () => {
 
   expect(store.getActions()).toEqual([
     {
-      type: 'VIEWER_ACCOUNT_DID_UPDATE',
-      changes: {
+      type: 'account/didUpdate',
+      payload: {
         username: 'new.phone@whois.this'
       }
     }
@@ -571,14 +588,14 @@ it('should unlock the app with "unlock"', async () => {
   await store.dispatch(unlock('password'))
 
   expect(store.getActions()).toEqual([
-    { type: 'ViewerAccountUnlocked' },
+    { type: 'account/unlocked', payload: undefined },
     {
-      type: 'GridsLoaded',
-      grids: []
+      type: 'account/gridsLoaded',
+      payload: []
     },
     {
-      type: 'AvatarsLoaded',
-      avatars: []
+      type: 'account/avatarsLoaded',
+      payload: []
     }
   ])
 

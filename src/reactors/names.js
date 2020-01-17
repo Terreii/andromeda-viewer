@@ -2,11 +2,11 @@ import { createSelector } from 'reselect'
 
 import { getDisplayName } from '../actions/friendsActions'
 
-import { getNames } from '../selectors/names'
+import { selectNames } from '../bundles/names'
 
 export const loadNames = createSelector(
   [
-    getNames
+    selectNames
   ],
   names => Object.values(names).some(name => !name.willHaveDisplayName())
     ? getDisplayName()

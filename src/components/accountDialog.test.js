@@ -6,15 +6,17 @@ import { Provider } from 'react-redux'
 import AccountDialog from './accountDialog'
 import configureStore from '../store/configureStore'
 import { updateAccount } from '../actions/viewerAccount'
+import { signInStatus } from '../bundles/account'
 
 jest.mock('../actions/viewerAccount')
 
-const { didSignIn } = jest.requireActual('../actions/viewerAccount')
-updateAccount.mockImplementation(args => Promise.resolve({ ...args }))
+updateAccount.mockImplementation(args => () => ({
+  then: () => args // mock a promise
+}))
 
-test('should display and update the account name', () => {
+it('should display and update the account name', () => {
   const store = configureStore()
-  store.dispatch(didSignIn(true, true, 'tester.mactestface@viewer.com'))
+  store.dispatch(signInStatus(true, true, 'tester.mactestface@viewer.com'))
 
   const rendered = mount(<Provider store={store}>
     <AccountDialog />
@@ -66,9 +68,9 @@ test('should display and update the account name', () => {
   ])
 })
 
-test('should change the password', () => {
+it('should change the password', () => {
   const store = configureStore()
-  store.dispatch(didSignIn(true, true, 'tester.mactestface@viewer.com'))
+  store.dispatch(signInStatus(true, true, 'tester.mactestface@viewer.com'))
 
   const rendered = mount(<Provider store={store}>
     <AccountDialog />
@@ -158,9 +160,9 @@ test('should change the password', () => {
   ])
 })
 
-test('should allow to change username and password at the same time', () => {
+it('should allow to change username and password at the same time', () => {
   const store = configureStore()
-  store.dispatch(didSignIn(true, true, 'tester.mactestface@viewer.com'))
+  store.dispatch(signInStatus(true, true, 'tester.mactestface@viewer.com'))
 
   const rendered = mount(<Provider store={store}>
     <AccountDialog />
@@ -210,7 +212,7 @@ test('should allow to change username and password at the same time', () => {
   ])
 })
 
-test('should pass aXe', async () => {
+it('should pass aXe', async () => {
   const rendered = mount(<Provider store={configureStore()}>
     <AccountDialog />
   </Provider>)

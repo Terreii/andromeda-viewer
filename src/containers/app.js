@@ -15,18 +15,18 @@ import PopupRenderer from './popups'
 import TopMenuBar from './topMenuBar'
 import AccountDialog from '../components/accountDialog'
 
-import { isSignedIn as doGetIsSignedIn } from '../actions/viewerAccount'
+import { isSignedIn as getIsSignedIn } from '../actions/viewerAccount'
 
-import { getIsSignedIn } from '../selectors/viewer'
-import { getIsLoggedIn } from '../selectors/session'
-import { getOwnAvatarName } from '../selectors/names'
+import { selectIsSignedIn } from '../bundles/account'
+import { selectOwnAvatarName } from '../bundles/names'
+import { selectIsLoggedIn } from '../bundles/session'
 
 import 'normalize.css'
 
 const Popups = React.memo(PopupRenderer)
 
 export default function App () {
-  const isSignedIn = useSelector(getIsSignedIn)
+  const isSignedIn = useSelector(selectIsSignedIn)
 
   const dispatch = useDispatch()
 
@@ -35,7 +35,7 @@ export default function App () {
       return // component was hot reloaded
     }
 
-    dispatch(doGetIsSignedIn())
+    dispatch(getIsSignedIn())
     // it will only be called once!
     // eslint-disable-next-line
   }, [])
@@ -66,8 +66,8 @@ export default function App () {
 }
 
 function useDocumentTitle () {
-  const selfName = useSelector(getOwnAvatarName)
-  const isLoggedIn = useSelector(getIsLoggedIn)
+  const selfName = useSelector(selectOwnAvatarName)
+  const isLoggedIn = useSelector(selectIsLoggedIn)
 
   useEffect(() => {
     document.title = isLoggedIn
@@ -77,7 +77,7 @@ function useDocumentTitle () {
 }
 
 function NoMatchRedirect () {
-  const isLoggedIn = useSelector(getIsLoggedIn)
+  const isLoggedIn = useSelector(selectIsLoggedIn)
 
   return <Redirect to={isLoggedIn ? '/session' : '/'} />
 }

@@ -16,29 +16,39 @@ import { fetchSeedCapabilities } from './llsd'
 import LLSD from '../llsd'
 import connectCircuit from './connectCircuit'
 
-import { getSavedAvatars, getSavedGrids } from '../selectors/viewer'
-import { getIsLoggedIn, getAgentId, getSessionId } from '../selectors/session'
+import { selectSavedAvatars, selectSavedGrids } from '../bundles/account'
+import {
+  startLogin,
+  login as loginAction,
+  loginFailed,
+  startLogout,
+  logout as didLogout,
+  userWasKicked,
+
+  selectAgentId,
+  selectSessionId,
+  selectIsLoggedIn
+} from '../bundles/session'
 
 // Actions for the session of an avatar
 
 // Logon the user. It will post using fetch to the server.
 export function login (avatarName, password, grid, save, isNew) {
   return async (dispatch, getState, extra) => {
-    if (getIsLoggedIn(getState())) throw new Error('There is already an avatar logged in!')
+    if (selectIsLoggedIn(getState())) throw new Error('There is already an avatar logged in!')
 
-    dispatch({
-      type: 'startLogin',
+    dispatch(startLogin({
       name: avatarName,
       grid,
       sync: save
-    })
+    }))
 
     const hash = crypto.createHash('md5')
     hash.update(password, 'ascii')
     const finalPassword = '$1$' + hash.digest('hex')
 
     const viewerData = {
-      loginUrl: grid.url,
+      loginUrl: grid.loginURL,
       userId: null
     }
 
@@ -49,17 +59,17 @@ export function login (avatarName, password, grid, save, isNew) {
 
     const circuit = import('../network/circuit')
 
-    const body = grid.isLoginLLSD
+    const body = grid.isLLSDLogin
       ? await loginWithLLSD(viewerData, avatarName.first, avatarName.last, finalPassword)
       : await loginWithXmlRpc(viewerData, avatarName.first, avatarName.last, finalPassword)
 
     if (body.login !== 'true') {
-      dispatch({ type: 'loginDidFail' })
+      dispatch(loginFailed({ error: body.message }))
       throw new Error(body.message)
     }
 
     // save grid if it is new (do not save if login did fail)
-    const gridExists = getSavedGrids(getState()).some(savedGrid => savedGrid.name === grid.name)
+    const gridExists = selectSavedGrids(getState()).some(savedGrid => savedGrid.name === grid.name)
     if (save && isNew && !gridExists) {
       await dispatch(saveGrid(grid))
     }
@@ -68,7 +78,7 @@ export function login (avatarName, password, grid, save, isNew) {
 
     const avatarData = save && isNew
       ? await dispatch(saveAvatar(avatarName, body.agent_id, grid.name)) // adding new avatars
-      : getSavedAvatars(getState()).reduce((last, avatar) => { // for saved avatars
+      : selectSavedAvatars(getState()).reduce((last, avatar) => { // for saved avatars
         if (last != null) return last
 
         return avatar.avatarIdentifier === avatarIdentifier
@@ -80,8 +90,7 @@ export function login (avatarName, password, grid, save, isNew) {
       ? await dispatch(getLocalChatHistory(avatarData.dataSaveId))
       : []
 
-    dispatch({
-      type: 'didLogin',
+    dispatch(loginAction({
       name: avatarName,
       save,
       avatarIdentifier: avatarData != null ? avatarData.avatarIdentifier : avatarIdentifier,
@@ -90,7 +99,7 @@ export function login (avatarName, password, grid, save, isNew) {
       uuid: body.agent_id,
       sessionInfo: body,
       localChatHistory
-    })
+    }))
 
     dispatch(loadIMChats())
 
@@ -211,7 +220,7 @@ export function logout () {
     const circuit = extra.circuit
     const activeState = getState()
 
-    if (!getIsLoggedIn(activeState)) {
+    if (!selectIsLoggedIn(activeState)) {
       return Promise.reject(new Error("You aren't logged in!"))
     }
 
@@ -219,23 +228,19 @@ export function logout () {
       circuit.send('LogoutRequest', {
         AgentData: [
           {
-            AgentID: getAgentId(activeState),
-            SessionID: getSessionId(activeState)
+            AgentID: selectAgentId(activeState),
+            SessionID: selectSessionId(activeState)
           }
         ]
       }, true)
         .catch(reject)
 
-      dispatch({
-        type: 'StartLogout'
-      })
+      dispatch(startLogout())
 
       circuit.once('LogoutReply', msg => {
         dispatch(afterAvatarSessionEnds())
 
-        dispatch({
-          type: 'DidLogout'
-        })
+        dispatch(didLogout())
 
         resolve()
       })
@@ -325,18 +330,17 @@ function connectToSim (sessionInfo, circuit) {
 function getKicked (msg) {
   return (dispatch, getState, extra) => {
     const activeState = getState()
-    const agentId = getAgentId(activeState)
-    const sessionId = getSessionId(activeState)
+    const agentId = selectAgentId(activeState)
+    const sessionId = selectSessionId(activeState)
     const msgAgentId = getValueOf(msg, 'UserInfo', 0, 'AgentID')
     const msgSessionId = getValueOf(msg, 'UserInfo', 0, 'SessionID')
 
     if (agentId === msgAgentId && sessionId === msgSessionId) {
       dispatch(afterAvatarSessionEnds())
 
-      dispatch({
-        type: 'UserWasKicked',
+      dispatch(userWasKicked({
         reason: getStringValueOf(msg, 'UserInfo', 0, 'Reason')
-      })
+      }))
     }
   }
 }
@@ -357,8 +361,8 @@ function afterAvatarSessionEnds () {
 function requestAvatarProperties (avatarID) {
   return (dispatch, getState, { circuit }) => {
     const activeState = getState()
-    const agentID = getAgentId(activeState)
-    const sessionID = getSessionId(activeState)
+    const agentID = selectAgentId(activeState)
+    const sessionID = selectSessionId(activeState)
 
     circuit.send('AvatarPropertiesRequest', {
       AgentData: [
