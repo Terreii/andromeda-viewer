@@ -39,7 +39,7 @@ const accountSlice = createSlice({
       state.unlocked = true
     },
   
-    showPopup (state, action: PayloadAction<'unlock' | 'signIn' | 'signUp' | 'signOut' | 'Error'>) {
+    showPopup (state, action: PayloadAction<'unlock' | 'signOut' | 'Error'>) {
       state.signInPopup = action.payload
     },
   

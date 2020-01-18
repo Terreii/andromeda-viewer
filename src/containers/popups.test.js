@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 
 import PopupRenderer from './popups'
 
-test('renders without crashing', () => {
+it('renders without crashing', () => {
   const store = {
     getState: () => ({}),
     dispatch: () => {},
@@ -18,7 +18,7 @@ test('renders without crashing', () => {
   </Provider>)
 })
 
-test('renders unlock without crashing', () => {
+it('renders unlock without crashing', () => {
   const store = {
     getState: () => ({
       account: {
@@ -37,7 +37,7 @@ test('renders unlock without crashing', () => {
   expect(rendered.find('h4 span').text()).toBe('Unlock')
 })
 
-test('renders resetPassword without crashing', () => {
+it('renders resetPassword without crashing', () => {
   const store = {
     getState: () => ({
       account: {
@@ -59,47 +59,7 @@ test('renders resetPassword without crashing', () => {
   expect(rendered.find('h4').text()).toBe('Reset password')
 })
 
-test('renders signIn without crashing', () => {
-  const store = {
-    getState: () => ({
-      account: {
-        loggedIn: false,
-        unlocked: false,
-        signInPopup: 'signIn'
-      },
-      session: {}
-    }),
-    dispatch: () => {},
-    subscribe: () => () => {}
-  }
-  const rendered = mount(<Provider store={store}>
-    <PopupRenderer />
-  </Provider>)
-
-  expect(rendered.find('h4').text()).toBe('Sign in')
-})
-
-test('renders signUp without crashing', () => {
-  const store = {
-    getState: () => ({
-      account: {
-        loggedIn: false,
-        unlocked: false,
-        signInPopup: 'signUp'
-      },
-      session: {}
-    }),
-    dispatch: () => {},
-    subscribe: () => () => {}
-  }
-  const rendered = mount(<Provider store={store}>
-    <PopupRenderer />
-  </Provider>)
-
-  expect(rendered.find('h4').text()).toBe('Sign up')
-})
-
-test('renders resetKeys without crashing', () => {
+it('renders resetKeys without crashing', () => {
   global.URL.createObjectURL = jest.fn()
   global.URL.revokeObjectURL = jest.fn()
 
@@ -135,7 +95,7 @@ test('renders resetKeys without crashing', () => {
   expect(rendered.find('h4').text()).toBe('Password reset keys')
 })
 
-test('renders signOut without crashing', () => {
+it('renders signOut without crashing', () => {
   const store = {
     getState: () => ({
       account: {

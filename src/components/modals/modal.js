@@ -3,12 +3,13 @@ import { Portal } from 'reakit/Portal'
 import { Dialog, DialogBackdrop } from 'reakit'
 
 import closeIcon from '../../icons/icon_close.svg'
-import styles from '../popups/popup.module.css'
+import styles from './modal.module.css'
 
 export default function Popup ({ children, title, showOnClose, backdrop, dialog }) {
   const closeIconInHeader = showOnClose
     ? <button
       className={'closePopup ' + styles.CloseButton}
+      aria-label={'close ' + title}
       onClick={event => {
         event.preventDefault()
         dialog.hide()
@@ -21,7 +22,7 @@ export default function Popup ({ children, title, showOnClose, backdrop, dialog 
   return (
     <>
       {backdrop && <Portal>
-        <DialogBackdrop {...dialog} />
+        <DialogBackdrop {...dialog} className={styles.Background} />
       </Portal>}
       <Dialog {...dialog} className={styles.Border} aria-label={title}>
         <div className={styles.Header}>

@@ -10,8 +10,6 @@ export default function TopBar ({
   userName,
   isLoggedIn,
   avatarName,
-  signIn,
-  signUp,
   signOut,
   logout
 }) {
@@ -21,8 +19,6 @@ export default function TopBar ({
       userName={userName}
       isLoggedIn={isLoggedIn}
       avatarName={avatarName}
-      signIn={signIn}
-      signUp={signUp}
       signOut={signOut}
       logout={logout}
     />

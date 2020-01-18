@@ -1,6 +1,7 @@
 import { axe } from 'jest-axe'
-import React from 'react'
 import { shallow, mount } from 'enzyme'
+import React from 'react'
+import { Provider } from 'react-redux'
 
 import SignIn from './signIn'
 
@@ -9,29 +10,30 @@ test('renders without crashing', () => {
 })
 
 test('on buttons click', () => {
-  const callbackData = []
+  const store = {
+    getState: () => ({}),
+    dispatch: () => {},
+    subscribe: () => () => {}
+  }
 
-  const rendered = mount(<SignIn
-    showSignInPopup={prop => {
-      callbackData.push(prop)
-    }}
-  />)
+  const rendered = mount(<Provider store={store}>
+    <SignIn />
+  </Provider>)
 
-  const buttons = rendered.find('button')
+  const buttons = rendered.find('button[aria-haspopup="dialog"]')
   expect(buttons.length).toBe(2)
-
-  buttons.forEach(button => {
-    button.simulate('click')
-  })
-
-  expect(callbackData).toEqual([
-    'signIn',
-    'signUp'
-  ])
 })
 
 test('should pass aXe', async () => {
-  const rendered = mount(<SignIn showSignInPopup={() => {}} />)
+  const store = {
+    getState: () => ({}),
+    dispatch: () => {},
+    subscribe: () => () => {}
+  }
+
+  const rendered = mount(<Provider store={store}>
+    <SignIn showSignInPopup={() => {}} />
+  </Provider>)
 
   expect(await axe(rendered.html())).toHaveNoViolations()
 })

@@ -1,18 +1,28 @@
 import React from 'react'
+import { useDialogState, DialogDisclosure } from 'reakit'
+
+import SignInDialog from '../modals/signIn'
 
 import styles from './signIn.module.css'
 
 export default function SignIn ({ showSignInPopup }) {
+  const signInDialog = useDialogState()
+  const signUpDialog = useDialogState()
+
   return <section className={styles.Container}>
     <h2 className={styles.Title}>New to this viewer?</h2>
     <div className={styles.ButtonRow}>
-      <button className={styles.SignInButton} onClick={() => { showSignInPopup('signIn') }}>
+      <DialogDisclosure {...signInDialog} className={styles.SignInButton}>
         Sign In
-      </button>
+      </DialogDisclosure>
+      <SignInDialog dialog={signInDialog} />
+
       <span className={styles.Separator}>or</span>
-      <button className={styles.SignInButton} onClick={() => { showSignInPopup('signUp') }}>
+
+      <DialogDisclosure {...signUpDialog} className={styles.SignInButton}>
         Sign Up
-      </button>
+      </DialogDisclosure>
+      <SignInDialog isSignUp dialog={signUpDialog} />
     </div>
   </section>
 }
