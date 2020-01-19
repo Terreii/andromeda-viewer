@@ -174,21 +174,18 @@ const imSlice = createSlice({
   },
 
   extraReducers: {
-    [chatSessionStarted.type]: (state, action: PayloadAction<
-      {
-        [key: string]: { id: string, saveId: string, name: string }
-      },
-      string,
-      { avatarDataSaveId: string }
-    >) => {
-      for (const [groupId, data] of Object.entries(action.payload)) {
+    [chatSessionStarted.type]: (state, action: PayloadAction<{
+      avatarDataSaveId: string
+      groups: { [key: string]: { id: string, saveId: string, name: string } }
+    }>) => {
+      for (const [groupId, data] of Object.entries(action.payload.groups)) {
         if (!(groupId in state)) {
           state[groupId] = getDefaultImChat()
         }
         const chatData = state[groupId]
   
         if (chatData._id === '') {
-          chatData._id = `${action.meta.avatarDataSaveId}/imChatsInfos/${data.saveId}`
+          chatData._id = `${action.payload.avatarDataSaveId}/imChatsInfos/${data.saveId}`
           chatData.sessionId = data.id
           chatData.saveId = data.saveId
         }
