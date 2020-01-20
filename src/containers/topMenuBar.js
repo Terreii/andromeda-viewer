@@ -5,7 +5,7 @@ import { action as toggleMenu } from 'redux-burger-menu'
 import TopBar from '../components/topBar'
 
 import { logout } from '../actions/sessionActions'
-import { showSignOutPopup } from '../actions/viewerAccount'
+import { signOut } from '../actions/viewerAccount'
 
 import { selectIsSignedIn, selectUserName } from '../bundles/account'
 import { selectOwnAvatarName } from '../bundles/names'
@@ -28,7 +28,7 @@ export default function TopBarContainer (props) {
   const doSignOutFromViewer = event => {
     event.preventDefault()
     dispatch(toggleMenu(false))
-    dispatch(showSignOutPopup())
+    dispatch(signOut())
   }
 
   return <TopBar

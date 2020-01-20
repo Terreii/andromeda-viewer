@@ -3,14 +3,13 @@ import { Portal } from 'react-portal'
 import { useSelector, useDispatch } from 'react-redux'
 
 import Popup from '../components/popups/popup'
-import SignOutPopup from '../components/popups/signOutPopup'
-import UnlockDialog from '../components/popups/unlockDialog'
+import UnlockDialog from '../components/modals/unlockDialog'
 import ResetKeysPopup from '../components/popups/resetKeysPopup'
 import ResetPasswordDialog from '../components/popups/resetPasswordDialog'
 
-import { signOut, unlock, changeEncryptionPassword } from '../actions/viewerAccount'
+import { signOut, changeEncryptionPassword } from '../actions/viewerAccount'
 
-import { selectPopup, selectPopupData, showPasswordReset, closePopup } from '../bundles/account'
+import { selectPopup, selectPopupData, closePopup } from '../bundles/account'
 
 export default (props) => {
   const popup = useSelector(selectPopup)
@@ -20,8 +19,6 @@ export default (props) => {
 
   const doClosePopup = () => dispatch(closePopup())
   const doSignOut = () => dispatch(signOut())
-  const doUnlock = cryptoPassword => dispatch(unlock(cryptoPassword))
-  const displayResetPassword = type => dispatch(showPasswordReset(type))
   const doChangeEncryptionPassword = (resetKey, nextPassword) => dispatch(
     changeEncryptionPassword(resetKey, nextPassword)
   )
@@ -31,21 +28,12 @@ export default (props) => {
   switch (popup) {
     case 'unlock':
       return <Portal>
-        <UnlockDialog
-          onUnlock={doUnlock}
-          onForgottenPassword={displayResetPassword}
-          onSignOut={doSignOut}
-        />
+        <UnlockDialog />
       </Portal>
 
     case 'resetKeys':
       return <Portal>
         <ResetKeysPopup onClose={doClosePopup} resetKeys={data} />
-      </Portal>
-
-    case 'signOut':
-      return <Portal>
-        <SignOutPopup onCancel={doClosePopup} onSignOut={doSignOut} />
       </Portal>
 
     case 'resetPassword':

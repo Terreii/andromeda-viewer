@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
+import { useDispatch } from 'react-redux'
+import { useDialogState } from 'reakit'
 
-import Popup from './popup'
+import Modal from './modal'
+
+import { showPasswordReset } from '../../bundles/account'
+import { signOut, unlock } from '../../actions/viewerAccount'
 
 import { useAutoFocus } from '../../hooks/utils'
 
@@ -8,14 +13,17 @@ import styles from './unlockAndSignOut.module.css'
 import formStyles from '../formElements.module.css'
 import lockIcon from '../../icons/black_lock.svg'
 
-export default function UnlockDialog ({ onUnlock, onSignOut, onForgottenPassword }) {
+export default function UnlockDialog () {
+  const dialog = useDialogState({ visible: process.env.NODE_ENV !== 'test' })
+  const dispatch = useDispatch()
+
   const [password, setPassword] = useState('')
   const [isUnlocking, setIsUnlocking] = useState(false)
   const [errorText, setErrorText] = useState(null)
 
   const doAutoFocus = useAutoFocus()
 
-  const unlock = async event => {
+  const doUnlock = async event => {
     event.preventDefault()
 
     if (password.length === 0) {
@@ -26,7 +34,7 @@ export default function UnlockDialog ({ onUnlock, onSignOut, onForgottenPassword
     setIsUnlocking(true)
 
     try {
-      await onUnlock(password)
+      await dispatch(unlock(password))
     } catch (error) {
       console.error(error)
       const nextErrorText = typeof error.message === 'string'
@@ -49,8 +57,8 @@ export default function UnlockDialog ({ onUnlock, onSignOut, onForgottenPassword
     Unlock
   </span>
 
-  return <Popup title={title}>
-    <form className={styles.Content} onSubmit={unlock}>
+  return <Modal title={title} dialog={dialog} backdrop>
+    <form className={styles.Content} onSubmit={doUnlock}>
       <span>Please enter your <i>Encryption-Password</i> to unlock this app!</span>
 
       <div className={styles.PasswordRow}>
@@ -75,7 +83,7 @@ export default function UnlockDialog ({ onUnlock, onSignOut, onForgottenPassword
             className={styles.ResetButton}
             onClick={event => {
               event.preventDefault()
-              onForgottenPassword('encryption')
+              dispatch(showPasswordReset('encryption'))
             }}
           >
             Reset password
@@ -97,7 +105,7 @@ export default function UnlockDialog ({ onUnlock, onSignOut, onForgottenPassword
           className={formStyles.DangerButton}
           onClick={event => {
             event.preventDefault()
-            onSignOut()
+            dispatch(signOut())
           }}
           disabled={isUnlocking}
         >
@@ -113,5 +121,5 @@ export default function UnlockDialog ({ onUnlock, onSignOut, onForgottenPassword
         </button>
       </div>
     </form>
-  </Popup>
+  </Modal>
 }

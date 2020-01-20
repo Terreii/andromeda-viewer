@@ -18,25 +18,6 @@ it('renders without crashing', () => {
   </Provider>)
 })
 
-it('renders unlock without crashing', () => {
-  const store = {
-    getState: () => ({
-      account: {
-        loggedIn: true,
-        unlocked: false
-      },
-      session: {}
-    }),
-    dispatch: () => {},
-    subscribe: () => () => {}
-  }
-  const rendered = mount(<Provider store={store}>
-    <PopupRenderer />
-  </Provider>)
-
-  expect(rendered.find('h4 span').text()).toBe('Unlock')
-})
-
 it('renders resetPassword without crashing', () => {
   const store = {
     getState: () => ({
@@ -93,24 +74,4 @@ it('renders resetKeys without crashing', () => {
   </Provider>)
 
   expect(rendered.find('h4').text()).toBe('Password reset keys')
-})
-
-it('renders signOut without crashing', () => {
-  const store = {
-    getState: () => ({
-      account: {
-        loggedIn: true,
-        unlocked: true,
-        signInPopup: 'signOut'
-      },
-      session: {}
-    }),
-    dispatch: () => {},
-    subscribe: () => () => {}
-  }
-  const rendered = mount(<Provider store={store}>
-    <PopupRenderer />
-  </Provider>)
-
-  expect(rendered.find('h4').text()).toBe('Sign Out?')
 })

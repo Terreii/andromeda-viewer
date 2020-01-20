@@ -39,7 +39,7 @@ const accountSlice = createSlice({
       state.unlocked = true
     },
   
-    showPopup (state, action: PayloadAction<'unlock' | 'signOut' | 'Error'>) {
+    showPopup (state, action: PayloadAction<'unlock' | 'Error'>) {
       state.signInPopup = action.payload
     },
   
@@ -235,6 +235,6 @@ function getDefault () {
 
 // Types
 
-type SignInPopup = 'signUp' | 'signIn' | 'signOut' | 'resetPassword' | 'resetKeys' | null
+type SignInPopup = 'resetPassword' | 'resetKeys' | null
 
 export type PopupType = SignInPopup | 'unlock'

@@ -4,7 +4,7 @@ import Popup from './popup'
 
 import { useAutoFocus } from '../../hooks/utils'
 
-import styles from './unlockAndSignOut.module.css'
+import styles from '../modals/unlockAndSignOut.module.css'
 import formStyles from '../formElements.module.css'
 
 export default function ResetPasswordDialog ({ type, onChangePassword, onSignOut, onCancel }) {
