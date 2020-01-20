@@ -18,28 +18,6 @@ it('renders without crashing', () => {
   </Provider>)
 })
 
-it('renders resetPassword without crashing', () => {
-  const store = {
-    getState: () => ({
-      account: {
-        loggedIn: true,
-        unlocked: false,
-        signInPopup: 'resetPassword'
-      },
-      session: {}
-    }),
-    dispatch: () => {},
-    subscribe: () => () => {}
-  }
-  const rendered = mount(<Provider store={store}>
-    <PopupRenderer
-      data='encryption'
-    />
-  </Provider>)
-
-  expect(rendered.find('h4').text()).toBe('Reset password')
-})
-
 it('renders resetKeys without crashing', () => {
   global.URL.createObjectURL = jest.fn()
   global.URL.revokeObjectURL = jest.fn()

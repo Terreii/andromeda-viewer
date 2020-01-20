@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 
 import Modal from './modal'
@@ -24,6 +24,16 @@ export default function SignInPopup ({ isSignUp, dialog }) {
 
   const [isSigningIn, setIsSigningIn] = useState(false)
   const [error, setError] = useState(null)
+
+  useEffect(() => {
+    password.onChange('')
+    password2.onChange('')
+
+    cryptoPassword.onChange('')
+    cryptoPassword2.onChange('')
+    // Only reset passwords if the visibility did change
+    // eslint-disable-next-line
+  }, [dialog.visible])
 
   const isValid = (() => {
     if ([password.value, cryptoPassword.value].some((s, i) => s.length < 8)) {

@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { useDialogState } from 'reakit'
+import { useDialogState, DialogDisclosure } from 'reakit'
 
 import Modal from './modal'
+import ResetPasswordDialog from './resetPasswordDialog'
 
-import { showPasswordReset } from '../../bundles/account'
 import { signOut, unlock } from '../../actions/viewerAccount'
 
 import { useAutoFocus } from '../../hooks/utils'
@@ -46,18 +46,17 @@ export default function UnlockDialog () {
     }
   }
 
-  const title = <span>
-    <img
-      className={styles.LockItem}
-      src={lockIcon}
-      height='18'
-      width='18'
-      alt=''
-    />
-    Unlock
-  </span>
+  const resetPasswordState = useDialogState()
 
-  return <Modal title={title} dialog={dialog} backdrop>
+  const icon = <img
+    className={styles.LockItem}
+    src={lockIcon}
+    height='18'
+    width='18'
+    alt=''
+  />
+
+  return <Modal title='Unlock' icon={icon} dialog={dialog} backdrop notCloseable>
     <form className={styles.Content} onSubmit={doUnlock}>
       <span>Please enter your <i>Encryption-Password</i> to unlock this app!</span>
 
@@ -77,17 +76,13 @@ export default function UnlockDialog () {
         />
         <small id='resetPassword' className={formStyles.Help}>
           If you did forget your encryption-password?
-          <button
+          <DialogDisclosure
+            {...resetPasswordState}
             id='resetPasswordButton'
-            type='button'
             className={styles.ResetButton}
-            onClick={event => {
-              event.preventDefault()
-              dispatch(showPasswordReset('encryption'))
-            }}
           >
             Reset password
-          </button>
+          </DialogDisclosure>
         </small>
         <small
           id='unlockError'
@@ -115,11 +110,13 @@ export default function UnlockDialog () {
         <button
           id='unlockButton'
           className={formStyles.PrimaryButton}
-          disabled={isUnlocking}
+          disabled={isUnlocking || password.length < 8}
         >
           Unlock
         </button>
       </div>
     </form>
+
+    <ResetPasswordDialog dialog={resetPasswordState} type='encryption' />
   </Modal>
 }

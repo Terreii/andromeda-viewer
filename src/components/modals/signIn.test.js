@@ -11,7 +11,7 @@ const Container = ({ store, isSignUp }) => {
 
   return <Provider store={store}>
     <DialogDisclosure {...dialog}>Test</DialogDisclosure>
-    <SignInPopup {...dialog} isSignUp={isSignUp} />
+    <SignInPopup dialog={dialog} isSignUp={isSignUp} />
   </Provider>
 }
 

@@ -1,13 +1,18 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useDispatch } from 'react-redux'
 
-import Popup from './popup'
+import Modal from './modal'
+
+import { signOut, changeEncryptionPassword } from '../../actions/viewerAccount'
 
 import { useAutoFocus } from '../../hooks/utils'
 
-import styles from '../modals/unlockAndSignOut.module.css'
+import styles from './unlockAndSignOut.module.css'
 import formStyles from '../formElements.module.css'
 
-export default function ResetPasswordDialog ({ type, onChangePassword, onSignOut, onCancel }) {
+export default function ResetPasswordDialog ({ type, dialog }) {
+  const dispatch = useDispatch()
+
   const isEncryption = type === 'encryption'
 
   const [resetKey, setResetKey] = useState('')
@@ -16,29 +21,43 @@ export default function ResetPasswordDialog ({ type, onChangePassword, onSignOut
   const [errorMessage, setErrorMessage] = useState(null)
   const [isChanging, setIsChanging] = useState(false)
 
+  useEffect(() => {
+    setResetKey('')
+    setPassword1('')
+    setPassword2('')
+    setErrorMessage(null)
+    setIsChanging(false)
+  }, [dialog.visible])
+
   const canChange = !isChanging &&
     resetKey.length === 32 &&
     password1.length >= 8 &&
     password1 === password2
 
-  const onSubmit = event => {
+  const onSubmit = async event => {
     event.preventDefault()
 
     if (canChange) {
       setIsChanging(true)
       setErrorMessage(null)
 
-      onChangePassword(resetKey, password1)
-        .catch(err => {
-          setErrorMessage(err.reason || err.toString())
-          setIsChanging(false)
-        })
+      try {
+        await dispatch(changeEncryptionPassword(resetKey, password1))
+      } catch (err) {
+        setErrorMessage(err.reason || err.toString())
+        setIsChanging(false)
+      }
     }
+  }
+
+  const onCancel = event => {
+    event.preventDefault()
+    dialog.hide()
   }
 
   const doAutoFocus = useAutoFocus()
 
-  return <Popup title='Reset password' onClose={onCancel}>
+  return <Modal title='Reset password' dialog={dialog} showOnClose backdrop>
     <form onSubmit={onSubmit}>
       <div className={formStyles.FormField}>
         <label htmlFor='oldInput'>{isEncryption ? 'Reset-key' : 'Password'}:</label>
@@ -51,6 +70,8 @@ export default function ResetPasswordDialog ({ type, onChangePassword, onSignOut
           autoFocus
           ref={doAutoFocus}
           required
+          minLength={isEncryption ? 32 : 8}
+          maxLength={isEncryption ? 32 : undefined}
           disabled={isChanging}
         />
         <small id='helpOld' className={formStyles.Help}>Please enter one of your reset-keys</small>
@@ -73,6 +94,7 @@ export default function ResetPasswordDialog ({ type, onChangePassword, onSignOut
           value={password1}
           onChange={event => { setPassword1(event.target.value) }}
           required
+          minLength='8'
           aria-describedby='newPasswordHelp'
           disabled={isChanging}
         />
@@ -88,6 +110,7 @@ export default function ResetPasswordDialog ({ type, onChangePassword, onSignOut
           value={password2}
           onChange={event => { setPassword2(event.target.value) }}
           required
+          minLength='8'
           aria-describedby='secondPwInputError'
           disabled={isChanging}
         />
@@ -113,7 +136,9 @@ export default function ResetPasswordDialog ({ type, onChangePassword, onSignOut
         <button
           type='button'
           className={formStyles.DangerButton}
-          onClick={onSignOut}
+          onClick={() => {
+            dispatch(signOut())
+          }}
           disabled={isChanging}
         >
           sign out
@@ -125,5 +150,5 @@ export default function ResetPasswordDialog ({ type, onChangePassword, onSignOut
         </button>
       </div>
     </form>
-  </Popup>
+  </Modal>
 }

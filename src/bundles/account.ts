@@ -39,13 +39,8 @@ const accountSlice = createSlice({
       state.unlocked = true
     },
   
-    showPopup (state, action: PayloadAction<'unlock' | 'Error'>) {
+    showPopup (state, action: PayloadAction<'Error'>) {
       state.signInPopup = action.payload
-    },
-  
-    showPasswordReset (state, action: PayloadAction<'encryption' | 'account'>) {
-      state.signInPopup = 'resetPassword'
-      state.popupData = action.payload
     },
   
     displayResetKeys (state, action: PayloadAction<string[]>) {
@@ -62,7 +57,7 @@ const accountSlice = createSlice({
     },
   
     closePopup (state) {
-      state.signInPopup = ''
+      state.signInPopup = null
       state.popupData = null
     },
   
@@ -143,7 +138,6 @@ export const {
   didUpdate,
 
   showPopup,
-  showPasswordReset,
   displayResetKeys,
   closePopup,
 
@@ -206,7 +200,7 @@ function getDefault () {
     unlocked: false,
     loggedIn: false,
     username: '',
-    signInPopup: '',
+    signInPopup: null as SignInPopup,
     popupData: null as string | string[] | null,
     savedAvatars: [] as SavedAvatarData[],
     savedAvatarsLoaded: false,
@@ -235,6 +229,6 @@ function getDefault () {
 
 // Types
 
-type SignInPopup = 'resetPassword' | 'resetKeys' | null
+type SignInPopup = 'resetKeys' | 'Error' | null
 
 export type PopupType = SignInPopup | 'unlock'
