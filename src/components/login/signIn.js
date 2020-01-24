@@ -5,7 +5,7 @@ import SignInDialog from '../modals/signIn'
 
 import styles from './signIn.module.css'
 
-export default function SignIn ({ showSignInPopup }) {
+export default function SignIn () {
   const signInDialog = useDialogState()
   const signUpDialog = useDialogState()
 

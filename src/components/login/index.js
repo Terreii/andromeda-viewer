@@ -8,7 +8,7 @@ import AvatarName from '../../avatarName'
 
 import styles from './index.module.css'
 
-export default function LoginForm ({ isSignedIn, avatars, grids, login, showSignInPopup }) {
+export default function LoginForm ({ isSignedIn, avatars, grids, login }) {
   const history = useHistory()
 
   const [selected, setSelected] = useState(() => avatars.length === 0
@@ -129,7 +129,7 @@ export default function LoginForm ({ isSignedIn, avatars, grids, login, showSign
           onSelect={setSelected}
         />
 
-        {!isSignedIn && <SignIn showSignInPopup={showSignInPopup} />}
+        {!isSignedIn && <SignIn />}
 
         {avatars.map(avatar => <AvatarLogin
           key={avatar._id}

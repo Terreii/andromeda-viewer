@@ -65,6 +65,7 @@ export default function SignInPopup ({ isSignUp, dialog }) {
         await dispatch(signIn(username, password.value, cryptoPassword.value))
       }
     } catch (err) {
+      console.error(err)
       setIsSigningIn(false)
       setError(err.message || err.toString())
     }

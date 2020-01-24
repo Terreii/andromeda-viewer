@@ -1,4 +1,4 @@
-import { createSlice, createSelector, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, createSelector, PayloadAction, Action } from '@reduxjs/toolkit'
 
 import { AvatarData, SavedAvatarData, Grid, HoodieObject } from '../types/viewer'
 
@@ -39,13 +39,12 @@ const accountSlice = createSlice({
       state.unlocked = true
     },
   
-    showPopup (state, action: PayloadAction<'Error'>) {
-      state.signInPopup = action.payload
-    },
-  
     displayResetKeys (state, action: PayloadAction<string[]>) {
-      state.signInPopup = 'resetKeys'
-      state.popupData = action.payload
+      state.resetKeys = action.payload
+    },
+
+    closeResetKeys (state, action: Action) {
+      state.resetKeys = null
     },
   
     didUpdate (state: { [key: string]: any }, action: PayloadAction<{ [key: string]: any }>) {
@@ -54,11 +53,6 @@ const accountSlice = createSlice({
         .forEach(([key, value]) => {
           state[key] = value
         })
-    },
-  
-    closePopup (state) {
-      state.signInPopup = null
-      state.popupData = null
     },
   
     avatarSaved (state, action: PayloadAction<SavedAvatarData>) {
@@ -137,9 +131,8 @@ export const {
   unlocked,
   didUpdate,
 
-  showPopup,
   displayResetKeys,
-  closePopup,
+  closeResetKeys,
 
   avatarSaved,
   avatarsLoaded,
@@ -170,28 +163,15 @@ export const selectSavedGrids = (state: any): Grid[] => state.account.savedGrids
 
 export const selectSavedGridsAreLoaded = (state: any): boolean => state.account.savedGridsLoaded
 
-// TODO: When #222 Use Reakit lands then Dialogs/Modal (up until now wrongly popup) will be
-// directly used in a component.
-// The last modal that will be controlled by this slice is the unlock modal.
-export const selectPopup = createSelector(
+export const selectShowUnlockDialog = createSelector(
   [
     selectIsSignedIn,
     selectIsUnlocked,
-    (state: any): SignInPopup => state.account.signInPopup,
-    (state: any): string | null => state.session.error
   ],
-  (isSignedIn, isUnlocked, signInPopup, sessionError) => {
-    const popup = signInPopup || sessionError
-
-    if (popup === 'resetPassword') return popup
-
-    return !isUnlocked && isSignedIn
-      ? 'unlock'
-      : popup
-  }
+  (isSignedIn, isUnlocked) => !isUnlocked && isSignedIn
 )
 
-export const selectPopupData = (state: any): any | null => state.account.popupData
+export const selectResetKeys = (state: any): string[] | null => state.account.resetKeys
 
 // Helpers
 
@@ -200,8 +180,7 @@ function getDefault () {
     unlocked: false,
     loggedIn: false,
     username: '',
-    signInPopup: null as SignInPopup,
-    popupData: null as string | string[] | null,
+    resetKeys: null as string[] | null,
     savedAvatars: [] as SavedAvatarData[],
     savedAvatarsLoaded: false,
     anonymAvatarData: null as AvatarData | null,

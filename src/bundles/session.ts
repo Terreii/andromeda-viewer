@@ -1,13 +1,8 @@
 // Reducer for general session info.
 
-import { createSlice, createSelector, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, createSelector, PayloadAction, Action } from '@reduxjs/toolkit'
 
-import {
-  selectIsSignedIn,
-  selectSavedAvatars,
-  selectAnonymAvatarData,
-  closePopup
-} from './account'
+import { selectIsSignedIn, selectSavedAvatars, selectAnonymAvatarData } from './account'
 import AvatarName from '../avatarName'
 
 import { LocalChatMessage } from '../types/chat'
@@ -71,12 +66,6 @@ const sessionSlice = createSlice({
       const state = getDefaultState()
       state.error = action.payload.reason
       return state
-    }
-  },
-
-  extraReducers: {
-    [closePopup.type]: (state) => {
-      state.error = null
     }
   }
 })

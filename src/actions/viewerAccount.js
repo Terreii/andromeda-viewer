@@ -6,10 +6,8 @@ import {
   signInStatus,
   signOut as accountDidSignOut,
   unlocked,
-  showPopup,
   displayResetKeys,
   didUpdate as accountDidUpdate,
-  closePopup,
   avatarSaved,
   avatarsLoaded,
   savedAvatarUpdated,
@@ -29,10 +27,6 @@ import {
 import { selectIsLoggedIn } from '../bundles/session'
 
 import { IMChatType } from '../types/chat'
-
-export function showSignOutPopup () {
-  return showPopup('signOut')
-}
 
 export function saveAvatar (name, agentId, grid) {
   return (dispatch, getState, { hoodie }) => {
@@ -210,7 +204,6 @@ export function signIn (username, password, cryptoPassword) {
       const accountProperties = await hoodie.account.signIn({ username, password })
       await hoodie.cryptoStore.unlock(cryptoPassword)
 
-      dispatch(closePopup())
       dispatch(signInStatus(true, true, accountProperties.username))
 
       listenToAccountChanges(hoodie.account, dispatch)
@@ -297,7 +290,6 @@ export function changeEncryptionPassword (resetKey, newPassword) {
     const result = await hoodie.cryptoStore.resetPassword(resetKey, newPassword)
 
     dispatch(unlocked())
-    dispatch(closePopup())
 
     dispatch(displayResetKeys(result.resetKeys))
 
@@ -308,7 +300,6 @@ export function changeEncryptionPassword (resetKey, newPassword) {
 
 export function signOut () {
   return async (dispatch, getState, { hoodie }) => {
-    dispatch(closePopup())
     await dispatch(logoutAvatar())
 
     try {

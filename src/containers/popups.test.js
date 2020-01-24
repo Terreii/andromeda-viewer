@@ -1,22 +1,8 @@
 import React from 'react'
-import { shallow, mount } from 'enzyme'
 import { Provider } from 'react-redux'
+import { render } from '@testing-library/react'
 
 import PopupRenderer from './popups'
-
-it('renders without crashing', () => {
-  const store = {
-    getState: () => ({}),
-    dispatch: () => {},
-    subscribe: () => () => {}
-  }
-  shallow(<Provider store={store}>
-    <PopupRenderer
-      popup='Welcome'
-      onClose={() => {}}
-    />
-  </Provider>)
-})
 
 it('renders resetKeys without crashing', () => {
   global.URL.createObjectURL = jest.fn()
@@ -27,8 +13,7 @@ it('renders resetKeys without crashing', () => {
       account: {
         loggedIn: true,
         unlocked: true,
-        signInPopup: 'resetKeys',
-        popupData: [
+        resetKeys: [
           '6f9be4b69637f3e18a0f747c4ae70158',
           '1d8ad0e879644a3cff07134a4b50bd09',
           '52f4944503133cd658cefbe5c905ba56',
@@ -47,9 +32,9 @@ it('renders resetKeys without crashing', () => {
     subscribe: () => () => {}
   }
 
-  const rendered = mount(<Provider store={store}>
+  const { queryByText } = render(<Provider store={store}>
     <PopupRenderer />
   </Provider>)
 
-  expect(rendered.find('h4').text()).toBe('Password reset keys')
+  expect(queryByText('Password reset keys').nodeName).toBe('H4')
 })
