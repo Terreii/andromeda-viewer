@@ -2,7 +2,7 @@ import React from 'react'
 import { Provider } from 'react-redux'
 import { render } from '@testing-library/react'
 
-import PopupRenderer from './popups'
+import ModalsRenderer from './globalModals'
 
 it('renders resetKeys without crashing', () => {
   global.URL.createObjectURL = jest.fn()
@@ -33,7 +33,7 @@ it('renders resetKeys without crashing', () => {
   }
 
   const { queryByText } = render(<Provider store={store}>
-    <PopupRenderer />
+    <ModalsRenderer />
   </Provider>)
 
   expect(queryByText('Password reset keys').nodeName).toBe('H4')

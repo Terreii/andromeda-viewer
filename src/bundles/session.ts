@@ -47,8 +47,10 @@ const sessionSlice = createSlice({
       state.cofVersion = action.payload.sessionInfo.cof_version
     },
 
-    loginFailed (state, action: PayloadAction<{ error: string }>) {
-      state.error = action.payload.error
+    loginFailed (state, action: PayloadAction<{ error: string }>) {},
+
+    closeErrorMessage (state, action: Action) {
+      state.error = null
     },
 
     // CHAT_TAB_CHANGED
@@ -76,6 +78,7 @@ export const {
   startLogin,
   login,
   loginFailed,
+  closeErrorMessage,
   changeChatTab,
   startLogout,
   logout,

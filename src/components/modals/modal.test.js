@@ -1,6 +1,5 @@
 import { axe } from 'jest-axe'
 import React from 'react'
-import { mount } from 'enzyme'
 import { render } from 'reakit-test-utils'
 import { useDialogState, DialogDisclosure } from 'reakit'
 
@@ -31,7 +30,7 @@ it('should pass aXe', async () => {
     </div>
   }
 
-  const rendered = mount(<Comp />)
+  const { container } = render(<Comp />)
 
-  expect(await axe(rendered.html())).toHaveNoViolations()
+  expect(await axe(container)).toHaveNoViolations()
 })
