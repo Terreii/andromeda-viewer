@@ -1,0 +1,19 @@
+/*
+ * styling for the chat/tabs
+ */
+
+.container {
+  height: calc(100vh - 2.5rem);
+  max-height: calc(100vh - 2.5rem);
+  display: flex;
+  flex-direction: column;
+}
+
+.list {
+  margin-top: 0.6rem;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+}
