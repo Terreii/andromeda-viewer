@@ -3,9 +3,7 @@
  */
 
 .List {
-  flex: 1 1 100%;
   overflow-y: scroll;
-  max-height: calc(100vh - 8.7em);
 }
 
 .Message > span, .Message > time {

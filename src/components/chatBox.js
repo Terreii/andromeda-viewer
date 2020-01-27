@@ -37,7 +37,9 @@ export default function ChatBox (props) {
       ? (target in names ? names[target].getName() : chat.name)
       : chat.name
 
-    tabs.push(<Tab key={`tab_${id}`} {...tab} stopId={id}>{name || id}</Tab>)
+    tabs.push(<Tab {...tab} key={`tab_${id}`} className={style.tabButton} stopId={id}>
+      {name || id}
+    </Tab>)
 
     tabPanels.push(<TabPanel key={`panel_${id}`} {...tab} className={style.panel} stopId={id}>
       <ChatDialog
@@ -59,18 +61,19 @@ export default function ChatBox (props) {
   return (
     <div className={style.container}>
       <TabList {...tab} className={style.list} aria-label='Chats'>
-        <Tab {...tab} stopId='friends'>Friends</Tab>
+        <Tab {...tab} className={style.tabButton} stopId='friends'>Friends</Tab>
 
-        <Tab {...tab} stopId='groups'>Groups</Tab>
+        <Tab {...tab} className={style.tabButton} stopId='groups'>Groups</Tab>
 
         {props.shouldDisplayNotifications && <Tab
           {...tab}
+          className={style.tabButton}
           stopId='notifications'
         >
           Notifications
         </Tab>}
 
-        <Tab {...tab} stopId='local'>Local</Tab>
+        <Tab {...tab} className={style.tabButton} stopId='local'>Local</Tab>
 
         {tabs}
       </TabList>
