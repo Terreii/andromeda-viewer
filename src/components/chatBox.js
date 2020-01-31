@@ -41,7 +41,13 @@ export default function ChatBox (props) {
       {name || id}
     </Tab>)
 
-    tabPanels.push(<TabPanel key={`panel_${id}`} {...tab} className={style.panel} stopId={id}>
+    tabPanels.push(<TabPanel
+      {...tab}
+      key={`panel_${id}`}
+      className={style.panel}
+      stopId={id}
+      tabIndex='-1'
+    >
       <ChatDialog
         data={chat}
         isIM
@@ -78,7 +84,7 @@ export default function ChatBox (props) {
         {tabs}
       </TabList>
 
-      <TabPanel {...tab} className={style.panel} stopId='friends'>
+      <TabPanel {...tab} className={style.panel} stopId='friends' tabIndex='-1'>
         <FriendsList
           names={names}
           friends={props.friends}
@@ -87,18 +93,23 @@ export default function ChatBox (props) {
         />
       </TabPanel>
 
-      <TabPanel {...tab} className={style.panel} stopId='groups'>
+      <TabPanel {...tab} className={style.panel} stopId='groups' tabIndex='-1'>
         <GroupsList
           groups={props.groups}
           startNewIMChat={props.startNewIMChat}
         />
       </TabPanel>
 
-      {props.shouldDisplayNotifications && <TabPanel {...tab} className={style.panel} stopId='notifications'>
+      {props.shouldDisplayNotifications && <TabPanel
+        {...tab}
+        className={style.panel}
+        stopId='notifications'
+        tabIndex='-1'
+      >
         <Notifications />
       </TabPanel>}
 
-      <TabPanel {...tab} className={style.panel} stopId='local'>
+      <TabPanel {...tab} className={style.panel} stopId='local' tabIndex='-1'>
         <ChatDialog
           data={props.localChat}
           names={names}
