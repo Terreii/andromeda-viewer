@@ -6,6 +6,10 @@ import {
 } from 'redux-burger-menu'
 import { NavLink } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
+import { useDialogState, DialogDisclosure } from 'reakit'
+
+import SignInDialog from './modals/signIn'
+import SignOutDialog from './modals/signOut'
 
 import styles from './topBar.module.css'
 import './burgerMenu.css'
@@ -17,8 +21,6 @@ export default function BurgerMenu ({
   userName,
   isLoggedIn,
   avatarName,
-  signIn,
-  signUp,
   logout,
   signOut
 }) {
@@ -34,22 +36,21 @@ export default function BurgerMenu ({
         <br />
         <small>{userName}</small>
       </NavLink>
-      : <button
+      : <SignInDialogOpener
         id='burgerMenuSignIn'
         className={styles.BurgerMenuItem}
-        onClick={signIn}
       >
         Sign into Andromeda
-      </button>
+      </SignInDialogOpener>
     }
 
-    {!isSignedIn && <button
+    {!isSignedIn && <SignInDialogOpener
       id='burgerMenuSignUp'
       className={'menu-item ' + styles.BurgerMenuItem}
-      onClick={signUp}
+      isSignUp
     >
       Sign up to Andromeda
-    </button>}
+    </SignInDialogOpener>}
 
     <hr />
 
@@ -77,12 +78,32 @@ export default function BurgerMenu ({
       log out
     </button>}
 
-    {isSignedIn && <button
+    {isSignedIn && <SignOutDialogOpener signOut={signOut} />}
+  </SlideMenu>
+}
+
+function SignInDialogOpener ({ id, className, isSignUp, children }) {
+  const dialog = useDialogState()
+
+  return <>
+    <DialogDisclosure {...dialog} id={id} className={className}>
+      {children}
+    </DialogDisclosure>
+    <SignInDialog dialog={dialog} isSignUp={isSignUp} />
+  </>
+}
+
+function SignOutDialogOpener ({ signOut }) {
+  const dialog = useDialogState()
+
+  return <>
+    <DialogDisclosure
+      {...dialog}
       id='sidebarSignOut'
       className={'menu-item ' + styles.BurgerMenuLogout}
-      onClick={signOut}
     >
       Log out from Viewer
-    </button>}
-  </SlideMenu>
+    </DialogDisclosure>
+    <SignOutDialog dialog={dialog} onSignOut={signOut} />
+  </>
 }

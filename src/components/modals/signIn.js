@@ -1,13 +1,18 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useDispatch } from 'react-redux'
 
-import Popup from './popup'
+import Modal from './modal'
 
-import styles from './signInPopup.module.css'
+import { signIn, signUp } from '../../actions/viewerAccount'
+
+import styles from './signIn.module.css'
 import formStyles from '../formElements.module.css'
 
-import { useFormInput, useAutoFocus } from '../../hooks/utils'
+import { useFormInput } from '../../hooks/utils'
 
-export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
+export default function SignInPopup ({ isSignUp, dialog }) {
+  const dispatch = useDispatch()
+
   const [username, setUsername] = useState('')
   const [usernameValid, setUsernameValid] = useState(false)
 
@@ -20,7 +25,15 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
   const [isSigningIn, setIsSigningIn] = useState(false)
   const [error, setError] = useState(null)
 
-  const doAutoFocus = useAutoFocus()
+  useEffect(() => {
+    password.onChange('')
+    password2.onChange('')
+
+    cryptoPassword.onChange('')
+    cryptoPassword2.onChange('')
+    // Only reset passwords if the visibility did change
+    // eslint-disable-next-line
+  }, [dialog.visible])
 
   const isValid = (() => {
     if ([password.value, cryptoPassword.value].some((s, i) => s.length < 8)) {
@@ -37,7 +50,7 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
     return username.length > 4 && usernameValid
   })()
 
-  const send = event => {
+  const send = async event => {
     event.preventDefault()
     if (!isValid) {
       return
@@ -45,15 +58,20 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
 
     setIsSigningIn(true)
 
-    const type = isSignUp ? 'signUp' : 'signIn'
-    onSend(username, password.value, cryptoPassword.value, type)
-      .catch(err => {
-        setIsSigningIn(false)
-        setError(err.message || err.toString())
-      })
+    try {
+      if (isSignUp) {
+        await dispatch(signUp(username, password.value, cryptoPassword.value))
+      } else {
+        await dispatch(signIn(username, password.value, cryptoPassword.value))
+      }
+    } catch (err) {
+      console.error(err)
+      setIsSigningIn(false)
+      setError(err.message || err.toString())
+    }
   }
 
-  return <Popup title={isSignUp ? 'Sign up' : 'Sign in'} onClose={onCancel}>
+  return <Modal title={isSignUp ? 'Sign up' : 'Sign in'} dialog={dialog} showOnClose backdrop>
     <form className={styles.Container} onSubmit={send}>
       <div className={formStyles.FormField}>
         <label htmlFor='username'>
@@ -72,7 +90,6 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
           placeholder='me-avatar@example.com'
           autoFocus
           required
-          ref={doAutoFocus}
           aria-describedby={isSignUp && 'mainHelp'}
           disabled={isSigningIn}
           onFocus={onFocusScrollIntoView}
@@ -194,7 +211,10 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
         <button
           type='button'
           className={formStyles.SecondaryButton}
-          onClick={onCancel}
+          onClick={event => {
+            event.preventDefault()
+            dialog.hide()
+          }}
           disabled={isSigningIn}
           onFocus={onFocusScrollIntoView}
         >
@@ -209,7 +229,7 @@ export default function SignInPopup ({ isSignUp, onSend, onCancel }) {
         </button>
       </div>
     </form>
-  </Popup>
+  </Modal>
 }
 
 function onFocusScrollIntoView (event) {

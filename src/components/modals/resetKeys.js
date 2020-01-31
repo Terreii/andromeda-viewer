@@ -1,31 +1,38 @@
 import React, { useState, useEffect } from 'react'
+import { useDispatch } from 'react-redux'
+import { useDialogState } from 'reakit'
 
-import Popup from './popup'
+import Modal from './modal'
+
+import { closeResetKeys } from '../../bundles/account'
 
 import { useAutoFocus } from '../../hooks/utils'
 
-import styles from './resetKeysPopup.module.css'
+import styles from './resetKeys.module.css'
 import formStyles from '../formElements.module.css'
 import keepItSecret from '../../icons/keepitsecret.png'
 
-export default function ResetKeysPopup ({ resetKeys, onClose }) {
+export default function ResetKeysModal ({ resetKeys }) {
+  const dispatch = useDispatch()
+  const dialog = useDialogState({ visible: process.env.NODE_ENV !== 'test' })
+
   const [fileURL, setFileURL] = useState('')
   useEffect(() => {
     const blob = new window.Blob(
       resetKeys.map(key => key + '\r\n'),
       { type: 'text/plain' }
     )
-    const objURL = window.URL.createObjectURL(blob)
+    const objURL = URL.createObjectURL(blob)
 
     setFileURL(objURL)
     return () => {
-      window.URL.revokeObjectURL(objURL)
+      URL.revokeObjectURL(objURL)
     }
   }, [resetKeys])
 
   const doAutoFocus = useAutoFocus()
 
-  return <Popup title='Password reset keys' onClose={onClose}>
+  return <Modal title='Password reset keys' dialog={dialog} backdrop>
     <form className={styles.Container}>
       <p>
         Those are your <b>encryption reset-keys</b>.<br />
@@ -62,11 +69,16 @@ export default function ResetKeysPopup ({ resetKeys, onClose }) {
         alt='Gandalf saying: Keep it secret, keep it safe!'
       />
 
-      <p>
-        Remember: If you lose your encryption password and the reset-keys, you lose your data!
-      </p>
+      <p>Remember: If you lose your encryption password and the reset-keys, you lose your data!</p>
 
-      <button className={formStyles.OkButton} onClick={onClose}>OK, I did save them!</button>
+      <button
+        className={formStyles.OkButton}
+        onClick={() => {
+          dispatch(closeResetKeys())
+        }}
+      >
+        OK, I did save them!
+      </button>
     </form>
-  </Popup>
+  </Modal>
 }

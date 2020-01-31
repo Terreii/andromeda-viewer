@@ -1,11 +1,11 @@
 import { axe } from 'jest-axe'
 import React from 'react'
-import { shallow, mount } from 'enzyme'
+import { render } from 'reakit-test-utils'
 
 import ChatBox from './chatBox'
 import AvatarName from '../avatarName'
 
-test('renders without crashing', () => {
+it('renders without crashing', () => {
   const names = {
     first: new AvatarName('Testery MacTestface')
   }
@@ -27,23 +27,41 @@ test('renders without crashing', () => {
     }
   ]
 
-  shallow(<ChatBox
+  const groups = [
+    {
+      id: 'abcd',
+      name: 'Great group',
+      insigniaID: 'dcba',
+      title: 'Person',
+      acceptNotices: true,
+      powers: [0, 0],
+      listInProfile: true,
+      sessionStarted: true
+    }
+  ]
+
+  const { container } = render(<ChatBox
     selfName={new AvatarName('self Resident')}
     names={names}
     IMs={im}
     friends={friends}
+    groups={groups}
     localChat={[]}
     sendLocalChatMessage={() => {}}
+    changeTab={() => {}}
   />)
+
+  expect(container).toBeTruthy()
 })
 
-test('should pass aXe', async () => {
+it('should pass aXe', async () => {
   const names = {
     first: new AvatarName('Testery MacTestface')
   }
 
   const im = [
     {
+      name: 'first chat',
       sessionId: '2345',
       withId: 'first',
       isIM: true,
@@ -59,16 +77,31 @@ test('should pass aXe', async () => {
     }
   ]
 
-  const rendered = mount(<div>
+  const groups = [
+    {
+      id: 'abcd',
+      name: 'Great group',
+      insigniaID: 'dcba',
+      title: 'Person',
+      acceptNotices: true,
+      powers: [0, 0],
+      listInProfile: true,
+      sessionStarted: true
+    }
+  ]
+
+  const { container } = render(<div>
     <ChatBox
       selfName={new AvatarName('self Resident')}
       names={names}
       IMs={im}
       friends={friends}
+      groups={groups}
       localChat={[]}
       sendLocalChatMessage={() => {}}
+      changeTab={() => {}}
     />
   </div>)
 
-  expect(await axe(rendered.html())).toHaveNoViolations()
+  expect(await axe(container)).toHaveNoViolations()
 })

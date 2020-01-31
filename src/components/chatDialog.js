@@ -31,7 +31,7 @@ export default function ChatDialog ({ isIM = false, data = [], names, sendTo, lo
 
   const placeholderText = `Send ${isIM ? 'Instant Message' : 'to local chat'}`
 
-  return <div className={styles.Container}>
+  return <>
     <ChatMessagesList
       messages={messages}
       isIM={isIM}
@@ -50,5 +50,5 @@ export default function ChatDialog ({ isIM = false, data = [], names, sendTo, lo
       />
       <button className={styles.SendButton}>send</button>
     </form>
-  </div>
+  </>
 }

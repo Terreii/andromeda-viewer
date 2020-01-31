@@ -2,10 +2,8 @@
  * Displays all Chats (local-chat and IMs)
  */
 
-import React from 'react'
-import Tabs, { TabPane } from 'rc-tabs'
-import TabContent from 'rc-tabs/lib/TabContent'
-import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar'
+import React, { useEffect } from 'react'
+import { useTabState, Tab, TabList, TabPanel } from 'reakit/Tab'
 
 import ChatDialog from './chatDialog'
 import FriendsList from './friendsList'
@@ -14,15 +12,24 @@ import NotificationsContainer from '../containers/notificationsContainer'
 
 import { IMChatType, IMDialog } from '../types/chat'
 
-import 'rc-tabs/assets/index.css'
-import './chatBox.css'
+import style from './chatBox.module.css'
 
 const Notifications = React.memo(NotificationsContainer)
 
 export default function ChatBox (props) {
   const names = props.names
+  const changeTab = props.changeTab
 
-  const panels = props.IMs.map(chat => {
+  const tab = useTabState({ selectedId: props.activeTab })
+  useEffect(
+    () => { changeTab(tab.selectedId) },
+    [tab.selectedId, changeTab]
+  )
+
+  const tabs = []
+  const tabPanels = []
+
+  for (const chat of props.IMs) {
     const id = chat.sessionId
     const target = chat.target
     const type = chat.type
@@ -30,7 +37,17 @@ export default function ChatBox (props) {
       ? (target in names ? names[target].getName() : chat.name)
       : chat.name
 
-    return <TabPane tab={name} key={id}>
+    tabs.push(<Tab {...tab} key={`tab_${id}`} className={style.tabButton} stopId={id}>
+      {name || id}
+    </Tab>)
+
+    tabPanels.push(<TabPanel
+      {...tab}
+      key={`panel_${id}`}
+      className={style.panel}
+      stopId={id}
+      tabIndex='-1'
+    >
       <ChatDialog
         data={chat}
         isIM
@@ -44,47 +61,64 @@ export default function ChatBox (props) {
         type={type}
         loadHistory={props.getIMHistory}
       />
-    </TabPane>
-  })
+    </TabPanel>)
+  }
 
-  return <Tabs
-    activeKey={props.activeTab}
-    onChange={props.changeTab}
-    renderTabBar={() => <ScrollableInkTabBar />}
-    renderTabContent={() => <TabContent />}
-  >
-    <TabPane tab='Friends' key='friends'>
-      <FriendsList
-        names={names}
-        friends={props.friends}
-        startNewIMChat={props.startNewIMChat}
-        updateRights={props.updateRights}
-      />
-    </TabPane>
+  return (
+    <div className={style.container}>
+      <TabList {...tab} className={style.list} aria-label='Chats'>
+        <Tab {...tab} className={style.tabButton} stopId='friends'>Friends</Tab>
 
-    <TabPane tab='Groups' key='groups'>
-      <GroupsList
-        groups={props.groups}
-        startNewIMChat={props.startNewIMChat}
-      />
-    </TabPane>
+        <Tab {...tab} className={style.tabButton} stopId='groups'>Groups</Tab>
 
-    {props.shouldDisplayNotifications && <TabPane
-      tab='Notifications'
-      key='notifications'
-    >
-      <Notifications />
-    </TabPane>}
+        {props.shouldDisplayNotifications && <Tab
+          {...tab}
+          className={style.tabButton}
+          stopId='notifications'
+        >
+          Notifications
+        </Tab>}
 
-    <TabPane tab='Local' key='local'>
-      <ChatDialog
-        data={props.localChat}
-        names={names}
-        sendTo={props.sendLocalChatMessage}
-      />
-    </TabPane>
+        <Tab {...tab} className={style.tabButton} stopId='local'>Local</Tab>
 
-    {panels}
-  </Tabs>
+        {tabs}
+      </TabList>
+
+      <TabPanel {...tab} className={style.panel} stopId='friends' tabIndex='-1'>
+        <FriendsList
+          names={names}
+          friends={props.friends}
+          startNewIMChat={props.startNewIMChat}
+          updateRights={props.updateRights}
+        />
+      </TabPanel>
+
+      <TabPanel {...tab} className={style.panel} stopId='groups' tabIndex='-1'>
+        <GroupsList
+          groups={props.groups}
+          startNewIMChat={props.startNewIMChat}
+        />
+      </TabPanel>
+
+      {props.shouldDisplayNotifications && <TabPanel
+        {...tab}
+        className={style.panel}
+        stopId='notifications'
+        tabIndex='-1'
+      >
+        <Notifications />
+      </TabPanel>}
+
+      <TabPanel {...tab} className={style.panel} stopId='local' tabIndex='-1'>
+        <ChatDialog
+          data={props.localChat}
+          names={names}
+          sendTo={props.sendLocalChatMessage}
+        />
+      </TabPanel>
+
+      {tabPanels}
+    </div>
+  )
 }
 ChatBox.displayName = 'ChatBox'

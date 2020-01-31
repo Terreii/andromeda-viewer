@@ -7,7 +7,7 @@ import { MemoryRouter } from 'react-router-dom'
 import BurgerMenu from './burgerMenu'
 import configureStore from '../store/configureStore'
 
-test('renders without crashing', () => {
+it('renders without crashing', () => {
   mount(<Provider store={configureStore()}>
     <MemoryRouter>
       <BurgerMenu
@@ -24,9 +24,7 @@ test('renders without crashing', () => {
   </Provider>)
 })
 
-test('click handling', () => {
-  let signInCount = 0
-  let signUpCount = 0
+it('click handling', () => {
   let signOutCount = 0
   let logoutCount = 0
 
@@ -39,12 +37,6 @@ test('click handling', () => {
         userName={''}
         isLoggedIn={false}
         avatarName={''}
-        signIn={() => {
-          signInCount += 1
-        }}
-        signUp={() => {
-          signUpCount += 1
-        }}
         signOut={() => {
           signOutCount += 1
         }}
@@ -55,13 +47,10 @@ test('click handling', () => {
     </MemoryRouter>
   </Provider>)
 
-  menu.find('#burgerMenuSignIn').simulate('click') // viewer sign in
-  menu.find('#burgerMenuSignUp').simulate('click') // viewer sign up
-
-  expect(signInCount).toBe(1)
-  expect(signUpCount).toBe(1)
-  expect(logoutCount).toBe(0)
-  expect(signOutCount).toBe(0)
+  expect(menu.find('button#burgerMenuSignIn').length).toBe(1) // viewer sign in
+  expect(menu.find('button#burgerMenuSignUp').length).toBe(1) // viewer sign up
+  expect(menu.find('button#sidebarSignOut').length).toBe(0) // viewer sign out
+  expect(menu.find('button#sidebarAvatarLogout').length).toBe(0) // avatar logout
 
   // Avatar logged in
 
@@ -72,12 +61,6 @@ test('click handling', () => {
         userName={''}
         isLoggedIn
         avatarName={'Tester'}
-        signIn={() => {
-          signInCount += 1
-        }}
-        signUp={() => {
-          signUpCount += 1
-        }}
         signOut={() => {
           signOutCount += 1
         }}
@@ -88,16 +71,17 @@ test('click handling', () => {
     </MemoryRouter>
   </Provider>)
 
-  menuAvatarLoggedIn.find('#burgerMenuSignIn').simulate('click') // viewer sign in
-  menuAvatarLoggedIn.find('#burgerMenuSignUp').simulate('click') // viewer sign up
-  menuAvatarLoggedIn.find('#sidebarAvatarLogout').simulate('click') // avatar logout
+  expect(menuAvatarLoggedIn.find('button#burgerMenuSignIn').length).toBe(1) // viewer sign in
+  expect(menuAvatarLoggedIn.find('button#burgerMenuSignUp').length).toBe(1) // viewer sign up
+  expect(menuAvatarLoggedIn.find('button#sidebarSignOut').length).toBe(0) // viewer sign out
+  expect(menuAvatarLoggedIn.find('button#sidebarAvatarLogout').length).toBe(1) // avatar logout
 
-  expect(signInCount).toBe(2)
-  expect(signUpCount).toBe(2)
+  menuAvatarLoggedIn.find('button#sidebarAvatarLogout').simulate('click') // avatar logout
+
   expect(logoutCount).toBe(1)
   expect(signOutCount).toBe(0)
 
-  // Viewr account logged in
+  // Viewer account logged in
 
   const menuViewerSignedIn = mount(<Provider store={configureStore()}>
     <MemoryRouter>
@@ -106,12 +90,6 @@ test('click handling', () => {
         userName={'tester@test.org'}
         isLoggedIn={false}
         avatarName={''}
-        signIn={() => {
-          signInCount += 1
-        }}
-        signUp={() => {
-          signUpCount += 1
-        }}
         signOut={() => {
           signOutCount += 1
         }}
@@ -122,12 +100,11 @@ test('click handling', () => {
     </MemoryRouter>
   </Provider>)
 
-  menuViewerSignedIn.find('#sidebarSignOut').simulate('click') // viewer sign out
+  // TODO: test for sign in and up buttons not being rendered
 
-  expect(signInCount).toBe(2)
-  expect(signUpCount).toBe(2)
+  expect(menuViewerSignedIn.find('button#sidebarSignOut')).toExist() // viewer sign out
+
   expect(logoutCount).toBe(1)
-  expect(signOutCount).toBe(1)
 
   // Viewer and avatar logged in
 
@@ -138,12 +115,6 @@ test('click handling', () => {
         userName={'tester@test.org'}
         isLoggedIn
         avatarName={'Tester'}
-        signIn={() => {
-          signInCount += 1
-        }}
-        signUp={() => {
-          signUpCount += 1
-        }}
         signOut={() => {
           signOutCount += 1
         }}
@@ -155,15 +126,12 @@ test('click handling', () => {
   </Provider>)
 
   menuAllIn.find('#sidebarAvatarLogout').simulate('click') // avatar logout
-  menuAllIn.find('#sidebarSignOut').simulate('click') // viewer sign out
+  expect(menuAllIn.find('button#sidebarSignOut')).toExist() // viewer sign out
 
-  expect(signInCount).toBe(2)
-  expect(signUpCount).toBe(2)
   expect(logoutCount).toBe(2)
-  expect(signOutCount).toBe(2)
 })
 
-test('should pass aXe', async () => {
+it('should pass aXe', async () => {
   const rendered = mount(<Provider store={configureStore()}>
     <MemoryRouter>
       <BurgerMenu

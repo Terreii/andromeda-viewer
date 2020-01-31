@@ -1,7 +1,8 @@
 import { axe } from 'jest-axe'
 import React from 'react'
-import { shallow } from 'enzyme'
+import { shallow, mount } from 'enzyme'
 import { MemoryRouter } from 'react-router-dom'
+import { Provider } from 'react-redux'
 
 import Login from './index'
 
@@ -85,19 +86,29 @@ test('should pass aXe', async () => {
     }
   ]
 
-  const rendered = shallow(<MemoryRouter>
-    <Login
-      grids={grids}
-      avatars={avatars}
-    />
-  </MemoryRouter>)
+  const store = {
+    getState: () => ({}),
+    dispatch: () => {},
+    subscribe: () => () => {}
+  }
 
-  const renderedNewUser = shallow(<MemoryRouter>
-    <Login
-      grids={grids}
-      avatars={[]}
-    />
-  </MemoryRouter>)
+  const rendered = mount(<Provider store={store}>
+    <MemoryRouter>
+      <Login
+        grids={grids}
+        avatars={avatars}
+      />
+    </MemoryRouter>
+  </Provider>)
+
+  const renderedNewUser = mount(<Provider store={store}>
+    <MemoryRouter>
+      <Login
+        grids={grids}
+        avatars={[]}
+      />
+    </MemoryRouter>
+  </Provider>)
 
   expect(await axe(rendered.html())).toHaveNoViolations()
 

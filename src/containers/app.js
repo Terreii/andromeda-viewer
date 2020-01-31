@@ -11,7 +11,7 @@ import { viewerName } from '../viewerInfo'
 
 import { AppContainer, LoadableChatComponent } from '../components/main'
 import LoginForm from './loginForm'
-import PopupRenderer from './popups'
+import GlobalModals from './globalModals'
 import TopMenuBar from './topMenuBar'
 import AccountDialog from '../components/accountDialog'
 
@@ -22,8 +22,6 @@ import { selectOwnAvatarName } from '../bundles/names'
 import { selectIsLoggedIn } from '../bundles/session'
 
 import 'normalize.css'
-
-const Popups = React.memo(PopupRenderer)
 
 export default function App () {
   const isSignedIn = useSelector(selectIsSignedIn)
@@ -61,7 +59,7 @@ export default function App () {
       </Route>
     </Switch>
     <TopMenuBar />
-    <Popups />
+    <GlobalModals />
   </AppContainer>
 }
 

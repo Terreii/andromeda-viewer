@@ -1,13 +1,8 @@
 // Reducer for general session info.
 
-import { createSlice, createSelector, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, createSelector, PayloadAction, Action } from '@reduxjs/toolkit'
 
-import {
-  selectIsSignedIn,
-  selectSavedAvatars,
-  selectAnonymAvatarData,
-  closePopup
-} from './account'
+import { selectIsSignedIn, selectSavedAvatars, selectAnonymAvatarData } from './account'
 import AvatarName from '../avatarName'
 
 import { LocalChatMessage } from '../types/chat'
@@ -52,8 +47,10 @@ const sessionSlice = createSlice({
       state.cofVersion = action.payload.sessionInfo.cof_version
     },
 
-    loginFailed (state, action: PayloadAction<{ error: string }>) {
-      state.error = action.payload.error
+    loginFailed (state, action: PayloadAction<{ error: string }>) {},
+
+    closeErrorMessage (state, action: Action) {
+      state.error = null
     },
 
     // CHAT_TAB_CHANGED
@@ -72,12 +69,6 @@ const sessionSlice = createSlice({
       state.error = action.payload.reason
       return state
     }
-  },
-
-  extraReducers: {
-    [closePopup.type]: (state) => {
-      state.error = null
-    }
   }
 })
 
@@ -87,6 +78,7 @@ export const {
   startLogin,
   login,
   loginFailed,
+  closeErrorMessage,
   changeChatTab,
   startLogout,
   logout,

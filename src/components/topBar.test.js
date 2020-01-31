@@ -7,22 +7,20 @@ import { MemoryRouter } from 'react-router-dom'
 import TopBar from './topBar'
 import configureStore from '../store/configureStore'
 
-test('renders without crashing', () => {
+it('renders without crashing', () => {
   shallow(<MemoryRouter>
     <TopBar
       isSignedIn={false}
       userName={''}
       isLoggedIn={false}
       avatarName={''}
-      signIn={() => {}}
-      signUp={() => {}}
       signOut={() => {}}
       logout={() => {}}
     />
   </MemoryRouter>)
 })
 
-test('should pass aXe', async () => {
+it('should pass aXe', async () => {
   const store = configureStore()
 
   const rendered = mount(<Provider store={store}>
@@ -32,8 +30,6 @@ test('should pass aXe', async () => {
         userName={''}
         isLoggedIn={false}
         avatarName={''}
-        signIn={() => {}}
-        signUp={() => {}}
         signOut={() => {}}
         logout={() => {}}
       />

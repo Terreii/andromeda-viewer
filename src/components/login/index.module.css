@@ -4,6 +4,7 @@
 
 .Container {
   overflow: scroll;
+  margin-top: 2.5rem;
 }
 
 .Main {
