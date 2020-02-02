@@ -1,6 +1,5 @@
 'use strict'
 
-const url = require('url')
 const xmlrpc = require('xmlrpc')
 const fetch = require('node-fetch')
 const uuid = require('uuid').v4
@@ -30,8 +29,8 @@ function processLogin (request, reply) {
 
       const reqLoginURL = request.headers[LOGIN_URL_HEADER]
       const loginURL = reqLoginURL && reqLoginURL.length > 0
-        ? new url.URL(reqLoginURL)
-        : new url.URL('https://login.agni.lindenlab.com:443/cgi-bin/login.cgi')
+        ? new URL(reqLoginURL)
+        : new URL('https://login.agni.lindenlab.com:443/cgi-bin/login.cgi')
 
       if (!loginURL || loginURL.host == null) {
         reply(400, { message: 'no grid login url!' })

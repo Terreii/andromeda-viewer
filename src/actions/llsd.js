@@ -24,17 +24,22 @@ export async function fetchLLSD (method, url, data = null, mimeType = LLSD.MIMET
 }
 
 function minimalFetchLLSD (method, url, data = null, mimeType = LLSD.MIMETYPE_XML) {
-  const headers = new window.Headers()
-  headers.append('content-type', 'text/plain')
-  headers.append('x-andromeda-fetch-url', url)
-  headers.append('x-andromeda-fetch-method', method)
-  headers.append('x-andromeda-fetch-type', mimeType)
+  const aURL = new URL(url)
+  // transform url to the proxy url
+  const protocol = aURL.protocol.replace(/:$/, '')
+  const requestURL = new URL(
+    `/hoodie/andromeda-viewer/proxy/${protocol}/${aURL.host}${aURL.pathname}`,
+    window.location.href
+  )
+  requestURL.search = aURL.search
 
   const body = data == null ? undefined : LLSD.format(mimeType, data)
 
-  return window.fetch('/hoodie/andromeda-viewer/proxy', {
-    method: 'POST',
-    headers,
+  return window.fetch(requestURL, {
+    method,
+    headers: data == null ? undefined : {
+      'Content-Type': mimeType
+    },
     body
   })
 }
