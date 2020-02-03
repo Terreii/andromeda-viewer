@@ -42,9 +42,9 @@ function processLogin (request, reply) {
       reqData.id0 = mac
 
       if (request.headers[LOGIN_CONTENT_TYPE_HEADER] === 'llsd') {
-        handleLLSD(reply, loginURL, reqData)
+        handleLLSD(request.server, reply, loginURL, reqData)
       } else {
-        handleXmlRpc(reply, loginURL, reqData)
+        handleXmlRpc(request.server, reply, loginURL, reqData)
       }
     })
     .catch(function (err) {
@@ -52,7 +52,7 @@ function processLogin (request, reply) {
     })
 }
 
-function handleXmlRpc (reply, loginURL, reqData) {
+function handleXmlRpc (server, reply, loginURL, reqData) {
   const xmlrpcClient = loginURL.protocol == null || loginURL.protocol === 'https:'
     ? xmlrpc.createSecureClient(loginURL)
     : xmlrpc.createClient(loginURL) // osgrid uses http for login ... why??
@@ -71,13 +71,26 @@ function handleXmlRpc (reply, loginURL, reqData) {
       response.type('application/json')
       response.statusCode = body.statusCode
     } else {
-      const response = reply(undefined, data)
-      response.type('application/json')
+      const didLogin = data.login === 'true'
+      if (didLogin) {
+        server.methods.generateSession((err, id) => {
+          if (err) {
+            reply(err)
+            return
+          }
+          const response = reply(undefined, data)
+          response.type('application/json')
+          response.header('X-Andromeda-Session-Id', id)
+        })
+      } else {
+        const response = reply(undefined, data)
+        response.type('application/json')
+      }
     }
   })
 }
 
-async function handleLLSD (reply, loginURL, reqData) {
+async function handleLLSD (server, reply, loginURL, reqData) {
   const fetchResult = await fetch(loginURL, {
     method: 'POST',
     headers: {
@@ -88,8 +101,20 @@ async function handleLLSD (reply, loginURL, reqData) {
     `
   })
   const body = await fetchResult.text()
+  const didLogin = body.includes('<key>login</key><string>true</string>')
 
-  if (fetchResult.statusCode < 300) {
+  if (fetchResult.status < 300 && didLogin) {
+    server.methods.generateSession((err, id) => {
+      if (err) {
+        reply(err)
+      } else {
+        const response = reply(undefined, body)
+        response.statusCode = fetchResult.status
+        response.type('application/llsd+xml')
+        response.header('X-Andromeda-Session-Id', id)
+      }
+    })
+  } else if (fetchResult.status < 300) {
     const response = reply(undefined, body)
     response.statusCode = fetchResult.status
     response.type('application/llsd+xml')
