@@ -46,6 +46,7 @@ function mapUri (request, callback) {
   }
 
   const headers = Object.assign({}, request.headers || {})
+  delete headers['x-andromeda-session-id']
   headers.host = url.hostname
 
   callback(null, url.href, headers)

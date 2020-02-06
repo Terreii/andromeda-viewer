@@ -1,5 +1,3 @@
-import { fetchLLSD } from './llsd'
-
 import { selectFriends, selectFriendById } from '../bundles/friends'
 import { selectFolderForAssetType } from '../bundles/inventory'
 import {
@@ -31,7 +29,7 @@ function sendUUIDNameRequest (ids) {
 
 function loadDisplayNames (idsArray) {
   const ids = idsArray.map(id => id.toString())
-  return (dispatch, getState) => {
+  return (dispatch, getState, { fetchLLSD }) => {
     if (ids.length === 0) return
 
     const fetchUrlString = selectDisplayNamesURL(getState())
@@ -42,7 +40,13 @@ function loadDisplayNames (idsArray) {
 
     dispatch(displayNamesStartLoading(ids))
 
-    fetchLLSD('GET', fetchUrl.href).then(result => {
+    fetchLLSD(fetchUrl.href).then(async response => {
+      if (!response.ok) {
+        dispatch(displayNamesLoaded([], ids))
+        return
+      }
+
+      const result = await response.llsd()
       const badIDs = result['bad_ids'] || []
       dispatch(sendUUIDNameRequest(badIDs)) // Try again
 

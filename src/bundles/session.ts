@@ -22,6 +22,7 @@ const sessionSlice = createSlice({
       state.activeChatTab = 'local'
       state.error = null
       state.sync = action.payload.save
+      state.andromedaSessionId = action.payload.sessionInfo.andromedaSessionId
 
       state.agentFlags = action.payload.sessionInfo.agent_flags
       state.maxGroups = action.payload.sessionInfo['max-agent-groups']
@@ -86,6 +87,9 @@ export const {
 } = sessionSlice.actions
 
 // Selectors
+
+export const selectAndromedaSessionId = (state: any): string | null =>
+  state.session.andromedaSessionId
 
 export const selectAvatarIdentifier = (state: any): string => state.session.avatarIdentifier
 
@@ -152,6 +156,7 @@ function getDefaultState () {
     agentAccess: Maturity.General,
     agentAccessMax: Maturity.General,
     secondsSinceEpoch: 0,
+    andromedaSessionId: null as string | null,
     openId: {
       url: '',
       token: ''
@@ -197,6 +202,7 @@ export interface LoginAction {
    */
   sessionInfo: {
     login: 'true' | 'false'
+    andromedaSessionId: string,
     first_name: string
     last_name: string
     agent_flags: number

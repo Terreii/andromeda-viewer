@@ -80,7 +80,7 @@ function handleXmlRpc (server, reply, loginURL, reqData) {
           }
           const response = reply(undefined, data)
           response.type('application/json')
-          response.header('X-Andromeda-Session-Id', id)
+          response.header('x-andromeda-session-id', id)
         })
       } else {
         const response = reply(undefined, data)
@@ -111,7 +111,7 @@ async function handleLLSD (server, reply, loginURL, reqData) {
         const response = reply(undefined, body)
         response.statusCode = fetchResult.status
         response.type('application/llsd+xml')
-        response.header('X-Andromeda-Session-Id', id)
+        response.header('x-andromeda-session-id', id)
       }
     })
   } else if (fetchResult.status < 300) {

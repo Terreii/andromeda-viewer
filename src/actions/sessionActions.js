@@ -167,7 +167,10 @@ async function loginWithXmlRpc (viewerData, first, last, password) {
     body: JSON.stringify(loginData),
     headers: createProxyLoginHeaders(viewerData)
   })
-  return response.json()
+
+  const data = await response.json()
+  data.andromedaSessionId = response.headers.get('x-andromeda-session-id')
+  return data
 }
 
 /**
@@ -211,7 +214,9 @@ async function loginWithLLSD (viewerData, first, last, password) {
   const parsed = LLSD.parse(response.headers.get('content-type'), body)
 
   // for transforming all UUIDs into strings
-  return JSON.parse(JSON.stringify(parsed))
+  const data = JSON.parse(JSON.stringify(parsed))
+  data.andromedaSessionId = response.headers.get('x-andromeda-session-id')
+  return data
 }
 
 // Logout an avatar

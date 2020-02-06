@@ -1,58 +1,24 @@
-import LLSD, { Binary, URI, UUID } from '../llsd'
+import { Binary, URI, UUID } from '../llsd'
 import caps from './capabilities.json'
 
 import { selectEventQueueGetUrl } from '../bundles/region'
 import { selectAvatarIdentifier } from '../bundles/session'
 
-async function parseLLSD (response) {
-  const body = await response.text()
-  return LLSD.parse(response.headers.get('content-type'), body)
-}
-
-export async function fetchLLSD (method, url, data = null, mimeType = LLSD.MIMETYPE_XML) {
-  const response = await minimalFetchLLSD(method, url, data, mimeType)
-
-  switch (response.headers.get('content-type')) {
-    case 'application/llsd+binary':
-    case 'application/llsd+json':
-    case 'application/llsd+xml':
-      return parseLLSD(response)
-
-    default:
-      throw new Error(await response.text())
-  }
-}
-
-function minimalFetchLLSD (method, url, data = null, mimeType = LLSD.MIMETYPE_XML) {
-  const aURL = new URL(url)
-  // transform url to the proxy url
-  const protocol = aURL.protocol.replace(/:$/, '')
-  const requestURL = new URL(
-    `/hoodie/andromeda-viewer/proxy/${protocol}/${aURL.host}${aURL.pathname}`,
-    window.location.href
-  )
-  requestURL.search = aURL.search
-
-  const body = data == null ? undefined : LLSD.format(mimeType, data)
-
-  return window.fetch(requestURL, {
-    method,
-    headers: data == null ? undefined : {
-      'Content-Type': mimeType
-    },
-    body
-  })
-}
-
 export function fetchSeedCapabilities (url) {
-  return async dispatch => {
+  return async (dispatch, getState, { fetchLLSD }) => {
     try {
-      const capabilities = await fetchLLSD('POST', url, caps)
-      dispatch({
-        type: 'SeedCapabilitiesLoaded',
-        capabilities
+      const response = await fetchLLSD(url, {
+        method: 'POST',
+        body: caps
       })
-      dispatch(activateEventQueue())
+      if (response.ok) {
+        const capabilities = await response.llsd()
+        dispatch({
+          type: 'SeedCapabilitiesLoaded',
+          capabilities
+        })
+        dispatch(activateEventQueue())
+      }
     } catch (error) {
       console.error(error)
     }
@@ -60,7 +26,7 @@ export function fetchSeedCapabilities (url) {
 }
 
 // http://wiki.secondlife.com/wiki/EventQueueGet
-async function * eventQueueGet (getState) {
+async function * eventQueueGet (getState, fetchLLSD) {
   const url = selectEventQueueGetUrl(getState())
   const avatarIdentifier = selectAvatarIdentifier(getState())
   let ack = 0
@@ -68,15 +34,21 @@ async function * eventQueueGet (getState) {
   do {
     let response
     try {
-      response = await minimalFetchLLSD('POST', url, { done: false, ack })
+      response = await fetchLLSD(url, {
+        method: 'POST',
+        body: {
+          done: false,
+          ack
+        }
+      })
     } catch (err) {
       // network error?
       console.error(err)
       continue
     }
 
-    if (response.status >= 200 && response.status < 300) {
-      const body = await parseLLSD(response)
+    if (response.ok && response.status >= 200 && response.status < 300) {
+      const body = await response.llsd()
       ack = body.id
       for (const event of body.events) {
         yield event
@@ -101,13 +73,19 @@ async function * eventQueueGet (getState) {
     }
   } while (selectAvatarIdentifier(getState()) === avatarIdentifier)
 
-  minimalFetchLLSD('POST', url, { done: true, ack })
+  fetchLLSD(url, {
+    method: 'POST',
+    body: {
+      done: true,
+      ack
+    }
+  })
     .catch(() => {})
 }
 
 function activateEventQueue () {
-  return async (dispatch, getState) => {
-    for await (const event of eventQueueGet(getState)) {
+  return async (dispatch, getState, { fetchLLSD }) => {
+    for await (const event of eventQueueGet(getState, fetchLLSD)) {
       try {
         toJSON(event.body)
         dispatch({
@@ -129,6 +107,8 @@ function activateEventQueue () {
  * @param {object|object[]} object A LLSD Object or Array.
  */
 export function toJSON (object) {
+  if (object == null) return null
+
   for (const [key, value] of Object.entries(object)) {
     if (value instanceof Date) {
       object[key] = value.getTime()
