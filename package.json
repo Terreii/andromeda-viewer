@@ -94,6 +94,7 @@
     "weallcontribute": "^1.0.9"
   },
   "dependencies": {
+    "@hapi/boom": "^9.0.0",
     "hoodie": "^28.2.10",
     "hoodie-plugin-store-crypto": "^3.2.1",
     "node-fetch": "^2.6.0",

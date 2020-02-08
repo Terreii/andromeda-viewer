@@ -2,6 +2,7 @@
 
 module.exports = init
 
+const Boom = require('@hapi/boom')
 const uuid = require('uuid').v4
 
 function init (server) {
@@ -56,7 +57,7 @@ function check (id, next) {
   if (sessions.has(id)) {
     return next(null, sessions.get(id))
   } else {
-    return next(new Error('not found'))
+    return next(Boom.forbidden('"x-andromeda-session-id" is wrong'))
   }
 }
 

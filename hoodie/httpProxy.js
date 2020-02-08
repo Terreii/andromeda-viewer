@@ -27,29 +27,38 @@ module.exports = function httpProxy (server) {
 }
 
 function mapUri (request, callback) {
-  const protocol = request.params.protocol
-  const hostname = request.params.hostname
-  const path = request.params.path || ''
+  const sessionId = request.headers['x-andromeda-session-id']
 
-  const url = new URL(`${protocol}://${hostname}/${path}`)
-
-  for (const headerName in request.query) {
-    const value = request.query[headerName]
-
-    if (Array.isArray(value)) {
-      for (const param of value) {
-        url.searchParams.append(headerName, param)
-      }
-    } else {
-      url.searchParams.append(headerName, value)
+  request.server.methods.checkSession(sessionId, (err, state) => {
+    if (err) {
+      callback(err)
+      return
     }
-  }
 
-  const headers = Object.assign({}, request.headers || {})
-  delete headers['x-andromeda-session-id']
-  headers.host = url.hostname
+    const protocol = request.params.protocol
+    const hostname = request.params.hostname
+    const path = request.params.path || ''
 
-  callback(null, url.href, headers)
+    const url = new URL(`${protocol}://${hostname}/${path}`)
+
+    for (const headerName in request.query) {
+      const value = request.query[headerName]
+
+      if (Array.isArray(value)) {
+        for (const param of value) {
+          url.searchParams.append(headerName, param)
+        }
+      } else {
+        url.searchParams.append(headerName, value)
+      }
+    }
+
+    const headers = Object.assign({}, request.headers || {})
+    delete headers['x-andromeda-session-id']
+    headers.host = url.hostname
+
+    callback(null, url.href, headers)
+  })
 }
 
 function onResponse (err, res, request, reply, settings, ttl) {

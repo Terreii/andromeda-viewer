@@ -51,7 +51,11 @@ async function * eventQueueGet (getState, fetchLLSD) {
       const body = await response.llsd()
       ack = body.id
       for (const event of body.events) {
-        yield event
+        if (selectAvatarIdentifier(getState()) === avatarIdentifier) {
+          yield event
+        } else {
+          return
+        }
       }
     } else if (response.status === 404) { // Session did end
       return []
@@ -72,15 +76,6 @@ async function * eventQueueGet (getState, fetchLLSD) {
       continue
     }
   } while (selectAvatarIdentifier(getState()) === avatarIdentifier)
-
-  fetchLLSD(url, {
-    method: 'POST',
-    body: {
-      done: true,
-      ack
-    }
-  })
-    .catch(() => {})
 }
 
 function activateEventQueue () {
