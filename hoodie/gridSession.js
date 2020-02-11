@@ -38,6 +38,25 @@ function init (server) {
  */
 const sessions = new Map()
 
+setInterval(() => {
+  const timeout = Date.now() - (10 * 60 * 1000) // 10 min
+  const toRemove = []
+
+  for (const [id, state] of sessions.entries()) {
+    if (typeof state === 'number' && state < timeout) {
+      toRemove.push(id)
+    }
+  }
+
+  if (toRemove.length > 0) {
+    process.nextTick(() => {
+      for (const id of toRemove) {
+        sessions.delete(id)
+      }
+    })
+  }
+}, 10000) // every 10s
+
 /**
  * Generates a new session UUID.
  * @param {function} next callback
@@ -67,4 +86,20 @@ function check (id, next) {
  * @param {'active'|'end'|number} state  Session is active (has a connection) or time of inactive
  * @param {function}              next   callback
  */
-function change (id, state, next) {}
+function change (id, state, next) {
+  if (!sessions.has(id)) {
+    return next(Boom.forbidden('"x-andromeda-session-id" is wrong'))
+  }
+
+  if (state === 'end') {
+    sessions.delete(id)
+    return next(null, 'end')
+  }
+
+  if (state === 'active' || typeof state === 'number') {
+    sessions.set(id, state)
+    return next(null, state)
+  }
+
+  return next(Boom.badRequest(`bad state "${state}"`))
+}

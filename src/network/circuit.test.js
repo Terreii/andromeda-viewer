@@ -75,7 +75,7 @@ function createTestHeader (reliable, resend, hasAcks) {
   return headBuffer
 }
 
-const circuit = new Circuit('127.0.0.1', 8080, 123456)
+const circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
 
 test('it should create an instance', () => {
   expect(circuit instanceof Circuit).toBe(true)
@@ -101,10 +101,14 @@ test('circuit should save messages until the WebSocket is open and send if open'
   expect(circuit.cachedMessages.length).toBe(1)
 
   circuit.websocket.onopen()
+  expect(circuit.websocket.sendMessages.length).toBe(1)
+  expect(circuit.websocket.sendMessages[0]).toBe('session id')
+
+  circuit.websocket.onmessage({ data: 'ok' })
 
   expect(circuit.websocketIsOpen).toBe(true)
   expect(circuit.cachedMessages.length).toBe(0)
-  expect(circuit.websocket.sendMessages.length).toBe(1)
+  expect(circuit.websocket.sendMessages.length).toBe(2)
 
   circuit.send('PacketAck', {
     Packets: [
@@ -115,7 +119,7 @@ test('circuit should save messages until the WebSocket is open and send if open'
   })
 
   expect(circuit.cachedMessages.length).toBe(0)
-  expect(circuit.websocket.sendMessages.length).toBe(2)
+  expect(circuit.websocket.sendMessages.length).toBe(3)
 })
 
 test('parse a received package', () => {

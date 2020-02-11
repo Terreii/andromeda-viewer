@@ -258,7 +258,13 @@ function connectToSim (sessionInfo, circuit) {
   return async (dispatch, getState, extraArgs) => {
     const Circuit = circuit.default
     const circuitCode = sessionInfo.circuit_code
-    const activeCircuit = new Circuit(sessionInfo.sim_ip, sessionInfo.sim_port, circuitCode)
+
+    const activeCircuit = new Circuit(
+      sessionInfo.sim_ip,
+      sessionInfo.sim_port,
+      circuitCode,
+      sessionInfo.andromedaSessionId
+    )
     extraArgs.circuit = activeCircuit
 
     const sessionId = sessionInfo.session_id
