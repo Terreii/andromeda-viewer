@@ -12,12 +12,12 @@ import {
 } from '../bundles/names'
 import { selectAgentId, selectSessionId } from '../bundles/session'
 
-import { IMDialog } from '../types/chat'
+import { IMDialog, NotificationTypes } from '../types/chat'
 import { AssetType } from '../types/inventory'
 import { TeleportFlags } from '../types/people'
 import { getValueOf } from '../network/msgGetters'
 import { receive as notificationActionCreator } from '../bundles/notifications'
-import {NotificationTypes} from '../types/chat'
+
 function sendUUIDNameRequest (ids) {
   return (dispatch, getState, { circuit }) => {
     if (ids.length === 0) return
@@ -59,22 +59,22 @@ function loadDisplayNames (idsArray) {
   }
 }
 
-export function FriendOnline(msg) {
+export function FriendOnline (msg) {
   return (dispatch, getState) => {
     let state = getState()
     const fromAgentId = getValueOf(msg, 'AgentBlock', 'AgentID')
-    let name = selectAvatarNameById(state,fromAgentId)
+    let name = selectAvatarNameById(state, fromAgentId)
     if (name === undefined) {
       dispatch(displayNamesStartLoading([fromAgentId]))
       state = getState()
-      name = selectAvatarNameById(state,fromAgentId)
-      if(name === undefined) {
+      name = selectAvatarNameById(state, fromAgentId)
+      if (name === undefined) {
         name = fromAgentId
       }
     } else {
-      name = "("+name.getFullName()+") " + name.getDisplayName()
+      name = '(' + name.getFullName() + ') ' + name.getDisplayName()
     }
-    dispatch(handleSystemNotification(name+" is online"))
+    dispatch(handleSystemNotification(name + ' is online'))
   }
 }
 function handleSystemNotification (msg) {
@@ -84,23 +84,23 @@ function handleSystemNotification (msg) {
   })
 }
 
-export function FriendOffline(msg) {
+export function FriendOffline (msg) {
   return (dispatch, getState) => {
     let state = getState()
     const fromAgentId = getValueOf(msg, 'AgentBlock', 'AgentID')
-    let name = selectAvatarNameById(state,fromAgentId)
+    let name = selectAvatarNameById(state, fromAgentId)
     if (name === undefined) {
       dispatch(displayNamesStartLoading([fromAgentId]))
       state = getState()
-      name = selectAvatarNameById(state,fromAgentId)
-      if(name === undefined) {
+      name = selectAvatarNameById(state, fromAgentId)
+      if (name === undefined) {
         name = fromAgentId
       }
     } else {
-      name = "("+name.getFullName()+") " + name.getDisplayName()
+      name = '(' + name.getFullName() + ') ' + name.getDisplayName()
     }
 
-      dispatch(handleSystemNotification(name+" is offline"))
+    dispatch(handleSystemNotification(name + ' is offline'))
   }
 }
 export function getDisplayName () {
