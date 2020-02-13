@@ -12,7 +12,7 @@ import {
   retrieveInstantMessages
 } from './chatMessageActions'
 import { getAllFriendsDisplayNames } from './friendsActions'
-import { fetchSeedCapabilities } from './llsd'
+import { fetchSeedCapabilities } from './capabilities'
 import LLSD from '../llsd'
 import connectCircuit from './connectCircuit'
 
