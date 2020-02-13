@@ -18,7 +18,12 @@ export function proxyFetch (getState, resource, init = {}) {
 
     // add the session id header for the proxy.
     // To authenticate the current active grid session.
-    init.headers['x-andromeda-session-id'] = getState().session.andromedaSessionId
+    const sessionId = getState().session.andromedaSessionId
+    if (init.headers instanceof window.Headers) {
+      init.headers.set('x-andromeda-session-id', sessionId)
+    } else {
+      init.headers['x-andromeda-session-id'] = getState().session.andromedaSessionId
+    }
 
     const aURL = new URL(resource, window.location.href)
     // transform url to the proxy url
