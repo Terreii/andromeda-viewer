@@ -61,7 +61,7 @@
     "double-ended-queue": "^2.1.0-0",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.2",
-    "http-proxy-middleware": "^0.20.0",
+    "http-proxy-middleware": "^0.21.0",
     "jest-axe": "^3.3.0",
     "jest-enzyme": "^7.1.2",
     "jszip": "^3.2.2",
