@@ -6,10 +6,20 @@
   overflow-y: scroll;
 }
 
+.Message {}
+
 .Message > time {
   padding-right: 0.3em;
 }
 
 .Message > span, .Message > time {
   font-size: 120%;
+}
+
+.icr_me {
+  composes: Message;
+}
+
+.icr_me > span {
+  font-style: italic;
 }

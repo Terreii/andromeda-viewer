@@ -8,14 +8,15 @@ const TextLine = memo(({ msg, name }) => {
   const time = new Date(msg.time)
 
   const message = msg.message
+  const isIrcMe = message.startsWith('/me ') || message.startsWith("/me'")
 
   const parsed = useMemo(
     () => {
       const urls = anchorme(message, { list: true })
 
-      if (urls.length === 0) return [message]
+      let text = isIrcMe ? message.substring(4) : message
 
-      let text = message
+      if (urls.length === 0) return [text]
       const result = []
 
       for (const url of urls) {
@@ -59,10 +60,10 @@ const TextLine = memo(({ msg, name }) => {
 
       return result
     },
-    [message]
+    [isIrcMe, message]
   )
 
-  return <div className={styles.Message}>
+  return <div className={isIrcMe ? styles.icr_me : styles.Message}>
     <time dateTime={time.toISOString()}>
       {leadingZero(time.getHours())}
       :
@@ -71,7 +72,7 @@ const TextLine = memo(({ msg, name }) => {
       {leadingZero(time.getSeconds())}
     </time>
 
-    <span className={styles.AvatarName}>{name.toString()}: </span>
+    <span className={styles.AvatarName}>{name.toString()}{isIrcMe ? '' : ':'} </span>
 
     <span className='messageText'>
       {parsed.map((part, index) => {
