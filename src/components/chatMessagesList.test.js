@@ -94,6 +94,32 @@ describe('local chat', () => {
       .toBe('noopener noreferrer')
   })
 
+  it('should render messages starting with /me without a colon', () => {
+    const messages = [
+      {
+        _id: 'first',
+        fromId: 'ABCB',
+        message: '/me wonders about the world!',
+        time: '2018-08-10T11:03:00.000Z'
+      }
+    ]
+
+    const names = {
+      ABCB: new AvatarName('Testery MacTestface')
+    }
+
+    const { debug, queryByText } = render(<ChatMessagesList
+      messages={messages}
+      names={names}
+    />)
+    debug()
+
+    expect(queryByText('13:03:00')).toBeTruthy()
+    expect(queryByText('13:03:00').tagName).toBe('TIME')
+    expect(queryByText('Testery Mactestface')).toBeTruthy()
+    expect(queryByText('wonders about the world!')).toBeTruthy()
+  })
+
   it('should pass aXe', async () => {
     const messages = [
       {
@@ -213,6 +239,33 @@ describe('IMs', () => {
       .toBe('http://wiki.secondlife.com/wiki/Main_Page')
     expect(queryByText('the second life wiki').rel)
       .toBe('noopener noreferrer')
+  })
+
+  it('should render messages starting with /me without a colon', () => {
+    const messages = [
+      {
+        _id: 'first',
+        fromId: 'ABCB',
+        message: '/me wonders about the world!',
+        time: '2018-08-10T11:03:00.000Z'
+      }
+    ]
+
+    const names = {
+      ABCB: new AvatarName('Testery MacTestface')
+    }
+
+    const { debug, queryByText } = render(<ChatMessagesList
+      messages={messages}
+      isIM
+      names={names}
+    />)
+    debug()
+
+    expect(queryByText('13:03:00')).toBeTruthy()
+    expect(queryByText('13:03:00').tagName).toBe('TIME')
+    expect(queryByText('Testery Mactestface')).toBeTruthy()
+    expect(queryByText('wonders about the world!')).toBeTruthy()
   })
 
   it('should pass aXe', async () => {
