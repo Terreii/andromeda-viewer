@@ -6,11 +6,10 @@
   overflow-y: scroll;
 }
 
-.Message > span, .Message > time {
+.Message > time {
   padding-right: 0.3em;
-  font-size: 120%;
 }
 
-.AvatarName::after {
-  content: ":";
+.Message > span, .Message > time {
+  font-size: 120%;
 }
