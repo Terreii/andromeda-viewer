@@ -1,6 +1,7 @@
 import React from 'react'
 
-import { Container, Text } from './utils'
+import { Container } from './utils'
+import Text from '../text'
 
 import { useName } from '../../hooks/names'
 
@@ -29,7 +30,9 @@ export default function FriendshipOffer ({ data, onAccept, onDecline, onClose }:
   const name = useName(data.fromId)
 
   return <Container title={`${name} has offered to teleport you to their location.`}>
-    <Text text={data.text} />
+    <p>
+      <Text text={data.text} multiline />
+    </p>
 
     <div className={styles.ButtonsRow}>
       <button className={formStyles.OkButton} onClick={doAccept} disabled>
