@@ -57,6 +57,24 @@ it('should use its className for the <a>', () => {
     .toBe('text-class')
 })
 
+it('should support multiline mode', () => {
+  const { queryByText } = render(<div>
+    <Text
+      text={'Hello World! https://en.wikipedia.org/wiki/Second_Life\n' +
+        '[http://wiki.secondlife.com/wiki/Main_Page the second life\nwiki]'}
+      multiline
+    />
+  </div>)
+
+  const sibling = queryByText('https://en.wikipedia.org/wiki/Second_Life').nextElementSibling
+  expect(sibling).toBeTruthy()
+  expect(sibling.nodeName).toBe('BR')
+
+  const brChild = queryByText('the second life', { exact: false }).querySelector('br')
+  expect(brChild).toBeTruthy()
+  expect(brChild.nodeName).toBe('BR')
+})
+
 it('should pass aXe', async () => {
   const { container } = render(<div>
     <Text

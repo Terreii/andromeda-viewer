@@ -4,17 +4,20 @@ import anchorme from 'anchorme'
 /**
  * Render text and detect URLs it. URLs will be rendered as <a>.
  * This can also use the [url some text] formatting used in SL and openSIM.
- * @param {object} param             React Argument.
- * @param {string} param.text        Text body that should be rendered.
- * @param {string} [param.className] ClassNames for the links (<a>).
+ * @param {object}  param             React Argument.
+ * @param {string}  param.text        Text body that should be rendered.
+ * @param {boolean} [param.multiline] Should a <br> be added for \n?
+ * @param {string}  [param.className] ClassNames for the links (<a>).
  */
-export default function Text ({ text, className }) {
+export default function Text ({ text, multiline, className }) {
   const parsed = useMemo(
     () => {
       const urls = anchorme(text, { list: true })
 
       if (urls.length === 0) {
-        return [text]
+        return [
+          multiline ? toMultiLine(text) : text
+        ]
       }
 
       let rest = text
@@ -44,11 +47,12 @@ export default function Text ({ text, className }) {
 
         // split out text only part
         if (index > 0) {
-          result.push(rest.substring(0, index))
+          const subString = rest.substring(0, index)
+          result.push(multiline ? toMultiLine(subString) : subString)
         }
 
         result.push({
-          text: linkBody,
+          text: multiline ? toMultiLine(linkBody) : linkBody,
           url: url.raw
         })
 
@@ -56,17 +60,17 @@ export default function Text ({ text, className }) {
       }
 
       if (rest.length > 0) {
-        result.push(rest)
+        result.push(multiline ? toMultiLine(rest) : rest)
       }
 
       return result
     },
-    [text]
+    [text, multiline]
   )
 
   return <>
     {parsed.map((part, index) => {
-      if (typeof part === 'string') {
+      if (typeof part === 'string' || part.url == null) {
         return part
       } else {
         return <a
@@ -81,4 +85,22 @@ export default function Text ({ text, className }) {
       }
     })}
   </>
+}
+
+/**
+ * Add <br> to strings.
+ * @param {string} text Text that should be split up and <br> be added.
+ */
+function toMultiLine (text) {
+  const result = []
+
+  text.split('\n').forEach((line, index) => {
+    if (index > 0) {
+      result.push(<br key={'br_' + index} />)
+    }
+
+    result.push(line)
+  })
+
+  return result
 }
