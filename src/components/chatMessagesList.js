@@ -23,7 +23,7 @@ const TextLine = memo(({ msg, name }) => {
         const urlStartIndex = text.indexOf(url.raw)
         const urlEndIndex = urlStartIndex + url.raw.length
 
-        const hasLinkBody = text.charAt(Math.max(0, urlStartIndex - 1)) === '[' &&
+        const hasLinkBody = text.charAt(urlStartIndex - 1) === '[' &&
           /\s/.test(text.charAt(urlEndIndex))
 
         let index = urlStartIndex
@@ -35,7 +35,7 @@ const TextLine = memo(({ msg, name }) => {
           const body = text.substring(urlEndIndex + 1, closingIndex)
 
           if (closingIndex >= 0 && body.length > 0) {
-            index = Math.max(0, urlStartIndex - 1)
+            index = urlStartIndex - 1
             endIndex = closingIndex + 1
             linkBody = body
           }
