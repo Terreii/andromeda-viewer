@@ -29,7 +29,8 @@ function sendUUIDNameRequest (ids) {
 
 function loadDisplayNames (idsArray) {
   const ids = idsArray.map(id => id.toString())
-  return (dispatch, getState, { fetchLLSD }) => {
+
+  return async (dispatch, getState, { fetchLLSD }) => {
     if (ids.length === 0) return
 
     const fetchUrlString = selectDisplayNamesURL(getState())
@@ -40,23 +41,22 @@ function loadDisplayNames (idsArray) {
 
     dispatch(displayNamesStartLoading(ids))
 
-    fetchLLSD(fetchUrl.href).then(async response => {
-      if (!response.ok) {
-        dispatch(displayNamesLoaded([], ids))
-        return
-      }
+    const response = await fetchLLSD(fetchUrl.href)
+    if (!response.ok) {
+      dispatch(displayNamesLoaded([], ids))
+      return
+    }
 
-      const result = await response.llsd()
-      const badIDs = result['bad_ids'] || []
-      dispatch(sendUUIDNameRequest(badIDs)) // Try again
+    const result = await response.llsd()
+    const badIDs = result['bad_ids'] || []
+    dispatch(sendUUIDNameRequest(badIDs)) // Try again
 
-      result.agents.forEach(agent => {
-        agent.display_name_next_update = agent.display_name_next_update.getTime()
-        agent.id = agent.id.toString()
-      })
-
-      dispatch(displayNamesLoaded(result.agents, badIDs, result['bad_usernames'] || []))
+    result.agents.forEach(agent => {
+      agent.display_name_next_update = agent.display_name_next_update.getTime()
+      agent.id = agent.id.toString()
     })
+
+    dispatch(displayNamesLoaded(result.agents, badIDs, result['bad_usernames'] || []))
   }
 }
 
