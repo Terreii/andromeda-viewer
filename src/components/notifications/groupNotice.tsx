@@ -1,6 +1,7 @@
 import React from 'react'
 
-import { Container, Text } from './utils'
+import { Container } from './utils'
+import Text from '../text'
 
 import { useName, useGroupName } from '../../hooks/names'
 
@@ -33,7 +34,9 @@ export default function GroupNotice ({ data, onAccept, onDecline, onClose }: Not
   return <Container title={`Group Notice from ${groupName} - ${data.title}`}>
     <small>send by {name.toString()}</small>
 
-    <Text text={data.text} />
+    <p>
+      <Text text={data.text} multiline />
+    </p>
 
     {data.item && <div>
       This notice includes item

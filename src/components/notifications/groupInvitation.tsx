@@ -1,6 +1,7 @@
 import React from 'react'
 
-import { Container, Text } from './utils'
+import { Container } from './utils'
+import Text from '../text'
 
 import { GroupInvitationNotification } from '../../types/chat'
 
@@ -25,7 +26,9 @@ export default function GroupInvitation ({ data, onAccept, onDecline, onClose }:
   const fee = numberFormater.format(data.fee)
 
   return <Container title={'Invitation to join a group'}>
-    <Text text={data.text} />
+    <p>
+      <Text text={data.text} multiline />
+    </p>
 
     <span>
       {'Fee: '}

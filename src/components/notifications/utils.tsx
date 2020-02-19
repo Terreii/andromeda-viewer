@@ -14,12 +14,3 @@ export function Container ({ title, children }: ContainerArgs) {
     {children}
   </div>
 }
-
-export function Text ({ text }: { text: string }) {
-  return <p>
-    {text.split('\n').flatMap((line, index) => index === 0
-      ? line
-      : [<br key={'br_' + index} />, line]
-    )}
-  </p>
-}
