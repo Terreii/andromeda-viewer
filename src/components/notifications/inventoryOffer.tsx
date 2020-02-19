@@ -1,6 +1,7 @@
 import React from 'react'
 
-import { Container, Text } from './utils'
+import { Container } from './utils'
+import Text from '../text'
 
 import { useName } from '../../hooks/names'
 
@@ -44,7 +45,9 @@ export default function InventoryOffer ({ data, onAccept, onDecline, onClose }: 
   const name = useName(data.fromId)
 
   return <Container title={`${name} did offer you ${a} ${itemTypeName} item.`}>
-    <Text text={data.text} />
+    <p>
+      <Text text={data.text} multiline />
+    </p>
 
     <div className={styles.ButtonsRow}>
       <button className={formStyles.OkButton} onClick={doAccept}>
