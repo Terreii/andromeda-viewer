@@ -13,17 +13,60 @@ import { parseBody, createBody } from './networkMessages'
 import { getValueOf, mapBlockOf } from './msgGetters'
 
 export default class Circuit extends events.EventEmitter {
-  constructor (hostIP, hostPort, circuitCode) {
+  /**
+   * sequenceNumber is the id of a packet.
+   * It will be increased for every packed.
+   */
+  sequenceNumber = 0
+
+  /**
+   * This is the sequenceNumber from the server.
+   */
+  senderSequenceNumber = 0
+
+  /**
+   * Did all handshaking happen?
+   */
+  websocketIsOpen = false
+
+  /**
+   * Messages not send yet. Because the socket in not open yet.
+   * They will be send once the handshaking did complete, and then they will be deleted.
+   */
+  cachedMessages = []
+
+  /**
+   * Acks that have to be send.
+   * It holds a number for every senderSequenceNumber to count the times it was send.
+   */
+  simAcks = new Map()
+
+  /**
+   * Que of Acks that should be send on the end of an package.
+   */
+  simAcksOnPacket = new Deque()
+
+  /**
+   * Acks of packages send from the viewer.
+   * It also includes their body and other infos, needed to resend them.
+   */
+  viewerAcks = []
+
+  /**
+   * Connects to the Sim using the UDP-Bridge of the Andromeda Viewer Server.
+   * @param {string} hostIP       IP Address of the Sim.
+   * @param {number} hostPort     Port of the Sim.
+   * @param {number} circuitCode  Circuit code used to authenticate the udp connection to the sim.
+   * @param {string} sessionId    UUID of the session for andromeda udp bridge.
+   */
+  constructor (hostIP, hostPort, circuitCode, sessionId) {
     super()
     this.ip = hostIP
     this.ipArray = this.ip.split('.').map(part => Number(part))
     this.port = hostPort
     this.circuitCode = circuitCode
-    // sequenceNumber is the id of a packet. It will be increased for every packed
-    this.sequenceNumber = 0
-    this.senderSequenceNumber = 0
+    this.sessionId = sessionId
 
-    this.websocketIsOpen = false
     const socketUrl = new window.URL(window.location.href.replace(/#.*$/, ''))
     // http -> ws  &  https -> wss
     socketUrl.protocol = socketUrl.protocol.replace(/^http/, 'ws')
@@ -31,29 +74,38 @@ export default class Circuit extends events.EventEmitter {
     this.websocket = new window.WebSocket(socketUrl.toString())
     this.websocket.binaryType = 'arraybuffer'
     this.websocket.onopen = this._onOpen.bind(this)
-    this.cachedMessages = []
     this.websocket.onmessage = this._onMessage.bind(this)
-
-    this.simAcks = new Map()
-    this.simAcksOnPacket = new Deque()
-    this.viewerAcks = []
 
     setTimeout(() => this._startAcksProcess(), 100)
   }
 
+  /**
+   * Send the session id used for the bridge.
+   * To authenticate this socket and finish the handshaking.
+   */
   _onOpen () {
-    this.websocketIsOpen = true
-    this.cachedMessages.forEach(buffer => this.websocket.send(buffer))
-    this.cachedMessages = []
+    this.websocket.send(this.sessionId)
   }
 
   close () {
-    this.websocket.close()
+    this.websocket.close(1000, 'session end')
     this.removeAllListeners()
     clearInterval(this.acksProcessInterval)
   }
 
   _onMessage (message) {
+    // Fully open the connection. If the server did send "ok" then it is open.
+    if (!this.websocketIsOpen && typeof message.data === 'string') {
+      if (message.data !== 'ok') {
+        this.close()
+        return
+      }
+      this.websocketIsOpen = true
+      this.cachedMessages.forEach(buffer => this.websocket.send(buffer))
+      this.cachedMessages = []
+      return
+    }
+
     const msg = Buffer.from(message.data)
 
     const ip = msg.readUInt8(0) + '.' +

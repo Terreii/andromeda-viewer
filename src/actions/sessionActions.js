@@ -12,7 +12,7 @@ import {
   retrieveInstantMessages
 } from './chatMessageActions'
 import { getAllFriendsDisplayNames } from './friendsActions'
-import { fetchSeedCapabilities } from './llsd'
+import { fetchSeedCapabilities } from './capabilities'
 import LLSD from '../llsd'
 import connectCircuit from './connectCircuit'
 
@@ -167,7 +167,10 @@ async function loginWithXmlRpc (viewerData, first, last, password) {
     body: JSON.stringify(loginData),
     headers: createProxyLoginHeaders(viewerData)
   })
-  return response.json()
+
+  const data = await response.json()
+  data.andromedaSessionId = response.headers.get('x-andromeda-session-id')
+  return data
 }
 
 /**
@@ -211,7 +214,9 @@ async function loginWithLLSD (viewerData, first, last, password) {
   const parsed = LLSD.parse(response.headers.get('content-type'), body)
 
   // for transforming all UUIDs into strings
-  return JSON.parse(JSON.stringify(parsed))
+  const data = JSON.parse(JSON.stringify(parsed))
+  data.andromedaSessionId = response.headers.get('x-andromeda-session-id')
+  return data
 }
 
 // Logout an avatar
@@ -253,7 +258,13 @@ function connectToSim (sessionInfo, circuit) {
   return async (dispatch, getState, extraArgs) => {
     const Circuit = circuit.default
     const circuitCode = sessionInfo.circuit_code
-    const activeCircuit = new Circuit(sessionInfo.sim_ip, sessionInfo.sim_port, circuitCode)
+
+    const activeCircuit = new Circuit(
+      sessionInfo.sim_ip,
+      sessionInfo.sim_port,
+      circuitCode,
+      sessionInfo.andromedaSessionId
+    )
     extraArgs.circuit = activeCircuit
 
     const sessionId = sessionInfo.session_id

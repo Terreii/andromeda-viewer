@@ -1,6 +1,7 @@
 import React from 'react'
 
-import { Container, Text } from './utils'
+import { Container } from './utils'
+import Text from '../text'
 
 import { useName } from '../../hooks/names'
 
@@ -20,7 +21,9 @@ export default function LoadURL ({ data, onClose }: NotificationArgs) {
   const name = useName(data.fromId)
 
   return <Container title={`${name} did send you an URL`}>
-    <Text text={data.text} />
+    <p>
+      <Text text={data.text} multiline />
+    </p>
 
     <div>
       <a href={href} target='_blank' rel='noopener noreferrer'>{href}</a>

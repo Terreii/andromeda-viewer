@@ -1,14 +1,15 @@
 'use strict'
 
+module.exports = bridgeInit
+
 const dgram = require('dgram')
 
 const WebSocket = require('ws')
 
-module.exports = bridgeInit
-
-const openBridges = new WeakMap() // all Bridges will be stored here.
+// all Bridges will be stored here.
 // If a Bridge closes it will set its socket to undefined. the WeakMap will then
 // garbage collect the Bridge
+const openBridges = new WeakMap()
 
 function bridgeInit (server) {
   const wss = new WebSocket.Server({
@@ -16,29 +17,65 @@ function bridgeInit (server) {
     perMessageDeflate: false,
     path: '/andromeda-bridge'
   })
-  wss.on('connection', ws => openBridges.set(ws, new Bridge(ws)))
+
+  wss.on('connection', ws => openBridges.set(ws, new Bridge(ws, server)))
 }
 
 // The Bridge stores the websocket to the client and the UDP-socket to the sim
 // the first 6 bytes of a message, between this server and a client, is the
 // IP and Port of the sim
 class Bridge {
-  constructor (socket) {
+  constructor (socket, server) {
+    this.didAuth = false
+    this.sessionId = ''
+
+    this.checkSession = server.methods.checkSession
+    this.changeSessionState = server.methods.changeSessionState
+
     this.socket = socket
-    const udp = dgram.createSocket('udp4')
-    this.udp = udp
-    udp.bind()
+    this.udp = null
 
-    const onClose = this.onClose.bind(this)
     socket.on('message', this.clientToGrid.bind(this))
-    socket.on('close', onClose)
+    socket.on('close', this.onSocketClose.bind(this))
+  }
 
-    udp.on('message', this.gridToClient.bind(this))
-    udp.on('close', onClose)
+  authenticate (sessionId) {
+    this.checkSession(sessionId, (err, state) => {
+      if (err) {
+        // handle error
+        this.socket.close(1008, 'wrong session id')
+        return
+      }
+
+      if (typeof state === 'number') {
+        // Session has no active socket -> open
+        this.didAuth = true
+        this.changeSessionState(sessionId, 'active', (err, state) => {
+          if (err) {
+            this.didAuth = false
+            this.socket.close(1011, err.message)
+          } else {
+            this.sessionId = sessionId
+
+            const udp = dgram.createSocket('udp4')
+            this.udp = udp
+            udp.bind()
+
+            udp.on('message', this.gridToClient.bind(this))
+            udp.on('close', this.onUDPClose.bind(this))
+
+            this.socket.send('ok')
+          }
+        })
+      } else {
+        // session did close or has an active socket -> close this socket
+        this.socket.close(1008, 'already active socket open')
+      }
+    })
   }
 
   clientToGrid (message) {
-    if (message instanceof Buffer) {
+    if (message instanceof Buffer && this.didAuth) {
       const ip = message.readUInt8(0) + '.' +
         message.readUInt8(1) + '.' +
         message.readUInt8(2) + '.' +
@@ -47,6 +84,8 @@ class Bridge {
 
       const buffy = message.slice(6)
       this.udp.send(buffy, 0, buffy.length, port, ip)
+    } else if (!this.didAuth && typeof message === 'string') {
+      this.authenticate(message)
     }
   }
 
@@ -66,13 +105,34 @@ class Bridge {
     this.socket.send(buffy, { binary: true })
   }
 
-  onClose () {
+  onSocketClose (code, reason) {
+    if (this.socket && this.sessionId !== '') {
+      const nextState = code === 1000 ? 'end' : Date.now()
+
+      this.changeSessionState(this.sessionId, nextState, (err, state) => {
+        if (err) {
+          console.error(err)
+        }
+      })
+    }
+
+    if (this.socket) {
+      this.socket = undefined
+    }
+
     if (this.udp) {
       this.udp.close()
       this.udp = undefined
     }
+  }
+
+  onUDPClose () {
+    if (this.udp) {
+      this.udp = undefined
+    }
+
     if (this.socket) {
-      this.socket.close()
+      this.socket.close(1012, 'udp did close')
       this.socket = undefined
     }
   }

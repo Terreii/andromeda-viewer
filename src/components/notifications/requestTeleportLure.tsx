@@ -1,6 +1,7 @@
 import React from 'react'
 
-import { Container, Text } from './utils'
+import { Container } from './utils'
+import Text from '../text'
 
 import { useName } from '../../hooks/names'
 
@@ -19,7 +20,9 @@ export default function RequestTeleportLure ({ data, onAccept, onClose }: Notifi
   const name = useName(data.fromId)
 
   return <Container title={`${name} is requesting to be teleported to your location.`}>
-    <Text text={data.text} />
+    <p>
+      <Text text={data.text} multiline />
+    </p>
 
     <div className={styles.ButtonsRow}>
       <button

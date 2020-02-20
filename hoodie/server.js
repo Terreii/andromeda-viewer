@@ -1,11 +1,13 @@
 'use strict'
 
 const bridge = require('./bridge')
-const login = require('./login')
+const gridSession = require('./gridSession')
 const proxy = require('./httpProxy')
+const login = require('./login')
 
 exports.register = function (server, options, next) {
   try {
+    gridSession(server)
     login(server)
     bridge(server)
     proxy(server)

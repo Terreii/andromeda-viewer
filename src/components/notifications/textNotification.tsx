@@ -1,6 +1,7 @@
 import React from 'react'
 
-import { Container, Text } from './utils'
+import { Container } from './utils'
+import Text from '../text'
 
 import { NotificationTypes, TextNotification, SystemNotification } from '../../types/chat'
 
@@ -18,7 +19,9 @@ export default function TextNotificationComponent ({ data, onClose }: TextNotifi
     : data.fromName
 
   return <Container title={title}>
-    <Text text={data.text} />
+    <p>
+      <Text text={data.text} multiline />
+    </p>
 
     <div className={styles.ButtonsRow}>
       <button className={formStyles.PrimaryButton} onClick={onClose}>
