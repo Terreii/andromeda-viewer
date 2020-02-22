@@ -1,8 +1,13 @@
 import { axe } from 'jest-axe'
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
+import { Provider } from 'react-redux'
 import { mount } from 'enzyme'
+import configureMockStore from 'redux-mock-store'
+import thunk from 'redux-thunk'
 
 import AvatarName from '../../avatarName'
+import { acceptFriendshipOffer, declineFriendshipOffer } from '../../actions/friendsActions'
 import { useName, useGroupName } from '../../hooks/names'
 
 import { NotificationTypes } from '../../types/chat'
@@ -15,13 +20,25 @@ global.Array.prototype.flatMap = jest.fn(function (fn) {
   return [].concat(this.map(fn))
 })
 
+jest.mock('../../actions/friendsActions')
 jest.mock('../../hooks/names')
 const mockedName = 'Tester Mactestface'
 beforeEach(() => {
   useName.mockReturnValueOnce(new AvatarName(mockedName))
 })
 
-test('renders without crashing', () => {
+function configureStore (state = {}) {
+  const store = configureMockStore([thunk])
+  return store(state)
+}
+
+function Container ({ store, children }) {
+  return <Provider store={store}>
+    {children}
+  </Provider>
+}
+
+it('renders without crashing', () => {
   const allNotifications = [
     {
       id: 0,
@@ -36,7 +53,7 @@ test('renders without crashing', () => {
   />)
 })
 
-test('renders a basic MessageBox', () => {
+it('renders a basic MessageBox', () => {
   const allNotifications = [
     {
       id: 4,
@@ -64,7 +81,7 @@ test('renders a basic MessageBox', () => {
   expect(onClose.mock.calls[0][0]).toBe(4)
 })
 
-test('renders a system MessageBox', () => {
+it('renders a system MessageBox', () => {
   const allNotifications = [
     {
       id: 4,
@@ -91,7 +108,12 @@ test('renders a system MessageBox', () => {
   expect(onClose.mock.calls[0][0]).toBe(4)
 })
 
-test('renders a friendship request', () => {
+it('renders a friendship request', () => {
+  acceptFriendshipOffer.mockImplementation(id => ({ type: 'FRIENDSHIP_ACCEPTED', agentId: id }))
+  declineFriendshipOffer.mockImplementation(id => ({ type: 'FRIENDSHIP_DECLINED', agentId: id }))
+
+  const store = configureStore()
+
   const fromId = '5df644f5-8b12-4caf-8e91-d7cae057e5f2'
   const sessionId = '84bcf978-fbb1-4fe8-b3fa-9d00e01a11d9'
   const allNotifications = [
@@ -105,50 +127,48 @@ test('renders a friendship request', () => {
     }
   ]
 
-  const onAcceptFriendship = jest.fn()
-  const onDeclineFriendship = jest.fn()
   const onClose = jest.fn()
 
-  const rendered = mount(<Notifications
-    notifications={allNotifications}
-    acceptFriendship={onAcceptFriendship}
-    declineFriendship={onDeclineFriendship}
-    onClose={onClose}
-  />)
+  const { queryByText } = render(<Container store={store}>
+    <Notifications
+      notifications={allNotifications}
+      onClose={onClose}
+    />
+  </Container>)
 
-  expect(rendered.find('p').text()).toBe('I would like to by your friend!')
-
-  const buttons = rendered.find('button')
-  expect(buttons.length).toBe(2)
+  expect(queryByText('I would like to by your friend!')).toBeTruthy()
+  expect(queryByText('I would like to by your friend!').nodeName).toBe('P')
 
   // Accept
-  buttons.at(0).simulate('click')
+  const acceptButton = queryByText('Accept')
+  expect(acceptButton).toBeTruthy()
+  expect(acceptButton.nodeName).toBe('BUTTON')
 
-  expect(onAcceptFriendship.mock.calls.length).toBe(1)
-  expect(onDeclineFriendship.mock.calls.length).toBe(0)
-  expect(onAcceptFriendship.mock.calls[0]).toEqual([
-    fromId,
-    sessionId
+  fireEvent.click(acceptButton)
+  expect(acceptFriendshipOffer.mock.calls).toEqual([
+    [fromId, sessionId]
   ])
+  expect(declineFriendshipOffer.mock.calls.length).toBe(0)
 
   expect(onClose.mock.calls.length).toBe(1)
-  expect(onClose.mock.calls[0][0]).toBe(4)
 
   // Decline
-  buttons.at(1).simulate('click')
+  const declineButton = queryByText('Decline')
+  expect(declineButton).toBeTruthy()
+  expect(declineButton.nodeName).toBe('BUTTON')
 
-  expect(onAcceptFriendship.mock.calls.length).toBe(1)
-  expect(onDeclineFriendship.mock.calls.length).toBe(1)
-  expect(onDeclineFriendship.mock.calls[0]).toEqual([
-    fromId,
-    sessionId
+  fireEvent.click(declineButton)
+  expect(acceptFriendshipOffer.mock.calls).toEqual([
+    [fromId, sessionId]
+  ])
+  expect(declineFriendshipOffer.mock.calls).toEqual([
+    [fromId, sessionId]
   ])
 
   expect(onClose.mock.calls.length).toBe(2)
-  expect(onClose.mock.calls[1][0]).toBe(4)
 })
 
-test('renders a group invitation', () => {
+it('renders a group invitation', () => {
   const transactionId = 'transactionId'
   const groupId = 'group id'
 
@@ -209,7 +229,7 @@ test('renders a group invitation', () => {
   expect(onClose.mock.calls[1][0]).toBe(4)
 })
 
-test('renders a group notice', () => {
+it('renders a group notice', () => {
   useGroupName.mockReturnValueOnce('Tester Group')
 
   const transactionId = 'transactionId'
@@ -312,7 +332,7 @@ test('renders a group notice', () => {
   expect(onClose.mock.calls[2][0]).toBe(4)
 })
 
-test('renders an open URL', () => {
+it('renders an open URL', () => {
   const href = 'https://secondlife.com/support/downloads/'
   const onClose = jest.fn()
 
@@ -343,7 +363,7 @@ test('renders an open URL', () => {
   expect(onClose.mock.calls[0][0]).toBe(1)
 })
 
-test('renders a request teleport lure', () => {
+it('renders a request teleport lure', () => {
   const senderId = '1234567890'
   const onAccept = jest.fn()
   const onClose = jest.fn()
@@ -387,7 +407,7 @@ test('renders a request teleport lure', () => {
   expect(onClose.mock.calls[1][0]).toBe(1)
 })
 
-test('renders a teleport lure', () => {
+it('renders a teleport lure', () => {
   const onAccept = jest.fn()
   const onDecline = jest.fn()
   const onClose = jest.fn()
@@ -452,7 +472,7 @@ test('renders a teleport lure', () => {
   expect(onClose.mock.calls[0][0]).toBe(1)
 })
 
-test('renders a inventory offer', () => {
+it('renders a inventory offer', () => {
   const transactionId = 'transactionId'
   const fromId = '5df644f5-8b12-4caf-8e91-d7cae057e5f2'
 
@@ -521,7 +541,7 @@ test('renders a inventory offer', () => {
   expect(onClose.mock.calls[1][0]).toBe(4)
 })
 
-test('should pass aXe', async () => {
+it('should pass aXe', async () => {
   const allNotifications = [
     {
       id: 0,
@@ -623,9 +643,11 @@ test('should pass aXe', async () => {
     }
   ]
 
-  const rendered = mount(<Notifications
-    notifications={allNotifications}
-  />)
+  const store = configureStore()
 
-  expect(await axe(rendered.html())).toHaveNoViolations()
+  const { container } = render(<Container store={store}>
+    <Notifications notifications={allNotifications} />
+  </Container>)
+
+  expect(await axe(container)).toHaveNoViolations()
 })

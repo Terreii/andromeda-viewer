@@ -16,8 +16,6 @@ import infoListStyles from '../infoList.module.css'
 
 interface NotificationArgs {
   notifications: Notification[]
-  acceptFriendship: (fromId: string, sessionId: string) => void
-  declineFriendship: (fromId: string, sessionId: string) => void
   acceptGroupInvite: (transactionId: string, groupId: string) => void
   declineGroupInvite: (transactionId: string, groupId: string) => void
   offerTeleport: (target: string) => void
@@ -41,8 +39,6 @@ interface NotificationArgs {
 
 export default function notificationsList ({
   notifications,
-  acceptFriendship,
-  declineFriendship,
   acceptGroupInvite,
   declineGroupInvite,
   offerTeleport,
@@ -70,8 +66,6 @@ export default function notificationsList ({
             return <FriendshipOffer
               key={notification.id}
               data={notification}
-              onAccept={acceptFriendship}
-              onDecline={declineFriendship}
               onClose={doClose}
             />
 

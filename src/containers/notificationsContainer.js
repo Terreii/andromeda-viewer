@@ -4,8 +4,6 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { close as closeNotification, selectNotifications } from '../bundles/notifications'
 import {
-  acceptFriendshipOffer,
-  declineFriendshipOffer,
   offerTeleportLure,
   acceptTeleportLure,
   declineTeleportLure
@@ -21,8 +19,6 @@ export default function NotificationsContainer () {
 
   const actions = useMemo(() => bindActionCreators({
     closeNotification,
-    acceptFriendshipOffer,
-    declineFriendshipOffer,
     acceptGroupInvitation,
     declineGroupInvitation,
     acceptInventoryOffer,
@@ -34,8 +30,6 @@ export default function NotificationsContainer () {
 
   return <NotificationsView
     notifications={notifications}
-    acceptFriendship={actions.acceptFriendshipOffer}
-    declineFriendship={actions.declineFriendshipOffer}
     acceptGroupInvite={actions.acceptGroupInvitation}
     declineGroupInvite={actions.declineGroupInvitation}
     acceptInventoryOffer={actions.acceptInventoryOffer}
