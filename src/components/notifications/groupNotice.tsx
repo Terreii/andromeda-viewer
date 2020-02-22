@@ -1,33 +1,24 @@
 import React from 'react'
+import { useDispatch } from 'react-redux'
 
-import { Container } from './utils'
+import { Container, ComponentArguments } from './utils'
 import Text from '../text'
+
+import { acceptInventoryOffer, declineInventoryOffer } from '../../actions/inventory'
 
 import { useName, useGroupName } from '../../hooks/names'
 
 import { GroupNoticeNotification } from '../../types/chat'
-import { AssetType, getItemTypeName } from '../../types/inventory'
+import { getItemTypeName } from '../../types/inventory'
 
 import formStyles from '../formElements.module.css'
 import styles from './notifications.module.css'
 
-interface NotificationArgs {
-  data: GroupNoticeNotification
-  onAccept: (
-    fromId: string,
-    transactionId: string,
-    assetType: AssetType,
-    isFromGroup: boolean
-  ) => void
-  onDecline: (
-    fromId: string,
-    transactionId: string,
-    isFromGroup: boolean
-  ) => void
-  onClose: () => void
-}
+export default function GroupNotice (
+  { data, onClose }: ComponentArguments<GroupNoticeNotification>
+) {
+  const dispatch = useDispatch()
 
-export default function GroupNotice ({ data, onAccept, onDecline, onClose }: NotificationArgs) {
   const name = useName(data.senderId) || ''
   const groupName = useGroupName(data.groupId)
 
@@ -49,7 +40,9 @@ export default function GroupNotice ({ data, onAccept, onDecline, onClose }: Not
       {data.item && <button
         className={formStyles.OkButton}
         onClick={() => {
-          onAccept(data.senderId, data.item!.transactionId, data.item!.type, true)
+          dispatch(
+            acceptInventoryOffer(data.senderId, data.item!.transactionId, data.item!.type, true)
+          )
           onClose()
         }}
       >
@@ -59,7 +52,7 @@ export default function GroupNotice ({ data, onAccept, onDecline, onClose }: Not
       {data.item && <button
         className={formStyles.DangerButton}
         onClick={() => {
-          onDecline(data.senderId, data.item!.transactionId, true)
+          dispatch(declineInventoryOffer(data.senderId, data.item!.transactionId, true))
           onClose()
         }}
       >

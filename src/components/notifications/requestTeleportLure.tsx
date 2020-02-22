@@ -1,7 +1,10 @@
 import React from 'react'
+import { useDispatch } from 'react-redux'
 
-import { Container } from './utils'
+import { Container, ComponentArguments } from './utils'
 import Text from '../text'
+
+import { offerTeleportLure } from '../../actions/friendsActions'
 
 import { useName } from '../../hooks/names'
 
@@ -10,13 +13,11 @@ import { RequestTeleportLureNotification } from '../../types/chat'
 import formStyles from '../formElements.module.css'
 import styles from './notifications.module.css'
 
-interface NotificationArgs {
-  data: RequestTeleportLureNotification
-  onAccept: (target: string) => void
-  onClose: () => void
-}
+export default function RequestTeleportLure (
+  { data, onClose }: ComponentArguments<RequestTeleportLureNotification>
+) {
+  const dispatch = useDispatch()
 
-export default function RequestTeleportLure ({ data, onAccept, onClose }: NotificationArgs) {
   const name = useName(data.fromId)
 
   return <Container title={`${name} is requesting to be teleported to your location.`}>
@@ -28,7 +29,7 @@ export default function RequestTeleportLure ({ data, onAccept, onClose }: Notifi
       <button
         className={formStyles.OkButton}
         onClick={() => {
-          onAccept(data.fromId)
+          dispatch(offerTeleportLure(data.fromId))
           onClose()
         }}
       >

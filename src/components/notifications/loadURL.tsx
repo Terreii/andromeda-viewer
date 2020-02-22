@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Container } from './utils'
+import { Container, ComponentArguments } from './utils'
 import Text from '../text'
 
 import { useName } from '../../hooks/names'
@@ -10,12 +10,7 @@ import { LoadURLNotification } from '../../types/chat'
 import formStyles from '../formElements.module.css'
 import styles from './notifications.module.css'
 
-interface NotificationArgs {
-  data: LoadURLNotification
-  onClose: () => void
-}
-
-export default function LoadURL ({ data, onClose }: NotificationArgs) {
+export default function LoadURL ({ data, onClose }: ComponentArguments<LoadURLNotification>) {
   const href = data.url.toString().replace(/^javascript:/i, '')
 
   const name = useName(data.fromId)

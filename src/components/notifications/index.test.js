@@ -2,12 +2,19 @@ import { axe } from 'jest-axe'
 import React from 'react'
 import { render, fireEvent } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { mount } from 'enzyme'
 import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
 
 import AvatarName from '../../avatarName'
-import { acceptFriendshipOffer, declineFriendshipOffer } from '../../actions/friendsActions'
+import {
+  acceptFriendshipOffer,
+  declineFriendshipOffer,
+  offerTeleportLure,
+  acceptTeleportLure,
+  declineTeleportLure
+} from '../../actions/friendsActions'
+import { acceptGroupInvitation, declineGroupInvitation } from '../../actions/groupsActions'
+import { acceptInventoryOffer, declineInventoryOffer } from '../../actions/inventory'
 import { useName, useGroupName } from '../../hooks/names'
 
 import { NotificationTypes } from '../../types/chat'
@@ -21,6 +28,8 @@ global.Array.prototype.flatMap = jest.fn(function (fn) {
 })
 
 jest.mock('../../actions/friendsActions')
+jest.mock('../../actions/groupsActions')
+jest.mock('../../actions/inventory')
 jest.mock('../../hooks/names')
 const mockedName = 'Tester Mactestface'
 beforeEach(() => {
@@ -48,7 +57,7 @@ it('renders without crashing', () => {
     }
   ]
 
-  mount(<Notifications
+  render(<Notifications
     notifications={allNotifications}
   />)
 })
@@ -63,19 +72,28 @@ it('renders a basic MessageBox', () => {
     }
   ]
 
+  const store = configureStore()
+
   const onClose = jest.fn()
 
-  const rendered = mount(<Notifications
-    notifications={allNotifications}
-    onClose={onClose}
-  />)
+  const { queryByText } = render(<Container store={store}>
+    <Notifications
+      notifications={allNotifications}
+      onClose={onClose}
+    />
+  </Container>)
 
-  expect(rendered).toContainReact(<h4>Tester</h4>)
-  expect(rendered.find('p').text()).toBe('Test')
+  expect(queryByText('Tester')).toBeTruthy()
+  expect(queryByText('Tester').nodeName).toBe('H4')
 
-  const buttons = rendered.find('button')
-  expect(buttons.length).toBe(1)
-  buttons.at(0).simulate('click')
+  expect(queryByText('Test')).toBeTruthy()
+  expect(queryByText('Test').nodeName).toBe('P')
+
+  const button = queryByText('OK')
+  expect(button).toBeTruthy()
+  expect(button.nodeName).toBe('BUTTON')
+
+  fireEvent.click(button)
 
   expect(onClose.mock.calls.length).toBe(1)
   expect(onClose.mock.calls[0][0]).toBe(4)
@@ -90,19 +108,30 @@ it('renders a system MessageBox', () => {
     }
   ]
 
+  const store = configureStore()
+
   const onClose = jest.fn()
 
-  const rendered = mount(<Notifications
-    notifications={allNotifications}
-    onClose={onClose}
-  />)
+  const { queryByText } = render(<Container store={store}>
+    <Notifications
+      notifications={allNotifications}
+      onClose={onClose}
+    />
+  </Container>)
 
-  expect(rendered).toContainReact(<h4>System Notification</h4>)
-  expect(rendered.find('p').text()).toBe('Test')
+  const header = queryByText('System Notification')
+  expect(header).toBeTruthy()
+  expect(header.nodeName).toBe('H4')
 
-  const buttons = rendered.find('button')
-  expect(buttons.length).toBe(1)
-  buttons.at(0).simulate('click')
+  const body = queryByText('Test')
+  expect(body).toBeTruthy()
+  expect(body.nodeName).toBe('P')
+
+  const button = queryByText('OK')
+  expect(button).toBeTruthy()
+  expect(button.nodeName).toBe('BUTTON')
+
+  fireEvent.click(button)
 
   expect(onClose.mock.calls.length).toBe(1)
   expect(onClose.mock.calls[0][0]).toBe(4)
@@ -169,6 +198,11 @@ it('renders a friendship request', () => {
 })
 
 it('renders a group invitation', () => {
+  acceptGroupInvitation.mockImplementation(() => () => {})
+  declineGroupInvitation.mockImplementation(() => () => {})
+
+  const store = configureStore()
+
   const transactionId = 'transactionId'
   const groupId = 'group id'
 
@@ -186,57 +220,63 @@ it('renders a group invitation', () => {
     }
   ]
 
-  const onAccept = jest.fn()
-  const onDecline = jest.fn()
   const onClose = jest.fn()
 
-  const rendered = mount(<Notifications
-    notifications={allNotifications}
-    acceptGroupInvite={onAccept}
-    declineGroupInvite={onDecline}
-    onClose={onClose}
-  />)
+  const { queryByText } = render(<Container store={store}>
+    <Notifications
+      notifications={allNotifications}
+      onClose={onClose}
+    />
+  </Container>)
 
-  expect(rendered.find('p').text()).toBe('Join my group!')
+  expect(queryByText('Join my group!')).toBeTruthy()
+  expect(queryByText('Join my group!').nodeName).toBe('P')
 
-  const buttons = rendered.find('button')
-  expect(buttons.length).toBe(2)
+  const feeElement = queryByText('Fee:')
+  expect(feeElement).toBeTruthy()
+  expect(feeElement.textContent).toBe('Fee: 0L$')
 
   // Accept
-  buttons.at(0).simulate('click')
+  const acceptButton = queryByText('Accept')
+  expect(acceptButton).toBeTruthy()
+  expect(acceptButton.nodeName).toBe('BUTTON')
 
-  expect(onAccept.mock.calls.length).toBe(1)
-  expect(onDecline.mock.calls.length).toBe(0)
-  expect(onAccept.mock.calls[0]).toEqual([
-    transactionId,
-    groupId
+  fireEvent.click(acceptButton)
+  expect(acceptGroupInvitation.mock.calls).toEqual([
+    [transactionId, groupId]
   ])
+  expect(declineGroupInvitation.mock.calls.length).toBe(0)
 
   expect(onClose.mock.calls.length).toBe(1)
-  expect(onClose.mock.calls[0][0]).toBe(4)
 
   // Decline
-  buttons.at(1).simulate('click')
+  const declineButton = queryByText('Decline')
+  expect(declineButton).toBeTruthy()
+  expect(declineButton.nodeName).toBe('BUTTON')
 
-  expect(onAccept.mock.calls.length).toBe(1)
-  expect(onDecline.mock.calls.length).toBe(1)
-  expect(onDecline.mock.calls[0]).toEqual([
-    transactionId,
-    groupId
+  fireEvent.click(declineButton)
+  expect(acceptGroupInvitation.mock.calls).toEqual([
+    [transactionId, groupId]
+  ])
+  expect(declineGroupInvitation.mock.calls).toEqual([
+    [transactionId, groupId]
   ])
 
   expect(onClose.mock.calls.length).toBe(2)
-  expect(onClose.mock.calls[1][0]).toBe(4)
 })
 
-it('renders a group notice', () => {
+it('renders a group notice with items', () => {
+  acceptInventoryOffer.mockImplementation(() => () => {})
+  declineInventoryOffer.mockImplementation(() => () => {})
   useGroupName.mockReturnValueOnce('Tester Group')
+
+  const store = configureStore()
 
   const transactionId = 'transactionId'
   const groupId = 'group id'
   const senderId = 'dcba'
 
-  const dataWithItem = [
+  const data = [
     {
       id: 4,
       notificationType: NotificationTypes.GroupNotice,
@@ -254,7 +294,77 @@ it('renders a group notice', () => {
     }
   ]
 
-  const dataWithoutItem = [
+  const onClose = jest.fn()
+
+  // With item
+  const { queryByText } = render(<Container store={store}>
+    <Notifications
+      notifications={data}
+      onClose={onClose}
+    />
+  </Container>)
+
+  expect(queryByText('Group Notice from Tester Group - New stuff')).toBeTruthy()
+  expect(queryByText('Group Notice from Tester Group - New stuff').nodeName).toBe('H4')
+
+  expect(queryByText('Changes in this group:- a- b')).toBeTruthy()
+  expect(queryByText('Changes in this group:- a- b').nodeName).toBe('P')
+
+  // Accept
+  const acceptButton = queryByText('Save item')
+  expect(acceptButton).toBeTruthy()
+  expect(acceptButton.nodeName).toBe('BUTTON')
+
+  fireEvent.click(acceptButton)
+  expect(acceptInventoryOffer.mock.calls).toEqual([
+    [
+      senderId,
+      transactionId,
+      AssetType.ImageJPEG,
+      true
+    ]
+  ])
+  expect(declineInventoryOffer.mock.calls.length).toBe(0)
+
+  expect(onClose.mock.calls.length).toBe(1)
+
+  // Decline
+  const declineButton = queryByText('Decline item')
+  expect(declineButton).toBeTruthy()
+  expect(declineButton.nodeName).toBe('BUTTON')
+
+  fireEvent.click(declineButton)
+  expect(acceptInventoryOffer.mock.calls).toEqual([
+    [
+      senderId,
+      transactionId,
+      AssetType.ImageJPEG,
+      true
+    ]
+  ])
+  expect(declineInventoryOffer.mock.calls).toEqual([
+    [
+      senderId,
+      transactionId,
+      true
+    ]
+  ])
+
+  expect(onClose.mock.calls.length).toBe(2)
+  expect(onClose.mock.calls[1][0]).toBe(4)
+})
+
+it('renders a group notice without item', () => {
+  acceptInventoryOffer.mockImplementation(() => () => {})
+  declineInventoryOffer.mockImplementation(() => () => {})
+  useGroupName.mockReturnValueOnce('Tester Group')
+
+  const store = configureStore()
+
+  const groupId = 'group id'
+  const senderId = 'dcba'
+
+  const data = [
     {
       id: 4,
       notificationType: NotificationTypes.GroupNotice,
@@ -268,130 +378,118 @@ it('renders a group notice', () => {
     }
   ]
 
-  const onAccept = jest.fn()
-  const onDecline = jest.fn()
   const onClose = jest.fn()
 
-  const withItemRendered = mount(<Notifications
-    notifications={dataWithItem}
-    acceptInventoryOffer={onAccept}
-    declineInventoryOffer={onDecline}
-    onClose={onClose}
-  />)
+  // With item
+  const { queryByText } = render(<Container store={store}>
+    <Notifications
+      notifications={data}
+      onClose={onClose}
+    />
+  </Container>)
 
-  expect(withItemRendered.find('h4').text()).toBe('Group Notice from Tester Group - New stuff')
-  expect(withItemRendered.find('p').text()).toBe('Changes in this group:- a- b')
+  expect(queryByText('Group Notice from Tester Group - New stuff')).toBeTruthy()
+  expect(queryByText('Group Notice from Tester Group - New stuff').nodeName).toBe('H4')
 
-  const buttons = withItemRendered.find('button')
-  expect(buttons.length).toBe(2)
+  expect(queryByText('Changes in this group:- a- b')).toBeTruthy()
+  expect(queryByText('Changes in this group:- a- b').nodeName).toBe('P')
 
-  // Accept
-  buttons.at(0).simulate('click')
+  // Accept and decline buttons
+  expect(queryByText('Save item')).toBeNull()
+  expect(queryByText('Decline item')).toBeNull()
 
-  expect(onAccept.mock.calls.length).toBe(1)
-  expect(onDecline.mock.calls.length).toBe(0)
-  expect(onAccept.mock.calls[0]).toEqual([
-    senderId,
-    transactionId,
-    AssetType.ImageJPEG,
-    true
-  ])
+  // Button
+  const okButton = queryByText('OK')
+  expect(okButton).toBeTruthy()
+  expect(okButton.nodeName).toBe('BUTTON')
+
+  const acceptCount = acceptInventoryOffer.mock.calls.length
+  const declineCount = declineInventoryOffer.mock.calls.length
+
+  fireEvent.click(okButton)
+
+  expect(acceptInventoryOffer.mock.calls.length).toBe(acceptCount)
+  expect(declineInventoryOffer.mock.calls.length).toBe(declineCount)
 
   expect(onClose.mock.calls.length).toBe(1)
   expect(onClose.mock.calls[0][0]).toBe(4)
-
-  // Decline
-  buttons.at(1).simulate('click')
-
-  expect(onAccept.mock.calls.length).toBe(1)
-  expect(onDecline.mock.calls.length).toBe(1)
-  expect(onDecline.mock.calls[0]).toEqual([
-    senderId,
-    transactionId,
-    true
-  ])
-
-  expect(onClose.mock.calls.length).toBe(2)
-  expect(onClose.mock.calls[1][0]).toBe(4)
-
-  const withoutItemRendered = mount(<Notifications
-    notifications={dataWithoutItem}
-    acceptGroupNoticeItem={onAccept}
-    declineGroupNoticeItem={onDecline}
-    onClose={onClose}
-  />)
-
-  const okButtons = withoutItemRendered.find('button')
-  expect(okButtons.length).toBe(1)
-
-  okButtons.at(0).simulate('click')
-
-  expect(onAccept.mock.calls.length).toBe(1)
-  expect(onDecline.mock.calls.length).toBe(1)
-  expect(onClose.mock.calls.length).toBe(3)
-  expect(onClose.mock.calls[2][0]).toBe(4)
 })
 
 it('renders an open URL', () => {
   const href = 'https://secondlife.com/support/downloads/'
   const onClose = jest.fn()
 
-  const rendered = mount(<Notifications
-    notifications={[
-      {
-        id: 1,
-        notificationType: NotificationTypes.LoadURL,
-        text: 'Please go to this URL',
-        url: href,
-        fromId: 'Abcd',
-        fromName: 'Tester'
-      }
-    ]}
-    onClose={onClose}
-  />)
+  const store = configureStore()
 
-  expect(rendered).toContainReact(<a href={href} target='_blank' rel='noopener noreferrer'>
-    {href}
-  </a>)
+  const { container, queryByText } = render(<Container store={store}>
+    <Notifications
+      notifications={[
+        {
+          id: 1,
+          notificationType: NotificationTypes.LoadURL,
+          text: 'Please go to this URL',
+          url: href,
+          fromId: 'Abcd',
+          fromName: 'Tester'
+        }
+      ]}
+      onClose={onClose}
+    />
+  </Container>)
 
-  const button = rendered.find('button')
-  expect(button.length).toBe(1)
+  const a = container.querySelector(`a[href="${href}"]`)
+  expect(a).toBeTruthy()
+  expect(a.target).toBe('_blank')
+  expect(a.rel).toBe('noopener noreferrer')
+  expect(a.textContent).toBe(href)
 
-  button.at(0).simulate('click')
+  const button = queryByText('OK')
+  expect(button).toBeTruthy()
+  expect(button.nodeName).toBe('BUTTON')
+
+  fireEvent.click(button)
 
   expect(onClose.mock.calls.length).toBe(1)
   expect(onClose.mock.calls[0][0]).toBe(1)
 })
 
 it('renders a request teleport lure', () => {
+  offerTeleportLure.mockImplementation(() => () => {})
+
+  const store = configureStore()
+
   const senderId = '1234567890'
   const onAccept = jest.fn()
   const onClose = jest.fn()
 
-  const rendered = mount(<Notifications
-    notifications={[
-      {
-        id: 1,
-        notificationType: NotificationTypes.RequestTeleportLure,
-        text: 'Please teleport me to you.',
-        fromId: senderId,
-        fromName: mockedName
-      }
-    ]}
-    offerTeleport={onAccept}
-    onClose={onClose}
-  />)
+  const { queryByText } = render(<Container store={store}>
+    <Notifications
+      notifications={[
+        {
+          id: 1,
+          notificationType: NotificationTypes.RequestTeleportLure,
+          text: 'Please teleport me to you.',
+          fromId: senderId,
+          fromName: mockedName
+        }
+      ]}
+      offerTeleport={onAccept}
+      onClose={onClose}
+    />
+  </Container>)
 
-  expect(rendered).toIncludeText(mockedName + ' is requesting to be teleported to your location.')
-
-  const buttons = rendered.find('button')
-  expect(buttons.length).toBe(2)
+  expect(queryByText(mockedName + ' is requesting to be teleported to your location.'))
+    .toBeTruthy()
 
   // Accept
-  buttons.at(0).simulate('click')
+  const acceptButton = queryByText('Accept')
+  expect(acceptButton).toBeTruthy()
+  expect(acceptButton.nodeName).toBe('BUTTON')
 
-  expect(onAccept.mock.calls.length).toBe(1)
-  expect(onAccept.mock.calls[0]).toEqual([
+  fireEvent.click(acceptButton)
+
+  expect(offerTeleportLure.mock.calls.length).toBe(1)
+  expect(offerTeleportLure.mock.calls[0]).toEqual([
     senderId
   ])
 
@@ -399,71 +497,80 @@ it('renders a request teleport lure', () => {
   expect(onClose.mock.calls[0][0]).toBe(1)
 
   // Decline
-  buttons.at(1).simulate('click')
+  const declineButton = queryByText('Decline')
+  expect(declineButton).toBeTruthy()
+  expect(declineButton.nodeName).toBe('BUTTON')
 
-  expect(onAccept.mock.calls.length).toBe(1)
+  fireEvent.click(declineButton)
+
+  expect(offerTeleportLure.mock.calls.length).toBe(1)
 
   expect(onClose.mock.calls.length).toBe(2)
   expect(onClose.mock.calls[1][0]).toBe(1)
 })
 
 it('renders a teleport lure', () => {
-  const onAccept = jest.fn()
-  const onDecline = jest.fn()
+  acceptTeleportLure.mockImplementation(() => () => {})
+  declineTeleportLure.mockImplementation(() => () => {})
+
+  const store = configureStore()
+
   const onClose = jest.fn()
 
   const senderId = 'abcdef'
   const lureId = 'fedcba'
 
-  const rendered = mount(<Notifications
-    notifications={[
-      {
-        id: 1,
-        notificationType: NotificationTypes.TeleportLure,
-        text: 'Join me at my location!',
-        fromId: senderId,
-        fromName: mockedName,
-        lureId,
-        regionId: [123, 123],
-        position: [28, 29, 30],
-        lockAt: [0, 1, 2],
-        maturity: Maturity.General,
-        godLike: false
-      }
-    ]}
-    acceptTeleportLure={onAccept}
-    declineTeleportLure={onDecline}
-    onClose={onClose}
-  />)
+  const { queryByText } = render(<Container store={store}>
+    <Notifications
+      notifications={[
+        {
+          id: 1,
+          notificationType: NotificationTypes.TeleportLure,
+          text: 'Join me at my location!',
+          fromId: senderId,
+          fromName: mockedName,
+          lureId,
+          regionId: [123, 123],
+          position: [28, 29, 30],
+          lockAt: [0, 1, 2],
+          maturity: Maturity.General,
+          godLike: false
+        }
+      ]}
+      onClose={onClose}
+    />
+  </Container>)
 
-  expect(rendered).toIncludeText(`${mockedName} has offered to teleport you to their location.`)
-
-  const buttons = rendered.find('button')
-  expect(buttons.length).toBe(2)
+  expect(queryByText(`${mockedName} has offered to teleport you to their location.`))
+    .toBeTruthy()
 
   // Accept
-  buttons.at(0).simulate('click')
-  expect(buttons.at(0)).toIncludeText('Accept (not jet implemented)')
-  expect(buttons.at(0).prop('disabled')).toBeTruthy()
+  const acceptButton = queryByText('Accept (not yet implemented)')
+  expect(acceptButton).toBeTruthy()
+  expect(acceptButton.nodeName).toBe('BUTTON')
+  expect(acceptButton.disabled).toBeTruthy()
 
-  expect(onAccept.mock.calls.length).toBe(0)
-  // expect(onAccept.mock.calls[0]).toEqual([
+  expect(acceptTeleportLure.mock.calls.length).toBe(0)
+  // expect(acceptTeleportLure.mock.calls[0]).toEqual([
   //   senderId,
   //   lureId
   // ])
 
-  expect(onDecline.mock.calls.length).toBe(0)
+  expect(declineTeleportLure.mock.calls.length).toBe(0)
 
   expect(onClose.mock.calls.length).toBe(0)
 
   // Decline
-  buttons.at(1).simulate('click')
-  expect(buttons.at(1)).toIncludeText('Decline')
+  const declineButton = queryByText('Decline')
+  expect(declineButton).toBeTruthy()
+  expect(declineButton.nodeName).toBe('BUTTON')
 
-  expect(onAccept.mock.calls.length).toBe(0)
+  fireEvent.click(declineButton)
 
-  expect(onDecline.mock.calls.length).toBe(1)
-  expect(onDecline.mock.calls[0]).toEqual([
+  expect(acceptTeleportLure.mock.calls.length).toBe(0)
+
+  expect(declineTeleportLure.mock.calls.length).toBe(1)
+  expect(declineTeleportLure.mock.calls[0]).toEqual([
     senderId,
     lureId
   ])
@@ -473,6 +580,11 @@ it('renders a teleport lure', () => {
 })
 
 it('renders a inventory offer', () => {
+  acceptInventoryOffer.mockImplementation(() => () => {})
+  declineInventoryOffer.mockImplementation(() => () => {})
+
+  const store = configureStore()
+
   const transactionId = 'transactionId'
   const fromId = '5df644f5-8b12-4caf-8e91-d7cae057e5f2'
 
@@ -493,28 +605,29 @@ it('renders a inventory offer', () => {
     }
   ]
 
-  const onAccept = jest.fn()
-  const onDecline = jest.fn()
+  const acceptCount = acceptInventoryOffer.mock.calls.length
+  const declineCount = declineInventoryOffer.mock.calls.length
   const onClose = jest.fn()
 
-  const rendered = mount(<Notifications
-    notifications={allNotifications}
-    acceptInventoryOffer={onAccept}
-    declineInventoryOffer={onDecline}
-    onClose={onClose}
-  />)
+  const { queryByText } = render(<Container store={store}>
+    <Notifications
+      notifications={allNotifications}
+      onClose={onClose}
+    />
+  </Container>)
 
-  expect(rendered.find('p').text()).toBe('Here is my offer!')
-
-  const buttons = rendered.find('button')
-  expect(buttons.length).toBe(2)
+  expect(queryByText('Here is my offer!')).toBeTruthy()
 
   // Accept
-  buttons.at(0).simulate('click')
+  const acceptButton = queryByText('Accept')
+  expect(acceptButton).toBeTruthy()
+  expect(acceptButton.nodeName).toBe('BUTTON')
 
-  expect(onAccept.mock.calls.length).toBe(1)
-  expect(onDecline.mock.calls.length).toBe(0)
-  expect(onAccept.mock.calls[0]).toEqual([
+  fireEvent.click(acceptButton)
+
+  expect(acceptInventoryOffer.mock.calls.length).toBe(acceptCount + 1)
+  expect(declineInventoryOffer.mock.calls.length).toBe(declineCount + 0)
+  expect(acceptInventoryOffer.mock.calls[acceptCount]).toEqual([
     fromId,
     transactionId,
     AssetType.ImageJPEG,
@@ -526,11 +639,15 @@ it('renders a inventory offer', () => {
   expect(onClose.mock.calls[0][0]).toBe(4)
 
   // Decline
-  buttons.at(1).simulate('click')
+  const declineButton = queryByText('Decline')
+  expect(declineButton).toBeTruthy()
+  expect(declineButton.nodeName).toBe('BUTTON')
 
-  expect(onAccept.mock.calls.length).toBe(1)
-  expect(onDecline.mock.calls.length).toBe(1)
-  expect(onDecline.mock.calls[0]).toEqual([
+  fireEvent.click(declineButton)
+
+  expect(acceptInventoryOffer.mock.calls.length).toBe(acceptCount + 1)
+  expect(declineInventoryOffer.mock.calls.length).toBe(declineCount + 1)
+  expect(declineInventoryOffer.mock.calls[declineCount]).toEqual([
     fromId,
     transactionId,
     false,

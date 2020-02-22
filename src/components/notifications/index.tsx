@@ -10,44 +10,15 @@ import TeleportLure from './teleportLure'
 import InventoryOffer from './inventoryOffer'
 
 import { NotificationTypes, Notification } from '../../types/chat'
-import { AssetType } from '../../types/inventory'
 
 import infoListStyles from '../infoList.module.css'
 
 interface NotificationArgs {
   notifications: Notification[]
-  acceptGroupInvite: (transactionId: string, groupId: string) => void
-  declineGroupInvite: (transactionId: string, groupId: string) => void
-  offerTeleport: (target: string) => void
-  acceptTeleportLure: (fromId: string, sessionId: string) => void
-  declineTeleportLure: (fromId: string, sessionId: string) => void
-  acceptInventoryOffer: (
-    fromId: string,
-    transactionId: string,
-    assetType: AssetType,
-    isFromGroup?: boolean,
-    isFromObject?: boolean
-  ) => void,
-  declineInventoryOffer: (
-    fromId: string,
-    transactionId: string,
-    isFromGroup?: boolean,
-    isFromObject?: boolean
-  ) => void
   onClose: (id: number) => void
 }
 
-export default function notificationsList ({
-  notifications,
-  acceptGroupInvite,
-  declineGroupInvite,
-  offerTeleport,
-  acceptTeleportLure,
-  declineTeleportLure,
-  acceptInventoryOffer,
-  declineInventoryOffer,
-  onClose
-}: NotificationArgs) {
+export default function notificationsList ({ notifications, onClose }: NotificationArgs) {
   return <main className={infoListStyles.Container} aria-label='Notifications'>
     <div className={infoListStyles.NotificationList}>
       {notifications.map(notification => {
@@ -73,8 +44,6 @@ export default function notificationsList ({
             return <GroupInvitation
               key={notification.id}
               data={notification}
-              onAccept={acceptGroupInvite}
-              onDecline={declineGroupInvite}
               onClose={doClose}
             />
 
@@ -82,8 +51,6 @@ export default function notificationsList ({
             return <GroupNotice
               key={notification.id}
               data={notification}
-              onAccept={acceptInventoryOffer}
-              onDecline={declineInventoryOffer}
               onClose={doClose}
             />
 
@@ -98,7 +65,6 @@ export default function notificationsList ({
             return <RequestTeleportLure
               key={notification.id}
               data={notification}
-              onAccept={offerTeleport}
               onClose={doClose}
             />
 
@@ -106,8 +72,6 @@ export default function notificationsList ({
             return <TeleportLure
               key={notification.id}
               data={notification}
-              onAccept={acceptTeleportLure}
-              onDecline={declineTeleportLure}
               onClose={doClose}
             />
 
@@ -115,8 +79,6 @@ export default function notificationsList ({
             return <InventoryOffer
               key={notification.id}
               data={notification}
-              onAccept={acceptInventoryOffer}
-              onDecline={declineInventoryOffer}
               onClose={doClose}
             />
 
