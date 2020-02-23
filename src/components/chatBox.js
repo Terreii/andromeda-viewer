@@ -8,13 +8,11 @@ import { useTabState, Tab, TabList, TabPanel } from 'reakit/Tab'
 import ChatDialog from './chatDialog'
 import FriendsList from './friendsList'
 import GroupsList from './groupsList'
-import NotificationsContainer from '../containers/notificationsContainer'
+import Notifications from './notifications'
 
 import { IMChatType, IMDialog } from '../types/chat'
 
 import style from './chatBox.module.css'
-
-const Notifications = React.memo(NotificationsContainer)
 
 export default function ChatBox (props) {
   const names = props.names

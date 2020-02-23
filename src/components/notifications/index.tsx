@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { memo } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 
 import TextNotification from './textNotification'
 import FriendshipOffer from './friendshipOffer'
@@ -9,20 +10,20 @@ import RequestTeleportLure from './requestTeleportLure'
 import TeleportLure from './teleportLure'
 import InventoryOffer from './inventoryOffer'
 
-import { NotificationTypes, Notification } from '../../types/chat'
+import { close, selectNotifications } from '../../bundles/notifications'
+
+import { NotificationTypes } from '../../types/chat'
 
 import infoListStyles from '../infoList.module.css'
 
-interface NotificationArgs {
-  notifications: Notification[]
-  onClose: (id: number) => void
-}
+export default memo(function NotificationsList () {
+  const notifications = useSelector(selectNotifications)
+  const dispatch = useDispatch()
 
-export default function notificationsList ({ notifications, onClose }: NotificationArgs) {
   return <main className={infoListStyles.Container} aria-label='Notifications'>
     <div className={infoListStyles.NotificationList}>
       {notifications.map(notification => {
-        const doClose = () => onClose(notification.id!)
+        const doClose = () => dispatch(close(notification.id!))
 
         switch (notification.notificationType) {
           case NotificationTypes.TextOnly:
@@ -101,4 +102,4 @@ export default function notificationsList ({ notifications, onClose }: Notificat
       })}
     </div>
   </main>
-}
+})
