@@ -1,6 +1,9 @@
 import React from 'react'
+import { useSelector } from 'react-redux'
 
 import { IMChatType } from '../types/chat'
+
+import { selectGroups } from '../bundles/groups'
 
 import styles from './infoList.module.css'
 import chatBubble from '../icons/chat_bubble.svg'
@@ -20,7 +23,9 @@ function GroupRow ({ group, startNewIMChat }) {
   </li>
 }
 
-export default function GroupsList ({ groups, startNewIMChat }) {
+export default function GroupsList ({ startNewIMChat }) {
+  const groups = useSelector(selectGroups)
+
   return <main className={styles.Container} aria-label='Groups'>
     <ul className={styles.List}>
       {groups.map(group => <GroupRow

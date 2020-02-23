@@ -1,6 +1,9 @@
 import React from 'react'
+import { useSelector } from 'react-redux'
 
 import { IMChatType } from '../types/chat'
+
+import { selectFriends } from '../bundles/friends'
 
 import styles from './infoList.module.css'
 import chatBubble from '../icons/chat_bubble.svg'
@@ -65,7 +68,9 @@ function FriendRow ({ friend, name, skipLink, onRightsChanged, startNewIMChat })
   </li>
 }
 
-export default function FriendsList ({ friends, names, updateRights, startNewIMChat }) {
+export default function FriendsList ({ names, updateRights, startNewIMChat }) {
+  const friends = useSelector(selectFriends)
+
   return <main className={styles.Container} aria-label='Friends'>
     <ul className={styles.List}>
       {friends.map((friend, index, all) => {

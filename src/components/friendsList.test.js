@@ -1,165 +1,198 @@
 import { axe } from 'jest-axe'
 import React from 'react'
-import { mount } from 'enzyme'
+import { Provider } from 'react-redux'
+import { render, fireEvent } from 'reakit-test-utils'
+import configureMockStore from 'redux-mock-store'
+import thunk from 'redux-thunk'
 
 import FriendsList from './friendsList'
 import AvatarName from '../avatarName'
 
 import { IMChatType } from '../types/chat'
 
-test('renders without crashing', () => {
-  const friends = [
-    {
-      id: 'first',
-      rightsGiven: {},
-      rightsHas: {}
-    }
-  ]
+function configureStore (state = {}) {
+  const store = configureMockStore([thunk])
+  return store(state)
+}
 
+it('renders without crashing', () => {
   const names = {
     first: new AvatarName('Testery MacTestface')
   }
 
-  mount(<FriendsList
-    friends={friends}
-    names={names}
-  />)
+  const store = configureStore({
+    friends: [
+      {
+        id: 'first',
+        rightsGiven: {},
+        rightsHas: {}
+      }
+    ]
+  })
+
+  const { container } = render(<Provider store={store}>
+    <FriendsList names={names} />
+  </Provider>)
+
+  expect(container).toBeTruthy()
 })
 
-test('rendering', () => {
-  const friends = [
-    {
-      id: 'first',
-      rightsGiven: {
-        canSeeOnline: true,
-        canSeeOnMap: false,
-        canModifyObjects: true
-      },
-      rightsHas: {
-        canSeeOnline: true,
-        canSeeOnMap: false,
-        canModifyObjects: true
-      }
-    },
-    {
-      id: 'other',
-      rightsGiven: {
-        canSeeOnline: false,
-        canSeeOnMap: true,
-        canModifyObjects: false
-      },
-      rightsHas: {
-        canSeeOnline: false,
-        canSeeOnMap: true,
-        canModifyObjects: false
-      }
-    }
-  ]
-
+it('rendering', () => {
   const names = {
     first: new AvatarName('Testery MacTestface'),
     other: new AvatarName('Buddy Budds')
   }
 
-  const list = mount(<FriendsList
-    friends={friends}
-    names={names}
-  />)
-
-  const liElements = list.find('li')
-  expect(liElements.length).toBe(2)
-  liElements.forEach((row, index) => {
-    const isFirst = index === 0
-
-    expect(row.find('img[src="chat_bubble.svg"]').prop('alt'))
-      .toBe('Start new chat with ' + (isFirst ? 'Testery Mactestface' : 'Buddy Budds'))
-
-    expect(row.find('input[type="checkbox"]').length).toBe(5)
+  const store = configureStore({
+    friends: [
+      {
+        id: 'first',
+        rightsGiven: {
+          canSeeOnline: true,
+          canSeeOnMap: false,
+          canModifyObjects: true
+        },
+        rightsHas: {
+          canSeeOnline: true,
+          canSeeOnMap: false,
+          canModifyObjects: true
+        }
+      },
+      {
+        id: 'other',
+        rightsGiven: {
+          canSeeOnline: false,
+          canSeeOnMap: true,
+          canModifyObjects: false
+        },
+        rightsHas: {
+          canSeeOnline: false,
+          canSeeOnMap: true,
+          canModifyObjects: false
+        }
+      }
+    ]
   })
+
+  const { queryByText, queryAllByAltText } = render(<Provider store={store}>
+    <FriendsList names={names} />
+  </Provider>)
+
+  const first = queryByText('Testery Mactestface')
+  expect(first).toBeTruthy()
+  expect(first.parentElement.nodeName).toBe('LI')
+
+  expect(queryAllByAltText('Start new chat with Testery Mactestface')).toBeTruthy()
+
+  const second = queryByText('Buddy Budds')
+  expect(second).toBeTruthy()
+  expect(second.parentElement.nodeName).toBe('LI')
+
+  expect(queryAllByAltText('Start new chat with Buddy Budds')).toBeTruthy()
 })
 
-test('event handling/changing rights', () => {
-  const friends = [
-    {
-      id: 'first',
-      rightsGiven: {
-        canSeeOnline: false,
-        canSeeOnMap: false,
-        canModifyObjects: false
-      },
-      rightsHas: {
-        canSeeOnline: false,
-        canSeeOnMap: false,
-        canModifyObjects: false
+it('event handling/changing rights', () => {
+  const store = configureStore({
+    friends: [
+      {
+        id: 'first',
+        rightsGiven: {
+          canSeeOnline: false,
+          canSeeOnMap: false,
+          canModifyObjects: false
+        },
+        rightsHas: {
+          canSeeOnline: false,
+          canSeeOnMap: false,
+          canModifyObjects: false
+        }
       }
-    }
-  ]
+    ]
+  })
 
   const names = {
     first: new AvatarName('Testery MacTestface')
   }
 
-  const changeCounts = {
-    canSeeOnline: 0,
-    canSeeOnMap: 0,
-    canModifyObjects: 0
-  }
+  const changeRight = jest.fn()
 
-  const list = mount(<FriendsList
-    friends={friends}
-    names={names}
-    updateRights={(friendId, data) => {
-      expect(friendId).toBe('first')
-      Object.keys(data).forEach(key => {
-        changeCounts[key] += 1
-      })
-    }}
-  />)
+  const { queryByTitle } = render(<Provider store={store}>
+    <FriendsList
+      names={names}
+      updateRights={changeRight}
+    />
+  </Provider>)
 
-  const checkboxen = list.find('input[type="checkbox"]')
-  expect(checkboxen.length).toBe(5)
+  const friendCanSeeOnline = queryByTitle("Friend can see when you're online")
+  expect(friendCanSeeOnline).toBeTruthy()
+  expect(friendCanSeeOnline.disabled).toBeFalsy()
+  expect(friendCanSeeOnline.type).toBe('checkbox')
 
-  checkboxen.forEach(checkbox => {
-    checkbox.simulate('change', {
-      target: {
-        disabled: false,
-        checked: true
-      }
-    })
-  })
+  fireEvent.click(friendCanSeeOnline)
+  expect(changeRight.mock.calls[changeRight.mock.calls.length - 1]).toEqual([
+    'first',
+    { canSeeOnline: true }
+  ])
 
-  checkboxen.forEach(checkbox => {
-    checkbox.simulate('change', {
-      target: {
-        disabled: true,
-        checked: true
-      }
-    })
-  })
+  const friendCanSeeMap = queryByTitle('Friend can locate you on the map')
+  expect(friendCanSeeMap).toBeTruthy()
+  expect(friendCanSeeMap.disabled).toBeFalsy()
+  expect(friendCanSeeMap.type).toBe('checkbox')
 
-  expect(changeCounts).toEqual({
-    canSeeOnline: 1,
-    canSeeOnMap: 1,
-    canModifyObjects: 1
-  })
+  fireEvent.click(friendCanSeeMap)
+  expect(changeRight.mock.calls[changeRight.mock.calls.length - 1]).toEqual([
+    'first',
+    { canSeeOnMap: true }
+  ])
+
+  const friendCanChangeObjects = queryByTitle('Friend can edit, delete or take objects')
+  expect(friendCanChangeObjects).toBeTruthy()
+  expect(friendCanChangeObjects.disabled).toBeFalsy()
+  expect(friendCanChangeObjects.type).toBe('checkbox')
+
+  fireEvent.click(friendCanChangeObjects)
+  expect(changeRight.mock.calls[changeRight.mock.calls.length - 1]).toEqual([
+    'first',
+    { canModifyObjects: true }
+  ])
+
+  const changeCounts = changeRight.mock.calls.length
+
+  const youCanSeeMap = queryByTitle('You can locate them on the map')
+  expect(youCanSeeMap).toBeTruthy()
+  expect(youCanSeeMap.disabled).toBeTruthy()
+  expect(youCanSeeMap.type).toBe('checkbox')
+
+  fireEvent.click(youCanSeeMap)
+
+  const youCanChangeObjects = queryByTitle("You can edit this friend's objects")
+  expect(youCanChangeObjects).toBeTruthy()
+  expect(youCanChangeObjects.disabled).toBeTruthy()
+  expect(youCanChangeObjects.type).toBe('checkbox')
+
+  fireEvent.click(youCanChangeObjects)
+
+  expect(changeRight.mock.calls.length).toBe(changeCounts)
 })
 
-test('should handle creating a new chat', () => {
-  const friends = [
-    {
-      id: 'first',
-      rightsGiven: {
-        canSeeOnline: false,
-        canSeeOnMap: false,
-        canModifyObjects: false
-      },
-      rightsHas: {
-        canSeeOnline: false,
-        canSeeOnMap: false,
-        canModifyObjects: false
+it('should handle creating a new chat', () => {
+  const store = configureStore({
+    friends: [
+      {
+        id: 'first',
+        rightsGiven: {
+          canSeeOnline: false,
+          canSeeOnMap: false,
+          canModifyObjects: false
+        },
+        rightsHas: {
+          canSeeOnline: false,
+          canSeeOnMap: false,
+          canModifyObjects: false
+        }
       }
-    }
-  ]
+    ]
+  })
 
   const names = {
     first: new AvatarName('Testery MacTestface')
@@ -167,14 +200,20 @@ test('should handle creating a new chat', () => {
 
   const startNewIMChat = jest.fn()
 
-  const rendered = mount(<FriendsList
-    friends={friends}
-    names={names}
-    startNewIMChat={startNewIMChat}
-  />)
+  const { queryByAltText } = render(<Provider store={store}>
+    <FriendsList
+      names={names}
+      startNewIMChat={startNewIMChat}
+    />
+  </Provider>)
 
-  const newChatButton = rendered.find('button')
-  newChatButton.simulate('click')
+  const newChatButton = queryByAltText('Start new chat with Testery Mactestface')
+  expect(newChatButton).toBeTruthy()
+  expect(newChatButton.nodeName).toBe('IMG')
+  expect(newChatButton.parentElement).toBeTruthy()
+  expect(newChatButton.parentElement.nodeName).toBe('BUTTON')
+
+  fireEvent.click(newChatButton)
 
   expect(startNewIMChat.mock.calls.length).toBe(1)
   expect(startNewIMChat.mock.calls[0]).toEqual([
@@ -184,23 +223,24 @@ test('should handle creating a new chat', () => {
   ])
 })
 
-test('should pass aXe', async () => {
-  const friends = [
-    {
-      id: 'first',
-      rightsGiven: {},
-      rightsHas: {}
-    }
-  ]
-
+it('should pass aXe', async () => {
   const names = {
     first: new AvatarName('Testery MacTestface')
   }
 
-  const rendered = mount(<FriendsList
-    friends={friends}
-    names={names}
-  />)
+  const store = configureStore({
+    friends: [
+      {
+        id: 'first',
+        rightsGiven: {},
+        rightsHas: {}
+      }
+    ]
+  })
 
-  expect(await axe(rendered.html())).toHaveNoViolations()
+  const { container } = render(<Provider store={store}>
+    <FriendsList names={names} />
+  </Provider>)
+
+  expect(await axe(container)).toHaveNoViolations()
 })

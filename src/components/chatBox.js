@@ -85,17 +85,13 @@ export default function ChatBox (props) {
       <TabPanel {...tab} className={style.panel} stopId='friends' tabIndex='-1'>
         <FriendsList
           names={names}
-          friends={props.friends}
           startNewIMChat={props.startNewIMChat}
           updateRights={props.updateRights}
         />
       </TabPanel>
 
       <TabPanel {...tab} className={style.panel} stopId='groups' tabIndex='-1'>
-        <GroupsList
-          groups={props.groups}
-          startNewIMChat={props.startNewIMChat}
-        />
+        <GroupsList startNewIMChat={props.startNewIMChat} />
       </TabPanel>
 
       {props.shouldDisplayNotifications && <TabPanel
