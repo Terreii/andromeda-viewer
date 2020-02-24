@@ -15,7 +15,7 @@ export const AppContainer = ({ children, className, ...props }) => (
   </div>
 )
 
-const ChatContainer = lazy(() => import('../containers/chatContainer'))
+const ChatBox = lazy(() => import('./chatBox'))
 
 export function LoadableChatComponent () {
   const isLoggedIn = useSelector(selectIsLoggedIn)
@@ -29,6 +29,6 @@ export function LoadableChatComponent () {
   </div>
 
   return <Suspense fallback={fallback}>
-    <ChatContainer />
+    <ChatBox />
   </Suspense>
 }

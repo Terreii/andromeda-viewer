@@ -8,7 +8,11 @@ import thunk from 'redux-thunk'
 import FriendsList from './friendsList'
 import AvatarName from '../avatarName'
 
+import { updateRights } from '../actions/friendsActions'
+
 import { IMChatType } from '../types/chat'
+
+jest.mock('../actions/friendsActions')
 
 function configureStore (state = {}) {
   const store = configureMockStore([thunk])
@@ -92,6 +96,8 @@ it('rendering', () => {
 })
 
 it('event handling/changing rights', () => {
+  updateRights.mockImplementation(() => () => {})
+
   const store = configureStore({
     friends: [
       {
@@ -114,13 +120,8 @@ it('event handling/changing rights', () => {
     first: new AvatarName('Testery MacTestface')
   }
 
-  const changeRight = jest.fn()
-
   const { queryByTitle } = render(<Provider store={store}>
-    <FriendsList
-      names={names}
-      updateRights={changeRight}
-    />
+    <FriendsList names={names} />
   </Provider>)
 
   const friendCanSeeOnline = queryByTitle("Friend can see when you're online")
@@ -129,7 +130,7 @@ it('event handling/changing rights', () => {
   expect(friendCanSeeOnline.type).toBe('checkbox')
 
   fireEvent.click(friendCanSeeOnline)
-  expect(changeRight.mock.calls[changeRight.mock.calls.length - 1]).toEqual([
+  expect(updateRights.mock.calls[updateRights.mock.calls.length - 1]).toEqual([
     'first',
     { canSeeOnline: true }
   ])
@@ -140,7 +141,7 @@ it('event handling/changing rights', () => {
   expect(friendCanSeeMap.type).toBe('checkbox')
 
   fireEvent.click(friendCanSeeMap)
-  expect(changeRight.mock.calls[changeRight.mock.calls.length - 1]).toEqual([
+  expect(updateRights.mock.calls[updateRights.mock.calls.length - 1]).toEqual([
     'first',
     { canSeeOnMap: true }
   ])
@@ -151,12 +152,12 @@ it('event handling/changing rights', () => {
   expect(friendCanChangeObjects.type).toBe('checkbox')
 
   fireEvent.click(friendCanChangeObjects)
-  expect(changeRight.mock.calls[changeRight.mock.calls.length - 1]).toEqual([
+  expect(updateRights.mock.calls[updateRights.mock.calls.length - 1]).toEqual([
     'first',
     { canModifyObjects: true }
   ])
 
-  const changeCounts = changeRight.mock.calls.length
+  const changeCounts = updateRights.mock.calls.length
 
   const youCanSeeMap = queryByTitle('You can locate them on the map')
   expect(youCanSeeMap).toBeTruthy()
@@ -172,7 +173,7 @@ it('event handling/changing rights', () => {
 
   fireEvent.click(youCanChangeObjects)
 
-  expect(changeRight.mock.calls.length).toBe(changeCounts)
+  expect(updateRights.mock.calls.length).toBe(changeCounts)
 })
 
 it('should handle creating a new chat', () => {

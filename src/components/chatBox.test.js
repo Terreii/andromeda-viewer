@@ -33,30 +33,29 @@ it('renders without crashing', () => {
         listInProfile: true,
         sessionStarted: true
       }
-    ]
+    ],
+    IMs: [
+      {
+        sessionId: '2345',
+        withId: 'first',
+        isIM: true,
+        messages: []
+      }
+    ],
+    localChat: [],
+    names: {
+      names: {
+        first: new AvatarName('Testery MacTestface')
+      }
+    },
+    notifications: { active: [] },
+    session: { activeChatTab: 'local' }
   })
-
-  const names = {
-    first: new AvatarName('Testery MacTestface')
-  }
-
-  const im = [
-    {
-      sessionId: '2345',
-      withId: 'first',
-      isIM: true,
-      messages: []
-    }
-  ]
 
   const { container } = render(<Provider store={store}>
     <ChatBox
       selfName={new AvatarName('self Resident')}
-      names={names}
-      IMs={im}
-      localChat={[]}
       sendLocalChatMessage={() => {}}
-      changeTab={() => {}}
     />
   </Provider>)
 
@@ -83,31 +82,30 @@ it('should pass aXe', async () => {
         listInProfile: true,
         sessionStarted: true
       }
-    ]
+    ],
+    IMs: [
+      {
+        name: 'first chat',
+        sessionId: '2345',
+        withId: 'first',
+        isIM: true,
+        messages: []
+      }
+    ],
+    localChat: [],
+    names: {
+      names: {
+        first: new AvatarName('Testery MacTestface')
+      }
+    },
+    notifications: { active: [] },
+    session: { activeChatTab: 'local' }
   })
-
-  const names = {
-    first: new AvatarName('Testery MacTestface')
-  }
-
-  const im = [
-    {
-      name: 'first chat',
-      sessionId: '2345',
-      withId: 'first',
-      isIM: true,
-      messages: []
-    }
-  ]
 
   const { container } = render(<Provider store={store}>
     <ChatBox
       selfName={new AvatarName('self Resident')}
-      names={names}
-      IMs={im}
-      localChat={[]}
       sendLocalChatMessage={() => {}}
-      changeTab={() => {}}
     />
   </Provider>)
 
