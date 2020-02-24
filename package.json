@@ -99,7 +99,7 @@
     "hoodie": "^28.2.10",
     "hoodie-plugin-store-crypto": "^3.2.1",
     "node-fetch": "^2.6.0",
-    "uuid": "^3.4.0",
+    "uuid": "^7.0.0",
     "ws": "^7.2.1",
     "xmlrpc": "^1.3.2"
   },
