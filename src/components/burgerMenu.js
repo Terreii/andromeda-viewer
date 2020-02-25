@@ -5,8 +5,14 @@ import {
   action as toggleMenu
 } from 'redux-burger-menu'
 import { NavLink } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { useDialogState, DialogDisclosure } from 'reakit'
+
+import { selectIsSignedIn, selectUserName } from '../bundles/account'
+import { selectOwnAvatarName } from '../bundles/names'
+
+import { logout } from '../actions/sessionActions'
+import { signOut } from '../actions/viewerAccount'
 
 import SignInDialog from './modals/signIn'
 import SignOutDialog from './modals/signOut'
@@ -16,15 +22,24 @@ import './burgerMenu.css'
 
 const SlideMenu = reduxBurgerMenu(Menu)
 
-export default function BurgerMenu ({
-  isSignedIn,
-  userName,
-  isLoggedIn,
-  avatarName,
-  logout,
-  signOut
-}) {
+export default function BurgerMenu ({ isLoggedIn }) {
   const dispatch = useDispatch()
+  const isSignedIn = useSelector(selectIsSignedIn)
+  const userName = useSelector(selectUserName)
+  const avatarName = useSelector(selectOwnAvatarName)
+
+  const doLogout = event => {
+    event.preventDefault()
+    dispatch(toggleMenu(false))
+    dispatch(logout())
+  }
+
+  const doSignOutFromViewer = event => {
+    event.preventDefault()
+    dispatch(toggleMenu(false))
+    dispatch(signOut())
+  }
+
   const doClose = () => {
     dispatch(toggleMenu(false))
   }
@@ -73,12 +88,12 @@ export default function BurgerMenu ({
     {isLoggedIn && <button
       id='sidebarAvatarLogout'
       className={'menu-item ' + styles.BurgerMenuLogout}
-      onClick={logout}
+      onClick={doLogout}
     >
       log out
     </button>}
 
-    {isSignedIn && <SignOutDialogOpener signOut={signOut} />}
+    {isSignedIn && <SignOutDialogOpener signOut={doSignOutFromViewer} />}
   </SlideMenu>
 }
 

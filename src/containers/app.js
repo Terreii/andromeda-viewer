@@ -12,7 +12,7 @@ import { viewerName } from '../viewerInfo'
 import { AppContainer, LoadableChatComponent } from '../components/main'
 import LoginForm from './loginForm'
 import GlobalModals from './globalModals'
-import TopMenuBar from './topMenuBar'
+import TopMenuBar from '../components/topBar'
 import AccountDialog from '../components/accountDialog'
 
 import { isSignedIn as getIsSignedIn } from '../actions/viewerAccount'
