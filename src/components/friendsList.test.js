@@ -1,9 +1,9 @@
 import { axe } from 'jest-axe'
 import React from 'react'
 import { Provider } from 'react-redux'
-import { render, fireEvent } from 'reakit-test-utils'
 import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
+import { render, fireEvent } from '@testing-library/react'
 
 import FriendsList from './friendsList'
 import AvatarName from '../avatarName'

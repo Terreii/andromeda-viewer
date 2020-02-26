@@ -1,9 +1,9 @@
 import { axe } from 'jest-axe'
 import React from 'react'
 import { Provider } from 'react-redux'
-import { render } from 'reakit-test-utils'
 import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
+import { render } from '@testing-library/react'
 
 import ChatBox from './chatBox'
 import AvatarName from '../avatarName'

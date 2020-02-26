@@ -10,7 +10,7 @@ import { Route, Switch, Redirect } from 'react-router-dom'
 import { viewerName } from '../viewerInfo'
 
 import { AppContainer, LoadableChatComponent } from '../components/main'
-import LoginForm from './loginForm'
+import Login from '../components/login'
 import GlobalModals from './globalModals'
 import TopMenuBar from '../components/topBar'
 import AccountDialog from '../components/accountDialog'
@@ -43,7 +43,7 @@ export default function App () {
   return <AppContainer>
     <Switch>
       <Route exact path='/'>
-        <LoginForm isSignedIn={isSignedIn} />
+        <Login isSignedIn={isSignedIn} />
       </Route>
       <Route path='/session'>
         <LoadableChatComponent />

@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { useHistory } from 'react-router-dom'
+
+import { selectSavedAvatars, selectSavedGrids } from '../../bundles/account'
+
+import { login } from '../../actions/sessionActions'
 
 import LoginNewAvatar from './newAvatarLogin'
 import AvatarLogin from './avatarLogin'
@@ -8,8 +13,12 @@ import AvatarName from '../../avatarName'
 
 import styles from './index.module.css'
 
-export default function LoginForm ({ isSignedIn, avatars, grids, login }) {
+export default function LoginForm ({ isSignedIn }) {
+  const dispatch = useDispatch()
+
   const history = useHistory()
+  const avatars = useSelector(selectSavedAvatars)
+  const grids = useSelector(selectSavedGrids)
 
   const [selected, setSelected] = useState(() => avatars.length === 0
     ? 'new'
@@ -95,7 +104,7 @@ export default function LoginForm ({ isSignedIn, avatars, grids, login }) {
       const avatarName = new AvatarName(name)
       setIsLoggingIn(name)
 
-      await login(avatarName, password, grid, save, isNew)
+      await dispatch(login(avatarName, password, grid, save, isNew))
       history.push('/session')
     } catch (err) {
       console.error(err)
