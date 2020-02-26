@@ -1,12 +1,10 @@
-import uuid, { v4 } from 'uuid'
+import { v4 as uuid } from 'uuid'
 
-test('it should have a v4 function', () => {
-  expect(typeof uuid.v4).toBe('function')
-  expect(typeof v4).toBe('function')
+it('should have a v4 function', () => {
+  expect(typeof uuid).toBe('function')
 })
 
-test('it should create a valid uuid', () => {
+it('should create a valid uuid', () => {
   const reg = /[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-4[0-9A-Fa-f]{3}-[89abAB][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}/
-  expect(uuid.v4()).toMatch(reg)
-  expect(v4()).toMatch(reg)
+  expect(uuid()).toMatch(reg)
 })
