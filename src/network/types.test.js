@@ -2,7 +2,7 @@
 
 'use strict'
 
-import uuid from 'uuid'
+import { v4 as uuid } from 'uuid'
 
 import {
   NullType,
@@ -32,11 +32,11 @@ import {
 describe('Null', function () {
   const buffy = Buffer.alloc(1, 0)
 
-  test('should have a size of 0', () => {
+  it('should have a size of 0', () => {
     expect(NullType.createBuffer().byteLength).toBe(0)
   })
 
-  test('should have a value of null', () => {
+  it('should have a value of null', () => {
     expect(NullType.parseBuffer(buffy)).toBeNull()
   })
 })
@@ -53,16 +53,16 @@ describe('Fixed', () => {
   const buffer = Fixed.createBuffer(array, size)
   const fixed = Fixed.parseBuffer(buffer, offset, size)
 
-  test(`buffer should have the size of ${size}`, () => {
+  it(`buffer should have the size of ${size}`, () => {
     expect(buffer.byteLength).toBe(size)
   })
-  test(`should return a buffer with the size of ${size}`, () => {
+  it(`should return a buffer with the size of ${size}`, () => {
     expect(fixed.byteLength).toBe(size)
   })
-  test('should return a buffer with 2 at index 2', () => {
+  it('should return a buffer with 2 at index 2', () => {
     expect(fixed.readUInt8(2)).toBe(2)
   })
-  test(`offset should be ${size}`, () => {
+  it(`offset should be ${size}`, () => {
     expect(offset).toEqual({
       value: size
     })
@@ -81,16 +81,16 @@ describe('Variable1', () => {
   const buffer = Variable1.createBuffer(array)
   const variable = Variable1.parseBuffer(buffer, offset)
 
-  test(`buffer should have the size of ${size + 1}`, () => {
+  it(`buffer should have the size of ${size + 1}`, () => {
     expect(buffer.byteLength).toBe(size + 1)
   })
-  test(`should return a buffer with the size of ${size}`, () => {
+  it(`should return a buffer with the size of ${size}`, () => {
     expect(variable.byteLength).toBe(size)
   })
-  test('should return a buffer with 1 at index 0', () => {
+  it('should return a buffer with 1 at index 0', () => {
     expect(variable.readUInt8(0)).toBe(1)
   })
-  test('should throw an error if non array like structures are given to ' +
+  it('should throw an error if non array like structures are given to ' +
     'createBuffer', () => {
     try {
       let test = Variable1.createBuffer({ 0: 2 })
@@ -100,13 +100,13 @@ describe('Variable1', () => {
       expect(true).toBe(true)
     }
   })
-  test(`offset should be ${size + 1}`, () => {
+  it(`offset should be ${size + 1}`, () => {
     expect(offset).toEqual({
       value: size + 1
     })
   })
 
-  test('should parse a string', () => {
+  it('should parse a string', () => {
     const aString = 'Hello world!'
     const buffer2 = Variable1.createBuffer(aString)
     const stringVar = Variable1.parseBuffer(buffer2, { value: 0 })
@@ -128,16 +128,16 @@ describe('Variable2', () => {
   const buffer = Variable2.createBuffer(array)
   const variable = Variable2.parseBuffer(buffer, offset)
 
-  test(`buffer should have the size of ${size + 2}`, () => {
+  it(`buffer should have the size of ${size + 2}`, () => {
     expect(buffer.byteLength).toBe(size + 2)
   })
-  test(`should return a buffer with the size of ${size}`, () => {
+  it(`should return a buffer with the size of ${size}`, () => {
     expect(variable.byteLength).toBe(size)
   })
-  test('should return a buffer with 1 at index 0', () => {
+  it('should return a buffer with 1 at index 0', () => {
     expect(variable.readUInt8(0)).toBe(1)
   })
-  test('should throw an error if non array like structures are given to ' +
+  it('should throw an error if non array like structures are given to ' +
     'createBuffer', () => {
     try {
       let test = Variable1.createBuffer({ 0: 2 })
@@ -147,13 +147,13 @@ describe('Variable2', () => {
       expect(true).toBe(true)
     }
   })
-  test(`offset should be ${size + 2}`, () => {
+  it(`offset should be ${size + 2}`, () => {
     expect(offset).toEqual({
       value: size + 2
     })
   })
 
-  test('should parse a string', () => {
+  it('should parse a string', () => {
     const aString = 'Hello world!'
     const buffer2 = Variable2.createBuffer(aString)
     const stringVar = Variable2.parseBuffer(buffer2, { value: 0 })
@@ -167,7 +167,7 @@ describe('Numbers', () => {
   const posBuffer = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8])
   const negBuffer = Buffer.from([-1, -2, -3, -4, -5, -6, -7, -8])
 
-  test('U8 should have the unsigned value of the given position', () => {
+  it('U8 should have the unsigned value of the given position', () => {
     const offset = Math.floor(Math.random() * 8)
     const offsetObj = {
       value: offset
@@ -188,7 +188,7 @@ describe('Numbers', () => {
     })
   })
 
-  test('U16 should have the unsigned value of the given position', () => {
+  it('U16 should have the unsigned value of the given position', () => {
     const offset = Math.floor(Math.random() * 4)
     const offsetObj = {
       value: offset
@@ -209,7 +209,7 @@ describe('Numbers', () => {
     })
   })
 
-  test('U32 should have the unsigned value of the given position', () => {
+  it('U32 should have the unsigned value of the given position', () => {
     const offset = Math.floor(Math.random() * 2)
     const offsetObj = {
       value: offset
@@ -231,7 +231,7 @@ describe('Numbers', () => {
     })
   })
 
-  test('S8 should have the signed value of the given position', () => {
+  it('S8 should have the signed value of the given position', () => {
     const offset = Math.floor(Math.random() * 8)
     const offsetObj = {
       value: offset
@@ -253,7 +253,7 @@ describe('Numbers', () => {
     })
   })
 
-  test('S16 should have the signed value of the given position', () => {
+  it('S16 should have the signed value of the given position', () => {
     const offset = Math.floor(Math.random() * 4)
     const offsetObj = {
       value: offset
@@ -275,7 +275,7 @@ describe('Numbers', () => {
     })
   })
 
-  test('S32 should have the signed value of the given position', () => {
+  it('S32 should have the signed value of the given position', () => {
     const offset = Math.floor(Math.random() * 2)
     const offsetObj = {
       value: offset
@@ -297,7 +297,7 @@ describe('Numbers', () => {
     })
   })
 
-  test('F32 should have the value of the given position', () => {
+  it('F32 should have the value of the given position', () => {
     const buffer = Buffer.alloc(8)
     const value = Math.random()
     buffer.writeFloatLE(value, 4)
@@ -318,7 +318,7 @@ describe('Numbers', () => {
     })
   })
 
-  test('F64 should have the value of the given position', () => {
+  it('F64 should have the value of the given position', () => {
     const buffer = Buffer.alloc(8)
     const value = Math.random()
     buffer.writeDoubleLE(value, 0)
@@ -340,7 +340,7 @@ describe('Numbers', () => {
 })
 
 describe('Vectors', () => {
-  test('LLVector3 should store a array of 3 floats', () => {
+  it('LLVector3 should store a array of 3 floats', () => {
     const buffer = Buffer.alloc(4 * 4)
     ;[1.1, 2.2, 3.3, 4.4].forEach((num, i) => {
       buffer.writeFloatLE(num, i * 4)
@@ -365,7 +365,7 @@ describe('Vectors', () => {
     })
   })
 
-  test('LLVector3d should store a array of 3 floats', () => {
+  it('LLVector3d should store a array of 3 floats', () => {
     const buffer = Buffer.alloc(4 * 8)
     const array = [1.1, 2.2, 3.3, 4.4]
     array.forEach((num, i) => buffer.writeDoubleLE(num, i * 8))
@@ -389,7 +389,7 @@ describe('Vectors', () => {
     })
   })
 
-  test('LLVector4 should store a array of 4 floats', () => {
+  it('LLVector4 should store a array of 4 floats', () => {
     const buffer = Buffer.alloc(5 * 4)
     const array = [1.1, 2.2, 3.3, 4.4, 5.5]
     array.forEach((num, i) => buffer.writeFloatLE(num, i * 4))
@@ -414,7 +414,7 @@ describe('Vectors', () => {
     })
   })
 
-  test('LLQuaternion should store a array of 3 floats', () => {
+  it('LLQuaternion should store a array of 3 floats', () => {
     const buffer = Buffer.alloc(4 * 4)
     ;[1.1, 2.2, 3.3, 4.4].forEach((num, i) => {
       buffer.writeFloatLE(num, i * 4)
@@ -440,11 +440,11 @@ describe('Vectors', () => {
 })
 
 describe('LLUUID', () => {
-  test('should store a valid UUID', () => {
+  it('should store a valid UUID', () => {
     const buffer = Buffer.alloc(16)
-    uuid.v4(null, buffer)
+    uuid(null, buffer)
     const idString = LLUUID.parseBuffer(buffer, { value: 0 })
-    const idString2 = uuid.v4()
+    const idString2 = uuid()
     const buffy = LLUUID.createBuffer(idString2)
     const offset = {
       value: 0
@@ -460,7 +460,7 @@ describe('LLUUID', () => {
 })
 
 describe('BOOL', () => {
-  test('should store either a true or a false', () => {
+  it('should store either a true or a false', () => {
     const buffer = Buffer.from([0, 1])
     const offset = {
       value: 0
@@ -496,7 +496,7 @@ describe('IPADDR & IPPORT', () => {
   const reg = new RegExp('^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).)' +
     '{3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$')
 
-  test('should parse a valid ip-address', () => {
+  it('should parse a valid ip-address', () => {
     expect(reg.test(IPADDR.parseBuffer(buffer, { value: 0 })))
       .toBe(true)
 
@@ -517,7 +517,7 @@ describe('IPADDR & IPPORT', () => {
     })
   })
 
-  test('should parse a valid ip-port', () => {
+  it('should parse a valid ip-port', () => {
     expect(IPPORT.parseBuffer(buffer, { value: 4 }))
       .toBe(buffer.readUInt16LE(4))
 
@@ -533,7 +533,7 @@ describe('IPADDR & IPPORT', () => {
     })
   })
 
-  test('should create valid buffers', () => {
+  it('should create valid buffers', () => {
     const addr = Buffer.from([1, 2, 3, 4])
     expect(IPADDR.createBuffer('1.2.3.4')).toEqual(addr)
     expect(IPADDR.createBuffer([1, 2, 3, 4])).toEqual(addr)
