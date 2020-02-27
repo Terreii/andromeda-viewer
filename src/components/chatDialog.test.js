@@ -1,172 +1,143 @@
 import { axe } from 'jest-axe'
 import React from 'react'
-import { shallow, mount } from 'enzyme'
+import { render, fireEvent } from '@testing-library/react'
 
 import ChatDialog from './chatDialog'
 import AvatarName from '../avatarName'
 
-test('renders without crashing', () => {
+it('renders without crashing', () => {
   const names = {
     first: new AvatarName('Testery MacTestface')
   }
 
-  shallow(<ChatDialog
+  const { container } = render(<ChatDialog
     names={names}
     data={[]}
     isIM={false}
     sendTo={() => {}}
   />)
+
+  expect(container).toBeTruthy()
 })
 
-test('renders local chat', () => {
-  const names = {
-    first: new AvatarName('Testery MacTestface')
-  }
-
-  const sendData = {
-    text: null,
-    count: 0
-  }
-
-  const renderedLocal = mount(<ChatDialog
-    names={names}
-    data={[]}
-    sendTo={text => {
-      sendData.text = text
-      sendData.count += 1
-    }}
-  />)
-
-  expect(renderedLocal.find('input').prop('placeholder')).toBe('Send to local chat')
-
-  const sendButton = renderedLocal.find('button')
-  expect(sendButton.text()).toBe('send')
-
-  renderedLocal.find('input').simulate('change', {
-    target: {
-      value: 'Hello World!'
+describe('local chat', () => {
+  it('renders', async () => {
+    const names = {
+      first: new AvatarName('Testery MacTestface')
     }
+
+    const send = jest.fn()
+
+    const { queryByText, queryByPlaceholderText, findByText } = render(<ChatDialog
+      names={names}
+      data={[]}
+      sendTo={send}
+    />)
+
+    const input = queryByPlaceholderText('Send to local chat')
+    expect(input).toBeTruthy()
+    expect(input.nodeName).toBe('INPUT')
+    expect(input.type).toBe('text')
+
+    const sendButton = queryByText('send')
+    expect(sendButton).toBeTruthy()
+    expect(sendButton.nodeName).toBe('BUTTON')
+
+    fireEvent.change(input, {
+      target: {
+        value: 'Hello World!'
+      }
+    })
+    fireEvent.submit(await findByText('send'))
+
+    expect(send.mock.calls).toEqual([
+      ['Hello World!']
+    ])
   })
-  sendButton.simulate('submit')
 
-  expect(sendData.text).toBe('Hello World!')
-  expect(sendData.count).toBe(1)
-})
-
-test('renders IM chat', () => {
-  const names = {
-    first: new AvatarName('Testery MacTestface')
-  }
-
-  const imData = {
-    sessionId: 'abc',
-    saveId: 'def',
-    messages: []
-  }
-
-  const loadHistoryData = {
-    id: null,
-    saveId: null,
-    count: 0
-  }
-
-  const sendData = {
-    text: null,
-    count: 0
-  }
-
-  const renderedIM = mount(<ChatDialog
-    names={names}
-    data={imData}
-    isIM
-    sendTo={text => {
-      sendData.text = text
-      sendData.count += 1
-    }}
-    loadHistory={(id, saveId) => {
-      loadHistoryData.id = id
-      loadHistoryData.saveId = saveId
-      loadHistoryData.count += 1
-    }}
-  />)
-
-  expect(renderedIM.find('input').prop('placeholder')).toBe('Send Instant Message')
-
-  const sendButton = renderedIM.find('button')
-  expect(sendButton.text()).toBe('send')
-  renderedIM.find('input').simulate('change', {
-    target: {
-      value: 'Hello World!'
+  it('should pass aXe', async () => {
+    const names = {
+      first: new AvatarName('Testery MacTestface')
     }
+
+    const { container } = render(<ChatDialog
+      names={names}
+      data={[]}
+      isIM={false}
+      sendTo={() => {}}
+    />)
+
+    expect(await axe(container)).toHaveNoViolations()
   })
-  sendButton.simulate('submit')
-
-  expect(sendData.text).toBe('Hello World!')
-  expect(sendData.count).toBe(1)
-
-  expect(loadHistoryData.id).toBe('abc')
-  expect(loadHistoryData.saveId).toBe('def')
-  expect(loadHistoryData.count).toBe(1)
 })
 
-test('Local chat should pass aXe', async () => {
-  const names = {
-    first: new AvatarName('Testery MacTestface')
-  }
+describe('IM chat', () => {
+  it('renders', async () => {
+    const names = {
+      first: new AvatarName('Testery MacTestface')
+    }
 
-  const sendData = {
-    text: null,
-    count: 0
-  }
+    const imData = {
+      sessionId: 'abc',
+      saveId: 'def',
+      messages: []
+    }
 
-  const rendered = mount(<ChatDialog
-    names={names}
-    data={[]}
-    sendTo={text => {
-      sendData.text = text
-      sendData.count += 1
-    }}
-  />)
+    const send = jest.fn()
+    const loadHistory = jest.fn()
 
-  expect(await axe(rendered.html())).toHaveNoViolations()
-})
+    const { queryByText, queryByPlaceholderText, findByText } = render(<ChatDialog
+      isIM
+      names={names}
+      data={imData}
+      sendTo={send}
+      loadHistory={loadHistory}
+    />)
 
-test('IM chat should pass aXe', async () => {
-  const names = {
-    first: new AvatarName('Testery MacTestface')
-  }
+    const input = queryByPlaceholderText('Send Instant Message')
+    expect(input).toBeTruthy()
+    expect(input.nodeName).toBe('INPUT')
+    expect(input.type).toBe('text')
 
-  const imData = {
-    sessionId: 'abc',
-    saveId: 'def',
-    messages: []
-  }
+    const sendButton = queryByText('send')
+    expect(sendButton).toBeTruthy()
+    expect(sendButton.nodeName).toBe('BUTTON')
 
-  const loadHistoryData = {
-    id: null,
-    saveId: null,
-    count: 0
-  }
+    fireEvent.change(input, {
+      target: {
+        value: 'Hello World!'
+      }
+    })
+    fireEvent.submit(await findByText('send'))
 
-  const sendData = {
-    text: null,
-    count: 0
-  }
+    expect(send.mock.calls).toEqual([
+      ['Hello World!']
+    ])
 
-  const rendered = mount(<ChatDialog
-    names={names}
-    data={imData}
-    isIM
-    sendTo={text => {
-      sendData.text = text
-      sendData.count += 1
-    }}
-    loadHistory={(id, saveId) => {
-      loadHistoryData.id = id
-      loadHistoryData.saveId = saveId
-      loadHistoryData.count += 1
-    }}
-  />)
+    expect(loadHistory.mock.calls).toEqual([
+      [imData.sessionId, imData.saveId]
+    ])
+  })
 
-  expect(await axe(rendered.html())).toHaveNoViolations()
+  it('should pass aXe', async () => {
+    const names = {
+      first: new AvatarName('Testery MacTestface')
+    }
+
+    const imData = {
+      sessionId: 'abc',
+      saveId: 'def',
+      messages: []
+    }
+
+    const { container } = render(<ChatDialog
+      isIM
+      names={names}
+      data={imData}
+      sendTo={() => {}}
+      loadHistory={() => {}}
+    />)
+
+    expect(await axe(container)).toHaveNoViolations()
+  })
 })

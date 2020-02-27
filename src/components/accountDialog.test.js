@@ -1,7 +1,7 @@
 import { axe } from 'jest-axe'
 import React from 'react'
-import { mount } from 'enzyme'
 import { Provider } from 'react-redux'
+import { render, fireEvent } from '@testing-library/react'
 
 import AccountDialog from './accountDialog'
 import configureStore from '../store/configureStore'
@@ -10,149 +10,181 @@ import { signInStatus } from '../bundles/account'
 
 jest.mock('../actions/viewerAccount')
 
-updateAccount.mockImplementation(args => () => ({
-  then: () => args // mock a promise
-}))
+updateAccount.mockImplementation(args => async () => {
+  return args // mock a promise
+})
 
-it('should display and update the account name', () => {
+it('should display and update the account name', async () => {
   const store = configureStore()
   store.dispatch(signInStatus(true, true, 'tester.mactestface@viewer.com'))
 
-  const rendered = mount(<Provider store={store}>
+  const { queryByLabelText, queryByText, findByLabelText, findByText } = render(<Provider
+    store={store}
+  >
     <AccountDialog />
   </Provider>)
 
-  expect(rendered.find('#usernameChange').prop('value')).toBe('tester.mactestface@viewer.com')
-  expect(rendered.find('#updateAccountData').prop('disabled')).toBeTruthy()
+  const username = queryByLabelText('Username / Mail')
+  expect(username).toBeTruthy()
+  expect(username.nodeName).toBe('INPUT')
+  expect(username.type).toBe('email')
+  expect(username.value).toBe('tester.mactestface@viewer.com')
+
+  const updateButton = queryByText('update')
+  expect(updateButton).toBeTruthy()
+  expect(updateButton.nodeName).toBe('BUTTON')
+  expect(updateButton.disabled).toBeTruthy()
 
   // enter a not valid email address
-  rendered.find('#usernameChange').simulate('change', {
+  fireEvent.change(username, {
     target: {
-      value: 'tester.mactestface@',
-      validity: {
-        valid: false
-      }
+      value: 'tester.mactestface@'
     }
   })
-  expect(rendered.find('#usernameChange').prop('value')).toBe('tester.mactestface@')
-  expect(rendered.find('#updateAccountData').prop('disabled')).toBeTruthy()
+  expect((await findByLabelText('Username / Mail')).value).toBe('tester.mactestface@')
+  expect(queryByText('update').disabled).toBeTruthy()
 
-  rendered.find('form').simulate('submit')
+  fireEvent.submit(username)
   expect(updateAccount.mock.calls.length).toBe(0)
 
   // reset data
-  rendered.find('#accountDataReset').simulate('click')
-  expect(rendered.find('#usernameChange').prop('value')).toBe('tester.mactestface@viewer.com')
-  expect(rendered.find('#updateAccountData').prop('disabled')).toBeTruthy()
+  const resetButton = await findByText('reset')
+  expect(resetButton).toBeTruthy()
+  expect(resetButton.nodeName).toBe('BUTTON')
+  expect(resetButton.type).toBe('reset')
 
-  rendered.find('form').simulate('submit')
+  fireEvent.click(resetButton)
+
+  expect((await findByLabelText('Username / Mail')).value).toBe('tester.mactestface@viewer.com')
+  expect(queryByText('update').disabled).toBeTruthy()
+
+  fireEvent.submit(username)
   expect(updateAccount.mock.calls.length).toBe(0)
 
   // enter and change a valid email address
-  rendered.find('#usernameChange').simulate('change', {
+  fireEvent.change(await findByLabelText('Username / Mail'), {
     target: {
-      value: 'tester.mactestface@viewer.net',
-      validity: {
-        valid: true
-      }
+      value: 'tester.mactestface@viewer.net'
     }
   })
-  expect(rendered.find('#usernameChange').prop('value')).toBe('tester.mactestface@viewer.net')
-  expect(rendered.find('#updateAccountData').prop('disabled')).toBeFalsy()
+  expect((await findByLabelText('Username / Mail')).value).toBe('tester.mactestface@viewer.net')
+  expect(updateButton.disabled).toBeFalsy()
 
   // change username
-  rendered.find('form').simulate('submit')
+  fireEvent.submit(username)
+
+  expect((await findByLabelText('Username / Mail')).value).toBe('tester.mactestface@viewer.net')
   expect(updateAccount.mock.calls.length).toBe(1)
   expect(updateAccount.mock.calls[0]).toEqual([
     { nextUsername: 'tester.mactestface@viewer.net' }
   ])
 })
 
-it('should change the password', () => {
+it('should change the password', async () => {
   const store = configureStore()
   store.dispatch(signInStatus(true, true, 'tester.mactestface@viewer.com'))
 
-  const rendered = mount(<Provider store={store}>
+  const startUpdateCallCount = updateAccount.mock.calls.length
+
+  const { queryByLabelText, queryByText, findByLabelText } = render(<Provider
+    store={store}
+  >
     <AccountDialog />
   </Provider>)
 
-  expect(rendered.find('#passwordChangeOld').prop('value')).toBe('')
-  expect(rendered.find('#passwordChangeNew').prop('value')).toBe('')
-  expect(rendered.find('#passwordChangeNew2').prop('value')).toBe('')
-  expect(rendered.find('#updateAccountData').prop('disabled')).toBeTruthy()
+  const passwordChangeOld = queryByLabelText('Old password')
+  expect(passwordChangeOld).toBeTruthy()
+  expect(passwordChangeOld.nodeName).toBe('INPUT')
+  expect(passwordChangeOld.type).toBe('password')
+  expect(passwordChangeOld.autocomplete).toBe('current-password')
 
-  rendered.find('form').simulate('submit')
-  expect(updateAccount.mock.calls.length).toBe(1)
+  const passwordChangeNew = queryByLabelText('New password')
+  expect(passwordChangeNew).toBeTruthy()
+  expect(passwordChangeNew.nodeName).toBe('INPUT')
+  expect(passwordChangeNew.type).toBe('password')
+  expect(passwordChangeNew.autocomplete).toBe('new-password')
+
+  const passwordChangeRepeat = queryByLabelText('Repeat password')
+  expect(passwordChangeRepeat).toBeTruthy()
+  expect(passwordChangeRepeat.nodeName).toBe('INPUT')
+  expect(passwordChangeRepeat.type).toBe('password')
+  expect(passwordChangeRepeat.autocomplete).toBe('new-password')
+
+  const updateButton = queryByText('update')
+  expect(updateButton).toBeTruthy()
+  expect(updateButton.nodeName).toBe('BUTTON')
+  expect(updateButton.disabled).toBeTruthy()
+
+  fireEvent.submit(queryByLabelText('Username / Mail'))
+  expect(updateAccount.mock.calls.length).toBe(startUpdateCallCount)
 
   // enter old password
-  rendered.find('#passwordChangeOld').simulate('change', {
+  fireEvent.change(passwordChangeOld, {
     target: {
-      value: 'oldPassword',
-      validity: {
-        valid: true
-      }
+      value: 'oldPassword'
     }
   })
-  expect(rendered.find('#passwordChangeOld').prop('value')).toBe('oldPassword')
-  expect(rendered.find('#passwordChangeNew').prop('value')).toBe('')
-  expect(rendered.find('#passwordChangeNew2').prop('value')).toBe('')
-  expect(rendered.find('#updateAccountData').prop('disabled')).toBeTruthy()
 
-  rendered.find('form').simulate('submit')
-  expect(updateAccount.mock.calls.length).toBe(1)
+  expect((await findByLabelText('Old password')).value).toBe('oldPassword')
+  expect(passwordChangeNew.value).toBe('')
+  expect(passwordChangeRepeat.value).toBe('')
+  expect(updateButton.disabled).toBeTruthy()
+
+  fireEvent.click(updateButton)
+  expect(updateAccount.mock.calls.length).toBe(startUpdateCallCount)
 
   // enter new password
-  rendered.find('#passwordChangeNew').simulate('change', {
+  fireEvent.change(await findByLabelText('New password'), {
     target: {
-      value: 'newPassword',
-      validity: {
-        valid: true
-      }
+      value: 'newPassword'
     }
   })
-  expect(rendered.find('#passwordChangeOld').prop('value')).toBe('oldPassword')
-  expect(rendered.find('#passwordChangeNew').prop('value')).toBe('newPassword')
-  expect(rendered.find('#passwordChangeNew2').prop('value')).toBe('')
-  expect(rendered.find('#updateAccountData').prop('disabled')).toBeTruthy()
 
-  rendered.find('form').simulate('submit')
-  expect(updateAccount.mock.calls.length).toBe(1)
+  expect((await findByLabelText('Old password')).value).toBe('oldPassword')
+  expect(passwordChangeNew.value).toBe('newPassword')
+  expect(passwordChangeRepeat.value).toBe('')
+  expect(updateButton.disabled).toBeTruthy()
+
+  fireEvent.click(updateButton)
+  expect(updateAccount.mock.calls.length).toBe(startUpdateCallCount)
 
   // enter not matching password
-  rendered.find('#passwordChangeNew2').simulate('change', {
+  fireEvent.change(await findByLabelText('Repeat password'), {
     target: {
-      value: 'otherPassword',
-      validity: {
-        valid: true
-      }
+      value: 'otherPassword'
     }
   })
-  expect(rendered.find('#passwordChangeOld').prop('value')).toBe('oldPassword')
-  expect(rendered.find('#passwordChangeNew').prop('value')).toBe('newPassword')
-  expect(rendered.find('#passwordChangeNew2').prop('value')).toBe('otherPassword')
-  expect(rendered.find('#updateAccountData').prop('disabled')).toBeTruthy()
 
-  rendered.find('form').simulate('submit')
-  expect(updateAccount.mock.calls.length).toBe(1)
+  expect((await findByLabelText('Old password')).value).toBe('oldPassword')
+  expect(passwordChangeNew.value).toBe('newPassword')
+  expect(passwordChangeRepeat.value).toBe('otherPassword')
+  expect(updateButton.disabled).toBeTruthy()
+
+  fireEvent.click(updateButton)
+  expect(updateAccount.mock.calls.length).toBe(startUpdateCallCount)
 
   // enter new password
-  rendered.find('#passwordChangeNew2').simulate('change', {
+  fireEvent.change(await findByLabelText('Repeat password'), {
     target: {
-      value: 'newPassword',
-      validity: {
-        valid: true
-      }
+      value: 'newPassword'
     }
   })
-  expect(rendered.find('#passwordChangeOld').prop('value')).toBe('oldPassword')
-  expect(rendered.find('#passwordChangeNew').prop('value')).toBe('newPassword')
-  expect(rendered.find('#passwordChangeNew2').prop('value')).toBe('newPassword')
-  expect(rendered.find('#updateAccountData').prop('disabled')).toBeFalsy()
+
+  expect((await findByLabelText('Old password')).value).toBe('oldPassword')
+  expect(passwordChangeNew.value).toBe('newPassword')
+  expect(passwordChangeRepeat.value).toBe('newPassword')
+  expect(updateButton.disabled).toBeFalsy()
 
   // change username
-  rendered.find('form').simulate('submit')
-  expect(updateAccount.mock.calls.length).toBe(2)
-  expect(updateAccount.mock.calls[1]).toEqual([
+  fireEvent.click(updateButton)
+
+  expect((await findByLabelText('Old password')).value).toBe('')
+  expect(passwordChangeNew.value).toBe('')
+  expect(passwordChangeRepeat.value).toBe('')
+  expect(updateButton.disabled).toBeTruthy()
+
+  expect(updateAccount.mock.calls.length).toBe(startUpdateCallCount + 1)
+  expect(updateAccount.mock.calls[startUpdateCallCount]).toEqual([
     {
       nextPassword: 'newPassword',
       password: 'oldPassword'
@@ -160,50 +192,49 @@ it('should change the password', () => {
   ])
 })
 
-it('should allow to change username and password at the same time', () => {
+it('should allow to change username and password at the same time', async () => {
   const store = configureStore()
   store.dispatch(signInStatus(true, true, 'tester.mactestface@viewer.com'))
 
-  const rendered = mount(<Provider store={store}>
+  const startUpdateCallCount = updateAccount.mock.calls.length
+
+  const { queryByLabelText, findByLabelText, findByText } = render(<Provider store={store}>
     <AccountDialog />
   </Provider>)
 
-  rendered.find('#usernameChange').simulate('change', {
+  fireEvent.change(queryByLabelText('Username / Mail'), {
     target: {
-      value: 'tester.mactestface@viewer.net',
-      validity: {
-        valid: true
-      }
-    }
-  })
-  rendered.find('#passwordChangeOld').simulate('change', {
-    target: {
-      value: 'oldPassword',
-      validity: {
-        valid: true
-      }
-    }
-  })
-  rendered.find('#passwordChangeNew').simulate('change', {
-    target: {
-      value: 'newPassword',
-      validity: {
-        valid: true
-      }
-    }
-  })
-  rendered.find('#passwordChangeNew2').simulate('change', {
-    target: {
-      value: 'newPassword',
-      validity: {
-        valid: true
-      }
+      value: 'tester.mactestface@viewer.net'
     }
   })
 
-  rendered.find('form').simulate('submit')
-  expect(updateAccount.mock.calls.length).toBe(3)
-  expect(updateAccount.mock.calls[2]).toEqual([
+  fireEvent.change(await findByLabelText('Old password'), {
+    target: {
+      value: 'oldPassword'
+    }
+  })
+
+  fireEvent.change(await findByLabelText('New password'), {
+    target: {
+      value: 'newPassword'
+    }
+  })
+
+  fireEvent.change(await findByLabelText('Repeat password'), {
+    target: {
+      value: 'newPassword'
+    }
+  })
+
+  fireEvent.click(await findByText('update'))
+
+  expect((await findByLabelText('Username / Mail')).value).toBe('tester.mactestface@viewer.net')
+  expect(queryByLabelText('Old password').value).toBe('')
+  expect(queryByLabelText('New password').value).toBe('')
+  expect(queryByLabelText('Repeat password').value).toBe('')
+
+  expect(updateAccount.mock.calls.length).toBe(startUpdateCallCount + 1)
+  expect(updateAccount.mock.calls[startUpdateCallCount]).toEqual([
     {
       nextUsername: 'tester.mactestface@viewer.net',
       nextPassword: 'newPassword',
@@ -213,9 +244,12 @@ it('should allow to change username and password at the same time', () => {
 })
 
 it('should pass aXe', async () => {
-  const rendered = mount(<Provider store={configureStore()}>
+  const store = configureStore()
+  store.dispatch(signInStatus(true, true, 'tester.mactestface@viewer.com'))
+
+  const { container } = render(<Provider store={store}>
     <AccountDialog />
   </Provider>)
 
-  expect(await axe(rendered.html())).toHaveNoViolations()
+  expect(await axe(container)).toHaveNoViolations()
 })

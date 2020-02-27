@@ -1,39 +1,37 @@
 import { axe } from 'jest-axe'
-import { shallow, mount } from 'enzyme'
 import React from 'react'
 import { Provider } from 'react-redux'
+import { render } from '@testing-library/react'
 
 import SignIn from './signIn'
+import configureStore from '../../store/configureStore'
 
-test('renders without crashing', () => {
-  shallow(<SignIn />)
-})
-
-test('on buttons click', () => {
-  const store = {
-    getState: () => ({}),
-    dispatch: () => {},
-    subscribe: () => () => {}
-  }
-
-  const rendered = mount(<Provider store={store}>
+it('renders without crashing', () => {
+  const { container } = render(<Provider store={configureStore()}>
     <SignIn />
   </Provider>)
 
-  const buttons = rendered.find('button[aria-haspopup="dialog"]')
-  expect(buttons.length).toBe(2)
+  expect(container).toBeTruthy()
 })
 
-test('should pass aXe', async () => {
-  const store = {
-    getState: () => ({}),
-    dispatch: () => {},
-    subscribe: () => () => {}
-  }
-
-  const rendered = mount(<Provider store={store}>
-    <SignIn showSignInPopup={() => {}} />
+it('on buttons click', () => {
+  const { queryByText } = render(<Provider store={configureStore()}>
+    <SignIn />
   </Provider>)
 
-  expect(await axe(rendered.html())).toHaveNoViolations()
+  const signInButton = queryByText('Sign In')
+  expect(signInButton).toBeTruthy()
+  expect(signInButton.nodeName).toBe('BUTTON')
+
+  const signUpButton = queryByText('Sign Up')
+  expect(signUpButton).toBeTruthy()
+  expect(signUpButton.nodeName).toBe('BUTTON')
+})
+
+it('should pass aXe', async () => {
+  const { container } = render(<Provider store={configureStore()}>
+    <SignIn />
+  </Provider>)
+
+  expect(await axe(container)).toHaveNoViolations()
 })

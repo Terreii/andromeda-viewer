@@ -12,6 +12,7 @@ In this directory are the general and setup modules located. Most of the App is 
 - [`actions`](./actions) contains all redux-actions.
 - [`bundles`]('./bundles) hold and handle state changes. They also export selectors to access state.
 - [`components`](./components) contains all react-components.
+- [`hooks`](./hooks) contains common [react-hooks](https://reactjs.org/docs/hooks-intro.html).
 - [`icons`](./icons) all icons and images.
 - [`network`](./network) contains the UDP-network lair.
 - [`reactors`](./reactors) contains functions that react to state changes and dispatch actions.
