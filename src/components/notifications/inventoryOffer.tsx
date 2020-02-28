@@ -1,41 +1,36 @@
 import React from 'react'
+import { useDispatch } from 'react-redux'
 
-import { Container } from './utils'
+import { Container, ComponentArguments } from './utils'
 import Text from '../text'
+
+import { acceptInventoryOffer, declineInventoryOffer } from '../../actions/inventory'
 
 import { useName } from '../../hooks/names'
 
 import { InventoryOfferedNotification } from '../../types/chat'
-import { AssetType, getItemTypeName } from '../../types/inventory'
+import { getItemTypeName } from '../../types/inventory'
 
 import formStyles from '../formElements.module.css'
 import styles from './notifications.module.css'
 
-interface NotificationArgs {
-  data: InventoryOfferedNotification
-  onAccept: (
-    fromId: string,
-    transactionId: string,
-    assetType: AssetType,
-    isFromGroup: boolean,
-    isFromObject: boolean
-  ) => void
-  onDecline: (
-    fromId: string,
-    transactionId: string,
-    isFromGroup: boolean,
-    isFromObject: boolean
-  ) => void
-  onClose: () => void
-}
+export default function InventoryOffer (
+  { data, onClose }: ComponentArguments<InventoryOfferedNotification>
+) {
+  const dispatch = useDispatch()
 
-export default function InventoryOffer ({ data, onAccept, onDecline, onClose }: NotificationArgs) {
   const doAccept = () => {
-    onAccept(data.fromId, data.item.transactionId, data.item.type, false, data.fromObject)
+    dispatch(acceptInventoryOffer(
+      data.fromId,
+      data.item.transactionId,
+      data.item.type,
+      false,
+      data.fromObject
+    ))
     onClose()
   }
   const doDecline = () => {
-    onDecline(data.fromId, data.item.transactionId, false, data.fromObject)
+    dispatch(declineInventoryOffer(data.fromId, data.item.transactionId, false, data.fromObject))
     onClose()
   }
 

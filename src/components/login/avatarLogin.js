@@ -62,7 +62,13 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
         const target = event.target
 
         setTimeout(() => {
-          if (target == null) return
+          if (
+            target == null ||
+            target.parentElement == null ||
+            target.parentElement.scrollIntoView == null
+          ) {
+            return
+          }
 
           target.parentElement.scrollIntoView(true)
         }, 16)

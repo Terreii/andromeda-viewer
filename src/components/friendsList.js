@@ -1,6 +1,11 @@
 import React from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 
 import { IMChatType } from '../types/chat'
+
+import { selectFriends } from '../bundles/friends'
+
+import { updateRights } from '../actions/friendsActions'
 
 import styles from './infoList.module.css'
 import chatBubble from '../icons/chat_bubble.svg'
@@ -42,9 +47,7 @@ function FriendRow ({ friend, name, skipLink, onRightsChanged, startNewIMChat })
         aria-label={titles[key][rightName]}
         onChange={event => {
           if (event.target.disabled || key === 'rightsHas') return
-          onRightsChanged(friend.id, {
-            [rightName]: event.target.checked
-          })
+          onRightsChanged(rightName, event.target.checked)
         }}
       />
       rights.push(ele)
@@ -65,7 +68,10 @@ function FriendRow ({ friend, name, skipLink, onRightsChanged, startNewIMChat })
   </li>
 }
 
-export default function FriendsList ({ friends, names, updateRights, startNewIMChat }) {
+export default function FriendsList ({ names, startNewIMChat }) {
+  const dispatch = useDispatch()
+  const friends = useSelector(selectFriends)
+
   return <main className={styles.Container} aria-label='Friends'>
     <ul className={styles.List}>
       {friends.map((friend, index, all) => {
@@ -78,7 +84,11 @@ export default function FriendsList ({ friends, names, updateRights, startNewIMC
             : '#skip-friends-list-content'}
           friend={friend}
           name={name}
-          onRightsChanged={updateRights}
+          onRightsChanged={(rightName, nextValue) => {
+            dispatch(updateRights(friend.id, {
+              [rightName]: nextValue
+            }))
+          }}
           startNewIMChat={startNewIMChat}
         />
       })}

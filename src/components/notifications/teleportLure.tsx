@@ -1,7 +1,10 @@
 import React from 'react'
+import { useDispatch } from 'react-redux'
 
-import { Container } from './utils'
+import { Container, ComponentArguments } from './utils'
 import Text from '../text'
+
+import { acceptTeleportLure, declineTeleportLure } from '../../actions/friendsActions'
 
 import { useName } from '../../hooks/names'
 
@@ -10,20 +13,15 @@ import { TeleportLure } from '../../types/chat'
 import formStyles from '../formElements.module.css'
 import styles from './notifications.module.css'
 
-interface NotificationArgs {
-  data: TeleportLure
-  onAccept: (fromId: string, sessionId: string) => void
-  onDecline: (fromId: string, sessionId: string) => void
-  onClose: () => void
-}
+export default function FriendshipOffer ({ data, onClose }: ComponentArguments<TeleportLure>) {
+  const dispatch = useDispatch()
 
-export default function FriendshipOffer ({ data, onAccept, onDecline, onClose }: NotificationArgs) {
   const doAccept = () => {
-    onAccept(data.fromId, data.lureId)
+    dispatch(acceptTeleportLure(data.fromId, data.lureId))
     onClose()
   }
   const doDecline = () => {
-    onDecline(data.fromId, data.lureId)
+    dispatch(declineTeleportLure(data.fromId, data.lureId))
     onClose()
   }
 
@@ -36,7 +34,7 @@ export default function FriendshipOffer ({ data, onAccept, onDecline, onClose }:
 
     <div className={styles.ButtonsRow}>
       <button className={formStyles.OkButton} onClick={doAccept} disabled>
-        Accept (not jet implemented)
+        Accept (not yet implemented)
       </button>
 
       <button className={formStyles.DangerButton} onClick={doDecline}>

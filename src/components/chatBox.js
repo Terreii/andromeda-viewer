@@ -3,33 +3,54 @@
  */
 
 import React, { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { useTabState, Tab, TabList, TabPanel } from 'reakit/Tab'
 
 import ChatDialog from './chatDialog'
 import FriendsList from './friendsList'
 import GroupsList from './groupsList'
-import NotificationsContainer from '../containers/notificationsContainer'
+import Notifications from './notifications'
+
+import {
+  sendLocalChatMessage,
+  sendInstantMessage,
+  startNewIMChat,
+  getIMHistory
+} from '../actions/chatMessageActions'
+
+import { selectActiveIMChats } from '../bundles/imChat'
+import { selectLocalChat } from '../bundles/localChat'
+import { selectNames } from '../bundles/names'
+import { selectShouldDisplayNotifications } from '../bundles/notifications'
+import { selectActiveTab, changeChatTab } from '../bundles/session'
 
 import { IMChatType, IMDialog } from '../types/chat'
 
 import style from './chatBox.module.css'
 
-const Notifications = React.memo(NotificationsContainer)
-
 export default function ChatBox (props) {
-  const names = props.names
-  const changeTab = props.changeTab
+  const dispatch = useDispatch()
+  const localChat = useSelector(selectLocalChat)
+  const names = useSelector(selectNames)
+  const shouldDisplayNotifications = useSelector(selectShouldDisplayNotifications)
 
-  const tab = useTabState({ selectedId: props.activeTab })
+  const tab = useTabState({ selectedId: useSelector(selectActiveTab) })
   useEffect(
-    () => { changeTab(tab.selectedId) },
-    [tab.selectedId, changeTab]
+    () => { dispatch(changeChatTab(tab.selectedId)) },
+    [tab.selectedId, dispatch]
+  )
+
+  const doStartNewIMChat = (chatType, targetId, name) => dispatch(
+    startNewIMChat(chatType, targetId, name)
+  )
+  const doLoadImHistory = (sessionId, chatSaveId) => dispatch(
+    getIMHistory(sessionId, chatSaveId)
   )
 
   const tabs = []
   const tabPanels = []
 
-  for (const chat of props.IMs) {
+  for (const chat of useSelector(selectActiveIMChats)) {
     const id = chat.sessionId
     const target = chat.target
     const type = chat.type
@@ -51,15 +72,17 @@ export default function ChatBox (props) {
       <ChatDialog
         data={chat}
         isIM
-        sendTo={text => props.sendInstantMessage(
-          text,
-          target,
-          id,
-          type === IMChatType.personal ? IMDialog.MessageFromAgent : IMDialog.SessionSend
-        )}
+        sendTo={text => {
+          dispatch(sendInstantMessage(
+            text,
+            target,
+            id,
+            type === IMChatType.personal ? IMDialog.MessageFromAgent : IMDialog.SessionSend
+          ))
+        }}
         names={names}
         type={type}
-        loadHistory={props.getIMHistory}
+        loadHistory={doLoadImHistory}
       />
     </TabPanel>)
   }
@@ -71,7 +94,7 @@ export default function ChatBox (props) {
 
         <Tab {...tab} className={style.tabButton} stopId='groups'>Groups</Tab>
 
-        {props.shouldDisplayNotifications && <Tab
+        {shouldDisplayNotifications && <Tab
           {...tab}
           className={style.tabButton}
           stopId='notifications'
@@ -87,17 +110,12 @@ export default function ChatBox (props) {
       <TabPanel {...tab} className={style.panel} stopId='friends' tabIndex='-1'>
         <FriendsList
           names={names}
-          friends={props.friends}
-          startNewIMChat={props.startNewIMChat}
-          updateRights={props.updateRights}
+          startNewIMChat={doStartNewIMChat}
         />
       </TabPanel>
 
       <TabPanel {...tab} className={style.panel} stopId='groups' tabIndex='-1'>
-        <GroupsList
-          groups={props.groups}
-          startNewIMChat={props.startNewIMChat}
-        />
+        <GroupsList startNewIMChat={doStartNewIMChat} />
       </TabPanel>
 
       {props.shouldDisplayNotifications && <TabPanel
@@ -111,9 +129,11 @@ export default function ChatBox (props) {
 
       <TabPanel {...tab} className={style.panel} stopId='local' tabIndex='-1'>
         <ChatDialog
-          data={props.localChat}
+          data={localChat}
           names={names}
-          sendTo={props.sendLocalChatMessage}
+          sendTo={text => {
+            dispatch(sendLocalChatMessage(text, 1, 0))
+          }}
         />
       </TabPanel>
 
@@ -121,4 +141,3 @@ export default function ChatBox (props) {
     </div>
   )
 }
-ChatBox.displayName = 'ChatBox'

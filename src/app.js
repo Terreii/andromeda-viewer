@@ -1,29 +1,36 @@
 /*
  * Entry-point into the app on the client side
- *
  */
 
 import React, { useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { Route, Switch, Redirect } from 'react-router-dom'
+import { Provider, useSelector, useDispatch } from 'react-redux'
+import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
 
-import { viewerName } from '../viewerInfo'
+import { viewerName } from './viewerInfo'
 
-import { AppContainer, LoadableChatComponent } from '../components/main'
-import LoginForm from './loginForm'
-import GlobalModals from './globalModals'
-import TopMenuBar from './topMenuBar'
-import AccountDialog from '../components/accountDialog'
+import { AppContainer, LoadableChatComponent } from './components/main'
+import Login from './components/login'
+import GlobalModals from './components/modals/globalModals'
+import TopMenuBar from './components/topBar'
+import AccountDialog from './components/accountDialog'
 
-import { isSignedIn as getIsSignedIn } from '../actions/viewerAccount'
+import { isSignedIn as getIsSignedIn } from './actions/viewerAccount'
 
-import { selectIsSignedIn } from '../bundles/account'
-import { selectOwnAvatarName } from '../bundles/names'
-import { selectIsLoggedIn } from '../bundles/session'
+import { selectIsSignedIn } from './bundles/account'
+import { selectOwnAvatarName } from './bundles/names'
+import { selectIsLoggedIn } from './bundles/session'
 
 import 'normalize.css'
 
-export default function App () {
+export default function Root ({ store }) {
+  return <Provider store={store}>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </Provider>
+}
+
+function App () {
   const isSignedIn = useSelector(selectIsSignedIn)
 
   const dispatch = useDispatch()
@@ -43,7 +50,7 @@ export default function App () {
   return <AppContainer>
     <Switch>
       <Route exact path='/'>
-        <LoginForm isSignedIn={isSignedIn} />
+        <Login isSignedIn={isSignedIn} />
       </Route>
       <Route path='/session'>
         <LoadableChatComponent />

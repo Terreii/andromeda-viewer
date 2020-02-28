@@ -96,7 +96,13 @@ export default function NewAvatarLogin ({
         const target = event.target
 
         setTimeout(() => {
-          if (target == null) return
+          if (
+            target == null ||
+            target.parentElement == null ||
+            target.parentElement.scrollIntoView == null
+          ) {
+            return
+          }
 
           target.parentElement.scrollIntoView(true)
         }, 16)

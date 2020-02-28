@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import Root from './containers/root'
+import Root from './app'
 import configureStore from './store/configureStore'
 import registerServiceWorker from './registerServiceWorker'
 
@@ -14,7 +14,7 @@ ReactDOM.render(
 
 if (process.env.NODE_ENV !== 'production') {
   if (module.hot) {
-    module.hot.accept('./containers/root', () => {
+    module.hot.accept('./app', () => {
       ReactDOM.render(
         <Root store={store} />,
         document.getElementById('root')

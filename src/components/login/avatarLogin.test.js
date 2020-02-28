@@ -1,10 +1,10 @@
 import { axe } from 'jest-axe'
 import React from 'react'
-import { shallow, mount } from 'enzyme'
+import { render, fireEvent } from '@testing-library/react'
 
 import AvatarLogin from './avatarLogin'
 
-test('renders without crashing', () => {
+it('renders without crashing', () => {
   const avatar = {
     _id: 'avatar/testery',
     name: 'Testery MacTestface',
@@ -16,19 +16,62 @@ test('renders without crashing', () => {
     loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
   }
 
-  shallow(<AvatarLogin
+  const { container: notSelectedContainer } = render(<AvatarLogin
     avatar={avatar}
     grid={grid}
   />)
 
-  shallow(<AvatarLogin
+  expect(notSelectedContainer).toBeTruthy()
+
+  const { container: selectedContainer } = render(<AvatarLogin
     avatar={avatar}
     grid={grid}
     isSelected
   />)
+
+  expect(selectedContainer).toBeTruthy()
 })
 
-test('login works', () => {
+it('should call onSelect when clicked and not selected', () => {
+  const avatar = {
+    _id: 'avatar/testery',
+    name: 'Testery MacTestface',
+    grid: 'Second Life',
+    avatarIdentifier: 'abcd@Second Life'
+  }
+
+  const grid = {
+    name: 'Second Life',
+    loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
+  }
+
+  const onLogin = jest.fn()
+  const onSelect = jest.fn()
+
+  const { queryByText } = render(<AvatarLogin
+    avatar={avatar}
+    grid={grid}
+    onLogin={onLogin}
+    isSelected={false}
+    onSelect={onSelect}
+  />)
+
+  expect(queryByText('Testery Mactestface')).toBeTruthy()
+
+  const clickText = queryByText('click to login')
+  expect(clickText).toBeTruthy()
+  expect(clickText.parentElement).toBeTruthy()
+  expect(clickText.parentElement.nodeName).toBe('BUTTON')
+
+  fireEvent.click(clickText.parentElement)
+
+  expect(onLogin.mock.calls).toEqual([])
+  expect(onSelect.mock.calls).toEqual([
+    ['abcd@Second Life']
+  ])
+})
+
+it('should successfully login', async () => {
   const avatar = {
     _id: 'avatar/testery',
     name: 'Testery MacTestface',
@@ -40,55 +83,55 @@ test('login works', () => {
     loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
   }
 
-  const loginInfo = {
-    count: 0,
-    avatar: null,
-    password: null
-  }
+  const onLogin = jest.fn()
 
-  const rendered = mount(<AvatarLogin
+  const { queryByText, queryByLabelText, findByText } = render(<AvatarLogin
     avatar={avatar}
     grid={grid}
-    onLogin={(theAvatar, password) => {
-      loginInfo.count += 1
-      loginInfo.avatar = theAvatar
-      loginInfo.password = password
-    }}
+    onLogin={onLogin}
     isSelected
   />)
 
-  const input = rendered.find('input')
-  const button = rendered.find('button')
-
-  input.simulate('submit')
-
   // no password
-  expect(button.prop('disabled')).toBeTruthy()
-  expect(loginInfo.count).toBe(0)
+  const loginButton = queryByText('Login')
+  expect(loginButton).toBeTruthy()
+  expect(loginButton.nodeName).toBe('BUTTON')
+  expect(loginButton.disabled).toBeTruthy()
 
-  input.simulate('change', {
+  const input = queryByLabelText('Password:')
+  expect(input).toBeTruthy()
+  expect(input.nodeName).toBe('INPUT')
+
+  fireEvent.change(input, {
     target: {
       value: 'aPassword'
     }
   })
 
-  button.simulate('submit')
+  const enabledButton = await findByText('Login')
+  expect(enabledButton).toBeTruthy()
+  expect(enabledButton.nodeName).toBe('BUTTON')
+  expect(enabledButton.disabled).toBeFalsy()
 
-  expect(loginInfo.count).toBe(1)
-  expect(loginInfo.avatar).toBe(avatar)
-  expect(loginInfo.password).toBe('aPassword')
+  fireEvent.submit(enabledButton)
 
-  loginInfo.avatar = null
-  loginInfo.password = null
+  expect(onLogin.mock.calls).toEqual([
+    [avatar, 'aPassword']
+  ])
 
-  input.simulate('submit')
+  // login again
+  const enabledButton2 = await findByText('Login')
+  expect(enabledButton2).toBeTruthy()
+  expect(enabledButton2.nodeName).toBe('BUTTON')
+  expect(enabledButton2.disabled).toBeFalsy()
 
-  expect(loginInfo.count).toBe(2)
-  expect(loginInfo.avatar).toBe(avatar)
-  expect(loginInfo.password).toBe('aPassword')
+  fireEvent.submit(enabledButton2)
+
+  expect(onLogin.mock.calls.length).toBe(2)
+  expect(onLogin.mock.calls[1]).toEqual([avatar, 'aPassword'])
 })
 
-test('should pass aXe', async () => {
+it('should pass aXe', async () => {
   const avatar = {
     _id: 'avatar/testery',
     name: 'Testery MacTestface',
@@ -100,22 +143,12 @@ test('should pass aXe', async () => {
     loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
   }
 
-  const loginInfo = {
-    count: 0,
-    avatar: null,
-    password: null
-  }
-
-  const rendered = mount(<AvatarLogin
+  const { container } = render(<AvatarLogin
     avatar={avatar}
     grid={grid}
-    onLogin={(theAvatar, password) => {
-      loginInfo.count += 1
-      loginInfo.avatar = theAvatar
-      loginInfo.password = password
-    }}
+    onLogin={() => {}}
     isSelected
   />)
 
-  expect(await axe(rendered.html())).toHaveNoViolations()
+  expect(await axe(container)).toHaveNoViolations()
 })
