@@ -1,4 +1,4 @@
-import { name, version } from '../package.json'
+import { name, version, bugs, repository } from '../package.json'
 
 export const viewerName = name
 
@@ -45,3 +45,7 @@ export const viewerPlatformVersion = (() => {
   const index = userAgent.lastIndexOf('/') + 1
   return userAgent.slice(index) || defaultVersion
 })()
+
+export const bugsUrl = bugs.url
+
+export const repositoryUrl = repository.url.replace(/.git$/i, '')

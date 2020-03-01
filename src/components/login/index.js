@@ -6,10 +6,11 @@ import { selectSavedAvatars, selectSavedGrids } from '../../bundles/account'
 
 import { login } from '../../actions/sessionActions'
 
-import LoginNewAvatar from './newAvatarLogin'
-import AvatarLogin from './avatarLogin'
-import SignIn from './signIn'
 import AvatarName from '../../avatarName'
+import AvatarLogin from './avatarLogin'
+import InfoSection from './info-section'
+import LoginNewAvatar from './newAvatarLogin'
+import SignIn from './signIn'
 
 import styles from './index.module.css'
 
@@ -161,5 +162,9 @@ export default function LoginForm ({ isSignedIn }) {
         </p>
       </div>}
     </main>
+
+    <footer>
+      <InfoSection />
+    </footer>
   </div>
 }
