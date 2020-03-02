@@ -1,5 +1,7 @@
 import { name, version, bugs, repository } from '../package.json'
 
+export { author } from '../package.json'
+
 export const viewerName = name
 
 export const viewerVersion = version + '.0'
