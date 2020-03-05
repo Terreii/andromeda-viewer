@@ -1,6 +1,9 @@
-import { name, version, bugs, repository } from '../package.json'
+import { name, version, author as authorFromPackage, bugs, repository } from '../package.json'
 
-export { author } from '../package.json'
+export const author = {
+  ...authorFromPackage,
+  avatarName: 'Terreii Resident'
+}
 
 export const viewerName = name
 

@@ -15,7 +15,7 @@ export default function InfoSection () {
       </Tab>
 
       <Tab {...tab} stopId='terms'>
-        Terms Of Service
+        Terms of Service
       </Tab>
 
       <Tab {...tab} stopId='privacy'>
@@ -46,6 +46,9 @@ export default function InfoSection () {
           Come and have a look around
         </a>
         . (Be careful there will be feature spoilers! 😉)
+        <button type='button' onClick={() => { tab.move('open-source') }}>
+          more about open source
+        </button>
       </p>
 
       <p>
@@ -56,10 +59,10 @@ export default function InfoSection () {
       <p>I can’t give you costumer support, but you can contact me:</p>
       <ul>
         <li>at <a href={`mailto:${author.email}`}>{author.email}</a></li>
-        <li>or IM in world <b>{'Avatar name placeholder'}</b></li>
+        <li>or IM in world <strong>{author.avatarName}</strong></li>
       </ul>
       <p>
-        <b>I’ll try to read every message, but can’t respond to them all. </b>
+        <strong>I’ll try to read every message, but can’t respond to them all. </strong>
         Thanks for understanding.
       </p>
 
@@ -73,7 +76,7 @@ export default function InfoSection () {
 
       <p>
         Browsers are sadly not capable to fully support the Second Life Protocol. Because of this
-        situation a part of it must be send over a server. But the server will not store anything
+        situation a part of it must be send over a server. But the server will not store any content
         from the SL protocol!
         <br />
         Everything that is saved will first be encrypted on your computer and then,
@@ -81,26 +84,34 @@ export default function InfoSection () {
         you choose to, the encrypted version will be stored on the server.
       </p>
 
+      <button type='button' onClick={() => { tab.move('encryption') }}>
+        More about encryption
+      </button>
+
       <p>{'<<Placeholder for what will be send over the proxy server>>'}</p>
 
       <h3>Account and avatars</h3>
 
-      <p>There are two types of logins:</p>
-      <ul>
-        <li>
-          You can login with your <b>Avatar</b> without saving anything. When you log out,
-          everything will be forgotten.
-        </li>
-        <li>
-          When you did create an <b>Account</b>, then you can store and sync an avatar and
-          its chat history.
-        </li>
-      </ul>
+      <p>
+        If you just what to test {viewerName}, then there is the <em>login anonymously</em> option.
+        You enter one of your avatars' login information and you're ready to start.
+        While this session last, nothing will be stored. And once you log out all local data will
+        be removed, too.
+        <br />
+        But if you choose to create an {viewerName}-account, then you have the option to save and
+        sync your avatars' data.
+      </p>
 
-      <p>When you chose to create an {viewerName}-account, you will be asked for two passwords:</p>
+      <p>
+        While creating an {viewerName}-account, you will be asked to make two passwords:
+      </p>
       <ol>
-        <li>Your <b>{viewerName}-account password</b>. Used to sign in to this viewer.</li>
-        <li>And an <b>encryption password</b>. It is used to encrypt your avatars' data.</li>
+        <li>
+          Your <strong>{viewerName}-account password</strong>. Used to sign in to this viewer.
+        </li>
+        <li>
+          And an <strong>encryption password</strong>. It is used to encrypt your avatars' data.
+        </li>
       </ol>
     </TabPanel>
 
@@ -122,7 +133,7 @@ export default function InfoSection () {
             target='_blank'
             rel='noopener noreferrer'
           >
-            <b>hoodie-plugin-store-crypto</b>
+            <strong>hoodie-plugin-store-crypto</strong>
           </a>.
         </summary>
         It uses <a
@@ -144,6 +155,36 @@ export default function InfoSection () {
         >
           <code>AES-GCM</code>
         </a> for encryption.
+        <br />
+        You can find it's source code on <a
+          href='https://github.com/Terreii/hoodie-plugin-store-crypto'
+          target='_blank'
+          rel='noopener noreferrer'
+        >
+          GitHub
+        </a>.
+        <br />
+        The key creation is implemented in <a
+          href='https://github.com/Terreii/hoodie-plugin-store-crypto/blob/latest/lib/create-key.js'
+          target='_blank'
+          rel='noopener noreferrer'
+        >
+          <code>lib/create-key.js</code>
+        </a>, while encrypting is in <a
+          href={'https://github.com/Terreii/hoodie-plugin-store-crypto/blob/latest/lib/' +
+            'helpers/encrypt-core.js'}
+          target='_blank'
+          rel='noopener noreferrer'
+        >
+          <code>lib/helpers/encrypt-core.js</code>
+        </a> and decrypting in <a
+          href={'https://github.com/Terreii/hoodie-plugin-store-crypto/blob/latest/lib/' +
+            'helpers/decrypt-core.js'}
+          target='_blank'
+          rel='noopener noreferrer'
+        >
+          <code>lib/helpers/decrypt-core.js</code>
+        </a>.
       </details>
 
       <p>When you create an account you will be ask for two (2) passwords:</p>
@@ -158,18 +199,23 @@ export default function InfoSection () {
         <dd>
           This password is used to encrypt all your Avatars data.
           Your encryption password will <em>never leave</em> your machine!
+          <br />
+          Your encryption password will not even be stored! For this reason you must enter your
+          encryption password every time you open a tab of this viewer.
+          <br />
+          <em>10 Reset keys</em> will be created for your encryption password.
+          <br />
+          <strong>
+            If you loose your encryption password, the 10 reset keys are the only way
+            to get your data back!
+          </strong>
         </dd>
       </dl>
-
-      <p>
-        Your encryption password will not even be stored! For this reason you must enter your
-        encryption password every time you open a tab of this viewer.
-      </p>
 
       <h3>What is encrypted?</h3>
 
       <p>
-        If you choose to save your Avatar, all its data will be stored and synced encrypted.
+        If you choose to save an Avatar, all its data will be stored and synced, encrypted.
         This includes:
       </p>
       <ul>
