@@ -57,6 +57,7 @@ it('should pass aXe', async () => {
         unlocked: true,
         loggedIn: true,
         username: 'tester@test.org',
+        tos: { loading: true, version: 0 },
         savedAvatars: avatars,
         savedAvatarsLoaded: true,
         savedGrids: grids,

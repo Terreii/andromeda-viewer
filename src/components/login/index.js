@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 
-import { selectSavedAvatars, selectSavedGrids } from '../../bundles/account'
+import { selectSavedAvatars, selectSavedGrids, selectShowToS } from '../../bundles/account'
 
 import { login } from '../../actions/sessionActions'
 
 import AvatarName from '../../avatarName'
 import AvatarLogin from './avatarLogin'
+import FirstRunDialog from '../modals/firstRunDialog'
 import LoginNewAvatar from './newAvatarLogin'
 import SignIn from './signIn'
 
@@ -15,6 +16,7 @@ import styles from './index.module.css'
 
 export default function LoginForm ({ isSignedIn }) {
   const dispatch = useDispatch()
+  const showToS = useSelector(selectShowToS)
 
   const history = useHistory()
   const avatars = useSelector(selectSavedAvatars)
@@ -127,6 +129,8 @@ export default function LoginForm ({ isSignedIn }) {
   }
 
   return <div className={styles.Container}>
+    {showToS && <FirstRunDialog />}
+
     <main className={styles.Main}>
       <div className={styles.AvatarList}>
         <LoginNewAvatar
