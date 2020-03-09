@@ -8,7 +8,6 @@ import { login } from '../../actions/sessionActions'
 
 import AvatarName from '../../avatarName'
 import AvatarLogin from './avatarLogin'
-import InfoSection from './info-section'
 import LoginNewAvatar from './newAvatarLogin'
 import SignIn from './signIn'
 
@@ -161,10 +160,12 @@ export default function LoginForm ({ isSignedIn }) {
           </React.Fragment>)}
         </p>
       </div>}
-    </main>
 
-    <footer>
-      <InfoSection />
-    </footer>
+      <footer className={styles.legalFooter}>
+        <small>
+          This software is not provided or supported by Linden Lab, the makers of Second Life.
+        </small>
+      </footer>
+    </main>
   </div>
 }

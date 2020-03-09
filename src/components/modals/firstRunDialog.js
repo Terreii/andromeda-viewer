@@ -1,32 +1,37 @@
-import React from 'react'
-import { useTabState, Tab, TabList, TabPanel } from 'reakit'
+import React, { useState } from 'react'
+import { useDialogState, useTabState, Tab, TabList, TabPanel } from 'reakit'
 
+import Modal from './modal'
 import { viewerName, author, repositoryUrl } from '../../viewerInfo'
 
-import styles from './info-section.module.css'
+import styles from './firstRunDialog.module.css'
+import formStyles from '../formElements.module.css'
 
-export default function InfoSection () {
+export default function FirstRunDialog () {
   const tab = useTabState(() => ({ selectedId: 'general' }))
+  const dialog = useDialogState(() => ({ visible: process.env.NODE_ENV !== 'test' }))
 
-  return <div>
-    <TabList {...tab} aria-label='Infos tabs'>
-      <Tab {...tab} stopId='general'>
+  const [agreeToTos, setAgreeToTos] = useState(false)
+
+  return <Modal title='Information about the Viewer' dialog={dialog} backdrop notCloseable>
+    <TabList {...tab} className={styles.list} aria-label='Infos tabs'>
+      <Tab {...tab} className={styles.tabButton} stopId='general'>
         Welcome
       </Tab>
 
-      <Tab {...tab} stopId='terms'>
+      <Tab {...tab} className={styles.tabButton} stopId='terms'>
         Terms of Service
       </Tab>
 
-      <Tab {...tab} stopId='privacy'>
+      <Tab {...tab} className={styles.tabButton} stopId='privacy'>
         Privacy Policy
       </Tab>
 
-      <Tab {...tab} stopId='encryption'>
+      <Tab {...tab} className={styles.tabButton} stopId='encryption'>
         Encryption
       </Tab>
 
-      <Tab {...tab} stopId='open-source'>
+      <Tab {...tab} className={styles.tabButton} stopId='open-source'>
         Open Source
       </Tab>
     </TabList>
@@ -46,10 +51,14 @@ export default function InfoSection () {
           Come and have a look around
         </a>
         . (Be careful there will be feature spoilers! 😉)
-        <button type='button' onClick={() => { tab.move('open-source') }}>
-          more about open source
-        </button>
       </p>
+      <button
+        type='button'
+        className={formStyles.Button}
+        onClick={() => { tab.move('open-source') }}
+      >
+        more about open source
+      </button>
 
       <p>
         Currently only local chat, IMs, group chat, notifications and friends and groups list
@@ -66,6 +75,12 @@ export default function InfoSection () {
         Thanks for understanding.
       </p>
 
+      <p>
+        <strong>
+          This software is not provided or supported by Linden Lab, the makers of Second Life.
+        </strong>
+      </p>
+
       <h3>Protocol and safety</h3>
 
       <p>
@@ -76,15 +91,19 @@ export default function InfoSection () {
 
       <p>
         Browsers are sadly not capable to fully support the Second Life Protocol. Because of this
-        situation a part of it must be send over a server. But the server will not store any content
-        from the SL protocol!
+        situation a part of it must be send over a server. But the server will not store any
+        content from the SL protocol!
         <br />
         Everything that is saved will first be encrypted on your computer and then,
         <em> if </em>
         you choose to, the encrypted version will be stored on the server.
       </p>
 
-      <button type='button' onClick={() => { tab.move('encryption') }}>
+      <button
+        type='button'
+        className={formStyles.Button}
+        onClick={() => { tab.move('encryption') }}
+      >
         More about encryption
       </button>
 
@@ -93,8 +112,8 @@ export default function InfoSection () {
       <h3>Account and avatars</h3>
 
       <p>
-        If you just what to test {viewerName}, then there is the <em>login anonymously</em> option.
-        You enter one of your avatars' login information and you're ready to start.
+        If you just what to test {viewerName}, then there is the <em>login anonymously </em>
+        option. You enter one of your avatars' login information and you're ready to start.
         While this session last, nothing will be stored. And once you log out all local data will
         be removed, too.
         <br />
@@ -165,7 +184,9 @@ export default function InfoSection () {
         </a>.
         <br />
         The key creation is implemented in <a
-          href='https://github.com/Terreii/hoodie-plugin-store-crypto/blob/latest/lib/create-key.js'
+          href={
+            'https://github.com/Terreii/hoodie-plugin-store-crypto/blob/latest/lib/create-key.js'
+          }
           target='_blank'
           rel='noopener noreferrer'
         >
@@ -274,5 +295,28 @@ export default function InfoSection () {
         </li>
       </ul>
     </TabPanel>
-  </div>
+
+    <form className={styles.tosRow}>
+      <label>
+        <input
+          type='checkbox'
+          className={styles.tosCheckbox}
+          checked={agreeToTos}
+          onChange={event => {
+            setAgreeToTos(event.target.checked)
+          }}
+        />
+        I agree to the <strong>Terms of Service</strong> and <strong>Privacy Policy </strong>
+      </label>
+      <br />
+      <button
+        type='button'
+        className={formStyles.PrimaryButton}
+        onClick={() => { dialog.hide() }}
+        disabled={!agreeToTos}
+      >
+        Accept
+      </button>
+    </form>
+  </Modal>
 }

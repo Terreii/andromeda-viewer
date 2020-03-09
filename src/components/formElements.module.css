@@ -13,6 +13,7 @@
   border: var(--button-border);
   font-weight: 400;
   background: #e0e0e0;
+  cursor: pointer;
 }
 .Button:hover, .Button:focus {
   background: #cacbcd;
@@ -24,6 +25,7 @@
 }
 .Button:disabled {
   opacity: 0.65;
+  cursor: auto;
 }
 
 .DangerButton {

@@ -2,8 +2,9 @@ import React from 'react'
 import { useSelector } from 'react-redux'
 
 import ErrorDialog from './error'
-import UnlockDialog from './unlockDialog'
+import FirstRunDialog from './firstRunDialog'
 import ResetKeysPopup from './resetKeys'
+import UnlockDialog from './unlockDialog'
 
 import { selectShowUnlockDialog, selectResetKeys } from '../../bundles/account'
 import { selectErrorMessage } from '../../bundles/session'
@@ -19,6 +20,8 @@ export default React.memo(() => {
     return <ResetKeysPopup resetKeys={resetKeys} />
   } else if (errorMessage != null) {
     return <ErrorDialog errorMessage={errorMessage} />
+  } else if (true) {
+    return <FirstRunDialog />
   } else {
     return null
   }
