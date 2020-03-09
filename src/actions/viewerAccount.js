@@ -168,6 +168,14 @@ export function isSignedIn () {
   }
 }
 
+export function doGetToSAgreeState () {
+  return () => {}
+}
+
+export function doAgreeToToS () {
+  return () => {}
+}
+
 function listenToAccountChanges (account, dispatch) {
   const handler = changes => {
     dispatch(accountDidUpdate(changes))

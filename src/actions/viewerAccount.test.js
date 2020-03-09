@@ -2,17 +2,20 @@ import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
 import { v4 } from 'uuid'
 
-import { signInStatus } from '../bundles/account'
+import { signInStatus, selectShowToS, signOut } from '../bundles/account'
 import {
   saveAvatar,
   loadSavedAvatars,
   saveGrid,
   loadSavedGrids,
   isSignedIn,
+  doGetToSAgreeState,
+  doAgreeToToS,
   unlock
 } from './viewerAccount'
 
 import AvatarName from '../avatarName'
+import configureStore from '../store/configureStore'
 
 jest.mock('uuid')
 v4.mockReturnValue('b039f51f-41d9-41e7-a4b1-5490fbfd5eb9')
@@ -121,6 +124,190 @@ it('saveAvatar', async () => {
       grid: 'grid.org'
     }
   ])
+})
+
+describe('Welcoming and Terms of Service state', () => {
+  // Please update this every time the ToS are changed!
+  const currentToSVersion = 1
+
+  it('loads terms of service state and subscribe to changes of it', async () => {
+    const find = jest.fn().mockResolvedValueOnce({
+      _id: 'terms_of_service',
+      version: currentToSVersion
+    })
+    const on = jest.fn()
+    const withIdPrefix = jest.fn(() => ({ on }))
+
+    window.hoodie = {
+      store: {
+        find,
+        withIdPrefix
+      }
+    }
+    const store = configureStore()
+
+    expect(selectShowToS(store.getState())).toBe(false)
+
+    await store.dispatch(doGetToSAgreeState())
+
+    expect(find).toHaveBeenLastCalledWith('terms_of_service')
+
+    expect(withIdPrefix).toHaveBeenLastCalledWith('terms_of_service')
+
+    expect(on).toHaveBeenCalled()
+    expect(typeof on.mock.calls[0][0]).toBe('function')
+
+    expect(selectShowToS(store.getState())).toBe(false)
+  })
+
+  it('should display the ToS if the last version is older then current', async () => {
+    const find = jest.fn().mockResolvedValueOnce({
+      _id: 'terms_of_service',
+      version: currentToSVersion - 1
+    })
+    const on = jest.fn()
+    const withIdPrefix = jest.fn(() => ({ on }))
+
+    window.hoodie = {
+      store: {
+        find,
+        withIdPrefix
+      }
+    }
+    const store = configureStore()
+
+    expect(selectShowToS(store.getState())).toBe(false)
+
+    await store.dispatch(doGetToSAgreeState())
+
+    expect(find).toBeCalled()
+    expect(on).toBeCalled()
+
+    expect(selectShowToS(store.getState())).toBeTruthy()
+  })
+
+  it('should display the ToS if "terms_of_service" doc doesn\'t exist', async () => {
+    const find = jest.fn().mockImplementationOnce(id => {
+      const missing = new Error(`Object with id "${id}" is missing`)
+      missing.name = 'Not found'
+      missing.status = 404
+      return Promise.reject(missing)
+    })
+    const on = jest.fn()
+    const withIdPrefix = jest.fn(() => ({ on }))
+
+    window.hoodie = {
+      store: {
+        find,
+        withIdPrefix
+      }
+    }
+    const store = configureStore()
+
+    expect(selectShowToS(store.getState())).toBe(false)
+
+    await store.dispatch(doGetToSAgreeState())
+
+    expect(find).toBeCalled()
+    expect(on).toBeCalled()
+
+    expect(selectShowToS(store.getState())).toBeTruthy()
+  })
+
+  it('should close the Welcoming and ToS dialog and store a "terms_of_service" doc', async () => {
+    const find = jest.fn().mockImplementationOnce(id => {
+      const missing = new Error(`Object with id "${id}" is missing`)
+      missing.name = 'Not found'
+      missing.status = 404
+      return Promise.reject(missing)
+    })
+    const on = jest.fn()
+    const withIdPrefix = jest.fn(() => ({ on }))
+
+    const updateOrAdd = jest.fn().mockImplementation(obj => Promise.resolve(obj))
+
+    window.hoodie = {
+      store: {
+        find,
+        updateOrAdd,
+        withIdPrefix
+      }
+    }
+    const store = configureStore()
+
+    await store.dispatch(doGetToSAgreeState())
+
+    expect(selectShowToS(store.getState())).toBeTruthy()
+
+    await store.dispatch(doAgreeToToS())
+
+    expect(selectShowToS(store.getState())).toBeFalsy()
+
+    expect(updateOrAdd).toBeCalled()
+    expect(updateOrAdd.mock.calls[0]).toEqual({
+      _id: 'terms_of_service',
+      version: currentToSVersion
+    })
+  })
+
+  it('should not display the Welcome/ToS dialog after viewer-account sign out', async () => {
+    const find = jest.fn().mockResolvedValueOnce({
+      _id: 'terms_of_service',
+      version: currentToSVersion
+    })
+    const on = jest.fn()
+    const withIdPrefix = jest.fn(() => ({ on }))
+
+    window.hoodie = {
+      store: {
+        find,
+        withIdPrefix
+      }
+    }
+    const store = configureStore()
+
+    store.dispatch(signInStatus(true, true, 'tester.mactestface@viewer.com'))
+
+    await store.dispatch(doGetToSAgreeState())
+
+    expect(selectShowToS(store.getState())).toBe(false)
+
+    store.dispatch(signOut())
+
+    expect(selectShowToS(store.getState())).toBe(false)
+  })
+
+  it('should not display the welcome/ToS if the viewer is not unlocked', async () => {
+    const find = jest.fn().mockResolvedValueOnce({
+      _id: 'terms_of_service',
+      version: currentToSVersion - 1
+    })
+    const on = jest.fn()
+    const withIdPrefix = jest.fn(() => ({ on }))
+
+    window.hoodie = {
+      account: {
+        one: () => {}
+      },
+      store: {
+        find,
+        withIdPrefix
+      }
+    }
+    const store = configureStore()
+
+    expect(selectShowToS(store.getState())).toBe(false)
+
+    await store.dispatch(doGetToSAgreeState())
+
+    store.dispatch(signInStatus(true, false, 'tester.mactestface@viewer.com'))
+
+    expect(selectShowToS(store.getState())).toBe(false)
+
+    await store.dispatch(unlock())
+
+    expect(selectShowToS(store.getState())).toBe(true)
+  })
 })
 
 it('loadSavedAvatars', async () => {
