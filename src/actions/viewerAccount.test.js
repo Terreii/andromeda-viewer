@@ -155,7 +155,8 @@ describe('Welcoming and Terms of Service state', () => {
     expect(withIdPrefix).toHaveBeenLastCalledWith('terms_of_service')
 
     expect(on).toHaveBeenCalled()
-    expect(typeof on.mock.calls[0][0]).toBe('function')
+    expect(on.mock.calls[0][0]).toBe('change')
+    expect(typeof on.mock.calls[0][1]).toBe('function')
 
     expect(selectShowToS(store.getState())).toBe(false)
   })
@@ -243,8 +244,7 @@ describe('Welcoming and Terms of Service state', () => {
 
     expect(selectShowToS(store.getState())).toBeFalsy()
 
-    expect(updateOrAdd).toBeCalled()
-    expect(updateOrAdd.mock.calls[0]).toEqual({
+    expect(updateOrAdd).toHaveBeenLastCalledWith({
       _id: 'terms_of_service',
       version: currentToSVersion
     })
@@ -292,6 +292,13 @@ describe('Welcoming and Terms of Service state', () => {
       store: {
         find,
         withIdPrefix
+      },
+      cryptoStore: {
+        unlock: () => {},
+        withIdPrefix: () => ({
+          on: () => {},
+          findAll: () => []
+        })
       }
     }
     const store = configureStore()
@@ -307,6 +314,92 @@ describe('Welcoming and Terms of Service state', () => {
     await store.dispatch(unlock())
 
     expect(selectShowToS(store.getState())).toBe(true)
+  })
+
+  it('should update an outdated doc after sign in', async () => {
+    const find = jest.fn().mockImplementationOnce(id => {
+      const missing = new Error(`Object with id "${id}" is missing`)
+      missing.name = 'Not found'
+      missing.status = 404
+      return Promise.reject(missing)
+    })
+
+    const on = jest.fn()
+    const withIdPrefix = jest.fn(() => ({ on }))
+    const update = jest.fn(obj => obj)
+    const updateOrAdd = jest.fn().mockImplementation(obj => Promise.resolve(obj))
+
+    window.hoodie = {
+      store: {
+        find,
+        update,
+        updateOrAdd,
+        withIdPrefix
+      }
+    }
+    const store = configureStore()
+
+    await store.dispatch(doGetToSAgreeState())
+    await store.dispatch(doAgreeToToS())
+
+    store.dispatch(signInStatus(true, true, 'tester.mactestface@viewer.com'))
+
+    const fn = on.mock.calls[0][1]
+    expect(typeof fn).toBe('function')
+
+    fn('update', {
+      _id: 'terms_of_service',
+      _rev: '1-12345678',
+      version: currentToSVersion - 1
+    })
+
+    expect(selectShowToS(store.getState())).toBeFalsy()
+    expect(update).toBeCalledWith({
+      _id: 'terms_of_service',
+      _rev: '1-12345678',
+      version: currentToSVersion
+    })
+  })
+
+  it('should ignore changes of not outdated tos doc', async () => {
+    const find = jest.fn().mockImplementationOnce(id => {
+      const missing = new Error(`Object with id "${id}" is missing`)
+      missing.name = 'Not found'
+      missing.status = 404
+      return Promise.reject(missing)
+    })
+
+    const on = jest.fn()
+    const withIdPrefix = jest.fn(() => ({ on }))
+    const update = jest.fn(obj => obj)
+    const updateOrAdd = jest.fn().mockImplementation(obj => Promise.resolve(obj))
+
+    window.hoodie = {
+      store: {
+        find,
+        update,
+        updateOrAdd,
+        withIdPrefix
+      }
+    }
+    const store = configureStore()
+
+    await store.dispatch(doGetToSAgreeState())
+    await store.dispatch(doAgreeToToS())
+
+    store.dispatch(signInStatus(true, true, 'tester.mactestface@viewer.com'))
+
+    const fn = on.mock.calls[0][1]
+    expect(typeof fn).toBe('function')
+
+    fn('update', {
+      _id: 'terms_of_service',
+      _rev: '1-12345678',
+      version: currentToSVersion
+    })
+
+    expect(selectShowToS(store.getState())).toBeFalsy()
+    expect(update).not.toBeCalled()
   })
 })
 

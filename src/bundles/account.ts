@@ -4,6 +4,8 @@ import { AvatarData, SavedAvatarData, Grid, HoodieObject } from '../types/viewer
 
 // Reducer for viewer-account and state
 
+export const currentToSVersion = 1
+
 const accountSlice = createSlice({
   name: 'account',
 
@@ -57,6 +59,19 @@ const accountSlice = createSlice({
         .forEach(([key, value]) => {
           state[key] = value
         })
+    },
+
+    didLoadToSState (state, action: PayloadAction<{ isNew: boolean, doc: ToSStateDoc | null }>) {
+      state.tos.loading = false
+      if (action.payload.isNew) {
+        state.tos.version = 0
+      } else {
+        state.tos.version = action.payload.doc?.version ?? 0
+      }
+    },
+
+    didAgreeToToS (state, action: Action) {
+      state.tos.version = currentToSVersion
     },
   
     avatarSaved (state, action: PayloadAction<SavedAvatarData>) {
@@ -138,6 +153,9 @@ export const {
   displayResetKeys,
   closeResetKeys,
 
+  didLoadToSState,
+  didAgreeToToS,
+
   avatarSaved,
   avatarsLoaded,
   savedAvatarUpdated,
@@ -190,7 +208,7 @@ export const selectShowToS = createSelector(
   (tos, isSignedIn, isUnlocked): boolean => {
     if ((isSignedIn && !isUnlocked) || tos.loading) return false
 
-    return tos.version < 1
+    return tos.version < currentToSVersion
   }
 )
 
@@ -235,6 +253,11 @@ function getDefault () {
 
 interface State {
   account: ReturnType<typeof accountSlice.reducer>
+}
+
+interface ToSStateDoc extends HoodieObject {
+  _id: 'terms_of_service',
+  version: number
 }
 
 type SignInPopup = 'resetKeys' | 'Error' | null

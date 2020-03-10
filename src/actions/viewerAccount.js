@@ -3,11 +3,15 @@
 import { v4 as uuid } from 'uuid'
 
 import {
+  currentToSVersion,
+
   signInStatus,
   signOut as accountDidSignOut,
   unlocked,
   displayResetKeys,
   didUpdate as accountDidUpdate,
+  didLoadToSState,
+  didAgreeToToS,
   avatarSaved,
   avatarsLoaded,
   savedAvatarUpdated,
@@ -19,6 +23,7 @@ import {
 
   selectIsSignedIn,
   selectIsUnlocked,
+  selectToS,
   selectSavedAvatars,
   selectSavedAvatarsAreLoaded,
   selectSavedGrids,
@@ -169,11 +174,49 @@ export function isSignedIn () {
 }
 
 export function doGetToSAgreeState () {
-  return () => {}
+  return async (dispatch, getState, { hoodie }) => {
+    if (!selectToS(getState()).loading) return
+
+    const store = hoodie.store.withIdPrefix('terms_of_service')
+    store.on('change', (eventName, doc) => {
+      if (doc.version < currentToSVersion) {
+        doc.version = currentToSVersion
+        hoodie.store.update(doc)
+      }
+    })
+
+    try {
+      const doc = await hoodie.store.find('terms_of_service')
+      dispatch(didLoadToSState({
+        isNew: false,
+        doc
+      }))
+    } catch (err) {
+      if (err.status === 404) {
+        dispatch(didLoadToSState({ isNew: true, doc: null }))
+      } else {
+        throw err
+      }
+    }
+  }
 }
 
 export function doAgreeToToS () {
-  return () => {}
+  return async (dispatch, getState, { hoodie }) => {
+    if (selectToS(getState()).loading) return
+
+    try {
+      await hoodie.store.updateOrAdd({
+        _id: 'terms_of_service',
+        version: currentToSVersion
+      })
+    } catch (err) {
+      // only log, to remove the dialog, but display it the next time.
+      console.error(err)
+    }
+
+    dispatch(didAgreeToToS())
+  }
 }
 
 function listenToAccountChanges (account, dispatch) {
