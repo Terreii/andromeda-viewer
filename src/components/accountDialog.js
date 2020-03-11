@@ -106,131 +106,132 @@ This is permanent and can not be undone!`)
 
   const autoFocusRef = useAutoFocus()
 
-  return <form className={style.Container} onSubmit={onSubmit}>
-    <h3>Update your account</h3>
-    <div className={formStyles.FormField}>
-      <label htmlFor='usernameChange'>Username / Mail</label>
-      <input
-        {...changedUsername}
-        id='usernameChange'
-        type='email'
-        className={formStyles.Input}
-        disabled={isUpdating}
-        autoFocus
-        required
-        ref={autoFocusRef}
-      />
-    </div>
-
-    <fieldset className={style.FieldSet}>
-      <legend>Change your password</legend>
-
-      <small className={formStyles.Help}>
-        If you leave them blank, we won't modify the password.
-      </small>
-
+  return (
+    <form className={style.Container} onSubmit={onSubmit}>
+      <h3>Update your account</h3>
       <div className={formStyles.FormField}>
-        <label htmlFor='passwordChangeOld'>Old password</label>
+        <label htmlFor='usernameChange'>Username / Mail</label>
         <input
-          {...oldPassword}
-          id='passwordChangeOld'
-          type='password'
+          {...changedUsername}
+          id='usernameChange'
+          type='email'
           className={formStyles.Input}
-          autoComplete='current-password'
-          minLength='8'
-          required={passwordRequired}
           disabled={isUpdating}
+          autoFocus
+          required
+          ref={autoFocusRef}
         />
       </div>
 
-      <div className={formStyles.FormField}>
-        <label htmlFor='passwordChangeNew'>New password</label>
-        <input
-          {...newPassword}
-          id='passwordChangeNew'
-          type='password'
-          className={formStyles.Input}
-          autoComplete='new-password'
-          minLength='8'
-          required={passwordRequired}
-          aria-describedby='passwordHelp'
-          disabled={isUpdating}
-        />
-        <small
-          id='passwordHelp'
-          className={formStyles.Error}
-          data-hide={!passwordRequired || newPassword.value.length >= 8}
-          role='alert'
-        >
-          A password must be 8 characters or longer!
+      <fieldset className={style.FieldSet}>
+        <legend>Change your password</legend>
+
+        <small className={formStyles.Help}>
+          If you leave them blank, we won't modify the password.
         </small>
-      </div>
 
-      <div className={formStyles.FormField}>
-        <label htmlFor='passwordChangeNew2'>Repeat password</label>
-        <input
-          {...newPassword2}
-          id='passwordChangeNew2'
-          type='password'
-          className={formStyles.Input}
-          autoComplete='new-password'
-          minLength='8'
-          required={passwordRequired}
-          aria-describedby='password2Help'
-          disabled={isUpdating}
-        />
-        <small
-          id='password2Help'
-          className={formStyles.Error}
-          data-hide={!passwordRequired || newPassword.value === newPassword2.value}
-          role='alert'
+        <div className={formStyles.FormField}>
+          <label htmlFor='passwordChangeOld'>Old password</label>
+          <input
+            {...oldPassword}
+            id='passwordChangeOld'
+            type='password'
+            className={formStyles.Input}
+            autoComplete='current-password'
+            minLength='8'
+            required={passwordRequired}
+            disabled={isUpdating}
+          />
+        </div>
+
+        <div className={formStyles.FormField}>
+          <label htmlFor='passwordChangeNew'>New password</label>
+          <input
+            {...newPassword}
+            id='passwordChangeNew'
+            type='password'
+            className={formStyles.Input}
+            autoComplete='new-password'
+            minLength='8'
+            required={passwordRequired}
+            aria-describedby='passwordHelp'
+            disabled={isUpdating}
+          />
+          <small
+            id='passwordHelp'
+            className={formStyles.Error}
+            data-hide={!passwordRequired || newPassword.value.length >= 8}
+            role='alert'
+          >
+            A password must be 8 characters or longer!
+          </small>
+        </div>
+
+        <div className={formStyles.FormField}>
+          <label htmlFor='passwordChangeNew2'>Repeat password</label>
+          <input
+            {...newPassword2}
+            id='passwordChangeNew2'
+            type='password'
+            className={formStyles.Input}
+            autoComplete='new-password'
+            minLength='8'
+            required={passwordRequired}
+            aria-describedby='password2Help'
+            disabled={isUpdating}
+          />
+          <small
+            id='password2Help'
+            className={formStyles.Error}
+            data-hide={!passwordRequired || newPassword.value === newPassword2.value}
+            role='alert'
+          >
+            Password doesn't match!
+          </small>
+        </div>
+      </fieldset>
+
+      {error && <p className={formStyles.Error} role='alert'>{error}</p>}
+
+      <div className={style.ButtonRow}>
+        <button
+          id='updateAccountData'
+          className={formStyles.OkButton}
+          disabled={isUpdating ||
+            (passwordRequired && !passwordsAreValid) || // password did change but not valid
+            (changedUsername.value !== username && !usernameIsValid) || // username did change
+            (changedUsername.value === username && !passwordRequired)} // nothing did change
         >
-          Password doesn't match!
-        </small>
+          update
+        </button>
+
+        <button
+          type='reset'
+          id='accountDataReset'
+          onClick={resetAll}
+          className={formStyles.SecondaryButton}
+          disabled={isUpdating}
+        >
+          reset
+        </button>
       </div>
-    </fieldset>
 
-    {error && <p className={formStyles.Error} role='alert'>{error}</p>}
+      <hr className={style.Separator} />
 
-    <div className={style.ButtonRow}>
-      <button
-        id='updateAccountData'
-        className={formStyles.OkButton}
-        disabled={isUpdating ||
-          (passwordRequired && !passwordsAreValid) || // password did change but not valid
-          (changedUsername.value !== username && !usernameIsValid) || // username did change
-          (changedUsername.value === username && !passwordRequired) // nothing did change
-        }
-      >
-        update
-      </button>
+      <AccountDataDownload />
+
+      <hr className={style.Separator} />
 
       <button
-        type='reset'
-        id='accountDataReset'
-        onClick={resetAll}
-        className={formStyles.SecondaryButton}
+        type='button'
+        className={formStyles.DangerButton}
+        onClick={doDeleteAccount}
         disabled={isUpdating}
       >
-        reset
+        Delete your {viewerName} account
       </button>
-    </div>
-
-    <hr className={style.Separator} />
-
-    <AccountDataDownload />
-
-    <hr className={style.Separator} />
-
-    <button
-      type='button'
-      className={formStyles.DangerButton}
-      onClick={doDeleteAccount}
-      disabled={isUpdating}
-    >
-      Delete your {viewerName} account
-    </button>
-  </form>
+    </form>
+  )
 }
 
 function AccountDataDownload () {
@@ -272,29 +273,35 @@ function AccountDataDownload () {
     }
   }
 
-  return <div className={style.ButtonRow}>
-    <button
-      type='button'
-      className={formStyles.PrimaryButton}
-      onClick={doStartDownload}
-      disabled={isDownloading}
-    >
-      Prepare your data to download
-    </button>
+  return (
+    <div className={style.ButtonRow}>
+      <button
+        type='button'
+        className={formStyles.PrimaryButton}
+        onClick={doStartDownload}
+        disabled={isDownloading}
+      >
+        Prepare your data to download
+      </button>
 
-    {error && <small className={formStyles.Error} role='alert'>
-      {error}
-    </small>}
+      {error && (
+        <small className={formStyles.Error} role='alert'>
+          {error}
+        </small>
+      )}
 
-    {url && <a
-      href={url}
-      target='_blank'
-      rel='noopener noreferrer'
-      className={formStyles.OkButton}
-      download={`${viewerName}_user_data.zip`}
-      role='alert'
-    >
-      Download your data
-    </a>}
-  </div>
+      {url && (
+        <a
+          href={url}
+          target='_blank'
+          rel='noopener noreferrer'
+          className={formStyles.OkButton}
+          download={`${viewerName}_user_data.zip`}
+          role='alert'
+        >
+          Download your data
+        </a>
+      )}
+    </div>
+  )
 }

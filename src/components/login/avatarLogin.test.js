@@ -16,18 +16,22 @@ it('renders without crashing', () => {
     loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
   }
 
-  const { container: notSelectedContainer } = render(<AvatarLogin
-    avatar={avatar}
-    grid={grid}
-  />)
+  const { container: notSelectedContainer } = render(
+    <AvatarLogin
+      avatar={avatar}
+      grid={grid}
+    />
+  )
 
   expect(notSelectedContainer).toBeTruthy()
 
-  const { container: selectedContainer } = render(<AvatarLogin
-    avatar={avatar}
-    grid={grid}
-    isSelected
-  />)
+  const { container: selectedContainer } = render(
+    <AvatarLogin
+      avatar={avatar}
+      grid={grid}
+      isSelected
+    />
+  )
 
   expect(selectedContainer).toBeTruthy()
 })
@@ -48,13 +52,15 @@ it('should call onSelect when clicked and not selected', () => {
   const onLogin = jest.fn()
   const onSelect = jest.fn()
 
-  const { queryByText } = render(<AvatarLogin
-    avatar={avatar}
-    grid={grid}
-    onLogin={onLogin}
-    isSelected={false}
-    onSelect={onSelect}
-  />)
+  const { queryByText } = render(
+    <AvatarLogin
+      avatar={avatar}
+      grid={grid}
+      onLogin={onLogin}
+      isSelected={false}
+      onSelect={onSelect}
+    />
+  )
 
   expect(queryByText('Testery Mactestface')).toBeTruthy()
 
@@ -85,12 +91,14 @@ it('should successfully login', async () => {
 
   const onLogin = jest.fn()
 
-  const { queryByText, queryByLabelText, findByText } = render(<AvatarLogin
-    avatar={avatar}
-    grid={grid}
-    onLogin={onLogin}
-    isSelected
-  />)
+  const { queryByText, queryByLabelText, findByText } = render(
+    <AvatarLogin
+      avatar={avatar}
+      grid={grid}
+      onLogin={onLogin}
+      isSelected
+    />
+  )
 
   // no password
   const loginButton = queryByText('Login')
@@ -143,12 +151,14 @@ it('should pass aXe', async () => {
     loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
   }
 
-  const { container } = render(<AvatarLogin
-    avatar={avatar}
-    grid={grid}
-    onLogin={() => {}}
-    isSelected
-  />)
+  const { container } = render(
+    <AvatarLogin
+      avatar={avatar}
+      grid={grid}
+      onLogin={() => {}}
+      isSelected
+    />
+  )
 
   expect(await axe(container)).toHaveNoViolations()
 })

@@ -32,9 +32,11 @@ it('renders resetKeys without crashing', () => {
     subscribe: () => () => {}
   }
 
-  const { queryByText } = render(<Provider store={store}>
-    <ModalsRenderer />
-  </Provider>)
+  const { queryByText } = render(
+    <Provider store={store}>
+      <ModalsRenderer />
+    </Provider>
+  )
 
   expect(queryByText('Password reset keys').nodeName).toBe('H4')
 })

@@ -9,20 +9,22 @@ export default function SignIn () {
   const signInDialog = useDialogState()
   const signUpDialog = useDialogState()
 
-  return <section className={styles.Container}>
-    <h2 className={styles.Title}>New to this viewer?</h2>
-    <div className={styles.ButtonRow}>
-      <DialogDisclosure {...signInDialog} className={styles.SignInButton}>
-        Sign In
-      </DialogDisclosure>
-      <SignInDialog dialog={signInDialog} />
+  return (
+    <section className={styles.Container}>
+      <h2 className={styles.Title}>New to this viewer?</h2>
+      <div className={styles.ButtonRow}>
+        <DialogDisclosure {...signInDialog} className={styles.SignInButton}>
+          Sign In
+        </DialogDisclosure>
+        <SignInDialog dialog={signInDialog} />
 
-      <span className={styles.Separator}>or</span>
+        <span className={styles.Separator}>or</span>
 
-      <DialogDisclosure {...signUpDialog} className={styles.SignInButton}>
-        Sign Up
-      </DialogDisclosure>
-      <SignInDialog isSignUp dialog={signUpDialog} />
-    </div>
-  </section>
+        <DialogDisclosure {...signUpDialog} className={styles.SignInButton}>
+          Sign Up
+        </DialogDisclosure>
+        <SignInDialog isSignUp dialog={signUpDialog} />
+      </div>
+    </section>
+  )
 }

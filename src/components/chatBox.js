@@ -58,33 +58,37 @@ export default function ChatBox (props) {
       ? (target in names ? names[target].getName() : chat.name)
       : chat.name
 
-    tabs.push(<Tab {...tab} key={`tab_${id}`} className={style.tabButton} stopId={id}>
-      {name || id}
-    </Tab>)
+    tabs.push(
+      <Tab {...tab} key={`tab_${id}`} className={style.tabButton} stopId={id}>
+        {name || id}
+      </Tab>
+    )
 
-    tabPanels.push(<TabPanel
-      {...tab}
-      key={`panel_${id}`}
-      className={style.panel}
-      stopId={id}
-      tabIndex='-1'
-    >
-      <ChatDialog
-        data={chat}
-        isIM
-        sendTo={text => {
-          dispatch(sendInstantMessage(
-            text,
-            target,
-            id,
-            type === IMChatType.personal ? IMDialog.MessageFromAgent : IMDialog.SessionSend
-          ))
-        }}
-        names={names}
-        type={type}
-        loadHistory={doLoadImHistory}
-      />
-    </TabPanel>)
+    tabPanels.push(
+      <TabPanel
+        {...tab}
+        key={`panel_${id}`}
+        className={style.panel}
+        stopId={id}
+        tabIndex='-1'
+      >
+        <ChatDialog
+          data={chat}
+          isIM
+          sendTo={text => {
+            dispatch(sendInstantMessage(
+              text,
+              target,
+              id,
+              type === IMChatType.personal ? IMDialog.MessageFromAgent : IMDialog.SessionSend
+            ))
+          }}
+          names={names}
+          type={type}
+          loadHistory={doLoadImHistory}
+        />
+      </TabPanel>
+    )
   }
 
   return (
@@ -94,13 +98,15 @@ export default function ChatBox (props) {
 
         <Tab {...tab} className={style.tabButton} stopId='groups'>Groups</Tab>
 
-        {shouldDisplayNotifications && <Tab
-          {...tab}
-          className={style.tabButton}
-          stopId='notifications'
-        >
-          Notifications
-        </Tab>}
+        {shouldDisplayNotifications && (
+          <Tab
+            {...tab}
+            className={style.tabButton}
+            stopId='notifications'
+          >
+            Notifications
+          </Tab>
+        )}
 
         <Tab {...tab} className={style.tabButton} stopId='local'>Local</Tab>
 
@@ -118,14 +124,16 @@ export default function ChatBox (props) {
         <GroupsList startNewIMChat={doStartNewIMChat} />
       </TabPanel>
 
-      {props.shouldDisplayNotifications && <TabPanel
-        {...tab}
-        className={style.panel}
-        stopId='notifications'
-        tabIndex='-1'
-      >
-        <Notifications />
-      </TabPanel>}
+      {props.shouldDisplayNotifications && (
+        <TabPanel
+          {...tab}
+          className={style.panel}
+          stopId='notifications'
+          tabIndex='-1'
+        >
+          <Notifications />
+        </TabPanel>
+      )}
 
       <TabPanel {...tab} className={style.panel} stopId='local' tabIndex='-1'>
         <ChatDialog

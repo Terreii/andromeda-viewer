@@ -68,23 +68,27 @@ export default function Text ({ text, multiline, className }) {
     [text, multiline]
   )
 
-  return <>
-    {parsed.map((part, index) => {
-      if (typeof part === 'string' || part.url == null) {
-        return part
-      } else {
-        return <a
-          key={index}
-          href={part.url}
-          target='_blank'
-          rel='noopener noreferrer'
-          className={className}
-        >
-          {part.text}
-        </a>
-      }
-    })}
-  </>
+  return (
+    <>
+      {parsed.map((part, index) => {
+        if (typeof part === 'string' || part.url == null) {
+          return part
+        } else {
+          return (
+            <a
+              key={index}
+              href={part.url}
+              target='_blank'
+              rel='noopener noreferrer'
+              className={className}
+            >
+              {part.text}
+            </a>
+          )
+        }
+      })}
+    </>
+  )
 }
 
 /**

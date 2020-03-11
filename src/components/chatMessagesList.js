@@ -11,21 +11,23 @@ const TextLine = memo(({ msg, name }) => {
   const isIrcMe = msg.message.startsWith('/me ') || msg.message.startsWith("/me'")
   const message = isIrcMe ? msg.message.substring(4) : msg.message
 
-  return <div className={isIrcMe ? styles.icr_me : styles.Message}>
-    <time dateTime={time.toISOString()}>
-      {leadingZero(time.getHours())}
-      :
-      {leadingZero(time.getMinutes())}
-      :
-      {leadingZero(time.getSeconds())}
-    </time>
+  return (
+    <div className={isIrcMe ? styles.icr_me : styles.Message}>
+      <time dateTime={time.toISOString()}>
+        {leadingZero(time.getHours())}
+        :
+        {leadingZero(time.getMinutes())}
+        :
+        {leadingZero(time.getSeconds())}
+      </time>
 
-    <span className={styles.AvatarName}>{name.toString()}{isIrcMe ? '' : ':'} </span>
+      <span className={styles.AvatarName}>{name.toString()}{isIrcMe ? '' : ':'} </span>
 
-    <span className='messageText'>
-      <Text text={message} />
-    </span>
-  </div>
+      <span className='messageText'>
+        <Text text={message} />
+      </span>
+    </div>
+  )
 })
 
 class ChatList extends React.Component {
@@ -38,9 +40,11 @@ class ChatList extends React.Component {
       return <TextLine key={msg._id} msg={msg} name={name} />
     })
 
-    return <div className={styles.List} {...props}>
-      {messagesLines}
-    </div>
+    return (
+      <div className={styles.List} {...props}>
+        {messagesLines}
+      </div>
+    )
   }
 }
 

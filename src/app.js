@@ -23,11 +23,13 @@ import { selectIsLoggedIn } from './bundles/session'
 import 'normalize.css'
 
 export default function Root ({ store }) {
-  return <Provider store={store}>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </Provider>
+  return (
+    <Provider store={store}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </Provider>
+  )
 }
 
 function App () {
@@ -47,27 +49,28 @@ function App () {
 
   useDocumentTitle()
 
-  return <AppContainer>
-    <Switch>
-      <Route exact path='/'>
-        <Login isSignedIn={isSignedIn} />
-      </Route>
-      <Route path='/session'>
-        <LoadableChatComponent />
-      </Route>
-      <Route path='/profile'>
-        {isSignedIn
-          ? <AccountDialog />
-          : <Redirect to='/' />
-        }
-      </Route>
-      <Route path='*'>
-        <NoMatchRedirect />
-      </Route>
-    </Switch>
-    <TopMenuBar />
-    <GlobalModals />
-  </AppContainer>
+  return (
+    <AppContainer>
+      <Switch>
+        <Route exact path='/'>
+          <Login isSignedIn={isSignedIn} />
+        </Route>
+        <Route path='/session'>
+          <LoadableChatComponent />
+        </Route>
+        <Route path='/profile'>
+          {isSignedIn
+            ? <AccountDialog />
+            : <Redirect to='/' />}
+        </Route>
+        <Route path='*'>
+          <NoMatchRedirect />
+        </Route>
+      </Switch>
+      <TopMenuBar />
+      <GlobalModals />
+    </AppContainer>
+  )
 }
 
 function useDocumentTitle () {

@@ -23,9 +23,11 @@ const resetKeys = [
 ]
 
 const Container = ({ store, resetKey }) => {
-  return <Provider store={store}>
-    <ResetKeys resetKeys={resetKey} />
-  </Provider>
+  return (
+    <Provider store={store}>
+      <ResetKeys resetKeys={resetKey} />
+    </Provider>
+  )
 }
 
 global.URL.createObjectURL = jest.fn()

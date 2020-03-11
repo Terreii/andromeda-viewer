@@ -31,53 +31,61 @@ const avatars = [
 ]
 
 it('renders without crashing', () => {
-  const { container } = render(<Provider store={configureStore()}>
-    <MemoryRouter>
-      <Login />
-    </MemoryRouter>
-  </Provider>)
+  const { container } = render(
+    <Provider store={configureStore()}>
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    </Provider>
+  )
 
   expect(container).toBeTruthy()
 })
 
 it('renders with avatars', () => {
-  const { container } = render(<Provider store={configureStore()}>
-    <MemoryRouter>
-      <Login isSignedIn />
-    </MemoryRouter>
-  </Provider>)
+  const { container } = render(
+    <Provider store={configureStore()}>
+      <MemoryRouter>
+        <Login isSignedIn />
+      </MemoryRouter>
+    </Provider>
+  )
 
   expect(container).toBeTruthy()
 })
 
 it('should pass aXe with avatars', async () => {
-  const { container } = render(<Provider
-    store={configureStore({
-      account: {
-        unlocked: true,
-        loggedIn: true,
-        username: 'tester@test.org',
-        savedAvatars: avatars,
-        savedAvatarsLoaded: true,
-        savedGrids: grids,
-        savedGridsLoaded: true
-      }
-    })}
-  >
-    <MemoryRouter>
-      <Login isSignedIn />
-    </MemoryRouter>
-  </Provider>)
+  const { container } = render(
+    <Provider
+      store={configureStore({
+        account: {
+          unlocked: true,
+          loggedIn: true,
+          username: 'tester@test.org',
+          savedAvatars: avatars,
+          savedAvatarsLoaded: true,
+          savedGrids: grids,
+          savedGridsLoaded: true
+        }
+      })}
+    >
+      <MemoryRouter>
+        <Login isSignedIn />
+      </MemoryRouter>
+    </Provider>
+  )
 
   expect(await axe(container)).toHaveNoViolations()
 })
 
 it('should pass aXe with no avatars', async () => {
-  const { container } = render(<Provider store={configureStore()}>
-    <MemoryRouter>
-      <Login />
-    </MemoryRouter>
-  </Provider>)
+  const { container } = render(
+    <Provider store={configureStore()}>
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    </Provider>
+  )
 
   expect(await axe(container)).toHaveNoViolations()
 })

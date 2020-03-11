@@ -15,15 +15,17 @@ export default function TextNotificationComponent (
     ? 'System Notification'
     : data.fromName
 
-  return <Container title={title}>
-    <p>
-      <Text text={data.text} multiline />
-    </p>
+  return (
+    <Container title={title}>
+      <p>
+        <Text text={data.text} multiline />
+      </p>
 
-    <div className={styles.ButtonsRow}>
-      <button className={formStyles.PrimaryButton} onClick={onClose}>
-        OK
-      </button>
-    </div>
-  </Container>
+      <div className={styles.ButtonsRow}>
+        <button className={formStyles.PrimaryButton} onClick={onClose}>
+          OK
+        </button>
+      </div>
+    </Container>
+  )
 }

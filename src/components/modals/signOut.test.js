@@ -12,10 +12,12 @@ const mockStore = configureMockStore()
 const Container = ({ store, onSignOut }) => {
   const dialog = useDialogState()
 
-  return <Provider store={store}>
-    <DialogDisclosure {...dialog}>Toggle show</DialogDisclosure>
-    <SignOutDialog dialog={dialog} onSignOut={onSignOut} />
-  </Provider>
+  return (
+    <Provider store={store}>
+      <DialogDisclosure {...dialog}>Toggle show</DialogDisclosure>
+      <SignOutDialog dialog={dialog} onSignOut={onSignOut} />
+    </Provider>
+  )
 }
 
 it('should render without crashing', () => {

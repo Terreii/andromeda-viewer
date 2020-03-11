@@ -10,11 +10,13 @@ import configureStore from '../store/configureStore'
 it('renders without crashing', () => {
   const store = configureStore()
 
-  const { container } = render(<Provider store={store}>
-    <MemoryRouter>
-      <TopBar />
-    </MemoryRouter>
-  </Provider>)
+  const { container } = render(
+    <Provider store={store}>
+      <MemoryRouter>
+        <TopBar />
+      </MemoryRouter>
+    </Provider>
+  )
 
   expect(container).toBeTruthy()
 })
@@ -22,11 +24,13 @@ it('renders without crashing', () => {
 it('should pass aXe', async () => {
   const store = configureStore()
 
-  const { container } = render(<Provider store={store}>
-    <MemoryRouter>
-      <TopBar />
-    </MemoryRouter>
-  </Provider>)
+  const { container } = render(
+    <Provider store={store}>
+      <MemoryRouter>
+        <TopBar />
+      </MemoryRouter>
+    </Provider>
+  )
 
   expect(await axe(container)).toHaveNoViolations()
 })

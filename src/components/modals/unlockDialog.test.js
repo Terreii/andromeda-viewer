@@ -14,9 +14,11 @@ jest.mock('../../actions/viewerAccount')
 const mockStore = configureMockStore([thunk])
 
 const Container = ({ store }) => {
-  return <Provider store={store}>
-    <UnlockDialog />
-  </Provider>
+  return (
+    <Provider store={store}>
+      <UnlockDialog />
+    </Provider>
+  )
 }
 
 it('should render without crashing', () => {

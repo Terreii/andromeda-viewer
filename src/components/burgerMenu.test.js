@@ -10,22 +10,26 @@ import AvatarName from '../avatarName'
 import configureStore from '../store/configureStore'
 
 it('renders without crashing', () => {
-  const { container } = render(<Provider store={configureStore()}>
-    <MemoryRouter>
-      <BurgerMenu isLoggedIn={false} />
-    </MemoryRouter>
-  </Provider>)
+  const { container } = render(
+    <Provider store={configureStore()}>
+      <MemoryRouter>
+        <BurgerMenu isLoggedIn={false} />
+      </MemoryRouter>
+    </Provider>
+  )
 
   expect(container).toBeTruthy()
 })
 
 describe('buttons', () => {
   it('not logged or signed in', () => {
-    const { queryByText } = render(<Provider store={configureStore()}>
-      <MemoryRouter>
-        <BurgerMenu isLoggedIn={false} />
-      </MemoryRouter>
-    </Provider>)
+    const { queryByText } = render(
+      <Provider store={configureStore()}>
+        <MemoryRouter>
+          <BurgerMenu isLoggedIn={false} />
+        </MemoryRouter>
+      </Provider>
+    )
 
     // viewer sign in
     const signInOpener = queryByText('Sign into Andromeda')
@@ -46,24 +50,26 @@ describe('buttons', () => {
   })
 
   it('avatar logged in', () => {
-    const { queryByText } = render(<Provider
-      store={configureStore({
-        names: {
+    const { queryByText } = render(
+      <Provider
+        store={configureStore({
           names: {
-            abc: new AvatarName('Tester')
+            names: {
+              abc: new AvatarName('Tester')
+            }
+          },
+          session: {
+            agentId: 'abc',
+            avatarIdentifier: 'abc@test.org',
+            sessionId: '1234'
           }
-        },
-        session: {
-          agentId: 'abc',
-          avatarIdentifier: 'abc@test.org',
-          sessionId: '1234'
-        }
-      })}
-    >
-      <MemoryRouter>
-        <BurgerMenu isLoggedIn />
-      </MemoryRouter>
-    </Provider>)
+        })}
+      >
+        <MemoryRouter>
+          <BurgerMenu isLoggedIn />
+        </MemoryRouter>
+      </Provider>
+    )
 
     // viewer sign in
     const signInOpener = queryByText('Sign into Andromeda')
@@ -88,18 +94,20 @@ describe('buttons', () => {
   })
 
   it('viewer account logged in', () => {
-    const { queryByText } = render(<Provider
-      store={configureStore({
-        account: {
-          loggedIn: true,
-          username: 'tester@test.org'
-        }
-      })}
-    >
-      <MemoryRouter>
-        <BurgerMenu isLoggedIn={false} />
-      </MemoryRouter>
-    </Provider>)
+    const { queryByText } = render(
+      <Provider
+        store={configureStore({
+          account: {
+            loggedIn: true,
+            username: 'tester@test.org'
+          }
+        })}
+      >
+        <MemoryRouter>
+          <BurgerMenu isLoggedIn={false} />
+        </MemoryRouter>
+      </Provider>
+    )
 
     // viewer sign in
     expect(queryByText('Sign into Andromeda')).toBeNull()
@@ -118,28 +126,30 @@ describe('buttons', () => {
   })
 
   it('viewer and avatar logged in', () => {
-    const { queryByText } = render(<Provider
-      store={configureStore({
-        account: {
-          loggedIn: true,
-          username: 'tester@test.org'
-        },
-        names: {
+    const { queryByText } = render(
+      <Provider
+        store={configureStore({
+          account: {
+            loggedIn: true,
+            username: 'tester@test.org'
+          },
           names: {
-            abc: new AvatarName('Tester')
+            names: {
+              abc: new AvatarName('Tester')
+            }
+          },
+          session: {
+            agentId: 'abc',
+            avatarIdentifier: 'abc@test.org',
+            sessionId: '1234'
           }
-        },
-        session: {
-          agentId: 'abc',
-          avatarIdentifier: 'abc@test.org',
-          sessionId: '1234'
-        }
-      })}
-    >
-      <MemoryRouter>
-        <BurgerMenu isLoggedIn />
-      </MemoryRouter>
-    </Provider>)
+        })}
+      >
+        <MemoryRouter>
+          <BurgerMenu isLoggedIn />
+        </MemoryRouter>
+      </Provider>
+    )
 
     // viewer sign in
     expect(queryByText('Sign into Andromeda')).toBeNull()
@@ -162,20 +172,22 @@ describe('buttons', () => {
 })
 
 it('should pass aXe', async () => {
-  const { container } = render(<Provider store={configureStore()}>
-    <MemoryRouter>
-      <BurgerMenu
-        isSignedIn={false}
-        userName={''}
-        isLoggedIn={false}
-        avatarName={''}
-        signIn={() => {}}
-        signUp={() => {}}
-        signOut={() => {}}
-        logout={() => {}}
-      />
-    </MemoryRouter>
-  </Provider>)
+  const { container } = render(
+    <Provider store={configureStore()}>
+      <MemoryRouter>
+        <BurgerMenu
+          isSignedIn={false}
+          userName=''
+          isLoggedIn={false}
+          avatarName=''
+          signIn={() => {}}
+          signUp={() => {}}
+          signOut={() => {}}
+          logout={() => {}}
+        />
+      </MemoryRouter>
+    </Provider>
+  )
 
   expect(await axe(container)).toHaveNoViolations()
 })

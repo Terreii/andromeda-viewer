@@ -16,16 +16,20 @@ it('renders without crashing', () => {
     }
   ]
 
-  const { container: notSelectedContainer } = render(<NewAvatarLogin
-    grids={grids}
-  />)
+  const { container: notSelectedContainer } = render(
+    <NewAvatarLogin
+      grids={grids}
+    />
+  )
 
   expect(notSelectedContainer).toBeTruthy()
 
-  const { container: selectedContainer } = render(<NewAvatarLogin
-    grids={grids}
-    isSelected
-  />)
+  const { container: selectedContainer } = render(
+    <NewAvatarLogin
+      grids={grids}
+      isSelected
+    />
+  )
 
   expect(selectedContainer).toBeTruthy()
 })
@@ -44,13 +48,15 @@ it('should login while not signed', async () => {
 
   const onLogin = jest.fn()
 
-  const { queryByLabelText, queryByText, findByText, findByLabelText } = render(<NewAvatarLogin
-    grids={grids}
-    isSignedIn={false}
-    onLogin={onLogin}
-    isLoggingIn={false}
-    isSelected
-  />)
+  const { queryByLabelText, queryByText, findByText, findByLabelText } = render(
+    <NewAvatarLogin
+      grids={grids}
+      isSignedIn={false}
+      onLogin={onLogin}
+      isLoggingIn={false}
+      isSelected
+    />
+  )
 
   const nameInput = queryByLabelText('Avatar:')
   expect(nameInput).toBeTruthy()
@@ -119,13 +125,15 @@ it('signed in login works', async () => {
 
   const onLogin = jest.fn()
 
-  const { queryByLabelText, queryByText, findByText, findByLabelText } = render(<NewAvatarLogin
-    grids={grids}
-    isSignedIn
-    onLogin={onLogin}
-    isLoggingIn={false}
-    isSelected
-  />)
+  const { queryByLabelText, queryByText, findByText, findByLabelText } = render(
+    <NewAvatarLogin
+      grids={grids}
+      isSignedIn
+      onLogin={onLogin}
+      isLoggingIn={false}
+      isSelected
+    />
+  )
 
   const nameInput = queryByLabelText('Avatar:')
   expect(nameInput).toBeTruthy()
@@ -199,13 +207,15 @@ it('should add a new grid', async () => {
 
   const onLogin = jest.fn()
 
-  const { queryByLabelText, findByText, findByLabelText } = render(<NewAvatarLogin
-    grids={grids}
-    isSignedIn
-    onLogin={onLogin}
-    isLoggingIn={false}
-    isSelected
-  />)
+  const { queryByLabelText, findByText, findByLabelText } = render(
+    <NewAvatarLogin
+      grids={grids}
+      isSignedIn
+      onLogin={onLogin}
+      isLoggingIn={false}
+      isSelected
+    />
+  )
 
   const gridSelect = queryByLabelText('Grid:')
   expect(gridSelect).toBeTruthy()
@@ -307,16 +317,20 @@ it('should pass aXe', async () => {
     }
   ]
 
-  const { container: notSelectedContainer } = render(<NewAvatarLogin
-    grids={grids}
-  />)
+  const { container: notSelectedContainer } = render(
+    <NewAvatarLogin
+      grids={grids}
+    />
+  )
 
   expect(await axe(notSelectedContainer)).toHaveNoViolations()
 
-  const { container: selectedContainer, queryByLabelText, findByLabelText } = render(<NewAvatarLogin
-    grids={grids}
-    isSelected
-  />)
+  const { container: selectedContainer, queryByLabelText, findByLabelText } = render(
+    <NewAvatarLogin
+      grids={grids}
+      isSelected
+    />
+  )
 
   expect(await axe(selectedContainer)).toHaveNoViolations()
 

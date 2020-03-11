@@ -35,10 +35,12 @@ describe('local chat', () => {
       1234: new AvatarName('Viewerer Account')
     }
 
-    const { queryByText } = render(<ChatMessagesList
-      messages={messages}
-      names={names}
-    />)
+    const { queryByText } = render(
+      <ChatMessagesList
+        messages={messages}
+        names={names}
+      />
+    )
 
     expect(queryByText(getTimeString('2018-08-10T11:03:00.000Z'))).toBeTruthy()
     expect(queryByText(getTimeString('2018-08-10T11:03:00.000Z')).tagName).toBe('TIME')
@@ -72,10 +74,12 @@ describe('local chat', () => {
       1234: new AvatarName('Viewerer Account')
     }
 
-    const { queryByText } = render(<ChatMessagesList
-      messages={messages}
-      names={names}
-    />)
+    const { queryByText } = render(
+      <ChatMessagesList
+        messages={messages}
+        names={names}
+      />
+    )
 
     // first message
     expect(queryByText(getTimeString('2018-08-10T11:03:00.000Z'))).toBeTruthy()
@@ -116,10 +120,12 @@ describe('local chat', () => {
       ABCB: new AvatarName('Testery MacTestface')
     }
 
-    const { queryByText } = render(<ChatMessagesList
-      messages={messages}
-      names={names}
-    />)
+    const { queryByText } = render(
+      <ChatMessagesList
+        messages={messages}
+        names={names}
+      />
+    )
 
     expect(queryByText(getTimeString('2018-08-10T11:03:00.000Z'))).toBeTruthy()
     expect(queryByText(getTimeString('2018-08-10T11:03:00.000Z')).tagName).toBe('TIME')
@@ -148,10 +154,12 @@ describe('local chat', () => {
       1234: new AvatarName('Viewerer Account')
     }
 
-    const { container } = render(<ChatMessagesList
-      messages={messages}
-      names={names}
-    />)
+    const { container } = render(
+      <ChatMessagesList
+        messages={messages}
+        names={names}
+      />
+    )
 
     expect(await axe(container)).toHaveNoViolations()
   })
@@ -179,11 +187,13 @@ describe('IMs', () => {
       1234: new AvatarName('Viewerer Account')
     }
 
-    const { queryByText } = render(<ChatMessagesList
-      messages={messages}
-      isIM
-      names={names}
-    />)
+    const { queryByText } = render(
+      <ChatMessagesList
+        messages={messages}
+        isIM
+        names={names}
+      />
+    )
 
     expect(queryByText(getTimeString('2018-08-10T11:03:00.000Z'))).toBeTruthy()
     expect(queryByText(getTimeString('2018-08-10T11:03:00.000Z')).tagName).toBe('TIME')
@@ -217,11 +227,13 @@ describe('IMs', () => {
       1234: new AvatarName('Viewerer Account')
     }
 
-    const { queryByText } = render(<ChatMessagesList
-      messages={messages}
-      isIM
-      names={names}
-    />)
+    const { queryByText } = render(
+      <ChatMessagesList
+        messages={messages}
+        isIM
+        names={names}
+      />
+    )
 
     // first message
     expect(queryByText(getTimeString('2018-08-10T11:03:00.000Z'))).toBeTruthy()
@@ -262,11 +274,13 @@ describe('IMs', () => {
       ABCB: new AvatarName('Testery MacTestface')
     }
 
-    const { queryByText } = render(<ChatMessagesList
-      messages={messages}
-      isIM
-      names={names}
-    />)
+    const { queryByText } = render(
+      <ChatMessagesList
+        messages={messages}
+        isIM
+        names={names}
+      />
+    )
 
     expect(queryByText(getTimeString('2018-08-10T11:03:00.000Z'))).toBeTruthy()
     expect(queryByText(getTimeString('2018-08-10T11:03:00.000Z')).tagName).toBe('TIME')
@@ -295,11 +309,13 @@ describe('IMs', () => {
       1234: new AvatarName('Viewerer Account')
     }
 
-    const { container } = render(<ChatMessagesList
-      messages={messages}
-      isIM
-      names={names}
-    />)
+    const { container } = render(
+      <ChatMessagesList
+        messages={messages}
+        isIM
+        names={names}
+      />
+    )
 
     expect(await axe(container)).toHaveNoViolations()
   })
