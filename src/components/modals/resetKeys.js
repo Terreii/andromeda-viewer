@@ -42,24 +42,26 @@ export default function ResetKeysModal ({ resetKeys }) {
         There is no other way to get your data back!
       </p>
 
+      <p>You can also download them:</p>
+
+      <div className={styles.ButtonContainer}>
+        <a
+          className={styles.DownloadLink}
+          href={fileURL}
+          target='_blank'
+          rel='noopener noreferrer'
+          download='andromeda-viewer-reset-keys.txt'
+          ref={doAutoFocus}
+        >
+          Download as a file
+        </a>
+      </div>
+
       <ul className={styles.KeysList}>
         {resetKeys.map((key, index) => <li key={`reset-key-${index}`}>
           <span>{key}</span>
         </li>)}
       </ul>
-
-      <p>You can also download them:</p>
-
-      <a
-        className={styles.DownloadLink}
-        href={fileURL}
-        target='_blank'
-        rel='noopener noreferrer'
-        download='andromeda-viewer-reset-keys.txt'
-        ref={doAutoFocus}
-      >
-        Download as a file
-      </a>
 
       <img
         className={styles.Gandalf}
@@ -71,14 +73,16 @@ export default function ResetKeysModal ({ resetKeys }) {
 
       <p>Remember: If you lose your encryption password and the reset-keys, you lose your data!</p>
 
-      <button
-        className={formStyles.OkButton}
-        onClick={() => {
-          dispatch(closeResetKeys())
-        }}
-      >
-        OK, I did save them!
-      </button>
+      <div className={styles.ButtonContainer}>
+        <button
+          className={formStyles.OkButton}
+          onClick={() => {
+            dispatch(closeResetKeys())
+          }}
+        >
+          OK, I did save them!
+        </button>
+      </div>
     </form>
   </Modal>
 }

@@ -1,13 +1,16 @@
 import React, { useState } from 'react'
+import { useDispatch } from 'react-redux'
 import { useDialogState, useTabState, Tab, TabList, TabPanel } from 'reakit'
 
 import Modal from './modal'
 import { viewerName, author, repositoryUrl } from '../../viewerInfo'
+import { doAgreeToToS } from '../../actions/viewerAccount'
 
 import styles from './firstRunDialog.module.css'
 import formStyles from '../formElements.module.css'
 
 export default function FirstRunDialog () {
+  const dispatch = useDispatch()
   const tab = useTabState(() => ({ selectedId: 'general' }))
   const dialog = useDialogState(() => ({ visible: process.env.NODE_ENV !== 'test' }))
 
@@ -312,7 +315,10 @@ export default function FirstRunDialog () {
       <button
         type='button'
         className={formStyles.PrimaryButton}
-        onClick={() => { dialog.hide() }}
+        onClick={() => {
+          dialog.hide()
+          dispatch(doAgreeToToS())
+        }}
         disabled={!agreeToTos}
       >
         Accept
