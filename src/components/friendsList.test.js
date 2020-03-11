@@ -34,9 +34,11 @@ it('renders without crashing', () => {
     ]
   })
 
-  const { container } = render(<Provider store={store}>
-    <FriendsList names={names} />
-  </Provider>)
+  const { container } = render(
+    <Provider store={store}>
+      <FriendsList names={names} />
+    </Provider>
+  )
 
   expect(container).toBeTruthy()
 })
@@ -78,9 +80,11 @@ it('rendering', () => {
     ]
   })
 
-  const { queryByText, queryAllByAltText } = render(<Provider store={store}>
-    <FriendsList names={names} />
-  </Provider>)
+  const { queryByText, queryAllByAltText } = render(
+    <Provider store={store}>
+      <FriendsList names={names} />
+    </Provider>
+  )
 
   const first = queryByText('Testery Mactestface')
   expect(first).toBeTruthy()
@@ -120,9 +124,11 @@ it('event handling/changing rights', () => {
     first: new AvatarName('Testery MacTestface')
   }
 
-  const { queryByTitle } = render(<Provider store={store}>
-    <FriendsList names={names} />
-  </Provider>)
+  const { queryByTitle } = render(
+    <Provider store={store}>
+      <FriendsList names={names} />
+    </Provider>
+  )
 
   const friendCanSeeOnline = queryByTitle("Friend can see when you're online")
   expect(friendCanSeeOnline).toBeTruthy()
@@ -201,12 +207,14 @@ it('should handle creating a new chat', () => {
 
   const startNewIMChat = jest.fn()
 
-  const { queryByAltText } = render(<Provider store={store}>
-    <FriendsList
-      names={names}
-      startNewIMChat={startNewIMChat}
-    />
-  </Provider>)
+  const { queryByAltText } = render(
+    <Provider store={store}>
+      <FriendsList
+        names={names}
+        startNewIMChat={startNewIMChat}
+      />
+    </Provider>
+  )
 
   const newChatButton = queryByAltText('Start new chat with Testery Mactestface')
   expect(newChatButton).toBeTruthy()
@@ -239,9 +247,11 @@ it('should pass aXe', async () => {
     ]
   })
 
-  const { container } = render(<Provider store={store}>
-    <FriendsList names={names} />
-  </Provider>)
+  const { container } = render(
+    <Provider store={store}>
+      <FriendsList names={names} />
+    </Provider>
+  )
 
   expect(await axe(container)).toHaveNoViolations()
 })

@@ -24,39 +24,41 @@ export default function GroupInvitation (
 
   const fee = numberFormater.format(data.fee)
 
-  return <Container title={'Invitation to join a group'}>
-    <p>
-      <Text text={data.text} multiline />
-    </p>
+  return (
+    <Container title={'Invitation to join a group'}>
+      <p>
+        <Text text={data.text} multiline />
+      </p>
 
-    <span>
-      {'Fee: '}
-      <span className={styles.Fee}>
-        {fee}
-        <span aria-label='Linden Dollar'>L$</span>
+      <span>
+        {'Fee: '}
+        <span className={styles.Fee}>
+          {fee}
+          <span aria-label='Linden Dollar'>L$</span>
+        </span>
       </span>
-    </span>
 
-    <div className={styles.ButtonsRow}>
-      <button
-        className={formStyles.OkButton}
-        onClick={() => {
-          dispatch(acceptGroupInvitation(data.transactionId, data.groupId))
-          onClose()
-        }}
-      >
-        Accept
-      </button>
+      <div className={styles.ButtonsRow}>
+        <button
+          className={formStyles.OkButton}
+          onClick={() => {
+            dispatch(acceptGroupInvitation(data.transactionId, data.groupId))
+            onClose()
+          }}
+        >
+          Accept
+        </button>
 
-      <button
-        className={formStyles.DangerButton}
-        onClick={() => {
-          dispatch(declineGroupInvitation(data.transactionId, data.groupId))
-          onClose()
-        }}
-      >
-        Decline
-      </button>
-    </div>
-  </Container>
+        <button
+          className={formStyles.DangerButton}
+          onClick={() => {
+            dispatch(declineGroupInvitation(data.transactionId, data.groupId))
+            onClose()
+          }}
+        >
+          Decline
+        </button>
+      </div>
+    </Container>
+  )
 }

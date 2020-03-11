@@ -39,19 +39,21 @@ export default function InventoryOffer (
 
   const name = useName(data.fromId)
 
-  return <Container title={`${name} did offer you ${a} ${itemTypeName} item.`}>
-    <p>
-      <Text text={data.text} multiline />
-    </p>
+  return (
+    <Container title={`${name} did offer you ${a} ${itemTypeName} item.`}>
+      <p>
+        <Text text={data.text} multiline />
+      </p>
 
-    <div className={styles.ButtonsRow}>
-      <button className={formStyles.OkButton} onClick={doAccept}>
-        Accept
-      </button>
+      <div className={styles.ButtonsRow}>
+        <button className={formStyles.OkButton} onClick={doAccept}>
+          Accept
+        </button>
 
-      <button className={formStyles.DangerButton} onClick={doDecline}>
-        Decline
-      </button>
-    </div>
-  </Container>
+        <button className={formStyles.DangerButton} onClick={doDecline}>
+          Decline
+        </button>
+      </div>
+    </Container>
+  )
 }

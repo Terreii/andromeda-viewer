@@ -106,7 +106,7 @@ export function login (avatarName, password, grid, save, isNew) {
     // Set the active circuit and connect to sim
     dispatch(connectToSim(body, await circuit))
 
-    dispatch(fetchSeedCapabilities(body['seed_capability']))
+    dispatch(fetchSeedCapabilities(body.seed_capability))
       .then(() => dispatch(getAllFriendsDisplayNames()))
 
     return body

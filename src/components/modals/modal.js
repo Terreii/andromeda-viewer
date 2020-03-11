@@ -17,22 +17,26 @@ export default function Modal ({
   const closeable = !notCloseable
 
   const closeIconInHeader = showOnClose && closeable
-    ? <button
-      className={'closeModal ' + styles.CloseButton}
-      onClick={event => {
-        event.preventDefault()
-        dialog.hide()
-      }}
-    >
-      <img src={closeIcon} alt={`close dialog ${title}`} height='32' width='32' />
-    </button>
+    ? (
+      <button
+        className={'closeModal ' + styles.CloseButton}
+        onClick={event => {
+          event.preventDefault()
+          dialog.hide()
+        }}
+      >
+        <img src={closeIcon} alt={`close dialog ${title}`} height='32' width='32' />
+      </button>
+    )
     : <span />
 
   return (
     <>
-      {backdrop && <Portal>
-        <DialogBackdrop {...dialog} className={styles.Background} />
-      </Portal>}
+      {backdrop && (
+        <Portal>
+          <DialogBackdrop {...dialog} className={styles.Background} />
+        </Portal>
+      )}
       <Dialog
         {...dialog}
         className={styles.Border}

@@ -18,11 +18,11 @@ it('should display and update the account name', async () => {
   const store = configureStore()
   store.dispatch(signInStatus(true, true, 'tester.mactestface@viewer.com'))
 
-  const { queryByLabelText, queryByText, findByLabelText, findByText } = render(<Provider
-    store={store}
-  >
-    <AccountDialog />
-  </Provider>)
+  const { queryByLabelText, queryByText, findByLabelText, findByText } = render(
+    <Provider store={store}>
+      <AccountDialog />
+    </Provider>
+  )
 
   const username = queryByLabelText('Username / Mail')
   expect(username).toBeTruthy()
@@ -86,11 +86,11 @@ it('should change the password', async () => {
 
   const startUpdateCallCount = updateAccount.mock.calls.length
 
-  const { queryByLabelText, queryByText, findByLabelText } = render(<Provider
-    store={store}
-  >
-    <AccountDialog />
-  </Provider>)
+  const { queryByLabelText, queryByText, findByLabelText } = render(
+    <Provider store={store}>
+      <AccountDialog />
+    </Provider>
+  )
 
   const passwordChangeOld = queryByLabelText('Old password')
   expect(passwordChangeOld).toBeTruthy()
@@ -198,9 +198,11 @@ it('should allow to change username and password at the same time', async () => 
 
   const startUpdateCallCount = updateAccount.mock.calls.length
 
-  const { queryByLabelText, findByLabelText, findByText } = render(<Provider store={store}>
-    <AccountDialog />
-  </Provider>)
+  const { queryByLabelText, findByLabelText, findByText } = render(
+    <Provider store={store}>
+      <AccountDialog />
+    </Provider>
+  )
 
   fireEvent.change(queryByLabelText('Username / Mail'), {
     target: {
@@ -247,9 +249,11 @@ it('should pass aXe', async () => {
   const store = configureStore()
   store.dispatch(signInStatus(true, true, 'tester.mactestface@viewer.com'))
 
-  const { container } = render(<Provider store={store}>
-    <AccountDialog />
-  </Provider>)
+  const { container } = render(
+    <Provider store={store}>
+      <AccountDialog />
+    </Provider>
+  )
 
   expect(await axe(container)).toHaveNoViolations()
 })

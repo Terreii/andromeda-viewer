@@ -20,25 +20,27 @@ export default function RequestTeleportLure (
 
   const name = useName(data.fromId)
 
-  return <Container title={`${name} is requesting to be teleported to your location.`}>
-    <p>
-      <Text text={data.text} multiline />
-    </p>
+  return (
+    <Container title={`${name} is requesting to be teleported to your location.`}>
+      <p>
+        <Text text={data.text} multiline />
+      </p>
 
-    <div className={styles.ButtonsRow}>
-      <button
-        className={formStyles.OkButton}
-        onClick={() => {
-          dispatch(offerTeleportLure(data.fromId))
-          onClose()
-        }}
-      >
-        Accept
-      </button>
+      <div className={styles.ButtonsRow}>
+        <button
+          className={formStyles.OkButton}
+          onClick={() => {
+            dispatch(offerTeleportLure(data.fromId))
+            onClose()
+          }}
+        >
+          Accept
+        </button>
 
-      <button className={formStyles.DangerButton} onClick={onClose}>
-        Decline
-      </button>
-    </div>
-  </Container>
+        <button className={formStyles.DangerButton} onClick={onClose}>
+          Decline
+        </button>
+      </div>
+    </Container>
+  )
 }

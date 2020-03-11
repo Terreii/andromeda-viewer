@@ -27,19 +27,21 @@ export default function FriendshipOffer ({ data, onClose }: ComponentArguments<T
 
   const name = useName(data.fromId)
 
-  return <Container title={`${name} has offered to teleport you to their location.`}>
-    <p>
-      <Text text={data.text} multiline />
-    </p>
+  return (
+    <Container title={`${name} has offered to teleport you to their location.`}>
+      <p>
+        <Text text={data.text} multiline />
+      </p>
 
-    <div className={styles.ButtonsRow}>
-      <button className={formStyles.OkButton} onClick={doAccept} disabled>
-        Accept (not yet implemented)
-      </button>
+      <div className={styles.ButtonsRow}>
+        <button className={formStyles.OkButton} onClick={doAccept} disabled>
+          Accept (not yet implemented)
+        </button>
 
-      <button className={formStyles.DangerButton} onClick={doDecline}>
-        Decline
-      </button>
-    </div>
-  </Container>
+        <button className={formStyles.DangerButton} onClick={doDecline}>
+          Decline
+        </button>
+      </div>
+    </Container>
+  )
 }

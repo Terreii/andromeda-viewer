@@ -32,53 +32,59 @@ export default function ResetKeysModal ({ resetKeys }) {
 
   const doAutoFocus = useAutoFocus()
 
-  return <Modal title='Password reset keys' dialog={dialog} backdrop>
-    <form className={styles.Container}>
-      <p>
-        Those are your <b>encryption reset-keys</b>.<br />
-        You need them, when you did forget your encryption-password!<br />
-        <b>Please save them!</b><br />
-        <b>Save them some where secure!</b><br />
-        There is no other way to get your data back!
-      </p>
+  return (
+    <Modal title='Password reset keys' dialog={dialog} backdrop>
+      <form className={styles.Container}>
+        <p>
+          Those are your <b>encryption reset-keys</b>.<br />
+          You need them, when you did forget your encryption-password!<br />
+          <b>Please save them!</b><br />
+          <b>Save them some where secure!</b><br />
+          There is no other way to get your data back!
+        </p>
 
-      <ul className={styles.KeysList}>
-        {resetKeys.map((key, index) => <li key={`reset-key-${index}`}>
-          <span>{key}</span>
-        </li>)}
-      </ul>
+        <ul className={styles.KeysList}>
+          {resetKeys.map((key, index) => (
+            <li key={`reset-key-${index}`}>
+              <span>{key}</span>
+            </li>
+          ))}
+        </ul>
 
-      <p>You can also download them:</p>
+        <p>You can also download them:</p>
 
-      <a
-        className={styles.DownloadLink}
-        href={fileURL}
-        target='_blank'
-        rel='noopener noreferrer'
-        download='andromeda-viewer-reset-keys.txt'
-        ref={doAutoFocus}
-      >
-        Download as a file
-      </a>
+        <a
+          className={styles.DownloadLink}
+          href={fileURL}
+          target='_blank'
+          rel='noopener noreferrer'
+          download='andromeda-viewer-reset-keys.txt'
+          ref={doAutoFocus}
+        >
+          Download as a file
+        </a>
 
-      <img
-        className={styles.Gandalf}
-        src={keepItSecret}
-        height='200'
-        width='200'
-        alt='Gandalf saying: Keep it secret, keep it safe!'
-      />
+        <img
+          className={styles.Gandalf}
+          src={keepItSecret}
+          height='200'
+          width='200'
+          alt='Gandalf saying: Keep it secret, keep it safe!'
+        />
 
-      <p>Remember: If you lose your encryption password and the reset-keys, you lose your data!</p>
+        <p>
+          Remember: If you lose your encryption password and the reset-keys, you lose your data!
+        </p>
 
-      <button
-        className={formStyles.OkButton}
-        onClick={() => {
-          dispatch(closeResetKeys())
-        }}
-      >
-        OK, I did save them!
-      </button>
-    </form>
-  </Modal>
+        <button
+          className={formStyles.OkButton}
+          onClick={() => {
+            dispatch(closeResetKeys())
+          }}
+        >
+          OK, I did save them!
+        </button>
+      </form>
+    </Modal>
+  )
 }

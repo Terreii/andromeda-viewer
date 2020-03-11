@@ -126,40 +126,48 @@ export default function LoginForm ({ isSignedIn }) {
     doLogin(name, password, gridName, true, false)
   }
 
-  return <div className={styles.Container}>
-    <main className={styles.Main}>
-      <div className={styles.AvatarList}>
-        <LoginNewAvatar
-          grids={grids}
-          isSignedIn={isSignedIn}
-          onLogin={loginAnonymously}
-          isLoggingIn={isLoggingIn}
-          isSelected={selected === 'new'}
-          onSelect={setSelected}
-        />
+  return (
+    <div className={styles.Container}>
+      <main className={styles.Main}>
+        <div className={styles.AvatarList}>
+          <LoginNewAvatar
+            grids={grids}
+            isSignedIn={isSignedIn}
+            onLogin={loginAnonymously}
+            isLoggingIn={isLoggingIn}
+            isSelected={selected === 'new'}
+            onSelect={setSelected}
+          />
 
-        {!isSignedIn && <SignIn />}
+          {!isSignedIn && <SignIn />}
 
-        {avatars.map(avatar => <AvatarLogin
-          key={avatar._id}
-          avatar={avatar}
-          grid={grids.find(grid => grid.name === avatar.grid)}
-          onLogin={loginWithSavedAvatar}
-          isLoggingIn={isLoggingIn}
-          isSelected={selected === avatar.avatarIdentifier}
-          onSelect={setSelected}
-        />)}
-      </div>
+          {avatars.map(avatar => (
+            <AvatarLogin
+              key={avatar._id}
+              avatar={avatar}
+              grid={grids.find(grid => grid.name === avatar.grid)}
+              onLogin={loginWithSavedAvatar}
+              isLoggingIn={isLoggingIn}
+              isSelected={selected === avatar.avatarIdentifier}
+              onSelect={setSelected}
+            />
+          ))}
+        </div>
 
-      {errorMessage && <div className={styles.ErrorOut}>
-        {errorMessage.title.length > 0 && <h4>{errorMessage.title}</h4>}
-        <p>
-          {errorMessage.body.split('\n').map((line, index) => <React.Fragment key={index}>
-            {line}
-            <br />
-          </React.Fragment>)}
-        </p>
-      </div>}
-    </main>
-  </div>
+        {errorMessage && (
+          <div className={styles.ErrorOut}>
+            {errorMessage.title.length > 0 && <h4>{errorMessage.title}</h4>}
+            <p>
+              {errorMessage.body.split('\n').map((line, index) => (
+                <React.Fragment key={index}>
+                  {line}
+                  <br />
+                </React.Fragment>
+              ))}
+            </p>
+          </div>
+        )}
+      </main>
+    </div>
+  )
 }

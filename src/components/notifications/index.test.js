@@ -56,9 +56,11 @@ it('renders without crashing', () => {
 
   const store = configureStore()
 
-  render(<Provider store={store}>
-    <Notifications />
-  </Provider>)
+  render(
+    <Provider store={store}>
+      <Notifications />
+    </Provider>
+  )
 })
 
 it('renders a basic MessageBox', () => {
@@ -75,9 +77,11 @@ it('renders a basic MessageBox', () => {
 
   const closeCount = close.mock.calls.length
 
-  const { queryByText } = render(<Provider store={store}>
-    <Notifications />
-  </Provider>)
+  const { queryByText } = render(
+    <Provider store={store}>
+      <Notifications />
+    </Provider>
+  )
 
   expect(queryByText('Tester')).toBeTruthy()
   expect(queryByText('Tester').nodeName).toBe('H4')
@@ -108,9 +112,11 @@ it('renders a system MessageBox', () => {
 
   const closeCount = close.mock.calls.length
 
-  const { queryByText } = render(<Provider store={store}>
-    <Notifications />
-  </Provider>)
+  const { queryByText } = render(
+    <Provider store={store}>
+      <Notifications />
+    </Provider>
+  )
 
   const header = queryByText('System Notification')
   expect(header).toBeTruthy()
@@ -151,9 +157,11 @@ it('renders a friendship request', () => {
     }
   ])
 
-  const { queryByText } = render(<Provider store={store}>
-    <Notifications />
-  </Provider>)
+  const { queryByText } = render(
+    <Provider store={store}>
+      <Notifications />
+    </Provider>
+  )
 
   expect(queryByText('I would like to by your friend!')).toBeTruthy()
   expect(queryByText('I would like to by your friend!').nodeName).toBe('P')
@@ -212,9 +220,11 @@ it('renders a group invitation', () => {
     }
   ])
 
-  const { queryByText } = render(<Provider store={store}>
-    <Notifications />
-  </Provider>)
+  const { queryByText } = render(
+    <Provider store={store}>
+      <Notifications />
+    </Provider>
+  )
 
   expect(queryByText('Join my group!')).toBeTruthy()
   expect(queryByText('Join my group!').nodeName).toBe('P')
@@ -284,9 +294,11 @@ it('renders a group notice with items', () => {
   ])
 
   // With item
-  const { queryByText } = render(<Provider store={store}>
-    <Notifications />
-  </Provider>)
+  const { queryByText } = render(
+    <Provider store={store}>
+      <Notifications />
+    </Provider>
+  )
 
   expect(queryByText('Group Notice from Tester Group - New stuff')).toBeTruthy()
   expect(queryByText('Group Notice from Tester Group - New stuff').nodeName).toBe('H4')
@@ -365,9 +377,11 @@ it('renders a group notice without item', () => {
   ])
 
   // With item
-  const { queryByText } = render(<Provider store={store}>
-    <Notifications />
-  </Provider>)
+  const { queryByText } = render(
+    <Provider store={store}>
+      <Notifications />
+    </Provider>
+  )
 
   expect(queryByText('Group Notice from Tester Group - New stuff')).toBeTruthy()
   expect(queryByText('Group Notice from Tester Group - New stuff').nodeName).toBe('H4')
@@ -414,9 +428,11 @@ it('renders an open URL', () => {
 
   const closeCount = close.mock.calls.length
 
-  const { container, queryByText } = render(<Provider store={store}>
-    <Notifications />
-  </Provider>)
+  const { container, queryByText } = render(
+    <Provider store={store}>
+      <Notifications />
+    </Provider>
+  )
 
   const a = container.querySelector(`a[href="${href}"]`)
   expect(a).toBeTruthy()
@@ -452,9 +468,11 @@ it('renders a request teleport lure', () => {
 
   const closeCount = close.mock.calls.length
 
-  const { queryByText } = render(<Provider store={store}>
-    <Notifications />
-  </Provider>)
+  const { queryByText } = render(
+    <Provider store={store}>
+      <Notifications />
+    </Provider>
+  )
 
   expect(queryByText(mockedName + ' is requesting to be teleported to your location.'))
     .toBeTruthy()
@@ -512,9 +530,11 @@ it('renders a teleport lure', () => {
 
   const store = configureStore()
 
-  const { queryByText } = render(<Provider store={store}>
-    <Notifications />
-  </Provider>)
+  const { queryByText } = render(
+    <Provider store={store}>
+      <Notifications />
+    </Provider>
+  )
 
   expect(queryByText(`${mockedName} has offered to teleport you to their location.`))
     .toBeTruthy()
@@ -584,9 +604,11 @@ it('renders an inventory offer', () => {
   const declineCount = declineInventoryOffer.mock.calls.length
   const closeCount = close.mock.calls.length
 
-  const { queryByText } = render(<Provider store={store}>
-    <Notifications />
-  </Provider>)
+  const { queryByText } = render(
+    <Provider store={store}>
+      <Notifications />
+    </Provider>
+  )
 
   expect(queryByText('Here is my offer!')).toBeTruthy()
 
@@ -734,9 +756,11 @@ it('should pass aXe', async () => {
 
   const store = configureStore()
 
-  const { container } = render(<Provider store={store}>
-    <Notifications />
-  </Provider>)
+  const { container } = render(
+    <Provider store={store}>
+      <Notifications />
+    </Provider>
+  )
 
   expect(await axe(container)).toHaveNoViolations()
 })

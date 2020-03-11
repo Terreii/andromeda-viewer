@@ -15,19 +15,21 @@ export default function LoadURL ({ data, onClose }: ComponentArguments<LoadURLNo
 
   const name = useName(data.fromId)
 
-  return <Container title={`${name} did send you an URL`}>
-    <p>
-      <Text text={data.text} multiline />
-    </p>
+  return (
+    <Container title={`${name} did send you an URL`}>
+      <p>
+        <Text text={data.text} multiline />
+      </p>
 
-    <div>
-      <a href={href} target='_blank' rel='noopener noreferrer'>{href}</a>
-    </div>
+      <div>
+        <a href={href} target='_blank' rel='noopener noreferrer'>{href}</a>
+      </div>
 
-    <div className={styles.ButtonsRow}>
-      <button className={formStyles.PrimaryButton} onClick={onClose}>
-        OK
-      </button>
-    </div>
-  </Container>
+      <div className={styles.ButtonsRow}>
+        <button className={formStyles.PrimaryButton} onClick={onClose}>
+          OK
+        </button>
+      </div>
+    </Container>
+  )
 }

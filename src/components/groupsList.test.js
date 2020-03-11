@@ -29,9 +29,11 @@ it('renders without crashing', () => {
     ]
   })
 
-  const { container } = render(<Provider store={store}>
-    <GroupsList startNewIMChat={() => {}} />
-  </Provider>)
+  const { container } = render(
+    <Provider store={store}>
+      <GroupsList startNewIMChat={() => {}} />
+    </Provider>
+  )
 
   expect(container).toBeTruthy()
 })
@@ -58,9 +60,11 @@ it('rendering', () => {
     ]
   })
 
-  const { queryByText } = render(<Provider store={store}>
-    <GroupsList startNewIMChat={() => {}} />
-  </Provider>)
+  const { queryByText } = render(
+    <Provider store={store}>
+      <GroupsList startNewIMChat={() => {}} />
+    </Provider>
+  )
 
   expect(queryByText('Test Group')).toBeTruthy()
 
@@ -83,9 +87,11 @@ it('start chat', () => {
 
   const startNewIMChat = jest.fn()
 
-  const { queryByAltText } = render(<Provider store={store}>
-    <GroupsList startNewIMChat={startNewIMChat} />
-  </Provider>)
+  const { queryByAltText } = render(
+    <Provider store={store}>
+      <GroupsList startNewIMChat={startNewIMChat} />
+    </Provider>
+  )
 
   const newChatButton = queryByAltText('Start new chat with Test Group')
   expect(newChatButton).toBeTruthy()
@@ -125,9 +131,11 @@ it('should pass aXe', async () => {
     ]
   })
 
-  const { container } = render(<Provider store={store}>
-    <GroupsList startNewIMChat={() => {}} />
-  </Provider>)
+  const { container } = render(
+    <Provider store={store}>
+      <GroupsList startNewIMChat={() => {}} />
+    </Provider>
+  )
 
   expect(await axe(container)).toHaveNoViolations()
 })

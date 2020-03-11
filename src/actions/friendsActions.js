@@ -48,7 +48,7 @@ function loadDisplayNames (idsArray) {
     }
 
     const result = await response.llsd()
-    const badIDs = result['bad_ids'] || []
+    const badIDs = result.bad_ids || []
     dispatch(sendUUIDNameRequest(badIDs)) // Try again
 
     result.agents.forEach(agent => {
@@ -56,7 +56,7 @@ function loadDisplayNames (idsArray) {
       agent.id = agent.id.toString()
     })
 
-    dispatch(displayNamesLoaded(result.agents, badIDs, result['bad_usernames'] || []))
+    dispatch(displayNamesLoaded(result.agents, badIDs, result.bad_usernames || []))
   }
 }
 

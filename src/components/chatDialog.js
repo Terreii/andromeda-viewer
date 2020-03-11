@@ -31,24 +31,26 @@ export default function ChatDialog ({ isIM = false, data = [], names, sendTo, lo
 
   const placeholderText = `Send ${isIM ? 'Instant Message' : 'to local chat'}`
 
-  return <>
-    <ChatMessagesList
-      messages={messages}
-      isIM={isIM}
-      names={names}
-      onScrolledTop={doLoadHistory}
-    />
-    <form className={styles.InputRow} onSubmit={send}>
-      <input
-        type='text'
-        className={styles.TextBox}
-        name='chatInput'
-        placeholder={placeholderText}
-        aria-label={placeholderText}
-        value={text}
-        onChange={event => { setText(event.target.value) }}
+  return (
+    <>
+      <ChatMessagesList
+        messages={messages}
+        isIM={isIM}
+        names={names}
+        onScrolledTop={doLoadHistory}
       />
-      <button className={styles.SendButton}>send</button>
-    </form>
-  </>
+      <form className={styles.InputRow} onSubmit={send}>
+        <input
+          type='text'
+          className={styles.TextBox}
+          name='chatInput'
+          placeholder={placeholderText}
+          aria-label={placeholderText}
+          value={text}
+          onChange={event => { setText(event.target.value) }}
+        />
+        <button className={styles.SendButton}>send</button>
+      </form>
+    </>
+  )
 }

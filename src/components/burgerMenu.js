@@ -44,81 +44,100 @@ export default function BurgerMenu ({ isLoggedIn }) {
     dispatch(toggleMenu(false))
   }
 
-  return <SlideMenu>
-    {isSignedIn
-      ? <NavLink className={styles.BurgerMenuItem} to='/profile' onClick={doClose}>
-        Signed in as
-        <br />
-        <small>{userName}</small>
-      </NavLink>
-      : <SignInDialogOpener
-        id='burgerMenuSignIn'
-        className={styles.BurgerMenuItem}
-      >
-        Sign into Andromeda
-      </SignInDialogOpener>
-    }
+  return (
+    <SlideMenu>
+      {isSignedIn
+        ? (
+          <NavLink className={styles.BurgerMenuItem} to='/profile' onClick={doClose}>
+            Signed in as
+            <br />
+            <small>{userName}</small>
+          </NavLink>
+        )
+        : (
+          <SignInDialogOpener
+            id='burgerMenuSignIn'
+            className={styles.BurgerMenuItem}
+          >
+            Sign into Andromeda
+          </SignInDialogOpener>
+        )}
 
-    {!isSignedIn && <SignInDialogOpener
-      id='burgerMenuSignUp'
-      className={'menu-item ' + styles.BurgerMenuItem}
-      isSignUp
-    >
-      Sign up to Andromeda
-    </SignInDialogOpener>}
+      {!isSignedIn && (
+        <SignInDialogOpener
+          id='burgerMenuSignUp'
+          className={'menu-item ' + styles.BurgerMenuItem}
+          isSignUp
+        >
+          Sign up to Andromeda
+        </SignInDialogOpener>
+      )}
 
-    <hr />
+      <hr />
 
-    {!isLoggedIn && <NavLink className={styles.BurgerMenuItem} exact to='/' onClick={doClose}>
-      Avatar List
-    </NavLink>}
+      {!isLoggedIn && (
+        <NavLink className={styles.BurgerMenuItem} exact to='/' onClick={doClose}>
+          Avatar List
+        </NavLink>
+      )}
 
-    {isLoggedIn && <span className={styles.BurgerMenuItem}>
-      Current Avatar:
-      <br />
-      {avatarName.toString()}
-    </span>}
+      {isLoggedIn && (
+        <span className={styles.BurgerMenuItem}>
+          Current Avatar:
+          <br />
+          {avatarName.toString()}
+        </span>
+      )}
 
-    {isLoggedIn && <NavLink className={styles.BurgerMenuItem} to='/session' onClick={doClose}>
-      Chat
-    </NavLink>}
+      {isLoggedIn && (
+        <NavLink className={styles.BurgerMenuItem} to='/session' onClick={doClose}>
+          Chat
+        </NavLink>
+      )}
 
-    <hr />
+      <hr />
 
-    {isLoggedIn && <button
-      id='sidebarAvatarLogout'
-      className={'menu-item ' + styles.BurgerMenuLogout}
-      onClick={doLogout}
-    >
-      log out
-    </button>}
+      {isLoggedIn && (
+        <button
+          id='sidebarAvatarLogout'
+          className={'menu-item ' + styles.BurgerMenuLogout}
+          onClick={doLogout}
+        >
+          log out
+        </button>
+      )}
 
-    {isSignedIn && <SignOutDialogOpener signOut={doSignOutFromViewer} />}
-  </SlideMenu>
+      {isSignedIn && <SignOutDialogOpener signOut={doSignOutFromViewer} />}
+    </SlideMenu>
+  )
 }
 
 function SignInDialogOpener ({ id, className, isSignUp, children }) {
   const dialog = useDialogState()
 
-  return <>
-    <DialogDisclosure {...dialog} id={id} className={className}>
-      {children}
-    </DialogDisclosure>
-    <SignInDialog dialog={dialog} isSignUp={isSignUp} />
-  </>
+  return (
+    <>
+      <DialogDisclosure {...dialog} id={id} className={className}>
+        {children}
+      </DialogDisclosure>
+      <SignInDialog dialog={dialog} isSignUp={isSignUp} />
+    </>
+  )
 }
 
 function SignOutDialogOpener ({ signOut }) {
   const dialog = useDialogState()
 
-  return <>
-    <DialogDisclosure
-      {...dialog}
-      id='sidebarSignOut'
-      className={'menu-item ' + styles.BurgerMenuLogout}
-    >
-      Log out from Viewer
-    </DialogDisclosure>
-    <SignOutDialog dialog={dialog} onSignOut={signOut} />
-  </>
+  return (
+    <>
+      <DialogDisclosure
+        {...dialog}
+        id='sidebarSignOut'
+        className={'menu-item ' + styles.BurgerMenuLogout}
+      >
+        Log out from Viewer
+      </DialogDisclosure>
+      <SignOutDialog dialog={dialog} onSignOut={signOut} />
+    </>
+  )
 }

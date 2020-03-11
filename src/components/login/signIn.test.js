@@ -7,17 +7,21 @@ import SignIn from './signIn'
 import configureStore from '../../store/configureStore'
 
 it('renders without crashing', () => {
-  const { container } = render(<Provider store={configureStore()}>
-    <SignIn />
-  </Provider>)
+  const { container } = render(
+    <Provider store={configureStore()}>
+      <SignIn />
+    </Provider>
+  )
 
   expect(container).toBeTruthy()
 })
 
 it('on buttons click', () => {
-  const { queryByText } = render(<Provider store={configureStore()}>
-    <SignIn />
-  </Provider>)
+  const { queryByText } = render(
+    <Provider store={configureStore()}>
+      <SignIn />
+    </Provider>
+  )
 
   const signInButton = queryByText('Sign In')
   expect(signInButton).toBeTruthy()
@@ -29,9 +33,11 @@ it('on buttons click', () => {
 })
 
 it('should pass aXe', async () => {
-  const { container } = render(<Provider store={configureStore()}>
-    <SignIn />
-  </Provider>)
+  const { container } = render(
+    <Provider store={configureStore()}>
+      <SignIn />
+    </Provider>
+  )
 
   expect(await axe(container)).toHaveNoViolations()
 })

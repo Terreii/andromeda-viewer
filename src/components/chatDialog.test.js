@@ -10,12 +10,14 @@ it('renders without crashing', () => {
     first: new AvatarName('Testery MacTestface')
   }
 
-  const { container } = render(<ChatDialog
-    names={names}
-    data={[]}
-    isIM={false}
-    sendTo={() => {}}
-  />)
+  const { container } = render(
+    <ChatDialog
+      names={names}
+      data={[]}
+      isIM={false}
+      sendTo={() => {}}
+    />
+  )
 
   expect(container).toBeTruthy()
 })
@@ -28,11 +30,13 @@ describe('local chat', () => {
 
     const send = jest.fn()
 
-    const { queryByText, queryByPlaceholderText, findByText } = render(<ChatDialog
-      names={names}
-      data={[]}
-      sendTo={send}
-    />)
+    const { queryByText, queryByPlaceholderText, findByText } = render(
+      <ChatDialog
+        names={names}
+        data={[]}
+        sendTo={send}
+      />
+    )
 
     const input = queryByPlaceholderText('Send to local chat')
     expect(input).toBeTruthy()
@@ -60,12 +64,14 @@ describe('local chat', () => {
       first: new AvatarName('Testery MacTestface')
     }
 
-    const { container } = render(<ChatDialog
-      names={names}
-      data={[]}
-      isIM={false}
-      sendTo={() => {}}
-    />)
+    const { container } = render(
+      <ChatDialog
+        names={names}
+        data={[]}
+        isIM={false}
+        sendTo={() => {}}
+      />
+    )
 
     expect(await axe(container)).toHaveNoViolations()
   })
@@ -86,13 +92,15 @@ describe('IM chat', () => {
     const send = jest.fn()
     const loadHistory = jest.fn()
 
-    const { queryByText, queryByPlaceholderText, findByText } = render(<ChatDialog
-      isIM
-      names={names}
-      data={imData}
-      sendTo={send}
-      loadHistory={loadHistory}
-    />)
+    const { queryByText, queryByPlaceholderText, findByText } = render(
+      <ChatDialog
+        isIM
+        names={names}
+        data={imData}
+        sendTo={send}
+        loadHistory={loadHistory}
+      />
+    )
 
     const input = queryByPlaceholderText('Send Instant Message')
     expect(input).toBeTruthy()
@@ -130,13 +138,15 @@ describe('IM chat', () => {
       messages: []
     }
 
-    const { container } = render(<ChatDialog
-      isIM
-      names={names}
-      data={imData}
-      sendTo={() => {}}
-      loadHistory={() => {}}
-    />)
+    const { container } = render(
+      <ChatDialog
+        isIM
+        names={names}
+        data={imData}
+        sendTo={() => {}}
+        loadHistory={() => {}}
+      />
+    )
 
     expect(await axe(container)).toHaveNoViolations()
   })

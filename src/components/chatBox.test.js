@@ -52,12 +52,14 @@ it('renders without crashing', () => {
     session: { activeChatTab: 'local' }
   })
 
-  const { container } = render(<Provider store={store}>
-    <ChatBox
-      selfName={new AvatarName('self Resident')}
-      sendLocalChatMessage={() => {}}
-    />
-  </Provider>)
+  const { container } = render(
+    <Provider store={store}>
+      <ChatBox
+        selfName={new AvatarName('self Resident')}
+        sendLocalChatMessage={() => {}}
+      />
+    </Provider>
+  )
 
   expect(container).toBeTruthy()
 })
@@ -102,12 +104,14 @@ it('should pass aXe', async () => {
     session: { activeChatTab: 'local' }
   })
 
-  const { container } = render(<Provider store={store}>
-    <ChatBox
-      selfName={new AvatarName('self Resident')}
-      sendLocalChatMessage={() => {}}
-    />
-  </Provider>)
+  const { container } = render(
+    <Provider store={store}>
+      <ChatBox
+        selfName={new AvatarName('self Resident')}
+        sendLocalChatMessage={() => {}}
+      />
+    </Provider>
+  )
 
   expect(await axe(container)).toHaveNoViolations()
 })

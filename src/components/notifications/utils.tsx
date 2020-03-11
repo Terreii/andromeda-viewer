@@ -10,11 +10,13 @@ interface ContainerArgs {
 }
 
 export function Container ({ title, children }: ContainerArgs) {
-  return <div className={styles.Border}>
-    {title && <h4>{title}</h4>}
+  return (
+    <div className={styles.Border}>
+      {title && <h4>{title}</h4>}
 
-    {children}
-  </div>
+      {children}
+    </div>
+  )
 }
 
 export interface ComponentArguments<T extends NotificationBase> {

@@ -9,10 +9,12 @@ import SignInPopup from './signIn'
 const Container = ({ store, isSignUp }) => {
   const dialog = useDialogState()
 
-  return <Provider store={store}>
-    <DialogDisclosure {...dialog}>Test</DialogDisclosure>
-    <SignInPopup dialog={dialog} isSignUp={isSignUp} />
-  </Provider>
+  return (
+    <Provider store={store}>
+      <DialogDisclosure {...dialog}>Test</DialogDisclosure>
+      <SignInPopup dialog={dialog} isSignUp={isSignUp} />
+    </Provider>
+  )
 }
 
 describe('signUp', () => {

@@ -24,11 +24,15 @@ export function LoadableChatComponent () {
     return <Redirect push to='/' />
   }
 
-  const fallback = <div className={styles.LoadingView}>
-    <span>Loading ...</span>
-  </div>
+  const fallback = (
+    <div className={styles.LoadingView}>
+      <span>Loading ...</span>
+    </div>
+  )
 
-  return <Suspense fallback={fallback}>
-    <ChatBox />
-  </Suspense>
+  return (
+    <Suspense fallback={fallback}>
+      <ChatBox />
+    </Suspense>
+  )
 }

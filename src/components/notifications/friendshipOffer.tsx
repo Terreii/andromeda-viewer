@@ -30,19 +30,21 @@ export default function FriendshipOffer (
 
   const name = useName(data.fromId)
 
-  return <Container title={`${name} has offered you friendship.`}>
-    <p>
-      <Text text={data.text} multiline />
-    </p>
+  return (
+    <Container title={`${name} has offered you friendship.`}>
+      <p>
+        <Text text={data.text} multiline />
+      </p>
 
-    <div className={styles.ButtonsRow}>
-      <button className={formStyles.OkButton} onClick={onAccept}>
-        Accept
-      </button>
+      <div className={styles.ButtonsRow}>
+        <button className={formStyles.OkButton} onClick={onAccept}>
+          Accept
+        </button>
 
-      <button className={formStyles.DangerButton} onClick={onDecline}>
-        Decline
-      </button>
-    </div>
-  </Container>
+        <button className={formStyles.DangerButton} onClick={onDecline}>
+          Decline
+        </button>
+      </div>
+    </Container>
+  )
 }
