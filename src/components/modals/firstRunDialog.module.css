@@ -1,24 +1,34 @@
-/*
- * styling for the chat/tabs
- */
+.viewerName {
+  text-transform: capitalize;
+}
 
-.container {
-  position: relative;
-  height: calc(100vh - 3.2rem);
-  width: 100vw;
-  display: flex;
-  flex-direction: column;
-  padding-top: 0.6rem;
-  padding-top: 3.1rem;
+.panel {
+  margin-top: 2rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.panel code {
+  padding: .2em .4em;
+  margin: 0;
+  font-size: 85%;
+  background-color: rgba(27,31,35,.05);
+  border-radius: 3px;
 }
 
 .list {
+  position: fixed;
+  top: 2.5rem;
+  width: 95%;
+  width: calc(100% - 3em);
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   border-bottom: 1px solid black;
   margin-left: 5px;
   margin-right: 5px;
+  background: snow;
+  background: var(--modal-background);
 }
 
 .tabButton {
@@ -28,7 +38,7 @@
   border-radius: 0.25rem 0.25rem 0 0;
   margin: 1px 0 -1px 0;
   padding: 0.5em 1em;
-  background-color: #fff;
+  background-color: transparent;
 }
 .tabButton:focus {
   box-shadow: 0 0 0 0.2em highlight;
@@ -40,13 +50,19 @@
   border-width: 1px 1px 0px 1px;
   border-width: 1px;
   border-bottom-color: #fff;
+  z-index: 1;
 }
 
-.panel {
+.tosRow {
   display: flex;
   flex-direction: column;
-  flex: auto;
-  margin: 0.3em;
-  height: 80%;
-  line-height: 1.5;
+  align-items: flex-start;
+  padding: 1rem 0rem 0.5rem 1rem;
+}
+.tosRow > * + * {
+  margin-top: 0.25rem;
+}
+
+.tosCheckbox {
+  margin-right: 0.3rem;
 }

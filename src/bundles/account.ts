@@ -4,6 +4,8 @@ import { AvatarData, SavedAvatarData, Grid, HoodieObject } from '../types/viewer
 
 // Reducer for viewer-account and state
 
+export const currentToSVersion = 1
+
 const accountSlice = createSlice({
   name: 'account',
 
@@ -33,7 +35,11 @@ const accountSlice = createSlice({
       }
     },
   
-    signOut: getDefault,
+    signOut (state, action) {
+      const nextState = getDefault()
+      nextState.tos = state.tos
+      return nextState
+    },
   
     unlocked (state) {
       state.unlocked = true
@@ -53,6 +59,19 @@ const accountSlice = createSlice({
         .forEach(([key, value]) => {
           state[key] = value
         })
+    },
+
+    didLoadToSState (state, action: PayloadAction<{ isNew: boolean, doc: ToSStateDoc | null }>) {
+      state.tos.loading = false
+      if (action.payload.isNew) {
+        state.tos.version = 0
+      } else {
+        state.tos.version = action.payload.doc?.version ?? 0
+      }
+    },
+
+    didAgreeToToS (state, action: Action) {
+      state.tos.version = currentToSVersion
     },
   
     avatarSaved (state, action: PayloadAction<SavedAvatarData>) {
@@ -134,6 +153,9 @@ export const {
   displayResetKeys,
   closeResetKeys,
 
+  didLoadToSState,
+  didAgreeToToS,
+
   avatarSaved,
   avatarsLoaded,
   savedAvatarUpdated,
@@ -147,21 +169,23 @@ export const {
 
 // Selectors
 
-export const selectIsSignedIn = (state: any): boolean => state.account.loggedIn
+export const selectIsSignedIn = (state: State): boolean => state.account.loggedIn
 
-export const selectIsUnlocked = (state: any): boolean => state.account.unlocked
+export const selectIsUnlocked = (state: State): boolean => state.account.unlocked
 
-export const selectUserName = (state: any): string => state.account.username
+export const selectUserName = (state: State): string => state.account.username
 
-export const selectSavedAvatars = (state: any): SavedAvatarData[] => state.account.savedAvatars
+export const selectSavedAvatars = (state: State): SavedAvatarData[] => state.account.savedAvatars
 
-export const selectSavedAvatarsAreLoaded = (state: any): boolean => state.account.savedAvatarsLoaded
+export const selectSavedAvatarsAreLoaded = (state: State): boolean =>
+  state.account.savedAvatarsLoaded
 
-export const selectAnonymAvatarData = (state: any): AvatarData => state.account.anonymAvatarData
+export const selectAnonymAvatarData = (state: State): AvatarData | null =>
+  state.account.anonymAvatarData
 
-export const selectSavedGrids = (state: any): Grid[] => state.account.savedGrids
+export const selectSavedGrids = (state: State): Grid[] => state.account.savedGrids
 
-export const selectSavedGridsAreLoaded = (state: any): boolean => state.account.savedGridsLoaded
+export const selectSavedGridsAreLoaded = (state: State): boolean => state.account.savedGridsLoaded
 
 export const selectShowUnlockDialog = createSelector(
   [
@@ -171,7 +195,22 @@ export const selectShowUnlockDialog = createSelector(
   (isSignedIn, isUnlocked) => !isUnlocked && isSignedIn
 )
 
-export const selectResetKeys = (state: any): string[] | null => state.account.resetKeys
+export const selectResetKeys = (state: State): string[] | null => state.account.resetKeys
+
+export const selectToS = (state: State) => state.account.tos
+
+export const selectShowToS = createSelector(
+  [
+    selectToS,
+    selectIsSignedIn,
+    selectIsUnlocked
+  ],
+  (tos, isSignedIn, isUnlocked): boolean => {
+    if ((isSignedIn && !isUnlocked) || tos.loading) return false
+
+    return tos.version < currentToSVersion
+  }
+)
 
 // Helpers
 
@@ -181,6 +220,10 @@ function getDefault () {
     loggedIn: false,
     username: '',
     resetKeys: null as string[] | null,
+    tos: {
+      loading: true,
+      version: 0
+    },
     savedAvatars: [] as SavedAvatarData[],
     savedAvatarsLoaded: false,
     anonymAvatarData: null as AvatarData | null,
@@ -207,6 +250,15 @@ function getDefault () {
 }
 
 // Types
+
+interface State {
+  account: ReturnType<typeof accountSlice.reducer>
+}
+
+interface ToSStateDoc extends HoodieObject {
+  _id: 'terms_of_service',
+  version: number
+}
 
 type SignInPopup = 'resetKeys' | 'Error' | null
 

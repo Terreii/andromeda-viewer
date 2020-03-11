@@ -2,8 +2,8 @@ import React from 'react'
 import { useSelector } from 'react-redux'
 
 import ErrorDialog from './error'
-import UnlockDialog from './unlockDialog'
 import ResetKeysPopup from './resetKeys'
+import UnlockDialog from './unlockDialog'
 
 import { selectShowUnlockDialog, selectResetKeys } from '../../bundles/account'
 import { selectErrorMessage } from '../../bundles/session'

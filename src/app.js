@@ -14,7 +14,7 @@ import GlobalModals from './components/modals/globalModals'
 import TopMenuBar from './components/topBar'
 import AccountDialog from './components/accountDialog'
 
-import { isSignedIn as getIsSignedIn } from './actions/viewerAccount'
+import { isSignedIn as getIsSignedIn, doGetToSAgreeState } from './actions/viewerAccount'
 
 import { selectIsSignedIn } from './bundles/account'
 import { selectOwnAvatarName } from './bundles/names'
@@ -41,6 +41,7 @@ function App () {
     }
 
     dispatch(getIsSignedIn())
+    dispatch(doGetToSAgreeState())
     // it will only be called once!
     // eslint-disable-next-line
   }, [])

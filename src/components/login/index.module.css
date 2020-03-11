@@ -13,6 +13,7 @@
   color: rgb(255, 255, 255);
   color: var(--dialog-color-active);
   max-width: 75vw;
+  min-height: calc(100vh - 5em);
   margin-top: 2em;
   margin-left: auto;
   margin-right: auto;
@@ -55,4 +56,12 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, 25em);
   }
+}
+
+.legalFooter {
+  text-align: center;
+  position: sticky;
+  bottom: .5rem;
+  color: gray;
+  margin-top: auto;
 }
