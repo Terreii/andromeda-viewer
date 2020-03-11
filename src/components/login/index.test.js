@@ -50,8 +50,8 @@ it('renders with avatars', () => {
   expect(container).toBeTruthy()
 })
 
-it('should pass aXe', async () => {
-  const { container: withAvatars } = render(<Provider
+it('should pass aXe with avatars', async () => {
+  const { container } = render(<Provider
     store={configureStore({
       account: {
         unlocked: true,
@@ -69,13 +69,15 @@ it('should pass aXe', async () => {
     </MemoryRouter>
   </Provider>)
 
-  expect(await axe(withAvatars)).toHaveNoViolations()
+  expect(await axe(container)).toHaveNoViolations()
+})
 
-  const { container: newUser } = render(<Provider store={configureStore()}>
+it('should pass aXe with no avatars', async () => {
+  const { container } = render(<Provider store={configureStore()}>
     <MemoryRouter>
       <Login />
     </MemoryRouter>
   </Provider>)
 
-  expect(await axe(newUser)).toHaveNoViolations()
+  expect(await axe(container)).toHaveNoViolations()
 })
