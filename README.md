@@ -4,7 +4,8 @@ Small web-client for connecting to the virtual world of [Second Life](https://se
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 [![Dependency Status](https://david-dm.org/Terreii/andromeda-viewer.svg)](https://david-dm.org/Terreii/andromeda-viewer)
 [![devDependency Status](https://david-dm.org/Terreii/andromeda-viewer/dev-status.svg)](https://david-dm.org/Terreii/andromeda-viewer#info=devDependencies)
-[![Build Status](https://travis-ci.org/Terreii/andromeda-viewer.svg?branch=master)](https://travis-ci.org/Terreii/andromeda-viewer) 
+[![Build Status](https://travis-ci.org/Terreii/andromeda-viewer.svg?branch=master)](https://travis-ci.org/Terreii/andromeda-viewer)
+[![Known Vulnerabilities](https://snyk.io/test/github/Terreii/andromeda-viewer/badge.svg)](https://snyk.io/test/github/Terreii/andromeda-viewer)
 
 _**This viewer is not production ready!**_
 
