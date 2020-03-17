@@ -1,39 +1,43 @@
 import { axe } from 'jest-axe'
-import { shallow, mount } from 'enzyme'
 import React from 'react'
 import { Provider } from 'react-redux'
+import { render } from '@testing-library/react'
 
 import SignIn from './signIn'
+import configureStore from '../../store/configureStore'
 
-test('renders without crashing', () => {
-  shallow(<SignIn />)
+it('renders without crashing', () => {
+  const { container } = render(
+    <Provider store={configureStore()}>
+      <SignIn />
+    </Provider>
+  )
+
+  expect(container).toBeTruthy()
 })
 
-test('on buttons click', () => {
-  const store = {
-    getState: () => ({}),
-    dispatch: () => {},
-    subscribe: () => () => {}
-  }
+it('on buttons click', () => {
+  const { queryByText } = render(
+    <Provider store={configureStore()}>
+      <SignIn />
+    </Provider>
+  )
 
-  const rendered = mount(<Provider store={store}>
-    <SignIn />
-  </Provider>)
+  const signInButton = queryByText('Sign In')
+  expect(signInButton).toBeTruthy()
+  expect(signInButton.nodeName).toBe('BUTTON')
 
-  const buttons = rendered.find('button[aria-haspopup="dialog"]')
-  expect(buttons.length).toBe(2)
+  const signUpButton = queryByText('Sign Up')
+  expect(signUpButton).toBeTruthy()
+  expect(signUpButton.nodeName).toBe('BUTTON')
 })
 
-test('should pass aXe', async () => {
-  const store = {
-    getState: () => ({}),
-    dispatch: () => {},
-    subscribe: () => () => {}
-  }
+it('should pass aXe', async () => {
+  const { container } = render(
+    <Provider store={configureStore()}>
+      <SignIn />
+    </Provider>
+  )
 
-  const rendered = mount(<Provider store={store}>
-    <SignIn showSignInPopup={() => {}} />
-  </Provider>)
-
-  expect(await axe(rendered.html())).toHaveNoViolations()
+  expect(await axe(container)).toHaveNoViolations()
 })

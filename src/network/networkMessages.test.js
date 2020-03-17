@@ -2,7 +2,7 @@
 
 'use strict'
 
-import uuid from 'uuid'
+import { v4 as uuid } from 'uuid'
 
 import { parseBody, createBody } from './networkMessages'
 import {
@@ -22,14 +22,14 @@ describe('parseBody', () => {
 
   const testMessage = parseBody(buffer, '127.0.0.1', 8080, true, true)
 
-  test('should return the TestMessage', () => {
+  it('should return the TestMessage', () => {
     expect(testMessage.constructor === Object).toBe(true)
     expect(testMessage.frequency).toBe('Low')
     expect(testMessage.number).toBe(1)
     expect(testMessage.name).toBe('TestMessage')
   })
 
-  test('should include info of sender and package', () => {
+  it('should include info of sender and package', () => {
     expect(testMessage.isReliable).toBe(true)
     expect(testMessage.isResend).toBe(true)
     expect(testMessage.from).toEqual({
@@ -38,13 +38,13 @@ describe('parseBody', () => {
     })
   })
 
-  test('should have one U32 in an array in the TestBlock1', () => {
+  it('should have one U32 in an array in the TestBlock1', () => {
     expect(getNumberOfBlockInstancesOf(testMessage, 'TestBlock1')).toBe(1)
 
     expect(getValueOf(testMessage, 'TestBlock1', 0, 'Test1')).toBe(0)
   })
 
-  test('should have 3 U32 in 4 Arrays in NeighborBlock', () => {
+  it('should have 3 U32 in 4 Arrays in NeighborBlock', () => {
     expect(getNumberOfBlockInstancesOf(testMessage, 'NeighborBlock')).toBe(4)
 
     const values = [
@@ -64,7 +64,7 @@ describe('parseBody', () => {
     expect(getValuesOf(testMessage, 'NeighborBlock', 3, values)).toEqual(shouldValues)
   })
 
-  test('should return Strings for values', () => {
+  it('should return Strings for values', () => {
     expect(getStringValueOf(testMessage, 'TestBlock1', 'Test1')).toBe('0')
     expect(getStringValueOf(testMessage, 'NeighborBlock', 0, 'Test0')).toBe('0')
     expect(getStringValueOf(testMessage, 'NeighborBlock', 1, 'Test1')).toBe('0')
@@ -72,7 +72,7 @@ describe('parseBody', () => {
     expect(getStringValueOf(testMessage, 'NeighborBlock', 3, 'Test0')).toBe('0')
   })
 
-  test('should map over block instances', () => {
+  it('should map over block instances', () => {
     const data = mapBlockOf(testMessage, 'NeighborBlock', (getValue, index) => {
       return `${index} Test0 ${getValue('Test0')}`
     })
@@ -85,7 +85,7 @@ describe('parseBody', () => {
     expect(data).toHaveLength(4)
   })
 
-  test('should get multiple values', () => {
+  it('should get multiple values', () => {
     const data = getValuesOf(testMessage, 'NeighborBlock', 1, ['Test0', 'Test1', 'Test2'])
     const dataStr = getStringValuesOf(testMessage, 'NeighborBlock', ['Test0', 'Test1', 'Test2'])
     const data2 = getValuesOf(testMessage, 'NeighborBlock', [])
@@ -110,7 +110,7 @@ describe('parseBody', () => {
 
 describe('createBody', () => {
   let buffer
-  test('should create a Object with a Buffer out of a JSON like object',
+  it('should create a Object with a Buffer out of a JSON like object',
     () => {
       const testMessage = {
         TestBlock1: [
@@ -149,20 +149,20 @@ describe('createBody', () => {
       buffer = obj.buffer
     })
 
-  test('should have a length of 56 bytes', () => {
+  it('should have a length of 56 bytes', () => {
     expect(buffer.length).toBe(56)
   })
 
-  test('should have the correct message number', () => {
+  it('should have the correct message number', () => {
     expect(buffer.readUInt16BE(0)).toBe(65535)
     expect(buffer.readUInt16BE(2)).toBe(1)
   })
 
-  test('should store in TestBlock1 the correct value', () => {
+  it('should store in TestBlock1 the correct value', () => {
     expect(buffer.readUInt32LE(4)).toBe(1337)
   })
 
-  test('should store in NeighborBlock the correct values', done => {
+  it('should store in NeighborBlock the correct values', done => {
     for (let i = 0; i < 12; i++) {
       expect(buffer.readUInt32LE(8 + (i * 4))).toBe(i)
     }
@@ -171,9 +171,9 @@ describe('createBody', () => {
 })
 
 describe('parseBody should work with buffer from createBody', () => {
-  const aUUID = uuid.v4()
+  const aUUID = uuid()
 
-  test('TestMessage', () => {
+  it('TestMessage', () => {
     const buffy = createBody('TestMessage', {
       TestBlock1: [
         {
@@ -210,7 +210,7 @@ describe('parseBody should work with buffer from createBody', () => {
     expect(getValueOf(parsedMessage, 'NeighborBlock', 3, 'Test2')).toBe(11)
   })
 
-  test('NeighborList', () => {
+  it('NeighborList', () => {
     const buffy = createBody('NeighborList', {
       NeighborBlock: [
         {
@@ -268,7 +268,7 @@ describe('parseBody should work with buffer from createBody', () => {
     expect(getStringValueOf(parsedMessage, 'NeighborBlock', 'Name')).toBe('Hello Sim!')
   })
 
-  test('ImprovedInstantMessage', () => {
+  it('ImprovedInstantMessage', () => {
     const now = Math.floor(Date.now() / 1000)
     const buffy = createBody('ImprovedInstantMessage', {
       AgentData: [

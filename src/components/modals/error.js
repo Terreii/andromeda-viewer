@@ -20,48 +20,52 @@ export default function ErrorDialog ({ errorMessage }) {
   const dialog = useDialogState(() => ({ visible: process.env.NODE_ENV !== 'test' }))
   const autoFocusRef = useAutoFocus()
 
-  return <>
-    {process.env.NODE_ENV !== 'test' && <Portal>
-      <DialogBackdrop {...dialog} className={styles.Background} />
-    </Portal>}
-    <Dialog
-      {...dialog}
-      className={styles.Error}
-      role='alertdialog'
-      aria-label='Error'
-    >
-      <div className={styles.Header}>
-        <button
-          className={'closeModal ' + styles.CloseButton}
-          onClick={event => {
-            event.preventDefault()
-            dialog.hide()
-          }}
-        >
-          <img src={closeIcon} alt='close error dialog' height='32' width='32' />
-        </button>
-        <h4 className={styles.Title}>Error!</h4>
-      </div>
-      <article className={styles.Content}>
-        {errorMessage.split('\n').map((line, index) => (
-          <React.Fragment key={index}>
-            {line}
-            <br />
-          </React.Fragment>
-        ))}
+  return (
+    <>
+      {process.env.NODE_ENV !== 'test' && (
+        <Portal>
+          <DialogBackdrop {...dialog} className={styles.Background} />
+        </Portal>
+      )}
+      <Dialog
+        {...dialog}
+        className={styles.Error}
+        role='alertdialog'
+        aria-label='Error'
+      >
+        <div className={styles.Header}>
+          <button
+            className={'closeModal ' + styles.CloseButton}
+            onClick={event => {
+              event.preventDefault()
+              dialog.hide()
+            }}
+          >
+            <img src={closeIcon} alt='close error dialog' height='32' width='32' />
+          </button>
+          <h4 className={styles.Title}>Error!</h4>
+        </div>
+        <article className={styles.Content}>
+          {errorMessage.split('\n').map((line, index) => (
+            <React.Fragment key={index}>
+              {line}
+              <br />
+            </React.Fragment>
+          ))}
 
-        <button
-          type='button'
-          className={formStyles.Button + ' ' + styles.ErrorButton}
-          onClick={() => {
-            dispatch(closeErrorMessage())
-            dialog.hide()
-          }}
-          ref={autoFocusRef}
-        >
-          close
-        </button>
-      </article>
-    </Dialog>
-  </>
+          <button
+            type='button'
+            className={formStyles.Button + ' ' + styles.ErrorButton}
+            onClick={() => {
+              dispatch(closeErrorMessage())
+              dialog.hide()
+            }}
+            ref={autoFocusRef}
+          >
+            close
+          </button>
+        </article>
+      </Dialog>
+    </>
+  )
 }

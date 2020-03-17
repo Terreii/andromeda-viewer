@@ -33,19 +33,21 @@ export default function NewAvatarLogin ({
   const doAutoFocus = useAutoFocus()
 
   if (!isSelected) {
-    return <form
-      className={`${styles.NewAvatarLoginContainer} ${styles['not-selected']}`}
-      onSubmit={event => {
-        event.preventDefault()
-        onSelect('new')
-      }}
-    >
-      <button className={styles.HiddenButton}>
-        <h2 className={styles.Title}>Add avatar or login anonymously</h2>
+    return (
+      <form
+        className={`${styles.NewAvatarLoginContainer} ${styles['not-selected']}`}
+        onSubmit={event => {
+          event.preventDefault()
+          onSelect('new')
+        }}
+      >
+        <button className={styles.HiddenButton}>
+          <h2 className={styles.Title}>Add avatar or login anonymously</h2>
 
-        <span className={styles.ActiveText}>click to add</span>
-      </button>
-    </form>
+          <span className={styles.ActiveText}>click to add</span>
+        </button>
+      </form>
+    )
   }
 
   const isNewGrid = selectedGrid === ''
@@ -71,131 +73,143 @@ export default function NewAvatarLogin ({
     onLogin(name, password, grid, save)
   }
 
-  return <form
-    className={styles.NewAvatarLoginContainer + (isNewGrid ? ' ' + styles.high : '')}
-    onSubmit={doLogin}
-  >
-    <h2 className={styles.Title}>
-      {isSignedIn ? 'Add avatar or ' : ''}
-      login anonymously
-    </h2>
-
-    <label className={styles.NewName} htmlFor='newAvatarNameInput'>Avatar:</label>
-    <input
-      id='newAvatarNameInput'
-      type='text'
-      className={styles.NewNameInput}
-      value={name}
-      onChange={onNameChange}
-      disabled={isLoggingIn}
-      minLength='1'
-      required
-      autoFocus
-      ref={doAutoFocus}
-      onFocus={event => {
-        const target = event.target
-
-        setTimeout(() => {
-          if (target == null) return
-
-          target.parentElement.scrollIntoView(true)
-        }, 16)
-      }}
-    />
-
-    <label className={styles.NewPassword} htmlFor='newAvatarPasswordInput'>Password:</label>
-    <input
-      id='newAvatarPasswordInput'
-      type='password'
-      className={styles.PasswordInput}
-      value={password}
-      onChange={onPasswordChange}
-      disabled={isLoggingIn}
-      minLength='2'
-      required
-    />
-
-    <label className={styles.Grid} htmlFor='newAvatarGridSelection'>Grid:</label>
-    <select
-      id='newAvatarGridSelection'
-      className={styles.GridSelection}
-      value={selectedGrid}
-      onChange={event => { setSelectedGrid(event.target.value) }}
+  return (
+    <form
+      className={styles.NewAvatarLoginContainer + (isNewGrid ? ' ' + styles.high : '')}
+      onSubmit={doLogin}
     >
-      {grids.map(grid => <option key={grid.name} value={grid.name}>
-        {grid.name}
-      </option>)}
+      <h2 className={styles.Title}>
+        {isSignedIn ? 'Add avatar or ' : ''}
+        login anonymously
+      </h2>
 
-      <option value=''>+ Add new Grid</option>
-    </select>
-
-    {isNewGrid && <fieldset className={styles.NewGridLine}>
-      <legend>Add a new Grid</legend>
-
-      <div className={formElementsStyles.FormField}>
-        <label htmlFor='newGridNameInput'>Name</label>
-        <input
-          id='newGridNameInput'
-          type='text'
-          className={formElementsStyles.Input}
-          value={gridName}
-          onChange={onGridNameChange}
-          minLength='1'
-          required
-        />
-      </div>
-      <div className={formElementsStyles.FormField}>
-        <label htmlFor='newGridUrlInput'>URL</label>
-        <input
-          id='newGridUrlInput'
-          type='url'
-          className={formElementsStyles.Input}
-          placeholder='https://example.com/login'
-          value={gridUrl}
-          onChange={onGridUrlChange}
-          required
-        />
-      </div>
-      <label
-        id='newGridIsLLSDLabel'
-        title={'Most grids will support LLSD based logins.\r\n' +
-          "Only un-check if grid doesn't support it!"}
-      >
-        <input
-          id='newGridIsLLSD'
-          type='checkbox'
-          checked={isGridLLSD}
-          onChange={event => { setIsGridLLSD(event.target.checked) }}
-        />
-        {' Grid uses LLSD login'}
-      </label>
-    </fieldset>}
-
-    <div className={styles.SaveNew}>
+      <label className={styles.NewName} htmlFor='newAvatarNameInput'>Avatar:</label>
       <input
-        id='saveNewAvatarButton'
-        type='checkbox'
-        onChange={event => { setSaveAvatar(event.target.checked) }}
-        checked={saveAvatar}
-        disabled={!isSignedIn || isLoggingIn}
-        aria-describedby='saveNewAvatarHelp'
+        id='newAvatarNameInput'
+        type='text'
+        className={styles.NewNameInput}
+        value={name}
+        onChange={onNameChange}
+        disabled={isLoggingIn}
+        minLength='1'
+        required
+        autoFocus
+        ref={doAutoFocus}
+        onFocus={event => {
+          const target = event.target
+
+          setTimeout(() => {
+            if (
+              target == null ||
+              target.parentElement == null ||
+              target.parentElement.scrollIntoView == null
+            ) {
+              return
+            }
+
+            target.parentElement.scrollIntoView(true)
+          }, 16)
+        }}
       />
-      <label htmlFor='saveNewAvatarButton'> Save / Add</label>
-      <br />
-      <small id='saveNewAvatarHelp' className={styles.SaveHelp}>
-        Save and sync this avatar and it's chats,
+
+      <label className={styles.NewPassword} htmlFor='newAvatarPasswordInput'>Password:</label>
+      <input
+        id='newAvatarPasswordInput'
+        type='password'
+        className={styles.PasswordInput}
+        value={password}
+        onChange={onPasswordChange}
+        disabled={isLoggingIn}
+        minLength='2'
+        required
+      />
+
+      <label className={styles.Grid} htmlFor='newAvatarGridSelection'>Grid:</label>
+      <select
+        id='newAvatarGridSelection'
+        className={styles.GridSelection}
+        value={selectedGrid}
+        onChange={event => { setSelectedGrid(event.target.value) }}
+      >
+        {grids.map(grid => (
+          <option key={grid.name} value={grid.name}>
+            {grid.name}
+          </option>
+        ))}
+
+        <option value=''>+ Add new Grid</option>
+      </select>
+
+      {isNewGrid && (
+        <fieldset className={styles.NewGridLine}>
+          <legend>Add a new Grid</legend>
+
+          <div className={formElementsStyles.FormField}>
+            <label htmlFor='newGridNameInput'>Name</label>
+            <input
+              id='newGridNameInput'
+              type='text'
+              className={formElementsStyles.Input}
+              value={gridName}
+              onChange={onGridNameChange}
+              minLength='1'
+              required
+            />
+          </div>
+          <div className={formElementsStyles.FormField}>
+            <label htmlFor='newGridUrlInput'>URL</label>
+            <input
+              id='newGridUrlInput'
+              type='url'
+              className={formElementsStyles.Input}
+              placeholder='https://example.com/login'
+              value={gridUrl}
+              onChange={onGridUrlChange}
+              required
+            />
+          </div>
+          <label
+            id='newGridIsLLSDLabel'
+            title={'Most grids will support LLSD based logins.\r\n' +
+            "Only un-check if grid doesn't support it!"}
+          >
+            <input
+              id='newGridIsLLSD'
+              type='checkbox'
+              checked={isGridLLSD}
+              onChange={event => { setIsGridLLSD(event.target.checked) }}
+            />
+            {' Grid uses LLSD login'}
+          </label>
+        </fieldset>
+      )}
+
+      <div className={styles.SaveNew}>
+        <input
+          id='saveNewAvatarButton'
+          type='checkbox'
+          onChange={event => { setSaveAvatar(event.target.checked) }}
+          checked={saveAvatar}
+          disabled={!isSignedIn || isLoggingIn}
+          aria-describedby='saveNewAvatarHelp'
+        />
+        <label htmlFor='saveNewAvatarButton'> Save / Add</label>
         <br />
-        after the first successful login.
-      </small>
-    </div>
-    <button
-      id='newAvatarLoginButton'
-      className={styles.LoginButton}
-      disabled={isLoggingIn || !isValid}
-    >
-      {isLoggingIn === name ? 'Connecting ...' : 'Login'}
-    </button>
-  </form>
+        <small id='saveNewAvatarHelp' className={styles.SaveHelp}>
+          Save and sync this avatar and it's chats,
+          <br />
+          after the first successful login.
+        </small>
+      </div>
+      <button
+        id='newAvatarLoginButton'
+        className={styles.LoginButton}
+        disabled={isLoggingIn || !isValid}
+      >
+        {isLoggingIn === name ? 'Connecting ...' : 'Login'}
+      </button>
+    </form>
+  )
 }
 
 function useInput (defaultValue) {

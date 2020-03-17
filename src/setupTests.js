@@ -1,7 +1,7 @@
-import { configure } from 'enzyme'
-import Adapter from 'enzyme-adapter-react-16'
-import 'jest-enzyme'
 import { toHaveNoViolations } from 'jest-axe'
+import MutationObserver from '@sheerun/mutationobserver-shim'
 
-configure({ adapter: new Adapter() })
 expect.extend(toHaveNoViolations)
+
+// Remove this (and uninstall it) after "react-scripts" ships with Jest v25
+window.MutationObserver = MutationObserver

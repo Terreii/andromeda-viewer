@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { useHistory } from 'react-router-dom'
+
+import { selectSavedAvatars, selectSavedGrids } from '../../bundles/account'
+
+import { login } from '../../actions/sessionActions'
 
 import LoginNewAvatar from './newAvatarLogin'
 import AvatarLogin from './avatarLogin'
@@ -8,8 +13,12 @@ import AvatarName from '../../avatarName'
 
 import styles from './index.module.css'
 
-export default function LoginForm ({ isSignedIn, avatars, grids, login }) {
+export default function LoginForm ({ isSignedIn }) {
+  const dispatch = useDispatch()
+
   const history = useHistory()
+  const avatars = useSelector(selectSavedAvatars)
+  const grids = useSelector(selectSavedGrids)
 
   const [selected, setSelected] = useState(() => avatars.length === 0
     ? 'new'
@@ -95,7 +104,7 @@ export default function LoginForm ({ isSignedIn, avatars, grids, login }) {
       const avatarName = new AvatarName(name)
       setIsLoggingIn(name)
 
-      await login(avatarName, password, grid, save, isNew)
+      await dispatch(login(avatarName, password, grid, save, isNew))
       history.push('/session')
     } catch (err) {
       console.error(err)
@@ -117,40 +126,48 @@ export default function LoginForm ({ isSignedIn, avatars, grids, login }) {
     doLogin(name, password, gridName, true, false)
   }
 
-  return <div className={styles.Container}>
-    <main className={styles.Main}>
-      <div className={styles.AvatarList}>
-        <LoginNewAvatar
-          grids={grids}
-          isSignedIn={isSignedIn}
-          onLogin={loginAnonymously}
-          isLoggingIn={isLoggingIn}
-          isSelected={selected === 'new'}
-          onSelect={setSelected}
-        />
+  return (
+    <div className={styles.Container}>
+      <main className={styles.Main}>
+        <div className={styles.AvatarList}>
+          <LoginNewAvatar
+            grids={grids}
+            isSignedIn={isSignedIn}
+            onLogin={loginAnonymously}
+            isLoggingIn={isLoggingIn}
+            isSelected={selected === 'new'}
+            onSelect={setSelected}
+          />
 
-        {!isSignedIn && <SignIn />}
+          {!isSignedIn && <SignIn />}
 
-        {avatars.map(avatar => <AvatarLogin
-          key={avatar._id}
-          avatar={avatar}
-          grid={grids.find(grid => grid.name === avatar.grid)}
-          onLogin={loginWithSavedAvatar}
-          isLoggingIn={isLoggingIn}
-          isSelected={selected === avatar.avatarIdentifier}
-          onSelect={setSelected}
-        />)}
-      </div>
+          {avatars.map(avatar => (
+            <AvatarLogin
+              key={avatar._id}
+              avatar={avatar}
+              grid={grids.find(grid => grid.name === avatar.grid)}
+              onLogin={loginWithSavedAvatar}
+              isLoggingIn={isLoggingIn}
+              isSelected={selected === avatar.avatarIdentifier}
+              onSelect={setSelected}
+            />
+          ))}
+        </div>
 
-      {errorMessage && <div className={styles.ErrorOut}>
-        {errorMessage.title.length > 0 && <h4>{errorMessage.title}</h4>}
-        <p>
-          {errorMessage.body.split('\n').map((line, index) => <React.Fragment key={index}>
-            {line}
-            <br />
-          </React.Fragment>)}
-        </p>
-      </div>}
-    </main>
-  </div>
+        {errorMessage && (
+          <div className={styles.ErrorOut}>
+            {errorMessage.title.length > 0 && <h4>{errorMessage.title}</h4>}
+            <p>
+              {errorMessage.body.split('\n').map((line, index) => (
+                <React.Fragment key={index}>
+                  {line}
+                  <br />
+                </React.Fragment>
+              ))}
+            </p>
+          </div>
+        )}
+      </main>
+    </div>
+  )
 }

@@ -1,10 +1,10 @@
 import { axe } from 'jest-axe'
 import React from 'react'
-import { shallow, mount } from 'enzyme'
+import { render, fireEvent } from '@testing-library/react'
 
 import NewAvatarLogin from './newAvatarLogin'
 
-test('renders without crashing', () => {
+it('renders without crashing', () => {
   const grids = [
     {
       name: 'Second Life',
@@ -16,17 +16,25 @@ test('renders without crashing', () => {
     }
   ]
 
-  shallow(<NewAvatarLogin
-    grids={grids}
-  />)
+  const { container: notSelectedContainer } = render(
+    <NewAvatarLogin
+      grids={grids}
+    />
+  )
 
-  shallow(<NewAvatarLogin
-    grids={grids}
-    isSelected
-  />)
+  expect(notSelectedContainer).toBeTruthy()
+
+  const { container: selectedContainer } = render(
+    <NewAvatarLogin
+      grids={grids}
+      isSelected
+    />
+  )
+
+  expect(selectedContainer).toBeTruthy()
 })
 
-test('not signed in login works', () => {
+it('should login while not signed', async () => {
   const grids = [
     {
       name: 'Second Life',
@@ -38,80 +46,72 @@ test('not signed in login works', () => {
     }
   ]
 
-  const loginData = []
+  const onLogin = jest.fn()
 
-  const rendered = mount(<NewAvatarLogin
-    grids={grids}
-    isSignedIn={false}
-    onLogin={(name, password, grid, save) => {
-      loginData.push({
-        name,
-        password,
-        grid,
-        save
-      })
-    }}
-    isLoggingIn={false}
-    isSelected
-  />)
+  const { queryByLabelText, queryByText, findByText, findByLabelText } = render(
+    <NewAvatarLogin
+      grids={grids}
+      isSignedIn={false}
+      onLogin={onLogin}
+      isLoggingIn={false}
+      isSelected
+    />
+  )
 
-  const nameInput = rendered.find('[type="text"]').first()
-  const passwordInput = rendered.find('[type="password"]').first()
-  const saveCheckbox = rendered.find('#saveNewAvatarButton')
-  const loginButton = rendered.find('#newAvatarLoginButton').first()
+  const nameInput = queryByLabelText('Avatar:')
+  expect(nameInput).toBeTruthy()
+  expect(nameInput.nodeName).toBe('INPUT')
+  expect(nameInput.required).toBeTruthy()
 
-  nameInput.simulate('change', {
+  const passwordInput = queryByLabelText('Password:')
+  expect(passwordInput).toBeTruthy()
+  expect(passwordInput.nodeName).toBe('INPUT')
+  expect(passwordInput.type).toBe('password')
+
+  const saveCheckbox = queryByLabelText('Save / Add')
+  expect(saveCheckbox).toBeTruthy()
+  expect(saveCheckbox.nodeName).toBe('INPUT')
+  expect(saveCheckbox.type).toBe('checkbox')
+  expect(saveCheckbox.disabled).toBeTruthy()
+
+  const loginButton = queryByText('Login')
+  expect(loginButton).toBeTruthy()
+  expect(loginButton.nodeName).toBe('BUTTON')
+  expect(loginButton.disabled).toBeTruthy()
+
+  fireEvent.change(nameInput, {
     target: {
-      value: 'Tester',
-      validity: {
-        valid: true
-      }
+      value: 'Tester'
     }
   })
 
-  passwordInput.simulate('change', {
+  expect((await findByText('Login')).disabled).toBeTruthy()
+  expect(queryByLabelText('Avatar:').validity.valid).toBeTruthy()
+
+  fireEvent.change(passwordInput, {
     target: {
-      value: 'secret',
-      validity: {
-        valid: true
-      }
+      value: 'secret'
     }
   })
 
-  rendered.update()
-  loginButton.simulate('submit')
+  const activeLoginButton = await findByText('Login')
+  expect(activeLoginButton.disabled).toBeFalsy()
+  expect(queryByLabelText('Password:').validity.valid).toBeTruthy()
 
-  expect(loginData.length).toBe(1)
-  expect(loginData[0]).toEqual({
-    name: 'Tester',
-    password: 'secret',
-    grid: 'Second Life',
-    save: false
-  })
+  fireEvent.submit(activeLoginButton)
 
-  expect(saveCheckbox.prop('disabled')).toBe(true)
-  expect(saveCheckbox.prop('checked')).toBe(false)
+  expect(onLogin.mock.calls).toEqual([
+    ['Tester', 'secret', 'Second Life', false]
+  ])
 
-  nameInput.simulate('submit')
+  fireEvent.submit(await findByLabelText('Avatar:'))
+  expect(onLogin.mock.calls[1]).toEqual(['Tester', 'secret', 'Second Life', false])
 
-  passwordInput.simulate('submit')
-
-  expect(loginData.length).toBe(3)
-  expect(loginData[1]).toEqual({
-    name: 'Tester',
-    password: 'secret',
-    grid: 'Second Life',
-    save: false
-  })
-  expect(loginData[2]).toEqual({
-    name: 'Tester',
-    password: 'secret',
-    grid: 'Second Life',
-    save: false
-  })
+  fireEvent.submit(await findByLabelText('Password:'))
+  expect(onLogin.mock.calls[2]).toEqual(['Tester', 'secret', 'Second Life', false])
 })
 
-test('signed in login works', () => {
+it('signed in login works', async () => {
   const grids = [
     {
       name: 'Second Life',
@@ -123,84 +123,77 @@ test('signed in login works', () => {
     }
   ]
 
-  const loginData = []
+  const onLogin = jest.fn()
 
-  const rendered = mount(<NewAvatarLogin
-    grids={grids}
-    isSignedIn
-    onLogin={(name, password, grid, save) => {
-      loginData.push({
-        name,
-        password,
-        grid,
-        save
-      })
-    }}
-    isLoggingIn={false}
-    isSelected
-  />)
+  const { queryByLabelText, queryByText, findByText, findByLabelText } = render(
+    <NewAvatarLogin
+      grids={grids}
+      isSignedIn
+      onLogin={onLogin}
+      isLoggingIn={false}
+      isSelected
+    />
+  )
 
-  const nameInput = rendered.find('[type="text"]').first()
-  const passwordInput = rendered.find('[type="password"]').first()
-  const saveCheckbox = rendered.find('#saveNewAvatarButton')
-  const loginButton = rendered.find('#newAvatarLoginButton').first()
+  const nameInput = queryByLabelText('Avatar:')
+  expect(nameInput).toBeTruthy()
+  expect(nameInput.nodeName).toBe('INPUT')
+  expect(nameInput.required).toBeTruthy()
 
-  nameInput.simulate('change', {
+  const passwordInput = queryByLabelText('Password:')
+  expect(passwordInput).toBeTruthy()
+  expect(passwordInput.nodeName).toBe('INPUT')
+  expect(passwordInput.type).toBe('password')
+
+  const saveCheckbox = queryByLabelText('Save / Add')
+  expect(saveCheckbox).toBeTruthy()
+  expect(saveCheckbox.nodeName).toBe('INPUT')
+  expect(saveCheckbox.type).toBe('checkbox')
+  expect(saveCheckbox.disabled).toBeFalsy()
+
+  const loginButton = queryByText('Login')
+  expect(loginButton).toBeTruthy()
+  expect(loginButton.nodeName).toBe('BUTTON')
+  expect(loginButton.disabled).toBeTruthy()
+
+  fireEvent.change(nameInput, {
     target: {
-      value: 'Tester',
-      validity: {
-        valid: true
-      }
+      value: 'Tester'
     }
   })
 
-  passwordInput.simulate('change', {
+  expect((await findByText('Login')).disabled).toBeTruthy()
+  expect(queryByLabelText('Avatar:').validity.valid).toBeTruthy()
+
+  fireEvent.change(passwordInput, {
     target: {
-      value: 'secret',
-      validity: {
-        valid: true
-      }
+      value: 'secret'
     }
   })
 
-  rendered.update()
-  loginButton.simulate('submit')
+  const activeLoginButton = await findByText('Login')
+  expect(activeLoginButton.disabled).toBeFalsy()
+  expect(queryByLabelText('Password:').validity.valid).toBeTruthy()
 
-  expect(loginData.length).toBe(1)
-  expect(loginData[0]).toEqual({
-    name: 'Tester',
-    password: 'secret',
-    grid: 'Second Life',
-    save: true
-  })
+  fireEvent.submit(activeLoginButton)
 
-  expect(saveCheckbox.prop('disabled')).toBe(false)
-  saveCheckbox.simulate('change', {
-    target: {
-      checked: false
-    }
-  })
+  expect(onLogin.mock.calls).toEqual([
+    ['Tester', 'secret', 'Second Life', true]
+  ])
 
-  nameInput.simulate('submit')
+  fireEvent.submit(await findByLabelText('Avatar:'))
+  expect(onLogin.mock.calls[1]).toEqual(['Tester', 'secret', 'Second Life', true])
 
-  passwordInput.simulate('submit')
+  fireEvent.submit(await findByLabelText('Password:'))
+  expect(onLogin.mock.calls[2]).toEqual(['Tester', 'secret', 'Second Life', true])
 
-  expect(loginData.length).toBe(3)
-  expect(loginData[1]).toEqual({
-    name: 'Tester',
-    password: 'secret',
-    grid: 'Second Life',
-    save: false
-  })
-  expect(loginData[2]).toEqual({
-    name: 'Tester',
-    password: 'secret',
-    grid: 'Second Life',
-    save: false
-  })
+  fireEvent.click(await findByLabelText('Save / Add'))
+  expect((await findByLabelText('Save / Add')).checked).toBeFalsy()
+  fireEvent.submit(activeLoginButton)
+  expect(onLogin.mock.calls[3]).toEqual(['Tester', 'secret', 'Second Life', false])
 })
 
-test('adding new grid', () => {
+it('should add a new grid', async () => {
   const grids = [
     {
       name: 'Second Life',
@@ -212,119 +205,107 @@ test('adding new grid', () => {
     }
   ]
 
-  const loginData = []
+  const onLogin = jest.fn()
 
-  const rendered = mount(<NewAvatarLogin
-    grids={grids}
-    isSignedIn
-    onLogin={(name, password, grid, save) => {
-      loginData.push({
-        name,
-        password,
-        grid,
-        save
-      })
-    }}
-    isLoggingIn={false}
-    isSelected
-  />)
+  const { queryByLabelText, findByText, findByLabelText } = render(
+    <NewAvatarLogin
+      grids={grids}
+      isSignedIn
+      onLogin={onLogin}
+      isLoggingIn={false}
+      isSelected
+    />
+  )
 
-  const gridSelect = rendered.find('#newAvatarGridSelection').first()
+  const gridSelect = queryByLabelText('Grid:')
+  expect(gridSelect).toBeTruthy()
+  expect(gridSelect.nodeName).toBe('SELECT')
+  expect(gridSelect.value).toBe('Second Life')
 
-  gridSelect.simulate('change', {
+  expect(queryByLabelText('Name')).toBeNull()
+  expect(queryByLabelText('URL')).toBeNull()
+  expect(queryByLabelText('Grid uses LLSD login')).toBeNull()
+
+  fireEvent.change(gridSelect, {
     target: {
-      value: '',
-      validity: {
-        valid: true
-      }
+      value: ''
     }
   })
 
-  const gridName = rendered.find('#newGridNameInput').first()
-  const gridURL = rendered.find('#newGridUrlInput').first()
-  const gridIsLLSD = rendered.find('#newGridIsLLSD').first()
+  const gridName = await findByLabelText('Name')
+  expect(gridName).toBeTruthy()
+  expect(gridName.nodeName).toBe('INPUT')
+  expect(gridName.type).toBe('text')
 
-  gridName.simulate('change', {
+  const gridURL = queryByLabelText('URL')
+  expect(gridURL).toBeTruthy()
+  expect(gridURL.nodeName).toBe('INPUT')
+  expect(gridURL.type).toBe('url')
+
+  const gridIsLLSD = queryByLabelText('Grid uses LLSD login')
+  expect(gridIsLLSD).toBeTruthy()
+  expect(gridIsLLSD.nodeName).toBe('INPUT')
+  expect(gridIsLLSD.type).toBe('checkbox')
+  expect(gridIsLLSD.checked).toBeTruthy()
+
+  fireEvent.change(gridName, {
     target: {
-      value: 'Alpha Grid',
-      validity: {
-        valid: true
-      }
+      value: 'Alpha Grid'
     }
   })
 
-  gridURL.simulate('change', {
+  fireEvent.change(await findByLabelText('URL'), {
     target: {
-      value: 'https://alpha-grid.com/login',
-      validity: {
-        valid: true
-      }
+      value: 'https://alpha-grid.com/login'
     }
   })
 
-  expect(gridIsLLSD.prop('checked')).toBeTruthy()
-
-  rendered.update()
-
-  const nameInput = rendered.find('#newAvatarNameInput').first()
-  const passwordInput = rendered.find('#newAvatarPasswordInput').first()
-  const loginButton = rendered.find('#newAvatarLoginButton').first()
-
-  nameInput.simulate('change', {
+  fireEvent.change(queryByLabelText('Avatar:'), {
     target: {
-      value: 'Tester',
-      validity: {
-        valid: true
-      }
+      value: 'Tester'
     }
   })
 
-  passwordInput.simulate('change', {
+  fireEvent.change(await findByLabelText('Password:'), {
     target: {
-      value: 'secret',
-      validity: {
-        valid: true
-      }
+      value: 'secret'
     }
   })
 
-  loginButton.simulate('submit')
+  fireEvent.submit(await findByText('Login'))
 
-  expect(loginData.length).toBe(1)
-  expect(loginData[0]).toEqual({
-    name: 'Tester',
-    password: 'secret',
-    grid: {
-      name: 'Alpha Grid',
-      loginUrl: 'https://alpha-grid.com/login',
-      isLoginLLSD: true
-    },
-    save: true
-  })
+  expect(onLogin.mock.calls).toEqual([
+    [
+      'Tester',
+      'secret',
+      {
+        name: 'Alpha Grid',
+        loginUrl: 'https://alpha-grid.com/login',
+        isLoginLLSD: true
+      },
+      true
+    ]
+  ])
 
   // if grid is llsd is false.
-  gridIsLLSD.simulate('change', {
-    target: {
-      checked: false
-    }
-  })
-  rendered.update()
-  loginButton.simulate('submit')
+  fireEvent.click(await findByLabelText('Grid uses LLSD login'))
+  expect((await findByLabelText('Grid uses LLSD login')).checked).toBeFalsy()
 
-  expect(loginData.length).toBe(2)
-  expect(loginData[1]).toEqual({
-    name: 'Tester',
-    password: 'secret',
-    grid: {
+  fireEvent.submit(await findByText('Login'))
+
+  expect(onLogin.mock.calls[1]).toEqual([
+    'Tester',
+    'secret',
+    {
       name: 'Alpha Grid',
       loginUrl: 'https://alpha-grid.com/login',
       isLoginLLSD: false
     },
-    save: true
-  })
+    true
+  ])
 })
 
-test('should pass aXe', async () => {
+it('should pass aXe', async () => {
   const grids = [
     {
       name: 'Second Life',
@@ -336,27 +317,31 @@ test('should pass aXe', async () => {
     }
   ]
 
-  const notSelected = shallow(<NewAvatarLogin
-    grids={grids}
-  />)
+  const { container: notSelectedContainer } = render(
+    <NewAvatarLogin
+      grids={grids}
+    />
+  )
 
-  const selected = shallow(<NewAvatarLogin
-    grids={grids}
-    isSelected
-  />)
+  expect(await axe(notSelectedContainer)).toHaveNoViolations()
 
-  expect(await axe(notSelected.html())).toHaveNoViolations()
-  expect(await axe(selected.html())).toHaveNoViolations()
+  const { container: selectedContainer, queryByLabelText, findByLabelText } = render(
+    <NewAvatarLogin
+      grids={grids}
+      isSelected
+    />
+  )
+
+  expect(await axe(selectedContainer)).toHaveNoViolations()
 
   // adding new grid
-  selected.find('#newAvatarGridSelection').simulate('change', {
+  fireEvent.change(queryByLabelText('Grid:'), {
     target: {
-      value: '',
-      validity: {
-        valid: true
-      }
+      value: ''
     }
   })
 
-  expect(await axe(selected.html())).toHaveNoViolations()
+  await findByLabelText('Grid:')
+
+  expect(await axe(selectedContainer)).toHaveNoViolations()
 })

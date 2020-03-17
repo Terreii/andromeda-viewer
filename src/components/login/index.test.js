@@ -1,116 +1,91 @@
 import { axe } from 'jest-axe'
 import React from 'react'
-import { shallow, mount } from 'enzyme'
 import { MemoryRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
+import { render } from '@testing-library/react'
 
 import Login from './index'
+import configureStore from '../../store/configureStore'
 
-test('renders without crashing', () => {
-  const grids = [
-    {
-      name: 'Second Life',
-      loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
-    },
-    {
-      name: 'Second Life Beta',
-      loginURL: 'https://login.aditi.lindenlab.com/cgi-bin/login.cgi'
-    },
-    {
-      name: 'OS Grid',
-      loginURL: 'http://login.osgrid.org/'
-    }
-  ]
-
-  shallow(<MemoryRouter>
-    <Login
-      avatars={[]}
-      grids={grids}
-    />
-  </MemoryRouter>)
-})
-
-test('renders with avatars', () => {
-  const grids = [
-    {
-      name: 'Second Life',
-      loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
-    },
-    {
-      name: 'Second Life Beta',
-      loginURL: 'https://login.aditi.lindenlab.com/cgi-bin/login.cgi'
-    },
-    {
-      name: 'OS Grid',
-      loginURL: 'http://login.osgrid.org/'
-    }
-  ]
-
-  const avatars = [
-    {
-      _id: 'avatar/testery',
-      name: 'Testery MacTestface',
-      grid: 'Second Life'
-    }
-  ]
-
-  shallow(<MemoryRouter>
-    <Login
-      grids={grids}
-      avatars={avatars}
-    />
-  </MemoryRouter>)
-})
-
-test('should pass aXe', async () => {
-  const grids = [
-    {
-      name: 'Second Life',
-      loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
-    },
-    {
-      name: 'Second Life Beta',
-      loginURL: 'https://login.aditi.lindenlab.com/cgi-bin/login.cgi'
-    },
-    {
-      name: 'OS Grid',
-      loginURL: 'http://login.osgrid.org/'
-    }
-  ]
-
-  const avatars = [
-    {
-      _id: 'avatar/testery',
-      name: 'Testery MacTestface',
-      grid: 'Second Life'
-    }
-  ]
-
-  const store = {
-    getState: () => ({}),
-    dispatch: () => {},
-    subscribe: () => () => {}
+const grids = [
+  {
+    name: 'Second Life',
+    loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
+  },
+  {
+    name: 'Second Life Beta',
+    loginURL: 'https://login.aditi.lindenlab.com/cgi-bin/login.cgi'
+  },
+  {
+    name: 'OS Grid',
+    loginURL: 'http://login.osgrid.org/'
   }
+]
 
-  const rendered = mount(<Provider store={store}>
-    <MemoryRouter>
-      <Login
-        grids={grids}
-        avatars={avatars}
-      />
-    </MemoryRouter>
-  </Provider>)
+const avatars = [
+  {
+    _id: 'avatar/testery',
+    name: 'Testery MacTestface',
+    grid: 'Second Life'
+  }
+]
 
-  const renderedNewUser = mount(<Provider store={store}>
-    <MemoryRouter>
-      <Login
-        grids={grids}
-        avatars={[]}
-      />
-    </MemoryRouter>
-  </Provider>)
+it('renders without crashing', () => {
+  const { container } = render(
+    <Provider store={configureStore()}>
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    </Provider>
+  )
 
-  expect(await axe(rendered.html())).toHaveNoViolations()
+  expect(container).toBeTruthy()
+})
 
-  expect(await axe(renderedNewUser.html())).toHaveNoViolations()
+it('renders with avatars', () => {
+  const { container } = render(
+    <Provider store={configureStore()}>
+      <MemoryRouter>
+        <Login isSignedIn />
+      </MemoryRouter>
+    </Provider>
+  )
+
+  expect(container).toBeTruthy()
+})
+
+it('should pass aXe with avatars', async () => {
+  const { container } = render(
+    <Provider
+      store={configureStore({
+        account: {
+          unlocked: true,
+          loggedIn: true,
+          username: 'tester@test.org',
+          savedAvatars: avatars,
+          savedAvatarsLoaded: true,
+          savedGrids: grids,
+          savedGridsLoaded: true
+        }
+      })}
+    >
+      <MemoryRouter>
+        <Login isSignedIn />
+      </MemoryRouter>
+    </Provider>
+  )
+
+  expect(await axe(container)).toHaveNoViolations()
+})
+
+it('should pass aXe with no avatars', async () => {
+  const { container } = render(
+    <Provider store={configureStore()}>
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    </Provider>
+  )
+
+  expect(await axe(container)).toHaveNoViolations()
 })

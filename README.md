@@ -4,7 +4,8 @@ Small web-client for connecting to the virtual world of [Second Life](https://se
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 [![Dependency Status](https://david-dm.org/Terreii/andromeda-viewer.svg)](https://david-dm.org/Terreii/andromeda-viewer)
 [![devDependency Status](https://david-dm.org/Terreii/andromeda-viewer/dev-status.svg)](https://david-dm.org/Terreii/andromeda-viewer#info=devDependencies)
-[![Build Status](https://travis-ci.org/Terreii/andromeda-viewer.svg?branch=master)](https://travis-ci.org/Terreii/andromeda-viewer) [![Greenkeeper badge](https://badges.greenkeeper.io/Terreii/andromeda-viewer.svg)](https://greenkeeper.io/)
+[![Build Status](https://travis-ci.org/Terreii/andromeda-viewer.svg?branch=master)](https://travis-ci.org/Terreii/andromeda-viewer)
+[![Known Vulnerabilities](https://snyk.io/test/github/Terreii/andromeda-viewer/badge.svg)](https://snyk.io/test/github/Terreii/andromeda-viewer)
 
 _**This viewer is not production ready!**_
 
@@ -17,7 +18,7 @@ Please read and review the documentation. You can find it in the **doc-folder**.
 Contact me at any time.
 
 ### How to get started
-You need to have **[node.js](https://nodejs.org/) version 8.9.0 or higher** installed and a *Second Life* account or an *account on an [OpenSimulator Grid](http://opensimulator.org/wiki/Grid_List)*. [More on node.js and npm.js](https://docs.npmjs.com/getting-started/what-is-npm) (npm.js comes with node.js). You can check your installed version with the command `node -v`.
+You need to have **[node.js](https://nodejs.org/) version 10.17.0 or higher** installed and a *Second Life* account or an *account on an [OpenSimulator Grid](http://opensimulator.org/wiki/Grid_List)*. [More on node.js and npm.js](https://docs.npmjs.com/getting-started/what-is-npm) (npm.js comes with node.js). You can check your installed version with the command `node -v`.
 
 To start open a terminal window (cmd or PowerShell on windows) in your working copy of this project. And run the command `npm install`. This will install all dependencies.
 

@@ -15,7 +15,7 @@ export const AppContainer = ({ children, className, ...props }) => (
   </div>
 )
 
-const ChatContainer = lazy(() => import('../containers/chatContainer'))
+const ChatBox = lazy(() => import('./chatBox'))
 
 export function LoadableChatComponent () {
   const isLoggedIn = useSelector(selectIsLoggedIn)
@@ -24,11 +24,15 @@ export function LoadableChatComponent () {
     return <Redirect push to='/' />
   }
 
-  const fallback = <div className={styles.LoadingView}>
-    <span>Loading ...</span>
-  </div>
+  const fallback = (
+    <div className={styles.LoadingView}>
+      <span>Loading ...</span>
+    </div>
+  )
 
-  return <Suspense fallback={fallback}>
-    <ChatContainer />
-  </Suspense>
+  return (
+    <Suspense fallback={fallback}>
+      <ChatBox />
+    </Suspense>
+  )
 }

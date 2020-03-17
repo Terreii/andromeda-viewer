@@ -17,10 +17,12 @@ const mockStore = configureMockStore([thunk])
 const Container = ({ store, type }) => {
   const dialog = useDialogState()
 
-  return <Provider store={store}>
-    <DialogDisclosure {...dialog}>toggle show</DialogDisclosure>
-    <ResetPasswordDialog dialog={dialog} type={type} />
-  </Provider>
+  return (
+    <Provider store={store}>
+      <DialogDisclosure {...dialog}>toggle show</DialogDisclosure>
+      <ResetPasswordDialog dialog={dialog} type={type} />
+    </Provider>
+  )
 }
 
 it('should render without crashing', () => {
@@ -42,10 +44,12 @@ it('should call changeEncryptionPassword only if the input is valid', async () =
   const password2Label = 'Repeat new password'
   const changePasswordText = 'change encryption password'
 
-  const { queryByLabelText, queryByText, findByLabelText, findByText } = render(<Container
-    store={store}
-    type='encryption'
-  />)
+  const { queryByLabelText, queryByText, findByLabelText, findByText } = render(
+    <Container
+      store={store}
+      type='encryption'
+    />
+  )
 
   expect(queryByText('Reset password')).toBeTruthy()
   expect(queryByText('Reset password').nodeName).toBe('H4')
@@ -136,10 +140,12 @@ it('should call signOut', () => {
 
   signOut.mockReturnValueOnce({ type: 'signOut' })
 
-  const { queryByText } = render(<Container
-    store={store}
-    type='encryption'
-  />)
+  const { queryByText } = render(
+    <Container
+      store={store}
+      type='encryption'
+    />
+  )
 
   fireEvent.click(queryByText('sign out'))
   expect(store.getActions()).toEqual([

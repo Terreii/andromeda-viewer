@@ -1,6 +1,10 @@
 import React from 'react'
+import { useDispatch } from 'react-redux'
 
-import { Container, Text } from './utils'
+import { Container, ComponentArguments } from './utils'
+import Text from '../text'
+
+import { acceptTeleportLure, declineTeleportLure } from '../../actions/friendsActions'
 
 import { useName } from '../../hooks/names'
 
@@ -9,36 +13,35 @@ import { TeleportLure } from '../../types/chat'
 import formStyles from '../formElements.module.css'
 import styles from './notifications.module.css'
 
-interface NotificationArgs {
-  data: TeleportLure
-  onAccept: (fromId: string, sessionId: string) => void
-  onDecline: (fromId: string, sessionId: string) => void
-  onClose: () => void
-}
+export default function FriendshipOffer ({ data, onClose }: ComponentArguments<TeleportLure>) {
+  const dispatch = useDispatch()
 
-export default function FriendshipOffer ({ data, onAccept, onDecline, onClose }: NotificationArgs) {
   const doAccept = () => {
-    onAccept(data.fromId, data.lureId)
+    dispatch(acceptTeleportLure(data.fromId, data.lureId))
     onClose()
   }
   const doDecline = () => {
-    onDecline(data.fromId, data.lureId)
+    dispatch(declineTeleportLure(data.fromId, data.lureId))
     onClose()
   }
 
   const name = useName(data.fromId)
 
-  return <Container title={`${name} has offered to teleport you to their location.`}>
-    <Text text={data.text} />
+  return (
+    <Container title={`${name} has offered to teleport you to their location.`}>
+      <p>
+        <Text text={data.text} multiline />
+      </p>
 
-    <div className={styles.ButtonsRow}>
-      <button className={formStyles.OkButton} onClick={doAccept} disabled>
-        Accept (not jet implemented)
-      </button>
+      <div className={styles.ButtonsRow}>
+        <button className={formStyles.OkButton} onClick={doAccept} disabled>
+          Accept (not yet implemented)
+        </button>
 
-      <button className={formStyles.DangerButton} onClick={doDecline}>
-        Decline
-      </button>
-    </div>
-  </Container>
+        <button className={formStyles.DangerButton} onClick={doDecline}>
+          Decline
+        </button>
+      </div>
+    </Container>
+  )
 }

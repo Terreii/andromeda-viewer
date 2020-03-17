@@ -1,5 +1,3 @@
-import { fetchLLSD } from './llsd'
-
 import { selectFriends, selectFriendById } from '../bundles/friends'
 import { selectFolderForAssetType } from '../bundles/inventory'
 import {
@@ -34,7 +32,8 @@ function sendUUIDNameRequest (ids) {
 
 function loadDisplayNames (idsArray) {
   const ids = idsArray.map(id => id.toString())
-  return (dispatch, getState) => {
+
+  return async (dispatch, getState, { fetchLLSD }) => {
     if (ids.length === 0) return
 
     const fetchUrlString = selectDisplayNamesURL(getState())
@@ -45,17 +44,22 @@ function loadDisplayNames (idsArray) {
 
     dispatch(displayNamesStartLoading(ids))
 
-    fetchLLSD('GET', fetchUrl.href).then(result => {
-      const badIDs = result['bad_ids'] || []
-      dispatch(sendUUIDNameRequest(badIDs)) // Try again
+    const response = await fetchLLSD(fetchUrl.href)
+    if (!response.ok) {
+      dispatch(displayNamesLoaded([], ids))
+      return
+    }
 
-      result.agents.forEach(agent => {
-        agent.display_name_next_update = agent.display_name_next_update.getTime()
-        agent.id = agent.id.toString()
-      })
+    const result = await response.llsd()
+    const badIDs = result.bad_ids || []
+    dispatch(sendUUIDNameRequest(badIDs)) // Try again
 
-      dispatch(displayNamesLoaded(result.agents, badIDs, result['bad_usernames'] || []))
+    result.agents.forEach(agent => {
+      agent.display_name_next_update = agent.display_name_next_update.getTime()
+      agent.id = agent.id.toString()
     })
+
+    dispatch(displayNamesLoaded(result.agents, badIDs, result.bad_usernames || []))
   }
 }
 

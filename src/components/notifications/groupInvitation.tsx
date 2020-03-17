@@ -1,6 +1,10 @@
 import React from 'react'
+import { useDispatch } from 'react-redux'
 
-import { Container, Text } from './utils'
+import { Container, ComponentArguments } from './utils'
+import Text from '../text'
+
+import { acceptGroupInvitation, declineGroupInvitation } from '../../actions/groupsActions'
 
 import { GroupInvitationNotification } from '../../types/chat'
 
@@ -13,48 +17,48 @@ const numberFormater = Intl && Intl.NumberFormat
     format: (number: Number) => number.toString()
   }
 
-interface NotificationArgs {
-  data: GroupInvitationNotification
-  onAccept: (transactionId: string, groupId: string) => void
-  onDecline: (transactionId: string, groupId: string) => void
-  onClose: () => void
-}
-  
-  
-export default function GroupInvitation ({ data, onAccept, onDecline, onClose }: NotificationArgs) {
+export default function GroupInvitation (
+  { data, onClose }: ComponentArguments<GroupInvitationNotification>
+) {
+  const dispatch = useDispatch()
+
   const fee = numberFormater.format(data.fee)
 
-  return <Container title={'Invitation to join a group'}>
-    <Text text={data.text} />
+  return (
+    <Container title={'Invitation to join a group'}>
+      <p>
+        <Text text={data.text} multiline />
+      </p>
 
-    <span>
-      {'Fee: '}
-      <span className={styles.Fee}>
-        {fee}
-        <span aria-label='Linden Dollar'>L$</span>
+      <span>
+        {'Fee: '}
+        <span className={styles.Fee}>
+          {fee}
+          <span aria-label='Linden Dollar'>L$</span>
+        </span>
       </span>
-    </span>
 
-    <div className={styles.ButtonsRow}>
-      <button
-        className={formStyles.OkButton}
-        onClick={() => {
-          onAccept(data.transactionId, data.groupId)
-          onClose()
-        }}
-      >
-        Accept
-      </button>
+      <div className={styles.ButtonsRow}>
+        <button
+          className={formStyles.OkButton}
+          onClick={() => {
+            dispatch(acceptGroupInvitation(data.transactionId, data.groupId))
+            onClose()
+          }}
+        >
+          Accept
+        </button>
 
-      <button
-        className={formStyles.DangerButton}
-        onClick={() => {
-          onDecline(data.transactionId, data.groupId)
-          onClose()
-        }}
-      >
-        Decline
-      </button>
-    </div>
-  </Container>
+        <button
+          className={formStyles.DangerButton}
+          onClick={() => {
+            dispatch(declineGroupInvitation(data.transactionId, data.groupId))
+            onClose()
+          }}
+        >
+          Decline
+        </button>
+      </div>
+    </Container>
+  )
 }
