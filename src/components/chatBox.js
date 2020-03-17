@@ -28,7 +28,7 @@ import { IMChatType, IMDialog } from '../types/chat'
 
 import style from './chatBox.module.css'
 
-export default function ChatBox (props) {
+export default function ChatBox () {
   const dispatch = useDispatch()
   const localChat = useSelector(selectLocalChat)
   const names = useSelector(selectNames)
@@ -124,7 +124,7 @@ export default function ChatBox (props) {
         <GroupsList startNewIMChat={doStartNewIMChat} />
       </TabPanel>
 
-      {props.shouldDisplayNotifications && (
+      {shouldDisplayNotifications && (
         <TabPanel
           {...tab}
           className={style.panel}

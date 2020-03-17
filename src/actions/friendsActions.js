@@ -63,24 +63,20 @@ function loadDisplayNames (idsArray) {
   }
 }
 
-export function FriendOnline (msg) {
-  return (dispatch, getState) => {
-    let state = getState()
+export function friendOnline (msg) {
+  return async (dispatch, getState) => {
     const fromAgentId = getValueOf(msg, 'AgentBlock', 'AgentID')
-    let name = selectAvatarNameById(state, fromAgentId)
-    if (name === undefined) {
-      dispatch(displayNamesStartLoading([fromAgentId]))
-      state = getState()
-      name = selectAvatarNameById(state, fromAgentId)
-      if (name === undefined) {
-        name = fromAgentId
-      }
-    } else {
-      name = '(' + name.getFullName() + ') ' + name.getDisplayName()
+    let name = selectAvatarNameById(getState(), fromAgentId)
+
+    if (name == null) {
+      await dispatch(loadDisplayNames([fromAgentId]))
+      name = selectAvatarNameById(getState(), fromAgentId)
     }
-    dispatch(handleSystemNotification(name + ' is online'))
+
+    dispatch(handleSystemNotification(name?.getDisplayName() ?? fromAgentId + ' is online'))
   }
 }
+
 function handleSystemNotification (msg) {
   return notificationActionCreator({
     notificationType: NotificationTypes.System,
@@ -88,25 +84,20 @@ function handleSystemNotification (msg) {
   })
 }
 
-export function FriendOffline (msg) {
-  return (dispatch, getState) => {
-    let state = getState()
+export function friendOffline (msg) {
+  return async (dispatch, getState) => {
     const fromAgentId = getValueOf(msg, 'AgentBlock', 'AgentID')
-    let name = selectAvatarNameById(state, fromAgentId)
-    if (name === undefined) {
-      dispatch(displayNamesStartLoading([fromAgentId]))
-      state = getState()
-      name = selectAvatarNameById(state, fromAgentId)
-      if (name === undefined) {
-        name = fromAgentId
-      }
-    } else {
-      name = '(' + name.getFullName() + ') ' + name.getDisplayName()
+    let name = selectAvatarNameById(getState(), fromAgentId)
+
+    if (name == null) {
+      await dispatch(loadDisplayNames([fromAgentId]))
+      name = selectAvatarNameById(getState(), fromAgentId)
     }
 
-    dispatch(handleSystemNotification(name + ' is offline'))
+    dispatch(handleSystemNotification(name?.getDisplayName() ?? fromAgentId + ' is offline'))
   }
 }
+
 export function getDisplayName () {
   return (dispatch, getState) => {
     const names = selectNames(getState())

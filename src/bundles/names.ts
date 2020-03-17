@@ -66,6 +66,14 @@ const nameSlice = createSlice({
 
           state.names[id] = next
         }
+
+        for (const badId of action.payload.badIDs) {
+          if (badId in state.names && state.names[badId].isLoadingDisplayName) {
+            state.names[badId] = state.names[badId].withIsLoadingSetTo(false)
+          } else if (!(badId in state.names)) {
+            state.names[badId] = new AvatarName({ first: badId, last: '' })
+          }
+        }
       },
       prepare: (agents: any, badIDs: string[] | null, badNames: string[] | null) => ({
         payload: {
