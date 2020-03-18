@@ -1,4 +1,4 @@
-import { selectFriends, selectFriendById } from '../bundles/friends'
+import { selectFriends, selectFriendById, onlineStateChanged } from '../bundles/friends'
 import { selectFolderForAssetType } from '../bundles/inventory'
 import {
   displayNamesStartLoading,
@@ -73,6 +73,8 @@ export function friendOnline (msg) {
       name = selectAvatarNameById(getState(), fromAgentId)
     }
 
+    dispatch(onlineStateChanged({ id: fromAgentId, online: true }))
+
     dispatch(handleSystemNotification(name?.getDisplayName() ?? fromAgentId + ' is online'))
   }
 }
@@ -93,6 +95,8 @@ export function friendOffline (msg) {
       await dispatch(loadDisplayNames([fromAgentId]))
       name = selectAvatarNameById(getState(), fromAgentId)
     }
+
+    dispatch(onlineStateChanged({ id: fromAgentId, online: true }))
 
     dispatch(handleSystemNotification(name?.getDisplayName() ?? fromAgentId + ' is offline'))
   }

@@ -8,6 +8,8 @@ export interface FriendRights {
 
 export interface Friend {
   id: string
+  // Is friend online
+  online: boolean
   // from me to friend
   rightsGiven: FriendRights
   // Friend has given me rights

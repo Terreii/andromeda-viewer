@@ -10,6 +10,11 @@ import { getValueOf, mapBlockOf } from '../network/msgGetters'
 
 import { Friend } from '../types/people'
 
+export type FriendOnlineStateAction = PayloadAction<{
+  id: string,
+  online: boolean
+}>
+
 const friendsSlice = createSlice({
   name: 'friends',
 
@@ -54,6 +59,15 @@ const friendsSlice = createSlice({
           }
         }
       }
+    },
+
+    onlineStateChanged (state, action: FriendOnlineStateAction) {
+      for (const friend of state) {
+        if (friend.id === action.payload.id) {
+          friend.online = action.payload.online
+          return
+        }
+      }
     }
   },
 
@@ -68,6 +82,7 @@ const friendsSlice = createSlice({
   
         return {
           id: friend.buddy_id,
+          online: false,
           rightsGiven: parseRights(rightsGiven), // Rights you have given to friend
           rightsHas: parseRights(rightsHas) // Rights friend has given you
         }
@@ -81,7 +96,7 @@ const friendsSlice = createSlice({
 
 export default friendsSlice.reducer
 
-export const { changeRights } = friendsSlice.actions
+export const { changeRights, onlineStateChanged } = friendsSlice.actions
 
 // selectors
 export const selectFriends = (state: any): Friend[] => state.friends
