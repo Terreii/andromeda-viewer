@@ -51,3 +51,20 @@
   background: #ffc;
   border:1px solid #900;
 }
+
+.friendOffline {
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-right: 0.3rem;
+  transform: translateY(-1px);
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  border: 1px solid black;
+}
+
+.friendOnline {
+  composes: friendOffline;
+  border-color: lime;
+  background-color: lime;
+}

@@ -53,6 +53,7 @@ it('rendering', () => {
     friends: [
       {
         id: 'first',
+        online: true,
         rightsGiven: {
           canSeeOnline: true,
           canSeeOnMap: false,
@@ -66,6 +67,7 @@ it('rendering', () => {
       },
       {
         id: 'other',
+        online: false,
         rightsGiven: {
           canSeeOnline: false,
           canSeeOnMap: true,
@@ -99,6 +101,60 @@ it('rendering', () => {
   expect(queryAllByAltText('Start new chat with Buddy Budds')).toBeTruthy()
 })
 
+it('shows the online state of friends', () => {
+  const names = {
+    first: new AvatarName('Testery MacTestface'),
+    other: new AvatarName('Buddy Budds')
+  }
+
+  const store = configureStore({
+    friends: [
+      {
+        id: 'first',
+        online: true,
+        rightsGiven: {
+          canSeeOnline: true,
+          canSeeOnMap: false,
+          canModifyObjects: true
+        },
+        rightsHas: {
+          canSeeOnline: true,
+          canSeeOnMap: false,
+          canModifyObjects: true
+        }
+      },
+      {
+        id: 'other',
+        online: false,
+        rightsGiven: {
+          canSeeOnline: false,
+          canSeeOnMap: true,
+          canModifyObjects: false
+        },
+        rightsHas: {
+          canSeeOnline: false,
+          canSeeOnMap: true,
+          canModifyObjects: false
+        }
+      }
+    ]
+  })
+
+  const { queryByTitle, queryByLabelText } = render(
+    <Provider store={store}>
+      <FriendsList names={names} />
+    </Provider>
+  )
+
+  expect(queryByLabelText('online')).toBeTruthy()
+  expect(queryByTitle('online')).toBeTruthy()
+  expect(queryByLabelText('online')).toBe(queryByTitle('online'))
+
+  expect(queryByLabelText('offline')).toBeTruthy()
+  expect(queryByTitle('offline')).toBeTruthy()
+  expect(queryByLabelText('offline')).toBe(queryByTitle('offline'))
+})
+
 it('event handling/changing rights', () => {
   updateRights.mockImplementation(() => () => {})
 
@@ -106,6 +162,7 @@ it('event handling/changing rights', () => {
     friends: [
       {
         id: 'first',
+        online: true,
         rightsGiven: {
           canSeeOnline: false,
           canSeeOnMap: false,
@@ -136,10 +193,7 @@ it('event handling/changing rights', () => {
   expect(friendCanSeeOnline.type).toBe('checkbox')
 
   fireEvent.click(friendCanSeeOnline)
-  expect(updateRights.mock.calls[updateRights.mock.calls.length - 1]).toEqual([
-    'first',
-    { canSeeOnline: true }
-  ])
+  expect(updateRights).lastCalledWith('first', { canSeeOnline: true })
 
   const friendCanSeeMap = queryByTitle('Friend can locate you on the map')
   expect(friendCanSeeMap).toBeTruthy()
@@ -147,10 +201,7 @@ it('event handling/changing rights', () => {
   expect(friendCanSeeMap.type).toBe('checkbox')
 
   fireEvent.click(friendCanSeeMap)
-  expect(updateRights.mock.calls[updateRights.mock.calls.length - 1]).toEqual([
-    'first',
-    { canSeeOnMap: true }
-  ])
+  expect(updateRights).lastCalledWith('first', { canSeeOnMap: true })
 
   const friendCanChangeObjects = queryByTitle('Friend can edit, delete or take objects')
   expect(friendCanChangeObjects).toBeTruthy()
@@ -158,10 +209,7 @@ it('event handling/changing rights', () => {
   expect(friendCanChangeObjects.type).toBe('checkbox')
 
   fireEvent.click(friendCanChangeObjects)
-  expect(updateRights.mock.calls[updateRights.mock.calls.length - 1]).toEqual([
-    'first',
-    { canModifyObjects: true }
-  ])
+  expect(updateRights).lastCalledWith('first', { canModifyObjects: true })
 
   const changeCounts = updateRights.mock.calls.length
 
@@ -179,7 +227,7 @@ it('event handling/changing rights', () => {
 
   fireEvent.click(youCanChangeObjects)
 
-  expect(updateRights.mock.calls.length).toBe(changeCounts)
+  expect(updateRights).toBeCalledTimes(changeCounts)
 })
 
 it('should handle creating a new chat', () => {
@@ -187,6 +235,7 @@ it('should handle creating a new chat', () => {
     friends: [
       {
         id: 'first',
+        online: true,
         rightsGiven: {
           canSeeOnline: false,
           canSeeOnMap: false,
@@ -224,12 +273,7 @@ it('should handle creating a new chat', () => {
 
   fireEvent.click(newChatButton)
 
-  expect(startNewIMChat.mock.calls.length).toBe(1)
-  expect(startNewIMChat.mock.calls[0]).toEqual([
-    IMChatType.personal,
-    'first',
-    'Testery Mactestface'
-  ])
+  expect(startNewIMChat).lastCalledWith(IMChatType.personal, 'first', 'Testery Mactestface')
 })
 
 it('should pass aXe', async () => {
@@ -241,6 +285,7 @@ it('should pass aXe', async () => {
     friends: [
       {
         id: 'first',
+        online: true,
         rightsGiven: {},
         rightsHas: {}
       }

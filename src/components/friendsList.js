@@ -57,6 +57,9 @@ function FriendRow ({ friend, name, skipLink, onRightsChanged, startNewIMChat })
 
   return (
     <li id={'friends_list_' + friend.id} className={styles.Item}>
+      {friend.online
+        ? <div aria-label='online' title='online' className={styles.friendOnline} />
+        : <div aria-label='offline' title='offline' className={styles.friendOffline} />}
       <div className={styles.Name}>{name}</div>
       <a className={styles.SkipToContentLink} href={skipLink}>{`Skip ${name}`}</a>
       <button
