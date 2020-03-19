@@ -411,6 +411,16 @@ export interface FriendshipOfferNotification extends NotificationBase {
 }
 
 /**
+ * Friend online change
+ */
+export interface FriendOnlineStateChangeNotification extends NotificationBase {
+  notificationType: NotificationTypes.FriendOnlineStateChange
+  friendId: string
+  online: boolean
+  text: ''
+}
+
+/**
  * A group invitation.
  * 
  * It contains fee, roleId infos.
@@ -538,6 +548,7 @@ export interface PermissionsNotification extends NotificationBase {
 export type Notification = TextNotification |
   SystemNotification |
   FriendshipOfferNotification |
+  FriendOnlineStateChangeNotification |
   GroupInvitationNotification |
   GroupNoticeNotification |
   LoadURLNotification |
@@ -556,6 +567,10 @@ export enum NotificationTypes {
    * Like {@link NotificationTypes.TextOnly} but from the System (Grid).
    */
   System,
+  /**
+   * A friend did go online or offline.
+   */
+  FriendOnlineStateChange,
   /**
    * This notification represents a friendship offer.
    * 

@@ -1,7 +1,7 @@
 import React, { memo } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
-import TextNotification from './textNotification'
+import FriendOnlineNotification from './friendOnlineNotification'
 import FriendshipOffer from './friendshipOffer'
 import GroupInvitation from './groupInvitation'
 import GroupNotice from './groupNotice'
@@ -9,6 +9,7 @@ import LoadURL from './loadURL'
 import RequestTeleportLure from './requestTeleportLure'
 import TeleportLure from './teleportLure'
 import InventoryOffer from './inventoryOffer'
+import TextNotification from './textNotification'
 
 import { close, selectNotifications } from '../../bundles/notifications'
 
@@ -40,6 +41,15 @@ export default memo(function NotificationsList () {
             case NotificationTypes.FriendshipOffer:
               return (
                 <FriendshipOffer
+                  key={notification.id}
+                  data={notification}
+                  onClose={doClose}
+                />
+              )
+
+            case NotificationTypes.FriendOnlineStateChange:
+              return (
+                <FriendOnlineNotification
                   key={notification.id}
                   data={notification}
                   onClose={doClose}
@@ -114,10 +124,11 @@ export default memo(function NotificationsList () {
                   onClose={doClose}
                 />
               )
-
-            default:
-              throw new TypeError('unknown NotificationType')
           }
+
+          return ((): never => {
+            throw new TypeError('unknown NotificationType')
+          })()
         })}
       </div>
     </main>

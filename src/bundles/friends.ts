@@ -12,7 +12,8 @@ import { Friend } from '../types/people'
 
 export type FriendOnlineStateAction = PayloadAction<{
   id: string,
-  online: boolean
+  online: boolean,
+  showNotification: boolean
 }>
 
 const friendsSlice = createSlice({

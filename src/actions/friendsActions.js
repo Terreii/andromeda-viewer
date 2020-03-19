@@ -10,11 +10,10 @@ import {
 } from '../bundles/names'
 import { selectAgentId, selectSessionId } from '../bundles/session'
 
-import { IMDialog, NotificationTypes } from '../types/chat'
+import { IMDialog } from '../types/chat'
 import { AssetType } from '../types/inventory'
 import { TeleportFlags } from '../types/people'
 import { getValueOf } from '../network/msgGetters'
-import { receive as notificationActionCreator } from '../bundles/notifications'
 
 function sendUUIDNameRequest (ids) {
   return (dispatch, getState, { circuit }) => {
@@ -64,41 +63,28 @@ function loadDisplayNames (idsArray) {
 }
 
 export function friendOnline (msg) {
-  return async (dispatch, getState) => {
+  return (dispatch, getState) => {
     const fromAgentId = getValueOf(msg, 'AgentBlock', 'AgentID')
-    let name = selectAvatarNameById(getState(), fromAgentId)
+    const name = selectAvatarNameById(getState(), fromAgentId)
 
-    if (name == null) {
-      await dispatch(loadDisplayNames([fromAgentId]))
-      name = selectAvatarNameById(getState(), fromAgentId)
-    }
-
-    dispatch(onlineStateChanged({ id: fromAgentId, online: true }))
-
-    dispatch(handleSystemNotification(name?.getDisplayName() ?? fromAgentId + ' is online'))
+    dispatch(onlineStateChanged({
+      id: fromAgentId,
+      online: true,
+      showNotification: name != null // don't show the notification on login
+    }))
   }
 }
 
-function handleSystemNotification (msg) {
-  return notificationActionCreator({
-    notificationType: NotificationTypes.System,
-    text: msg
-  })
-}
-
 export function friendOffline (msg) {
-  return async (dispatch, getState) => {
+  return (dispatch, getState) => {
     const fromAgentId = getValueOf(msg, 'AgentBlock', 'AgentID')
-    let name = selectAvatarNameById(getState(), fromAgentId)
+    const name = selectAvatarNameById(getState(), fromAgentId)
 
-    if (name == null) {
-      await dispatch(loadDisplayNames([fromAgentId]))
-      name = selectAvatarNameById(getState(), fromAgentId)
-    }
-
-    dispatch(onlineStateChanged({ id: fromAgentId, online: true }))
-
-    dispatch(handleSystemNotification(name?.getDisplayName() ?? fromAgentId + ' is offline'))
+    dispatch(onlineStateChanged({
+      id: fromAgentId,
+      online: false,
+      showNotification: name != null // don't show the notification on login
+    }))
   }
 }
 

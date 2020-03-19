@@ -95,8 +95,8 @@ it('renders a basic MessageBox', () => {
 
   fireEvent.click(button)
 
-  expect(close.mock.calls.length).toBe(closeCount + 1)
-  expect(close.mock.calls[closeCount][0]).toBe(4)
+  expect(close).toBeCalledTimes(closeCount + 1)
+  expect(close).lastCalledWith(4)
 })
 
 it('renders a system MessageBox', () => {
@@ -132,8 +132,86 @@ it('renders a system MessageBox', () => {
 
   fireEvent.click(button)
 
-  expect(close.mock.calls.length).toBe(closeCount + 1)
-  expect(close.mock.calls[closeCount][0]).toBe(4)
+  expect(close).toBeCalledTimes(closeCount + 1)
+  expect(close).lastCalledWith(4)
+})
+
+it('renders a friend online state change notification to online', () => {
+  selectNotifications.mockReturnValue([
+    {
+      id: 4,
+      notificationType: NotificationTypes.FriendOnlineStateChange,
+      friendId: '5df644f5-8b12-4caf-8e91-d7cae057e5f2',
+      online: true,
+      text: ''
+    }
+  ])
+
+  const store = configureStore()
+
+  const closeCount = close.mock.calls.length
+
+  const { queryByText } = render(
+    <Provider store={store}>
+      <Notifications />
+    </Provider>
+  )
+
+  const header = queryByText('Friend went online')
+  expect(header).toBeTruthy()
+  expect(header.nodeName).toBe('H4')
+
+  const body = queryByText('Tester Mactestface is online')
+  expect(body).toBeTruthy()
+  expect(body.nodeName).toBe('P')
+
+  const button = queryByText('OK')
+  expect(button).toBeTruthy()
+  expect(button.nodeName).toBe('BUTTON')
+
+  fireEvent.click(button)
+
+  expect(close).toBeCalledTimes(closeCount + 1)
+  expect(close).lastCalledWith(4)
+})
+
+it('renders a friend online state change notification to offline', () => {
+  selectNotifications.mockReturnValue([
+    {
+      id: 4,
+      notificationType: NotificationTypes.FriendOnlineStateChange,
+      friendId: '5df644f5-8b12-4caf-8e91-d7cae057e5f2',
+      online: false,
+      text: ''
+    }
+  ])
+
+  const store = configureStore()
+
+  const closeCount = close.mock.calls.length
+
+  const { queryByText } = render(
+    <Provider store={store}>
+      <Notifications />
+    </Provider>
+  )
+
+  const header = queryByText('Friend went offline')
+  expect(header).toBeTruthy()
+  expect(header.nodeName).toBe('H4')
+
+  const body = queryByText('Tester Mactestface is offline')
+  expect(body).toBeTruthy()
+  expect(body.nodeName).toBe('P')
+
+  const button = queryByText('OK')
+  expect(button).toBeTruthy()
+  expect(button.nodeName).toBe('BUTTON')
+
+  fireEvent.click(button)
+
+  expect(close).toBeCalledTimes(closeCount + 1)
+  expect(close).lastCalledWith(4)
 })
 
 it('renders a friendship request', () => {
@@ -172,12 +250,11 @@ it('renders a friendship request', () => {
   expect(acceptButton.nodeName).toBe('BUTTON')
 
   fireEvent.click(acceptButton)
-  expect(acceptFriendshipOffer.mock.calls).toEqual([
-    [fromId, sessionId]
-  ])
-  expect(declineFriendshipOffer.mock.calls.length).toBe(0)
+  expect(acceptFriendshipOffer).lastCalledWith(fromId, sessionId)
+  expect(declineFriendshipOffer).not.toBeCalled()
 
-  expect(close.mock.calls.length).toBe(closeCount + 1)
+  expect(close).toBeCalledTimes(closeCount + 1)
+  expect(close).lastCalledWith(4)
 
   // Decline
   const declineButton = queryByText('Decline')
@@ -185,14 +262,11 @@ it('renders a friendship request', () => {
   expect(declineButton.nodeName).toBe('BUTTON')
 
   fireEvent.click(declineButton)
-  expect(acceptFriendshipOffer.mock.calls).toEqual([
-    [fromId, sessionId]
-  ])
-  expect(declineFriendshipOffer.mock.calls).toEqual([
-    [fromId, sessionId]
-  ])
+  expect(acceptFriendshipOffer).toBeCalledTimes(1)
+  expect(declineFriendshipOffer).lastCalledWith(fromId, sessionId)
 
-  expect(close.mock.calls.length).toBe(closeCount + 2)
+  expect(close).toBeCalledTimes(closeCount + 2)
+  expect(close).lastCalledWith(4)
 })
 
 it('renders a group invitation', () => {
@@ -239,12 +313,11 @@ it('renders a group invitation', () => {
   expect(acceptButton.nodeName).toBe('BUTTON')
 
   fireEvent.click(acceptButton)
-  expect(acceptGroupInvitation.mock.calls).toEqual([
-    [transactionId, groupId]
-  ])
-  expect(declineGroupInvitation.mock.calls.length).toBe(0)
+  expect(acceptGroupInvitation).lastCalledWith(transactionId, groupId)
+  expect(declineGroupInvitation).not.toBeCalled()
 
-  expect(close.mock.calls.length).toBe(closeCount + 1)
+  expect(close).toBeCalledTimes(closeCount + 1)
+  expect(close).lastCalledWith(4)
 
   // Decline
   const declineButton = queryByText('Decline')
@@ -252,14 +325,11 @@ it('renders a group invitation', () => {
   expect(declineButton.nodeName).toBe('BUTTON')
 
   fireEvent.click(declineButton)
-  expect(acceptGroupInvitation.mock.calls).toEqual([
-    [transactionId, groupId]
-  ])
-  expect(declineGroupInvitation.mock.calls).toEqual([
-    [transactionId, groupId]
-  ])
+  expect(acceptGroupInvitation).toBeCalledTimes(1)
+  expect(declineGroupInvitation).lastCalledWith(transactionId, groupId)
 
-  expect(close.mock.calls.length).toBe(closeCount + 2)
+  expect(close).toBeCalledTimes(closeCount + 2)
+  expect(close).lastCalledWith(4)
 })
 
 it('renders a group notice with items', () => {
@@ -312,17 +382,12 @@ it('renders a group notice with items', () => {
   expect(acceptButton.nodeName).toBe('BUTTON')
 
   fireEvent.click(acceptButton)
-  expect(acceptInventoryOffer.mock.calls).toEqual([
-    [
-      senderId,
-      transactionId,
-      AssetType.ImageJPEG,
-      true
-    ]
-  ])
-  expect(declineInventoryOffer.mock.calls.length).toBe(0)
+  expect(acceptInventoryOffer)
+    .lastCalledWith(senderId, transactionId, AssetType.ImageJPEG, true)
+  expect(declineInventoryOffer).not.toBeCalled()
 
-  expect(close.mock.calls.length).toBe(closeCount + 1)
+  expect(close).toBeCalledTimes(closeCount + 1)
+  expect(close).lastCalledWith(4)
 
   // Decline
   const declineButton = queryByText('Decline item')
@@ -330,24 +395,12 @@ it('renders a group notice with items', () => {
   expect(declineButton.nodeName).toBe('BUTTON')
 
   fireEvent.click(declineButton)
-  expect(acceptInventoryOffer.mock.calls).toEqual([
-    [
-      senderId,
-      transactionId,
-      AssetType.ImageJPEG,
-      true
-    ]
-  ])
-  expect(declineInventoryOffer.mock.calls).toEqual([
-    [
-      senderId,
-      transactionId,
-      true
-    ]
-  ])
+  expect(acceptInventoryOffer.mock.calls.length).toBe(1)
+  expect(declineInventoryOffer)
+    .lastCalledWith(senderId, transactionId, true)
 
-  expect(close.mock.calls.length).toBe(closeCount + 2)
-  expect(close.mock.calls[closeCount + 1][0]).toBe(4)
+  expect(close).toBeCalledTimes(closeCount + 2)
+  expect(close).lastCalledWith(4)
 })
 
 it('renders a group notice without item', () => {
@@ -403,11 +456,11 @@ it('renders a group notice without item', () => {
 
   fireEvent.click(okButton)
 
-  expect(acceptInventoryOffer.mock.calls.length).toBe(acceptCount)
-  expect(declineInventoryOffer.mock.calls.length).toBe(declineCount)
+  expect(acceptInventoryOffer).toBeCalledTimes(acceptCount)
+  expect(declineInventoryOffer).toBeCalledTimes(declineCount)
 
-  expect(close.mock.calls.length).toBe(closeCount + 1)
-  expect(close.mock.calls[closeCount][0]).toBe(4)
+  expect(close).toBeCalledTimes(closeCount + 1)
+  expect(close).lastCalledWith(4)
 })
 
 it('renders an open URL', () => {
@@ -446,8 +499,8 @@ it('renders an open URL', () => {
 
   fireEvent.click(button)
 
-  expect(close.mock.calls.length).toBe(closeCount + 1)
-  expect(close.mock.calls[closeCount][0]).toBe(1)
+  expect(close).toBeCalledTimes(closeCount + 1)
+  expect(close).lastCalledWith(1)
 })
 
 it('renders a request teleport lure', () => {
@@ -484,13 +537,11 @@ it('renders a request teleport lure', () => {
 
   fireEvent.click(acceptButton)
 
-  expect(offerTeleportLure.mock.calls.length).toBe(1)
-  expect(offerTeleportLure.mock.calls[0]).toEqual([
-    senderId
-  ])
+  expect(offerTeleportLure).toBeCalled()
+  expect(offerTeleportLure).lastCalledWith(senderId)
 
-  expect(close.mock.calls.length).toBe(closeCount + 1)
-  expect(close.mock.calls[closeCount][0]).toBe(1)
+  expect(close).toBeCalledTimes(closeCount + 1)
+  expect(close).lastCalledWith(1)
 
   // Decline
   const declineButton = queryByText('Decline')
@@ -499,10 +550,10 @@ it('renders a request teleport lure', () => {
 
   fireEvent.click(declineButton)
 
-  expect(offerTeleportLure.mock.calls.length).toBe(1)
+  expect(offerTeleportLure).toBeCalledTimes(1)
 
-  expect(close.mock.calls.length).toBe(closeCount + 2)
-  expect(close.mock.calls[closeCount + 1][0]).toBe(1)
+  expect(close).toBeCalledTimes(closeCount + 2)
+  expect(close).lastCalledWith(1)
 })
 
 it('renders a teleport lure', () => {
@@ -545,15 +596,15 @@ it('renders a teleport lure', () => {
   expect(acceptButton.nodeName).toBe('BUTTON')
   expect(acceptButton.disabled).toBeTruthy()
 
-  expect(acceptTeleportLure.mock.calls.length).toBe(0)
+  expect(acceptTeleportLure).not.toBeCalled()
   // expect(acceptTeleportLure.mock.calls[0]).toEqual([
   //   senderId,
   //   lureId
   // ])
 
-  expect(declineTeleportLure.mock.calls.length).toBe(0)
+  expect(declineTeleportLure).not.toBeCalled()
 
-  expect(close.mock.calls.length).toBe(closeCount)
+  expect(close).toBeCalledTimes(closeCount)
 
   // Decline
   const declineButton = queryByText('Decline')
@@ -562,16 +613,12 @@ it('renders a teleport lure', () => {
 
   fireEvent.click(declineButton)
 
-  expect(acceptTeleportLure.mock.calls.length).toBe(0)
+  expect(acceptTeleportLure).not.toBeCalled()
 
-  expect(declineTeleportLure.mock.calls.length).toBe(1)
-  expect(declineTeleportLure.mock.calls[0]).toEqual([
-    senderId,
-    lureId
-  ])
+  expect(declineTeleportLure).lastCalledWith(senderId, lureId)
 
-  expect(close.mock.calls.length).toBe(closeCount + 1)
-  expect(close.mock.calls[closeCount][0]).toBe(1)
+  expect(close).toBeCalledTimes(closeCount + 1)
+  expect(close).lastCalledWith(1)
 })
 
 it('renders an inventory offer', () => {
@@ -619,18 +666,13 @@ it('renders an inventory offer', () => {
 
   fireEvent.click(acceptButton)
 
-  expect(acceptInventoryOffer.mock.calls.length).toBe(acceptCount + 1)
-  expect(declineInventoryOffer.mock.calls.length).toBe(declineCount + 0)
-  expect(acceptInventoryOffer.mock.calls[acceptCount]).toEqual([
-    fromId,
-    transactionId,
-    AssetType.ImageJPEG,
-    false,
-    false
-  ])
+  expect(acceptInventoryOffer).toBeCalledTimes(acceptCount + 1)
+  expect(declineInventoryOffer).toBeCalledTimes(declineCount)
+  expect(acceptInventoryOffer)
+    .lastCalledWith(fromId, transactionId, AssetType.ImageJPEG, false, false)
 
-  expect(close.mock.calls.length).toBe(closeCount + 1)
-  expect(close.mock.calls[closeCount][0]).toBe(4)
+  expect(close).toBeCalledTimes(closeCount + 1)
+  expect(close).lastCalledWith(4)
 
   // Decline
   const declineButton = queryByText('Decline')
@@ -639,17 +681,12 @@ it('renders an inventory offer', () => {
 
   fireEvent.click(declineButton)
 
-  expect(acceptInventoryOffer.mock.calls.length).toBe(acceptCount + 1)
-  expect(declineInventoryOffer.mock.calls.length).toBe(declineCount + 1)
-  expect(declineInventoryOffer.mock.calls[declineCount]).toEqual([
-    fromId,
-    transactionId,
-    false,
-    false
-  ])
+  expect(acceptInventoryOffer).toBeCalledTimes(acceptCount + 1)
+  expect(declineInventoryOffer).toBeCalledTimes(declineCount + 1)
+  expect(declineInventoryOffer).lastCalledWith(fromId, transactionId, false, false)
 
-  expect(close.mock.calls.length).toBe(closeCount + 2)
-  expect(close.mock.calls[closeCount + 1][0]).toBe(4)
+  expect(close).toBeCalledTimes(closeCount + 2)
+  expect(close).lastCalledWith(4)
 })
 
 it('should pass aXe', async () => {
@@ -751,6 +788,20 @@ it('should pass aXe', async () => {
         type: AssetType.ImageJPEG,
         transactionId: 'xyz'
       }
+    },
+    {
+      id: 10,
+      notificationType: NotificationTypes.FriendOnlineStateChange,
+      friendId: '5df644f5-8b12-4caf-8e91-d7cae057e5f2',
+      online: true,
+      text: ''
+    },
+    {
+      id: 11,
+      notificationType: NotificationTypes.FriendOnlineStateChange,
+      friendId: '5df644f5-8b12-4caf-8e91-d7cae057e5f2',
+      online: false,
+      text: ''
     }
   ])
 

@@ -1,8 +1,9 @@
 import { createSlice, createSelector, PayloadAction } from '@reduxjs/toolkit'
 
+import { onlineStateChanged, FriendOnlineStateAction } from './friends'
 import { logout, userWasKicked, selectActiveTab } from './session'
 
-import { Notification } from '../types/chat'
+import { Notification, NotificationTypes } from '../types/chat'
 
 const notificationSlice = createSlice({
   name: 'notifications',
@@ -27,6 +28,19 @@ const notificationSlice = createSlice({
   },
 
   extraReducers: {
+    [onlineStateChanged.type] (state, action: FriendOnlineStateAction) {
+      if (action.payload.showNotification) {
+        state.active.push({
+          id: state.index,
+          notificationType: NotificationTypes.FriendOnlineStateChange,
+          friendId: action.payload.id,
+          online: action.payload.online,
+          text: ''
+        })
+        state.index += 1
+      }
+    },
+
     [logout.type] (state) {
       state.active = []
       state.index = 0
