@@ -13,7 +13,7 @@ import { selectAgentId, selectSessionId } from '../bundles/session'
 import { IMDialog } from '../types/chat'
 import { AssetType } from '../types/inventory'
 import { TeleportFlags } from '../types/people'
-import { getValueOf } from '../network/msgGetters'
+import { mapBlockOf } from '../network/msgGetters'
 
 function sendUUIDNameRequest (ids) {
   return (dispatch, getState, { circuit }) => {
@@ -62,28 +62,19 @@ function loadDisplayNames (idsArray) {
   }
 }
 
-export function friendOnline (msg) {
+export function doHandleFriendOnlineStateChange (msg) {
   return (dispatch, getState) => {
-    const fromAgentId = getValueOf(msg, 'AgentBlock', 'AgentID')
-    const name = selectAvatarNameById(getState(), fromAgentId)
-
-    dispatch(onlineStateChanged({
-      id: fromAgentId,
-      online: true,
-      showNotification: name != null // don't show the notification on login
+    const ids = mapBlockOf(msg, 'AgentBlock', get => get('AgentID'))
+    const state = getState()
+    const friends = ids.map(id => ({
+      id,
+      // don't show the notification on login
+      showNotification: selectAvatarNameById(state, id) != null
     }))
-  }
-}
-
-export function friendOffline (msg) {
-  return (dispatch, getState) => {
-    const fromAgentId = getValueOf(msg, 'AgentBlock', 'AgentID')
-    const name = selectAvatarNameById(getState(), fromAgentId)
 
     dispatch(onlineStateChanged({
-      id: fromAgentId,
-      online: false,
-      showNotification: name != null // don't show the notification on login
+      friends,
+      online: msg.name === 'OnlineNotification'
     }))
   }
 }

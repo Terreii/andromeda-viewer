@@ -29,15 +29,17 @@ const notificationSlice = createSlice({
 
   extraReducers: {
     [onlineStateChanged.type] (state, action: FriendOnlineStateAction) {
-      if (action.payload.showNotification) {
-        state.active.push({
-          id: state.index,
-          notificationType: NotificationTypes.FriendOnlineStateChange,
-          friendId: action.payload.id,
-          online: action.payload.online,
-          text: ''
-        })
-        state.index += 1
+      for (const friend of action.payload.friends) {
+        if (friend.showNotification) {
+          state.active.push({
+            id: state.index,
+            notificationType: NotificationTypes.FriendOnlineStateChange,
+            friendId: friend.id,
+            online: action.payload.online,
+            text: ''
+          })
+          state.index += 1
+        }
       }
     },
 

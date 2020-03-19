@@ -11,9 +11,8 @@ import { getValueOf, mapBlockOf } from '../network/msgGetters'
 import { Friend } from '../types/people'
 
 export type FriendOnlineStateAction = PayloadAction<{
-  id: string,
-  online: boolean,
-  showNotification: boolean
+  friends: { id: string, showNotification: boolean }[],
+  online: boolean
 }>
 
 const friendsSlice = createSlice({
@@ -63,10 +62,12 @@ const friendsSlice = createSlice({
     },
 
     onlineStateChanged (state, action: FriendOnlineStateAction) {
-      for (const friend of state) {
-        if (friend.id === action.payload.id) {
-          friend.online = action.payload.online
-          return
+      const friends = new Map(state.map((friend, index) => [friend.id, index]))
+
+      for (const friend of action.payload.friends) {
+        if (friends.has(friend.id)) {
+          const index = friends.get(friend.id)!
+          state[index].online = action.payload.online
         }
       }
     }

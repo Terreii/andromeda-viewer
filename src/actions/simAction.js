@@ -3,7 +3,7 @@ import { getValueOf } from '../network/msgGetters'
 
 import { changeRights } from '../bundles/friends'
 import { selectAgentId, selectSessionId } from '../bundles/session'
-import { friendOnline, friendOffline } from './friendsActions'
+import { doHandleFriendOnlineStateChange } from './friendsActions'
 
 // Gets all messages from the SIM and filters them, and if needed: calls their own actions.
 function simActionFilter (msg) {
@@ -21,10 +21,8 @@ function simActionFilter (msg) {
       return sendRegionHandshakeReply(msg)
 
     case 'OnlineNotification':
-      return friendOnline(msg)
-
     case 'OfflineNotification':
-      return friendOffline(msg)
+      return doHandleFriendOnlineStateChange(msg)
 
     // For all messages that will and can be directly dispatched
     case 'AgentMovementComplete':
