@@ -32,7 +32,7 @@ it('should render plain URLs as <a>', () => {
     .toBe('noopener noreferrer')
 })
 
-it('should render plain URLs after a firefox chat info', () => {
+it('should render plain URLs after a )', () => {
   const { queryByText } = render(
     <div>
       <Text
