@@ -37,7 +37,7 @@ it('should render plain URLs after a firefox chat info', () => {
     <div>
       <Text
         text={'(32W 6.3.2f*) http://wiki.secondlife.com/wiki/Main_Page ' +
-        'https://en.wikipedia.org/wiki/Second_Life'}
+        'https://en.wikipedia.org/wiki/Second_Life http://example.com/test()'}
       />
     </div>
   )
@@ -55,6 +55,11 @@ it('should render plain URLs after a firefox chat info', () => {
     .toBe('https://en.wikipedia.org/wiki/Second_Life')
   expect(queryByText('https://en.wikipedia.org/wiki/Second_Life').rel)
     .toBe('noopener noreferrer')
+
+  expect(queryByText('http://example.com/test()')).toBeTruthy()
+  expect(queryByText('http://example.com/test()').tagName).toBe('A')
+  expect(queryByText('http://example.com/test()').href).toBe('http://example.com/test()')
+  expect(queryByText('http://example.com/test()').rel).toBe('noopener noreferrer')
 })
 
 it('should render formatted URLs as <a> with the text as its child', () => {
