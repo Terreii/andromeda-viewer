@@ -12,7 +12,19 @@ import anchorme from 'anchorme'
 export default function Text ({ text, multiline, className }) {
   const parsed = useMemo(
     () => {
-      const urls = anchorme(text, { list: true })
+      const found = anchorme(text.replace(/\)/g, '.)escape'), { list: true })
+
+      const urls = found.map(url => {
+        if (/\.\)escape/g.test(url.raw)) {
+          return {
+            ...url,
+            raw: url.raw.replace(/\.\)escape/g, ')'),
+            encoded: url.encoded.replace(/\.\)escape/g, ')')
+          }
+        } else {
+          return url
+        }
+      })
 
       if (urls.length === 0) {
         return [

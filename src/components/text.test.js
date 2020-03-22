@@ -32,6 +32,36 @@ it('should render plain URLs as <a>', () => {
     .toBe('noopener noreferrer')
 })
 
+it('should render plain URLs after a firefox chat info', () => {
+  const { queryByText } = render(
+    <div>
+      <Text
+        text={'(32W 6.3.2f*) http://wiki.secondlife.com/wiki/Main_Page ' +
+        'https://en.wikipedia.org/wiki/Second_Life http://example.com/test()'}
+      />
+    </div>
+  )
+
+  expect(queryByText('http://wiki.secondlife.com/wiki/Main_Page')).toBeTruthy()
+  expect(queryByText('http://wiki.secondlife.com/wiki/Main_Page').tagName).toBe('A')
+  expect(queryByText('http://wiki.secondlife.com/wiki/Main_Page').href)
+    .toBe('http://wiki.secondlife.com/wiki/Main_Page')
+  expect(queryByText('http://wiki.secondlife.com/wiki/Main_Page').rel)
+    .toBe('noopener noreferrer')
+
+  expect(queryByText('https://en.wikipedia.org/wiki/Second_Life')).toBeTruthy()
+  expect(queryByText('https://en.wikipedia.org/wiki/Second_Life').tagName).toBe('A')
+  expect(queryByText('https://en.wikipedia.org/wiki/Second_Life').href)
+    .toBe('https://en.wikipedia.org/wiki/Second_Life')
+  expect(queryByText('https://en.wikipedia.org/wiki/Second_Life').rel)
+    .toBe('noopener noreferrer')
+
+  expect(queryByText('http://example.com/test()')).toBeTruthy()
+  expect(queryByText('http://example.com/test()').tagName).toBe('A')
+  expect(queryByText('http://example.com/test()').href).toBe('http://example.com/test()')
+  expect(queryByText('http://example.com/test()').rel).toBe('noopener noreferrer')
+})
+
 it('should render formatted URLs as <a> with the text as its child', () => {
   const { queryByText } = render(
     <div>
