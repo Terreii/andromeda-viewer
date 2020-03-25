@@ -5,30 +5,24 @@ import Circuit from './circuit'
 import { createBody, parseBody } from './networkMessages'
 import { getValueOf } from './msgGetters'
 
+let circuit
+
 // Utility for testing
-window.WebSocket = class WebSocket {
-  constructor (url) {
-    this.url = url
 
-    this.sendMessages = []
+window.WebSocket = jest.fn().mockImplementation(() => {
+  return {
+    send: jest.fn(),
+    close: jest.fn(),
+
+    onopen () {},
+
+    onerror () {},
+
+    onclose () {},
+
+    onmessage () {}
   }
-
-  send (buffer) {
-    this.sendMessages.push(buffer)
-    expect(buffer).toBeTruthy()
-    if (typeof this.onTestMessage === 'function') {
-      this.onTestMessage(buffer)
-    }
-  }
-
-  onopen () {}
-
-  onmessage (buffer) {}
-
-  getSendMessages (index = this.sendMessages.length - 1) {
-    return this.sendMessages[index]
-  }
-}
+})
 
 let sequenceNumberForTests = 0
 function createTestMessage (reliable, resend, hasAcks) {
@@ -75,20 +69,41 @@ function createTestHeader (reliable, resend, hasAcks) {
   return headBuffer
 }
 
-const circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+function openSocket () {
+  circuit.websocket.onmessage({ data: 'ok' })
+}
+
+// Tests
+
+beforeEach(() => {
+  if (circuit) {
+    circuit.close()
+  }
+  window.WebSocket.mockClear()
+})
 
 test('it should create an instance', () => {
+  circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+
   expect(circuit instanceof Circuit).toBe(true)
   expect(circuit.circuitCode).toBe(123456)
   expect(circuit.ip).toBe('127.0.0.1')
   expect(circuit.ipArray).toEqual([127, 0, 0, 1])
   expect(circuit.port).toBe(8080)
-  expect(circuit.websocket.url).toBe('ws://localhost/andromeda-bridge')
+  expect(window.WebSocket).lastCalledWith('ws://localhost/andromeda-bridge')
 
   expect(circuit.websocketIsOpen).toBe(false)
 })
 
-test('circuit should save messages until the WebSocket is open and send if open', () => {
+test('circuit closes', () => {
+  circuit.close()
+
+  expect(circuit.websocket.close).toBeCalled()
+})
+
+test('circuit should send the session id at first', () => {
+  circuit = new Circuit('127.0.0.1', 8080, 123456, 'the session id')
+
   circuit.send('PacketAck', {
     Packets: [
       {
@@ -97,18 +112,38 @@ test('circuit should save messages until the WebSocket is open and send if open'
     ]
   })
 
-  expect(circuit.websocket.sendMessages.length).toBe(0)
+  expect(circuit.websocket.send).not.toBeCalled()
   expect(circuit.cachedMessages.length).toBe(1)
 
   circuit.websocket.onopen()
-  expect(circuit.websocket.sendMessages.length).toBe(1)
-  expect(circuit.websocket.sendMessages[0]).toBe('session id')
 
-  circuit.websocket.onmessage({ data: 'ok' })
+  expect(circuit.websocket.send).toBeCalledWith('the session id')
+  expect(circuit.websocket.send).toBeCalledTimes(1)
+  expect(circuit.cachedMessages.length).toBe(1)
+})
+
+test('circuit should save messages until the WebSocket is open and send if open', () => {
+  circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+
+  circuit.send('PacketAck', {
+    Packets: [
+      {
+        ID: 0
+      }
+    ]
+  })
+
+  expect(circuit.websocket.send).not.toBeCalled()
+
+  circuit.websocket.onopen()
+
+  expect(circuit.websocket.send).toBeCalledWith('session id')
+
+  openSocket()
 
   expect(circuit.websocketIsOpen).toBe(true)
   expect(circuit.cachedMessages.length).toBe(0)
-  expect(circuit.websocket.sendMessages.length).toBe(2)
+  expect(circuit.websocket.send).toBeCalledTimes(2)
 
   circuit.send('PacketAck', {
     Packets: [
@@ -119,26 +154,101 @@ test('circuit should save messages until the WebSocket is open and send if open'
   })
 
   expect(circuit.cachedMessages.length).toBe(0)
-  expect(circuit.websocket.sendMessages.length).toBe(3)
+  expect(circuit.websocket.send).toBeCalledTimes(3)
 })
 
 test('parse a received package', () => {
+  circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+
+  openSocket()
+
   const messageBuffer = createTestMessage(false, false, false)
 
-  const received = []
-  circuit.on('packetReceived', message => {
-    expect(message).toBeTruthy()
-    received.push(message)
-  })
+  const handler = jest.fn()
+  circuit.on('packetReceived', handler)
 
   circuit.websocket.onmessage({ data: messageBuffer })
 
-  expect(received.length).toBe(1)
+  expect(handler).toBeCalledWith({
+    frequency: 'Low',
+    from: {
+      ip: '127.0.0.1',
+      port: 33
+    },
+    isOld: undefined,
+    isReliable: false,
+    isResend: false,
+    name: 'TestMessage',
+    type: 'udp/TestMessage',
+    number: 1,
+    size: 52,
+    trusted: false,
+    NeighborBlock: [
+      {
+        Test0: 0,
+        Test1: 1,
+        Test2: 2
+      },
+      {
+        Test0: 3,
+        Test1: 4,
+        Test2: 5
+      },
+      {
+        Test0: 6,
+        Test1: 7,
+        Test2: 8
+      },
+      {
+        Test0: 9,
+        Test1: 10,
+        Test2: 11
+      }
+    ],
+    TestBlock1: [
+      {
+        Test1: 0
+      }
+    ],
+    blocks: [
+      [
+        {
+          Test1: 0
+        }
+      ],
+      [
+        {
+          Test0: 0,
+          Test1: 1,
+          Test2: 2
+        },
+        {
+          Test0: 3,
+          Test1: 4,
+          Test2: 5
+        },
+        {
+          Test0: 6,
+          Test1: 7,
+          Test2: 8
+        },
+        {
+          Test0: 9,
+          Test1: 10,
+          Test2: 11
+        }
+      ]
+    ]
+  })
   expect(circuit.senderSequenceNumber).toBe(0)
   circuit.removeAllListeners()
 })
 
 test('save sender sequence number of reliable packages as ack', () => {
+  circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+
+  openSocket()
+
   const message1 = createTestMessage(true, false, false)
   const message2 = createTestMessage(true, false, false)
 
@@ -158,6 +268,14 @@ test('save sender sequence number of reliable packages as ack', () => {
 })
 
 test('send ack at end of package', () => {
+  circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+
+  openSocket()
+
+  const websocket = circuit.websocket
+  websocket.onmessage({ data: createTestMessage(true, false, false) })
+  websocket.onmessage({ data: createTestMessage(true, false, false) })
+
   circuit.send('CompletePingCheck', {
     PingID: [
       {
@@ -166,8 +284,7 @@ test('send ack at end of package', () => {
     ]
   })
 
-  const sendMessages = circuit.websocket.sendMessages
-  const last = sendMessages[sendMessages.length - 1]
+  const last = circuit.websocket.send.mock.calls[0][0]
 
   // Check if there are the correct number of acks
   expect(circuit.simAcks).toEqual(new Map([
@@ -187,44 +304,56 @@ test('send ack at end of package', () => {
   ])
 })
 
-test('circuit should send after 100ms a PacketAck', () => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      // could be CompletePingCheck
-      const ackMessage1 = circuit.websocket.sendMessages[circuit.websocket.sendMessages.length - 2]
-      const ackMessage2 = circuit.websocket.sendMessages[circuit.websocket.sendMessages.length - 1]
-      const parsedAckMessageA = parseBody(ackMessage1.slice(12))
-      const parsedAckMessageB = parseBody(ackMessage2.slice(12))
-      const parsedAckMessage = parsedAckMessageA.name === 'PacketAck'
-        ? parsedAckMessageA
-        : parsedAckMessageB
+test('circuit should send after 100ms a PacketAck', async () => {
+  circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
 
-      try {
-        expect(parsedAckMessage).toBeTruthy()
-        expect(getValueOf(parsedAckMessage, 'Packets', 0, 'ID')).toBe(0)
+  openSocket()
 
-        resolve()
-      } catch (err) {
-        reject(err)
-      }
-    }, 100)
-  })
+  const websocket = circuit.websocket
+  websocket.onmessage({ data: createTestMessage(true, false, false) })
+  websocket.onmessage({ data: createTestMessage(true, false, false) })
+
+  await new Promise((resolve) => setTimeout(resolve, 210))
+
+  for (const [pack] of circuit.websocket.send.mock.calls) {
+    const msg = parseBody(pack.slice(12))
+
+    switch (msg.name) {
+      case 'PacketAck':
+        expect(getValueOf(msg, 'Packets', 0, 'ID')).toBeGreaterThanOrEqual(0)
+        continue
+
+      case 'StartPingCheck':
+        expect(getValueOf(msg, 'PingID', 0, 'PingID')).toBe(0)
+        continue
+
+      default:
+        expect(msg.name).toBeUndefined()
+        continue
+    }
+  }
 })
 
-test('circuit should resend a package after 500ms', () => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const last = circuit.websocket.getSendMessages()
+test('circuit should resend a package after 500ms', async () => {
+  circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
 
-      try {
-        expect(last.readUInt8(6) | 32).toBeTruthy()
+  openSocket()
 
-        resolve()
-      } catch (err) {
-        reject(err)
+  circuit.send('CompletePingCheck', {
+    PingID: [
+      {
+        PingID: 0
       }
-    }, 400)
-  })
+    ]
+  }, true)
+
+  await new Promise(resolve => setTimeout(resolve, 575))
+
+  const completePingChecks = circuit.websocket.send.mock.calls
+    .map(([pack]) => parseBody(pack.slice(12)))
+    .filter(msg => msg.name === 'CompletePingCheck')
+
+  expect(completePingChecks.length).toBe(2)
 })
 
 describe('circuit should remove acks that the server has send back', () => {
@@ -476,15 +605,4 @@ describe('circuit returns a Promise by reliable packages', () => {
     expect(result).toBeInstanceOf(Promise)
     return result
   })
-})
-
-test('circuit closes', () => {
-  let websocketClosed = false
-  circuit.websocket.close = () => {
-    websocketClosed = true
-  }
-
-  circuit.close()
-
-  expect(websocketClosed).toBeTruthy()
 })
