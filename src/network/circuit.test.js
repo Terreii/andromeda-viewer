@@ -76,10 +76,16 @@ function openSocket () {
 // Tests
 
 beforeEach(() => {
-  if (circuit) {
-    circuit.close()
-  }
+  circuit = null
   window.WebSocket.mockClear()
+})
+
+afterEach(() => {
+  if (circuit.viewerAcks.length > 0) {
+    circuit.viewerAcks = []
+  }
+
+  circuit.close()
 })
 
 test('it should create an instance', () => {
@@ -96,6 +102,8 @@ test('it should create an instance', () => {
 })
 
 test('circuit closes', () => {
+  circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+
   circuit.close()
 
   expect(circuit.websocket.close).toBeCalled()
@@ -356,8 +364,60 @@ test('circuit should resend a package after 500ms', async () => {
   expect(completePingChecks.length).toBe(2)
 })
 
+test('Acks are send 2 times with the PacketAck message', async () => {
+  circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+
+  openSocket()
+
+  const socketSend = jest.fn()
+  circuit.websocket.send = socketSend
+
+  circuit.websocket.onmessage({ data: createTestMessage(true, false, false) })
+
+  const check = expected => {
+    for (const sequenceNumber in circuit.simAcks) {
+      const sendCount = circuit.simAcks[sequenceNumber]
+      expect(sendCount).toBe(expected)
+    }
+  }
+
+  check(0)
+
+  await new Promise(resolve => { setTimeout(resolve, 320) })
+
+  const acks = socketSend.mock.calls
+    .map(([msg]) => parseBody(msg.slice(12)).Packets)
+    .filter(p => p != null)
+  expect(acks.length).toBe(2)
+  expect(acks[0][0].ID).toBeGreaterThanOrEqual(0)
+  expect(acks[1][0].ID).toBeGreaterThanOrEqual(0)
+  expect(acks[0][0].ID).toBe(acks[1][0].ID)
+})
+
 describe('circuit should remove acks that the server has send back', () => {
   test('with the PacketAck', () => {
+    circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+    openSocket()
+
+    circuit.send('OpenCircuit', {
+      CircuitInfo: [
+        {
+          IP: '0.0.0.0',
+          Port: 13
+        }
+      ]
+    }, true)
+    circuit.send('OpenCircuit', {
+      CircuitInfo: [
+        {
+          IP: '0.0.0.0',
+          Port: 13
+        }
+      ]
+    }, true)
+
+    expect(circuit.viewerAcks.length).toBe(2)
+
     const acksBody = createBody('PacketAck', {
       Packets: circuit.viewerAcks.map(ack => ({ ID: ack.sequenceNumber }))
     })
@@ -369,7 +429,9 @@ describe('circuit should remove acks that the server has send back', () => {
   })
 
   test('with acks at the end of a packet', () => {
-    // create an ack
+    circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+    openSocket()
+
     circuit.send('OpenCircuit', {
       CircuitInfo: [
         {
@@ -378,14 +440,25 @@ describe('circuit should remove acks that the server has send back', () => {
         }
       ]
     }, true)
-    expect(circuit.viewerAcks.length).toBe(1)
+    circuit.send('OpenCircuit', {
+      CircuitInfo: [
+        {
+          IP: '0.0.0.0',
+          Port: 13
+        }
+      ]
+    }, true)
+
+    expect(circuit.viewerAcks.length).toBe(2)
 
     // test at the end of packet
     const messagePart1 = createTestMessage(false, false, true)
 
     // create Ack at end
-    const acks = Buffer.from([0, 0, 0, 0, 1])
+    const acks = Buffer.alloc((circuit.viewerAcks.length * 4) + 1)
     acks.writeUInt32BE(circuit.viewerAcks[0].sequenceNumber, 0)
+    acks.writeUInt32BE(circuit.viewerAcks[1].sequenceNumber, 4)
+    acks.writeUInt8(circuit.viewerAcks.length, acks.length - 1)
     const message2 = Buffer.concat([messagePart1, acks])
     circuit.websocket.onmessage({ data: message2 })
 
@@ -394,11 +467,12 @@ describe('circuit should remove acks that the server has send back', () => {
 })
 
 describe('sending only 255 or less acks at the end of a package', () => {
-  const sendAcks = []
-
   test('circuit only sends less then 256 Acks', () => {
-    circuit.simAcks.clear()
-    circuit.simAcksOnPacket.clear()
+    circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+    openSocket()
+
+    const send = jest.fn()
+    circuit.websocket.send = send
 
     for (let i = 0; i < 300; ++i) {
       const msg = createTestMessage(true, false, false)
@@ -414,10 +488,11 @@ describe('sending only 255 or less acks at the end of a package', () => {
       ]
     }, true)
 
-    const last = circuit.websocket.getSendMessages()
+    const last = send.mock.calls[send.mock.calls.length - 1][0]
 
     expect(last.readUInt8(last.length - 1)).toBe(255)
 
+    const sendAcks = []
     for (let offset = last.length - 1, count = last.readUInt8(offset); count > 0; count--) {
       offset -= 4
       sendAcks.push(last.readUInt32BE(offset))
@@ -431,10 +506,19 @@ describe('sending only 255 or less acks at the end of a package', () => {
     expect(correctAcks).toBe(true)
   })
 
-  describe('send not-jet-send and the oldest acks by the next package', () => {
-    const newAcks = []
-
+  describe('send not-yet-send and the oldest acks by the next package', () => {
     test('send max possible acks', () => {
+      circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+      openSocket()
+
+      const send = jest.fn()
+      circuit.websocket.send = send
+
+      for (let i = 0; i < 300; ++i) {
+        const msg = createTestMessage(true, false, false)
+        circuit.websocket.onmessage({ data: msg })
+      }
+
       circuit.send('OpenCircuit', {
         CircuitInfo: [
           {
@@ -444,82 +528,68 @@ describe('sending only 255 or less acks at the end of a package', () => {
         ]
       }, true)
 
-      const last = circuit.websocket.getSendMessages()
+      circuit.send('OpenCircuit', {
+        CircuitInfo: [
+          {
+            IP: '0.0.0.0',
+            Port: 13
+          }
+        ]
+      }, true)
 
-      for (let offset = last.length - 1, count = last.readUInt8(offset); count > 0; count--) {
-        offset -= 4
-        newAcks.push(last.readUInt32BE(offset))
-      }
+      const last = send.mock.calls[send.mock.calls.length - 1][0]
 
       expect(last.readUInt8(last.length - 1)).toBe(45)
     })
 
-    test('not jet send acks are send', () => {
-      const notJetSend = newAcks.filter(ack => !sendAcks.includes(ack)).sort((a, b) => a - b)
-      expect(notJetSend.length).toBe(45)
+    test('not yet send acks are send', () => {
+      circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+      openSocket()
 
-      const correctAcks = notJetSend.every((value, index, all) => index === 0
-        ? true
-        : all[index - 1] + 1 === value
-      )
-      expect(correctAcks).toBe(true)
-    })
+      const acks = new Set()
 
-    test('no old Acks are send', () => {
-      const oldestAcks = newAcks.filter(ack => sendAcks.includes(ack)).sort((a, b) => a - b)
-      expect(oldestAcks.length).toBe(0)
-    })
-  })
-})
+      const send = jest.fn(msg => {
+        for (let offset = msg.length - 1, count = msg.readUInt8(offset); count > 0; count--) {
+          offset -= 4
+          acks.add(msg.readUInt32BE(offset))
+        }
+      })
+      circuit.websocket.send = send
 
-test('Acks are send 2 times with the PacketAck message', () => {
-  const check = expected => {
-    for (const sequenceNumber in circuit.simAcks) {
-      const sendCount = circuit.simAcks[sequenceNumber]
-      expect(sendCount).toBe(expected)
-    }
-  }
-
-  check(0)
-
-  const messages = []
-  circuit.websocket.onTestMessage = buffer => {
-    const msg = parseBody(buffer.slice(12))
-    if (msg.name === 'PacketAck') {
-      messages.push(msg)
-
-      if (messages.length === 1) {
-        check(1)
+      for (let i = 0; i < 300; ++i) {
+        const msg = createTestMessage(true, false, false)
+        circuit.websocket.onmessage({ data: msg })
       }
-    }
-  }
 
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      try {
-        circuit.websocket.onTestMessage = undefined
+      circuit.send('OpenCircuit', {
+        CircuitInfo: [
+          {
+            IP: '0.0.0.0',
+            Port: 13
+          }
+        ]
+      }, true)
 
-        expect(messages.length).toBe(2)
-        expect(Object.keys(circuit.simAcks).length).toBe(0)
+      const acksCount = acks.size
 
-        expect(messages[0].Packets.length).toBe(255)
-        expect(messages[1].Packets.length).toBe(255)
+      circuit.send('OpenCircuit', {
+        CircuitInfo: [
+          {
+            IP: '0.0.0.0',
+            Port: 13
+          }
+        ]
+      }, true)
 
-        resolve()
-      } catch (err) {
-        reject(err)
-      }
-    }, 200)
+      expect(acks.size).toBe(acksCount + 45)
+    })
   })
 })
 
 describe('circuit returns a Promise by reliable packages', () => {
-  let reliablePackage = null
-
-  test('circuit returns a Promise by reliable packages', () => {
-    circuit.simAcks.clear()
-    circuit.simAcksOnPacket.clear()
-    circuit.viewerAcks = []
+  test('Promise resolves if ack is received', () => {
+    circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+    openSocket()
 
     const result = circuit.send('OpenCircuit', {
       CircuitInfo: [
@@ -530,12 +600,6 @@ describe('circuit returns a Promise by reliable packages', () => {
       ]
     }, true)
 
-    expect(result).toBeInstanceOf(Promise)
-
-    reliablePackage = result
-  })
-
-  test('Promise resolves if ack is received', () => {
     const sequenceNumber = circuit.viewerAcks[0].sequenceNumber
 
     const acksBody = createBody('PacketAck', {
@@ -546,39 +610,20 @@ describe('circuit returns a Promise by reliable packages', () => {
     const header = createTestHeader(false, false, false)
     const message = Buffer.concat([header, acksBody.buffer])
 
-    setTimeout(() => {
-      circuit.websocket.onmessage({ data: message })
-    }, 50)
+    circuit.websocket.onmessage({ data: message })
 
-    expect(reliablePackage).toBeTruthy()
-    return reliablePackage
+    expect(result).toBeInstanceOf(Promise)
+    return expect(result).resolves.toBeUndefined()
   })
 
-  test('Promise rejects after sending it Package 4 times', async () => {
-    let error = null
+  test('Promise also resolves if the Packet was resend', async () => {
+    circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+    openSocket()
 
-    try {
-      await circuit.send('OpenCircuit', {
-        CircuitInfo: [
-          {
-            IP: '0.0.0.0',
-            Port: 13
-          }
-        ]
-      }, true)
-    } catch (err) {
-      error = err
-    }
-
-    expect(error).toBeInstanceOf(Error)
-    expect(error.message).toBe('Server did timeout')
-  })
-
-  test('Promise also resolves if the Packet was resend', () => {
     let messageWasAlreadySend = false
-    circuit.websocket.onTestMessage = buffer => {
-      if (messageWasAlreadySend && circuit.viewerAcks.length > 0) {
-        const sequenceNumber = circuit.viewerAcks[0].sequenceNumber
+    circuit.websocket.send = buffer => {
+      if (messageWasAlreadySend) {
+        const sequenceNumber = buffer.readUInt32BE(7)
 
         const acksBody = createBody('PacketAck', {
           Packets: [
@@ -588,7 +633,9 @@ describe('circuit returns a Promise by reliable packages', () => {
         const header = createTestHeader(false, false, false)
         const message = Buffer.concat([header, acksBody.buffer])
 
-        circuit.websocket.onmessage({ data: message })
+        setTimeout(() => {
+          circuit.websocket.onmessage({ data: message })
+        }, 0)
       } else {
         messageWasAlreadySend = true
       }
@@ -602,7 +649,43 @@ describe('circuit returns a Promise by reliable packages', () => {
         }
       ]
     }, true)
-    expect(result).toBeInstanceOf(Promise)
-    return result
+
+    return expect(result).resolves.toBeUndefined()
+  })
+
+  test('Promise rejects after sending it Package 4 times', async () => {
+    circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+    openSocket()
+
+    circuit.websocket.send = buffer => {
+      const body = parseBody(buffer.slice(12))
+
+      if (body.name !== 'SimulatorMapUpdate') {
+        const socket = circuit.websocket
+        setTimeout(() => {
+          const sequenceNumber = buffer.readUInt32BE(7)
+
+          const acksBody = createBody('PacketAck', {
+            Packets: [
+              { ID: sequenceNumber }
+            ]
+          })
+          const header = createTestHeader(true, false, false)
+          const message = Buffer.concat([header, acksBody.buffer])
+
+          socket.onmessage({ data: message })
+        }, 0)
+      }
+    }
+
+    const result = circuit.send('SimulatorMapUpdate', {
+      MapData: [
+        {
+          Flags: 13
+        }
+      ]
+    }, true)
+
+    return expect(result).rejects.toThrowError(new Error('Server did timeout'))
   })
 })
