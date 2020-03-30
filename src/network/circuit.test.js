@@ -76,6 +76,7 @@ function openSocket () {
 // Tests
 
 beforeEach(() => {
+  jest.useFakeTimers()
   circuit = null
   window.WebSocket.mockClear()
 })
@@ -104,8 +105,15 @@ test('it should create an instance', () => {
 test('circuit closes', () => {
   circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
 
+  const removeAllListeners = circuit.removeAllListeners
+  circuit.removeAllListeners = jest.fn(() => {
+    removeAllListeners.call(circuit)
+  })
+
   circuit.close()
 
+  expect(clearInterval).toBeCalled()
+  expect(circuit.removeAllListeners).toBeCalled()
   expect(circuit.websocket.close).toBeCalled()
   expect(circuit.websocket.close).lastCalledWith(1000, 'session end')
 })
@@ -313,7 +321,7 @@ test('send ack at end of package', () => {
   ])
 })
 
-test('circuit should send after 100ms a PacketAck', async () => {
+test('circuit should send after 100ms a PacketAck', () => {
   circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
 
   openSocket()
@@ -322,7 +330,11 @@ test('circuit should send after 100ms a PacketAck', async () => {
   websocket.onmessage({ data: createTestMessage(true, false, false) })
   websocket.onmessage({ data: createTestMessage(true, false, false) })
 
-  await new Promise((resolve) => setTimeout(resolve, 210))
+  jest.runOnlyPendingTimers()
+
+  expect(setTimeout).toHaveBeenCalledTimes(1)
+  expect(setTimeout).toHaveBeenLastCalledWith(expect.any(Function), 100)
+  expect(setInterval).toHaveBeenLastCalledWith(expect.any(Function), 100)
 
   for (const [pack] of circuit.websocket.send.mock.calls) {
     const msg = parseBody(pack.slice(12))
@@ -343,10 +355,13 @@ test('circuit should send after 100ms a PacketAck', async () => {
   }
 })
 
-test('circuit should resend a package after 500ms', async () => {
+test('circuit should resend a package after 500ms', () => {
   circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
 
   openSocket()
+
+  jest.runOnlyPendingTimers()
+  const sendTime = Date.now()
 
   circuit.send('CompletePingCheck', {
     PingID: [
@@ -356,7 +371,12 @@ test('circuit should resend a package after 500ms', async () => {
     ]
   }, true)
 
-  await new Promise(resolve => setTimeout(resolve, 575))
+  expect(circuit.viewerAcks.length).toBe(1)
+  expect(circuit.viewerAcks[0].time).toBeGreaterThanOrEqual(sendTime)
+
+  circuit.viewerAcks[0].time = Date.now() - 501
+
+  jest.runOnlyPendingTimers()
 
   const completePingChecks = circuit.websocket.send.mock.calls
     .map(([pack]) => parseBody(pack.slice(12)))
@@ -365,7 +385,7 @@ test('circuit should resend a package after 500ms', async () => {
   expect(completePingChecks.length).toBe(2)
 })
 
-test('Acks are send 2 times with the PacketAck message', async () => {
+test('Acks are send 2 times with the PacketAck message', () => {
   circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
 
   openSocket()
@@ -381,7 +401,9 @@ test('Acks are send 2 times with the PacketAck message', async () => {
 
   check(0)
 
-  await new Promise(resolve => { setTimeout(resolve, 320) })
+  for (let i = 0; i < 3; ++i) {
+    jest.runOnlyPendingTimers()
+  }
 
   const acks = circuit.websocket.send.mock.calls
     .map(([msg]) => parseBody(msg.slice(12)).Packets)
@@ -610,9 +632,11 @@ describe('circuit returns a Promise by reliable packages', () => {
     return expect(result).resolves.toBeUndefined()
   })
 
-  test('Promise also resolves if the Packet was resend', async () => {
+  test('Promise also resolves if the Packet was resend', () => {
     circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
     openSocket()
+
+    jest.runOnlyPendingTimers()
 
     let messageWasAlreadySend = false
     circuit.websocket.send = buffer => {
@@ -644,12 +668,20 @@ describe('circuit returns a Promise by reliable packages', () => {
       ]
     }, true)
 
+    expect(circuit.viewerAcks.length).toBe(1)
+    circuit.viewerAcks[0].time = Date.now() - 501
+
+    jest.runOnlyPendingTimers()
+    jest.runOnlyPendingTimers() // for the setTimeout in circuit.websocket.send mock
+
     return expect(result).resolves.toBeUndefined()
   })
 
-  test('Promise rejects after sending it Package 4 times', async () => {
+  test('Promise rejects after sending it Package 4 times', () => {
     circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
     openSocket()
+
+    jest.runOnlyPendingTimers()
 
     circuit.websocket.send = buffer => {
       const body = parseBody(buffer.slice(12))
@@ -680,15 +712,19 @@ describe('circuit returns a Promise by reliable packages', () => {
       ]
     }, true)
 
+    for (let i = 0; i < 4; ++i) {
+      expect(circuit.viewerAcks.length).toBe(1)
+      expect(circuit.viewerAcks[0].resentCount).toBe(i)
+      circuit.viewerAcks[0].time = Date.now() - 501
+
+      jest.runOnlyPendingTimers()
+    }
+
     return expect(result).rejects.toThrowError(new Error('Server did timeout'))
   })
 })
 
 describe('disconnection', () => {
-  beforeEach(() => {
-    jest.useFakeTimers()
-  })
-
   test('it tries to reconnect when a websocket is disconnected', () => {
     circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
     openSocket()
@@ -717,14 +753,14 @@ describe('disconnection', () => {
     expect(window.WebSocket).toBeCalledTimes(1)
     setTimeout.mockReset()
 
+    const closeEvent = jest.fn()
+    circuit.on('close', closeEvent)
+
     circuit.websocket.onclose(new window.CloseEvent('Policy Violation', {
       wasClean: true,
       code: 1008,
       reason: 'wrong session id'
     }))
-
-    const closeEvent = jest.fn()
-    circuit.on('close', closeEvent)
 
     expect(setTimeout).not.toHaveBeenCalled()
 
