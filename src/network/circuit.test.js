@@ -107,6 +107,7 @@ test('circuit closes', () => {
   circuit.close()
 
   expect(circuit.websocket.close).toBeCalled()
+  expect(circuit.websocket.close).lastCalledWith(1000, 'session end')
 })
 
 test('circuit should send the session id at first', () => {
@@ -369,9 +370,6 @@ test('Acks are send 2 times with the PacketAck message', async () => {
 
   openSocket()
 
-  const socketSend = jest.fn()
-  circuit.websocket.send = socketSend
-
   circuit.websocket.onmessage({ data: createTestMessage(true, false, false) })
 
   const check = expected => {
@@ -385,7 +383,7 @@ test('Acks are send 2 times with the PacketAck message', async () => {
 
   await new Promise(resolve => { setTimeout(resolve, 320) })
 
-  const acks = socketSend.mock.calls
+  const acks = circuit.websocket.send.mock.calls
     .map(([msg]) => parseBody(msg.slice(12)).Packets)
     .filter(p => p != null)
   expect(acks.length).toBe(2)
@@ -471,9 +469,6 @@ describe('sending only 255 or less acks at the end of a package', () => {
     circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
     openSocket()
 
-    const send = jest.fn()
-    circuit.websocket.send = send
-
     for (let i = 0; i < 300; ++i) {
       const msg = createTestMessage(true, false, false)
       circuit.websocket.onmessage({ data: msg })
@@ -488,7 +483,7 @@ describe('sending only 255 or less acks at the end of a package', () => {
       ]
     }, true)
 
-    const last = send.mock.calls[send.mock.calls.length - 1][0]
+    const last = circuit.websocket.send.mock.calls[circuit.websocket.send.mock.calls.length - 1][0]
 
     expect(last.readUInt8(last.length - 1)).toBe(255)
 
@@ -510,9 +505,6 @@ describe('sending only 255 or less acks at the end of a package', () => {
     test('send max possible acks', () => {
       circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
       openSocket()
-
-      const send = jest.fn()
-      circuit.websocket.send = send
 
       for (let i = 0; i < 300; ++i) {
         const msg = createTestMessage(true, false, false)
@@ -537,7 +529,9 @@ describe('sending only 255 or less acks at the end of a package', () => {
         ]
       }, true)
 
-      const last = send.mock.calls[send.mock.calls.length - 1][0]
+      const last = circuit.websocket.send.mock.calls[
+        circuit.websocket.send.mock.calls.length - 1
+      ][0]
 
       expect(last.readUInt8(last.length - 1)).toBe(45)
     })
@@ -687,5 +681,104 @@ describe('circuit returns a Promise by reliable packages', () => {
     }, true)
 
     return expect(result).rejects.toThrowError(new Error('Server did timeout'))
+  })
+})
+
+describe('disconnection', () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+  })
+
+  test('it tries to reconnect when a websocket is disconnected', () => {
+    circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+    openSocket()
+
+    expect(window.WebSocket).toBeCalledTimes(1)
+    setTimeout.mockReset()
+
+    circuit.websocket.onclose(new window.CloseEvent('Abnormal Closure', {
+      wasClean: false,
+      code: 1006,
+      reason: 'disconnect'
+    }))
+
+    expect(setTimeout).toHaveBeenCalled()
+    expect(setTimeout.mock.calls[0]).toEqual([
+      expect.any(Function),
+      100
+    ])
+    expect(window.WebSocket).toBeCalledTimes(2)
+  })
+
+  test("it shouldn't reconnect when the bridge did disconnect for a wrong session ID", () => {
+    circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+    openSocket()
+
+    expect(window.WebSocket).toBeCalledTimes(1)
+    setTimeout.mockReset()
+
+    circuit.websocket.onclose(new window.CloseEvent('Policy Violation', {
+      wasClean: true,
+      code: 1008,
+      reason: 'wrong session id'
+    }))
+
+    const closeEvent = jest.fn()
+    circuit.on('close', closeEvent)
+
+    expect(setTimeout).not.toHaveBeenCalled()
+
+    expect(window.WebSocket).toBeCalledTimes(1)
+    expect(closeEvent).toBeCalled()
+  })
+
+  test('it should exponentially increase the reconnect timeout', () => {
+    circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+    openSocket()
+
+    expect(window.WebSocket).toBeCalledTimes(1)
+    setTimeout.mockReset()
+
+    for (let i = 0; i < 5; ++i) {
+      circuit.websocket.onclose(new window.CloseEvent('Abnormal Closure', {
+        wasClean: false,
+        code: 1006,
+        reason: 'disconnect'
+      }))
+      jest.runAllTimers()
+    }
+
+    expect(window.WebSocket).toHaveBeenCalledTimes(6)
+    expect(setTimeout).toHaveBeenCalledTimes(5)
+    expect(setTimeout.mock.calls).toEqual([
+      [expect.any(Function), 100],
+      [expect.any(Function), 200],
+      [expect.any(Function), 400],
+      [expect.any(Function), 800],
+      [expect.any(Function), 1600]
+    ])
+  })
+
+  test('it should timeout after 10 retries', () => {
+    circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+    openSocket()
+
+    window.WebSocket.mockReset()
+    setTimeout.mockReset()
+
+    const closeEvent = jest.fn()
+    circuit.on('close', closeEvent)
+
+    for (let i = 0; i <= 11; ++i) {
+      circuit.websocket.onclose(new window.CloseEvent('Abnormal Closure', {
+        wasClean: false,
+        code: 1006,
+        reason: 'disconnect'
+      }))
+      jest.runAllTimers()
+    }
+
+    expect(window.WebSocket).toHaveBeenCalledTimes(10)
+    expect(closeEvent).toHaveBeenCalled()
   })
 })
