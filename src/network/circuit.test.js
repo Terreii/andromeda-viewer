@@ -730,19 +730,23 @@ describe('disconnection', () => {
     openSocket()
 
     expect(window.WebSocket).toBeCalledTimes(1)
-    setTimeout.mockReset()
+    jest.clearAllTimers()
 
     circuit.websocket.onclose(new window.CloseEvent('Abnormal Closure', {
       wasClean: false,
       code: 1006,
-      reason: 'disconnect'
+      reason: ''
     }))
 
-    expect(setTimeout).toHaveBeenCalled()
-    expect(setTimeout.mock.calls[0]).toEqual([
+    expect(setTimeout).toHaveBeenCalledTimes(2)
+    expect(setTimeout.mock.calls[1]).toEqual([
       expect.any(Function),
       100
     ])
+
+    jest.runOnlyPendingTimers()
+
+    expect(circuit.reconnectCount).toBe(1)
     expect(window.WebSocket).toBeCalledTimes(2)
   })
 
@@ -766,6 +770,10 @@ describe('disconnection', () => {
 
     expect(window.WebSocket).toBeCalledTimes(1)
     expect(closeEvent).toBeCalled()
+    expect(closeEvent).toHaveBeenLastCalledWith({
+      code: 1008,
+      reason: 'wrong session id'
+    })
   })
 
   test('it should exponentially increase the reconnect timeout', () => {
@@ -773,7 +781,7 @@ describe('disconnection', () => {
     openSocket()
 
     expect(window.WebSocket).toBeCalledTimes(1)
-    setTimeout.mockReset()
+    jest.clearAllTimers()
 
     for (let i = 0; i < 5; ++i) {
       circuit.websocket.onclose(new window.CloseEvent('Abnormal Closure', {
@@ -785,8 +793,9 @@ describe('disconnection', () => {
     }
 
     expect(window.WebSocket).toHaveBeenCalledTimes(6)
-    expect(setTimeout).toHaveBeenCalledTimes(5)
+    expect(setTimeout).toHaveBeenCalledTimes(6)
     expect(setTimeout.mock.calls).toEqual([
+      [expect.any(Function), 100], // from _startAcksProcess
       [expect.any(Function), 100],
       [expect.any(Function), 200],
       [expect.any(Function), 400],
@@ -799,11 +808,11 @@ describe('disconnection', () => {
     circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
     openSocket()
 
-    window.WebSocket.mockReset()
-    setTimeout.mockReset()
-
     const closeEvent = jest.fn()
     circuit.on('close', closeEvent)
+
+    expect(window.WebSocket).toBeCalledTimes(1)
+    jest.clearAllTimers()
 
     for (let i = 0; i <= 11; ++i) {
       circuit.websocket.onclose(new window.CloseEvent('Abnormal Closure', {
@@ -812,9 +821,16 @@ describe('disconnection', () => {
         reason: 'disconnect'
       }))
       jest.runAllTimers()
+
+      if (i < 11) {
+        expect(circuit.reconnectCount).toBe(i + 1)
+      }
     }
 
-    expect(window.WebSocket).toHaveBeenCalledTimes(10)
-    expect(closeEvent).toHaveBeenCalled()
+    expect(window.WebSocket).toHaveBeenCalledTimes(12)
+    expect(closeEvent).toHaveBeenCalledWith({
+      code: 1006,
+      reason: 'Max reconnection tries'
+    })
   })
 })
