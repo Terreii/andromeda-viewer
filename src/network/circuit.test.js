@@ -403,6 +403,7 @@ test('Acks are send 2 times with the PacketAck message', () => {
 
   for (let i = 0; i < 3; ++i) {
     jest.runOnlyPendingTimers()
+    circuit.websocket.onmessage({ data: createTestMessage() })
   }
 
   const acks = circuit.websocket.send.mock.calls
@@ -831,6 +832,23 @@ describe('disconnection', () => {
     expect(closeEvent).toHaveBeenCalledWith({
       code: 1006,
       reason: 'Max reconnection tries'
+    })
+  })
+
+  // This is for developing and if there will be a direct UDP connection in the future
+  test('it should disconnect after a timeout of not receiving any messages', () => {
+    circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
+    openSocket()
+
+    const closeHandler = jest.fn()
+    circuit.on('close', closeHandler)
+
+    // Timeout after 1 minute and 45 seconds
+    jest.runTimersToTime((60 + 45) * 1000 + 5)
+
+    expect(closeHandler).toHaveBeenCalledWith({
+      code: 1006,
+      reason: 'UDP disconnect'
     })
   })
 })

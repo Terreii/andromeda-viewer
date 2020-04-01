@@ -63,6 +63,12 @@ export default class Circuit extends events.EventEmitter {
   reconnectCount = 0
 
   /**
+   * How many Acks Process intervals did happen since the last message was received.
+   * Will be reset whenever a message is received.
+   */
+  lastReceivedCount = 0
+
+  /**
    * Connects to the Sim using the UDP-Bridge of the Andromeda Viewer Server.
    * @param {string} hostIP       IP Address of the Sim.
    * @param {number} hostPort     Port of the Sim.
@@ -148,6 +154,8 @@ export default class Circuit extends events.EventEmitter {
   }
 
   _onMessage (message) {
+    this.lastReceivedCount = 0
+
     // Fully open the connection. If the server did send "ok" then it is open.
     if (!this.websocketIsOpen && typeof message.data === 'string') {
       if (message.data !== 'ok') {
@@ -327,6 +335,17 @@ export default class Circuit extends events.EventEmitter {
     let pingId = 0
     this.acksProcessInterval = setInterval(() => {
       if (!this.websocketIsOpen) return
+
+      this.lastReceivedCount += 1
+
+      if (this.lastReceivedCount > 1.050) {
+        this.emit('close', {
+          code: 1006,
+          reason: 'UDP disconnect'
+        })
+        this.close()
+        return
+      }
 
       this._sendAcks()
 
