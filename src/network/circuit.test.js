@@ -840,11 +840,13 @@ describe('disconnection', () => {
     circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
     openSocket()
 
+    jest.runOnlyPendingTimers()
+
     const closeHandler = jest.fn()
     circuit.on('close', closeHandler)
 
     // Timeout after 1 minute and 45 seconds
-    jest.runTimersToTime((60 + 45) * 1000 + 5)
+    jest.runTimersToTime((60 + 45) * 1000 + 150)
 
     expect(closeHandler).toHaveBeenCalledWith({
       code: 1006,

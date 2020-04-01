@@ -338,7 +338,7 @@ export default class Circuit extends events.EventEmitter {
 
       this.lastReceivedCount += 1
 
-      if (this.lastReceivedCount > 1.050) {
+      if (this.lastReceivedCount > 1050) {
         this.emit('close', {
           code: 1006,
           reason: 'UDP disconnect'
