@@ -1,5 +1,7 @@
 'use strict'
 
+import ms from 'milliseconds'
+
 import Circuit from './circuit'
 
 import { createBody, parseBody } from './networkMessages'
@@ -845,8 +847,7 @@ describe('disconnection', () => {
     const closeHandler = jest.fn()
     circuit.on('close', closeHandler)
 
-    // Timeout after 1 minute and 45 seconds
-    jest.runTimersToTime((60 + 45) * 1000 + 150)
+    jest.runTimersToTime(ms.minutes(1) + ms.seconds(45) + 150)
 
     expect(closeHandler).toHaveBeenCalledWith({
       code: 1006,
