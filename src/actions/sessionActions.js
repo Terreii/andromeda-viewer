@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+import ms from 'milliseconds'
 import { v4 as uuid } from 'uuid'
 
 import { viewerName, viewerVersion, viewerPlatform, viewerPlatformVersion } from '../viewerInfo'
@@ -242,13 +243,20 @@ export function logout () {
 
       dispatch(startLogout())
 
-      circuit.once('LogoutReply', msg => {
+      let isLoggedOut = false
+      const logoutHandler = msg => {
+        if (isLoggedOut) return
+
+        isLoggedOut = true
         dispatch(afterAvatarSessionEnds())
 
         dispatch(didLogout())
 
         resolve()
-      })
+      }
+
+      circuit.once('LogoutReply', logoutHandler)
+      setTimeout(logoutHandler, ms.seconds(30)) // timeout for LogoutReply
     })
   }
 }

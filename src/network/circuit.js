@@ -7,7 +7,7 @@
  */
 
 import events from 'events'
-import Deque from 'double-ended-queue'
+import Queue from 'double-ended-queue'
 
 import { parseBody, createBody } from './networkMessages'
 import { getValueOf, mapBlockOf } from './msgGetters'
@@ -23,6 +23,11 @@ export default class Circuit extends events.EventEmitter {
    * This is the sequenceNumber from the server.
    */
   senderSequenceNumber = 0
+
+  /**
+   * The WebSocket that connects to the Server
+   */
+  websocket = null
 
   /**
    * Did all handshaking happen?
@@ -44,13 +49,24 @@ export default class Circuit extends events.EventEmitter {
   /**
    * Que of Acks that should be send on the end of an package.
    */
-  simAcksOnPacket = new Deque()
+  simAcksOnPacket = new Queue()
 
   /**
    * Acks of packages send from the viewer.
    * It also includes their body and other infos, needed to resend them.
    */
   viewerAcks = []
+
+  /**
+   * How often the circuit did try to reconnect.
+   */
+  reconnectCount = 0
+
+  /**
+   * How many Acks Process intervals did happen since the last message was received.
+   * Will be reset whenever a message is received.
+   */
+  lastReceivedCount = 0
 
   /**
    * Connects to the Sim using the UDP-Bridge of the Andromeda Viewer Server.
@@ -67,16 +83,21 @@ export default class Circuit extends events.EventEmitter {
     this.circuitCode = circuitCode
     this.sessionId = sessionId
 
-    const socketUrl = new window.URL(window.location.href.replace(/#.*$/, ''))
+    this._createNewWebSocket()
+
+    this.acksProcessInterval = setTimeout(() => this._startAcksProcess(), 100)
+  }
+
+  _createNewWebSocket () {
+    const socketUrl = new URL('/andromeda-bridge', window.location)
     // http -> ws  &  https -> wss
     socketUrl.protocol = socketUrl.protocol.replace(/^http/, 'ws')
-    socketUrl.pathname = '/andromeda-bridge'
+
     this.websocket = new window.WebSocket(socketUrl.toString())
     this.websocket.binaryType = 'arraybuffer'
     this.websocket.onopen = this._onOpen.bind(this)
     this.websocket.onmessage = this._onMessage.bind(this)
-
-    setTimeout(() => this._startAcksProcess(), 100)
+    this.websocket.onclose = this._onWebSocketClose.bind(this)
   }
 
   /**
@@ -87,6 +108,45 @@ export default class Circuit extends events.EventEmitter {
     this.websocket.send(this.sessionId)
   }
 
+  /**
+   * Called when the WebSocked did close.
+   * @param {CloseEvent} event CloseEvent from the websocket
+   */
+  _onWebSocketClose (event) {
+    this.websocketIsOpen = false
+
+    if (event.code === 1000) {
+      // Normal session end
+      return
+    }
+
+    if (event.code === 1008) {
+      this.emit('close', {
+        code: event.code,
+        reason: event.reason
+      })
+      this.removeAllListeners()
+      clearInterval(this.acksProcessInterval)
+      return
+    }
+
+    if (this.reconnectCount > 10) {
+      this.emit('close', {
+        code: 1006,
+        reason: 'Max reconnection tries'
+      })
+      this.removeAllListeners()
+      clearInterval(this.acksProcessInterval)
+      return
+    }
+
+    setTimeout(
+      this._createNewWebSocket.bind(this),
+      100 << this.reconnectCount
+    )
+    this.reconnectCount += 1
+  }
+
   close () {
     this.websocket.close(1000, 'session end')
     this.removeAllListeners()
@@ -94,6 +154,8 @@ export default class Circuit extends events.EventEmitter {
   }
 
   _onMessage (message) {
+    this.lastReceivedCount = 0
+
     // Fully open the connection. If the server did send "ok" then it is open.
     if (!this.websocketIsOpen && typeof message.data === 'string') {
       if (message.data !== 'ok') {
@@ -217,10 +279,8 @@ export default class Circuit extends events.EventEmitter {
 
     const sequenceNumber = this.sequenceNumber
     header.writeUInt32BE(sequenceNumber, 1)
-    this.sequenceNumber++
-    if (this.sequenceNumber > 4294967295) {
-      this.sequenceNumber = 0
-    }
+    // counts up until 4294967295 and then goes back to 0
+    this.sequenceNumber = (sequenceNumber + 1) % 4294967296
 
     const packet = Buffer.concat([target, header, body, acks])
 
@@ -274,6 +334,19 @@ export default class Circuit extends events.EventEmitter {
   _startAcksProcess () {
     let pingId = 0
     this.acksProcessInterval = setInterval(() => {
+      if (!this.websocketIsOpen) return
+
+      this.lastReceivedCount += 1
+
+      if (this.lastReceivedCount > 1050) {
+        this.emit('close', {
+          code: 1006,
+          reason: 'UDP disconnect'
+        })
+        this.close()
+        return
+      }
+
       this._sendAcks()
 
       if (this.viewerAcks.length > 0) {
@@ -288,7 +361,7 @@ export default class Circuit extends events.EventEmitter {
           }
         ]
       })
-      pingId = pingId === 255 ? 0 : pingId + 1
+      pingId = (pingId + 1) % 256 // counts up until 255 and then goes back to 0
     }, 100)
   }
 
