@@ -95,7 +95,7 @@
   "dependencies": {
     "@hapi/boom": "^9.1.0",
     "hoodie": "^28.2.10",
-    "hoodie-plugin-store-crypto": "^3.2.1",
+    "hoodie-plugin-store-crypto": "^3.3.0",
     "milliseconds": "^1.0.3",
     "node-fetch": "^2.6.0",
     "uuid": "^7.0.3",
