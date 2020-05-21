@@ -57,7 +57,7 @@
     "@types/react-redux": "^7.1.9",
     "@types/react-router-dom": "^5.1.5",
     "@types/uuid": "^8.0.0",
-    "anchorme": "^1.1.2",
+    "anchorme": "^2.1.2",
     "autoscroll-react": "^3.2.0",
     "concurrently": "^5.2.0",
     "double-ended-queue": "^2.1.0-0",

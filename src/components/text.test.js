@@ -42,12 +42,14 @@ it('should render plain URLs after a )', () => {
     </div>
   )
 
-  expect(queryByText('http://wiki.secondlife.com/wiki/Main_Page')).toBeTruthy()
-  expect(queryByText('http://wiki.secondlife.com/wiki/Main_Page').tagName).toBe('A')
-  expect(queryByText('http://wiki.secondlife.com/wiki/Main_Page').href)
-    .toBe('http://wiki.secondlife.com/wiki/Main_Page')
-  expect(queryByText('http://wiki.secondlife.com/wiki/Main_Page').rel)
-    .toBe('noopener noreferrer')
+  const firstLink = queryByText('http://wiki.secondlife.com/wiki/Main_Page')
+  expect(firstLink).toBeTruthy()
+  expect(firstLink.tagName).toBe('A')
+  expect(firstLink.href).toBe('http://wiki.secondlife.com/wiki/Main_Page')
+  expect(firstLink.rel).toBe('noopener noreferrer')
+
+  expect(firstLink.previousSibling).toBeTruthy()
+  expect(firstLink.previousSibling.textContent).toBe('(32W 6.3.2f*) ')
 
   expect(queryByText('https://en.wikipedia.org/wiki/Second_Life')).toBeTruthy()
   expect(queryByText('https://en.wikipedia.org/wiki/Second_Life').tagName).toBe('A')
@@ -81,8 +83,8 @@ it('should use its className for the <a>', () => {
   const { queryByText } = render(
     <div>
       <Text
-        text={'Hello World! https://en.wikipedia.org/wiki/Second_Life ' +
-        '[http://wiki.secondlife.com/wiki/Main_Page the second life wiki]'}
+        text={'Hello World! https://en.wikipedia.org/wiki/Second_Life other ' +
+        '[http://wiki.secondlife.com/wiki/Main_Page the second life wiki] moar'}
         className='text-class'
       />
     </div>
@@ -91,15 +93,22 @@ it('should use its className for the <a>', () => {
   expect(queryByText('https://en.wikipedia.org/wiki/Second_Life').className)
     .toBe('text-class')
 
+  expect(queryByText('https://en.wikipedia.org/wiki/Second_Life').nextSibling).toBeTruthy()
+  expect(queryByText('https://en.wikipedia.org/wiki/Second_Life').nextSibling.textContent)
+    .toBe(' other ')
+
   expect(queryByText('the second life wiki').className)
     .toBe('text-class')
+
+  expect(queryByText('the second life wiki').nextSibling).toBeTruthy()
+  expect(queryByText('the second life wiki').nextSibling.textContent).toBe(' moar')
 })
 
 it('should support multiline mode', () => {
   const { queryByText } = render(
     <div>
       <Text
-        text={'Hello World! https://en.wikipedia.org/wiki/Second_Life\n' +
+        text={'Hello World! https://en.wikipedia.org/wiki/Second_Life other\n' +
         '[http://wiki.secondlife.com/wiki/Main_Page the second life\nwiki]'}
         multiline
       />
@@ -109,6 +118,10 @@ it('should support multiline mode', () => {
   const sibling = queryByText('https://en.wikipedia.org/wiki/Second_Life').nextElementSibling
   expect(sibling).toBeTruthy()
   expect(sibling.nodeName).toBe('BR')
+
+  const textSibling = queryByText('https://en.wikipedia.org/wiki/Second_Life').nextSibling
+  expect(textSibling).not.toBe(sibling)
+  expect(textSibling.textContent).toBe(' other')
 
   const brChild = queryByText('the second life', { exact: false }).querySelector('br')
   expect(brChild).toBeTruthy()
