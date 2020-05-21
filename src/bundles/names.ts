@@ -90,7 +90,9 @@ const nameSlice = createSlice({
       state.names[action.payload.uuid] = action.payload.name
 
       for (const msg of action.payload.localChatHistory) {
-        addName(state.names, msg.fromId, msg.fromName)
+        if (String(msg.sourceType) === 'agent') {
+          addName(state.names, msg.fromId, msg.fromName)
+        }
       }
     },
 

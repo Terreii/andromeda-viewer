@@ -10,23 +10,23 @@ export interface AbstractChatMessage extends HoodieObject {
   /**
    * UUID from the sending avatar or object.
    */
-  fromId: string
+  fromId: string,
   /**
    * Name from the sender.
    */
-  fromName: string
+  fromName: string,
   /**
    * The message.
    */
-  message: string
+  message: string,
   /**
    * When it was send/received. It is a Date number.
    */
-  time: number
+  time: number,
   /**
    * Was it saved?
    */
-  didSave: boolean
+  didSave: boolean,
 }
 
 // Local chat
