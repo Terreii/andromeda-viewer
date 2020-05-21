@@ -2,7 +2,7 @@ import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
 import { v4 as uuid } from 'uuid'
 import { UUID as LLUUID } from '../llsd'
-import mockdate from 'mockdate'
+import { set as setMockDate } from 'mockdate'
 
 import {
   receiveChatFromSimulator,
@@ -35,7 +35,7 @@ import { AssetType } from '../types/inventory'
 const mockStore = configureMockStore([thunk])
 
 jest.mock('uuid')
-mockdate.set(1562630524418)
+setMockDate(1562630524418)
 
 describe('local chat', () => {
   it('should handle receiving local chat', () => {
