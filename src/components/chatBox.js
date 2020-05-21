@@ -34,11 +34,16 @@ export default function ChatBox () {
   const names = useSelector(selectNames)
   const shouldDisplayNotifications = useSelector(selectShouldDisplayNotifications)
 
-  const tab = useTabState({ selectedId: useSelector(selectActiveTab) })
+  const selectedId = useSelector(selectActiveTab)
+  const tab = useTabState({ selectedId })
   useEffect(
     () => { dispatch(changeChatTab(tab.selectedId)) },
     [tab.selectedId, dispatch]
   )
+  const setSelectedId = tab.setSelectedId
+  useEffect(() => {
+    setSelectedId(selectedId)
+  }, [selectedId, setSelectedId])
 
   const doStartNewIMChat = (chatType, targetId, name) => dispatch(
     startNewIMChat(chatType, targetId, name)
@@ -59,7 +64,7 @@ export default function ChatBox () {
       : chat.name
 
     tabs.push(
-      <Tab {...tab} key={`tab_${id}`} className={style.tabButton} stopId={id}>
+      <Tab {...tab} key={`tab_${id}`} id={`tab_${id}`} className={style.tabButton}>
         {name || id}
       </Tab>
     )
@@ -69,7 +74,6 @@ export default function ChatBox () {
         {...tab}
         key={`panel_${id}`}
         className={style.panel}
-        stopId={id}
         tabIndex='-1'
       >
         <ChatDialog
@@ -94,33 +98,33 @@ export default function ChatBox () {
   return (
     <div className={style.container}>
       <TabList {...tab} className={style.list} aria-label='Chats'>
-        <Tab {...tab} className={style.tabButton} stopId='friends'>Friends</Tab>
+        <Tab {...tab} id='tab_friends' className={style.tabButton}>Friends</Tab>
 
-        <Tab {...tab} className={style.tabButton} stopId='groups'>Groups</Tab>
+        <Tab {...tab} id='tab_groups' className={style.tabButton}>Groups</Tab>
 
         {shouldDisplayNotifications && (
           <Tab
             {...tab}
+            id='tab_notifications'
             className={style.tabButton}
-            stopId='notifications'
           >
             Notifications
           </Tab>
         )}
 
-        <Tab {...tab} className={style.tabButton} stopId='local'>Local</Tab>
+        <Tab {...tab} id='tab_local' className={style.tabButton}>Local</Tab>
 
         {tabs}
       </TabList>
 
-      <TabPanel {...tab} className={style.panel} stopId='friends' tabIndex='-1'>
+      <TabPanel {...tab} className={style.panel} tabIndex='-1'>
         <FriendsList
           names={names}
           startNewIMChat={doStartNewIMChat}
         />
       </TabPanel>
 
-      <TabPanel {...tab} className={style.panel} stopId='groups' tabIndex='-1'>
+      <TabPanel {...tab} className={style.panel} tabIndex='-1'>
         <GroupsList startNewIMChat={doStartNewIMChat} />
       </TabPanel>
 
@@ -128,14 +132,13 @@ export default function ChatBox () {
         <TabPanel
           {...tab}
           className={style.panel}
-          stopId='notifications'
           tabIndex='-1'
         >
           <Notifications />
         </TabPanel>
       )}
 
-      <TabPanel {...tab} className={style.panel} stopId='local' tabIndex='-1'>
+      <TabPanel {...tab} className={style.panel} tabIndex='-1'>
         <ChatDialog
           data={localChat}
           names={names}

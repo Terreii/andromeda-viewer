@@ -19,7 +19,7 @@ const sessionSlice = createSlice({
     // didLogin
     login (state, action: PayloadAction<LoginAction>) {
       state.avatarIdentifier = action.payload.avatarIdentifier
-      state.activeChatTab = 'local'
+      state.activeChatTab = 'tab_local'
       state.error = null
       state.sync = action.payload.save
       state.andromedaSessionId = action.payload.sessionInfo.andromedaSessionId
@@ -56,7 +56,9 @@ const sessionSlice = createSlice({
 
     // CHAT_TAB_CHANGED
     changeChatTab (state, action: PayloadAction<string>) {
-      state.activeChatTab = action.payload
+      state.activeChatTab = action.payload.startsWith('tab_')
+        ? action.payload
+        : 'tab_' + action.payload
     },
 
     startLogout: () => {},

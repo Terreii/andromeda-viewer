@@ -12,67 +12,87 @@ import anchorme from 'anchorme'
 export default function Text ({ text, multiline, className }) {
   const parsed = useMemo(
     () => {
-      const found = anchorme(text.replace(/\)/g, '.)escape'), { list: true })
+      // Escape ) because anchorme has an error with it.
+      const escapedText = text.replace(/\)/g, '.)escape')
+      const found = anchorme.list(escapedText)
 
-      const urls = found.map(url => {
-        if (/\.\)escape/g.test(url.raw)) {
+      if (found.length === 0) {
+        return multiline ? toMultiLine(text) : [text]
+      }
+
+      let move = 0
+      // remove the escape and move the start and end indexes
+      const urls = found.map((url, index) => {
+        // set move to the correct index if there was a ) before the first url.
+        if (index === 0) {
+          const textBeforeFirstURL = escapedText.substring(0, url.start)
+          move = textBeforeFirstURL.length - textBeforeFirstURL.replace(/\.\)escape/g, ')').length
+        }
+
+        if (/\.\)escape/g.test(url.string)) {
+          // replace the escape
+          const urlString = url.string.replace(/\.\)escape/g, ')')
+          const oldMove = move
+          move += url.string.length - urlString.length
           return {
             ...url,
-            raw: url.raw.replace(/\.\)escape/g, ')'),
-            encoded: url.encoded.replace(/\.\)escape/g, ')')
+            start: url.start - oldMove,
+            end: url.end - move,
+            string: urlString,
+            path: url.path.replace(/\.\)escape/g, ')')
           }
         } else {
-          return url
+          return {
+            ...url,
+            start: url.start - move,
+            end: url.end - move
+          }
         }
       })
 
-      if (urls.length === 0) {
-        return [
-          multiline ? toMultiLine(text) : text
-        ]
-      }
+      let lastEnd = 0
 
-      let rest = text
-      const result = []
+      const result = urls.flatMap((url, index, all) => {
+        let startIndex = url.start
+        let endIndex = url.end
+        let linkBody = url.string
 
-      for (const url of urls) {
-        const urlStartIndex = rest.indexOf(url.raw)
-        const urlEndIndex = urlStartIndex + url.raw.length
+        // if the link is a SL formatted link [url body text]
+        // There must be a [ before the url and a space after
+        if (text.charAt(url.start - 1) === '[' && /\s/.test(text.charAt(url.end))) {
+          // find the body
+          const closingIndex = text.indexOf(']', endIndex)
+          const body = text.substring(endIndex, closingIndex)
 
-        const hasLinkBody = rest.charAt(urlStartIndex - 1) === '[' &&
-          /\s/.test(rest.charAt(urlEndIndex))
-
-        let index = urlStartIndex
-        let endIndex = urlEndIndex
-        let linkBody = url.raw
-
-        if (hasLinkBody) {
-          const closingIndex = rest.indexOf(']', urlEndIndex + 1)
-          const body = rest.substring(urlEndIndex + 1, closingIndex)
-
-          if (closingIndex >= 0 && body.length > 0) {
-            index = urlStartIndex - 1
+          if (body.length > 0) {
+            startIndex = url.start - 1
             endIndex = closingIndex + 1
             linkBody = body
           }
         }
 
-        // split out text only part
-        if (index > 0) {
-          const subString = rest.substring(0, index)
-          result.push(multiline ? toMultiLine(subString) : subString)
+        let lines = []
+        // get the text between last url (or start) and this one
+        if ((lastEnd + 1) < startIndex) {
+          const slice = text.substring(lastEnd, startIndex)
+          lines = multiline ? toMultiLine(slice, index) : [slice]
         }
 
-        result.push({
-          text: multiline ? toMultiLine(linkBody) : linkBody,
-          url: url.raw
+        lines.push({
+          text: multiline ? toMultiLine(linkBody, 0) : linkBody,
+          url: url.string
         })
 
-        rest = rest.substring(endIndex)
-      }
+        lastEnd = endIndex
 
-      if (rest.length > 0) {
-        result.push(multiline ? toMultiLine(rest) : rest)
+        return lines
+      })
+
+      const rest = text.substring(lastEnd)
+      if (rest.length > 0 && multiline) {
+        result.push(...toMultiLine(rest))
+      } else if (rest.length > 0) {
+        result.push(rest)
       }
 
       return result
@@ -106,13 +126,14 @@ export default function Text ({ text, multiline, className }) {
 /**
  * Add <br> to strings.
  * @param {string} text Text that should be split up and <br> be added.
+ * @param {number} index Index of the string slice.
  */
-function toMultiLine (text) {
+function toMultiLine (text, index) {
   const result = []
 
-  text.split('\n').forEach((line, index) => {
-    if (index > 0) {
-      result.push(<br key={'br_' + index} />)
+  text.split('\n').forEach((line, i) => {
+    if (i > 0) {
+      result.push(<br key={`br_${index}_${i}`} />)
     }
 
     result.push(line)

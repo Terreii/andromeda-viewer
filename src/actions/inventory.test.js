@@ -1,6 +1,6 @@
 import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
-import mockdate from 'mockdate'
+import { set as setMockDate } from 'mockdate'
 
 import {
   acceptInventoryOffer,
@@ -11,7 +11,7 @@ import AvatarName from '../avatarName'
 import { IMDialog } from '../types/chat'
 import { AssetType } from '../types/inventory'
 
-mockdate.set(1562630524418)
+setMockDate(1562630524418)
 
 describe('inventory offers', () => {
   it('should handle offers from avatars', () => {
