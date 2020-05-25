@@ -20,8 +20,6 @@ import { selectIsSignedIn } from './bundles/account'
 import { selectOwnAvatarName } from './bundles/names'
 import { selectIsLoggedIn } from './bundles/session'
 
-import 'normalize.css'
-
 export default function Root ({ store }) {
   return (
     <Provider store={store}>
