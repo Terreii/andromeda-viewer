@@ -226,7 +226,7 @@ export default function SignInPopup ({ isSignUp, dialog }) {
         <div className={styles.ButtonsContainer}>
           <button
             type='button'
-            className={formStyles.SecondaryButton}
+            className='btn btn-secondary'
             onClick={event => {
               event.preventDefault()
               dialog.hide()
@@ -237,7 +237,7 @@ export default function SignInPopup ({ isSignUp, dialog }) {
             cancel
           </button>
           <button
-            className={formStyles.OkButton}
+            className='btn btn-ok'
             disabled={!isValid || isSigningIn}
             onFocus={onFocusScrollIntoView}
           >

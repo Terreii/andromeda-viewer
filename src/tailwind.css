@@ -1,5 +1,67 @@
 @tailwind base;
 
+.btn {
+  @apply p-2 text-base font-normal text-center text-black bg-gray-100 border-0 rounded;
+}
+.btn:hover, .Button:focus {
+  @apply bg-gray-300 shadow-outline outline-none;
+}
+.btn:active {
+  @apply bg-gray-400;
+}
+.btn:disabled {
+  @apply opacity-75;
+}
+
+/* Use together with .btn */
+.btn-danger {
+  @apply text-white bg-red-700;
+}
+.btn-danger:hover, .btn-danger:focus {
+  @apply bg-red-800;
+}
+.btn-danger:active {
+  @apply bg-red-900;
+}
+
+/* Use together with .btn */
+.btn-ok {
+  @apply text-black bg-green-500;
+}
+.btn-ok:hover, .btn-ok:focus {
+  @apply bg-green-600;
+}
+.btn-ok:active {
+  @apply bg-green-700;
+}
+
+/* Use together with .btn */
+.btn-primary {
+  @apply text-white bg-blue-700;
+}
+.btn-primary:hover, .btn-primary:focus {
+  @apply bg-blue-800;
+}
+.btn-primary:active {
+  @apply bg-blue-900;
+}
+
+/* Use together with .btn */
+.btn-secondary {
+  @apply text-black bg-gray-400;
+}
+.btn-secondary:hover, .btn-secondary:focus {
+  @apply bg-gray-500;
+}
+.btn-secondary:active {
+  @apply bg-gray-600;
+}
+
+/* Use together with .btn */
+.btn-transparent {
+  @apply bg-transparent border-0;
+}
+
 @tailwind components;
 
 @tailwind utilities;

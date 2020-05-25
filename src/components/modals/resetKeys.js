@@ -9,7 +9,6 @@ import { closeResetKeys } from '../../bundles/account'
 import { useAutoFocus } from '../../hooks/utils'
 
 import styles from './resetKeys.module.css'
-import formStyles from '../formElements.module.css'
 import keepItSecret from '../../icons/keepitsecret.png'
 
 export default function ResetKeysModal ({ resetKeys }) {
@@ -54,7 +53,7 @@ export default function ResetKeysModal ({ resetKeys }) {
         <p>You can also download them:</p>
 
         <a
-          className={styles.DownloadLink}
+          className='block mb-4 no-underline btn btn-primary'
           href={fileURL}
           target='_blank'
           rel='noopener noreferrer'
@@ -77,7 +76,7 @@ export default function ResetKeysModal ({ resetKeys }) {
         </p>
 
         <button
-          className={formStyles.OkButton}
+          className='btn btn-ok'
           onClick={() => {
             dispatch(closeResetKeys())
           }}

@@ -203,7 +203,7 @@ export default function NewAvatarLogin ({
       </div>
       <button
         id='newAvatarLoginButton'
-        className={styles.LoginButton}
+        className={styles.LoginButton + ' btn'}
         disabled={isLoggingIn || !isValid}
       >
         {isLoggingIn === name ? 'Connecting ...' : 'Login'}

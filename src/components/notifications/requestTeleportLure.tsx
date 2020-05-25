@@ -10,7 +10,6 @@ import { useName } from '../../hooks/names'
 
 import { RequestTeleportLureNotification } from '../../types/chat'
 
-import formStyles from '../formElements.module.css'
 import styles from './notifications.module.css'
 
 export default function RequestTeleportLure (
@@ -28,7 +27,7 @@ export default function RequestTeleportLure (
 
       <div className={styles.ButtonsRow}>
         <button
-          className={formStyles.OkButton}
+          className='btn btn-ok'
           onClick={() => {
             dispatch(offerTeleportLure(data.fromId))
             onClose()
@@ -37,7 +36,7 @@ export default function RequestTeleportLure (
           Accept
         </button>
 
-        <button className={formStyles.DangerButton} onClick={onClose}>
+        <button className='btn btn-danger' onClick={onClose}>
           Decline
         </button>
       </div>

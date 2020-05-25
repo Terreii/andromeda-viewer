@@ -10,7 +10,6 @@ import { useName } from '../../hooks/names'
 
 import { TeleportLure } from '../../types/chat'
 
-import formStyles from '../formElements.module.css'
 import styles from './notifications.module.css'
 
 export default function FriendshipOffer ({ data, onClose }: ComponentArguments<TeleportLure>) {
@@ -34,11 +33,11 @@ export default function FriendshipOffer ({ data, onClose }: ComponentArguments<T
       </p>
 
       <div className={styles.ButtonsRow}>
-        <button className={formStyles.OkButton} onClick={doAccept} disabled>
+        <button className='btn btn-ok' onClick={doAccept} disabled>
           Accept (not yet implemented)
         </button>
 
-        <button className={formStyles.DangerButton} onClick={doDecline}>
+        <button className='btn btn-danger' onClick={doDecline}>
           Decline
         </button>
       </div>

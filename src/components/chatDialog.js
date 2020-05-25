@@ -49,7 +49,7 @@ export default function ChatDialog ({ isIM = false, data = [], names, sendTo, lo
           value={text}
           onChange={event => { setText(event.target.value) }}
         />
-        <button className={styles.SendButton}>send</button>
+        <button className='flex-initial btn btn-primary'>send</button>
       </form>
     </>
   )

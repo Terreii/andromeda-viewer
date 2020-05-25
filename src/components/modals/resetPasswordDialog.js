@@ -130,7 +130,7 @@ export default function ResetPasswordDialog ({ type, dialog }) {
         <div className={styles.ButtonsRow}>
           <button
             type='button'
-            className={formStyles.SecondaryButton}
+            className='btn btn-secondary'
             onClick={onCancel}
             disabled={isChanging}
           >
@@ -138,7 +138,7 @@ export default function ResetPasswordDialog ({ type, dialog }) {
           </button>
           <button
             type='button'
-            className={formStyles.DangerButton}
+            className='btn btn-danger'
             onClick={() => {
               dispatch(signOut())
             }}
@@ -148,7 +148,7 @@ export default function ResetPasswordDialog ({ type, dialog }) {
           </button>
         </div>
         <div className={styles.ButtonsRow}>
-          <button className={formStyles.PrimaryButton} disabled={!canChange}>
+          <button className='btn btn-primary' disabled={!canChange}>
             change {isEncryption ? 'encryption ' : ''}password
           </button>
         </div>

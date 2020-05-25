@@ -8,7 +8,6 @@ import { useAutoFocus } from '../../hooks/utils'
 
 import closeIcon from '../../icons/icon_close.svg'
 import styles from './modal.module.css'
-import formStyles from '../formElements.module.css'
 
 /**
  * Displays session error messages.
@@ -55,7 +54,7 @@ export default function ErrorDialog ({ errorMessage }) {
 
           <button
             type='button'
-            className={formStyles.Button + ' ' + styles.ErrorButton}
+            className='mt-2 btn'
             onClick={() => {
               dispatch(closeErrorMessage())
               dialog.hide()

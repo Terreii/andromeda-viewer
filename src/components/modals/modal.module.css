@@ -43,9 +43,6 @@
   composes: Border;
   background: lightcoral;
 }
-.ErrorButton {
-  margin-top: 0.5rem;
-}
 
 .Header {
   border-bottom: 1px solid black;

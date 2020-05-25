@@ -209,7 +209,7 @@ This is permanent and can not be undone!`)
           type='reset'
           id='accountDataReset'
           onClick={resetAll}
-          className={formStyles.SecondaryButton}
+          className='btn btn-secondary'
           disabled={isUpdating}
         >
           reset
@@ -224,7 +224,7 @@ This is permanent and can not be undone!`)
 
       <button
         type='button'
-        className={formStyles.DangerButton}
+        className='btn btn-danger'
         onClick={doDeleteAccount}
         disabled={isUpdating}
       >
@@ -277,7 +277,7 @@ function AccountDataDownload () {
     <div className={style.ButtonRow}>
       <button
         type='button'
-        className={formStyles.PrimaryButton}
+        className='btn btn-primary'
         onClick={doStartDownload}
         disabled={isDownloading}
       >
@@ -295,7 +295,7 @@ function AccountDataDownload () {
           href={url}
           target='_blank'
           rel='noopener noreferrer'
-          className={formStyles.OkButton}
+          className='btn btn-ok'
           download={`${viewerName}_user_data.zip`}
           role='alert'
         >

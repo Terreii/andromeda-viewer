@@ -78,7 +78,10 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
         }}
       />
 
-      <button className={styles.LoginButton} disabled={isLoggingIn || password.length === 0}>
+      <button
+        className={styles.LoginButton + ' btn'}
+        disabled={isLoggingIn || password.length === 0}
+      >
         {isLoggingIn === avatar.name ? 'Connecting ...' : 'Login'}
       </button>
     </form>

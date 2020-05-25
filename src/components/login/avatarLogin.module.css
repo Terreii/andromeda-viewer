@@ -138,8 +138,9 @@
 }
 
 .LoginButton {
-  composes: Button from "../formElements.module.css";
   grid-area: login;
+  margin-top: auto;
+  margin-bottom: auto;
 }
 .AvatarLoginContainer .LoginButton {
   margin-top: .7em;
