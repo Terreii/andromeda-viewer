@@ -8,10 +8,11 @@
 }
 
 .LockItem {
-  position: relative;
-  left: -10%;
   margin: 0px;
   margin-right: 0.3em;
+  object-fit: contain;
+  height: 2rem;
+  width: 2rem;
 }
 
 .PasswordRow {
