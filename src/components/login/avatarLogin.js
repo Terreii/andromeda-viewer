@@ -4,8 +4,6 @@ import AvatarName from '../../avatarName'
 
 import { useAutoFocus } from '../../hooks/utils'
 
-import styles from './avatarLogin.module.css'
-
 export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSelected, onSelect }) {
   const [password, setPassword] = useState('')
   useEffect(() => {
@@ -17,17 +15,20 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
   if (!isSelected) {
     return (
       <form
-        className={`${styles.AvatarLoginContainer} ${styles['not-selected']}`}
+        className={'flex flex-col row-auto p-4 m-4 text-white bg-gray-700 rounded ' +
+        'focus-within:shadow-outline'}
         onSubmit={event => {
           event.preventDefault()
           onSelect(avatar.avatarIdentifier)
         }}
       >
-        <button className={styles.HiddenButton}>
-          <span className={styles.Name}>{new AvatarName(avatar.name).getDisplayName()}</span>
-          <span className={styles.Grid}>@{grid.name}</span>
+        <button className='flex flex-col text-white btn-transparent focus:outline-none'>
+          <h2 className='block m-1 text-center'>
+            <span className='text-2xl'>{new AvatarName(avatar.name).getDisplayName()}</span>
+            <span className='inline-block ml-3'>@{grid.name}</span>
+          </h2>
 
-          <span className={styles.ActiveText}>click to login</span>
+          <span className='text-center text-gray-400'>click to login</span>
         </button>
       </form>
     )
@@ -45,41 +46,48 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
   const passwordInputId = `passwordFor${avatar.avatarIdentifier}`
 
   return (
-    <form className={styles.AvatarLoginContainer} onSubmit={onSubmit}>
-      <h2 className={styles.Name}>{avatarName}</h2>
-      <span className={styles.Grid}>@{grid.name}</span>
+    <form
+      className='flex flex-col p-4 m-4 text-white bg-gray-700 rounded shadow'
+      onSubmit={onSubmit}
+    >
+      <h2 className='block m-1 text-center'>
+        <span className='text-2xl'>{new AvatarName(avatar.name).getDisplayName()}</span>
+        <span className='inline-block ml-3'>@{grid.name}</span>
+      </h2>
 
-      <label className={styles.PasswordInfo} htmlFor={passwordInputId}>Password:</label>
-      <input
-        id={passwordInputId}
-        type='password'
-        className={styles.PasswordInput}
-        value={password}
-        onChange={event => { setPassword(event.target.value) }}
-        required
-        autoFocus
-        ref={doAutoFocus}
-        disabled={isLoggingIn}
-        aria-label={'password for ' + avatarName}
-        onFocus={event => {
-          const target = event.target
+      <label className='text-left' htmlFor={passwordInputId}>
+        <span>Password</span>
+        <input
+          id={passwordInputId}
+          type='password'
+          className='block w-full mt-1 text-gray-900 form-input'
+          value={password}
+          onChange={event => { setPassword(event.target.value) }}
+          required
+          autoFocus
+          ref={doAutoFocus}
+          disabled={isLoggingIn}
+          aria-label={'password for ' + avatarName}
+          onFocus={event => {
+            const target = event.target
 
-          setTimeout(() => {
-            if (
-              target == null ||
-              target.parentElement == null ||
-              target.parentElement.scrollIntoView == null
-            ) {
-              return
-            }
+            setTimeout(() => {
+              if (
+                target == null ||
+                target.parentElement == null ||
+                target.parentElement.scrollIntoView == null
+              ) {
+                return
+              }
 
-            target.parentElement.scrollIntoView(true)
-          }, 16)
-        }}
-      />
+              target.parentElement.scrollIntoView(true)
+            }, 16)
+          }}
+        />
+      </label>
 
       <button
-        className={styles.LoginButton + ' btn'}
+        className='flex-auto mx-auto mt-3 btn btn-secondary'
         disabled={isLoggingIn || password.length === 0}
       >
         {isLoggingIn === avatar.name ? 'Connecting ...' : 'Login'}

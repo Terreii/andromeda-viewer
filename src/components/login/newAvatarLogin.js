@@ -2,9 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 
 import { useAutoFocus } from '../../hooks/utils'
 
-import formElementsStyles from '../formElements.module.css'
-import styles from './avatarLogin.module.css'
-
 export default function NewAvatarLogin ({
   isSelected,
   isSignedIn,
@@ -35,16 +32,21 @@ export default function NewAvatarLogin ({
   if (!isSelected) {
     return (
       <form
-        className={`${styles.NewAvatarLoginContainer} ${styles['not-selected']}`}
+        className={'flex flex-col row-auto p-4 m-4 text-white bg-gray-700 rounded ' +
+        'focus-within:shadow-outline'}
         onSubmit={event => {
           event.preventDefault()
           onSelect('new')
         }}
       >
-        <button className={styles.HiddenButton}>
-          <h2 className={styles.Title}>Add avatar or login anonymously</h2>
+        <button className='flex flex-col text-white btn-transparent focus:outline-none'>
+          <h2 className='block m-1 text-xl text-center'>
+            <span className='whitespace-no-wrap'>Add avatar</span>
+            <span> or </span>
+            <span className='whitespace-no-wrap'>login anonymously</span>
+          </h2>
 
-          <span className={styles.ActiveText}>click to add</span>
+          <span className='text-center text-gray-400'>click to add</span>
         </button>
       </form>
     )
@@ -75,135 +77,149 @@ export default function NewAvatarLogin ({
 
   return (
     <form
-      className={styles.NewAvatarLoginContainer + (isNewGrid ? ' ' + styles.high : '')}
+      className={'flex flex-col bg-gray-700 text-white m-4 p-4 rounded shadow ' + (isNewGrid
+        ? 'row-span-3'
+        : 'row-span-2'
+      )}
       onSubmit={doLogin}
     >
-      <h2 className={styles.Title}>
-        {isSignedIn ? 'Add avatar or ' : ''}
-        login anonymously
+      <h2 className='block m-1 text-xl text-center'>
+        {isSignedIn && (
+          <>
+            <span className='whitespace-no-wrap'>Add avatar</span>
+            <span> or </span>
+          </>
+        )}
+        <span className='whitespace-no-wrap'>login anonymously</span>
       </h2>
 
-      <label className={styles.NewName} htmlFor='newAvatarNameInput'>Avatar:</label>
-      <input
-        id='newAvatarNameInput'
-        type='text'
-        className={styles.NewNameInput}
-        value={name}
-        onChange={onNameChange}
-        disabled={isLoggingIn}
-        minLength='1'
-        required
-        autoFocus
-        ref={doAutoFocus}
-        onFocus={event => {
-          const target = event.target
+      <label className='text-left'>
+        <span>Avatar</span>
+        <input
+          type='text'
+          className='block w-full mt-1 text-gray-900 form-input'
+          value={name}
+          onChange={onNameChange}
+          disabled={isLoggingIn}
+          minLength='1'
+          placeholder='avatar name'
+          required
+          autoFocus
+          ref={doAutoFocus}
+          onFocus={event => {
+            const target = event.target
 
-          setTimeout(() => {
-            if (
-              target == null ||
-              target.parentElement == null ||
-              target.parentElement.scrollIntoView == null
-            ) {
-              return
-            }
+            setTimeout(() => {
+              if (
+                target == null ||
+                target.parentElement == null ||
+                target.parentElement.scrollIntoView == null
+              ) {
+                return
+              }
 
-            target.parentElement.scrollIntoView(true)
-          }, 16)
-        }}
-      />
+              target.parentElement.scrollIntoView(true)
+            }, 16)
+          }}
+        />
+      </label>
 
-      <label className={styles.NewPassword} htmlFor='newAvatarPasswordInput'>Password:</label>
-      <input
-        id='newAvatarPasswordInput'
-        type='password'
-        className={styles.PasswordInput}
-        value={password}
-        onChange={onPasswordChange}
-        disabled={isLoggingIn}
-        minLength='2'
-        required
-      />
+      <label className='mt-3 text-left'>
+        <span>Password</span>
+        <input
+          type='password'
+          className='block w-full mt-1 text-gray-900 form-input'
+          value={password}
+          onChange={onPasswordChange}
+          disabled={isLoggingIn}
+          minLength='2'
+          required
+        />
+      </label>
 
-      <label className={styles.Grid} htmlFor='newAvatarGridSelection'>Grid:</label>
-      <select
-        id='newAvatarGridSelection'
-        className={styles.GridSelection}
-        value={selectedGrid}
-        onChange={event => { setSelectedGrid(event.target.value) }}
-      >
-        {grids.map(grid => (
-          <option key={grid.name} value={grid.name}>
-            {grid.name}
-          </option>
-        ))}
+      <label className='mt-3 text-left'>
+        <span>Grid</span>
+        <select
+          className='block w-full mt-1 text-gray-900 form-select'
+          value={selectedGrid}
+          onChange={event => { setSelectedGrid(event.target.value) }}
+        >
+          {grids.map(grid => (
+            <option key={grid.name} value={grid.name}>
+              {grid.name}
+            </option>
+          ))}
 
-        <option value=''>+ Add new Grid</option>
-      </select>
+          <option value=''>+ Add new Grid</option>
+        </select>
+      </label>
 
       {isNewGrid && (
-        <fieldset className={styles.NewGridLine}>
+        <fieldset className='flex flex-col p-3 mt-3 text-left border border-white rounded'>
           <legend>Add a new Grid</legend>
 
-          <div className={formElementsStyles.FormField}>
-            <label htmlFor='newGridNameInput'>Name</label>
+          <label>
+            <span>Name</span>
             <input
-              id='newGridNameInput'
               type='text'
-              className={formElementsStyles.Input}
+              className='block w-full mt-1 text-gray-900 form-input'
               value={gridName}
               onChange={onGridNameChange}
               minLength='1'
               required
             />
-          </div>
-          <div className={formElementsStyles.FormField}>
-            <label htmlFor='newGridUrlInput'>URL</label>
+          </label>
+
+          <label className='mt-3'>
+            <span>URL</span>
             <input
-              id='newGridUrlInput'
               type='url'
-              className={formElementsStyles.Input}
+              className='block w-full mt-1 text-gray-900 form-input'
               placeholder='https://example.com/login'
               value={gridUrl}
               onChange={onGridUrlChange}
               required
             />
-          </div>
+          </label>
+
           <label
-            id='newGridIsLLSDLabel'
+            className='mt-3'
             title={'Most grids will support LLSD based logins.\r\n' +
             "Only un-check if grid doesn't support it!"}
           >
             <input
-              id='newGridIsLLSD'
               type='checkbox'
+              className='form-checkbox'
               checked={isGridLLSD}
               onChange={event => { setIsGridLLSD(event.target.checked) }}
             />
-            {' Grid uses LLSD login'}
+            <span className='ml-2'> Grid uses LLSD login</span>
           </label>
         </fieldset>
       )}
 
-      <div className={styles.SaveNew}>
-        <input
-          id='saveNewAvatarButton'
-          type='checkbox'
-          onChange={event => { setSaveAvatar(event.target.checked) }}
-          checked={saveAvatar}
-          disabled={!isSignedIn || isLoggingIn}
-          aria-describedby='saveNewAvatarHelp'
-        />
-        <label htmlFor='saveNewAvatarButton'> Save / Add</label>
+      <div className='mt-3 text-left'>
+        <label>
+          <input
+            type='checkbox'
+            className='form-checkbox'
+            onChange={event => { setSaveAvatar(event.target.checked) }}
+            checked={saveAvatar}
+            disabled={!isSignedIn || isLoggingIn}
+            aria-describedby='saveNewAvatarHelp'
+          />
+          <span className='ml-2'>Save / Add</span>
+        </label>
         <br />
-        <small id='saveNewAvatarHelp' className={styles.SaveHelp}>
+        <small id='saveNewAvatarHelp' className='leading-tight text-white'>
           Save and sync this avatar and it's chats,
-          <br />
           after the first successful login.
         </small>
       </div>
+
       <button
         id='newAvatarLoginButton'
-        className={styles.LoginButton + ' btn'}
+        className='flex-auto mx-auto mt-3 btn btn-secondary'
         disabled={isLoggingIn || !isValid}
       >
         {isLoggingIn === name ? 'Connecting ...' : 'Login'}

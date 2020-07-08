@@ -8,6 +8,10 @@ module.exports = {
   theme: {
     extend: {}
   },
-  variants: {},
-  plugins: []
+  variants: {
+    boxShadow: ['responsive', 'hover', 'focus', 'focus-within']
+  },
+  plugins: [
+    require('@tailwindcss/custom-forms')
+  ]
 }

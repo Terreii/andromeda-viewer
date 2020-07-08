@@ -106,7 +106,7 @@ it('should successfully login', async () => {
   expect(loginButton.nodeName).toBe('BUTTON')
   expect(loginButton.disabled).toBeTruthy()
 
-  const input = queryByLabelText('Password:')
+  const input = queryByLabelText('Password')
   expect(input).toBeTruthy()
   expect(input.nodeName).toBe('INPUT')
 
