@@ -5,9 +5,6 @@ import Modal from './modal'
 
 import { signIn, signUp } from '../../actions/viewerAccount'
 
-import styles from './signIn.module.css'
-import formStyles from '../formElements.module.css'
-
 import { useFormInput } from '../../hooks/utils'
 
 export default function SignInPopup ({ isSignUp, dialog }) {
@@ -72,16 +69,14 @@ export default function SignInPopup ({ isSignUp, dialog }) {
   }
 
   return (
-    <Modal title={isSignUp ? 'Sign up' : 'Sign in'} dialog={dialog} showOnClose backdrop>
-      <form className={styles.Container} onSubmit={send}>
-        <div className={formStyles.FormField}>
-          <label htmlFor='username'>
-            Username / email:
-          </label>
+    <Modal title={isSignUp ? 'Sign up' : 'Sign in'} dialog={dialog} showOnClose showCloseButton>
+      <form className='flex flex-col' onSubmit={send}>
+        <label className='flex flex-col m-1'>
+          <span>Username / email</span>
           <input
             id='username'
             type='email'
-            className={formStyles.Input}
+            className='block w-full mt-1 text-gray-900 form-input'
             autoComplete='email'
             value={username}
             onChange={event => {
@@ -96,21 +91,19 @@ export default function SignInPopup ({ isSignUp, dialog }) {
             onFocus={onFocusScrollIntoView}
           />
           {isSignUp && (
-            <small id='mainHelp' className={formStyles.Help}>
+            <small id='mainHelp' className='leading-6 text-gray-600'>
               Must be an email. We'll never share your email with anyone else.
             </small>
           )}
-        </div>
+        </label>
 
-        <div className={formStyles.FormField}>
-          <label htmlFor='password'>
-            Password:
-          </label>
+        <label className='flex flex-col m-1'>
+          <span>Password</span>
           <input
             {...password}
             id='password'
             type='password'
-            className={formStyles.Input}
+            className='block w-full mt-1 text-gray-900 form-input'
             autoComplete={isSignUp ? 'new-password' : 'current-password'}
             required
             minLength='8'
@@ -119,7 +112,7 @@ export default function SignInPopup ({ isSignUp, dialog }) {
             onFocus={onFocusScrollIntoView}
           />
           {isSignUp && (
-            <small id='passwordHelp' className={formStyles.Help}>
+            <small id='passwordHelp' className='leading-6 text-gray-600'>
               Please use a strong and unique password!<br />
               Minimal length: 8 characters!<br />
               {'A '}
@@ -127,49 +120,47 @@ export default function SignInPopup ({ isSignUp, dialog }) {
                 href='https://en.wikipedia.org/wiki/List_of_password_managers'
                 target='_blank'
                 rel='noopener noreferrer'
+                className='text-blue-600 underline hover:text-blue-800 focus:text-blue-800'
               >
                 Password Manager
               </a>
               {' is recommended.'}
             </small>
           )}
-        </div>
+        </label>
 
         {isSignUp && (
-          <div className={formStyles.FormField}>
-            <label htmlFor='password2'>
-              Repeat password:
-            </label>
+          <label className='flex flex-col m-1'>
+            <span>Repeat password</span>
             <input
               {...password2}
               id='password2'
               type='password'
-              className={formStyles.Input}
+              className='block w-full mt-1 text-gray-900 form-input'
               autoComplete='new-password'
               required
               minLength='8'
               disabled={isSigningIn}
               onFocus={onFocusScrollIntoView}
             />
-            <small
-              className={formStyles.Error}
-              data-hide={password2.value.length === 0 || password.value === password2.value}
-              role='alert'
-            >
-              Password doesn't match!
-            </small>
-          </div>
+            {!(password2.value.length === 0 || password.value === password2.value) && (
+              <small
+                className='px-4 py-2 mt-1 leading-6 text-red-800 bg-red-200 border border-red-500 rounded'
+                role='alert'
+              >
+                Password doesn't match!
+              </small>
+            )}
+          </label>
         )}
 
-        <div className={formStyles.FormField}>
-          <label htmlFor='cryptoPassword'>
-            Encryption password:
-          </label>
+        <label className='flex flex-col m-1'>
+          <span>Encryption password</span>
           <input
             {...cryptoPassword}
             id='cryptoPassword'
             type='password'
-            className={formStyles.Input}
+            className='block w-full mt-1 text-gray-900 form-input'
             required
             minLength='8'
             aria-describedby={isSignUp && 'cryptoPwHelp'}
@@ -177,7 +168,7 @@ export default function SignInPopup ({ isSignUp, dialog }) {
             onFocus={onFocusScrollIntoView}
           />
           {isSignUp && (
-            <small id='cryptoPwHelp' className={formStyles.Help}>
+            <small id='cryptoPwHelp' className='leading-5 text-gray-600'>
               Minimal length: 8 characters!<br />
               This password is used to encrypt your personal data.<br />
               This includes: <i>Avatar login-info</i>, <i>grids</i>, and <i>chat-logs</i>.<br />
@@ -188,42 +179,44 @@ export default function SignInPopup ({ isSignUp, dialog }) {
               This password will <b>never</b> be saved or leave your machine!
             </small>
           )}
-        </div>
+        </label>
 
         {isSignUp && (
-          <div className={formStyles.FormField}>
-            <label htmlFor='cryptoPassword2'>
-              Repeat encryption password:
-            </label>
+          <label className='flex flex-col m-1'>
+            <span>Repeat encryption password</span>
             <input
               {...cryptoPassword2}
               id='cryptoPassword2'
               type='password'
-              className={formStyles.Input}
+              className='block w-full mt-1 text-gray-900 form-input'
               required
               minLength='8'
               disabled={isSigningIn}
               onFocus={onFocusScrollIntoView}
             />
-            <small
-              className={formStyles.Error}
-              role='alert'
-              data-hide={
-                cryptoPassword2.length === 0 || cryptoPassword.value === cryptoPassword2.value
-              }
-            >
-              Encryption password doesn't match!
-            </small>
-          </div>
+            {!(cryptoPassword2.value.length === 0 ||
+              cryptoPassword.value === cryptoPassword2.value
+            ) && (
+              <small
+                className='px-4 py-2 mt-1 leading-6 text-red-800 bg-red-200 border border-red-500 rounded'
+                role='alert'
+              >
+                Encryption password doesn't match!
+              </small>
+            )}
+          </label>
         )}
 
         {error && (
-          <small className={formStyles.Error} role='alert'>
+          <small
+            className='px-4 py-2 mt-1 leading-6 text-red-800 bg-red-200 border border-red-500 rounded'
+            role='alert'
+          >
             {error}
           </small>
         )}
 
-        <div className={styles.ButtonsContainer}>
+        <div className='flex flex-row flex-auto px-1 py-0 mt-3 mb-1'>
           <button
             type='button'
             className='btn btn-secondary'
@@ -237,7 +230,7 @@ export default function SignInPopup ({ isSignUp, dialog }) {
             cancel
           </button>
           <button
-            className='btn btn-ok'
+            className='ml-2 btn btn-ok'
             disabled={!isValid || isSigningIn}
             onFocus={onFocusScrollIntoView}
           >

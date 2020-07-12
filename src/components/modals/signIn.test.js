@@ -40,7 +40,7 @@ describe('signUp', () => {
     expect(queryByText('Sign up')).toBeTruthy()
     expect(queryByText('cancel').nodeName).toBe('BUTTON')
     expect(queryByText('sign up').nodeName).toBe('BUTTON')
-    expect(queryByLabelText('Repeat password:')).toBeTruthy()
+    expect(queryByLabelText('Repeat password')).toBeTruthy()
   })
 
   it('should handle actions', async () => {
@@ -63,93 +63,94 @@ describe('signUp', () => {
     expect(dispatch.mock.calls.length).toBe(0)
 
     // Username input
-    expect(queryByLabelText('Username / email:')).toBeTruthy()
-    fireEvent.change(queryByLabelText('Username / email:'), {
+    expect(queryByLabelText('Username / email', { exact: false })).toBeTruthy()
+    fireEvent.change(queryByLabelText('Username / email', { exact: false }), {
       target: {
         value: 'testery.mactestface@example.com'
       }
     })
-    expect((await findByLabelText('Username / email:')).getAttribute('value'))
+    expect((await findByLabelText('Username / email', { exact: false })).getAttribute('value'))
       .toBe('testery.mactestface@example.com')
     expect(queryByText('sign up').disabled).toBeTruthy()
 
     // Password input
-    expect(queryByText("Password doesn't match!").dataset.hide).toBe('true')
+    expect(queryByText("Password doesn't match!")).toBeNull()
 
-    expect(queryByLabelText('Password:')).toBeTruthy()
-    fireEvent.change(queryByLabelText('Password:'), {
+    expect(queryByLabelText(/Password/)).toBeTruthy()
+    fireEvent.change(queryByLabelText(/Password/), {
       target: {
         value: 'secretPassword'
       }
     })
-    expect((await findByLabelText('Password:')).getAttribute('value'))
+    expect((await findByLabelText(/Password/)).getAttribute('value'))
       .toBe('secretPassword')
     expect(queryByText('sign up').disabled).toBeTruthy()
 
     // Password 2 input
-    expect(queryByLabelText('Repeat password:')).toBeTruthy()
-    fireEvent.change(queryByLabelText('Repeat password:'), {
+    expect(queryByLabelText('Repeat password')).toBeTruthy()
+    fireEvent.change(queryByLabelText('Repeat password'), {
       target: {
         value: 'secretPassword'
       }
     })
-    expect((await findByLabelText('Repeat password:')).getAttribute('value'))
+    expect((await findByLabelText('Repeat password')).getAttribute('value'))
       .toBe('secretPassword')
     expect(queryByText('sign up').disabled).toBeTruthy()
 
     // Mismatch
-    fireEvent.change(queryByLabelText('Password:'), {
+    fireEvent.change(queryByLabelText(/Password/), {
       target: {
         value: 'secretPassword2'
       }
     })
-    expect((await findByText("Password doesn't match!")).dataset.hide).toBe('false')
+    expect(await findByText("Password doesn't match!")).toBeTruthy()
 
-    fireEvent.change(queryByLabelText('Repeat password:'), {
+    fireEvent.change(queryByLabelText('Repeat password', { exact: false }), {
       target: {
         value: 'secretPassword2'
       }
     })
-    expect((await findByText("Password doesn't match!")).dataset.hide).toBe('true')
 
     // Crypto password input
-    expect(queryByLabelText('Encryption password:')).toBeTruthy()
-    fireEvent.change(queryByLabelText('Encryption password:'), {
+    expect(await findByLabelText(/Encryption password/)).toBeTruthy()
+    expect(queryByText("Password doesn't match!")).toBeNull()
+
+    fireEvent.change(queryByLabelText(/Encryption password/), {
       target: {
         value: 'cryptoPassword'
       }
     })
-    expect((await findByLabelText('Encryption password:')).getAttribute('value'))
+    expect((await findByLabelText(/^Encryption password/)).getAttribute('value'))
       .toBe('cryptoPassword')
     expect(queryByText('sign up').disabled).toBeTruthy()
 
     // Crypto password 2 input
-    expect(queryByLabelText('Repeat encryption password:')).toBeTruthy()
-    fireEvent.change(queryByLabelText('Repeat encryption password:'), {
+    expect(queryByLabelText(/Repeat encryption password/)).toBeTruthy()
+    fireEvent.change(queryByLabelText(/Repeat encryption password/), {
       target: {
         value: 'cryptoPassword'
       }
     })
-    expect((await findByLabelText('Repeat encryption password:')).getAttribute('value'))
+    expect((await findByLabelText(/Repeat encryption password/)).getAttribute('value'))
       .toBe('cryptoPassword')
     expect(queryByText('sign up').disabled).toBeFalsy()
 
     // Mismatch
-    fireEvent.change(queryByLabelText('Encryption password:'), {
+    fireEvent.change(queryByLabelText(/^Encryption password/), {
       target: {
         value: 'secretPassword'
       }
     })
-    expect((await findByText("Encryption password doesn't match!")).dataset.hide).toBe('false')
+    expect(await findByText("Encryption password doesn't match!")).toBeTruthy()
     expect(queryByText('sign up').disabled).toBeTruthy()
 
-    fireEvent.change(queryByLabelText('Repeat encryption password:'), {
+    fireEvent.change(queryByLabelText(/Repeat encryption password/), {
       target: {
         value: 'secretPassword'
       }
     })
-    expect((await findByText("Encryption password doesn't match!")).dataset.hide).toBe('true')
-    expect(queryByText('sign up').disabled).toBeFalsy()
+    expect((await findByText('sign up')).disabled).toBeFalsy()
+    expect(queryByText("Encryption password doesn't match!")).toBeNull()
 
     fireEvent.click(queryByText('sign up'))
     expect(dispatch.mock.calls.length).toBe(1)
@@ -214,43 +215,43 @@ describe('singIn', () => {
     expect(dispatch.mock.calls.length).toBe(0)
 
     // Username input
-    expect(queryByLabelText('Username / email:')).toBeTruthy()
-    fireEvent.change(queryByLabelText('Username / email:'), {
+    expect(queryByLabelText('Username / email', { exact: false })).toBeTruthy()
+    fireEvent.change(queryByLabelText('Username / email', { exact: false }), {
       target: {
         value: 'testery.mactestface@example.com'
       }
     })
-    expect((await findByLabelText('Username / email:')).getAttribute('value'))
+    expect((await findByLabelText('Username / email', { exact: false })).getAttribute('value'))
       .toBe('testery.mactestface@example.com')
     expect(queryByText('sign in').disabled).toBeTruthy()
 
     // Password input
-    expect(queryByLabelText('Password:')).toBeTruthy()
-    fireEvent.change(queryByLabelText('Password:'), {
+    expect(queryByLabelText(/^Password/)).toBeTruthy()
+    fireEvent.change(queryByLabelText(/^Password/), {
       target: {
         value: 'secretPassword'
       }
     })
-    expect((await findByLabelText('Password:')).getAttribute('value'))
+    expect((await findByLabelText(/^Password/)).getAttribute('value'))
       .toBe('secretPassword')
     expect(queryByText('sign in').disabled).toBeTruthy()
 
     // Password 2 input
-    expect(queryByLabelText('Repeat password:')).toBeNull()
+    expect(queryByLabelText(/Repeat password/)).toBeNull()
 
     // Crypto password input
-    expect(queryByLabelText('Encryption password:')).toBeTruthy()
-    fireEvent.change(queryByLabelText('Encryption password:'), {
+    expect(queryByLabelText(/Encryption password/)).toBeTruthy()
+    fireEvent.change(queryByLabelText(/Encryption password/), {
       target: {
         value: 'cryptoPassword'
       }
     })
-    expect((await findByLabelText('Encryption password:')).getAttribute('value'))
+    expect((await findByLabelText(/Encryption password/)).getAttribute('value'))
       .toBe('cryptoPassword')
     expect(queryByText('sign in').disabled).toBeFalsy()
 
     // Crypto password 2 input
-    expect(queryByLabelText('Repeat encryption password:')).toBeNull()
+    expect(queryByLabelText(/Repeat encryption password/)).toBeNull()
 
     fireEvent.click(queryByText('sign in'))
     expect(dispatch.mock.calls.length).toBe(1)
