@@ -39,8 +39,8 @@ it('should call changeEncryptionPassword only if the input is valid', async () =
     return Promise.resolve()
   })
 
-  const resetKeyLabel = 'Reset-key:'
-  const password1Label = 'New encryption Password'
+  const resetKeyLabel = /Reset-key/
+  const password1Label = /New\sencryption\sPassword/
   const password2Label = 'Repeat new password'
   const changePasswordText = 'change encryption password'
 
