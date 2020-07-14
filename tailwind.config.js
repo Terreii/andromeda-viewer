@@ -9,7 +9,8 @@ module.exports = {
     extend: {}
   },
   variants: {
-    boxShadow: ['responsive', 'hover', 'focus', 'focus-within']
+    boxShadow: ['responsive', 'hover', 'focus', 'focus-within'],
+    textColor: ['responsive', 'hover', 'focus', 'visited']
   },
   plugins: [
     require('@tailwindcss/custom-forms')

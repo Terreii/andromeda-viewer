@@ -6,8 +6,6 @@ import React, { useState, useEffect } from 'react'
 
 import ChatMessagesList from './chatMessagesList'
 
-import styles from './chatDialog.module.css'
-
 export default function ChatDialog ({ isIM = false, data = [], names, sendTo, loadHistory }) {
   const [text, setText] = useState('')
 
@@ -39,17 +37,17 @@ export default function ChatDialog ({ isIM = false, data = [], names, sendTo, lo
         names={names}
         onScrolledTop={doLoadHistory}
       />
-      <form className={styles.InputRow} onSubmit={send}>
+      <form className='flex flex-row m-2' onSubmit={send}>
         <input
           type='text'
-          className={styles.TextBox}
+          className='flex-grow flex-shrink-0 form-input'
           name='chatInput'
           placeholder={placeholderText}
           aria-label={placeholderText}
           value={text}
           onChange={event => { setText(event.target.value) }}
         />
-        <button className='flex-initial btn btn-primary'>send</button>
+        <button className='flex-initial ml-2 btn btn-primary'>send</button>
       </form>
     </>
   )
