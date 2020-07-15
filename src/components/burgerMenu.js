@@ -17,8 +17,6 @@ import { signOut } from '../actions/viewerAccount'
 import SignInDialog from './modals/signIn'
 import SignOutDialog from './modals/signOut'
 
-import './burgerMenu.css'
-
 const SlideMenu = reduxBurgerMenu(Menu)
 
 export default function BurgerMenu ({ isLoggedIn }) {

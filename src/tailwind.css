@@ -76,6 +76,64 @@
   }
 }
 
+/* Burger Menu */
+.bm-burger-button {
+  @apply fixed top-0 left-0 w-10 h-8 mt-2 ml-2;
+}
+.bm-burger-button > button:focus {
+  @apply rounded shadow-outline outline-none;
+}
+
+.bm-overlay {
+  @apply top-0;
+}
+
+.bm-burger-bars {
+  @apply bg-gray-100 rounded-lg;
+}
+
+.bm-morph-shape {
+  @apply text-gray-700 fill-current;
+}
+
+.bm-menu-wrap {
+  @apply top-0;
+}
+
+.bm-menu {
+  @apply px-6 pt-10 pb-0 text-lg bg-gray-700;
+}
+.bm-menu button, .bm-menu span, .bm-menu a {
+  @apply font-sans text-gray-400;
+}
+.bm-menu button:hover, .bm-menu span:hover, .bm-menu a:hover {
+  @apply text-red-400;
+}
+.bm-menu button:focus, .bm-menu span:focus, .bm-menu a:focus {
+  @apply rounded shadow-outline outline-none;
+}
+
+.bm-item-list button, .bm-item-list span, .bm-item-list a {
+  @apply px-0 py-3 font-bold text-left;
+}
+.bm-item-list button span, .bm-item-list span span {
+  @apply ml-1;
+}
+
+.bm-menu a.active {
+  @apply opacity-75;
+}
+
+.bm-cross {
+  @apply bg-gray-400;
+}
+.bm-cross:hover {
+  @apply bg-red-400;
+}
+.bm-cross-button > button:focus {
+  @apply rounded shadow-outline outline-none;
+}
+
 @tailwind components;
 
 @tailwind utilities;

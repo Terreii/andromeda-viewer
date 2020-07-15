@@ -8,7 +8,7 @@ import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
 
 import { viewerName } from './viewerInfo'
 
-import { AppContainer, LoadableChatComponent } from './components/main'
+import { LoadableChatComponent } from './components/main'
 import Login from './components/login'
 import GlobalModals from './components/modals/globalModals'
 import TopMenuBar from './components/topBar'
@@ -48,7 +48,7 @@ function App () {
   useDocumentTitle()
 
   return (
-    <AppContainer>
+    <div className='w-screen p-0 m-0 font-sans'>
       <Switch>
         <Route exact path='/'>
           <Login isSignedIn={isSignedIn} />
@@ -67,7 +67,7 @@ function App () {
       </Switch>
       <TopMenuBar />
       <GlobalModals />
-    </AppContainer>
+    </div>
   )
 }
 
@@ -76,9 +76,10 @@ function useDocumentTitle () {
   const isLoggedIn = useSelector(selectIsLoggedIn)
 
   useEffect(() => {
+    const viewerNameCapital = viewerName.charAt(0).toUpperCase() + viewerName.slice(1)
     document.title = isLoggedIn
-      ? `${selfName.getName()} - ${viewerName}`
-      : viewerName
+      ? `${selfName.getName()} - ${viewerNameCapital}`
+      : viewerNameCapital
   }, [isLoggedIn, selfName])
 }
 
