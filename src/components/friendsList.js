@@ -7,7 +7,6 @@ import { selectFriends } from '../bundles/friends'
 
 import { updateRights } from '../actions/friendsActions'
 
-import styles from './infoList.module.css'
 import chatBubble from '../icons/chat_bubble.svg'
 
 /*
@@ -41,7 +40,7 @@ function FriendRow ({ friend, name, skipLink, onRightsChanged, startNewIMChat })
         <input
           key={`friend-${friend.id}-${key}-${rightName}`}
           type='checkbox'
-          className={styles.ListItemInput}
+          className='m-1 form-checkbox'
           disabled={key === 'rightsHas'} // on the rights friend has given me
           checked={rightsMap[rightName]}
           title={titles[key][rightName]}
@@ -56,15 +55,28 @@ function FriendRow ({ friend, name, skipLink, onRightsChanged, startNewIMChat })
   })
 
   return (
-    <li id={'friends_list_' + friend.id} className={styles.Item}>
-      {friend.online
-        ? <div aria-label='online' title='online' className={styles.friendOnline} />
-        : <div aria-label='offline' title='offline' className={styles.friendOffline} />}
-      <div className={styles.Name}>{name}</div>
-      <a className={styles.SkipToContentLink} href={skipLink}>{`Skip ${name}`}</a>
+    <li
+      id={'friends_list_' + friend.id}
+      className='flex flex-row items-center p-1 rounded even:bg-gray-400'
+    >
+      <div
+        id={`online_status_${friend.id}`}
+        aria-label={friend.online ? 'online' : 'offline'}
+        title={friend.online ? 'online' : 'offline'}
+        className={`w-2 h-2 my-auto mr-1 border rounded-full ${friend.online
+          ? 'bg-green-400 border-green-400'
+          : 'border-black'
+        }`}
+      />
+      <div className='flex-auto' aria-labelledby={`online_status_${friend.id}`}>
+        {name}
+      </div>
+
+      <a className='sr-only' href={skipLink}>{`Skip ${name}`}</a>
+
       <button
         type='button'
-        className={styles.ListItemInput}
+        className='m-1 rounded focus:outline-none focus:shadow-outline'
         onClick={event => { startNewIMChat(IMChatType.personal, friend.id, name) }}
       >
         <img src={chatBubble} height='20' width='20' alt={`Start new chat with ${name}`} />
@@ -79,8 +91,8 @@ export default function FriendsList ({ names, startNewIMChat }) {
   const friends = useSelector(selectFriends)
 
   return (
-    <main className={styles.Container} aria-label='Friends'>
-      <ul className={styles.List}>
+    <main className='p-4 overflow-y-scroll' aria-label='Friends'>
+      <ul className='max-w-xl pl-4 mx-auto list-none'>
         {friends.map((friend, index, all) => {
           const name = friend.id in names ? names[friend.id].getDisplayName() : friend.id
 

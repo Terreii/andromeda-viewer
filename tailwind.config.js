@@ -9,6 +9,7 @@ module.exports = {
     extend: {}
   },
   variants: {
+    backgroundColor: ['responsive', 'even', 'hover', 'focus'],
     boxShadow: ['responsive', 'hover', 'focus', 'focus-within'],
     textColor: ['responsive', 'hover', 'focus', 'visited']
   },
