@@ -99,7 +99,7 @@
     "textlint-rule-common-misspellings": "^1.0.1",
     "textlint-rule-rousseau": "^1.4.6",
     "typedoc": "^0.17.7",
-    "typescript": "^3.9.3",
+    "typescript": "^3.9.6",
     "weallbehave": "^1.2.0",
     "weallcontribute": "^1.0.9"
   },
