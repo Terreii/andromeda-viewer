@@ -109,6 +109,6 @@ A LLSD-List with all capabilities-names gets pushed to the SeedCapabilities. Res
 
 ### EventQueueGet
 
-[`EventQueueGet`](http://wiki.secondlife.com/wiki/EventQueueGet) is a special capability: it is one of the two ways the sim-server can push events to the client/viewer. The technique used here is __HTTP Long Polling__. The other being UDP.
+The capability [`EventQueueGet`](http://wiki.secondlife.com/wiki/EventQueueGet) is one of the two ways the sim-server can push events to the client/viewer. The technique used here is __HTTP Long Polling__. The other being UDP.
 
 You can find more in its [documentation](http://wiki.secondlife.com/wiki/EventQueueGet).
