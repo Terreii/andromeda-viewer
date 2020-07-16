@@ -79,7 +79,7 @@
     "open-cli": "^6.0.1",
     "postcss-cli": "^7.1.1",
     "react": "^16.13.1",
-    "react-burger-menu": "^2.6.13",
+    "react-burger-menu": "^2.7.0",
     "react-dom": "^16.13.1",
     "react-portal": "^4.2.1",
     "react-redux": "^7.2.0",
