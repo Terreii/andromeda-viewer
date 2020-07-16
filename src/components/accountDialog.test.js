@@ -164,7 +164,7 @@ it('should change the password', async () => {
   expect(updateAccount.mock.calls.length).toBe(startUpdateCallCount)
 
   // enter new password
-  fireEvent.change(await findByLabelText('Repeat password'), {
+  fireEvent.change(await findByLabelText('Repeat password', { exact: false }), {
     target: {
       value: 'newPassword'
     }

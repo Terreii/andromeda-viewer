@@ -7,9 +7,6 @@ import { signOut, changeEncryptionPassword } from '../../actions/viewerAccount'
 
 import { useAutoFocus } from '../../hooks/utils'
 
-import styles from './unlockAndSignOut.module.css'
-import formStyles from '../formElements.module.css'
-
 export default function ResetPasswordDialog ({ type, dialog }) {
   const dispatch = useDispatch()
 
@@ -58,14 +55,14 @@ export default function ResetPasswordDialog ({ type, dialog }) {
   const doAutoFocus = useAutoFocus()
 
   return (
-    <Modal title='Reset password' dialog={dialog} showOnClose backdrop>
+    <Modal title='Reset password' dialog={dialog} showOnClose>
       <form onSubmit={onSubmit}>
-        <div className={formStyles.FormField}>
-          <label htmlFor='oldInput'>{isEncryption ? 'Reset-key' : 'Password'}:</label>
+        <label className='flex flex-col m-1'>
+          <span>{isEncryption ? 'Reset-key' : 'Password'}</span>
           <input
             id='oldInput'
             type='text'
-            className={formStyles.Input}
+            className='block w-full mt-1 text-gray-900 form-input'
             value={resetKey}
             onChange={event => { setResetKey(event.target.value) }}
             autoFocus
@@ -75,25 +72,26 @@ export default function ResetPasswordDialog ({ type, dialog }) {
             maxLength={isEncryption ? 32 : undefined}
             disabled={isChanging}
           />
-          <small id='helpOld' className={formStyles.Help}>
+          <small id='helpOld' className='leading-6 text-gray-600'>
             Please enter one of your reset-keys
           </small>
-          <small
-            id='oldInputError'
-            className={formStyles.Error}
-            data-hide={errorMessage == null || errorMessage.length === 0}
-            role='alert'
-          >
-            {errorMessage}
-          </small>
-        </div>
+          {errorMessage && errorMessage.length > 0 && (
+            <small
+              id='oldInputError'
+              className='px-4 py-2 mt-1 leading-6 text-red-800 bg-red-200 border border-red-500 rounded'
+              role='alert'
+            >
+              {errorMessage}
+            </small>
+          )}
+        </label>
 
-        <div className={formStyles.FormField}>
-          <label htmlFor='newPassword'>New {isEncryption ? 'encryption ' : ''}Password</label>
+        <label className='flex flex-col m-1'>
+          <span>{isEncryption ? 'New encryption Password' : 'New Password'}</span>
           <input
             id='newPassword'
             type='password'
-            className={formStyles.Input}
+            className='block w-full mt-1 text-gray-900 form-input'
             value={password1}
             onChange={event => { setPassword1(event.target.value) }}
             required
@@ -101,15 +99,17 @@ export default function ResetPasswordDialog ({ type, dialog }) {
             aria-describedby='newPasswordHelp'
             disabled={isChanging}
           />
-          <small id='newPasswordHelp' className={formStyles.Help}>Minimal length: 8 characters!</small>
-        </div>
+          <small id='newPasswordHelp' className='leading-6 text-gray-600'>
+            Minimal length: 8 characters!
+          </small>
+        </label>
 
-        <div className={formStyles.FormField}>
+        <div className='flex flex-col m-1'>
           <label htmlFor='newPassword2'>Repeat new password</label>
           <input
             id='newPassword2'
             type='password'
-            className={formStyles.Input}
+            className='block w-full mt-1 text-gray-900 form-input'
             value={password2}
             onChange={event => { setPassword2(event.target.value) }}
             required
@@ -117,20 +117,21 @@ export default function ResetPasswordDialog ({ type, dialog }) {
             aria-describedby='secondPwInputError'
             disabled={isChanging}
           />
-          <small
-            id='secondPwInputError'
-            className={formStyles.Error}
-            data-hide={password2.length === 0 || password1 === password2}
-            role='alert'
-          >
-            Password doesn't match!
-          </small>
+          {password2.length > 0 && password1 !== password2 && (
+            <small
+              id='secondPwInputError'
+              className='px-4 py-2 mt-1 leading-6 text-red-800 bg-red-200 border border-red-500 rounded'
+              role='alert'
+            >
+              Password doesn't match!
+            </small>
+          )}
         </div>
 
-        <div className={styles.ButtonsRow}>
+        <div className='flex flex-row-reverse justify-between p-1 mt-3'>
           <button
             type='button'
-            className={formStyles.SecondaryButton}
+            className='btn btn-secondary'
             onClick={onCancel}
             disabled={isChanging}
           >
@@ -138,7 +139,7 @@ export default function ResetPasswordDialog ({ type, dialog }) {
           </button>
           <button
             type='button'
-            className={formStyles.DangerButton}
+            className='btn btn-danger'
             onClick={() => {
               dispatch(signOut())
             }}
@@ -147,8 +148,8 @@ export default function ResetPasswordDialog ({ type, dialog }) {
             sign out
           </button>
         </div>
-        <div className={styles.ButtonsRow}>
-          <button className={formStyles.PrimaryButton} disabled={!canChange}>
+        <div className='flex flex-row-reverse justify-between p-1 mt-3'>
+          <button className='btn btn-primary' disabled={!canChange}>
             change {isEncryption ? 'encryption ' : ''}password
           </button>
         </div>

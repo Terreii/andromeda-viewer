@@ -58,12 +58,12 @@ it('should login while not signed', async () => {
     />
   )
 
-  const nameInput = queryByLabelText('Avatar:')
+  const nameInput = queryByLabelText('Avatar')
   expect(nameInput).toBeTruthy()
   expect(nameInput.nodeName).toBe('INPUT')
   expect(nameInput.required).toBeTruthy()
 
-  const passwordInput = queryByLabelText('Password:')
+  const passwordInput = queryByLabelText('Password')
   expect(passwordInput).toBeTruthy()
   expect(passwordInput.nodeName).toBe('INPUT')
   expect(passwordInput.type).toBe('password')
@@ -86,7 +86,7 @@ it('should login while not signed', async () => {
   })
 
   expect((await findByText('Login')).disabled).toBeTruthy()
-  expect(queryByLabelText('Avatar:').validity.valid).toBeTruthy()
+  expect(queryByLabelText('Avatar').validity.valid).toBeTruthy()
 
   fireEvent.change(passwordInput, {
     target: {
@@ -96,7 +96,7 @@ it('should login while not signed', async () => {
 
   const activeLoginButton = await findByText('Login')
   expect(activeLoginButton.disabled).toBeFalsy()
-  expect(queryByLabelText('Password:').validity.valid).toBeTruthy()
+  expect(queryByLabelText('Password').validity.valid).toBeTruthy()
 
   fireEvent.submit(activeLoginButton)
 
@@ -104,10 +104,10 @@ it('should login while not signed', async () => {
     ['Tester', 'secret', 'Second Life', false]
   ])
 
-  fireEvent.submit(await findByLabelText('Avatar:'))
+  fireEvent.submit(await findByLabelText('Avatar'))
   expect(onLogin.mock.calls[1]).toEqual(['Tester', 'secret', 'Second Life', false])
 
-  fireEvent.submit(await findByLabelText('Password:'))
+  fireEvent.submit(await findByLabelText('Password'))
   expect(onLogin.mock.calls[2]).toEqual(['Tester', 'secret', 'Second Life', false])
 })
 
@@ -135,12 +135,12 @@ it('signed in login works', async () => {
     />
   )
 
-  const nameInput = queryByLabelText('Avatar:')
+  const nameInput = queryByLabelText('Avatar')
   expect(nameInput).toBeTruthy()
   expect(nameInput.nodeName).toBe('INPUT')
   expect(nameInput.required).toBeTruthy()
 
-  const passwordInput = queryByLabelText('Password:')
+  const passwordInput = queryByLabelText('Password')
   expect(passwordInput).toBeTruthy()
   expect(passwordInput.nodeName).toBe('INPUT')
   expect(passwordInput.type).toBe('password')
@@ -163,7 +163,7 @@ it('signed in login works', async () => {
   })
 
   expect((await findByText('Login')).disabled).toBeTruthy()
-  expect(queryByLabelText('Avatar:').validity.valid).toBeTruthy()
+  expect(queryByLabelText('Avatar').validity.valid).toBeTruthy()
 
   fireEvent.change(passwordInput, {
     target: {
@@ -173,7 +173,7 @@ it('signed in login works', async () => {
 
   const activeLoginButton = await findByText('Login')
   expect(activeLoginButton.disabled).toBeFalsy()
-  expect(queryByLabelText('Password:').validity.valid).toBeTruthy()
+  expect(queryByLabelText('Password').validity.valid).toBeTruthy()
 
   fireEvent.submit(activeLoginButton)
 
@@ -181,10 +181,10 @@ it('signed in login works', async () => {
     ['Tester', 'secret', 'Second Life', true]
   ])
 
-  fireEvent.submit(await findByLabelText('Avatar:'))
+  fireEvent.submit(await findByLabelText('Avatar'))
   expect(onLogin.mock.calls[1]).toEqual(['Tester', 'secret', 'Second Life', true])
 
-  fireEvent.submit(await findByLabelText('Password:'))
+  fireEvent.submit(await findByLabelText('Password'))
   expect(onLogin.mock.calls[2]).toEqual(['Tester', 'secret', 'Second Life', true])
 
   fireEvent.click(await findByLabelText('Save / Add'))
@@ -217,7 +217,7 @@ it('should add a new grid', async () => {
     />
   )
 
-  const gridSelect = queryByLabelText('Grid:')
+  const gridSelect = queryByLabelText('Grid')
   expect(gridSelect).toBeTruthy()
   expect(gridSelect.nodeName).toBe('SELECT')
   expect(gridSelect.value).toBe('Second Life')
@@ -260,13 +260,13 @@ it('should add a new grid', async () => {
     }
   })
 
-  fireEvent.change(queryByLabelText('Avatar:'), {
+  fireEvent.change(queryByLabelText('Avatar'), {
     target: {
       value: 'Tester'
     }
   })
 
-  fireEvent.change(await findByLabelText('Password:'), {
+  fireEvent.change(await findByLabelText('Password'), {
     target: {
       value: 'secret'
     }
@@ -335,13 +335,13 @@ it('should pass aXe', async () => {
   expect(await axe(selectedContainer)).toHaveNoViolations()
 
   // adding new grid
-  fireEvent.change(queryByLabelText('Grid:'), {
+  fireEvent.change(queryByLabelText('Grid'), {
     target: {
       value: ''
     }
   })
 
-  await findByLabelText('Grid:')
+  await findByLabelText('Grid')
 
   expect(await axe(selectedContainer)).toHaveNoViolations()
 })

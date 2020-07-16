@@ -9,8 +9,6 @@ import { signOut, unlock } from '../../actions/viewerAccount'
 
 import { useAutoFocus } from '../../hooks/utils'
 
-import styles from './unlockAndSignOut.module.css'
-import formStyles from '../formElements.module.css'
 import lockIcon from '../../icons/black_lock.svg'
 
 export default function UnlockDialog () {
@@ -49,26 +47,30 @@ export default function UnlockDialog () {
   const resetPasswordState = useDialogState()
 
   const icon = (
-    <img
-      className={styles.LockItem}
-      src={lockIcon}
-      height='18'
-      width='18'
-      alt=''
-    />
+    <div>
+      <img
+        className='object-contain m-0 mt-1 mr-1'
+        src={lockIcon}
+        height='30'
+        width='30'
+        alt=''
+      />
+    </div>
   )
 
   return (
-    <Modal title='Unlock' icon={icon} dialog={dialog} backdrop notCloseable>
-      <form className={styles.Content} onSubmit={doUnlock}>
-        <span>Please enter your <i>Encryption-Password</i> to unlock this app!</span>
+    <Modal title='Unlock' icon={icon} dialog={dialog} notCloseable>
+      <form className='flex flex-col' onSubmit={doUnlock}>
+        <span className='m-1'>
+          Please enter your <em>Encryption-Password</em> to unlock this app!
+        </span>
 
-        <div className={styles.PasswordRow}>
-          <label htmlFor='unlockPasswordIn'>Password:</label>
+        <label className='flex flex-col m-1'>
+          <span>Password</span>
           <input
             id='unlockPasswordIn'
             type='password'
-            className={formStyles.Input}
+            className='block w-full mt-1 text-gray-900 form-input'
             autoComplete='current-password'
             autoFocus
             ref={doAutoFocus}
@@ -77,30 +79,31 @@ export default function UnlockDialog () {
             onChange={event => { setPassword(event.target.value) }}
             aria-describedby='resetPassword'
           />
-          <small id='resetPassword' className={formStyles.Help}>
+          <small id='resetPassword' className='leading-6 text-gray-600'>
             If you did forget your encryption-password?
             <DialogDisclosure
               {...resetPasswordState}
               id='resetPasswordButton'
-              className={styles.ResetButton}
+              className='inline p-0 pl-4 m-0 ml-1 text-blue-600 underline border-0 cursor-pointer hover:text-blue-800 focus:text-blue-800'
             >
               Reset password
             </DialogDisclosure>
           </small>
-          <small
-            id='unlockError'
-            className={formStyles.Error}
-            data-hide={errorText == null}
-            role='alert'
-          >
-            {errorText}
-          </small>
-        </div>
-        <div className={styles.ButtonsRow}>
+          {errorText && (
+            <small
+              id='unlockError'
+              className='px-4 py-2 mt-1 leading-6 text-red-800 bg-red-200 border border-red-500 rounded'
+              role='alert'
+            >
+              {errorText}
+            </small>
+          )}
+        </label>
+        <div className='flex flex-row justify-between p-1 mt-3'>
           <button
             id='signOutButton'
             type='button'
-            className={formStyles.DangerButton}
+            className='btn btn-danger'
             onClick={event => {
               event.preventDefault()
               dispatch(signOut())
@@ -112,7 +115,7 @@ export default function UnlockDialog () {
 
           <button
             id='unlockButton'
-            className={formStyles.PrimaryButton}
+            className='btn btn-primary'
             disabled={isUnlocking || password.length < 8}
           >
             Unlock

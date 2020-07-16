@@ -1,14 +1,12 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
-import { useDialogState, Dialog, DialogBackdrop, Portal } from 'reakit'
+import { useDialogState, Dialog, DialogBackdrop } from 'reakit'
 
 import { closeErrorMessage } from '../../bundles/session'
 
 import { useAutoFocus } from '../../hooks/utils'
 
 import closeIcon from '../../icons/icon_close.svg'
-import styles from './modal.module.css'
-import formStyles from '../formElements.module.css'
 
 /**
  * Displays session error messages.
@@ -21,21 +19,19 @@ export default function ErrorDialog ({ errorMessage }) {
   const autoFocusRef = useAutoFocus()
 
   return (
-    <>
-      {process.env.NODE_ENV !== 'test' && (
-        <Portal>
-          <DialogBackdrop {...dialog} className={styles.Background} />
-        </Portal>
-      )}
+    <DialogBackdrop
+      {...dialog}
+      className='fixed top-0 left-0 z-50 flex items-center justify-center w-screen h-screen bg-black bg-opacity-50'
+    >
       <Dialog
         {...dialog}
-        className={styles.Error}
+        className='relative z-50 flex flex-col max-h-screen mx-auto text-gray-900 bg-red-400 rounded'
         role='alertdialog'
         aria-label='Error'
       >
-        <div className={styles.Header}>
+        <div className='flex flex-row-reverse justify-between mx-1 mt-1 mb-0 border-b border-black'>
           <button
-            className={'closeModal ' + styles.CloseButton}
+            className='p-0 bg-transparent border-0 rounded focus:outline-none focus:shadow-outline'
             onClick={event => {
               event.preventDefault()
               dialog.hide()
@@ -43,9 +39,9 @@ export default function ErrorDialog ({ errorMessage }) {
           >
             <img src={closeIcon} alt='close error dialog' height='32' width='32' />
           </button>
-          <h4 className={styles.Title}>Error!</h4>
+          <h4 className='mx-5 mt-2 mb-1'>Error!</h4>
         </div>
-        <article className={styles.Content}>
+        <article className='relative flex flex-col m-4 overflow-y-scroll overscroll-y-contain'>
           {errorMessage.split('\n').map((line, index) => (
             <React.Fragment key={index}>
               {line}
@@ -55,7 +51,7 @@ export default function ErrorDialog ({ errorMessage }) {
 
           <button
             type='button'
-            className={formStyles.Button + ' ' + styles.ErrorButton}
+            className='mt-2 btn'
             onClick={() => {
               dispatch(closeErrorMessage())
               dialog.hide()
@@ -66,6 +62,6 @@ export default function ErrorDialog ({ errorMessage }) {
           </button>
         </article>
       </Dialog>
-    </>
+    </DialogBackdrop>
   )
 }

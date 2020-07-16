@@ -6,7 +6,6 @@ import { useName } from '../../hooks/names'
 
 import { FriendOnlineStateChangeNotification } from '../../types/chat'
 
-import formStyles from '../formElements.module.css'
 import styles from './notifications.module.css'
 
 export default function TextNotificationComponent (
@@ -20,7 +19,7 @@ export default function TextNotificationComponent (
       <p>{`${friendName?.getDisplayName() ?? data.friendId} is ${stateText}`}</p>
 
       <div className={styles.ButtonsRow}>
-        <button className={formStyles.PrimaryButton} onClick={onClose}>
+        <button className='btn btn-primary' onClick={onClose}>
           OK
         </button>
       </div>

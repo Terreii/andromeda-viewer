@@ -32,3 +32,4 @@ docs/types/
 src/network/messages.json
 *.map
 .hoodie
+src/styles.css

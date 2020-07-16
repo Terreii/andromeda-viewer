@@ -44,7 +44,7 @@ describe('buttons', () => {
     expect(signUpOpener.id).toBe('burgerMenuSignUp')
 
     // viewer sign out
-    expect(queryByText('Log out from Viewer')).toBeNull()
+    expect(queryByText('Log out from Viewer >>')).toBeNull()
     // avatar logout
     expect(queryByText('log out')).toBeNull()
   })
@@ -84,7 +84,7 @@ describe('buttons', () => {
     expect(signUpOpener.id).toBe('burgerMenuSignUp')
 
     // viewer sign out
-    expect(queryByText('Log out from Viewer')).toBeNull()
+    expect(queryByText('Log out from Viewer >>')).toBeNull()
 
     // avatar logout
     const logOut = queryByText('log out')
@@ -116,7 +116,7 @@ describe('buttons', () => {
     expect(queryByText('Sign up to Andromeda')).toBeNull()
 
     // viewer sign out
-    const signOut = queryByText('Log out from Viewer')
+    const signOut = queryByText('Log out from Viewer >>')
     expect(signOut).toBeTruthy()
     expect(signOut.nodeName).toBe('BUTTON')
     expect(signOut.id).toBe('sidebarSignOut')
@@ -158,7 +158,7 @@ describe('buttons', () => {
     expect(queryByText('Sign up to Andromeda')).toBeNull()
 
     // viewer sign out
-    const signOut = queryByText('Log out from Viewer')
+    const signOut = queryByText('Log out from Viewer >>')
     expect(signOut).toBeTruthy()
     expect(signOut.nodeName).toBe('BUTTON')
     expect(signOut.id).toBe('sidebarSignOut')

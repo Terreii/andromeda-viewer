@@ -7,7 +7,6 @@ import { useName } from '../../hooks/names'
 
 import { LoadURLNotification } from '../../types/chat'
 
-import formStyles from '../formElements.module.css'
 import styles from './notifications.module.css'
 
 export default function LoadURL ({ data, onClose }: ComponentArguments<LoadURLNotification>) {
@@ -26,7 +25,7 @@ export default function LoadURL ({ data, onClose }: ComponentArguments<LoadURLNo
       </div>
 
       <div className={styles.ButtonsRow}>
-        <button className={formStyles.PrimaryButton} onClick={onClose}>
+        <button className='btn btn-primary' onClick={onClose}>
           OK
         </button>
       </div>

@@ -26,8 +26,6 @@ import { selectActiveTab, changeChatTab } from '../bundles/session'
 
 import { IMChatType, IMDialog } from '../types/chat'
 
-import style from './chatBox.module.css'
-
 export default function ChatBox () {
   const dispatch = useDispatch()
   const localChat = useSelector(selectLocalChat)
@@ -64,7 +62,14 @@ export default function ChatBox () {
       : chat.name
 
     tabs.push(
-      <Tab {...tab} key={`tab_${id}`} id={`tab_${id}`} className={style.tabButton}>
+      <Tab
+        {...tab}
+        key={`tab_${id}`}
+        id={`tab_${id}`}
+        className={'flex-auto px-4 py-2 mt-px -mb-px bg-white border-b border-black rounded-t ' +
+          'focus:shadow-outline focus:outline-none ' +
+          (tab.selectedId === `tab_${id}` ? 'border' : '')}
+      >
         {name || id}
       </Tab>
     )
@@ -73,7 +78,7 @@ export default function ChatBox () {
       <TabPanel
         {...tab}
         key={`panel_${id}`}
-        className={style.panel}
+        className='flex flex-col flex-auto h-screen pt-24 m-1 -mt-24'
         tabIndex='-1'
       >
         <ChatDialog
@@ -96,49 +101,91 @@ export default function ChatBox () {
   }
 
   return (
-    <div className={style.container}>
-      <TabList {...tab} className={style.list} aria-label='Chats'>
-        <Tab {...tab} id='tab_friends' className={style.tabButton}>Friends</Tab>
+    <div className='relative flex flex-col w-screen h-screen pt-12 border-t-2 border-transparent'>
+      <TabList
+        {...tab}
+        className='z-10 flex flex-row flex-wrap mx-2 space-x-1 border-b border-black'
+        aria-label='Chats'
+      >
+        <Tab
+          {...tab}
+          id='tab_friends'
+          className={'flex-auto px-4 py-2 mt-px -mb-px bg-white border-b border-black rounded-t ' +
+            'focus:shadow-outline focus:outline-none ' +
+            (tab.selectedId === 'tab_friends' ? 'border' : '')}
+        >
+          Friends
+        </Tab>
 
-        <Tab {...tab} id='tab_groups' className={style.tabButton}>Groups</Tab>
+        <Tab
+          {...tab}
+          id='tab_groups'
+          className={'flex-auto px-4 py-2 mt-px -mb-px bg-white border-b border-black rounded-t ' +
+            'focus:shadow-outline focus:outline-none ' +
+            (tab.selectedId === 'tab_groups' ? 'border' : '')}
+        >
+          Groups
+        </Tab>
 
         {shouldDisplayNotifications && (
           <Tab
             {...tab}
             id='tab_notifications'
-            className={style.tabButton}
+            className={'flex-auto px-4 py-2 mt-px -mb-px bg-white border-b border-black ' +
+              'rounded-t focus:shadow-outline focus:outline-none ' +
+              (tab.selectedId === 'tab_notifications' ? 'border' : '')}
           >
             Notifications
           </Tab>
         )}
 
-        <Tab {...tab} id='tab_local' className={style.tabButton}>Local</Tab>
+        <Tab
+          {...tab}
+          id='tab_local'
+          className={'flex-auto px-4 py-2 mt-px -mb-px bg-white border-b border-black ' +
+            'rounded-t focus:shadow-outline focus:outline-none ' +
+            (tab.selectedId === 'tab_local' ? 'border' : '')}
+        >
+          Local
+        </Tab>
 
         {tabs}
       </TabList>
 
-      <TabPanel {...tab} className={style.panel} tabIndex='-1'>
+      <TabPanel
+        {...tab}
+        className='flex flex-col flex-auto h-screen pt-24 m-1 -mt-24'
+        tabIndex='-1'
+      >
         <FriendsList
           names={names}
           startNewIMChat={doStartNewIMChat}
         />
       </TabPanel>
 
-      <TabPanel {...tab} className={style.panel} tabIndex='-1'>
+      <TabPanel
+        {...tab}
+        className='flex flex-col flex-auto h-screen pt-24 m-1 -mt-24'
+        tabIndex='-1'
+      >
         <GroupsList startNewIMChat={doStartNewIMChat} />
       </TabPanel>
 
       {shouldDisplayNotifications && (
         <TabPanel
           {...tab}
-          className={style.panel}
+          className='flex flex-col flex-auto h-screen pt-24 m-1 -mt-24'
           tabIndex='-1'
         >
           <Notifications />
         </TabPanel>
       )}
 
-      <TabPanel {...tab} className={style.panel} tabIndex='-1'>
+      <TabPanel
+        {...tab}
+        className='flex flex-col flex-auto h-screen pt-24 m-1 -mt-24'
+        tabIndex='-1'
+      >
         <ChatDialog
           data={localChat}
           names={names}
