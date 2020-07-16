@@ -80,4 +80,4 @@ For example could the map work with following selectors:
 
 ## Types
 
-Types defined in bundles are just for actions and internal usage. Selectors should return a type defined in the `types` directory.
+Types defined in bundles should be for action-types and internal usage. Selectors should return a type defined in the `types` directory.
