@@ -10,7 +10,6 @@ import { acceptFriendshipOffer, declineFriendshipOffer } from '../../actions/fri
 
 import { FriendshipOfferNotification } from '../../types/chat'
 
-import formStyles from '../formElements.module.css'
 import styles from './notifications.module.css'
 
 export default function FriendshipOffer (
@@ -37,11 +36,11 @@ export default function FriendshipOffer (
       </p>
 
       <div className={styles.ButtonsRow}>
-        <button className={formStyles.OkButton} onClick={onAccept}>
+        <button className='btn btn-ok' onClick={onAccept}>
           Accept
         </button>
 
-        <button className={formStyles.DangerButton} onClick={onDecline}>
+        <button className='btn btn-danger' onClick={onDecline}>
           Decline
         </button>
       </div>

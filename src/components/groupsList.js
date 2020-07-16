@@ -5,18 +5,17 @@ import { IMChatType } from '../types/chat'
 
 import { selectGroups } from '../bundles/groups'
 
-import styles from './infoList.module.css'
 import chatBubble from '../icons/chat_bubble.svg'
 
 function GroupRow ({ group, startNewIMChat }) {
   const name = group.name
 
   return (
-    <li className={styles.Item}>
-      <div className={styles.Name}>{name}</div>
+    <li className='flex flex-row items-center p-1 rounded even:bg-gray-400'>
+      <div className='flex-auto'>{name}</div>
       <button
         type='button'
-        className={styles.ListItemInput}
+        className='rounded focus:outline-none focus:shadow-outline'
         onClick={event => { startNewIMChat(IMChatType.group, group.id, name) }}
       >
         <img src={chatBubble} height='20' width='20' alt={`Start new chat with ${name}`} />
@@ -29,8 +28,8 @@ export default function GroupsList ({ startNewIMChat }) {
   const groups = useSelector(selectGroups)
 
   return (
-    <main className={styles.Container} aria-label='Groups'>
-      <ul className={styles.List}>
+    <main className='p-4 overflow-y-scroll' aria-label='Groups'>
+      <ul className='max-w-xl pl-4 mx-auto list-none'>
         {groups.map(group => (
           <GroupRow
             key={group.id}

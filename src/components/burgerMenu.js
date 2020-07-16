@@ -17,9 +17,6 @@ import { signOut } from '../actions/viewerAccount'
 import SignInDialog from './modals/signIn'
 import SignOutDialog from './modals/signOut'
 
-import styles from './topBar.module.css'
-import './burgerMenu.css'
-
 const SlideMenu = reduxBurgerMenu(Menu)
 
 export default function BurgerMenu ({ isLoggedIn }) {
@@ -48,7 +45,11 @@ export default function BurgerMenu ({ isLoggedIn }) {
     <SlideMenu>
       {isSignedIn
         ? (
-          <NavLink className={styles.BurgerMenuItem} to='/profile' onClick={doClose}>
+          <NavLink
+            className='text-lg text-white bg-transparent border-0'
+            to='/profile'
+            onClick={doClose}
+          >
             Signed in as
             <br />
             <small>{userName}</small>
@@ -57,7 +58,7 @@ export default function BurgerMenu ({ isLoggedIn }) {
         : (
           <SignInDialogOpener
             id='burgerMenuSignIn'
-            className={styles.BurgerMenuItem}
+            className='text-lg text-white bg-transparent border-0'
           >
             Sign into Andromeda
           </SignInDialogOpener>
@@ -66,7 +67,7 @@ export default function BurgerMenu ({ isLoggedIn }) {
       {!isSignedIn && (
         <SignInDialogOpener
           id='burgerMenuSignUp'
-          className={'menu-item ' + styles.BurgerMenuItem}
+          className='text-lg text-white bg-transparent border-0 menu-item'
           isSignUp
         >
           Sign up to Andromeda
@@ -76,13 +77,18 @@ export default function BurgerMenu ({ isLoggedIn }) {
       <hr />
 
       {!isLoggedIn && (
-        <NavLink className={styles.BurgerMenuItem} exact to='/' onClick={doClose}>
+        <NavLink
+          className='text-lg text-white bg-transparent border-0'
+          exact
+          to='/'
+          onClick={doClose}
+        >
           Avatar List
         </NavLink>
       )}
 
       {isLoggedIn && (
-        <span className={styles.BurgerMenuItem}>
+        <span className='text-lg text-white bg-transparent border-0'>
           Current Avatar:
           <br />
           {avatarName.toString()}
@@ -90,7 +96,11 @@ export default function BurgerMenu ({ isLoggedIn }) {
       )}
 
       {isLoggedIn && (
-        <NavLink className={styles.BurgerMenuItem} to='/session' onClick={doClose}>
+        <NavLink
+          className='text-lg text-white bg-transparent border-0'
+          to='/session'
+          onClick={doClose}
+        >
           Chat
         </NavLink>
       )}
@@ -100,7 +110,7 @@ export default function BurgerMenu ({ isLoggedIn }) {
       {isLoggedIn && (
         <button
           id='sidebarAvatarLogout'
-          className={'menu-item ' + styles.BurgerMenuLogout}
+          className='text-lg text-white bg-transparent border-0 menu-item'
           onClick={doLogout}
         >
           log out
@@ -133,9 +143,9 @@ function SignOutDialogOpener ({ signOut }) {
       <DialogDisclosure
         {...dialog}
         id='sidebarSignOut'
-        className={'menu-item ' + styles.BurgerMenuLogout}
+        className='text-lg text-white bg-transparent border-0 menu-item'
       >
-        Log out from Viewer
+        Log out from Viewer {'>>'}
       </DialogDisclosure>
       <SignOutDialog dialog={dialog} onSignOut={signOut} />
     </>

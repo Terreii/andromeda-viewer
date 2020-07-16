@@ -5,7 +5,6 @@ import Text from '../text'
 
 import { NotificationTypes, TextNotification, SystemNotification } from '../../types/chat'
 
-import formStyles from '../formElements.module.css'
 import styles from './notifications.module.css'
 
 export default function TextNotificationComponent (
@@ -22,7 +21,7 @@ export default function TextNotificationComponent (
       </p>
 
       <div className={styles.ButtonsRow}>
-        <button className={formStyles.PrimaryButton} onClick={onClose}>
+        <button className='btn btn-primary' onClick={onClose}>
           OK
         </button>
       </div>

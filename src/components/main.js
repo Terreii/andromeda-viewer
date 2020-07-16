@@ -4,17 +4,6 @@ import { Redirect } from 'react-router-dom'
 
 import { selectIsLoggedIn } from '../bundles/session'
 
-import styles from './main.module.css'
-
-export const AppContainer = ({ children, className, ...props }) => (
-  <div
-    {...props}
-    className={className ? `${className} ${styles.AppContainer}` : styles.AppContainer}
-  >
-    {children}
-  </div>
-)
-
 const ChatBox = lazy(() => import('./chatBox'))
 
 export function LoadableChatComponent () {
@@ -25,7 +14,7 @@ export function LoadableChatComponent () {
   }
 
   const fallback = (
-    <div className={styles.LoadingView}>
+    <div className='flex flex-col items-center justify-center bg-black bg-opacity-50'>
       <span>Loading ...</span>
     </div>
   )

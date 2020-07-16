@@ -11,8 +11,6 @@ import AvatarLogin from './avatarLogin'
 import SignIn from './signIn'
 import AvatarName from '../../avatarName'
 
-import styles from './index.module.css'
-
 export default function LoginForm ({ isSignedIn }) {
   const dispatch = useDispatch()
 
@@ -127,9 +125,15 @@ export default function LoginForm ({ isSignedIn }) {
   }
 
   return (
-    <div className={styles.Container}>
-      <main className={styles.Main}>
-        <div className={styles.AvatarList}>
+    <div className='mt-10 overflow-scroll'>
+      <main
+        className={'flex flex-col max-w-screen-lg mx-auto my-0 text-center text-white ' +
+        'md:mt-8 md:mb-2'}
+      >
+        <div
+          className={'flex md:grid flex-col flex-wrap items-center md:items-start justify-center ' +
+          'lg:grid-cols-3 md:grid-cols-2 md:flex-row md:items-center'}
+        >
           <LoginNewAvatar
             grids={grids}
             isSignedIn={isSignedIn}
@@ -155,7 +159,7 @@ export default function LoginForm ({ isSignedIn }) {
         </div>
 
         {errorMessage && (
-          <div className={styles.ErrorOut}>
+          <div className='p-1 p-4 mx-auto mt-1 bg-red-700 rounded'>
             {errorMessage.title.length > 0 && <h4>{errorMessage.title}</h4>}
             <p>
               {errorMessage.body.split('\n').map((line, index) => (

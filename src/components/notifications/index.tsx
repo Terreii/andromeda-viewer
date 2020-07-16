@@ -15,17 +15,15 @@ import { close, selectNotifications } from '../../bundles/notifications'
 
 import { NotificationTypes } from '../../types/chat'
 
-import infoListStyles from '../infoList.module.css'
-
 export default memo(function NotificationsList () {
   const notifications = useSelector(selectNotifications)
   const dispatch = useDispatch()
 
   return (
-    <main className={infoListStyles.Container} aria-label='Notifications'>
-      <div className={infoListStyles.NotificationList}>
+    <main className='p-4 overflow-y-scroll' aria-label='Notifications'>
+      <div className='max-w-xl mx-auto mt-2 list-none'>
         {notifications.map(notification => {
-          const doClose = () => dispatch(close(notification.id!))
+          const doClose = () => dispatch(close(notification.id ?? 0))
 
           switch (notification.notificationType) {
             case NotificationTypes.TextOnly:
@@ -124,11 +122,10 @@ export default memo(function NotificationsList () {
                   onClose={doClose}
                 />
               )
-          }
 
-          return ((): never => {
-            throw new TypeError('unknown NotificationType')
-          })()
+            default:
+              throw new TypeError('unknown NotificationType')
+          }
         })}
       </div>
     </main>

@@ -40,12 +40,12 @@ it('should unlock with return key', async () => {
 
   const { queryByLabelText, findByLabelText, findByText } = render(<Container store={store} />)
 
-  expect(queryByLabelText('Password:').nodeName).toBe('INPUT')
+  expect(queryByLabelText(/^Password/).nodeName).toBe('INPUT')
 
-  fireEvent.submit(queryByLabelText('Password:'))
+  fireEvent.submit(queryByLabelText(/^Password/))
   expect(await findByText('No password was entered jet!')).toBeTruthy()
 
-  fireEvent.change(queryByLabelText('Password:'), {
+  fireEvent.change(queryByLabelText(/^Password/), {
     target: {
       value: 'aPassword'
     }
@@ -53,7 +53,7 @@ it('should unlock with return key', async () => {
 
   unlock.mockImplementation(password => ({ type: 'unlock', password }))
 
-  fireEvent.submit(await findByLabelText('Password:'))
+  fireEvent.submit(await findByLabelText(/^Password/))
 
   expect(unlock.mock.calls.length).toBe(oldUnlockCallCount + 1)
   expect(unlock.mock.calls[unlock.mock.calls.length - 1]).toEqual(['aPassword'])
@@ -69,11 +69,11 @@ it('should unlock with unlock button clicked', async () => {
 
   const { queryByLabelText, queryByText, findByText } = render(<Container store={store} />)
 
-  expect(queryByLabelText('Password:').nodeName).toBe('INPUT')
+  expect(queryByLabelText(/^Password/).nodeName).toBe('INPUT')
   expect(queryByText('Unlock', { selector: 'button' })).toBeTruthy()
   expect(queryByText('Unlock', { selector: 'button' }).disabled).toBeTruthy()
 
-  fireEvent.change(queryByLabelText('Password:'), {
+  fireEvent.change(queryByLabelText(/^Password/), {
     target: {
       value: 'aPassword'
     }

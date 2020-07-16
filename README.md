@@ -26,7 +26,7 @@ After that run `npm run build` to build the client side and make the viewer usea
 
 Then run `npm start` to start the server. Now you can use the viewer under http://127.0.0.1:8000/.
 
-```
+```sh
 git clone https://github.com/Terreii/andromeda-viewer.git
 cd andromeda-viewer
 npm install
@@ -34,13 +34,11 @@ npm run build
 npm start
 ```
 
-If you want to start developing you should run in a new terminal window `npm run watch`. It will build the viewer every time you make a change.
+If you want to start developing you should run `npm run dev` instead. It will build the viewer every time you make a change and also start the server.
 
+```sh
+npm run dev
 ```
-npm run watch
-```
-
-You can also use `npm run startDev`. It will start the server and also run the continuous build process!
 
 For more information how to use npm, please read the [npm-documentation](https://docs.npmjs.com/).
 
@@ -51,20 +49,20 @@ To make the setup-process easier, everything needed for this project should be a
 command | what it does
 --------|-------------
 `npm run help` | Prints out this README.md.
-`npm run build` | Builds the viewer. The viewer is in a unusable state after cloning.
-`npm run watch` | Builds the viewer. It continues to run and build the viewer when a file changes. This is the recommended build command while developing!
-`npm test` | Runs all tests and test:docs. Please run this before committing!
-`npm run test:coverage` | Runs all test and outputs a test coverage report. And will open the report.
+`npm run build` | Builds the viewer for production. The viewer is in a unusable state after cloning.
+`npm run dev` | Builds the viewer. It continues to run and build the viewer when a file changes. This is the recommended build command while developing!
+`npm test` | Runs all tests. Please run this before committing!
+`npm run test-coverage` | Runs all test and outputs a test coverage report. And will open the report.
 `npm run test:docs` | Runs [textlint](https://textlint.github.io/) and [alex.js](https://alexjs.com/) for catching misspelled, insensitive, inconsiderate writing in the documentation.
-`npm run build:type-docs` | Builds and opens the type documentation.
+`npm run type-docs` | Builds and opens the type documentation.
 `npm run open-type-docs` | Opens the existing type documentation.
 `npm run update-files` | Updates all [capabilities names](http://wiki.secondlife.com/wiki/Category:Capabilities) and [UDP-Messages](http://wiki.secondlife.com/wiki/Category:Messages).
 `npm run update-coc` | Updates the CODE_OF_CONDUCT.md
 `npm run update-contrib` | Updates the CONTRIBUTING.md
 `npm run fix:docs` | Runs `textlint --fix`.
 `npm run fix:style` | Runs `standard --fix`. It can fix many standard style rules.
-`npm run startDev` | combined `npm start` and `npm run watch`.
-`npm start` | Starts the server. The viewer can then be used on the local computer.
+`npm run fix` | Runs npm run `npm run fix:docs` and `npm run fix:style`.
+`npm start` | Starts the server. The viewer can then be used on the local computer. This is for production. `npm run build` must be run first.
 
 Enter those commands in a terminal (cmd or PowerShell on Windows) and press enter to run them.
 

@@ -11,7 +11,6 @@ import { useName } from '../../hooks/names'
 import { InventoryOfferedNotification } from '../../types/chat'
 import { getItemTypeName } from '../../types/inventory'
 
-import formStyles from '../formElements.module.css'
 import styles from './notifications.module.css'
 
 export default function InventoryOffer (
@@ -46,11 +45,11 @@ export default function InventoryOffer (
       </p>
 
       <div className={styles.ButtonsRow}>
-        <button className={formStyles.OkButton} onClick={doAccept}>
+        <button className='btn btn-ok' onClick={doAccept}>
           Accept
         </button>
 
-        <button className={formStyles.DangerButton} onClick={doDecline}>
+        <button className='btn btn-danger' onClick={doDecline}>
           Decline
         </button>
       </div>

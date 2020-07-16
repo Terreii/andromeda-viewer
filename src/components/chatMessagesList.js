@@ -1,8 +1,6 @@
 import React, { memo } from 'react'
 import autoscroll from 'autoscroll-react'
 
-import styles from './chatMessagesList.module.css'
-
 import Text from './text'
 
 const TextLine = memo(({ msg, name }) => {
@@ -12,8 +10,8 @@ const TextLine = memo(({ msg, name }) => {
   const message = isIrcMe ? msg.message.substring(4) : msg.message
 
   return (
-    <div className={isIrcMe ? styles.icr_me : styles.Message}>
-      <time dateTime={time.toISOString()}>
+    <div className={isIrcMe ? 'italic text-xl' : 'text-xl'}>
+      <time dateTime={time.toISOString()} className='pr-1'>
         {leadingZero(time.getHours())}
         :
         {leadingZero(time.getMinutes())}
@@ -21,10 +19,13 @@ const TextLine = memo(({ msg, name }) => {
         {leadingZero(time.getSeconds())}
       </time>
 
-      <span className={styles.AvatarName}>{name.toString()}{isIrcMe ? '' : ':'} </span>
+      <span>{name.toString()}{isIrcMe ? '' : ':'} </span>
 
-      <span className='messageText'>
-        <Text text={message} />
+      <span>
+        <Text
+          text={message}
+          className='text-blue-700 underline hover:text-blue-500 visited:text-indigo-600'
+        />
       </span>
     </div>
   )
@@ -41,7 +42,7 @@ class ChatList extends React.Component {
     })
 
     return (
-      <div className={styles.List} {...props}>
+      <div className='overflow-y-scroll' {...props}>
         {messagesLines}
       </div>
     )

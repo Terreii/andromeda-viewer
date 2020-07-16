@@ -8,7 +8,6 @@ import { acceptGroupInvitation, declineGroupInvitation } from '../../actions/gro
 
 import { GroupInvitationNotification } from '../../types/chat'
 
-import formStyles from '../formElements.module.css'
 import styles from './notifications.module.css'
 
 const numberFormater = Intl && Intl.NumberFormat
@@ -25,7 +24,7 @@ export default function GroupInvitation (
   const fee = numberFormater.format(data.fee)
 
   return (
-    <Container title={'Invitation to join a group'}>
+    <Container title='Invitation to join a group'>
       <p>
         <Text text={data.text} multiline />
       </p>
@@ -40,7 +39,7 @@ export default function GroupInvitation (
 
       <div className={styles.ButtonsRow}>
         <button
-          className={formStyles.OkButton}
+          className='btn btn-ok'
           onClick={() => {
             dispatch(acceptGroupInvitation(data.transactionId, data.groupId))
             onClose()
@@ -50,7 +49,7 @@ export default function GroupInvitation (
         </button>
 
         <button
-          className={formStyles.DangerButton}
+          className='btn btn-danger'
           onClick={() => {
             dispatch(declineGroupInvitation(data.transactionId, data.groupId))
             onClose()
