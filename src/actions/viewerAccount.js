@@ -25,6 +25,7 @@ import {
   selectSavedGridsAreLoaded
 } from '../bundles/account'
 import { selectIsLoggedIn } from '../bundles/session'
+import { createLocalDB, createRemoteDB, getUserDatabaseName, startSyncing } from '../store/db'
 
 import { IMChatType } from '../types/chat'
 
@@ -154,20 +155,43 @@ function gridsDidChange (type, grid) {
 }
 
 export function isSignedIn () {
-  return async (dispatch, getState, { hoodie }) => {
-    const properties = await hoodie.account.get(['session', 'username'])
-    const isLoggedIn = properties.session != null
-    const username = properties != null ? properties.username : undefined
-    dispatch(signInStatus(isLoggedIn, null, username))
+  return async (dispatch, getState, args) => {
+    const session = await args.remoteDB.getSession()
+    let username = session.userCtx.name
+
+    if (username == null) {
+      try {
+        const userDoc = await args.db.get('_local/account')
+        username = userDoc.name
+      } catch (err) {
+        if (err.status === 404) {
+          username = null
+        } else {
+          throw err
+        }
+      }
+    }
+
+    const isLoggedIn = username != null
 
     if (isLoggedIn) {
-      listenToAccountChanges(hoodie.account, dispatch)
+      const userDbName = getUserDatabaseName(username)
+      args.remoteDB = createRemoteDB(userDbName)
+
+      startSyncing(args.db, args.remoteDB)
+
+      if (process.env.NODE_ENV !== 'production') {
+        window.remoteDB = args.remoteDB
+      }
     }
+
+    dispatch(signInStatus(isLoggedIn, null, username))
 
     return isLoggedIn
   }
 }
 
+// eslint-disable-next-line
 function listenToAccountChanges (account, dispatch) {
   const handler = changes => {
     dispatch(accountDidUpdate(changes))
@@ -199,42 +223,58 @@ export function unlock (cryptoPassword) {
 }
 
 export function signIn (username, password, cryptoPassword) {
-  return async (dispatch, getState, { hoodie }) => {
+  return async (dispatch, getState, args) => {
     try {
-      const accountProperties = await hoodie.account.signIn({ username, password })
-      await hoodie.cryptoStore.unlock(cryptoPassword)
+      const accountProperties = await args.remoteDB.logIn(username, password)
+
+      const userDbName = getUserDatabaseName(accountProperties.name)
+      args.remoteDB = createRemoteDB(userDbName, false)
+
+      startSyncing(args.db, args.remoteDB)
+
+      if (process.env.NODE_ENV !== 'production') {
+        window.remoteDB = args.remoteDB
+      }
+
+      await args.db.put({
+        _id: '_local/account',
+        name: accountProperties.name
+      })
 
       dispatch(signInStatus(true, true, accountProperties.username))
-
-      listenToAccountChanges(hoodie.account, dispatch)
 
       await dispatch(loadSavedGrids())
       dispatch(loadSavedAvatars())
     } catch (err) {
       console.error(err)
 
-      // if the cryptoPassword is wrong, but the user password right
-      const properties = await hoodie.account.get(['session', 'username'])
-      const signedIn = properties.session != null
-      if (signedIn) {
-        await hoodie.account.signOut()
-        throw new Error('Encryption password is wrong!')
+      if (err.name === 'unauthorized' || err.name === 'forbidden') {
+        // name or password incorrect
+        throw new Error('Username or password is wrong!')
       }
-      throw new Error('Username or password is wrong!')
     }
   }
 }
 
 export function signUp (username, password, cryptoPassword) {
-  return async (dispatch, getState, { hoodie }) => {
-    await hoodie.account.signUp({ username, password })
-    const resetKeys = await hoodie.cryptoStore.setup(cryptoPassword)
+  return async (dispatch, getState, { remoteDB }) => {
+    try {
+      const result = await remoteDB.signUp(username, password)
+      const dbName = getUserDatabaseName(result.id.replace('org.couchdb.user:', ''))
+      createRemoteDB(dbName, false)
 
-    await dispatch(
-      signIn(username, password, cryptoPassword)
-    )
-
-    dispatch(displayResetKeys(resetKeys))
+      await dispatch(
+        signIn(username, password, cryptoPassword)
+      )
+    } catch (err) {
+      if (err && err.name === 'conflict') {
+        // already exists
+      } else if (err.name === 'forbidden') {
+        // invalid username
+      } else {
+        console.error(err)
+      }
+    }
   }
 }
 
@@ -299,13 +339,22 @@ export function changeEncryptionPassword (resetKey, newPassword) {
 }
 
 export function signOut () {
-  return async (dispatch, getState, { hoodie }) => {
+  return async (dispatch, getState, args) => {
     await dispatch(logoutAvatar())
 
     try {
-      await hoodie.account.signOut()
+      await args.remoteDB.logOut()
+      await args.db.destroy()
 
       dispatch(accountDidSignOut())
+
+      args.db = createLocalDB()
+      args.remoteDB = createRemoteDB('_users')
+
+      if (process.env.NODE_ENV !== 'production') {
+        window.localDB = args.db
+        window.remoteDB = args.remoteDB
+      }
     } catch (err) {
       console.error(err)
     }

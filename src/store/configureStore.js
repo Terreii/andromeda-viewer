@@ -2,6 +2,7 @@ import { configureStore, getDefaultMiddleware, isPlain } from '@reduxjs/toolkit'
 
 import rootReducer from '../bundles'
 import configureReactors from './configureReactors'
+import { createLocalDB, createRemoteDB } from './db'
 import { proxyFetch, fetchLLSD } from './llsdFetch'
 
 import AvatarName from '../avatarName'
@@ -10,6 +11,8 @@ import AvatarName from '../avatarName'
 export default function (preloadedState) {
   const extraArgument = {
     hoodie: window.hoodie,
+    db: createLocalDB(),
+    remoteDB: createRemoteDB('_users'),
     proxyFetch: null,
     fetchLLSD: null,
     circuit: null // will be set on login
@@ -42,6 +45,8 @@ export default function (preloadedState) {
 
   if (process.env.NODE_ENV !== 'production') {
     window.devStore = store
+    window.localDB = extraArgument.db
+    window.remoteDB = extraArgument.remoteDB
 
     if (module.hot) {
       // Enable Webpack hot module replacement for reducers
