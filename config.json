@@ -1,0 +1,9 @@
+{
+  "couchdb": {
+    "uuid": "5b9137ce-74a5-41e8-9160-c8d3fb157d05",
+    "database_dir": "./db"
+  },
+  "couch_httpd_auth": {
+    "allow_persistent_cookies": true
+  }
+}
