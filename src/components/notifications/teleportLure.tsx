@@ -1,7 +1,7 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 
-import { Container, ComponentArguments } from './utils'
+import { Container, ComponentArguments, ButtonsRow } from './utils'
 import Text from '../text'
 
 import { acceptTeleportLure, declineTeleportLure } from '../../actions/friendsActions'
@@ -9,8 +9,6 @@ import { acceptTeleportLure, declineTeleportLure } from '../../actions/friendsAc
 import { useName } from '../../hooks/names'
 
 import { TeleportLure } from '../../types/chat'
-
-import styles from './notifications.module.css'
 
 export default function FriendshipOffer ({ data, onClose }: ComponentArguments<TeleportLure>) {
   const dispatch = useDispatch()
@@ -32,7 +30,7 @@ export default function FriendshipOffer ({ data, onClose }: ComponentArguments<T
         <Text text={data.text} multiline />
       </p>
 
-      <div className={styles.ButtonsRow}>
+      <ButtonsRow>
         <button className='btn btn--ok' onClick={doAccept} disabled>
           Accept (not yet implemented)
         </button>
@@ -40,7 +38,7 @@ export default function FriendshipOffer ({ data, onClose }: ComponentArguments<T
         <button className='btn btn--danger' onClick={doDecline}>
           Decline
         </button>
-      </div>
+      </ButtonsRow>
     </Container>
   )
 }

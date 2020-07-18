@@ -1,7 +1,7 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 
-import { Container, ComponentArguments } from './utils'
+import { Container, ComponentArguments, ButtonsRow } from './utils'
 import Text from '../text'
 
 import { acceptInventoryOffer, declineInventoryOffer } from '../../actions/inventory'
@@ -10,8 +10,6 @@ import { useName } from '../../hooks/names'
 
 import { InventoryOfferedNotification } from '../../types/chat'
 import { getItemTypeName } from '../../types/inventory'
-
-import styles from './notifications.module.css'
 
 export default function InventoryOffer (
   { data, onClose }: ComponentArguments<InventoryOfferedNotification>
@@ -44,7 +42,7 @@ export default function InventoryOffer (
         <Text text={data.text} multiline />
       </p>
 
-      <div className={styles.ButtonsRow}>
+      <ButtonsRow>
         <button className='btn btn--ok' onClick={doAccept}>
           Accept
         </button>
@@ -52,7 +50,7 @@ export default function InventoryOffer (
         <button className='btn btn--danger' onClick={doDecline}>
           Decline
         </button>
-      </div>
+      </ButtonsRow>
     </Container>
   )
 }

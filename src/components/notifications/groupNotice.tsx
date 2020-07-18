@@ -1,7 +1,7 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 
-import { Container, ComponentArguments } from './utils'
+import { Container, ComponentArguments, ButtonsRow } from './utils'
 import Text from '../text'
 
 import { acceptInventoryOffer, declineInventoryOffer } from '../../actions/inventory'
@@ -10,8 +10,6 @@ import { useName, useGroupName } from '../../hooks/names'
 
 import { GroupNoticeNotification } from '../../types/chat'
 import { getItemTypeName } from '../../types/inventory'
-
-import styles from './notifications.module.css'
 
 export default function GroupNotice (
   { data, onClose }: ComponentArguments<GroupNoticeNotification>
@@ -38,7 +36,7 @@ export default function GroupNotice (
         </div>
       )}
 
-      <div className={styles.ButtonsRow}>
+      <ButtonsRow>
         {data.item && (
           <button
             className='btn btn--ok'
@@ -81,7 +79,7 @@ export default function GroupNotice (
             OK
           </button>
         )}
-      </div>
+      </ButtonsRow>
     </Container>
   )
 }

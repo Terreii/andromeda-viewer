@@ -1,11 +1,9 @@
 import React from 'react'
 
-import { Container, ComponentArguments } from './utils'
+import { Container, ComponentArguments, ButtonsRow } from './utils'
 import Text from '../text'
 
 import { NotificationTypes, TextNotification, SystemNotification } from '../../types/chat'
-
-import styles from './notifications.module.css'
 
 export default function TextNotificationComponent (
   { data, onClose }: ComponentArguments<TextNotification | SystemNotification>
@@ -20,11 +18,11 @@ export default function TextNotificationComponent (
         <Text text={data.text} multiline />
       </p>
 
-      <div className={styles.ButtonsRow}>
+      <ButtonsRow>
         <button className='btn btn--primary' onClick={onClose}>
           OK
         </button>
-      </div>
+      </ButtonsRow>
     </Container>
   )
 }

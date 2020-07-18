@@ -1,7 +1,7 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 
-import { Container, ComponentArguments } from './utils'
+import { Container, ComponentArguments, ButtonsRow } from './utils'
 import Text from '../text'
 
 import { offerTeleportLure } from '../../actions/friendsActions'
@@ -9,8 +9,6 @@ import { offerTeleportLure } from '../../actions/friendsActions'
 import { useName } from '../../hooks/names'
 
 import { RequestTeleportLureNotification } from '../../types/chat'
-
-import styles from './notifications.module.css'
 
 export default function RequestTeleportLure (
   { data, onClose }: ComponentArguments<RequestTeleportLureNotification>
@@ -25,7 +23,7 @@ export default function RequestTeleportLure (
         <Text text={data.text} multiline />
       </p>
 
-      <div className={styles.ButtonsRow}>
+      <ButtonsRow>
         <button
           className='btn btn--ok'
           onClick={() => {
@@ -39,7 +37,7 @@ export default function RequestTeleportLure (
         <button className='btn btn--danger' onClick={onClose}>
           Decline
         </button>
-      </div>
+      </ButtonsRow>
     </Container>
   )
 }
