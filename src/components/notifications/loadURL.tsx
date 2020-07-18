@@ -25,7 +25,7 @@ export default function LoadURL ({ data, onClose }: ComponentArguments<LoadURLNo
       </div>
 
       <div className={styles.ButtonsRow}>
-        <button className='btn btn-primary' onClick={onClose}>
+        <button className='btn btn--primary' onClick={onClose}>
           OK
         </button>
       </div>

@@ -21,7 +21,7 @@ export default function TextNotificationComponent (
       </p>
 
       <div className={styles.ButtonsRow}>
-        <button className='btn btn-primary' onClick={onClose}>
+        <button className='btn btn--primary' onClick={onClose}>
           OK
         </button>
       </div>

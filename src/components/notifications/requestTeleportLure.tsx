@@ -27,7 +27,7 @@ export default function RequestTeleportLure (
 
       <div className={styles.ButtonsRow}>
         <button
-          className='btn btn-ok'
+          className='btn btn--ok'
           onClick={() => {
             dispatch(offerTeleportLure(data.fromId))
             onClose()
@@ -36,7 +36,7 @@ export default function RequestTeleportLure (
           Accept
         </button>
 
-        <button className='btn btn-danger' onClick={onClose}>
+        <button className='btn btn--danger' onClick={onClose}>
           Decline
         </button>
       </div>

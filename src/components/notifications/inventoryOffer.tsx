@@ -45,11 +45,11 @@ export default function InventoryOffer (
       </p>
 
       <div className={styles.ButtonsRow}>
-        <button className='btn btn-ok' onClick={doAccept}>
+        <button className='btn btn--ok' onClick={doAccept}>
           Accept
         </button>
 
-        <button className='btn btn-danger' onClick={doDecline}>
+        <button className='btn btn--danger' onClick={doDecline}>
           Decline
         </button>
       </div>

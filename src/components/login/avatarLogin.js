@@ -22,7 +22,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
           onSelect(avatar.avatarIdentifier)
         }}
       >
-        <button className='flex flex-col text-white btn-transparent focus:outline-none'>
+        <button className='flex flex-col text-white btn--transparent focus:outline-none'>
           <h2 className='block m-1 text-center'>
             <span className='text-2xl'>{new AvatarName(avatar.name).getDisplayName()}</span>
             <span className='inline-block ml-3'>@{grid.name}</span>
@@ -87,7 +87,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
       </label>
 
       <button
-        className='flex-auto mx-auto mt-3 btn btn-secondary'
+        className='flex-auto mx-auto mt-3 btn btn--secondary'
         disabled={isLoggingIn || password.length === 0}
       >
         {isLoggingIn === avatar.name ? 'Connecting ...' : 'Login'}

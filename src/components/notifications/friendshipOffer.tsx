@@ -36,11 +36,11 @@ export default function FriendshipOffer (
       </p>
 
       <div className={styles.ButtonsRow}>
-        <button className='btn btn-ok' onClick={onAccept}>
+        <button className='btn btn--ok' onClick={onAccept}>
           Accept
         </button>
 
-        <button className='btn btn-danger' onClick={onDecline}>
+        <button className='btn btn--danger' onClick={onDecline}>
           Decline
         </button>
       </div>

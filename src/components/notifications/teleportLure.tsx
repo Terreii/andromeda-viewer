@@ -33,11 +33,11 @@ export default function FriendshipOffer ({ data, onClose }: ComponentArguments<T
       </p>
 
       <div className={styles.ButtonsRow}>
-        <button className='btn btn-ok' onClick={doAccept} disabled>
+        <button className='btn btn--ok' onClick={doAccept} disabled>
           Accept (not yet implemented)
         </button>
 
-        <button className='btn btn-danger' onClick={doDecline}>
+        <button className='btn btn--danger' onClick={doDecline}>
           Decline
         </button>
       </div>

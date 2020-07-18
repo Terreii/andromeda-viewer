@@ -19,7 +19,7 @@ export default function TextNotificationComponent (
       <p>{`${friendName?.getDisplayName() ?? data.friendId} is ${stateText}`}</p>
 
       <div className={styles.ButtonsRow}>
-        <button className='btn btn-primary' onClick={onClose}>
+        <button className='btn btn--primary' onClick={onClose}>
           OK
         </button>
       </div>

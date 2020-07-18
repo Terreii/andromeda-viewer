@@ -41,7 +41,7 @@ export default function GroupNotice (
       <div className={styles.ButtonsRow}>
         {data.item && (
           <button
-            className='btn btn-ok'
+            className='btn btn--ok'
             onClick={() => {
               const item = data.item
               if (item) {
@@ -63,7 +63,7 @@ export default function GroupNotice (
 
         {data.item && (
           <button
-            className='btn btn-danger'
+            className='btn btn--danger'
             onClick={() => {
               dispatch(declineInventoryOffer(data.senderId, data.item?.transactionId ?? '', true))
               onClose()
@@ -75,7 +75,7 @@ export default function GroupNotice (
 
         {!data.item && (
           <button
-            className='btn btn-primary'
+            className='btn btn--primary'
             onClick={onClose}
           >
             OK

@@ -39,7 +39,7 @@ export default function GroupInvitation (
 
       <div className={styles.ButtonsRow}>
         <button
-          className='btn btn-ok'
+          className='btn btn--ok'
           onClick={() => {
             dispatch(acceptGroupInvitation(data.transactionId, data.groupId))
             onClose()
@@ -49,7 +49,7 @@ export default function GroupInvitation (
         </button>
 
         <button
-          className='btn btn-danger'
+          className='btn btn--danger'
           onClick={() => {
             dispatch(declineGroupInvitation(data.transactionId, data.groupId))
             onClose()
