@@ -159,7 +159,7 @@ export default function LoginForm ({ isSignedIn }) {
         </div>
 
         {errorMessage && (
-          <div className='p-1 p-4 mx-auto mt-1 bg-red-700 rounded'>
+          <div className='p-4 mx-auto mt-1 bg-red-700 rounded'>
             {errorMessage.title.length > 0 && <h4>{errorMessage.title}</h4>}
             <p>
               {errorMessage.body.split('\n').map((line, index) => (
