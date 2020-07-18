@@ -131,7 +131,7 @@ export default function ResetPasswordDialog ({ type, dialog }) {
         <div className='flex flex-row-reverse justify-between p-1 mt-3'>
           <button
             type='button'
-            className='btn btn-secondary'
+            className='btn btn--secondary'
             onClick={onCancel}
             disabled={isChanging}
           >
@@ -139,7 +139,7 @@ export default function ResetPasswordDialog ({ type, dialog }) {
           </button>
           <button
             type='button'
-            className='btn btn-danger'
+            className='btn btn--danger'
             onClick={() => {
               dispatch(signOut())
             }}
@@ -149,7 +149,7 @@ export default function ResetPasswordDialog ({ type, dialog }) {
           </button>
         </div>
         <div className='flex flex-row-reverse justify-between p-1 mt-3'>
-          <button className='btn btn-primary' disabled={!canChange}>
+          <button className='btn btn--primary' disabled={!canChange}>
             change {isEncryption ? 'encryption ' : ''}password
           </button>
         </div>

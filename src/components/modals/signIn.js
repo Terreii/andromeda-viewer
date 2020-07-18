@@ -219,7 +219,7 @@ export default function SignInPopup ({ isSignUp, dialog }) {
         <div className='flex flex-row flex-auto px-1 py-0 mt-3 mb-1'>
           <button
             type='button'
-            className='btn btn-secondary'
+            className='btn btn--secondary'
             onClick={event => {
               event.preventDefault()
               dialog.hide()
@@ -230,7 +230,7 @@ export default function SignInPopup ({ isSignUp, dialog }) {
             cancel
           </button>
           <button
-            className='ml-2 btn btn-ok'
+            className='ml-2 btn btn--ok'
             disabled={!isValid || isSigningIn}
             onFocus={onFocusScrollIntoView}
           >

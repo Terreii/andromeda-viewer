@@ -21,7 +21,7 @@ export default memo(function NotificationsList () {
 
   return (
     <main className='p-4 overflow-y-scroll' aria-label='Notifications'>
-      <div className='max-w-xl mx-auto mt-2 list-none'>
+      <div className='max-w-xl mx-auto mt-2 space-y-2 list-none'>
         {notifications.map(notification => {
           const doClose = () => dispatch(close(notification.id ?? 0))
 

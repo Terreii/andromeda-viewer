@@ -52,7 +52,7 @@ export default function ResetKeysModal ({ resetKeys }) {
         <p>You can also download them:</p>
 
         <a
-          className='block mx-auto no-underline btn btn-primary'
+          className='block mx-auto no-underline btn btn--primary'
           href={fileURL}
           target='_blank'
           rel='noopener noreferrer'
@@ -78,7 +78,7 @@ export default function ResetKeysModal ({ resetKeys }) {
 
         <button
           type='button'
-          className='mx-auto mt-2 mb-1 btn btn-ok'
+          className='mx-auto mt-2 mb-1 btn btn--ok'
           onClick={() => {
             dispatch(closeResetKeys())
           }}

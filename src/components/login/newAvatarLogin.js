@@ -219,7 +219,7 @@ export default function NewAvatarLogin ({
 
       <button
         id='newAvatarLoginButton'
-        className='flex-auto mx-auto mt-3 btn btn-secondary'
+        className='flex-auto mx-auto mt-3 btn btn--secondary'
         disabled={isLoggingIn || !isValid}
       >
         {isLoggingIn === name ? 'Connecting ...' : 'Login'}

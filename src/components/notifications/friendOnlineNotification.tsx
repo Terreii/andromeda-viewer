@@ -1,12 +1,10 @@
 import React from 'react'
 
-import { Container, ComponentArguments } from './utils'
+import { Container, ComponentArguments, ButtonsRow } from './utils'
 
 import { useName } from '../../hooks/names'
 
 import { FriendOnlineStateChangeNotification } from '../../types/chat'
-
-import styles from './notifications.module.css'
 
 export default function TextNotificationComponent (
   { data, onClose }: ComponentArguments<FriendOnlineStateChangeNotification>
@@ -18,11 +16,11 @@ export default function TextNotificationComponent (
     <Container title={`Friend went ${stateText}`}>
       <p>{`${friendName?.getDisplayName() ?? data.friendId} is ${stateText}`}</p>
 
-      <div className={styles.ButtonsRow}>
-        <button className='btn btn-primary' onClick={onClose}>
+      <ButtonsRow>
+        <button className='btn btn--primary' onClick={onClose}>
           OK
         </button>
-      </div>
+      </ButtonsRow>
     </Container>
   )
 }

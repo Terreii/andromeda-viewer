@@ -1,14 +1,12 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 
-import { Container, ComponentArguments } from './utils'
+import { Container, ComponentArguments, ButtonsRow } from './utils'
 import Text from '../text'
 
 import { acceptGroupInvitation, declineGroupInvitation } from '../../actions/groupsActions'
 
 import { GroupInvitationNotification } from '../../types/chat'
-
-import styles from './notifications.module.css'
 
 const numberFormater = Intl && Intl.NumberFormat
   ? Intl.NumberFormat()
@@ -31,15 +29,15 @@ export default function GroupInvitation (
 
       <span>
         {'Fee: '}
-        <span className={styles.Fee}>
+        <span className='font-bold'>
           {fee}
           <span aria-label='Linden Dollar'>L$</span>
         </span>
       </span>
 
-      <div className={styles.ButtonsRow}>
+      <ButtonsRow>
         <button
-          className='btn btn-ok'
+          className='btn btn--ok'
           onClick={() => {
             dispatch(acceptGroupInvitation(data.transactionId, data.groupId))
             onClose()
@@ -49,7 +47,7 @@ export default function GroupInvitation (
         </button>
 
         <button
-          className='btn btn-danger'
+          className='btn btn--danger'
           onClick={() => {
             dispatch(declineGroupInvitation(data.transactionId, data.groupId))
             onClose()
@@ -57,7 +55,7 @@ export default function GroupInvitation (
         >
           Decline
         </button>
-      </div>
+      </ButtonsRow>
     </Container>
   )
 }

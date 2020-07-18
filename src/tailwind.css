@@ -13,51 +13,46 @@
   @apply opacity-75;
 }
 
-/* Use together with .btn */
-.btn-danger {
+.btn--danger {
   @apply text-white bg-red-700;
 }
-.btn-danger:hover, .btn-danger:focus {
+.btn--danger:hover, .btn--danger:focus {
   @apply bg-red-800;
 }
-.btn-danger:active {
+.btn--danger:active {
   @apply bg-red-900;
 }
 
-/* Use together with .btn */
-.btn-ok {
+.btn--ok {
   @apply text-black bg-green-500;
 }
-.btn-ok:hover, .btn-ok:focus {
+.btn--ok:hover, .btn--ok:focus {
   @apply bg-green-600;
 }
-.btn-ok:active {
+.btn--ok:active {
   @apply bg-green-700;
 }
 
-/* Use together with .btn */
-.btn-primary {
+.btn--primary {
   @apply text-white bg-blue-700;
 }
-.btn-primary:hover, .btn-primary:focus {
+.btn--primary:hover, .btn--primary:focus {
   @apply bg-blue-800;
 }
-.btn-primary:active {
+.btn--primary:active {
   @apply bg-blue-900;
 }
 
-/* Use together with .btn */
-.btn-secondary {
+.btn--secondary {
   @apply text-black bg-gray-400;
 }
-.btn-secondary:hover, .btn-secondary:focus {
+.btn--secondary:hover, .btn--secondary:focus {
   @apply bg-gray-500;
 }
-.btn-secondary:active {
+.btn--secondary:active {
   @apply bg-gray-600;
 }
 
-/* Use together with .btn */
 .btn-transparent {
   @apply bg-transparent border-0;
 }

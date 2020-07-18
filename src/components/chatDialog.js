@@ -47,7 +47,7 @@ export default function ChatDialog ({ isIM = false, data = [], names, sendTo, lo
           value={text}
           onChange={event => { setText(event.target.value) }}
         />
-        <button className='flex-initial ml-2 btn btn-primary'>send</button>
+        <button className='flex-initial ml-2 btn btn--primary'>send</button>
       </form>
     </>
   )
