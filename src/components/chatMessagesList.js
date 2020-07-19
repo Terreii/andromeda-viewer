@@ -42,7 +42,7 @@ class ChatList extends React.Component {
     })
 
     return (
-      <div className='overflow-y-scroll' {...props}>
+      <div className='overflow-y-scroll' role='log' {...props}>
         {messagesLines}
       </div>
     )
