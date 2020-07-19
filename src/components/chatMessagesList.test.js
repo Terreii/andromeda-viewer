@@ -129,7 +129,8 @@ describe('local chat', () => {
 
     expect(queryByText(getTimeString('2018-08-10T11:03:00.000Z'))).toBeTruthy()
     expect(queryByText(getTimeString('2018-08-10T11:03:00.000Z')).tagName).toBe('TIME')
-    expect(queryByText('Testery Mactestface')).toBeTruthy()
+    expect(queryByText('Testery Mactestface', { selector: '[aria-hidden="true"]' })).toBeTruthy()
+    expect(queryByText('Testery Mactestface', { selector: '.sr-only' })).toBeTruthy()
     expect(queryByText('wonders about the world!')).toBeTruthy()
   })
 
@@ -284,7 +285,8 @@ describe('IMs', () => {
 
     expect(queryByText(getTimeString('2018-08-10T11:03:00.000Z'))).toBeTruthy()
     expect(queryByText(getTimeString('2018-08-10T11:03:00.000Z')).tagName).toBe('TIME')
-    expect(queryByText('Testery Mactestface')).toBeTruthy()
+    expect(queryByText('Testery Mactestface', { selector: '[aria-hidden="true"]' })).toBeTruthy()
+    expect(queryByText('Testery Mactestface', { selector: '.sr-only' })).toBeTruthy()
     expect(queryByText('wonders about the world!')).toBeTruthy()
   })
 
