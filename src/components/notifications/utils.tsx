@@ -9,7 +9,7 @@ interface ContainerArgs {
 
 export function Container ({ title, children }: ContainerArgs) {
   return (
-    <div className='p-4 bg-gray-400 rounded'>
+    <div className='p-4 bg-gray-400 rounded focus:shadow-outline focus:outline-none' tabIndex={0}>
       {title && <h4>{title}</h4>}
 
       {children}

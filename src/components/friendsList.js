@@ -91,7 +91,11 @@ export default function FriendsList ({ names, startNewIMChat }) {
   const friends = useSelector(selectFriends)
 
   return (
-    <main className='p-4 overflow-y-scroll' aria-label='Friends'>
+    <main
+      className='p-4 mt-1 overflow-y-scroll focus:shadow-outline focus:outline-none'
+      tabIndex='0'
+      aria-label='Friends'
+    >
       <ul className='max-w-xl pl-4 mx-auto list-none'>
         {friends.map((friend, index, all) => {
           const name = friend.id in names ? names[friend.id].getDisplayName() : friend.id

@@ -44,7 +44,7 @@ class ChatList extends React.Component {
 
     return (
       <div
-        className='mt-1 overflow-y-scroll focus:shadow-outline'
+        className='mt-1 overflow-y-scroll focus:shadow-outline focus:outline-none'
         role='log'
         tabIndex='0'
         {...props}
