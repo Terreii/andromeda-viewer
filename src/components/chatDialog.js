@@ -37,7 +37,7 @@ export default function ChatDialog ({ isIM = false, data = [], names, sendTo, lo
         names={names}
         onScrolledTop={doLoadHistory}
       />
-      <form className='flex flex-row m-2 space-x-2' onSubmit={send}>
+      <form className='flex flex-row flex-shrink-0 m-2 space-x-2' onSubmit={send}>
         <input
           type='text'
           className='flex-grow flex-shrink-0 form-input'
