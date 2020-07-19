@@ -11,7 +11,7 @@ const TextLine = memo(({ msg, name }) => {
 
   return (
     <div className={isIrcMe ? 'italic text-xl' : 'text-xl'}>
-      <time dateTime={time.toISOString()} className='pr-1'>
+      <time dateTime={time.toISOString()} className='pr-1 font-mono'>
         {leadingZero(time.getHours())}
         :
         {leadingZero(time.getMinutes())}
@@ -42,7 +42,7 @@ class ChatList extends React.Component {
     })
 
     return (
-      <div className='overflow-y-scroll' role='log' {...props}>
+      <div className='overflow-y-scroll focus:shadow-outline' role='log' tabIndex='0' {...props}>
         {messagesLines}
       </div>
     )
