@@ -172,7 +172,7 @@ export default function ChatBox () {
       <TabPanel
         {...tab}
         className='flex flex-col flex-auto h-screen pt-24 m-1 -mt-24'
-        tabIndex='-1'
+        tabIndex={isFriendsTabActive ? '0' : '-1'}
       >
         <FriendsList
           names={names}
@@ -183,7 +183,7 @@ export default function ChatBox () {
       <TabPanel
         {...tab}
         className='flex flex-col flex-auto h-screen pt-24 m-1 -mt-24'
-        tabIndex='-1'
+        tabIndex={isGroupsTabActive ? '0' : '-1'}
       >
         <GroupsList startNewIMChat={doStartNewIMChat} />
       </TabPanel>
@@ -192,7 +192,7 @@ export default function ChatBox () {
         <TabPanel
           {...tab}
           className='flex flex-col flex-auto h-screen pt-24 m-1 -mt-24'
-          tabIndex='-1'
+          tabIndex={isNotificationsTabActive ? '0' : '-1'}
         >
           <Notifications />
         </TabPanel>
