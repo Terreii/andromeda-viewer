@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 
-import { selectSavedAvatars, selectSavedGrids } from '../../bundles/account'
+import { selectSavedAvatars, selectGridsByName } from '../../bundles/account'
 
 import { login } from '../../actions/sessionActions'
 
@@ -16,7 +16,7 @@ export default function LoginForm ({ isSignedIn }) {
 
   const history = useHistory()
   const avatars = useSelector(selectSavedAvatars)
-  const grids = useSelector(selectSavedGrids)
+  const grids = useSelector(selectGridsByName)
 
   const [selected, setSelected] = useState(() => avatars.length === 0
     ? 'new'
@@ -92,7 +92,7 @@ export default function LoginForm ({ isSignedIn }) {
       }
 
       const grid = typeof gridName === 'string'
-        ? grids.find(grid => grid.name === gridName)
+        ? grids[gridName]
         : gridName
       if (grid == null) {
         setErrorMessage('Unknown Grid!', `The Grid ${gridName} isn't in the grid-list!`)
@@ -135,7 +135,6 @@ export default function LoginForm ({ isSignedIn }) {
           'lg:grid-cols-3 md:grid-cols-2 md:flex-row md:items-center'}
         >
           <LoginNewAvatar
-            grids={grids}
             isSignedIn={isSignedIn}
             onLogin={loginAnonymously}
             isLoggingIn={isLoggingIn}
@@ -149,7 +148,7 @@ export default function LoginForm ({ isSignedIn }) {
             <AvatarLogin
               key={avatar._id}
               avatar={avatar}
-              grid={grids.find(grid => grid.name === avatar.grid)}
+              grid={grids[avatar.grid]}
               onLogin={loginWithSavedAvatar}
               isLoggingIn={isLoggingIn}
               isSelected={selected === avatar.avatarIdentifier}

@@ -161,6 +161,17 @@ export const selectAnonymAvatarData = (state: any): AvatarData => state.account.
 
 export const selectSavedGrids = (state: any): Grid[] => state.account.savedGrids
 
+export const selectGridsByName = createSelector(
+  selectSavedGrids,
+  grids => {
+    const allGrids: { [key: string]: Grid } = {}
+    for (const grid of grids) {
+      allGrids[grid.name] = grid
+    }
+    return allGrids
+  }
+)
+
 export const selectSavedGridsAreLoaded = (state: any): boolean => state.account.savedGridsLoaded
 
 export const selectShowUnlockDialog = createSelector(

@@ -1,61 +1,41 @@
 import { axe } from 'jest-axe'
 import React from 'react'
 import { render, fireEvent } from '@testing-library/react'
+import { Provider } from 'react-redux'
 
 import NewAvatarLogin from './newAvatarLogin'
+import configureStore from '../../store/configureStore'
 
 it('renders without crashing', () => {
-  const grids = [
-    {
-      name: 'Second Life',
-      loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
-    },
-    {
-      name: 'OS Grid',
-      loginURL: 'http://login.osgrid.org/'
-    }
-  ]
-
   const { container: notSelectedContainer } = render(
-    <NewAvatarLogin
-      grids={grids}
-    />
+    <Provider store={configureStore()}>
+      <NewAvatarLogin />
+    </Provider>
   )
 
   expect(notSelectedContainer).toBeTruthy()
 
   const { container: selectedContainer } = render(
-    <NewAvatarLogin
-      grids={grids}
-      isSelected
-    />
+    <Provider store={configureStore()}>
+      <NewAvatarLogin isSelected />
+    </Provider>
   )
 
   expect(selectedContainer).toBeTruthy()
 })
 
 it('should login while not signed', async () => {
-  const grids = [
-    {
-      name: 'Second Life',
-      loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
-    },
-    {
-      name: 'OS Grid',
-      loginURL: 'http://login.osgrid.org/'
-    }
-  ]
-
   const onLogin = jest.fn()
 
   const { queryByLabelText, queryByText, findByText, findByLabelText } = render(
-    <NewAvatarLogin
-      grids={grids}
-      isSignedIn={false}
-      onLogin={onLogin}
-      isLoggingIn={false}
-      isSelected
-    />
+    <Provider store={configureStore()}>
+      <NewAvatarLogin
+        isSignedIn={false}
+        onLogin={onLogin}
+        isLoggingIn={false}
+        isSelected
+      />
+    </Provider>
   )
 
   const nameInput = queryByLabelText('Avatar')
@@ -112,27 +92,17 @@ it('should login while not signed', async () => {
 })
 
 it('signed in login works', async () => {
-  const grids = [
-    {
-      name: 'Second Life',
-      loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
-    },
-    {
-      name: 'OS Grid',
-      loginURL: 'http://login.osgrid.org/'
-    }
-  ]
-
   const onLogin = jest.fn()
 
   const { queryByLabelText, queryByText, findByText, findByLabelText } = render(
-    <NewAvatarLogin
-      grids={grids}
-      isSignedIn
-      onLogin={onLogin}
-      isLoggingIn={false}
-      isSelected
-    />
+    <Provider store={configureStore()}>
+      <NewAvatarLogin
+        isSignedIn
+        onLogin={onLogin}
+        isLoggingIn={false}
+        isSelected
+      />
+    </Provider>
   )
 
   const nameInput = queryByLabelText('Avatar')
@@ -194,27 +164,17 @@ it('signed in login works', async () => {
 })
 
 it('should add a new grid', async () => {
-  const grids = [
-    {
-      name: 'Second Life',
-      loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
-    },
-    {
-      name: 'OS Grid',
-      loginURL: 'http://login.osgrid.org/'
-    }
-  ]
-
   const onLogin = jest.fn()
 
   const { queryByLabelText, findByText, findByLabelText } = render(
-    <NewAvatarLogin
-      grids={grids}
-      isSignedIn
-      onLogin={onLogin}
-      isLoggingIn={false}
-      isSelected
-    />
+    <Provider store={configureStore()}>
+      <NewAvatarLogin
+        isSignedIn
+        onLogin={onLogin}
+        isLoggingIn={false}
+        isSelected
+      />
+    </Provider>
   )
 
   const gridSelect = queryByLabelText('Grid')
@@ -306,30 +266,18 @@ it('should add a new grid', async () => {
 })
 
 it('should pass aXe', async () => {
-  const grids = [
-    {
-      name: 'Second Life',
-      loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
-    },
-    {
-      name: 'OS Grid',
-      loginURL: 'http://login.osgrid.org/'
-    }
-  ]
-
   const { container: notSelectedContainer } = render(
-    <NewAvatarLogin
-      grids={grids}
-    />
+    <Provider store={configureStore()}>
+      <NewAvatarLogin />
+    </Provider>
   )
 
   expect(await axe(notSelectedContainer)).toHaveNoViolations()
 
   const { container: selectedContainer, queryByLabelText, findByLabelText } = render(
-    <NewAvatarLogin
-      grids={grids}
-      isSelected
-    />
+    <Provider store={configureStore()}>
+      <NewAvatarLogin isSelected />
+    </Provider>
   )
 
   expect(await axe(selectedContainer)).toHaveNoViolations()
