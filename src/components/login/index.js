@@ -127,12 +127,10 @@ export default function LoginForm ({ isSignedIn }) {
   return (
     <div className='mt-10 overflow-scroll'>
       <main
-        className={'flex flex-col max-w-screen-lg mx-auto my-0 text-center text-white ' +
-        'md:mt-8 md:mb-2'}
+        className='flex flex-col max-w-screen-lg mx-auto my-0 text-center text-white md:mt-8 md:mb-2'
       >
         <div
-          className={'flex md:grid flex-col flex-wrap items-center md:items-start justify-center ' +
-          'lg:grid-cols-3 md:grid-cols-2 md:flex-row md:items-center'}
+          className='flex flex-col flex-wrap items-center justify-center md:grid md:items-start lg:grid-cols-3 md:grid-cols-2 md:flex-row'
         >
           <LoginNewAvatar
             isSignedIn={isSignedIn}

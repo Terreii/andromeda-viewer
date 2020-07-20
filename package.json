@@ -12,7 +12,7 @@
     "dev": "npm-run-all -p dev:*",
     "predev:app": "npm run build:messages",
     "dev:app": "react-scripts start",
-    "dev:server": "hoodie --inMemory --public build",
+    "dev:server": "hoodie --public build",
     "dev:style": "postcss src/tailwind.css -o src/styles.css --watch",
     "fix:docs": "textlint --fix README.md ./*/*.md ./src/*/*.md",
     "fix:style": "standard --fix",
