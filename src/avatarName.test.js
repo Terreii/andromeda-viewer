@@ -50,6 +50,16 @@ test('should parse a given name', () => {
     didLoadDisplayName: false,
     isLoadingDisplayName: false
   })
+  expect(new AvatarName({
+    id: 'e856f8e7-f774-4040-8392-df4185fa37e4'
+  })).toEqual({
+    first: '',
+    last: 'e856f8e7-f774-4040-8392-df4185fa37e4',
+    displayName: '',
+    isUsingDisplayName: false,
+    didLoadDisplayName: false,
+    isLoadingDisplayName: false
+  })
 })
 
 test(

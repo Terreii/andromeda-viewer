@@ -44,6 +44,12 @@ const nameSlice = createSlice({
   },
 
   reducers: {
+    addMissing (state, action: PayloadAction<string>) {
+      if (!(action.payload in state.names)) {
+        state.names[action.payload] = new AvatarName({ id: action.payload })
+      }
+    },
+
     displayNamesStartLoading (state, action: PayloadAction<string[]>) {
       for (const id of action.payload) {
         if (id in state.names) {
@@ -75,7 +81,11 @@ const nameSlice = createSlice({
           }
         }
       },
-      prepare: (agents: any, badIDs: string[] | null, badNames: string[] | null) => ({
+      prepare: (
+        agents: DisplayNameResultAvatar[],
+        badIDs: string[] | null,
+        badNames: string[] | null
+      ) => ({
         payload: {
           agents,
           badIDs: badIDs || [],
@@ -195,6 +205,7 @@ const nameSlice = createSlice({
 export default nameSlice.reducer
 
 export const {
+  addMissing,
   displayNamesStartLoading,
   displayNamesLoaded
 } = nameSlice.actions

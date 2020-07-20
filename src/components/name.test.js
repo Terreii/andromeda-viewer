@@ -8,6 +8,8 @@ import configureStore from '../store/configureStore'
 import { displayNamesLoaded } from '../bundles/names'
 import AvatarName from '../avatarName'
 
+jest.mock('../reactors/index.js', () => [])
+
 function createStoreWithNames (names) {
   return configureStore({
     names: { names }
@@ -120,6 +122,25 @@ it('should update if the name updates', () => {
   expect(queryByText(name.getName())).toBeFalsy()
   const nextName = name.withDisplayNameSetTo('Andromeda', 'tester', 'mactestface')
   expect(queryByText(nextName.getDisplayName())).toBeTruthy()
+})
+
+it('should pass its arguments down', () => {
+  const name = new AvatarName('Tester MacTestface')
+    .withDisplayNameSetTo('Andromeda', 'tester', 'mactestface')
+
+  const { queryByText } = render(
+    <Provider store={createStoreWithNames({ a: name })}>
+      <Name
+        id='a'
+        className='text-xl'
+        aria-label='test'
+      />
+    </Provider>
+  )
+
+  const component = queryByText(name.getDisplayName())
+  expect(component.classList.contains('text-xl')).toBeTruthy()
+  expect(component.getAttribute('aria-label')).toBe('test')
 })
 
 it('should pass aXe', async () => {
