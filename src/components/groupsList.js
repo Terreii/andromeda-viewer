@@ -28,7 +28,11 @@ export default function GroupsList ({ startNewIMChat }) {
   const groups = useSelector(selectGroups)
 
   return (
-    <main className='p-4 overflow-y-scroll' aria-label='Groups'>
+    <main
+      className='p-4 mt-1 overflow-y-scroll focus:shadow-outline focus:outline-none'
+      tabIndex='0'
+      aria-label='Groups'
+    >
       <ul className='max-w-xl pl-4 mx-auto list-none'>
         {groups.map(group => (
           <GroupRow

@@ -11,7 +11,7 @@ const TextLine = memo(({ msg, name }) => {
 
   return (
     <div className={isIrcMe ? 'italic text-xl' : 'text-xl'}>
-      <time dateTime={time.toISOString()} className='pr-1'>
+      <time dateTime={time.toISOString()} className='pr-1 font-mono'>
         {leadingZero(time.getHours())}
         :
         {leadingZero(time.getMinutes())}
@@ -19,7 +19,8 @@ const TextLine = memo(({ msg, name }) => {
         {leadingZero(time.getSeconds())}
       </time>
 
-      <span>{name.toString()}{isIrcMe ? '' : ':'} </span>
+      <span aria-hidden>{name.toString()}{isIrcMe ? '' : ':'} </span>
+      <span className='sr-only'>{typeof name === 'string' ? name : name.getName()}</span>
 
       <span>
         <Text
@@ -42,7 +43,12 @@ class ChatList extends React.Component {
     })
 
     return (
-      <div className='overflow-y-scroll' {...props}>
+      <div
+        className='mt-1 overflow-y-scroll focus:shadow-outline focus:outline-none'
+        role='log'
+        tabIndex='0'
+        {...props}
+      >
         {messagesLines}
       </div>
     )
