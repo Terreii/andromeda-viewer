@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react'
 
 import ChatMessagesList from './chatMessagesList'
 
-export default function ChatDialog ({ isIM = false, data = [], names, sendTo, loadHistory }) {
+export default function ChatDialog ({ isIM = false, data = [], sendTo, loadHistory }) {
   const [text, setText] = useState('')
 
   const messages = isIM ? data.messages : data
@@ -34,7 +34,6 @@ export default function ChatDialog ({ isIM = false, data = [], names, sendTo, lo
       <ChatMessagesList
         messages={messages}
         isIM={isIM}
-        names={names}
         onScrolledTop={doLoadHistory}
       />
       <form className='flex flex-row flex-shrink-0 m-2 space-x-2' onSubmit={send}>
