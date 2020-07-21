@@ -174,10 +174,7 @@ export default function ChatBox () {
         className='flex flex-col flex-auto h-screen pt-24 m-1 -mt-24'
         tabIndex={undefined}
       >
-        <FriendsList
-          names={names}
-          startNewIMChat={doStartNewIMChat}
-        />
+        <FriendsList startNewIMChat={doStartNewIMChat} />
       </TabPanel>
 
       <TabPanel
