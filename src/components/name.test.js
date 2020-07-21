@@ -57,10 +57,53 @@ it('renders not existing names as IDs', async () => {
     </Provider>
   )
 
-  expect(queryByText(id)).toBeTruthy()
+  expect(queryByText(id, { selector: '[aria-hidden="true"]' })).toBeTruthy()
+  expect(queryByText(id, { selector: '.sr-only' })).toBeTruthy()
 
   // Dispatch an action to load the name
   expect(store.getState().names.names[id]).toBeInstanceOf(AvatarName)
+})
+
+it('renders the fallback if name does not exist', async () => {
+  const id = 'e856f8e7-f774-4040-8392-df4185fa37e4'
+  const fallback = 'Fallback Macfallface'
+  const store = createStoreWithNames({
+    a: new AvatarName('Tester MacTestface')
+  })
+
+  const { queryByText } = render(
+    <Provider store={store}>
+      <Name id={id} fallback={fallback} />
+    </Provider>
+  )
+
+  expect(queryByText(fallback, { selector: '[aria-hidden="true"]' })).toBeTruthy()
+  expect(queryByText(fallback, { selector: '.sr-only' })).toBeTruthy()
+  expect(queryByText(id)).toBeFalsy()
+
+  // Dispatch an action to load the name
+  expect(store.getState().names.names[id]).toBeInstanceOf(AvatarName)
+  expect(store.getState().names.names[id].getName()).toBe(fallback)
+})
+
+it('should not add a missing name to names if loadMissing is set to false', () => {
+  const id = 'e856f8e7-f774-4040-8392-df4185fa37e4'
+  const fallback = 'Fallback Macfallface'
+  const store = createStoreWithNames({
+    a: new AvatarName('Tester MacTestface')
+  })
+
+  const { queryByText } = render(
+    <Provider store={store}>
+      <Name id={id} fallback={fallback} loadMissing={false} />
+    </Provider>
+  )
+
+  expect(queryByText(fallback, { selector: '[aria-hidden="true"]' })).toBeTruthy()
+  expect(queryByText(fallback, { selector: '.sr-only' })).toBeTruthy()
+  expect(queryByText(id)).toBeFalsy()
+
+  expect(store.getState().names.names[id]).toBeUndefined()
 })
 
 it('should update if the missing name gets loaded', () => {
@@ -74,7 +117,10 @@ it('should update if the missing name gets loaded', () => {
     </Provider>
   )
 
-  expect(queryByText('e856f8e7-f774-4040-8392-df4185fa37e4')).toBeTruthy()
+  expect(queryByText('e856f8e7-f774-4040-8392-df4185fa37e4', { selector: '[aria-hidden="true"]' }))
+    .toBeTruthy()
+  expect(queryByText('e856f8e7-f774-4040-8392-df4185fa37e4', { selector: '.sr-only' }))
+    .toBeTruthy()
 
   store.dispatch(displayNamesLoaded([
     {
@@ -91,6 +137,7 @@ it('should update if the missing name gets loaded', () => {
   expect(queryByText('e856f8e7-f774-4040-8392-df4185fa37e4')).toBeFalsy()
   const name = store.getState().names.names['e856f8e7-f774-4040-8392-df4185fa37e4']
   expect(queryByText(name.getDisplayName())).toBeTruthy()
+  expect(queryByText(name.getName())).toBeTruthy()
 })
 
 it('should update if the name updates', () => {
@@ -105,7 +152,8 @@ it('should update if the name updates', () => {
     </Provider>
   )
 
-  expect(queryByText(name.getName())).toBeTruthy()
+  expect(queryByText(name.getName(), { selector: '[aria-hidden="true"]' })).toBeTruthy()
+  expect(queryByText(name.getName(), { selector: '.sr-only' })).toBeTruthy()
 
   store.dispatch(displayNamesLoaded([
     {
@@ -122,6 +170,7 @@ it('should update if the name updates', () => {
   expect(queryByText(name.getName())).toBeFalsy()
   const nextName = name.withDisplayNameSetTo('Andromeda', 'tester', 'mactestface')
   expect(queryByText(nextName.getDisplayName())).toBeTruthy()
+  expect(queryByText(nextName.getName())).toBeTruthy()
 })
 
 it('should pass its arguments down', () => {
@@ -138,7 +187,7 @@ it('should pass its arguments down', () => {
     </Provider>
   )
 
-  const component = queryByText(name.getDisplayName())
+  const component = queryByText(name.getDisplayName()).parentElement
   expect(component.classList.contains('text-xl')).toBeTruthy()
   expect(component.getAttribute('aria-label')).toBe('test')
 })

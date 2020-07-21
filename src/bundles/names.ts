@@ -44,9 +44,11 @@ const nameSlice = createSlice({
   },
 
   reducers: {
-    addMissing (state, action: PayloadAction<string>) {
-      if (!(action.payload in state.names)) {
-        state.names[action.payload] = new AvatarName({ id: action.payload })
+    addMissing (state, action: PayloadAction<{ id: string, fallback?: string }>) {
+      if (!(action.payload.id in state.names)) {
+        state.names[action.payload.id] = action.payload.fallback == null
+          ? new AvatarName({ id: action.payload.id })
+          : new AvatarName(action.payload.fallback)
       }
     },
 
