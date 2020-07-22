@@ -20,7 +20,6 @@ import {
 } from '../actions/chatMessageActions'
 
 import { selectActiveIMChats } from '../bundles/imChat'
-import { selectLocalChat } from '../bundles/localChat'
 import { selectShouldDisplayNotifications } from '../bundles/notifications'
 import { selectActiveTab, changeChatTab } from '../bundles/session'
 
@@ -28,7 +27,6 @@ import { IMChatType, IMDialog } from '../types/chat'
 
 export default function ChatBox () {
   const dispatch = useDispatch()
-  const localChat = useSelector(selectLocalChat)
   const shouldDisplayNotifications = useSelector(selectShouldDisplayNotifications)
 
   const selectedId = useSelector(selectActiveTab)
@@ -193,7 +191,6 @@ export default function ChatBox () {
         tabIndex='-1'
       >
         <ChatDialog
-          data={localChat}
           sendTo={text => {
             dispatch(sendLocalChatMessage(text, 1, 0))
           }}

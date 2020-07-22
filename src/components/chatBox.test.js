@@ -34,14 +34,19 @@ it('renders without crashing', () => {
         sessionStarted: true
       }
     ],
-    IMs: [
-      {
-        sessionId: '2345',
-        withId: 'first',
-        isIM: true,
-        messages: []
+    IMs: {
+      chats: {
+        2345: {
+          sessionId: '2345',
+          withId: 'first',
+          isIM: true,
+          messages: []
+        }
+      },
+      messages: {
+        2345: []
       }
-    ],
+    },
     localChat: [],
     names: {
       names: {
@@ -85,15 +90,19 @@ it('should pass aXe', async () => {
         sessionStarted: true
       }
     ],
-    IMs: [
-      {
-        name: 'first chat',
-        sessionId: '2345',
-        withId: 'first',
-        isIM: true,
-        messages: []
+    IMs: {
+      chats: {
+        2345: {
+          name: 'first chat',
+          sessionId: '2345',
+          withId: 'first',
+          isIM: true
+        }
+      },
+      messages: {
+        2345: []
       }
-    ],
+    },
     localChat: [],
     names: {
       names: {

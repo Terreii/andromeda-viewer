@@ -401,53 +401,57 @@ describe('save, loading and sending IMs', () => {
       }
     })])({
       IMs: {
-        abcd: {
-          _id: 'an-id',
-          sessionId: 'abcd',
-          saveId: 'dcba',
-          type: IMChatType.personal,
-          target: 'f2373437-a2ef-4435-82b9-68d283538bb2',
-          name: 'Tester MacTestface',
+        chats: {
+          abcd: {
+            _id: 'an-id',
+            sessionId: 'abcd',
+            saveId: 'dcba',
+            type: IMChatType.personal,
+            target: 'f2373437-a2ef-4435-82b9-68d283538bb2',
+            name: 'Tester MacTestface',
 
-          didSaveChatInfo: false,
-          didLoadHistory: false,
-          isLoadingHistory: false,
-          active: false,
-          hasUnsavedMSG: false,
-          areTyping: new Set(),
-          messages: []
+            didSaveChatInfo: false,
+            didLoadHistory: false,
+            isLoadingHistory: false,
+            active: false,
+            hasUnsavedMSG: false,
+            areTyping: new Set()
+          },
+          willError: {
+            _id: 'an-id-too',
+            sessionId: 'willError',
+            saveId: 'xyz',
+            type: IMChatType.group,
+            target: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+            name: 'Great group',
+
+            didSaveChatInfo: false,
+            didLoadHistory: false,
+            isLoadingHistory: false,
+            active: false,
+            hasUnsavedMSG: false,
+            areTyping: new Set()
+          },
+          12345: {
+            _id: 'another-id',
+            sessionId: '12345',
+            saveId: '67890',
+            type: IMChatType.personal,
+            target: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+            name: 'New Person',
+
+            didSaveChatInfo: true,
+            didLoadHistory: false,
+            isLoadingHistory: false,
+            active: false,
+            hasUnsavedMSG: false,
+            areTyping: new Set()
+          }
         },
-        willError: {
-          _id: 'an-id-too',
-          sessionId: 'willError',
-          saveId: 'xyz',
-          type: IMChatType.group,
-          target: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-          name: 'Great group',
-
-          didSaveChatInfo: false,
-          didLoadHistory: false,
-          isLoadingHistory: false,
-          active: false,
-          hasUnsavedMSG: false,
-          areTyping: new Set(),
-          messages: []
-        },
-        12345: {
-          _id: 'another-id',
-          sessionId: '12345',
-          saveId: '67890',
-          type: IMChatType.personal,
-          target: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
-          name: 'New Person',
-
-          didSaveChatInfo: true,
-          didLoadHistory: false,
-          isLoadingHistory: false,
-          active: false,
-          hasUnsavedMSG: false,
-          areTyping: new Set(),
-          messages: []
+        messages: {
+          abcd: [],
+          willError: [],
+          12345: []
         }
       }
     })
@@ -653,21 +657,25 @@ describe('save, loading and sending IMs', () => {
         avatarIdentifier: 'test@sl'
       },
       IMs: {
-        '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25': {
-          name: 'Buddy',
-          target: 'f2373437-a2ef-4435-82b9-68d283538bb2',
-          saveId: 'abcd',
-          type: IMChatType.personal,
-          messages: [
-            { _id: 'saveId/imChats/abcd/2019-07-09T00:02:04.000Z' }
-          ]
+        chats: {
+          '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25': {
+            name: 'Buddy',
+            target: 'f2373437-a2ef-4435-82b9-68d283538bb2',
+            saveId: 'abcd',
+            type: IMChatType.personal
+          },
+          'da4bf092-5e29-4577-a662-171bd57915f8': {
+            name: 'Best group',
+            target: 'da4bf092-5e29-4577-a662-171bd57915f8',
+            saveId: 'efgh',
+            type: IMChatType.group
+          }
         },
-        'da4bf092-5e29-4577-a662-171bd57915f8': {
-          name: 'Best group',
-          target: 'da4bf092-5e29-4577-a662-171bd57915f8',
-          saveId: 'efgh',
-          type: IMChatType.group,
-          messages: []
+        messages: {
+          '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25': [
+            { _id: 'saveId/imChats/abcd/2019-07-09T00:02:04.000Z' }
+          ],
+          'da4bf092-5e29-4577-a662-171bd57915f8': []
         }
       }
     })
@@ -851,23 +859,30 @@ describe('save, loading and sending IMs', () => {
         }
       },
       IMs: {
-        '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25': {
-          name: 'Buddy',
-          target: 'f2373437-a2ef-4435-82b9-68d283538bb2',
-          saveId: 'abcd',
-          type: IMChatType.personal
+        chats: {
+          '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25': {
+            name: 'Buddy',
+            target: 'f2373437-a2ef-4435-82b9-68d283538bb2',
+            saveId: 'abcd',
+            type: IMChatType.personal
+          },
+          'da4bf092-5e29-4577-a662-171bd57915f8': {
+            name: 'Best group',
+            target: 'da4bf092-5e29-4577-a662-171bd57915f8',
+            saveId: 'efgh',
+            type: IMChatType.group
+          },
+          'ee6af506-fa78-408d-869f-78305b3889c3': {
+            name: 'Dr. Evil Inc.',
+            target: 'ee6af506-fa78-408d-869f-78305b3889c3',
+            saveId: 'ijkl',
+            type: IMChatType.conference
+          }
         },
-        'da4bf092-5e29-4577-a662-171bd57915f8': {
-          name: 'Best group',
-          target: 'da4bf092-5e29-4577-a662-171bd57915f8',
-          saveId: 'efgh',
-          type: IMChatType.group
-        },
-        'ee6af506-fa78-408d-869f-78305b3889c3': {
-          name: 'Dr. Evil Inc.',
-          target: 'ee6af506-fa78-408d-869f-78305b3889c3',
-          saveId: 'ijkl',
-          type: IMChatType.conference
+        messages: {
+          '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25': [],
+          'da4bf092-5e29-4577-a662-171bd57915f8': [],
+          'ee6af506-fa78-408d-869f-78305b3889c3': []
         }
       }
     })
@@ -1046,7 +1061,10 @@ describe('save, loading and sending IMs', () => {
         sessionId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9',
         avatarIdentifier: 'test@sl'
       },
-      IMs: {},
+      IMs: {
+        chats: {},
+        messages: {}
+      },
       names: {
         names: {
           'f2373437-a2ef-4435-82b9-68d283538bb2': new AvatarName('Tester Furry')
@@ -1165,15 +1183,19 @@ describe('incoming IM handling', () => {
           avatarIdentifier: 'Tester'
         },
         groups: [],
-        IMs: {}
+        IMs: {
+          chats: {},
+          messages: {}
+        }
       }
 
       if (actions.length >= 1) {
         // add new chat data to state
-        state.IMs[messageData.MessageBlock[0].ID] = {
+        state.IMs.chats[messageData.MessageBlock[0].ID] = {
           _id: 'saveId/imChatsInfos/abcdef',
           saveId: 'abcdef'
         }
+        state.IMs.messages[messageData.MessageBlock[0].ID] = []
       }
 
       return state
@@ -1232,9 +1254,14 @@ describe('incoming IM handling', () => {
       },
       groups: [],
       IMs: {
-        [messageData.MessageBlock[0].ID]: {
-          _id: 'saveId/imChatsInfos/abcdef',
-          saveId: 'abcdef'
+        chats: {
+          [messageData.MessageBlock[0].ID]: {
+            _id: 'saveId/imChatsInfos/abcdef',
+            saveId: 'abcdef'
+          }
+        },
+        messages: {
+          [messageData.MessageBlock[0].ID]: []
         }
       }
     })
@@ -1283,9 +1310,14 @@ describe('incoming IM handling', () => {
         }
       ],
       IMs: {
-        [groupId]: {
-          _id: 'saveId/imChatsInfos/abcdef',
-          saveId: 'abcdef'
+        chats: {
+          [groupId]: {
+            _id: 'saveId/imChatsInfos/abcdef',
+            saveId: 'abcdef'
+          }
+        },
+        messages: {
+          [groupId]: []
         }
       }
     })
@@ -1357,25 +1389,29 @@ describe('incoming IM handling', () => {
           avatarIdentifier: 'Tester'
         },
         groups: [],
-        IMs: {}
+        IMs: {
+          chats: {},
+          messages: {}
+        }
       }
 
       if (actions.length === 1 || actions.length === 3) {
         // add new chat data to state
-        state.IMs[id] = {
+        state.IMs.chats[id] = {
           _id: 'saveId/imChatsInfos/' + id,
           saveId: 'abcdef'
         }
+        state.IMs.messages[id] = []
       }
 
       return state
     })
 
     uuid.mockReturnValueOnce('abcdef')
-
     // IMDialog.SessionSend
     store.dispatch(receiveIM(messageData))
 
+    uuid.mockReturnValueOnce('abcdef')
     // IMDialog.MessageFromAgent with binaryBucket of length > 1
     store.dispatch(receiveIM(createImPackage(IMDialog.MessageFromAgent, {
       id,
@@ -1457,15 +1493,21 @@ describe('incoming IM handling', () => {
         }
       ],
       IMs: {
-        '01234567-8900-0000-0000-009876543210': {
-          saveId: 'abcdef',
-          sessionId: '01234567-8900-0000-0000-009876543210',
-          type: IMChatType.personal
+        chats: {
+          '01234567-8900-0000-0000-009876543210': {
+            saveId: 'abcdef',
+            sessionId: '01234567-8900-0000-0000-009876543210',
+            type: IMChatType.personal
+          },
+          'some-none-existing-id': {
+            saveId: 'something',
+            sessionId: 'some-none-existing-id',
+            type: IMChatType.group
+          }
         },
-        'some-none-existing-id': {
-          saveId: 'something',
-          sessionId: 'some-none-existing-id',
-          type: IMChatType.group
+        messages: {
+          '01234567-8900-0000-0000-009876543210': [],
+          'some-none-existing-id': []
         }
       }
     })
@@ -1520,15 +1562,21 @@ describe('incoming IM handling', () => {
         }
       ],
       IMs: {
-        '01234567-8900-0000-0000-009876543210': {
-          saveId: 'abcdef',
-          sessionId: '01234567-8900-0000-0000-009876543210',
-          type: IMChatType.personal
+        chats: {
+          '01234567-8900-0000-0000-009876543210': {
+            saveId: 'abcdef',
+            sessionId: '01234567-8900-0000-0000-009876543210',
+            type: IMChatType.personal
+          },
+          'some-none-existing-id': {
+            saveId: 'something',
+            sessionId: 'some-none-existing-id',
+            type: IMChatType.group
+          }
         },
-        'some-none-existing-id': {
-          saveId: 'something',
-          sessionId: 'some-none-existing-id',
-          type: IMChatType.group
+        messages: {
+          '01234567-8900-0000-0000-009876543210': [],
+          'some-none-existing-id': []
         }
       }
     })
@@ -1694,7 +1742,10 @@ describe('incoming IM handling', () => {
 
     it('should handle messages from objects', () => {
       const store = mockStore({
-        IMs: {}
+        IMs: {
+          chats: {},
+          messages: {}
+        }
       })
 
       // IMDialog.MessageFromObject

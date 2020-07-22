@@ -2,14 +2,32 @@
  * Displays a single conversation/dialog. Also the input
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import { useSelector } from 'react-redux'
 
 import ChatMessagesList from './chatMessagesList'
 
-export default function ChatDialog ({ isIM = false, data = [], sendTo, loadHistory }) {
+import { selectChatMessages } from '../bundles/imChat'
+import { selectLocalChat } from '../bundles/localChat'
+
+/**
+ * Display a chat.
+ * @param {object} param React param.
+ * @param {boolean} param.isIM   Is this chat a IM chat? This can be personal, group or conference.
+ * @param {import('../types/chat').IMChat?} param.data  IM chat data.
+ * @param {function} param.sendTo Callback to send a message.
+ * @param {function} param.loadHistory Action to load the chat history.
+ */
+export default function ChatDialog ({ isIM = false, data = {}, sendTo, loadHistory }) {
   const [text, setText] = useState('')
 
-  const messages = isIM ? data.messages : data
+  const chatId = isIM ? data.sessionId : ''
+  const messages = useSelector(useMemo(
+    () => isIM
+      ? state => selectChatMessages(state, chatId)
+      : selectLocalChat,
+    [isIM, chatId]
+  ))
 
   const send = event => {
     event.preventDefault()
