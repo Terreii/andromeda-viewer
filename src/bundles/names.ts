@@ -23,6 +23,7 @@ import {
   userWasKicked,
   LoginAction
 } from './session'
+import { UUID as LLUUID } from '../llsd'
 
 import {
   LocalChatMessage,
@@ -35,13 +36,13 @@ import {
 const nameSlice = createSlice({
   name: 'names',
 
-  initialState: {
+  initialState: ((): {
+    names: { [key: string]: AvatarName },
+    getDisplayNamesURL: string
+  } => ({
     names: {},
     getDisplayNamesURL: ''
-  } as {
-    names: { [key: string]: AvatarName }
-    getDisplayNamesURL: string
-  },
+  }))(),
 
   reducers: {
     addMissing (state, action: PayloadAction<{ id: string, fallback?: string }>) {
@@ -125,7 +126,10 @@ const nameSlice = createSlice({
       action: PayloadAction<{ chatType: IMChatType, session: string, msg: InstantMessage }>
     ) {
       const msg = action.payload.msg
-      if (!(action.payload.msg.fromId in state.names)) {
+      if (
+        !(action.payload.msg.fromId in state.names) &&
+        action.payload.msg.fromId !== LLUUID.nil
+      ) {
         addName(state.names, msg.fromId, msg.fromName)
       }
     },
@@ -239,11 +243,6 @@ function addName (names: { [key: string]: AvatarName }, uuid: string, name: stri
   }
 }
 
-interface DisplayNameResult {
-  agents: DisplayNameResultAvatar[],
-  badIDs: string[],
-  badNames: string[]
-}
 interface DisplayNameResultAvatar {
   id: string,
   username: string,
@@ -252,4 +251,10 @@ interface DisplayNameResultAvatar {
   legacy_first_name: string,
   legacy_last_name: string,
   is_display_name_default: boolean
+}
+
+interface DisplayNameResult {
+  agents: DisplayNameResultAvatar[],
+  badIDs: string[],
+  badNames: string[]
 }

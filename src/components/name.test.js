@@ -7,6 +7,7 @@ import Name from './name'
 import configureStore from '../store/configureStore'
 import { displayNamesLoaded } from '../bundles/names'
 import AvatarName from '../avatarName'
+import { UUID as LLUUID } from '../llsd'
 
 jest.mock('../reactors/index.js', () => [])
 
@@ -96,6 +97,26 @@ it('should not add a missing name to names if loadMissing is set to false', () =
   const { queryByText } = render(
     <Provider store={store}>
       <Name id={id} fallback={fallback} loadMissing={false} />
+    </Provider>
+  )
+
+  expect(queryByText(fallback, { selector: '[aria-hidden="true"]' })).toBeTruthy()
+  expect(queryByText(fallback, { selector: '.sr-only' })).toBeTruthy()
+  expect(queryByText(id)).toBeFalsy()
+
+  expect(store.getState().names.names[id]).toBeUndefined()
+})
+
+it('should not add a missing name to names if the id is a NIL UUID', () => {
+  const id = LLUUID.nil
+  const fallback = 'Fallback Macfallface'
+  const store = createStoreWithNames({
+    a: new AvatarName('Tester MacTestface')
+  })
+
+  const { queryByText } = render(
+    <Provider store={store}>
+      <Name id={id} fallback={fallback} />
     </Provider>
   )
 

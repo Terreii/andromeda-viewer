@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
+import { UUID as LLUUID } from '../llsd'
 import { addMissing, selectAvatarNameById } from '../bundles/names'
 
 export default function Name ({
@@ -23,7 +24,7 @@ export default function Name ({
   const name = useSelector(selector)
 
   useEffect(() => {
-    if (name == null && loadMissing) {
+    if (name == null && loadMissing && id !== LLUUID.nil) {
       dispatch(addMissing({
         id,
         fallback: fallback == null ? undefined : fallback

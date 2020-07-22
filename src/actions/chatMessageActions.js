@@ -567,10 +567,14 @@ function handleSystemMessageToIM (msg) {
     if (chat == null) return
 
     const time = new Date()
+    const timeStamp = +getValueOf(msg, 'MessageBlock', 'Timestamp')
+    if (timeStamp !== 0) {
+      time.setTime(timeStamp * 1000)
+    }
 
-    dispatch({
-      type: 'SYSTEM_IM_RECEIVED',
-      sessionId: id,
+    dispatch(receivedIM({
+      chatType: chat.type,
+      session: id,
       msg: {
         _id: `${selectAvatarDataSaveId(state)}/imChats/${chat.saveId}/${time.toJSON()}`,
         fromName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName') || 'Second Life',
@@ -579,7 +583,7 @@ function handleSystemMessageToIM (msg) {
         message: getStringValueOf(msg, 'MessageBlock', 'Message'),
         time: time.getTime()
       }
-    })
+    }))
   }
 }
 

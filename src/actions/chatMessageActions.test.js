@@ -1589,15 +1589,18 @@ describe('incoming IM handling', () => {
 
     expect(store.getActions()).toEqual([
       {
-        type: 'SYSTEM_IM_RECEIVED',
-        sessionId: '01234567-8900-0000-0000-009876543210',
-        msg: {
-          _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
-          fromName: 'Second Life',
-          fromId: LLUUID.nil,
-          offline: 0,
-          message: 'User not online - message will be stored and delivered later.',
-          time: 1562630524418
+        type: 'im/received',
+        payload: {
+          chatType: IMChatType.personal,
+          session: '01234567-8900-0000-0000-009876543210',
+          msg: {
+            _id: 'saveId/imChats/abcdef/2019-07-09T00:02:04.418Z',
+            fromName: 'Second Life',
+            fromId: LLUUID.nil,
+            offline: 0,
+            message: 'User not online - message will be stored and delivered later.',
+            time: 1562630524418
+          }
         }
       }
     ])
