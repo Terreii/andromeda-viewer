@@ -46,7 +46,7 @@ const nameSlice = createSlice({
 
   reducers: {
     addMissing (state, action: PayloadAction<{ id: string, fallback?: string }>) {
-      if (!(action.payload.id in state.names)) {
+      if (!(action.payload.id in state.names) && action.payload.id !== LLUUID.nil) {
         state.names[action.payload.id] = action.payload.fallback == null
           ? new AvatarName({ id: action.payload.id })
           : new AvatarName(action.payload.fallback)
@@ -103,7 +103,7 @@ const nameSlice = createSlice({
       state.names[action.payload.uuid] = action.payload.name
 
       for (const msg of action.payload.localChatHistory) {
-        if (String(msg.sourceType) === 'agent') {
+        if (String(msg.sourceType) === 'agent' && msg.fromId !== LLUUID.nil) {
           addName(state.names, msg.fromId, msg.fromName)
         }
       }
@@ -114,8 +114,10 @@ const nameSlice = createSlice({
     },
 
     [localChatReceived.type] (state, action: PayloadAction<LocalChatMessage>) {
-      if (!(action.payload.fromId in state.names) &&
-        action.payload.sourceType === LocalChatSourceType.Agent
+      if (
+        !(action.payload.fromId in state.names) &&
+        action.payload.sourceType === LocalChatSourceType.Agent &&
+        action.payload.fromId !== LLUUID.nil
       ) {
         addName(state.names, action.payload.fromId, action.payload.fromName)
       }
@@ -162,7 +164,7 @@ const nameSlice = createSlice({
       action: PayloadAction<{ sessionId: string, messages: InstantMessage[], didLoadAll: boolean }>
     ) {
       for (const msg of action.payload.messages) {
-        if (msg.fromId in state.names) continue
+        if (msg.fromId in state.names || msg.fromId === LLUUID.nil) continue
 
         state.names[msg.fromId] = new AvatarName(msg.fromName)
       }
@@ -237,6 +239,8 @@ export const selectOwnAvatarName = createSelector(
 
 // Only adds a Name to names if it is new or did change
 function addName (names: { [key: string]: AvatarName }, uuid: string, name: string) {
+  if (uuid === LLUUID.nil) return
+
   const updated = new AvatarName(name)
   if (!(uuid in names) || !names[uuid].compare(updated)) {
     names[uuid] = updated
