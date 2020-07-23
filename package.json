@@ -88,7 +88,7 @@
     "react-scripts": "^3.4.1",
     "react-test-renderer": "^16.13.1",
     "reakit": "^1.1.2",
-    "reakit-test-utils": "^0.13.0",
+    "reakit-test-utils": "^0.13.1",
     "redux-burger-menu": "^0.2.8",
     "redux-mock-store": "^1.5.4",
     "requestidlecallback": "^0.3.0",
