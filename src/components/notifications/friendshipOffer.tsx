@@ -2,9 +2,8 @@ import React from 'react'
 import { useDispatch } from 'react-redux'
 
 import { Container, ComponentArguments, ButtonsRow } from './utils'
+import Name from '../name'
 import Text from '../text'
-
-import { useName } from '../../hooks/names'
 
 import { acceptFriendshipOffer, declineFriendshipOffer } from '../../actions/friendsActions'
 
@@ -25,10 +24,8 @@ export default function FriendshipOffer (
     onClose()
   }
 
-  const name = useName(data.fromId)
-
   return (
-    <Container title={`${name} has offered you friendship.`}>
+    <Container title={<span><Name id={data.fromId} /> has offered you friendship.</span>}>
       <p>
         <Text text={data.text} multiline />
       </p>

@@ -16,7 +16,7 @@ import {
 import { acceptGroupInvitation, declineGroupInvitation } from '../../actions/groupsActions'
 import { acceptInventoryOffer, declineInventoryOffer } from '../../actions/inventory'
 import { close, selectNotifications } from '../../bundles/notifications'
-import { useName, useGroupName } from '../../hooks/names'
+import { useGroupName } from '../../hooks/names'
 
 import { NotificationTypes } from '../../types/chat'
 import { AssetType } from '../../types/inventory'
@@ -33,14 +33,21 @@ jest.mock('../../actions/groupsActions')
 jest.mock('../../actions/inventory')
 jest.mock('../../bundles/notifications')
 jest.mock('../../hooks/names')
-const mockedName = 'Tester Mactestface'
+
 beforeEach(() => {
-  useName.mockReturnValueOnce(new AvatarName(mockedName))
   close.mockImplementation(() => () => {})
 })
 
+const mockSenderId = '5df644f5-8b12-4caf-8e91-d7cae057e5f2'
+const mockedName = 'Tester Mactestface'
+
 function configureStore (state = {}) {
   const store = configureMockStore([thunk])
+  state.names = {
+    names: {
+      [mockSenderId]: new AvatarName(mockedName)
+    }
+  }
   return store(state)
 }
 
@@ -161,9 +168,12 @@ it('renders a friend online state change notification to online', () => {
   expect(header).toBeTruthy()
   expect(header.nodeName).toBe('H4')
 
-  const body = queryByText('Tester Mactestface is online')
+  const body = queryByText('Tester Mactestface', { selector: '[aria-hidden="true"]' })
   expect(body).toBeTruthy()
-  expect(body.nodeName).toBe('P')
+  expect(body.parentElement.parentElement.nodeName).toBe('P')
+
+  expect(queryByText('is online')).toBeTruthy()
+  expect(queryByText('is offline')).toBeFalsy()
 
   const button = queryByText('OK')
   expect(button).toBeTruthy()
@@ -200,9 +210,12 @@ it('renders a friend online state change notification to offline', () => {
   expect(header).toBeTruthy()
   expect(header.nodeName).toBe('H4')
 
-  const body = queryByText('Tester Mactestface is offline')
-  expect(body).toBeTruthy()
-  expect(body.nodeName).toBe('P')
+  const name = queryByText('Tester Mactestface', { selector: '[aria-hidden="true"]' })
+  expect(name).toBeTruthy()
+  expect(name.parentElement.parentElement.nodeName).toBe('P')
+
+  expect(queryByText('is online')).toBeFalsy()
+  expect(queryByText('is offline')).toBeTruthy()
 
   const button = queryByText('OK')
   expect(button).toBeTruthy()
@@ -504,7 +517,7 @@ it('renders an open URL', () => {
 })
 
 it('renders a request teleport lure', () => {
-  const senderId = '1234567890'
+  const senderId = '5df644f5-8b12-4caf-8e91-d7cae057e5f2'
 
   offerTeleportLure.mockImplementation(() => () => {})
   selectNotifications.mockReturnValue([
@@ -527,8 +540,7 @@ it('renders a request teleport lure', () => {
     </Provider>
   )
 
-  expect(queryByText(mockedName + ' is requesting to be teleported to your location.'))
-    .toBeTruthy()
+  expect(queryByText('is requesting to be teleported to your location.')).toBeTruthy()
 
   // Accept
   const acceptButton = queryByText('Accept')
@@ -558,7 +570,6 @@ it('renders a request teleport lure', () => {
 
 it('renders a teleport lure', () => {
   const closeCount = close.mock.calls.length
-  const senderId = 'abcdef'
   const lureId = 'fedcba'
 
   acceptTeleportLure.mockImplementation(() => () => {})
@@ -568,7 +579,7 @@ it('renders a teleport lure', () => {
       id: 1,
       notificationType: NotificationTypes.TeleportLure,
       text: 'Join me at my location!',
-      fromId: senderId,
+      fromId: mockSenderId,
       fromName: mockedName,
       lureId,
       regionId: [123, 123],
@@ -587,8 +598,8 @@ it('renders a teleport lure', () => {
     </Provider>
   )
 
-  expect(queryByText(`${mockedName} has offered to teleport you to their location.`))
-    .toBeTruthy()
+  expect(queryByText(mockedName, { selector: '[aria-hidden="true"]' })).toBeTruthy()
+  expect(queryByText('has offered to teleport you to their location.')).toBeTruthy()
 
   // Accept
   const acceptButton = queryByText('Accept (not yet implemented)')
@@ -615,7 +626,7 @@ it('renders a teleport lure', () => {
 
   expect(acceptTeleportLure).not.toBeCalled()
 
-  expect(declineTeleportLure).lastCalledWith(senderId, lureId)
+  expect(declineTeleportLure).lastCalledWith(mockSenderId, lureId)
 
   expect(close).toBeCalledTimes(closeCount + 1)
   expect(close).lastCalledWith(1)
