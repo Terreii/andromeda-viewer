@@ -1,12 +1,14 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 
+import { UUID as LLUUID } from '../../llsd'
 import { Container, ComponentArguments, ButtonsRow } from './utils'
+import Name from '../name'
 import Text from '../text'
 
 import { acceptInventoryOffer, declineInventoryOffer } from '../../actions/inventory'
 
-import { useName, useGroupName } from '../../hooks/names'
+import { useGroupName } from '../../hooks/names'
 
 import { GroupNoticeNotification } from '../../types/chat'
 import { getItemTypeName } from '../../types/inventory'
@@ -16,12 +18,11 @@ export default function GroupNotice (
 ) {
   const dispatch = useDispatch()
 
-  const name = useName(data.senderId) || ''
   const groupName = useGroupName(data.groupId)
 
   return (
     <Container title={`Group Notice from ${groupName} - ${data.title}`}>
-      <small>send by {name.toString()}</small>
+      <small>send by <Name id={data.senderId || LLUUID.nil} /></small>
 
       <p>
         <Text text={data.text} multiline />

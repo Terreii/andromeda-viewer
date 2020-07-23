@@ -23,6 +23,7 @@ import {
   userWasKicked,
   LoginAction
 } from './session'
+import { UUID as LLUUID } from '../llsd'
 
 import {
   LocalChatMessage,
@@ -35,15 +36,23 @@ import {
 const nameSlice = createSlice({
   name: 'names',
 
-  initialState: {
+  initialState: ((): {
+    names: { [key: string]: AvatarName },
+    getDisplayNamesURL: string
+  } => ({
     names: {},
     getDisplayNamesURL: ''
-  } as {
-    names: { [key: string]: AvatarName }
-    getDisplayNamesURL: string
-  },
+  }))(),
 
   reducers: {
+    addMissing (state, action: PayloadAction<{ id: string, fallback?: string }>) {
+      if (!(action.payload.id in state.names) && action.payload.id !== LLUUID.nil) {
+        state.names[action.payload.id] = action.payload.fallback == null
+          ? new AvatarName({ id: action.payload.id })
+          : new AvatarName(action.payload.fallback)
+      }
+    },
+
     displayNamesStartLoading (state, action: PayloadAction<string[]>) {
       for (const id of action.payload) {
         if (id in state.names) {
@@ -75,7 +84,11 @@ const nameSlice = createSlice({
           }
         }
       },
-      prepare: (agents: any, badIDs: string[] | null, badNames: string[] | null) => ({
+      prepare: (
+        agents: DisplayNameResultAvatar[],
+        badIDs: string[] | null,
+        badNames: string[] | null
+      ) => ({
         payload: {
           agents,
           badIDs: badIDs || [],
@@ -90,7 +103,7 @@ const nameSlice = createSlice({
       state.names[action.payload.uuid] = action.payload.name
 
       for (const msg of action.payload.localChatHistory) {
-        if (String(msg.sourceType) === 'agent') {
+        if (String(msg.sourceType) === 'agent' && msg.fromId !== LLUUID.nil) {
           addName(state.names, msg.fromId, msg.fromName)
         }
       }
@@ -101,8 +114,10 @@ const nameSlice = createSlice({
     },
 
     [localChatReceived.type] (state, action: PayloadAction<LocalChatMessage>) {
-      if (!(action.payload.fromId in state.names) &&
-        action.payload.sourceType === LocalChatSourceType.Agent
+      if (
+        !(action.payload.fromId in state.names) &&
+        action.payload.sourceType === LocalChatSourceType.Agent &&
+        action.payload.fromId !== LLUUID.nil
       ) {
         addName(state.names, action.payload.fromId, action.payload.fromName)
       }
@@ -113,7 +128,10 @@ const nameSlice = createSlice({
       action: PayloadAction<{ chatType: IMChatType, session: string, msg: InstantMessage }>
     ) {
       const msg = action.payload.msg
-      if (!(action.payload.msg.fromId in state.names)) {
+      if (
+        !(action.payload.msg.fromId in state.names) &&
+        action.payload.msg.fromId !== LLUUID.nil
+      ) {
         addName(state.names, msg.fromId, msg.fromName)
       }
     },
@@ -146,7 +164,7 @@ const nameSlice = createSlice({
       action: PayloadAction<{ sessionId: string, messages: InstantMessage[], didLoadAll: boolean }>
     ) {
       for (const msg of action.payload.messages) {
-        if (msg.fromId in state.names) continue
+        if (msg.fromId in state.names || msg.fromId === LLUUID.nil) continue
 
         state.names[msg.fromId] = new AvatarName(msg.fromName)
       }
@@ -195,6 +213,7 @@ const nameSlice = createSlice({
 export default nameSlice.reducer
 
 export const {
+  addMissing,
   displayNamesStartLoading,
   displayNamesLoaded
 } = nameSlice.actions
@@ -220,17 +239,14 @@ export const selectOwnAvatarName = createSelector(
 
 // Only adds a Name to names if it is new or did change
 function addName (names: { [key: string]: AvatarName }, uuid: string, name: string) {
+  if (uuid === LLUUID.nil) return
+
   const updated = new AvatarName(name)
   if (!(uuid in names) || !names[uuid].compare(updated)) {
     names[uuid] = updated
   }
 }
 
-interface DisplayNameResult {
-  agents: DisplayNameResultAvatar[],
-  badIDs: string[],
-  badNames: string[]
-}
 interface DisplayNameResultAvatar {
   id: string,
   username: string,
@@ -239,4 +255,10 @@ interface DisplayNameResultAvatar {
   legacy_first_name: string,
   legacy_last_name: string,
   is_display_name_default: boolean
+}
+
+interface DisplayNameResult {
+  agents: DisplayNameResultAvatar[],
+  badIDs: string[],
+  badNames: string[]
 }

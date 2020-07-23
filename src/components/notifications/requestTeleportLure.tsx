@@ -2,11 +2,10 @@ import React from 'react'
 import { useDispatch } from 'react-redux'
 
 import { Container, ComponentArguments, ButtonsRow } from './utils'
+import Name from '../name'
 import Text from '../text'
 
 import { offerTeleportLure } from '../../actions/friendsActions'
-
-import { useName } from '../../hooks/names'
 
 import { RequestTeleportLureNotification } from '../../types/chat'
 
@@ -15,10 +14,14 @@ export default function RequestTeleportLure (
 ) {
   const dispatch = useDispatch()
 
-  const name = useName(data.fromId)
-
   return (
-    <Container title={`${name} is requesting to be teleported to your location.`}>
+    <Container
+      title={(
+        <span>
+          <Name id={data.fromId} /> is requesting to be teleported to your location.
+        </span>
+      )}
+    >
       <p>
         <Text text={data.text} multiline />
       </p>

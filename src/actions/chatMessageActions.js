@@ -23,7 +23,8 @@ import {
   historyLoadingStarted as imHistoryLoadingStarted,
   historyLoadingFinished as imHistoryLoadingFinished,
 
-  selectIMChats
+  selectIMChats,
+  selectChatMessages
 } from '../bundles/imChat'
 import {
   received as localChatReceived,
@@ -566,10 +567,14 @@ function handleSystemMessageToIM (msg) {
     if (chat == null) return
 
     const time = new Date()
+    const timeStamp = +getValueOf(msg, 'MessageBlock', 'Timestamp')
+    if (timeStamp !== 0) {
+      time.setTime(timeStamp * 1000)
+    }
 
-    dispatch({
-      type: 'SYSTEM_IM_RECEIVED',
-      sessionId: id,
+    dispatch(receivedIM({
+      chatType: chat.type,
+      session: id,
       msg: {
         _id: `${selectAvatarDataSaveId(state)}/imChats/${chat.saveId}/${time.toJSON()}`,
         fromName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName') || 'Second Life',
@@ -578,7 +583,7 @@ function handleSystemMessageToIM (msg) {
         message: getStringValueOf(msg, 'MessageBlock', 'Message'),
         time: time.getTime()
       }
-    })
+    }))
   }
 }
 
@@ -818,6 +823,7 @@ function handleIMTypingEvent (msg) {
 
 export function saveIMChatMessages () {
   return async (dispatch, getState, { hoodie }) => {
+    const state = getState()
     const unsavedChats = Object.values(selectIMChats(getState())).filter(chat => chat.hasUnsavedMSG)
 
     const savingIds = {}
@@ -826,8 +832,9 @@ export function saveIMChatMessages () {
     const chatsToSave = unsavedChats.flatMap(chat => {
       const ids = []
       savingIds[chat.sessionId] = ids
+      const messages = selectChatMessages(state, chat.sessionId) || []
 
-      return chat.messages.filter(msg => !msg.didSave).map(msg => {
+      return messages.filter(msg => !msg.didSave).map(msg => {
         // side-effects!
         ids.push(msg._id)
         idToChatId.set(msg._id, chat.sessionId)
@@ -1010,11 +1017,11 @@ export function getIMHistory (sessionId, chatSaveId) {
     const activeState = getState()
     const chatSavePrefix = `${selectAvatarDataSaveId(activeState)}/imChats/${chatSaveId}`
 
-    const chat = selectIMChats(activeState)[sessionId]
+    const messages = selectChatMessages(activeState, sessionId)
     // get the _id of the oldest loaded msg
-    const hasAMessage = chat.messages.length > 0
+    const hasAMessage = messages && messages.length > 0
     const firstMsgId = hasAMessage
-      ? chat.messages[0]._id
+      ? messages[0]._id
       : (chatSavePrefix + '/\uFFFF') // or one with a special id that is always the last
 
     try {

@@ -20,10 +20,6 @@ function configureStore (state = {}) {
 }
 
 it('renders without crashing', () => {
-  const names = {
-    first: new AvatarName('Testery MacTestface')
-  }
-
   const store = configureStore({
     friends: [
       {
@@ -31,12 +27,17 @@ it('renders without crashing', () => {
         rightsGiven: {},
         rightsHas: {}
       }
-    ]
+    ],
+    names: {
+      names: {
+        first: new AvatarName('Testery MacTestface')
+      }
+    }
   })
 
   const { container } = render(
     <Provider store={store}>
-      <FriendsList names={names} />
+      <FriendsList />
     </Provider>
   )
 
@@ -44,11 +45,6 @@ it('renders without crashing', () => {
 })
 
 it('rendering', () => {
-  const names = {
-    first: new AvatarName('Testery MacTestface'),
-    other: new AvatarName('Buddy Budds')
-  }
-
   const store = configureStore({
     friends: [
       {
@@ -79,34 +75,35 @@ it('rendering', () => {
           canModifyObjects: false
         }
       }
-    ]
+    ],
+    names: {
+      names: {
+        first: new AvatarName('Testery MacTestface'),
+        other: new AvatarName('Buddy Budds')
+      }
+    }
   })
 
   const { queryByText, queryAllByAltText } = render(
     <Provider store={store}>
-      <FriendsList names={names} />
+      <FriendsList />
     </Provider>
   )
 
-  const first = queryByText('Testery Mactestface')
+  const first = queryByText('Testery Mactestface', { selector: '[aria-hidden="true"]' })
   expect(first).toBeTruthy()
-  expect(first.parentElement.nodeName).toBe('LI')
+  expect(first.parentElement.parentElement.nodeName).toBe('LI')
 
   expect(queryAllByAltText('Start new chat with Testery Mactestface')).toBeTruthy()
 
-  const second = queryByText('Buddy Budds')
+  const second = queryByText('Buddy Budds', { selector: '[aria-hidden="true"]' })
   expect(second).toBeTruthy()
-  expect(second.parentElement.nodeName).toBe('LI')
+  expect(second.parentElement.parentElement.nodeName).toBe('LI')
 
   expect(queryAllByAltText('Start new chat with Buddy Budds')).toBeTruthy()
 })
 
 it('shows the online state of friends', () => {
-  const names = {
-    first: new AvatarName('Testery MacTestface'),
-    other: new AvatarName('Buddy Budds')
-  }
-
   const store = configureStore({
     friends: [
       {
@@ -137,12 +134,18 @@ it('shows the online state of friends', () => {
           canModifyObjects: false
         }
       }
-    ]
+    ],
+    names: {
+      names: {
+        first: new AvatarName('Testery MacTestface'),
+        other: new AvatarName('Buddy Budds')
+      }
+    }
   })
 
   const { queryByTitle, queryByLabelText } = render(
     <Provider store={store}>
-      <FriendsList names={names} />
+      <FriendsList />
     </Provider>
   )
 
@@ -174,16 +177,17 @@ it('event handling/changing rights', () => {
           canModifyObjects: false
         }
       }
-    ]
+    ],
+    names: {
+      names: {
+        first: new AvatarName('Testery MacTestface')
+      }
+    }
   })
-
-  const names = {
-    first: new AvatarName('Testery MacTestface')
-  }
 
   const { queryByTitle } = render(
     <Provider store={store}>
-      <FriendsList names={names} />
+      <FriendsList />
     </Provider>
   )
 
@@ -247,21 +251,19 @@ it('should handle creating a new chat', () => {
           canModifyObjects: false
         }
       }
-    ]
+    ],
+    names: {
+      names: {
+        first: new AvatarName('Testery MacTestface')
+      }
+    }
   })
-
-  const names = {
-    first: new AvatarName('Testery MacTestface')
-  }
 
   const startNewIMChat = jest.fn()
 
   const { queryByAltText } = render(
     <Provider store={store}>
-      <FriendsList
-        names={names}
-        startNewIMChat={startNewIMChat}
-      />
+      <FriendsList startNewIMChat={startNewIMChat} />
     </Provider>
   )
 
@@ -277,10 +279,6 @@ it('should handle creating a new chat', () => {
 })
 
 it('should pass aXe', async () => {
-  const names = {
-    first: new AvatarName('Testery MacTestface')
-  }
-
   const store = configureStore({
     friends: [
       {
@@ -289,12 +287,17 @@ it('should pass aXe', async () => {
         rightsGiven: {},
         rightsHas: {}
       }
-    ]
+    ],
+    names: {
+      names: {
+        first: new AvatarName('Testery MacTestface')
+      }
+    }
   })
 
   const { container } = render(
     <Provider store={store}>
-      <FriendsList names={names} />
+      <FriendsList />
     </Provider>
   )
 

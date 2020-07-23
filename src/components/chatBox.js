@@ -7,6 +7,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { useTabState, Tab, TabList, TabPanel } from 'reakit/Tab'
 
 import ChatDialog from './chatDialog'
+import ChatTab from './chatTab'
 import FriendsList from './friendsList'
 import GroupsList from './groupsList'
 import Notifications from './notifications'
@@ -19,8 +20,6 @@ import {
 } from '../actions/chatMessageActions'
 
 import { selectActiveIMChats } from '../bundles/imChat'
-import { selectLocalChat } from '../bundles/localChat'
-import { selectNames } from '../bundles/names'
 import { selectShouldDisplayNotifications } from '../bundles/notifications'
 import { selectActiveTab, changeChatTab } from '../bundles/session'
 
@@ -28,8 +27,6 @@ import { IMChatType, IMDialog } from '../types/chat'
 
 export default function ChatBox () {
   const dispatch = useDispatch()
-  const localChat = useSelector(selectLocalChat)
-  const names = useSelector(selectNames)
   const shouldDisplayNotifications = useSelector(selectShouldDisplayNotifications)
 
   const selectedId = useSelector(selectActiveTab)
@@ -59,23 +56,17 @@ export default function ChatBox () {
     const id = chat.sessionId
     const target = chat.target
     const type = chat.type
-    const name = type === IMChatType.personal
-      ? (target in names ? names[target].getName() : chat.name)
-      : chat.name
     const tabId = `tab_${id}`
     const isActive = getIsActiveTab(tabId)
 
     tabs.push(
-      <Tab
-        {...tab}
+      <ChatTab
         key={tabId}
         id={tabId}
-        className={'flex-auto px-4 py-2 mt-px -mb-px bg-white border-b border-black rounded-t ' +
-          'focus:shadow-outline focus:outline-none ' +
-          (isActive ? 'border' : '')}
-      >
-        {name || id}
-      </Tab>
+        tab={tab}
+        isActive={isActive}
+        chat={chat}
+      />
     )
 
     tabPanels.push(
@@ -96,7 +87,6 @@ export default function ChatBox () {
               type === IMChatType.personal ? IMDialog.MessageFromAgent : IMDialog.SessionSend
             ))
           }}
-          names={names}
           type={type}
           loadHistory={doLoadImHistory}
         />
@@ -174,10 +164,7 @@ export default function ChatBox () {
         className='flex flex-col flex-auto h-screen pt-24 m-1 -mt-24'
         tabIndex={undefined}
       >
-        <FriendsList
-          names={names}
-          startNewIMChat={doStartNewIMChat}
-        />
+        <FriendsList startNewIMChat={doStartNewIMChat} />
       </TabPanel>
 
       <TabPanel
@@ -204,8 +191,6 @@ export default function ChatBox () {
         tabIndex='-1'
       >
         <ChatDialog
-          data={localChat}
-          names={names}
           sendTo={text => {
             dispatch(sendLocalChatMessage(text, 1, 0))
           }}
