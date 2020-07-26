@@ -19,8 +19,6 @@
   "EstateAccess",
   "EstateChangeInfo",
   "EventQueueGet",
-  "FlickrConnect",
-  "TwitterConnect",
   "FetchLib2",
   "FetchLibDescendents2",
   "FetchInventory2",
