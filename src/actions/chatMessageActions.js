@@ -593,15 +593,21 @@ function handleSystemMessageToIM (msg) {
  */
 function handleIMFromObject (msg) {
   // TODO: add handling of muted objects (+ their owners)
+  const fromName = getStringValueOf(msg, 'MessageBlock', 'FromAgentName')
+  let text = getStringValueOf(msg, 'MessageBlock', 'Message')
+  const slurl = getStringValueOf(msg, 'MessageBlock', 'BinaryBucket')
 
-  return {
-    type: 'NOTIFICATION_IN_CHAT_ADDED',
-    text: getStringValueOf(msg, 'MessageBlock', 'Message'),
-    fromName: getStringValueOf(msg, 'MessageBlock', 'FromAgentName'),
-    ownerId: getValueOf(msg, 'AgentData', 'AgentID'),
-    objectId: getValueOf(msg, 'MessageBlock', 'ID'),
-    slurl: getStringValueOf(msg, 'MessageBlock', 'BinaryBucket'),
-    time: Date.now()
+  if (typeof slurl === 'string' && slurl.length > 0) {
+    text += ' ' + slurl
+  }
+
+  if (fromName === 'Second Life') {
+    return notificationActionCreator({
+      notificationType: NotificationTypes.System,
+      text
+    })
+  } else {
+    return notificationInChatAdded(text, fromName, getValueOf(msg, 'AgentData', 'AgentID'))
   }
 }
 

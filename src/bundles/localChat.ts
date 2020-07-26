@@ -20,7 +20,7 @@ const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 const chatSlice = createSlice({
   name: 'localChat',
 
-  initialState: [] as LocalChatMessage[],
+  initialState: ((): LocalChatMessage[] => [])(),
 
   reducers: {
     received (state, action: PayloadAction<LocalChatMessage>) {
@@ -52,7 +52,7 @@ const chatSlice = createSlice({
           didSave: false
         })
       },
-      
+
       /**
        * Handles messages that are notifications, but should be displayed in local chat.
        * @param {string} text - Text of the Notification that should be displayed.
@@ -75,22 +75,22 @@ const chatSlice = createSlice({
 
     savingStarted (state, action: PayloadAction<string[]>) {
       if (action.payload.length === 0) return
-  
+
       for (const msg of state) {
         if (action.payload.includes(msg._id)) {
           msg.didSave = true
         }
       }
     },
-  
+
     savingFinished (
       state,
       action: PayloadAction<{ saved: LocalChatMessage[], didError: string[] }>
     ) {
       if (action.payload.didError.length === 0 && action.payload.saved.length === 0) return
-  
+
       const ids = action.payload.saved.map(msg => msg._id)
-  
+
       for (const msg of state) {
         const index = ids.indexOf(msg._id)
         if (index >= 0) {
@@ -105,14 +105,19 @@ const chatSlice = createSlice({
 
   extraReducers: {
     [login.type] (state, action: PayloadAction<LoginAction>) {
-      state.push(...action.payload.localChatHistory.map((msg: any) => ({
-        ...msg,
-        chatType: LocalChatType[capitalize(msg.chatType) as any],
-        sourceType: LocalChatSourceType[capitalize(msg.sourceType) as any],
-        audible: LocalChatAudible[capitalize(msg.audible) as any],
-        didSave: true
-      })))
-  
+      state.push(...action.payload.localChatHistory.map((msg: any) => {
+        const typeString: any = capitalize(msg.chatType)
+        const sourceTypeString: any = capitalize(msg.sourceType)
+        const audible: any = capitalize(msg.audible)
+        return {
+          ...msg,
+          chatType: LocalChatType[typeString],
+          sourceType: LocalChatSourceType[sourceTypeString],
+          audible: LocalChatAudible[audible],
+          didSave: true
+        }
+      }))
+
       state.push({
         _id: 'messageOfTheDay',
         fromName: 'Message of the Day',
@@ -130,7 +135,7 @@ const chatSlice = createSlice({
     [logout.type] () {
       return []
     },
-  
+
     [userWasKicked.type] () {
       return []
     }
