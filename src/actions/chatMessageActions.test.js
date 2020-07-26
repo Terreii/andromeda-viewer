@@ -1770,31 +1770,27 @@ describe('incoming IM handling', () => {
 
       expect(store.getActions()).toEqual([
         {
-          type: 'NOTIFICATION_IN_CHAT_ADDED',
-          text: 'Hello World!',
-          fromName: 'Tester',
-          ownerId: '01234567-8900-0000-0000-000000000000',
-          objectId: '01234567-8900-0000-0000-009876543210',
-          slurl: 'slurl://grid/x/y/z',
-          time: 1562630524418
+          type: 'localChat/notificationInChatAdded',
+          payload: {
+            text: 'Hello World! slurl://grid/x/y/z',
+            fromName: 'Tester',
+            fromId: '01234567-8900-0000-0000-000000000000',
+            time: 1562630524418
+          }
         },
         {
-          type: 'NOTIFICATION_IN_CHAT_ADDED',
-          text: 'Hello World!',
-          fromName: 'Second Life',
-          ownerId: '01234567-8900-0000-0000-000000000000',
-          objectId: '01234567-8900-0000-0000-009876543210',
-          slurl: 'slurl://grid/x/y/z',
-          time: 1562630524418
+          type: 'notifications/receive',
+          payload: {
+            notificationType: NotificationTypes.System,
+            text: 'Hello World! slurl://grid/x/y/z'
+          }
         },
         {
-          type: 'NOTIFICATION_IN_CHAT_ADDED',
-          text: 'Hello World!',
-          fromName: 'Second Life',
-          ownerId: '01234567-8900-0000-0000-000000000000',
-          objectId: '01234567-8900-0000-0000-009876543210',
-          slurl: 'slurl://grid/x/y/z',
-          time: 1562630524418
+          type: 'notifications/receive',
+          payload: {
+            notificationType: NotificationTypes.System,
+            text: 'Hello World! slurl://grid/x/y/z'
+          }
         }
       ])
     })
