@@ -12,7 +12,8 @@
     "dev": "npm-run-all -p dev:*",
     "predev:app": "npm run build:messages",
     "dev:app": "react-scripts start",
-    "dev:server": "pouchdb-server --config ./config.json",
+    "dev:db": "pouchdb-server --config ./config.json",
+    "dev:server": "node server/index.js",
     "dev:style": "postcss src/tailwind.css -o src/styles.css --watch",
     "fix:docs": "textlint --fix README.md ./*/*.md ./src/*/*.md",
     "fix:style": "standard --fix",
@@ -108,6 +109,7 @@
   },
   "dependencies": {
     "@hapi/boom": "^9.1.0",
+    "express": "^4.17.1",
     "hoodie": "^28.2.10",
     "hoodie-plugin-store-crypto": "^3.3.0",
     "milliseconds": "^1.0.3",
