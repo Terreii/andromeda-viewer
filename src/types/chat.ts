@@ -152,18 +152,17 @@ export enum IMChatType {
  * In messages are the IM stored.
  */
 export interface IMChat extends HoodieObject {
-  didSaveChatInfo: boolean
-  sessionId: string
-  saveId: string
-  type: IMChatType
-  target: string
-  name: string
-  didLoadHistory: boolean
-  isLoadingHistory: boolean
-  active: boolean
-  hasUnsavedMSG: boolean
+  didSaveChatInfo: boolean,
+  sessionId: string,
+  saveId: string,
+  type: IMChatType,
+  target: string,
+  name: string,
+  didLoadHistory: boolean,
+  isLoadingHistory: boolean,
+  active: boolean,
+  hasUnsavedMSG: boolean,
   areTyping: string[]
-  messages: InstantMessage[]
 }
 
 export enum IMDialog {

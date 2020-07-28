@@ -207,7 +207,7 @@ This is permanent and can not be undone!`)
       <div className='flex flex-col items-start mt-3 sm:flex-row'>
         <button
           id='updateAccountData'
-          className='btn btn-ok'
+          className='btn btn--ok'
           disabled={isUpdating ||
             (passwordRequired && !passwordsAreValid) || // password did change but not valid
             (changedUsername.value !== username && !usernameIsValid) || // username did change
@@ -220,7 +220,7 @@ This is permanent and can not be undone!`)
           type='reset'
           id='accountDataReset'
           onClick={resetAll}
-          className='mt-2 btn btn-secondary sm:ml-2 sm:mt-0'
+          className='mt-2 btn btn--secondary sm:ml-2 sm:mt-0'
           disabled={isUpdating}
         >
           reset
@@ -235,7 +235,7 @@ This is permanent and can not be undone!`)
 
       <button
         type='button'
-        className='btn btn-danger'
+        className='btn btn--danger'
         onClick={doDeleteAccount}
         disabled={isUpdating}
       >
@@ -297,7 +297,7 @@ function AccountDataDownload () {
 
       <button
         type='button'
-        className='btn btn-primary'
+        className='btn btn--primary'
         onClick={doStartDownload}
         disabled={isDownloading}
       >
@@ -321,7 +321,7 @@ function AccountDataDownload () {
             href={url}
             target='_blank'
             rel='noopener noreferrer'
-            className='mx-auto mt-3 btn btn-ok'
+            className='mx-auto mt-3 btn btn--ok'
             download={`${viewerName}_user_data.zip`}
             role='alert'
           >
@@ -330,7 +330,7 @@ function AccountDataDownload () {
 
           <button
             type='button'
-            className='mt-3 sm:ml-4 btn btn-secondary'
+            className='mt-3 sm:ml-4 btn btn--secondary'
             onClick={() => {
               modalState.hide()
             }}

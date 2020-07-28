@@ -1,16 +1,13 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 
-import { Container, ComponentArguments } from './utils'
+import { Container, ComponentArguments, ButtonsRow } from './utils'
+import Name from '../name'
 import Text from '../text'
-
-import { useName } from '../../hooks/names'
 
 import { acceptFriendshipOffer, declineFriendshipOffer } from '../../actions/friendsActions'
 
 import { FriendshipOfferNotification } from '../../types/chat'
-
-import styles from './notifications.module.css'
 
 export default function FriendshipOffer (
   { data, onClose }: ComponentArguments<FriendshipOfferNotification>
@@ -27,23 +24,21 @@ export default function FriendshipOffer (
     onClose()
   }
 
-  const name = useName(data.fromId)
-
   return (
-    <Container title={`${name} has offered you friendship.`}>
+    <Container title={<span><Name id={data.fromId} /> has offered you friendship.</span>}>
       <p>
         <Text text={data.text} multiline />
       </p>
 
-      <div className={styles.ButtonsRow}>
-        <button className='btn btn-ok' onClick={onAccept}>
+      <ButtonsRow>
+        <button className='btn btn--ok' onClick={onAccept}>
           Accept
         </button>
 
-        <button className='btn btn-danger' onClick={onDecline}>
+        <button className='btn btn--danger' onClick={onDecline}>
           Decline
         </button>
-      </div>
+      </ButtonsRow>
     </Container>
   )
 }

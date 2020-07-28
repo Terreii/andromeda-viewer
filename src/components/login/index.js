@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 
-import { selectSavedAvatars, selectSavedGrids } from '../../bundles/account'
+import { selectSavedAvatars, selectGridsByName } from '../../bundles/account'
 
 import { login } from '../../actions/sessionActions'
 
@@ -16,7 +16,7 @@ export default function LoginForm ({ isSignedIn }) {
 
   const history = useHistory()
   const avatars = useSelector(selectSavedAvatars)
-  const grids = useSelector(selectSavedGrids)
+  const grids = useSelector(selectGridsByName)
 
   const [selected, setSelected] = useState(() => avatars.length === 0
     ? 'new'
@@ -92,7 +92,7 @@ export default function LoginForm ({ isSignedIn }) {
       }
 
       const grid = typeof gridName === 'string'
-        ? grids.find(grid => grid.name === gridName)
+        ? grids[gridName]
         : gridName
       if (grid == null) {
         setErrorMessage('Unknown Grid!', `The Grid ${gridName} isn't in the grid-list!`)
@@ -127,15 +127,12 @@ export default function LoginForm ({ isSignedIn }) {
   return (
     <div className='mt-10 overflow-scroll'>
       <main
-        className={'flex flex-col max-w-screen-lg mx-auto my-0 text-center text-white ' +
-        'md:mt-8 md:mb-2'}
+        className='flex flex-col max-w-screen-lg mx-auto my-0 text-center text-white md:mt-8 md:mb-2'
       >
         <div
-          className={'flex md:grid flex-col flex-wrap items-center md:items-start justify-center ' +
-          'lg:grid-cols-3 md:grid-cols-2 md:flex-row md:items-center'}
+          className='flex flex-col flex-wrap items-center justify-center md:grid md:items-start lg:grid-cols-3 md:grid-cols-2 md:flex-row'
         >
           <LoginNewAvatar
-            grids={grids}
             isSignedIn={isSignedIn}
             onLogin={loginAnonymously}
             isLoggingIn={isLoggingIn}
@@ -149,7 +146,7 @@ export default function LoginForm ({ isSignedIn }) {
             <AvatarLogin
               key={avatar._id}
               avatar={avatar}
-              grid={grids.find(grid => grid.name === avatar.grid)}
+              grid={grids[avatar.grid]}
               onLogin={loginWithSavedAvatar}
               isLoggingIn={isLoggingIn}
               isSelected={selected === avatar.avatarIdentifier}
@@ -159,7 +156,7 @@ export default function LoginForm ({ isSignedIn }) {
         </div>
 
         {errorMessage && (
-          <div className='p-1 p-4 mx-auto mt-1 bg-red-700 rounded'>
+          <div className='p-4 mx-auto mt-1 bg-red-700 rounded'>
             {errorMessage.title.length > 0 && <h4>{errorMessage.title}</h4>}
             <p>
               {errorMessage.body.split('\n').map((line, index) => (

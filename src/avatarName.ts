@@ -20,7 +20,7 @@ export default class AvatarName {
   didLoadDisplayName: boolean
   isLoadingDisplayName: boolean
 
-  constructor (name: AvatarName | string | { first: string, last?: string }, lastName?: string) {
+  constructor (name: AvatarName | string | { first: string, last?: string } | { id: string }, lastName?: string) {
     if (name instanceof AvatarName) {
       this.first = name.first
       this.last = name.last
@@ -29,6 +29,9 @@ export default class AvatarName {
       this.didLoadDisplayName = name.didLoadDisplayName
       this.isLoadingDisplayName = name.isLoadingDisplayName
       return
+    } else if (typeof name === 'object' && 'id' in name) {
+      this.first = ''
+      this.last = name.id
     } else if (typeof name === 'object' && typeof name.first === 'string') {
       this.first = cleanName(name.first)
       this.last = cleanName(name.last || 'Resident')

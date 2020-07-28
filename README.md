@@ -48,7 +48,6 @@ To make the setup-process easier, everything needed for this project should be a
 
 command | what it does
 --------|-------------
-`npm run help` | Prints out this README.md.
 `npm run build` | Builds the viewer for production. The viewer is in a unusable state after cloning.
 `npm run dev` | Builds the viewer. It continues to run and build the viewer when a file changes. This is the recommended build command while developing!
 `npm test` | Runs all tests. Please run this before committing!

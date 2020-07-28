@@ -1,21 +1,16 @@
 import React from 'react'
 
-import { Container, ComponentArguments } from './utils'
+import { Container, ComponentArguments, ButtonsRow } from './utils'
+import Name from '../name'
 import Text from '../text'
 
-import { useName } from '../../hooks/names'
-
 import { LoadURLNotification } from '../../types/chat'
-
-import styles from './notifications.module.css'
 
 export default function LoadURL ({ data, onClose }: ComponentArguments<LoadURLNotification>) {
   const href = data.url.toString().replace(/^javascript:/i, '')
 
-  const name = useName(data.fromId)
-
   return (
-    <Container title={`${name} did send you an URL`}>
+    <Container title={<span><Name id={data.fromId} /> did send you an URL</span>}>
       <p>
         <Text text={data.text} multiline />
       </p>
@@ -24,11 +19,11 @@ export default function LoadURL ({ data, onClose }: ComponentArguments<LoadURLNo
         <a href={href} target='_blank' rel='noopener noreferrer'>{href}</a>
       </div>
 
-      <div className={styles.ButtonsRow}>
-        <button className='btn btn-primary' onClick={onClose}>
+      <ButtonsRow>
+        <button className='btn btn--primary' onClick={onClose}>
           OK
         </button>
-      </div>
+      </ButtonsRow>
     </Container>
   )
 }

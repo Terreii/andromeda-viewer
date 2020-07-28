@@ -1,17 +1,14 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 
-import { Container, ComponentArguments } from './utils'
+import { Container, ComponentArguments, ButtonsRow } from './utils'
+import Name from '../name'
 import Text from '../text'
 
 import { acceptInventoryOffer, declineInventoryOffer } from '../../actions/inventory'
 
-import { useName } from '../../hooks/names'
-
 import { InventoryOfferedNotification } from '../../types/chat'
 import { getItemTypeName } from '../../types/inventory'
-
-import styles from './notifications.module.css'
 
 export default function InventoryOffer (
   { data, onClose }: ComponentArguments<InventoryOfferedNotification>
@@ -35,24 +32,23 @@ export default function InventoryOffer (
 
   const itemTypeName = getItemTypeName(data.item.type)
   const a = ['a', 'e', 'i', 'o', 'u'].includes(itemTypeName.charAt(0).toLowerCase()) ? 'an' : 'a'
-
-  const name = useName(data.fromId)
+  const titleText = ` did offer you ${a} ${itemTypeName} item.`
 
   return (
-    <Container title={`${name} did offer you ${a} ${itemTypeName} item.`}>
+    <Container title={<span><Name id={data.fromId} />{titleText}</span>}>
       <p>
         <Text text={data.text} multiline />
       </p>
 
-      <div className={styles.ButtonsRow}>
-        <button className='btn btn-ok' onClick={doAccept}>
+      <ButtonsRow>
+        <button className='btn btn--ok' onClick={doAccept}>
           Accept
         </button>
 
-        <button className='btn btn-danger' onClick={doDecline}>
+        <button className='btn btn--danger' onClick={doDecline}>
           Decline
         </button>
-      </div>
+      </ButtonsRow>
     </Container>
   )
 }

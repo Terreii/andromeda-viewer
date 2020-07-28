@@ -7,6 +7,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { useTabState, Tab, TabList, TabPanel } from 'reakit/Tab'
 
 import ChatDialog from './chatDialog'
+import ChatTab from './chatTab'
 import FriendsList from './friendsList'
 import GroupsList from './groupsList'
 import Notifications from './notifications'
@@ -19,8 +20,6 @@ import {
 } from '../actions/chatMessageActions'
 
 import { selectActiveIMChats } from '../bundles/imChat'
-import { selectLocalChat } from '../bundles/localChat'
-import { selectNames } from '../bundles/names'
 import { selectShouldDisplayNotifications } from '../bundles/notifications'
 import { selectActiveTab, changeChatTab } from '../bundles/session'
 
@@ -28,8 +27,6 @@ import { IMChatType, IMDialog } from '../types/chat'
 
 export default function ChatBox () {
   const dispatch = useDispatch()
-  const localChat = useSelector(selectLocalChat)
-  const names = useSelector(selectNames)
   const shouldDisplayNotifications = useSelector(selectShouldDisplayNotifications)
 
   const selectedId = useSelector(selectActiveTab)
@@ -53,25 +50,23 @@ export default function ChatBox () {
   const tabs = []
   const tabPanels = []
 
+  const getIsActiveTab = ownId => tab.selectedId === ownId
+
   for (const chat of useSelector(selectActiveIMChats)) {
     const id = chat.sessionId
     const target = chat.target
     const type = chat.type
-    const name = type === IMChatType.personal
-      ? (target in names ? names[target].getName() : chat.name)
-      : chat.name
+    const tabId = `tab_${id}`
+    const isActive = getIsActiveTab(tabId)
 
     tabs.push(
-      <Tab
-        {...tab}
-        key={`tab_${id}`}
-        id={`tab_${id}`}
-        className={'flex-auto px-4 py-2 mt-px -mb-px bg-white border-b border-black rounded-t ' +
-          'focus:shadow-outline focus:outline-none ' +
-          (tab.selectedId === `tab_${id}` ? 'border' : '')}
-      >
-        {name || id}
-      </Tab>
+      <ChatTab
+        key={tabId}
+        id={tabId}
+        tab={tab}
+        isActive={isActive}
+        chat={chat}
+      />
     )
 
     tabPanels.push(
@@ -92,7 +87,6 @@ export default function ChatBox () {
               type === IMChatType.personal ? IMDialog.MessageFromAgent : IMDialog.SessionSend
             ))
           }}
-          names={names}
           type={type}
           loadHistory={doLoadImHistory}
         />
@@ -100,29 +94,42 @@ export default function ChatBox () {
     )
   }
 
+  const friendsId = 'tab_friends'
+  const isFriendsTabActive = getIsActiveTab(friendsId)
+
+  const groupsId = 'tab_groups'
+  const isGroupsTabActive = getIsActiveTab(groupsId)
+
+  const notificationsId = 'tab_notifications'
+  const isNotificationsTabActive = getIsActiveTab(notificationsId)
+
+  const localChatId = 'tab_local'
+  const isLocalChatTabActive = getIsActiveTab(localChatId)
+
   return (
     <div className='relative flex flex-col w-screen h-screen pt-12 border-t-2 border-transparent'>
       <TabList
         {...tab}
         className='z-10 flex flex-row flex-wrap mx-2 space-x-1 border-b border-black'
         aria-label='Chats'
+        aria-live='polite'
       >
         <Tab
           {...tab}
-          id='tab_friends'
+          id={friendsId}
           className={'flex-auto px-4 py-2 mt-px -mb-px bg-white border-b border-black rounded-t ' +
             'focus:shadow-outline focus:outline-none ' +
-            (tab.selectedId === 'tab_friends' ? 'border' : '')}
+            (isFriendsTabActive ? 'border' : '')}
         >
           Friends
         </Tab>
 
         <Tab
           {...tab}
-          id='tab_groups'
+          id={groupsId}
           className={'flex-auto px-4 py-2 mt-px -mb-px bg-white border-b border-black rounded-t ' +
             'focus:shadow-outline focus:outline-none ' +
-            (tab.selectedId === 'tab_groups' ? 'border' : '')}
+            (isGroupsTabActive ? 'border' : '')}
         >
           Groups
         </Tab>
@@ -130,10 +137,10 @@ export default function ChatBox () {
         {shouldDisplayNotifications && (
           <Tab
             {...tab}
-            id='tab_notifications'
+            id={notificationsId}
             className={'flex-auto px-4 py-2 mt-px -mb-px bg-white border-b border-black ' +
               'rounded-t focus:shadow-outline focus:outline-none ' +
-              (tab.selectedId === 'tab_notifications' ? 'border' : '')}
+              (isNotificationsTabActive ? 'border' : '')}
           >
             Notifications
           </Tab>
@@ -141,10 +148,10 @@ export default function ChatBox () {
 
         <Tab
           {...tab}
-          id='tab_local'
+          id={localChatId}
           className={'flex-auto px-4 py-2 mt-px -mb-px bg-white border-b border-black ' +
             'rounded-t focus:shadow-outline focus:outline-none ' +
-            (tab.selectedId === 'tab_local' ? 'border' : '')}
+            (isLocalChatTabActive ? 'border' : '')}
         >
           Local
         </Tab>
@@ -155,18 +162,15 @@ export default function ChatBox () {
       <TabPanel
         {...tab}
         className='flex flex-col flex-auto h-screen pt-24 m-1 -mt-24'
-        tabIndex='-1'
+        tabIndex={undefined}
       >
-        <FriendsList
-          names={names}
-          startNewIMChat={doStartNewIMChat}
-        />
+        <FriendsList startNewIMChat={doStartNewIMChat} />
       </TabPanel>
 
       <TabPanel
         {...tab}
         className='flex flex-col flex-auto h-screen pt-24 m-1 -mt-24'
-        tabIndex='-1'
+        tabIndex={undefined}
       >
         <GroupsList startNewIMChat={doStartNewIMChat} />
       </TabPanel>
@@ -175,7 +179,7 @@ export default function ChatBox () {
         <TabPanel
           {...tab}
           className='flex flex-col flex-auto h-screen pt-24 m-1 -mt-24'
-          tabIndex='-1'
+          tabIndex={undefined}
         >
           <Notifications />
         </TabPanel>
@@ -187,8 +191,6 @@ export default function ChatBox () {
         tabIndex='-1'
       >
         <ChatDialog
-          data={localChat}
-          names={names}
           sendTo={text => {
             dispatch(sendLocalChatMessage(text, 1, 0))
           }}

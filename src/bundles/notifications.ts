@@ -9,7 +9,7 @@ const notificationSlice = createSlice({
   name: 'notifications',
 
   initialState: {
-    active: [] as Notification[],
+    active: ((): Notification[] => [])(),
     index: 0
   },
 

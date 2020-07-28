@@ -3,9 +3,10 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { IMChatType } from '../types/chat'
 
-import { selectFriends } from '../bundles/friends'
-
 import { updateRights } from '../actions/friendsActions'
+import { selectFriends } from '../bundles/friends'
+import { selectNames } from '../bundles/names'
+import Name from './name'
 
 import chatBubble from '../icons/chat_bubble.svg'
 
@@ -68,9 +69,12 @@ function FriendRow ({ friend, name, skipLink, onRightsChanged, startNewIMChat })
           : 'border-black'
         }`}
       />
-      <div className='flex-auto' aria-labelledby={`online_status_${friend.id}`}>
-        {name}
-      </div>
+
+      <Name
+        id={friend.id}
+        className='flex-auto block'
+        aria-labelledby={`online_status_${friend.id}`}
+      />
 
       <a className='sr-only' href={skipLink}>{`Skip ${name}`}</a>
 
@@ -86,15 +90,20 @@ function FriendRow ({ friend, name, skipLink, onRightsChanged, startNewIMChat })
   )
 }
 
-export default function FriendsList ({ names, startNewIMChat }) {
+export default function FriendsList ({ startNewIMChat }) {
   const dispatch = useDispatch()
   const friends = useSelector(selectFriends)
+  const names = useSelector(selectNames)
 
   return (
-    <main className='p-4 overflow-y-scroll' aria-label='Friends'>
+    <main
+      className='p-4 mt-1 overflow-y-scroll focus:shadow-outline focus:outline-none'
+      tabIndex='0'
+      aria-label='Friends'
+    >
       <ul className='max-w-xl pl-4 mx-auto list-none'>
         {friends.map((friend, index, all) => {
-          const name = friend.id in names ? names[friend.id].getDisplayName() : friend.id
+          const name = friend.id in names ? names[friend.id].getName() : friend.id
 
           return (
             <FriendRow

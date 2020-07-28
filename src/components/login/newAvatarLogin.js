@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useSelector } from 'react-redux'
+
+import { selectSavedGrids } from '../../bundles/account'
 
 import { useAutoFocus } from '../../hooks/utils'
 
@@ -6,10 +9,11 @@ export default function NewAvatarLogin ({
   isSelected,
   isSignedIn,
   isLoggingIn,
-  grids,
   onSelect,
   onLogin
 }) {
+  const grids = useSelector(selectSavedGrids)
+
   const [name, isNameValid, onNameChange] = useInput('')
   const [password, isPwValid, onPasswordChange] = useInput('')
 
@@ -219,7 +223,7 @@ export default function NewAvatarLogin ({
 
       <button
         id='newAvatarLoginButton'
-        className='flex-auto mx-auto mt-3 btn btn-secondary'
+        className='flex-auto mx-auto mt-3 btn btn--secondary'
         disabled={isLoggingIn || !isValid}
       >
         {isLoggingIn === name ? 'Connecting ...' : 'Login'}

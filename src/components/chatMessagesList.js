@@ -2,16 +2,20 @@ import React, { memo } from 'react'
 import autoscroll from 'autoscroll-react'
 
 import Text from './text'
+import Name from './name'
 
-const TextLine = memo(({ msg, name }) => {
+import { LocalChatSourceType } from '../types/chat'
+
+const TextLine = memo(({ msg, isIM }) => {
   const time = new Date(msg.time)
 
   const isIrcMe = msg.message.startsWith('/me ') || msg.message.startsWith("/me'")
   const message = isIrcMe ? msg.message.substring(4) : msg.message
+  const loadMissing = isIM || msg.sourceType === LocalChatSourceType.Agent
 
   return (
     <div className={isIrcMe ? 'italic text-xl' : 'text-xl'}>
-      <time dateTime={time.toISOString()} className='pr-1'>
+      <time dateTime={time.toISOString()} className='pr-1 font-mono'>
         {leadingZero(time.getHours())}
         :
         {leadingZero(time.getMinutes())}
@@ -19,7 +23,12 @@ const TextLine = memo(({ msg, name }) => {
         {leadingZero(time.getSeconds())}
       </time>
 
-      <span>{name.toString()}{isIrcMe ? '' : ':'} </span>
+      <Name
+        id={msg.fromId}
+        loadMissing={loadMissing}
+        fallback={msg.fromName}
+      />
+      {isIrcMe ? ' ' : ': '}
 
       <span>
         <Text
@@ -33,17 +42,18 @@ const TextLine = memo(({ msg, name }) => {
 
 class ChatList extends React.Component {
   render () {
-    const { messages, isIM, names, ...props } = this.props
-
-    const messagesLines = messages.map(msg => {
-      const name = names[msg.fromId] || msg.fromName || ''
-
-      return <TextLine key={msg._id} msg={msg} name={name} />
-    })
+    const { messages, isIM, ...props } = this.props
 
     return (
-      <div className='overflow-y-scroll' {...props}>
-        {messagesLines}
+      <div
+        className='mt-1 overflow-y-scroll focus:shadow-outline focus:outline-none'
+        role='log'
+        tabIndex='0'
+        {...props}
+      >
+        {messages.map(msg => (
+          <TextLine key={msg._id} msg={msg} isIM={isIM} />
+        ))}
       </div>
     )
   }

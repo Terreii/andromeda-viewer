@@ -103,7 +103,7 @@ export default function UnlockDialog () {
           <button
             id='signOutButton'
             type='button'
-            className='btn btn-danger'
+            className='btn btn--danger'
             onClick={event => {
               event.preventDefault()
               dispatch(signOut())
@@ -115,7 +115,7 @@ export default function UnlockDialog () {
 
           <button
             id='unlockButton'
-            className='btn btn-primary'
+            className='btn btn--primary'
             disabled={isUnlocking || password.length < 8}
           >
             Unlock

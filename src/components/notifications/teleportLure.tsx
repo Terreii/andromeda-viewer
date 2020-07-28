@@ -1,16 +1,13 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 
-import { Container, ComponentArguments } from './utils'
+import { Container, ComponentArguments, ButtonsRow } from './utils'
+import Name from '../name'
 import Text from '../text'
 
 import { acceptTeleportLure, declineTeleportLure } from '../../actions/friendsActions'
 
-import { useName } from '../../hooks/names'
-
 import { TeleportLure } from '../../types/chat'
-
-import styles from './notifications.module.css'
 
 export default function FriendshipOffer ({ data, onClose }: ComponentArguments<TeleportLure>) {
   const dispatch = useDispatch()
@@ -24,23 +21,23 @@ export default function FriendshipOffer ({ data, onClose }: ComponentArguments<T
     onClose()
   }
 
-  const name = useName(data.fromId)
-
   return (
-    <Container title={`${name} has offered to teleport you to their location.`}>
+    <Container
+      title={<span><Name id={data.fromId} /> has offered to teleport you to their location.</span>}
+    >
       <p>
         <Text text={data.text} multiline />
       </p>
 
-      <div className={styles.ButtonsRow}>
-        <button className='btn btn-ok' onClick={doAccept} disabled>
+      <ButtonsRow>
+        <button className='btn btn--ok' onClick={doAccept} disabled>
           Accept (not yet implemented)
         </button>
 
-        <button className='btn btn-danger' onClick={doDecline}>
+        <button className='btn btn--danger' onClick={doDecline}>
           Decline
         </button>
-      </div>
+      </ButtonsRow>
     </Container>
   )
 }

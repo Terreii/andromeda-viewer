@@ -1,29 +1,28 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 
-import { Container, ComponentArguments } from './utils'
+import { UUID as LLUUID } from '../../llsd'
+import { Container, ComponentArguments, ButtonsRow } from './utils'
+import Name from '../name'
 import Text from '../text'
 
 import { acceptInventoryOffer, declineInventoryOffer } from '../../actions/inventory'
 
-import { useName, useGroupName } from '../../hooks/names'
+import { useGroupName } from '../../hooks/names'
 
 import { GroupNoticeNotification } from '../../types/chat'
 import { getItemTypeName } from '../../types/inventory'
-
-import styles from './notifications.module.css'
 
 export default function GroupNotice (
   { data, onClose }: ComponentArguments<GroupNoticeNotification>
 ) {
   const dispatch = useDispatch()
 
-  const name = useName(data.senderId) || ''
   const groupName = useGroupName(data.groupId)
 
   return (
     <Container title={`Group Notice from ${groupName} - ${data.title}`}>
-      <small>send by {name.toString()}</small>
+      <small>send by <Name id={data.senderId || LLUUID.nil} /></small>
 
       <p>
         <Text text={data.text} multiline />
@@ -38,10 +37,10 @@ export default function GroupNotice (
         </div>
       )}
 
-      <div className={styles.ButtonsRow}>
+      <ButtonsRow>
         {data.item && (
           <button
-            className='btn btn-ok'
+            className='btn btn--ok'
             onClick={() => {
               const item = data.item
               if (item) {
@@ -63,7 +62,7 @@ export default function GroupNotice (
 
         {data.item && (
           <button
-            className='btn btn-danger'
+            className='btn btn--danger'
             onClick={() => {
               dispatch(declineInventoryOffer(data.senderId, data.item?.transactionId ?? '', true))
               onClose()
@@ -75,13 +74,13 @@ export default function GroupNotice (
 
         {!data.item && (
           <button
-            className='btn btn-primary'
+            className='btn btn--primary'
             onClick={onClose}
           >
             OK
           </button>
         )}
-      </div>
+      </ButtonsRow>
     </Container>
   )
 }
