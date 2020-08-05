@@ -3,6 +3,7 @@ const express = require('express')
 const { body, header, validationResult } = require('express-validator')
 const nano = require('nano')(process.env.COUCH_URL || 'http://localhost:5984')
 const fetch = require('node-fetch')
+const pouchErrors = require('pouchdb-errors')
 const { v4: uuid } = require('uuid')
 
 const api = express.Router()
@@ -45,26 +46,20 @@ api.put(
   body('data.id').optional().isUUID(),
   body('data.attributes.username').isEmail(),
   body('data.attributes.password').isLength({ min: minPasswordLength }),
-  async (req, res) => {
-    res.type('application/vnd.api+json')
-
-    // handle the validation errors
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      res.status(400)
-      res.json({
-        errors: errors.array().map(error => ({
+  async (req, res, next) => {
+    try {
+      // handle the validation errors
+      const errors = validationResult(req)
+      if (!errors.isEmpty()) {
+        throw errors.array().map(error => ({
           ...error,
-          status: '400',
+          status: 400,
           title: 'Bad Request',
           detail: error.msg
         }))
-      })
-      return
-    }
+      }
 
-    const { attributes: { username, password }, id } = req.body.data
-    try {
+      const { attributes: { username, password }, id } = req.body.data
       // check if an user exist with that login-username/email
       const docs = await usersDB.find({
         selector: {
@@ -74,17 +69,10 @@ api.put(
       })
 
       if (docs.docs.length > 0) {
-        res.status(409)
-        res.json({
-          errors: [
-            {
-              status: '409',
-              title: 'Conflict',
-              detail: 'An account with that username already exists'
-            }
-          ]
-        })
-        return
+        throw pouchErrors.createError(
+          pouchErrors.REV_CONFLICT,
+          'An account with that username already exists'
+        )
       }
 
       // If an ID was send, check if an user exists with that id.
@@ -99,17 +87,10 @@ api.put(
           })
 
         if (exists) {
-          res.status(409)
-          res.json({
-            errors: [
-              {
-                status: '409',
-                title: 'Conflict',
-                detail: 'An account with that id already exists'
-              }
-            ]
-          })
-          return
+          throw pouchErrors.createError(
+            pouchErrors.REV_CONFLICT,
+            'An account with that id already exists'
+          )
         }
       }
 
@@ -129,6 +110,7 @@ api.put(
 
       // TODO: send email
 
+      res.type('application/vnd.api+json')
       res.status(200).json({
         links: {
           self: req.app.get('host') + req.originalUrl
@@ -143,37 +125,106 @@ api.put(
         }
       })
     } catch (error) {
-      res.status(200).json({
-        errors: [
-          {
-            status: '500',
-            title: 'Internal Server Error',
-            detail: error.toString()
-          }
-        ]
-      })
+      next(error)
     }
   }
 )
 
 // get user data
-api.get('/account', header('Authorization'), async (req, res) => {
+api.get('/account', ...createAuthValidator(), async (req, res) => {
   res.type('application/vnd.api+json')
 
-  // handle the validation errors
-  const errors = validationResult(req)
-  if (!errors.isEmpty()) {
-    res.status(401)
-    res.json({
-      errors: [{
-        status: '401',
-        title: 'Unauthorized',
-        detail: 'Authorization header missing'
-      }]
-    })
+  // Send the user infos
+  res.status(200).json({
+    links: {
+      self: req.app.get('host') + req.originalUrl
+    },
+    data: {
+      // id will later be used for syncing.
+      id: req.user.name,
+      type: 'account',
+      attributes: {
+        username: req.user.email
+      },
+      relationships: {}
+    }
+  })
+})
+
+// update account
+api.patch('/account', notImplemented)
+
+// delete account
+api.delete('/account', notImplemented)
+
+// log in
+api.put('', notImplemented)
+
+// is logged in
+api.get('', notImplemented)
+
+// log off
+api.delete('', notImplemented)
+
+// Error handler
+// This transforms the different error styles into application/vnd.api+json errors.
+api.use((err, req, res, next) => {
+  if (!err) {
+    next()
     return
   }
+  res.type('application/vnd.api+json')
 
+  const getStatus = anError => Number(anError.status || anError.statusCode) || 500
+  const format = anError => ({
+    status: getStatus(anError),
+    title: anError.title || anError.name,
+    detail: anError.detail || anError.message
+  })
+
+  if (Array.isArray(err)) {
+    res.status(getStatus(err[0]))
+    res.json({
+      errors: err.map(format)
+    })
+  } else {
+    res.status(getStatus(err))
+    res.json({
+      errors: [format(err)]
+    })
+  }
+})
+
+/**
+ * Create an Authorization validator.
+ * Is validates that there is a Basic Authorization header is there and uses it.
+ */
+function createAuthValidator () {
+  return [
+    header('Authorization').exists(),
+    (req, res, next) => {
+      // handle the validation errors
+      const errors = validationResult(req)
+      if (!errors.isEmpty()) {
+        next(pouchErrors.createError(
+          pouchErrors.UNAUTHORIZED,
+          'Authorization header missing'
+        ))
+      } else {
+        next()
+      }
+    },
+    authentication
+  ]
+}
+
+/**
+ * Handle Basic Authentication.
+ * @param {express.Request}      req   Express' request object.
+ * @param {express.Response}     res   Express' response object.
+ * @param {express.NextFunction} next  Call the next middleware.
+ */
+async function authentication (req, res, next) {
   try {
     const { name: username, pass: password } = basicAuth(req) || {}
 
@@ -184,8 +235,7 @@ api.get('/account', header('Authorization'), async (req, res) => {
       password == null ||
       password.length < minPasswordLength
     ) {
-      sendUnauthorized(res)
-      return
+      throw pouchErrors.UNAUTHORIZED
     }
 
     // Find the document of the user.
@@ -197,8 +247,7 @@ api.get('/account', header('Authorization'), async (req, res) => {
 
     // If the user doesn't exist
     if (docs.docs.length === 0) {
-      sendUnauthorized(res)
-      return
+      throw pouchErrors.UNAUTHORIZED
     }
     const user = docs.docs[0]
 
@@ -220,115 +269,19 @@ api.get('/account', header('Authorization'), async (req, res) => {
       })
     })
     if (response.status === 401 || !(await response.json()).ok) {
-      sendUnauthorized(res)
-      return
+      throw pouchErrors.UNAUTHORIZED
+    } else {
+      req.user = user
+      next()
     }
-
-    // Send the user infos
-    res.status(200).json({
-      links: {
-        self: req.app.get('host') + req.originalUrl
-      },
-      data: {
-        // id will later be used for syncing.
-        id: user.name,
-        type: 'account',
-        attributes: {
-          username: user.email
-        },
-        relationships: {}
-      }
-    })
   } catch (error) {
-    res.status(200).json({
-      errors: [
-        {
-          status: '500',
-          title: 'Internal Server Error',
-          detail: error.toString()
-        }
-      ]
-    })
+    next(error)
   }
-})
+}
 
-// update account
-api.patch('/account', (req, res) => {
-  res.status(500).json({
-    errors: [
-      {
-        status: '500',
-        title: 'Not Implemented',
-        detail: 'Not yet implemented'
-      }
-    ]
-  })
-})
-
-// delete account
-api.delete('/account', (req, res) => {
-  res.status(500).json({
-    errors: [
-      {
-        status: '500',
-        title: 'Not Implemented',
-        detail: 'Not yet implemented'
-      }
-    ]
-  })
-})
-
-// log in
-api.put('', (req, res) => {
-  res.status(500).json({
-    errors: [
-      {
-        status: '500',
-        title: 'Not Implemented',
-        detail: 'Not yet implemented'
-      }
-    ]
-  })
-})
-
-// is logged in
-api.get('', (req, res) => {
-  res.status(500).json({
-    errors: [
-      {
-        status: '500',
-        title: 'Not Implemented',
-        detail: 'Not yet implemented'
-      }
-    ]
-  })
-})
-
-// log off
-api.delete('', (req, res) => {
-  res.status(500).json({
-    errors: [
-      {
-        status: '500',
-        title: 'Not Implemented',
-        detail: 'Not yet implemented'
-      }
-    ]
-  })
-})
-
-/**
- * Create an unauthorized error response.
- * Should return after calling this function.
- * @param {express.response} res Response object from Express.js
- */
-function sendUnauthorized (res) {
-  res.status(401)
-  res.json({
-    errors: [{
-      status: '401',
-      title: 'Unauthorized',
-      detail: 'Invalid credential'
-    }]
-  })
+function notImplemented () {
+  const error = new Error('Not yet implemented')
+  error.status = 501
+  error.name = 'Not Implemented'
+  throw error
 }
