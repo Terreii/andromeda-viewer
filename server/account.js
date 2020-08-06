@@ -152,10 +152,60 @@ api.get('/account', ...createAuthValidator(), async (req, res) => {
 })
 
 // update account
-api.patch('/account', notImplemented)
+api.patch(
+  '/account',
+  ...createAuthValidator(),
+  body('data.type').equals('account'),
+  body('data.attributes.username').optional().isEmail(),
+  body('data.attributes.password').optional().isLength({ min: minPasswordLength }),
+  async (req, res, next) => {
+    try {
+      // handle the validation errors
+      const errors = validationResult(req)
+      if (!errors.isEmpty()) {
+        throw errors.array().map(error => ({
+          ...error,
+          status: 400,
+          title: 'Bad Request',
+          detail: error.msg
+        }))
+      }
+
+      let didChange = false
+      const { attributes: { username, password } } = req.body.data
+
+      if (password) {
+        req.user.password = password
+        didChange = true
+      }
+
+      if (username && username !== req.user.email) {
+        didChange = true
+        req.user.email = username
+        // todo send validation email and set email_validation to an UUID
+      }
+
+      // only update user-doc if something did change.
+      if (didChange) {
+        await usersDB.insert(req.user)
+      }
+      res.status(204).send('')
+    } catch (err) {
+      next(err)
+    }
+  }
+)
 
 // delete account
-api.delete('/account', notImplemented)
+api.delete('/account', ...createAuthValidator(), async (req, res, next) => {
+  try {
+    await usersDB.destroy(req.user._id, req.user._rev)
+
+    res.status(204).send('')
+  } catch (err) {
+    next(err)
+  }
+})
 
 // log in
 api.put('', notImplemented)
