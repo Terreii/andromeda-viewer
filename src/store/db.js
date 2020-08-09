@@ -1,12 +1,22 @@
 import PouchDB from 'pouchdb-browser'
 import memoryAdapter from 'pouchdb-adapter-memory'
 import auth from 'pouchdb-authentication'
+import hoodieApi from 'pouchdb-hoodie-api'
+import hoodiePluginStoreCrypto from 'hoodie-plugin-store-crypto'
 
 PouchDB.plugin(memoryAdapter)
 PouchDB.plugin(auth)
+PouchDB.plugin(hoodieApi)
 
 export function createLocalDB () {
   return new PouchDB('local')
+}
+
+export function createCryptoStore (localDB) {
+  const api = localDB.hoodieApi()
+  const getter = { store: api }
+  hoodiePluginStoreCrypto(getter)
+  return getter.cryptoStore
 }
 
 export function createRemoteDB (dbName, skipSetup = true) {

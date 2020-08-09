@@ -25,7 +25,13 @@ import {
   selectSavedGridsAreLoaded
 } from '../bundles/account'
 import { selectIsLoggedIn } from '../bundles/session'
-import { createLocalDB, createRemoteDB, getUserDatabaseName, startSyncing } from '../store/db'
+import {
+  createLocalDB,
+  createCryptoStore,
+  createRemoteDB,
+  getUserDatabaseName,
+  startSyncing
+} from '../store/db'
 
 import { IMChatType } from '../types/chat'
 
@@ -236,6 +242,7 @@ export function signIn (username, password, cryptoPassword) {
         window.remoteDB = args.remoteDB
       }
 
+      await args.cryptoStore.unlock(cryptoPassword)
       await args.db.put({
         _id: '_local/account',
         name: accountProperties.name
@@ -257,11 +264,12 @@ export function signIn (username, password, cryptoPassword) {
 }
 
 export function signUp (username, password, cryptoPassword) {
-  return async (dispatch, getState, { remoteDB }) => {
+  return async (dispatch, getState, { cryptoStore, remoteDB }) => {
     try {
       const result = await remoteDB.signUp(username, password)
       const dbName = getUserDatabaseName(result.id.replace('org.couchdb.user:', ''))
       createRemoteDB(dbName, false)
+      await cryptoStore.setup(cryptoPassword)
 
       await dispatch(
         signIn(username, password, cryptoPassword)
@@ -345,15 +353,18 @@ export function signOut () {
     try {
       await args.remoteDB.logOut()
       await args.db.destroy()
+      args.cryptoStore.lock()
 
       dispatch(accountDidSignOut())
 
       args.db = createLocalDB()
       args.remoteDB = createRemoteDB('_users')
+      args.cryptoStore = createCryptoStore(args.db)
 
       if (process.env.NODE_ENV !== 'production') {
         window.localDB = args.db
         window.remoteDB = args.remoteDB
+        window.cryptoStore = args.cryptoStore
       }
     } catch (err) {
       console.error(err)

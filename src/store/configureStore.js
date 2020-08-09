@@ -2,16 +2,18 @@ import { configureStore, getDefaultMiddleware, isPlain } from '@reduxjs/toolkit'
 
 import rootReducer from '../bundles'
 import configureReactors from './configureReactors'
-import { createLocalDB, createRemoteDB } from './db'
+import { createLocalDB, createCryptoStore, createRemoteDB } from './db'
 import { proxyFetch, fetchLLSD } from './llsdFetch'
 
 import AvatarName from '../avatarName'
 
 // Create Redux-Store with Hoodie
 export default function (preloadedState) {
+  const db = createLocalDB()
   const extraArgument = {
     hoodie: window.hoodie,
-    db: createLocalDB(),
+    cryptoStore: createCryptoStore(db),
+    db,
     remoteDB: createRemoteDB('_users'),
     proxyFetch: null,
     fetchLLSD: null,
@@ -47,6 +49,7 @@ export default function (preloadedState) {
     window.devStore = store
     window.localDB = extraArgument.db
     window.remoteDB = extraArgument.remoteDB
+    window.cryptoStore = extraArgument.cryptoStore
 
     if (module.hot) {
       // Enable Webpack hot module replacement for reducers
