@@ -228,61 +228,76 @@ export function unlock (cryptoPassword) {
   }
 }
 
+function signInAndSync (accountProperties, password, cryptoPassword) {
+  return async (dispatch, getState, args) => {
+    await args.remoteDB.logIn(accountProperties.data.id, password)
+
+    const userDbName = getUserDatabaseName(accountProperties.data.id)
+    args.remoteDB = createRemoteDB(userDbName, false)
+
+    startSyncing(args.db, args.remoteDB)
+
+    if (process.env.NODE_ENV !== 'production') {
+      window.remoteDB = args.remoteDB
+    }
+
+    await args.cryptoStore.unlock(cryptoPassword)
+    await args.db.put({
+      _id: '_local/account',
+      accountId: accountProperties.data.id,
+      name: accountProperties.data.attributes.username
+    })
+
+    dispatch(signInStatus(true, true, accountProperties.data.attributes.username))
+
+    await dispatch(loadSavedGrids())
+    dispatch(loadSavedAvatars())
+  }
+}
+
 export function signIn (username, password, cryptoPassword) {
   return async (dispatch, getState, args) => {
-    try {
-      const accountProperties = await args.remoteDB.logIn(username, password)
-
-      const userDbName = getUserDatabaseName(accountProperties.name)
-      args.remoteDB = createRemoteDB(userDbName, false)
-
-      startSyncing(args.db, args.remoteDB)
-
-      if (process.env.NODE_ENV !== 'production') {
-        window.remoteDB = args.remoteDB
+    const accountDataReq = await window.fetch('/session/account', {
+      method: 'GET',
+      headers: {
+        Authorization: 'Basic ' + window.btoa(`${username}:${password}`),
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
       }
-
-      await args.cryptoStore.unlock(cryptoPassword)
-      await args.db.put({
-        _id: '_local/account',
-        name: accountProperties.name
-      })
-
-      dispatch(signInStatus(true, true, accountProperties.username))
-
-      await dispatch(loadSavedGrids())
-      dispatch(loadSavedAvatars())
-    } catch (err) {
-      console.error(err)
-
-      if (err.name === 'unauthorized' || err.name === 'forbidden') {
-        // name or password incorrect
-        throw new Error('Username or password is wrong!')
-      }
+    })
+    const accountProperties = await accountDataReq.json()
+    if (accountProperties.error) {
+      throw accountProperties.error[0]
     }
+    await dispatch(signInAndSync(accountProperties, password, cryptoPassword))
   }
 }
 
 export function signUp (username, password, cryptoPassword) {
   return async (dispatch, getState, { cryptoStore, remoteDB }) => {
-    try {
-      const result = await remoteDB.signUp(username, password)
-      const dbName = getUserDatabaseName(result.id.replace('org.couchdb.user:', ''))
-      createRemoteDB(dbName, false)
-      await cryptoStore.setup(cryptoPassword)
-
-      await dispatch(
-        signIn(username, password, cryptoPassword)
-      )
-    } catch (err) {
-      if (err && err.name === 'conflict') {
-        // already exists
-      } else if (err.name === 'forbidden') {
-        // invalid username
-      } else {
-        console.error(err)
-      }
+    const request = await window.fetch('/session/account', {
+      method: 'PUT',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        data: {
+          type: 'account',
+          attributes: {
+            username,
+            password
+          }
+        }
+      })
+    })
+    const accountProperties = await request.json()
+    if (accountProperties.error) {
+      throw accountProperties.error[0]
     }
+    await cryptoStore.setup(cryptoPassword)
+
+    await dispatch(signInAndSync(accountProperties, password, cryptoPassword))
   }
 }
 

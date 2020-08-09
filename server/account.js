@@ -110,6 +110,10 @@ api.put(
 
       // TODO: send email
 
+      if (process.env.NODE_ENV === 'development') {
+        await nano.db.create('userdb-' + Buffer.from(userID).toString('hex'))
+      }
+
       res.type('application/vnd.api+json')
       res.status(200).json({
         links: {
