@@ -61,14 +61,14 @@ api.put(
 
       const { attributes: { username, password }, id } = req.body.data
       // check if an user exist with that login-username/email
-      const docs = await usersDB.find({
+      const { docs } = await usersDB.find({
         selector: {
           email: username
         },
-        fields: ['_id', 'name', 'email']
+        fields: ['_id', 'email']
       })
 
-      if (docs.docs.length > 0) {
+      if (docs.length > 0) {
         throw pouchErrors.createError(
           pouchErrors.REV_CONFLICT,
           'An account with that username already exists'
@@ -205,6 +205,10 @@ api.delete('/account', ...createAuthValidator(), async (req, res, next) => {
   try {
     await usersDB.destroy(req.user._id, req.user._rev)
 
+    if (process.env.NODE_ENV === 'development') {
+      await nano.db.destroy('userdb-' + Buffer.from(req.user._id).toString('hex'))
+    }
+
     res.status(204).send('')
   } catch (err) {
     next(err)
@@ -293,17 +297,17 @@ async function authentication (req, res, next) {
     }
 
     // Find the document of the user.
-    const docs = await usersDB.find({
+    const { docs } = await usersDB.find({
       selector: {
         email: username
       }
     })
 
     // If the user doesn't exist
-    if (docs.docs.length === 0) {
+    if (docs.length === 0) {
       throw pouchErrors.UNAUTHORIZED
     }
-    const user = docs.docs[0]
+    const user = docs[0]
 
     // Use the CouchDB session API for checking the password.
     // This works on CouchDB and PouchDB-Server and CouchDB with per-document-access.

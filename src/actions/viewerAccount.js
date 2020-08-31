@@ -367,6 +367,7 @@ export function signOut () {
 
     try {
       await args.remoteDB.logOut()
+      await args.remoteDB.close()
       await args.db.destroy()
       args.cryptoStore.lock()
 
