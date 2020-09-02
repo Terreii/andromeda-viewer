@@ -18,6 +18,7 @@ import {
   savedGridRemoved,
 
   selectIsSignedIn,
+  selectUserName,
   selectIsUnlocked,
   selectSavedAvatars,
   selectSavedAvatarsAreLoaded,
@@ -208,8 +209,62 @@ function listenToAccountChanges (account, dispatch) {
   })
 }
 
-export function unlock (cryptoPassword) {
-  return async (dispatch, getState, { hoodie }) => {
+/**
+ * Generate/derive the login and encryption passwords from one password and username.
+ * Inspired by https://github.com/mozilla/fxa/blob/main/packages/fxa-auth-client/lib/crypto.ts
+ * @param {string} username User' name
+ * @param {string} password User password
+ */
+async function derivePasswords (username, password) {
+  const enc = new TextEncoder()
+  const NAMESPACE = 'account.andromeda-viewer.com/v1/'
+  const key = await window.crypto.subtle.importKey(
+    'raw',
+    enc.encode(password),
+    'PBKDF2',
+    false,
+    ['deriveBits']
+  )
+  const stretchedRaw = await window.crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt: enc.encode(`${NAMESPACE}quickStretch:${username}`),
+      iterations: 100000,
+      hash: 'SHA-512'
+    },
+    key,
+    512
+  )
+  const stretchedKey = await window.crypto.subtle.importKey(
+    'raw',
+    stretchedRaw,
+    'HKDF',
+    false,
+    ['deriveBits']
+  )
+  const authPW = await window.crypto.subtle.deriveBits(
+    {
+      name: 'HKDF',
+      salt: new Uint8Array(0),
+      info: enc.encode(`${NAMESPACE}authPW`),
+      hash: 'SHA-512'
+    },
+    stretchedKey,
+    512
+  )
+  const toString = buffy => {
+    return Array.from(new Uint8Array(buffy))
+      .map(byte => byte.toString(16).padStart(2, '0'))
+      .join('')
+  }
+  return {
+    loginPassword: toString(authPW.slice(0, 32)),
+    cryptoPassword: toString(authPW.slice(32))
+  }
+}
+
+export function unlock (password) {
+  return async (dispatch, getState, args) => {
     const activeState = getState()
     if (selectIsUnlocked(activeState)) {
       return
@@ -219,7 +274,22 @@ export function unlock (cryptoPassword) {
       throw new Error('Not signed in!')
     }
 
-    await hoodie.cryptoStore.unlock(cryptoPassword)
+    const username = selectUserName(activeState)
+    const accountDoc = await args.db.get('_local/account')
+    const { loginPassword, cryptoPassword } = await derivePasswords(username, password)
+    await args.remoteDB.logIn(accountDoc.accountId, loginPassword)
+
+    const userDbName = getUserDatabaseName(accountDoc.accountId)
+    args.remoteDB.close()
+    args.remoteDB = createRemoteDB(userDbName, false)
+
+    startSyncing(args.db, args.remoteDB)
+
+    if (process.env.NODE_ENV !== 'production') {
+      window.remoteDB = args.remoteDB
+    }
+
+    await args.cryptoStore.unlock(cryptoPassword)
 
     dispatch(unlocked())
 
@@ -233,6 +303,7 @@ function signInAndSync (accountProperties, password, cryptoPassword) {
     await args.remoteDB.logIn(accountProperties.data.id, password)
 
     const userDbName = getUserDatabaseName(accountProperties.data.id)
+    args.remoteDB.close()
     args.remoteDB = createRemoteDB(userDbName, false)
 
     startSyncing(args.db, args.remoteDB)
@@ -255,12 +326,13 @@ function signInAndSync (accountProperties, password, cryptoPassword) {
   }
 }
 
-export function signIn (username, password, cryptoPassword) {
+export function signIn (username, password) {
   return async (dispatch, getState, args) => {
+    const { loginPassword, cryptoPassword } = await derivePasswords(username, password)
     const accountDataReq = await window.fetch('/session/account', {
       method: 'GET',
       headers: {
-        Authorization: 'Basic ' + window.btoa(`${username}:${password}`),
+        Authorization: 'Basic ' + window.btoa(`${username}:${loginPassword}`),
         Accept: 'application/json',
         'Content-Type': 'application/json'
       }
@@ -269,12 +341,14 @@ export function signIn (username, password, cryptoPassword) {
     if (accountProperties.error) {
       throw accountProperties.error[0]
     }
-    await dispatch(signInAndSync(accountProperties, password, cryptoPassword))
+    await dispatch(signInAndSync(accountProperties, loginPassword, cryptoPassword))
   }
 }
 
-export function signUp (username, password, cryptoPassword) {
+export function signUp (username, password) {
   return async (dispatch, getState, { cryptoStore, remoteDB }) => {
+    const { loginPassword, cryptoPassword } = await derivePasswords(username, password)
+
     const request = await window.fetch('/session/account', {
       method: 'PUT',
       headers: {
@@ -286,7 +360,7 @@ export function signUp (username, password, cryptoPassword) {
           type: 'account',
           attributes: {
             username,
-            password
+            password: loginPassword
           }
         }
       })
@@ -297,7 +371,7 @@ export function signUp (username, password, cryptoPassword) {
     }
     await cryptoStore.setup(cryptoPassword)
 
-    await dispatch(signInAndSync(accountProperties, password, cryptoPassword))
+    await dispatch(signInAndSync(accountProperties, loginPassword, cryptoPassword))
   }
 }
 
