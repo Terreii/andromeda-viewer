@@ -16,31 +16,23 @@ export default function SignInPopup ({ isSignUp, dialog }) {
   const password = useFormInput('')
   const password2 = useFormInput('')
 
-  const cryptoPassword = useFormInput('')
-  const cryptoPassword2 = useFormInput('')
-
   const [isSigningIn, setIsSigningIn] = useState(false)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     password.onChange('')
     password2.onChange('')
-
-    cryptoPassword.onChange('')
-    cryptoPassword2.onChange('')
     // Only reset passwords if the visibility did change
     // eslint-disable-next-line
   }, [dialog.visible])
 
   const isValid = (() => {
-    if ([password.value, cryptoPassword.value].some((s, i) => s.length < 8)) {
+    if (password.value.length < 8) {
       return false
     }
 
-    // this also checks length of password2 and cryptoPassword2
-    if (isSignUp && (
-      password.value !== password2.value || cryptoPassword.value !== cryptoPassword2.value
-    )) {
+    // this also checks length of password2
+    if (isSignUp && password.value !== password2.value) {
       return false
     }
 
@@ -57,9 +49,9 @@ export default function SignInPopup ({ isSignUp, dialog }) {
 
     try {
       if (isSignUp) {
-        await dispatch(signUp(username, password.value, cryptoPassword.value))
+        await dispatch(signUp(username, password.value))
       } else {
-        await dispatch(signIn(username, password.value, cryptoPassword.value))
+        await dispatch(signIn(username, password.value))
       }
     } catch (err) {
       console.error(err)
@@ -115,6 +107,7 @@ export default function SignInPopup ({ isSignUp, dialog }) {
             <small id='passwordHelp' className='leading-6 text-gray-600'>
               Please use a strong and unique password!<br />
               Minimal length: 8 characters!<br />
+              This password will <b>never</b> be saved or leave your machine!<br />
               {'A '}
               <a
                 href='https://en.wikipedia.org/wiki/List_of_password_managers'
@@ -149,59 +142,6 @@ export default function SignInPopup ({ isSignUp, dialog }) {
                 role='alert'
               >
                 Password doesn't match!
-              </small>
-            )}
-          </label>
-        )}
-
-        <label className='flex flex-col m-1'>
-          <span>Encryption password</span>
-          <input
-            {...cryptoPassword}
-            id='cryptoPassword'
-            type='password'
-            className='block w-full mt-1 text-gray-900 form-input'
-            required
-            minLength='8'
-            aria-describedby={isSignUp && 'cryptoPwHelp'}
-            disabled={isSigningIn}
-            onFocus={onFocusScrollIntoView}
-          />
-          {isSignUp && (
-            <small id='cryptoPwHelp' className='leading-5 text-gray-600'>
-              Minimal length: 8 characters!<br />
-              This password is used to encrypt your personal data.<br />
-              This includes: <i>Avatar login-info</i>, <i>grids</i>, and <i>chat-logs</i>.<br />
-              <b>Your personal data is encrypted on your machine.<br />
-              and will never leave it un-encrypted!
-              </b>
-              <br />
-              This password will <b>never</b> be saved or leave your machine!
-            </small>
-          )}
-        </label>
-
-        {isSignUp && (
-          <label className='flex flex-col m-1'>
-            <span>Repeat encryption password</span>
-            <input
-              {...cryptoPassword2}
-              id='cryptoPassword2'
-              type='password'
-              className='block w-full mt-1 text-gray-900 form-input'
-              required
-              minLength='8'
-              disabled={isSigningIn}
-              onFocus={onFocusScrollIntoView}
-            />
-            {!(cryptoPassword2.value.length === 0 ||
-              cryptoPassword.value === cryptoPassword2.value
-            ) && (
-              <small
-                className='px-4 py-2 mt-1 leading-6 text-red-800 bg-red-200 border border-red-500 rounded'
-                role='alert'
-              >
-                Encryption password doesn't match!
               </small>
             )}
           </label>

@@ -7,7 +7,6 @@ import {
   signOut as accountDidSignOut,
   unlocked,
   displayResetKeys,
-  didUpdate as accountDidUpdate,
   avatarSaved,
   avatarsLoaded,
   savedAvatarUpdated,
@@ -37,7 +36,7 @@ import {
 import { IMChatType } from '../types/chat'
 
 export function saveAvatar (name, agentId, grid) {
-  return (dispatch, getState, { hoodie }) => {
+  return (dispatch, getState, { cryptoStore }) => {
     const gridName = typeof grid === 'string' ? grid : grid.name
 
     const avatarIdentifier = `${agentId}@${gridName}`
@@ -48,7 +47,7 @@ export function saveAvatar (name, agentId, grid) {
       return Promise.reject(new Error('Avatar already exist!'))
     }
 
-    return hoodie.cryptoStore.withIdPrefix('avatars/').add({
+    return cryptoStore.withIdPrefix('avatars/').add({
       dataSaveId: uuid(),
       avatarIdentifier,
       name: name.getFullName(),
@@ -58,7 +57,7 @@ export function saveAvatar (name, agentId, grid) {
 }
 
 export function loadSavedAvatars () {
-  return async (dispatch, getState, { hoodie }) => {
+  return async (dispatch, getState, { db, cryptoStore }) => {
     const activeState = getState()
 
     if (!selectIsSignedIn(activeState)) {
@@ -67,14 +66,14 @@ export function loadSavedAvatars () {
 
     if (selectSavedAvatarsAreLoaded(activeState)) return
 
-    const avatarsStore = hoodie.cryptoStore.withIdPrefix('avatars/')
+    const avatarsStore = cryptoStore.withIdPrefix('avatars/')
 
     const changeHandler = (eventName, doc) => {
       dispatch(avatarsDidChange(eventName, doc))
     }
 
     avatarsStore.on('change', changeHandler)
-    hoodie.account.one('signout', () => {
+    db.on('destroyed', () => {
       avatarsStore.off('change', changeHandler)
     })
 
@@ -107,14 +106,14 @@ function avatarsDidChange (type, doc) {
 }
 
 export function saveGrid (newGrid) {
-  return (dispatch, getState, { hoodie }) => {
+  return (dispatch, getState, { cryptoStore }) => {
     const name = newGrid.name.trim()
 
     if (selectSavedGrids(getState()).some(grid => grid.name === name)) {
       return Promise.reject(new Error('Grid already exist!'))
     }
 
-    return hoodie.cryptoStore.withIdPrefix('grids/').add({
+    return cryptoStore.withIdPrefix('grids/').add({
       name,
       loginURL: newGrid.loginURL,
       isLLSDLogin: false
@@ -123,7 +122,7 @@ export function saveGrid (newGrid) {
 }
 
 export function loadSavedGrids () {
-  return async (dispatch, getState, { hoodie }) => {
+  return async (dispatch, getState, { db, cryptoStore }) => {
     const activeState = getState()
 
     if (!selectIsSignedIn(activeState)) {
@@ -132,14 +131,14 @@ export function loadSavedGrids () {
 
     if (selectSavedGridsAreLoaded(activeState)) return
 
-    const gridsStore = hoodie.cryptoStore.withIdPrefix('grids/')
+    const gridsStore = cryptoStore.withIdPrefix('grids/')
 
     const changeHandler = (change, doc) => {
       dispatch(gridsDidChange(change, doc))
     }
 
     gridsStore.on('change', changeHandler)
-    hoodie.account.one('signout', () => {
+    db.on('destroyed', () => {
       gridsStore.off('change', changeHandler)
     })
 
@@ -164,7 +163,7 @@ function gridsDidChange (type, grid) {
 export function isSignedIn () {
   return async (dispatch, getState, args) => {
     const session = await args.remoteDB.getSession()
-    let username = session.userCtx.name
+    let username = session?.userCtx?.name
 
     if (username == null) {
       try {
@@ -184,29 +183,13 @@ export function isSignedIn () {
     if (isLoggedIn) {
       const userDbName = getUserDatabaseName(username)
       args.remoteDB = createRemoteDB(userDbName)
-
-      startSyncing(args.db, args.remoteDB)
-
-      if (process.env.NODE_ENV !== 'production') {
-        window.remoteDB = args.remoteDB
-      }
+      args.cryptoStore = createCryptoStore(args.db, args.remoteDB)
     }
 
     dispatch(signInStatus(isLoggedIn, null, username))
 
     return isLoggedIn
   }
-}
-
-// eslint-disable-next-line
-function listenToAccountChanges (account, dispatch) {
-  const handler = changes => {
-    dispatch(accountDidUpdate(changes))
-  }
-  account.on('update', handler)
-  account.one('signout', () => {
-    account.off('update', handler)
-  })
 }
 
 /**
@@ -285,10 +268,6 @@ export function unlock (password) {
 
     startSyncing(args.db, args.remoteDB)
 
-    if (process.env.NODE_ENV !== 'production') {
-      window.remoteDB = args.remoteDB
-    }
-
     await args.cryptoStore.unlock(cryptoPassword)
 
     dispatch(unlocked())
@@ -305,12 +284,9 @@ function signInAndSync (accountProperties, password, cryptoPassword) {
     const userDbName = getUserDatabaseName(accountProperties.data.id)
     args.remoteDB.close()
     args.remoteDB = createRemoteDB(userDbName, false)
+    args.cryptoStore = createCryptoStore(args.db, args.remoteDB)
 
     startSyncing(args.db, args.remoteDB)
-
-    if (process.env.NODE_ENV !== 'production') {
-      window.remoteDB = args.remoteDB
-    }
 
     await args.cryptoStore.unlock(cryptoPassword)
     await args.db.put({
@@ -322,12 +298,14 @@ function signInAndSync (accountProperties, password, cryptoPassword) {
     dispatch(signInStatus(true, true, accountProperties.data.attributes.username))
 
     await dispatch(loadSavedGrids())
-    dispatch(loadSavedAvatars())
+    await dispatch(loadSavedAvatars())
   }
 }
 
 export function signIn (username, password) {
-  return async (dispatch, getState, args) => {
+  return async (dispatch, getState) => {
+    if (selectIsSignedIn(getState())) return
+
     const { loginPassword, cryptoPassword } = await derivePasswords(username, password)
     const accountDataReq = await window.fetch('/session/account', {
       method: 'GET',
@@ -346,7 +324,9 @@ export function signIn (username, password) {
 }
 
 export function signUp (username, password) {
-  return async (dispatch, getState, { cryptoStore, remoteDB }) => {
+  return async (dispatch, getState, { cryptoStore }) => {
+    if (selectIsSignedIn(getState())) return
+
     const { loginPassword, cryptoPassword } = await derivePasswords(username, password)
 
     const request = await window.fetch('/session/account', {
@@ -449,13 +429,7 @@ export function signOut () {
 
       args.db = createLocalDB()
       args.remoteDB = createRemoteDB('_users')
-      args.cryptoStore = createCryptoStore(args.db)
-
-      if (process.env.NODE_ENV !== 'production') {
-        window.localDB = args.db
-        window.remoteDB = args.remoteDB
-        window.cryptoStore = args.cryptoStore
-      }
+      args.cryptoStore = createCryptoStore(args.db, args.remoteDB)
     } catch (err) {
       console.error(err)
     }
@@ -468,11 +442,11 @@ export function signOut () {
  * @returns {object} JSON data and array of files (text).
  */
 export function downloadAccountData () {
-  return async (dispatch, getState, { hoodie }) => {
-    const allAvatars = await hoodie.cryptoStore.withIdPrefix('avatars/').findAll()
+  return async (dispatch, getState, { cryptoStore }) => {
+    const allAvatars = await cryptoStore.withIdPrefix('avatars/').findAll()
 
     const avatarData = await Promise.all(allAvatars.map(async avatar => {
-      const avatarStore = hoodie.cryptoStore.withIdPrefix(avatar.dataSaveId + '/')
+      const avatarStore = cryptoStore.withIdPrefix(avatar.dataSaveId + '/')
 
       const [localChat, imChatsInfos] = await Promise.all([
         avatarStore.withIdPrefix('localchat').findAll(),
@@ -494,15 +468,9 @@ export function downloadAccountData () {
     }))
 
     // Get other data
-    const [grids, account, profile] = await Promise.all([
-      hoodie.cryptoStore.withIdPrefix('grids/').findAll(),
-      hoodie.account.get(),
-      hoodie.account.profile.get()
-    ])
+    const grids = await cryptoStore.withIdPrefix('grids/').findAll()
 
     const raw = {
-      account,
-      profile,
       grids,
       avatars: avatarData
     }

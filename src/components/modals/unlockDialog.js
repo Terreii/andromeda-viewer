@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
-import { useDispatch } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { useDialogState, DialogDisclosure } from 'reakit'
 
 import Modal from './modal'
 import ResetPasswordDialog from './resetPasswordDialog'
 
 import { signOut, unlock } from '../../actions/viewerAccount'
+import { selectUserName } from '../../bundles/account'
 
 import { useAutoFocus } from '../../hooks/utils'
 
@@ -14,6 +15,7 @@ import lockIcon from '../../icons/black_lock.svg'
 export default function UnlockDialog () {
   const dialog = useDialogState({ visible: process.env.NODE_ENV !== 'test' })
   const dispatch = useDispatch()
+  const username = useSelector(selectUserName)
 
   const [password, setPassword] = useState('')
   const [isUnlocking, setIsUnlocking] = useState(false)
@@ -61,11 +63,13 @@ export default function UnlockDialog () {
   return (
     <Modal title='Unlock' icon={icon} dialog={dialog} notCloseable>
       <form className='flex flex-col' onSubmit={doUnlock}>
-        <span className='m-1'>
-          Please enter your <em>Encryption-Password</em> to unlock this app!
-        </span>
+        <p className='m-1'>
+          You are logged in as <strong>{username}</strong>.
+          <br />
+          Please enter your <em>Password</em> to unlock this app!
+        </p>
 
-        <label className='flex flex-col m-1'>
+        <label className='flex flex-col m-1 mt-2'>
           <span>Password</span>
           <input
             id='unlockPasswordIn'
