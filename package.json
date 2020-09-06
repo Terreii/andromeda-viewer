@@ -107,7 +107,7 @@
     "hoodie": "^28.2.10",
     "hoodie-plugin-store-crypto": "^3.3.0",
     "milliseconds": "^1.0.3",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "uuid": "^8.2.0",
     "ws": "^7.3.1",
     "xmlrpc": "^1.3.2"
