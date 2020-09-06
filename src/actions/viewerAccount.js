@@ -6,6 +6,7 @@ import {
   signInStatus,
   signOut as accountDidSignOut,
   unlocked,
+  didUpdateUsername,
   displayResetKeys,
   avatarSaved,
   avatarsLoaded,
@@ -160,6 +161,16 @@ function gridsDidChange (type, grid) {
   }
 }
 
+/**
+ * Get the users data.
+ * @param {PouchDB.Database} db The local Database.
+ * @returns {{ _id: string, _rev: string, accountId: string, name: string}} Doc with user info
+ */
+async function getUserInfo (db) {
+  const userDoc = await db.get('_local/account')
+  return userDoc
+}
+
 export function isSignedIn () {
   return async (dispatch, getState, args) => {
     const session = await args.remoteDB.getSession()
@@ -167,7 +178,7 @@ export function isSignedIn () {
 
     if (username == null) {
       try {
-        const userDoc = await args.db.get('_local/account')
+        const userDoc = await getUserInfo(args.db)
         username = userDoc.name
       } catch (err) {
         if (err.status === 404) {
@@ -258,7 +269,7 @@ export function unlock (password) {
     }
 
     const username = selectUserName(activeState)
-    const accountDoc = await args.db.get('_local/account')
+    const accountDoc = await getUserInfo(args.db)
     const { loginPassword, cryptoPassword } = await derivePasswords(username, password)
     await args.remoteDB.logIn(accountDoc.accountId, loginPassword)
 
@@ -356,21 +367,22 @@ export function signUp (username, password) {
 }
 
 /**
- * Update the Viewer Account (using hoodie).
+ * Update the Viewer Account.
  * @param {object} options Object containing optional params.
  * @param {string?} options.nextUsername If the username should be updated, then this is it.
- * @param {string?} options.password If the password should be updated, then this is the
- *                                   current password
+ * @param {string} options.password      The current password. Always needed, for encryption.
  * @param {string?} options.nextPassword If the password should be updated, then this is the new one
  */
 export function updateAccount ({ nextUsername, password, nextPassword }) {
   const mailReg = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/i
 
   const shouldUpdateUsername = nextUsername != null && nextUsername.length > 0
-  const shouldUpdatePassword = password != null && password.length > 0 &&
-    nextPassword != null && nextPassword.length > 0
+  const shouldUpdatePassword = nextPassword != null && nextPassword.length > 0
 
-  return async (dispatch, getState, { hoodie }) => {
+  return async (dispatch, getState, { db, cryptoStore }) => {
+    if (password == null || password.length < 8) {
+      throw new TypeError('Please enter the current password!')
+    }
     if (shouldUpdateUsername && !mailReg.test(nextUsername)) {
       throw new TypeError('Username must be a valid e-mail address!')
     }
@@ -378,20 +390,53 @@ export function updateAccount ({ nextUsername, password, nextPassword }) {
       throw new Error('Password must have 8 characters or more!')
     }
 
-    const username = await hoodie.account.get('username')
+    const { name } = await getUserInfo(db)
+    const updateName = shouldUpdateUsername ? nextUsername : undefined
+    const { loginPassword, cryptoPassword } = await derivePasswords(name, password)
+    const { loginPassword: nextLoginPw, cryptoPassword: nextCryptoPw } = await derivePasswords(
+      updateName ?? name,
+      shouldUpdatePassword ? nextPassword : password
+    )
 
-    const options = {
-      username: shouldUpdateUsername ? nextUsername : username
+    const accountDataReq = await window.fetch('/session/account', {
+      method: 'PATCH',
+      headers: {
+        Authorization: 'Basic ' + window.btoa(`${name}:${loginPassword}`),
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        data: {
+          type: 'account',
+          attributes: {
+            username: updateName,
+            password: nextLoginPw
+          }
+        }
+      })
+    })
+    const accountDataTxt = await accountDataReq.text()
+    const accountData = accountDataTxt.length > 0 ? JSON.parse(accountDataTxt) : {}
+
+    if (accountDataReq.ok && accountData.errors == null) {
+      const result = await cryptoStore.changePassword(cryptoPassword, nextCryptoPw)
+
+      dispatch(displayResetKeys(result.resetKeys))
+
+      if (shouldUpdateUsername) {
+        const userDoc = await getUserInfo(db)
+        userDoc.name = nextUsername
+        await db.put(userDoc)
+        dispatch(didUpdateUsername({ username: nextUsername }))
+      }
+    } else if (accountData.errors) {
+      const err = new Error(accountData.errors[0].title)
+      err.name = accountData.errors[0].title
+      err.message = accountData.errors[0].detail
+      throw err
+    } else {
+      throw new Error('unknown')
     }
-
-    // check if old password is correct
-    if (shouldUpdatePassword) {
-      await hoodie.account.signIn({ username, password }) // will reject if password is wrong
-
-      options.password = nextPassword
-    }
-
-    return hoodie.account.update(options)
   }
 }
 

@@ -34,7 +34,7 @@ export default function AccountPanel () {
   const { isValid: newPasswordIsValid, ...newPassword } = useFormInput('', true)
   const { isValid: newPassword2IsValid, ...newPassword2 } = useFormInput('', true)
 
-  const passwordRequired = [oldPassword, newPassword, newPassword2].some(p => p.value.length > 0)
+  const passwordRequired = [newPassword, newPassword2].some(p => p.value.length > 0)
   const passwordsAreValid = oldPasswordIsValid && newPasswordIsValid && newPassword2IsValid &&
     newPassword.value === newPassword2.value && newPassword.value.length > 0
 
@@ -57,13 +57,16 @@ export default function AccountPanel () {
     event.preventDefault()
 
     if (
+      !oldPasswordIsValid || oldPassword.value.length === 0 ||
       (username !== changedUsername.value && !usernameIsValid) ||
       (changedUsername.value === username && !passwordRequired)
     ) {
       return
     }
 
-    const option = {}
+    const option = {
+      password: oldPassword.value
+    }
 
     if (changedUsername.value !== username) {
       option.nextUsername = changedUsername.value
@@ -73,8 +76,6 @@ export default function AccountPanel () {
       if (!passwordsAreValid) {
         return
       }
-
-      option.password = oldPassword.value
       option.nextPassword = newPassword.value
     }
 
@@ -123,26 +124,26 @@ This is permanent and can not be undone!`)
         />
       </label>
 
+      <label className='flex flex-col mx-1 mt-3 mb-1'>
+        <span>Current password</span>
+        <input
+          {...oldPassword}
+          id='passwordChangeOld'
+          type='password'
+          className='block w-full mt-1 text-gray-900 form-input'
+          autoComplete='current-password'
+          minLength='8'
+          required={username !== changedUsername.value || passwordRequired}
+          disabled={isUpdating}
+        />
+      </label>
+
       <fieldset className='p-2 mt-4 border rounded focus-within:shadow-lg'>
         <legend className='mx-1'>Change your password</legend>
 
         <small className='mx-1 leading-6 text-gray-600'>
           If you leave them blank, we won't modify the password.
         </small>
-
-        <label className='flex flex-col mx-1 mt-3 mb-1'>
-          <span>Old password</span>
-          <input
-            {...oldPassword}
-            id='passwordChangeOld'
-            type='password'
-            className='block w-full mt-1 text-gray-900 form-input'
-            autoComplete='current-password'
-            minLength='8'
-            required={passwordRequired}
-            disabled={isUpdating}
-          />
-        </label>
 
         <label className='flex flex-col m-1'>
           <span>New password</span>
@@ -209,6 +210,7 @@ This is permanent and can not be undone!`)
           id='updateAccountData'
           className='btn btn--ok'
           disabled={isUpdating ||
+            (!oldPasswordIsValid || oldPassword.value.length === 0) ||
             (passwordRequired && !passwordsAreValid) || // password did change but not valid
             (changedUsername.value !== username && !usernameIsValid) || // username did change
             (changedUsername.value === username && !passwordRequired)} // nothing did change
