@@ -98,7 +98,7 @@
     "textlint-rule-common-misspellings": "^1.0.1",
     "textlint-rule-rousseau": "^1.4.6",
     "typedoc": "^0.19.1",
-    "typescript": "^3.9.7",
+    "typescript": "^4.0.2",
     "weallbehave": "^1.2.0",
     "weallcontribute": "^1.0.9"
   },
