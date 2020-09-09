@@ -592,12 +592,46 @@ function reduceExportChatLines (file, line) {
   return `${file}[${year}/${month}/${day} ${hours}:${min}]  ${line.fromName}: ${line.message}\n`
 }
 
-export function deleteAccount () {
-  return async (dispatch, getState, { hoodie }) => {
-    await dispatch(logoutAvatar())
+export function deleteAccount (password) {
+  return async (dispatch, getState, { db }) => {
+    const { name } = await getUserInfo(db)
+    const { loginPassword } = await derivePasswords(name, password)
 
-    const results = await hoodie.account.destroy()
-    dispatch({ type: 'ViewerAccountSignOut', results })
+    const accountDataReq = await window.fetch('/session/account', {
+      method: 'GET',
+      headers: {
+        Authorization: 'Basic ' + window.btoa(`${name}:${loginPassword}`),
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+
+    const toError = async req => {
+      const result = await req.json()
+      const err = new Error(result.errors[0].title)
+      err.name = result.errors[0].title
+      err.message = result.errors[0].detail
+      throw err
+    }
+
+    if (accountDataReq.ok) {
+      dispatch(signOut())
+
+      const accountDelReq = await window.fetch('/session/account', {
+        method: 'DELETE',
+        headers: {
+          Authorization: 'Basic ' + window.btoa(`${name}:${loginPassword}`),
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!accountDelReq.ok) {
+        await toError(accountDelReq)
+      }
+    } else {
+      await toError(accountDataReq)
+    }
   }
 }
 

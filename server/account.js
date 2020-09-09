@@ -29,15 +29,17 @@ const minPasswordLength = 8
  */
 
 // Create the email to user index.
-usersDB.createIndex({
-  index: {
-    fields: ['email']
-  },
-  ddoc: 'users-by-email',
-  name: 'users-by-email'
-}).catch(err => {
-  console.error("couldn't create the email index\nlogins will be slower!", err)
-})
+setTimeout(() => {
+  usersDB.createIndex({
+    index: {
+      fields: ['email']
+    },
+    ddoc: 'users-by-email',
+    name: 'users-by-email'
+  }).catch(err => {
+    console.error("couldn't create the email index\nlogins will be slower!", err)
+  })
+}, 1000)
 
 // sign up
 api.put(
@@ -206,7 +208,7 @@ api.delete('/account', ...createAuthValidator(), async (req, res, next) => {
     await usersDB.destroy(req.user._id, req.user._rev)
 
     if (process.env.NODE_ENV === 'development') {
-      await nano.db.destroy('userdb-' + Buffer.from(req.user._id).toString('hex'))
+      await nano.db.destroy('userdb-' + Buffer.from(req.user.name).toString('hex'))
     }
 
     res.status(204).send('')

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { useDialogState } from 'reakit'
+import { useDialogState, DialogDisclosure } from 'reakit'
 
 import { viewerName } from '../viewerInfo'
 
@@ -88,19 +88,6 @@ export default function AccountPanel () {
       setError(err.toString())
     } finally {
       setIsUpdating(false)
-    }
-  }
-
-  const doDeleteAccount = event => {
-    event.preventDefault()
-
-    const doIt = window.confirm(`
-Do you want to delete your account for ${viewerName} and all your data?
-
-This is permanent and can not be undone!`)
-
-    if (doIt) {
-      deleteAccount()
     }
   }
 
@@ -235,14 +222,7 @@ This is permanent and can not be undone!`)
 
       <hr className='my-3' />
 
-      <button
-        type='button'
-        className='btn btn--danger'
-        onClick={doDeleteAccount}
-        disabled={isUpdating}
-      >
-        Delete your {viewerName} account
-      </button>
+      <DeleteAccountModal />
     </form>
   )
 }
@@ -342,5 +322,80 @@ function AccountDataDownload () {
         </div>
       </Modal>
     </div>
+  )
+}
+
+function DeleteAccountModal () {
+  const dispatch = useDispatch()
+  const modalState = useDialogState()
+
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState(null)
+
+  const doDeleteAccount = async event => {
+    event.preventDefault()
+
+    if (password.length < 8) return
+
+    try {
+      await dispatch(deleteAccount(password))
+    } catch (err) {
+      setError(err)
+    }
+  }
+
+  return (
+    <>
+      <DialogDisclosure {...modalState} className='btn btn--danger'>
+        Delete your {viewerName} account
+      </DialogDisclosure>
+
+      <Modal title='Delete your account' dialog={modalState} showCloseButton>
+        <form className='flex flex-col' onSubmit={doDeleteAccount}>
+          <p className='m-1'>Please enter your password to delete your account.</p>
+
+          <p className='m-1 font-bold'>This is permanent and can not be undone!</p>
+
+          <label className='flex flex-col m-1 mt-2'>
+            <span>Password</span>
+
+            <input
+              type='password'
+              className='block w-full mt-1 text-gray-900 form-input'
+              value={password}
+              onChange={event => {
+                setPassword(event.target.value)
+              }}
+              required
+              minLength='8'
+            />
+          </label>
+
+          {error && (
+            <p className='p-4 mx-auto mt-1 bg-red-700 rounded'>
+              <span>{error.name}</span>
+              <br />
+              <span>{error.message}</span>
+            </p>
+          )}
+
+          <div className='flex flex-col justify-end p-1 mx-auto space-y-2 sm:mr-0 sm:flex-row sm:space-x-2 sm:space-y-0'>
+            <button className='btn btn--danger' disabled={password.length < 8}>
+              delete
+            </button>
+
+            <button
+              type='button'
+              className='btn btn--secondary'
+              onClick={() => {
+                modalState.hide()
+              }}
+            >
+              cancel
+            </button>
+          </div>
+        </form>
+      </Modal>
+    </>
   )
 }
