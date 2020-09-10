@@ -299,12 +299,12 @@ function signInAndSync (accountProperties, password, cryptoPassword) {
 
     startSyncing(args.db, args.remoteDB)
 
-    await args.cryptoStore.unlock(cryptoPassword)
     await args.db.put({
       _id: '_local/account',
       accountId: accountProperties.data.id,
       name: accountProperties.data.attributes.username
     })
+    await args.cryptoStore.unlock(cryptoPassword)
 
     dispatch(signInStatus(true, true, accountProperties.data.attributes.username))
 
@@ -360,7 +360,8 @@ export function signUp (username, password) {
     if (accountProperties.error) {
       throw accountProperties.error[0]
     }
-    await cryptoStore.setup(cryptoPassword)
+    const resetKeys = await cryptoStore.setup(cryptoPassword)
+    dispatch(displayResetKeys(resetKeys))
 
     await dispatch(signInAndSync(accountProperties, loginPassword, cryptoPassword))
   }
