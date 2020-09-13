@@ -318,7 +318,7 @@ export function signIn (username, password) {
     if (selectIsSignedIn(getState())) return
 
     const { loginPassword, cryptoPassword } = await derivePasswords(username, password)
-    const accountDataReq = await window.fetch('/session/account', {
+    const accountDataReq = await window.fetch('/api/session/account', {
       method: 'GET',
       headers: {
         Authorization: 'Basic ' + window.btoa(`${username}:${loginPassword}`),
@@ -340,7 +340,7 @@ export function signUp (username, password) {
 
     const { loginPassword, cryptoPassword } = await derivePasswords(username, password)
 
-    const request = await window.fetch('/session/account', {
+    const request = await window.fetch('/api/session/account', {
       method: 'PUT',
       headers: {
         Accept: 'application/json',
@@ -399,7 +399,7 @@ export function updateAccount ({ nextUsername, password, nextPassword }) {
       shouldUpdatePassword ? nextPassword : password
     )
 
-    const accountDataReq = await window.fetch('/session/account', {
+    const accountDataReq = await window.fetch('/api/session/account', {
       method: 'PATCH',
       headers: {
         Authorization: 'Basic ' + window.btoa(`${name}:${loginPassword}`),
@@ -598,7 +598,7 @@ export function deleteAccount (password) {
     const { name } = await getUserInfo(db)
     const { loginPassword } = await derivePasswords(name, password)
 
-    const accountDataReq = await window.fetch('/session/account', {
+    const accountDataReq = await window.fetch('/api/session/account', {
       method: 'GET',
       headers: {
         Authorization: 'Basic ' + window.btoa(`${name}:${loginPassword}`),
@@ -618,7 +618,7 @@ export function deleteAccount (password) {
     if (accountDataReq.ok) {
       dispatch(signOut())
 
-      const accountDelReq = await window.fetch('/session/account', {
+      const accountDelReq = await window.fetch('/api/session/account', {
         method: 'DELETE',
         headers: {
           Authorization: 'Basic ' + window.btoa(`${name}:${loginPassword}`),

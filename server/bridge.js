@@ -1,6 +1,6 @@
 'use strict'
 
-module.exports = bridgeInit
+module.exports = createWebSocketServer
 
 const dgram = require('dgram')
 
@@ -11,26 +11,52 @@ const WebSocket = require('ws')
 // garbage collect the Bridge
 const openBridges = new WeakMap()
 
-function bridgeInit (server) {
-  const wss = new WebSocket.Server({
-    server: server.listener,
-    perMessageDeflate: false,
-    path: '/andromeda-bridge'
-  })
+/**
+ * Creates a middleware that will add on the server of the first connection an Websocket server.
+ *
+ * Inspired by ws handling of http-proxy-middleware.
+ *
+ * @param {string} url URL where to listen to.
+ */
+function createWebSocketServer (url) {
+  let hasSubscribed = false
 
-  wss.on('connection', ws => openBridges.set(ws, new Bridge(ws, server)))
+  return (req, res, next) => {
+    if (!hasSubscribed) {
+      hasSubscribed = true
+
+      const wss = new WebSocket.Server({
+        server: req.connection.server,
+        perMessageDeflate: false,
+        path: url
+      })
+
+      wss.on('connection', ws => {
+        openBridges.set(ws, new Bridge(ws, {
+          checkSession (num, fn) {
+            fn(undefined, num)
+          },
+          changeSessionState (num, state, fn) {
+            fn(undefined, state)
+          }
+        }))
+      })
+    }
+
+    next()
+  }
 }
 
 // The Bridge stores the websocket to the client and the UDP-socket to the sim
 // the first 6 bytes of a message, between this server and a client, is the
 // IP and Port of the sim
 class Bridge {
-  constructor (socket, server) {
+  constructor (socket, session) {
     this.didAuth = false
     this.sessionId = ''
 
-    this.checkSession = server.methods.checkSession
-    this.changeSessionState = server.methods.changeSessionState
+    this.checkSession = session.checkSession
+    this.changeSessionState = session.changeSessionState
 
     this.socket = socket
     this.udp = null
