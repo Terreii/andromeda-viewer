@@ -4,6 +4,10 @@ const { createProxyMiddleware } = require('http-proxy-middleware')
 
 module.exports = proxySetup
 
+/**
+ * Setup the proxy.
+ * @param {import('express').Application} app  Express App.
+ */
 function proxySetup (app) {
   // Setup proxy for all http apis
   app.use(createProxyMiddleware('http://localhost:3001/hoodie/andromeda-viewer/proxy/', {

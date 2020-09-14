@@ -5,6 +5,7 @@ exports.createWebSocketCreationRoute = createWebSocketCreationRoute
 
 const dgram = require('dgram')
 
+const pouchdbErrors = require('pouchdb-errors')
 const webSocket = require('ws')
 
 // all Bridges will be stored here.
@@ -75,38 +76,35 @@ class Bridge {
   }
 
   authenticate (sessionId) {
-    this.checkSession(sessionId, (err, state) => {
-      if (err) {
-        // handle error
-        this.socket.close(1008, 'wrong session id')
-        return
-      }
+    try {
+      const state = this.checkSession(sessionId)
 
       if (typeof state === 'number') {
         // Session has no active socket -> open
         this.didAuth = true
-        this.changeSessionState(sessionId, 'active', (err, state) => {
-          if (err) {
-            this.didAuth = false
-            this.socket.close(1011, err.message)
-          } else {
-            this.sessionId = sessionId
+        this.changeSessionState(sessionId, 'active')
+        this.sessionId = sessionId
 
-            const udp = dgram.createSocket('udp4')
-            this.udp = udp
-            udp.bind()
+        const udp = dgram.createSocket('udp4')
+        this.udp = udp
+        udp.bind()
 
-            udp.on('message', this.gridToClient.bind(this))
-            udp.on('close', this.onUDPClose.bind(this))
+        udp.on('message', this.gridToClient.bind(this))
+        udp.on('close', this.onUDPClose.bind(this))
 
-            this.socket.send('ok')
-          }
-        })
+        this.socket.send('ok')
       } else {
         // session did close or has an active socket -> close this socket
         this.socket.close(1008, 'already active socket open')
       }
-    })
+    } catch (err) {
+      // handle error
+      if (err.status === pouchdbErrors.INVALID_REQUEST.status) {
+        this.socket.close(1011, err.message)
+      } else {
+        this.socket.close(1008, 'wrong session id')
+      }
+    }
   }
 
   clientToGrid (message) {
@@ -144,11 +142,11 @@ class Bridge {
     if (this.socket && this.sessionId !== '') {
       const nextState = code === 1000 ? 'end' : Date.now()
 
-      this.changeSessionState(this.sessionId, nextState, (err, state) => {
-        if (err) {
-          console.error(err)
-        }
-      })
+      try {
+        this.changeSessionState(this.sessionId, nextState)
+      } catch (err) {
+        console.error(err)
+      }
     }
 
     if (this.socket) {
