@@ -1,10 +1,11 @@
 'use strict'
 
-module.exports = createWebSocketServer
+exports.createWebSocketServer = createWebSocketServer
+exports.createWebSocketCreationRoute = createWebSocketCreationRoute
 
 const dgram = require('dgram')
 
-const WebSocket = require('ws')
+const webSocket = require('ws')
 
 // all Bridges will be stored here.
 // If a Bridge closes it will set its socket to undefined. the WeakMap will then
@@ -12,39 +13,47 @@ const WebSocket = require('ws')
 const openBridges = new WeakMap()
 
 /**
- * Creates a middleware that will add on the server of the first connection an Websocket server.
- *
+ * Creates a middleware that will add an WebSocket server on to the server,
+ * when first request is made.
+ * This is only for development!
  * Inspired by ws handling of http-proxy-middleware.
  *
- * @param {string} url URL where to listen to.
+ * @param {string} url   URL where to listen to.
  */
-function createWebSocketServer (url) {
+function createWebSocketCreationRoute (url) {
   let hasSubscribed = false
 
   return (req, res, next) => {
     if (!hasSubscribed) {
       hasSubscribed = true
-
-      const wss = new WebSocket.Server({
-        server: req.connection.server,
-        perMessageDeflate: false,
-        path: url
-      })
-
-      wss.on('connection', ws => {
-        openBridges.set(ws, new Bridge(ws, {
-          checkSession (num, fn) {
-            fn(undefined, num)
-          },
-          changeSessionState (num, state, fn) {
-            fn(undefined, state)
-          }
-        }))
-      })
+      createWebSocketServer(req.connection.server, url)
     }
-
     next()
   }
+}
+
+/**
+ * Creates a WebSocket Server
+ * @param {object} server  Node.js HTTP(S) server.
+ * @param {string} url     URL where to listen to.
+ */
+function createWebSocketServer (server, url) {
+  const wss = new webSocket.Server({
+    server,
+    perMessageDeflate: false,
+    path: url
+  })
+
+  wss.on('connection', ws => {
+    openBridges.set(ws, new Bridge(ws, {
+      checkSession (num, fn) {
+        fn(undefined, num)
+      },
+      changeSessionState (num, state, fn) {
+        fn(undefined, state)
+      }
+    }))
+  })
 }
 
 // The Bridge stores the websocket to the client and the UDP-socket to the sim
