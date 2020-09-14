@@ -1,14 +1,16 @@
+'use strict'
+
 const basicAuth = require('basic-auth')
 const express = require('express')
 const { body, header, validationResult } = require('express-validator')
-const nano = require('nano')(process.env.COUCH_URL || 'http://localhost:5984')
 const fetch = require('node-fetch')
 const pouchErrors = require('pouchdb-errors')
 const { v4: uuid } = require('uuid')
 
+const { nano, usersDB } = require('./db')
+
 const api = express.Router()
 api.use(express.json())
-const usersDB = nano.db.use('_users')
 
 module.exports = api
 
