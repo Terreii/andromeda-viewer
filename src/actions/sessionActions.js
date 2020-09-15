@@ -163,7 +163,7 @@ async function loginWithXmlRpc (viewerData, first, last, password) {
     read_critical: 'true'
   }
 
-  const response = await window.fetch('/hoodie/andromeda-viewer/login', {
+  const response = await window.fetch('/api/login', {
     method: 'POST',
     body: JSON.stringify(loginData),
     headers: createProxyLoginHeaders(viewerData)
@@ -206,13 +206,13 @@ async function loginWithLLSD (viewerData, first, last, password) {
     address_size: 32 // Is os 32 or 64 bit.
   }
 
-  const response = await window.fetch('/hoodie/andromeda-viewer/login', {
+  const response = await window.fetch('/api/login', {
     method: 'POST',
     body: JSON.stringify(loginData),
     headers: createProxyLoginHeaders(viewerData, true)
   })
   const body = await response.text()
-  const parsed = LLSD.parse(response.headers.get('content-type'), body)
+  const parsed = LLSD.parse(response.headers.get('content-type').split(';')[0], body)
 
   // for transforming all UUIDs into strings
   const data = JSON.parse(JSON.stringify(parsed))

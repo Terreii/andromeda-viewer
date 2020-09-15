@@ -27,7 +27,7 @@ function createWebSocketCreationRoute (url) {
   return (req, res, next) => {
     if (!hasSubscribed) {
       hasSubscribed = true
-      createWebSocketServer(req.connection.server, url)
+      createWebSocketServer(req.app, req.connection.server, url)
     }
     next()
   }
@@ -35,10 +35,11 @@ function createWebSocketCreationRoute (url) {
 
 /**
  * Creates a WebSocket Server
+ * @param {object} app     Express App.
  * @param {object} server  Node.js HTTP(S) server.
  * @param {string} url     URL where to listen to.
  */
-function createWebSocketServer (server, url) {
+function createWebSocketServer (app, server, url) {
   const wss = new webSocket.Server({
     server,
     perMessageDeflate: false,
@@ -46,14 +47,7 @@ function createWebSocketServer (server, url) {
   })
 
   wss.on('connection', ws => {
-    openBridges.set(ws, new Bridge(ws, {
-      checkSession (num, fn) {
-        fn(undefined, num)
-      },
-      changeSessionState (num, state, fn) {
-        fn(undefined, state)
-      }
-    }))
+    openBridges.set(ws, new Bridge(ws, app))
   })
 }
 
@@ -61,12 +55,12 @@ function createWebSocketServer (server, url) {
 // the first 6 bytes of a message, between this server and a client, is the
 // IP and Port of the sim
 class Bridge {
-  constructor (socket, session) {
+  constructor (socket, app) {
     this.didAuth = false
     this.sessionId = ''
 
-    this.checkSession = session.checkSession
-    this.changeSessionState = session.changeSessionState
+    this.checkSession = app.get('checkSession')
+    this.changeSessionState = app.get('changeSessionState')
 
     this.socket = socket
     this.udp = null
