@@ -110,11 +110,11 @@
     "weallcontribute": "^1.0.9"
   },
   "dependencies": {
-    "@hapi/boom": "^9.1.0",
     "basic-auth": "^2.0.1",
     "express": "^4.17.1",
     "express-validator": "^6.6.1",
     "hoodie": "^28.2.10",
+    "http-proxy": "^1.18.1",
     "milliseconds": "^1.0.3",
     "nano": "^8.2.2",
     "node-fetch": "^2.6.1",
