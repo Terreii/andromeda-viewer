@@ -7,20 +7,19 @@ import { proxyFetch, fetchLLSD } from './llsdFetch'
 
 import AvatarName from '../avatarName'
 
-// Create Redux-Store with Hoodie
+// Create Redux-Store with local db, remote db and more
 export default function (preloadedState) {
   const db = createLocalDB()
   const extraArgument = {
-    hoodie: window.hoodie,
     cryptoStore: createCryptoStore(db),
     db,
     remoteDB: createRemoteDB('_users'),
     proxyFetch: null,
     fetchLLSD: null,
+    onAvatarLogout: [],
     circuit: null // will be set on login
   }
 
-  // Bind Hoodie to the store
   const middleware = getDefaultMiddleware({
     thunk: {
       extraArgument

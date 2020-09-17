@@ -10,7 +10,7 @@ module.exports = proxySetup
  */
 function proxySetup (app) {
   // Setup proxy for all http apis
-  app.use(createProxyMiddleware('http://localhost:3001/hoodie/andromeda-viewer/proxy/', {
+  app.use(createProxyMiddleware('http://localhost:3001/api/proxy/', {
     changeOrigin: true,
     toProxy: true
   }))

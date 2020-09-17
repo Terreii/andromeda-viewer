@@ -174,7 +174,7 @@ export function receiveChatFromSimulator (msg) {
 }
 
 export function saveLocalChatMessages () {
-  return async (dispatch, getState, { hoodie }) => {
+  return async (dispatch, getState, { cryptoStore }) => {
     const localChat = selectLocalChat(getState())
     const messagesToSave = []
     const toLowerCase = s => s.charAt(0).toLowerCase() + s.slice(1)
@@ -207,7 +207,7 @@ export function saveLocalChatMessages () {
 
     dispatch(localChatSavingStarted(messagesToSave.map(msg => msg._id)))
 
-    const saved = await hoodie.cryptoStore.updateOrAdd(messagesToSave)
+    const saved = await cryptoStore.updateOrAdd(messagesToSave)
 
     const didSave = []
     const didError = []
@@ -237,7 +237,7 @@ export function saveLocalChatMessages () {
 export function deleteOldLocalChat () {
   const maxLocalChatHistory = 200
 
-  return (dispatch, getState, { hoodie }) => {
+  return (dispatch, getState, { cryptoStore }) => {
     const activeState = getState()
     if (!selectShouldSaveChat(activeState)) return Promise.resolve()
 
@@ -253,7 +253,7 @@ export function deleteOldLocalChat () {
       }
     }
 
-    return hoodie.cryptoStore.remove(toDeleteIds)
+    return cryptoStore.remove(toDeleteIds)
   }
 }
 
@@ -828,7 +828,7 @@ function handleIMTypingEvent (msg) {
 }
 
 export function saveIMChatMessages () {
-  return async (dispatch, getState, { hoodie }) => {
+  return async (dispatch, getState, { cryptoStore }) => {
     const state = getState()
     const unsavedChats = Object.values(selectIMChats(getState())).filter(chat => chat.hasUnsavedMSG)
 
@@ -857,7 +857,7 @@ export function saveIMChatMessages () {
 
     dispatch(savingInstantMessagesStarted(savingIds))
 
-    const saved = await hoodie.cryptoStore.updateOrAdd(chatsToSave)
+    const saved = await cryptoStore.updateOrAdd(chatsToSave)
 
     const results = saved.reduce((all, msg, index) => {
       const sessionId = idToChatId.get(chatsToSave[index]._id) // use chatsToSave for errors
@@ -892,8 +892,8 @@ export function saveIMChatMessages () {
  */
 
 export function getLocalChatHistory (avatarDataSaveId) {
-  return (dispatch, getState, { hoodie }) => {
-    return hoodie.cryptoStore.withIdPrefix(`${avatarDataSaveId}/localchat/`).findAll()
+  return (dispatch, getState, { cryptoStore }) => {
+    return cryptoStore.withIdPrefix(`${avatarDataSaveId}/localchat/`).findAll()
   }
 }
 
@@ -951,7 +951,7 @@ function createNewIMChat (chatType, sessionId, target, name) {
 }
 
 export function saveIMChatInfos () {
-  return async (dispatch, getState, { hoodie }) => {
+  return async (dispatch, getState, { cryptoStore }) => {
     const chatInfosToSave = Object.values(selectIMChats(getState()))
       .filter(chat => !chat.didSaveChatInfo)
       .map(chat => ({
@@ -969,7 +969,7 @@ export function saveIMChatInfos () {
       chatInfosToSave.map(chat => chat.sessionId)
     ))
 
-    const result = await hoodie.cryptoStore.findOrAdd(chatInfosToSave)
+    const result = await cryptoStore.findOrAdd(chatInfosToSave)
 
     const didError = []
     result.forEach((doc, index) => {
@@ -984,13 +984,13 @@ export function saveIMChatInfos () {
 
 // Loads IM Chat Infos.
 export function loadIMChats () {
-  return (dispatch, getState, { hoodie }) => {
+  return (dispatch, getState, { cryptoStore, onAvatarLogout }) => {
     const activeState = getState()
     // Only load the history if the user is logged into a viewer-account.
     if (!selectIsSignedIn(activeState)) return
 
     const avatarDataSaveId = selectAvatarDataSaveId(activeState)
-    const store = hoodie.cryptoStore.withIdPrefix(`${avatarDataSaveId}/imChatsInfos/`)
+    const store = cryptoStore.withIdPrefix(`${avatarDataSaveId}/imChatsInfos/`)
     store.findAll().then(result => {
       dispatch(imInfosLoaded(
         result.map(parseIMChatInfo)
@@ -1004,7 +1004,7 @@ export function loadIMChats () {
       ]))
     }
     store.on('add', handler)
-    hoodie.one('avatarDidLogout', () => {
+    onAvatarLogout.push(() => {
       store.off('add', handler)
     })
   }
@@ -1017,34 +1017,28 @@ function parseIMChatInfo (doc) {
 
 // Loads messages of an IM Chat.
 export function getIMHistory (sessionId, chatSaveId) {
-  return async (dispatch, getState, { hoodie }) => {
+  return async (dispatch, getState, { db, cryptoStore }) => {
     dispatch(imHistoryLoadingStarted({ sessionId }))
 
     const activeState = getState()
     const chatSavePrefix = `${selectAvatarDataSaveId(activeState)}/imChats/${chatSaveId}`
 
-    const messages = selectChatMessages(activeState, sessionId)
-    // get the _id of the oldest loaded msg
-    const hasAMessage = messages && messages.length > 0
-    const firstMsgId = hasAMessage
-      ? messages[0]._id
-      : (chatSavePrefix + '/\uFFFF') // or one with a special id that is always the last
+    const loadedMessages = selectChatMessages(activeState, sessionId)
+    const hasAMessage = loadedMessages && loadedMessages.length > 0
 
     try {
       // using PouchDB -> https://pouchdb.com/api.html#batch_fetch
-      const idsResult = await hoodie.store.db.allDocs({
-        startkey: firstMsgId,
+      const idsResult = await db.allDocs({
+        // get the _id of the oldest loaded msg
+        startkey: hasAMessage ? loadedMessages[0]._id : chatSavePrefix,
         endkey: chatSavePrefix,
-        limit: hasAMessage ? 101 : 100, // 100 + last
-        descending: true
+        skip: hasAMessage ? 1 : 0,
+        limit: 100,
+        descending: true,
+        include_docs: true
       })
 
-      const ids = idsResult.rows
-        .map(row => row.id)
-        .reverse()
-        .filter(id => id !== firstMsgId)
-
-      if (ids.length === 0) {
+      if (idsResult.rows.length === 0) {
         dispatch(imHistoryLoadingFinished({
           sessionId,
           messages: [],
@@ -1053,37 +1047,21 @@ export function getIMHistory (sessionId, chatSaveId) {
         return
       }
 
-      const messages = await hoodie.cryptoStore.find(ids)
+      const messages = await Promise.all(idsResult.rows.map(row => {
+        return cryptoStore.decrypt(row.doc, row.id)
+      }))
 
       dispatch(imHistoryLoadingFinished({
         sessionId,
-        messages,
+        messages: messages.reverse(),
         didLoadAll: messages.length < 100
       }))
     } catch (err) {
-      if (err.message === 'database is destroyed') {
-        // handle destroyed DB
-        const docs = await hoodie.cryptoStore.withIdPrefix(chatSavePrefix).findAll()
-
-        const endIndex = firstMsgId.endsWith('\uFFFF')
-          ? docs.length
-          : docs.findIndex(doc => doc._id === firstMsgId)
-
-        const startIndex = Math.max(0, endIndex - 100)
-        const messages = docs.slice(startIndex, endIndex)
-
-        dispatch(imHistoryLoadingFinished({
-          sessionId,
-          messages,
-          didLoadAll: messages.length === 0
-        }))
-      } else {
-        dispatch(imHistoryLoadingFinished({
-          sessionId,
-          message: [],
-          didLoadAll: false
-        }))
-      }
+      dispatch(imHistoryLoadingFinished({
+        sessionId,
+        message: [],
+        didLoadAll: false
+      }))
     }
   }
 }

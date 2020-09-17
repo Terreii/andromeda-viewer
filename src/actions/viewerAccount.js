@@ -74,7 +74,7 @@ export function loadSavedAvatars () {
     }
 
     avatarsStore.on('change', changeHandler)
-    db.on('destroyed', () => {
+    db.one('destroyed', () => {
       avatarsStore.off('change', changeHandler)
     })
 
@@ -139,7 +139,7 @@ export function loadSavedGrids () {
     }
 
     gridsStore.on('change', changeHandler)
-    db.on('destroyed', () => {
+    db.one('destroyed', () => {
       gridsStore.off('change', changeHandler)
     })
 
@@ -164,7 +164,7 @@ function gridsDidChange (type, grid) {
 /**
  * Get the users data.
  * @param {PouchDB.Database} db The local Database.
- * @returns {{ _id: string, _rev: string, accountId: string, name: string}} Doc with user info
+ * @returns {{ _id: string, _rev: string, accountId: string, name: string }} Doc with user info
  */
 async function getUserInfo (db) {
   const userDoc = await db.get('_local/account')

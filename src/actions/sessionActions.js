@@ -54,8 +54,8 @@ export function login (avatarName, password, grid, save, isNew) {
     }
 
     if (save) {
-      const userId = await extra.hoodie.account.get('id')
-      viewerData.userId = userId
+      const userData = await extra.db.get('_local/account')
+      viewerData.userId = userData.accountId
     }
 
     const circuit = import('../network/circuit')
@@ -255,6 +255,7 @@ export function logout () {
         resolve()
       }
 
+      circuit.on('packetReceived', console.log)
       circuit.once('LogoutReply', logoutHandler)
       setTimeout(logoutHandler, ms.seconds(30)) // timeout for LogoutReply
     })
@@ -371,7 +372,10 @@ function afterAvatarSessionEnds () {
     extra.circuit.removeAllListeners()
     extra.circuit = null
 
-    extra.hoodie.trigger('avatarDidLogout')
+    for (const cb of extra.onAvatarLogout || []) {
+      cb()
+    }
+    extra.onAvatarLogout = []
 
     return dispatch(deleteOldLocalChat())
   }
