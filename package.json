@@ -57,10 +57,10 @@
     "@reduxjs/toolkit": "^1.4.0",
     "@sheerun/mutationobserver-shim": "^0.3.3",
     "@tailwindcss/custom-forms": "^0.2.1",
-    "@testing-library/react": "^11.0.2",
+    "@testing-library/react": "^11.0.4",
     "@testing-library/react-hooks": "^3.4.1",
     "@types/jest": "^24.9.1",
-    "@types/node": "^14.6.4",
+    "@types/node": "^14.11.1",
     "@types/react": "^16.9.49",
     "@types/react-dom": "^16.9.8",
     "@types/react-redux": "^7.1.9",
@@ -99,7 +99,7 @@
     "requestidlecallback": "^0.3.0",
     "reselect": "^4.0.0",
     "standard": "^14.3.4",
-    "tailwindcss": "^1.8.4",
+    "tailwindcss": "^1.8.10",
     "textlint": "^11.7.6",
     "textlint-rule-alex": "^3.0.0",
     "textlint-rule-common-misspellings": "^1.0.1",
@@ -113,7 +113,6 @@
     "basic-auth": "^2.0.1",
     "express": "^4.17.1",
     "express-validator": "^6.6.1",
-    "hoodie": "^28.2.10",
     "http-proxy": "^1.18.1",
     "milliseconds": "^1.0.3",
     "nano": "^8.2.2",
@@ -128,11 +127,6 @@
     "env": [
       "jest",
       "es6"
-    ]
-  },
-  "hoodie": {
-    "plugins": [
-      "hoodie-plugin-store-crypto"
     ]
   }
 }
