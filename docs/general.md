@@ -23,9 +23,9 @@ The server then adds its own MAC-address and translates the JSON-data to the [XM
 
 The server translates the XML-RPC response to JSON and send and sends it back to the client as the response of its request.
 
-The client will the open a WebSocket back to the server. The server acts as a WebSocket to UDP bridge. For every WebSocket-connection the server listen on a new UDP-Port, to differentiate clients. A lot of Packet types have no way of identifying the target client. Having a port per client fixes this.
+The client will then open a WebSocket back to the server. The server acts as a WebSocket to UDP bridge. For every WebSocket-connection the server listen on a new UDP-Port, to differentiate clients. A lot of Packet types have no way off identifying the target client. Having a port per client fixes this.
 
 **The server keeps no log of the network-data**
 
 ## Client View
-The client uses the [FLUX](http://facebook.github.io/flux/) model. Where [redux](https://redux.js.org/) manages the state and the view-components are using [React](https://facebook.github.io/react/). And they styled with [styled-components](https://www.styled-components.com/).
+The client uses the [FLUX](http://facebook.github.io/flux/) model. Where [redux](https://redux.js.org/) manages the state and the view-components are using [React](https://facebook.github.io/react/). And they styled with [Tailwind CSS](https://tailwindcss.com/).

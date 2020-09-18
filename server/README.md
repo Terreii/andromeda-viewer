@@ -26,7 +26,7 @@ File | Description
 
 ## Development
 
-In normal development (`npm run dev`), the server-components are loaded into the create-react-app-dev-server ([src/setupProxy.js](../src/setupProxy.js)).
+`npm run dev` loads the server-components into the create-react-app-dev-server. Read more in [src/setupProxy.js](../src/setupProxy.js).
 
 When developing the server, run `npm run dev-server`. It is a variant of `npm run dev`, that proxies API-requests to a separate running server.
 Then also run the *server* in development with `npm run start-server-dev`.
@@ -35,7 +35,7 @@ Then also run the *server* in development with `npm run start-server-dev`.
 
 PouchDB-Server is accessible under [http://127.0.0.1:5984/_utils](http://127.0.0.1:5984/_utils).
 
-If you want to use CouchDB, then all scripts must be run separately:
+If you want to use CouchDB, then all scripts must get run separately:
 - `npm run dev:app` for building the client.
   - If you need a separate server, then `cross-env SERVER=debug npm run dev:app`.
 - `npm run dev:style` for building TailwindCSS.
