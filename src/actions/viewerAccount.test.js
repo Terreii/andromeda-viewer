@@ -1,6 +1,11 @@
+import nodeCrypto from 'crypto'
+
 import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
 import { v4 } from 'uuid'
+import PouchDB from 'pouchdb-browser'
+import memoryAdapter from 'pouchdb-adapter-memory'
+import hoodieApi from 'pouchdb-hoodie-api'
 
 import { signInStatus } from '../bundles/account'
 import {
@@ -14,8 +19,17 @@ import {
 
 import AvatarName from '../avatarName'
 
+PouchDB.plugin(memoryAdapter)
+PouchDB.plugin(hoodieApi)
+
 jest.mock('uuid')
 v4.mockReturnValue('b039f51f-41d9-41e7-a4b1-5490fbfd5eb9')
+
+window.TextEncoder = class TextEncoder {
+  encode (text) {
+    return Buffer.from(text)
+  }
+}
 
 it('didSignIn', () => {
   const store = configureMockStore([thunk])()
@@ -90,10 +104,8 @@ it('saveAvatar', async () => {
 
   const store = configureMockStore([
     thunk.withExtraArgument({
-      hoodie: {
-        cryptoStore: {
-          withIdPrefix
-        }
+      cryptoStore: {
+        withIdPrefix
       }
     })
   ])({
@@ -154,19 +166,17 @@ it('loadSavedAvatars', async () => {
   }))
 
   let callback = null
-  const accountOne = jest.fn((event, fn) => {
+  const dbOne = jest.fn((event, fn) => {
     callback = fn
   })
 
   const store = configureMockStore([
     thunk.withExtraArgument({
-      hoodie: {
-        account: {
-          one: accountOne
-        },
-        cryptoStore: {
-          withIdPrefix
-        }
+      db: {
+        one: dbOne
+      },
+      cryptoStore: {
+        withIdPrefix
       }
     })
   ])({
@@ -208,9 +218,9 @@ it('loadSavedAvatars', async () => {
   expect(withIdPrefix.mock.calls).toEqual([
     ['avatars/']
   ])
-  expect(accountOne.mock.calls.length).toBe(1)
-  expect(accountOne.mock.calls[0][0]).toBe('signout')
-  expect(accountOne.mock.calls[0][1]).toBeInstanceOf(Function)
+  expect(dbOne.mock.calls.length).toBe(1)
+  expect(dbOne.mock.calls[0][0]).toBe('destroyed')
+  expect(dbOne.mock.calls[0][1]).toBeInstanceOf(Function)
   expect(on.mock.calls.length).toBe(1)
   expect(on.mock.calls[0][0]).toBe('change')
 
@@ -286,10 +296,8 @@ it('saveGrid', async () => {
 
   const store = configureMockStore([
     thunk.withExtraArgument({
-      hoodie: {
-        cryptoStore: {
-          withIdPrefix
-        }
+      cryptoStore: {
+        withIdPrefix
       }
     })
   ])({
@@ -351,19 +359,17 @@ it('loadSavedGrids', async () => {
   }))
 
   let callback = null
-  const accountOne = jest.fn((event, fn) => {
+  const dbOne = jest.fn((event, fn) => {
     callback = fn
   })
 
   const store = configureMockStore([
     thunk.withExtraArgument({
-      hoodie: {
-        account: {
-          one: accountOne
-        },
-        cryptoStore: {
-          withIdPrefix
-        }
+      db: {
+        one: dbOne
+      },
+      cryptoStore: {
+        withIdPrefix
       }
     })
   ])({
@@ -401,9 +407,9 @@ it('loadSavedGrids', async () => {
   expect(withIdPrefix.mock.calls).toEqual([
     ['grids/']
   ])
-  expect(accountOne.mock.calls.length).toBe(1)
-  expect(accountOne.mock.calls[0][0]).toBe('signout')
-  expect(accountOne.mock.calls[0][1]).toBeInstanceOf(Function)
+  expect(dbOne.mock.calls.length).toBe(1)
+  expect(dbOne.mock.calls[0][0]).toBe('destroyed')
+  expect(dbOne.mock.calls[0][1]).toBeInstanceOf(Function)
   expect(on.mock.calls.length).toBe(1)
   expect(on.mock.calls[0][0]).toBe('change')
 
@@ -467,38 +473,26 @@ it('loadSavedGrids', async () => {
 
 it('should check sign in status with "isSignedIn"', async () => {
   let result = null
-  const get = jest.fn(() => Promise.resolve(result))
 
-  let handler = null
-  const on = jest.fn((type, fn) => {
-    handler = fn
-  })
-  let callback = null
-  const one = jest.fn((event, fn) => {
-    callback = fn
-  })
   const off = jest.fn()
 
   const store = configureMockStore([thunk.withExtraArgument({
-    hoodie: {
-      account: {
-        get,
-        on,
-        one,
-        off
+    db: new PouchDB('localDB', { adapter: 'memory' }),
+    remoteDB: {
+      getSession: () => {
+        return Promise.resolve({
+          userCtx: { name: result }
+        })
       }
     }
   })])()
 
-  result = {}
+  result = null
   const isSignedInResultNotLoggedIn = await store.dispatch(isSignedIn())
 
   expect(isSignedInResultNotLoggedIn).toBeFalsy()
 
-  result = {
-    session: 'sdkfgnsdnf',
-    username: 'tester.mactestface@viewer.com'
-  }
+  result = 'tester.mactestface@viewer.com'
   const isSignedInResult = await store.dispatch(isSignedIn())
 
   expect(isSignedInResult).toBeTruthy()
@@ -521,42 +515,6 @@ it('should check sign in status with "isSignedIn"', async () => {
       }
     }
   ])
-
-  store.clearActions()
-
-  expect(get.mock.calls).toEqual([
-    [
-      ['session', 'username']
-    ],
-    [
-      ['session', 'username']
-    ]
-  ])
-  expect(on.mock.calls.length).toBe(1)
-  expect(on.mock.calls[0][0]).toBe('update')
-
-  const eventHandler = on.mock.calls[0][1]
-  expect(eventHandler).toBeInstanceOf(Function)
-  expect(one.mock.calls.length).toBe(1)
-  expect(one.mock.calls[0][0]).toBe('signout')
-  expect(off.mock.calls.length).toBe(0)
-
-  handler({ username: 'new.phone@whois.this' })
-
-  expect(store.getActions()).toEqual([
-    {
-      type: 'account/didUpdate',
-      payload: {
-        username: 'new.phone@whois.this'
-      }
-    }
-  ])
-
-  callback()
-
-  expect(off.mock.calls).toEqual([
-    ['update', eventHandler]
-  ])
 })
 
 it('should unlock the app with "unlock"', async () => {
@@ -564,19 +522,79 @@ it('should unlock the app with "unlock"', async () => {
   const findAll = jest.fn(() => Promise.resolve([]))
   const on = jest.fn()
   const one = jest.fn()
+  const logIn = jest.fn(() => Promise.resolve())
+  const sync = jest.fn(() => ({
+    on: () => {}
+  }))
+
+  let lastKeyObj = null
+  let lastHashFn = ''
+  let lastPw = ''
+  const importKey = jest.fn((type, pw, hashFn, exportable, arg) => {
+    expect(type).toBe('raw')
+    expect(exportable).toBeFalsy()
+    expect(arg).toEqual(['deriveBits'])
+    lastKeyObj = {}
+    lastHashFn = hashFn
+    lastPw = pw
+    return Promise.resolve(lastKeyObj)
+  })
+
+  let lastKey = null
+  const deriveBits = jest.fn((args, key, keyLength) => {
+    expect(key).toBe(lastKeyObj)
+    expect(args.name).toBe(lastHashFn)
+    expect(args.hash).toBe('SHA-512')
+    expect(keyLength).toBe(512)
+
+    if (args.name === 'PBKDF2') {
+      const hash = args.hash.toLowerCase().replace('-', '')
+      const key = nodeCrypto.pbkdf2Sync(lastPw, args.salt, args.iterations, keyLength, hash)
+      lastKey = key
+      return Promise.resolve(key)
+    } else if (args.name === 'HKDF') {
+      expect(lastPw).toBe(lastKey)
+      return Promise.resolve(Buffer.concat([
+        Buffer.alloc(32, 1),
+        Buffer.alloc(32, 2)
+      ]))
+    } else {
+      throw new TypeError('unknown hash: ' + args.name)
+    }
+  })
+
+  window.crypto = {
+    subtle: {
+      importKey,
+      deriveBits
+    }
+  }
 
   const store = configureMockStore([thunk.withExtraArgument({
-    hoodie: {
-      cryptoStore: {
-        unlock: unlockCryptoStore,
-        withIdPrefix: prefix => ({
-          findAll: findAll.bind(null, prefix),
-          on: on.bind(null, prefix)
-        })
+    db: {
+      get (id) {
+        if (id === '_local/account') {
+          return Promise.resolve({
+            _id: '_local/account',
+            accountId: 'a_id',
+            name: 'tester'
+          })
+        }
       },
-      account: {
-        one
-      }
+      sync,
+      on,
+      one
+    },
+    remoteDB: {
+      close: () => {},
+      logIn
+    },
+    cryptoStore: {
+      unlock: unlockCryptoStore,
+      withIdPrefix: prefix => ({
+        findAll: findAll.bind(null, prefix),
+        on: on.bind(null, prefix)
+      })
     }
   })])({
     account: {
@@ -599,17 +617,23 @@ it('should unlock the app with "unlock"', async () => {
     }
   ])
 
-  expect(unlockCryptoStore.mock.calls).toEqual([
-    ['password']
-  ])
-  expect(findAll.mock.calls).toEqual([
-    ['grids/'],
-    ['avatars/']
-  ])
-  expect(on.mock.calls.length).toBe(2)
-  expect(on.mock.calls[0][0]).toBe('grids/')
-  expect(on.mock.calls[1][0]).toBe('avatars/')
-  expect(one.mock.calls.length).toBe(2)
-  expect(one.mock.calls[0][0]).toBe('signout')
-  expect(one.mock.calls[1][0]).toBe('signout')
+  expect(findAll).toHaveBeenNthCalledWith(1, 'grids/')
+  expect(findAll).toHaveBeenNthCalledWith(2, 'avatars/')
+
+  expect(on).toBeCalledTimes(2)
+  expect(on).toHaveBeenNthCalledWith(1, 'grids/', 'change', expect.any(Function))
+  expect(on).toHaveBeenNthCalledWith(2, 'avatars/', 'change', expect.any(Function))
+
+  expect(one).toBeCalledTimes(2)
+  expect(one).toHaveBeenNthCalledWith(1, 'destroyed', expect.any(Function))
+  expect(one).toHaveBeenNthCalledWith(2, 'destroyed', expect.any(Function))
+
+  expect(logIn).toHaveBeenCalledWith(
+    'a_id',
+    '0101010101010101010101010101010101010101010101010101010101010101'
+  )
+  expect(unlockCryptoStore).toHaveBeenCalledWith(
+    '0202020202020202020202020202020202020202020202020202020202020202'
+  )
+  expect(sync).toBeCalled()
 })

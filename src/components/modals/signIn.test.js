@@ -95,7 +95,7 @@ describe('signUp', () => {
     })
     expect((await findByLabelText('Repeat password')).getAttribute('value'))
       .toBe('secretPassword')
-    expect(queryByText('sign up').disabled).toBeTruthy()
+    expect(queryByText('sign up').disabled).toBeFalsy()
 
     // Mismatch
     fireEvent.change(queryByLabelText(/Password/), {
@@ -104,53 +104,14 @@ describe('signUp', () => {
       }
     })
     expect(await findByText("Password doesn't match!")).toBeTruthy()
+    expect(queryByText('sign up').disabled).toBeTruthy()
 
     fireEvent.change(queryByLabelText('Repeat password', { exact: false }), {
       target: {
         value: 'secretPassword2'
       }
     })
-
-    // Crypto password input
-    expect(await findByLabelText(/Encryption password/)).toBeTruthy()
-    expect(queryByText("Password doesn't match!")).toBeNull()
-
-    fireEvent.change(queryByLabelText(/Encryption password/), {
-      target: {
-        value: 'cryptoPassword'
-      }
-    })
-    expect((await findByLabelText(/^Encryption password/)).getAttribute('value'))
-      .toBe('cryptoPassword')
-    expect(queryByText('sign up').disabled).toBeTruthy()
-
-    // Crypto password 2 input
-    expect(queryByLabelText(/Repeat encryption password/)).toBeTruthy()
-    fireEvent.change(queryByLabelText(/Repeat encryption password/), {
-      target: {
-        value: 'cryptoPassword'
-      }
-    })
-    expect((await findByLabelText(/Repeat encryption password/)).getAttribute('value'))
-      .toBe('cryptoPassword')
     expect(queryByText('sign up').disabled).toBeFalsy()
-
-    // Mismatch
-    fireEvent.change(queryByLabelText(/^Encryption password/), {
-      target: {
-        value: 'secretPassword'
-      }
-    })
-    expect(await findByText("Encryption password doesn't match!")).toBeTruthy()
-    expect(queryByText('sign up').disabled).toBeTruthy()
-
-    fireEvent.change(queryByLabelText(/Repeat encryption password/), {
-      target: {
-        value: 'secretPassword'
-      }
-    })
-    expect((await findByText('sign up')).disabled).toBeFalsy()
-    expect(queryByText("Encryption password doesn't match!")).toBeNull()
 
     fireEvent.click(queryByText('sign up'))
     expect(dispatch.mock.calls.length).toBe(1)
@@ -234,24 +195,10 @@ describe('singIn', () => {
     })
     expect((await findByLabelText(/^Password/)).getAttribute('value'))
       .toBe('secretPassword')
-    expect(queryByText('sign in').disabled).toBeTruthy()
+    expect(queryByText('sign in').disabled).toBeFalsy()
 
     // Password 2 input
     expect(queryByLabelText(/Repeat password/)).toBeNull()
-
-    // Crypto password input
-    expect(queryByLabelText(/Encryption password/)).toBeTruthy()
-    fireEvent.change(queryByLabelText(/Encryption password/), {
-      target: {
-        value: 'cryptoPassword'
-      }
-    })
-    expect((await findByLabelText(/Encryption password/)).getAttribute('value'))
-      .toBe('cryptoPassword')
-    expect(queryByText('sign in').disabled).toBeFalsy()
-
-    // Crypto password 2 input
-    expect(queryByLabelText(/Repeat encryption password/)).toBeNull()
 
     fireEvent.click(queryByText('sign in'))
     expect(dispatch.mock.calls.length).toBe(1)

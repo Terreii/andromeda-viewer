@@ -7,7 +7,7 @@ const fetch = require('node-fetch')
 const pouchErrors = require('pouchdb-errors')
 const { v4: uuid } = require('uuid')
 
-const { nano, usersDB } = require('./db')
+const { nano, usersDB, getUserDbName } = require('./db')
 
 const api = express.Router()
 api.use(express.json())
@@ -115,7 +115,7 @@ api.put(
       // TODO: send email
 
       if (process.env.NODE_ENV === 'development') {
-        await nano.db.create('userdb-' + Buffer.from(userID).toString('hex'))
+        await nano.db.create(getUserDbName(userID))
       }
 
       res.type('application/vnd.api+json')
@@ -210,7 +210,7 @@ api.delete('/account', ...createAuthValidator(), async (req, res, next) => {
     await usersDB.destroy(req.user._id, req.user._rev)
 
     if (process.env.NODE_ENV === 'development') {
-      await nano.db.destroy('userdb-' + Buffer.from(req.user.name).toString('hex'))
+      await nano.db.destroy(getUserDbName(req.user.name))
     }
 
     res.status(204).send('')

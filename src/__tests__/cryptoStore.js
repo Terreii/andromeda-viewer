@@ -1,146 +1,104 @@
 'use strict'
 
-const storeData = {}
+import PouchDB from 'pouchdb-browser'
+import memoryAdapter from 'pouchdb-adapter-memory'
+import hoodieAPI from 'pouchdb-hoodie-api'
+import CryptoStore from 'hoodie-plugin-store-crypto'
 
-const hoodie = {
-  account: {
-    on: function () {}
-  },
+PouchDB.plugin(memoryAdapter)
+PouchDB.plugin(hoodieAPI)
 
-  store: {
-    find: function (id) {
-      if (Array.isArray(id)) {
-        return Promise.all(
-          id.map(
-            aID => hoodie.store.find(aID).catch(() => ({ status: 404 }))
-          )
-        )
-      }
+let db
 
-      const doc = storeData[id]
-      if (doc != null) {
-        return Promise.resolve(doc)
-      }
+beforeEach(() => {
+  db = new PouchDB('test', { adapter: 'memory' })
+})
 
-      const error = new Error('not found')
-      error.status = 404
-      return Promise.reject(error)
-    },
-
-    updateOrAdd: function (doc) {
-      if (Array.isArray(doc)) {
-        return Promise.all(doc.map(hoodie.store.updateOrAdd))
-      }
-
-      const newDoc = Object.assign(storeData[doc._id] || {}, doc, {
-        _rev: doc._rev != null && doc._rev.length > 0 ? doc._rev : '1-1234567890'
-      })
-      storeData[doc._id] = newDoc
-
-      return Promise.resolve(newDoc)
-    },
-
-    pull: function (ids) {
-      return Promise.all(ids.map(id => hoodie.store.find(id))).catch(() => [])
-    },
-
-    withIdPrefix: function (prefix) {
-      return {
-        findAll () {
-          const docs = []
-
-          for (const key in storeData) {
-            if (key.startsWith(prefix)) {
-              docs.push(storeData[key])
-            }
-          }
-
-          return Promise.resolve(docs)
-        }
-      }
-    },
-
-    on: function () {},
-    off: function () {},
-    one: function () {}
-  }
-}
-
-test('import is a function that adds the cryptoStore to hoodie', () => {
-  expect(hoodie.cryptoStore).toBeUndefined()
-
-  require('hoodie-plugin-store-crypto')(hoodie)
-
-  expect(hoodie.cryptoStore).toBeTruthy()
+afterEach(async () => {
+  await db.destroy()
 })
 
 test('cryptoStore and its methods exists', () => {
-  expect(typeof hoodie.cryptoStore).toBe('object')
+  const cryptoStore = new CryptoStore(db.hoodieApi())
 
-  expect(typeof hoodie.cryptoStore.setup).toBe('function')
-  expect(typeof hoodie.cryptoStore.unlock).toBe('function')
-  expect(typeof hoodie.cryptoStore.changePassword).toBe('function')
+  expect(typeof cryptoStore).toBe('object')
 
-  expect(typeof hoodie.cryptoStore.add).toBe('function')
-  expect(typeof hoodie.cryptoStore.find).toBe('function')
-  expect(typeof hoodie.cryptoStore.findOrAdd).toBe('function')
-  expect(typeof hoodie.cryptoStore.findAll).toBe('function')
-  expect(typeof hoodie.cryptoStore.update).toBe('function')
-  expect(typeof hoodie.cryptoStore.updateOrAdd).toBe('function')
-  expect(typeof hoodie.cryptoStore.updateAll).toBe('function')
-  expect(typeof hoodie.cryptoStore.remove).toBe('function')
-  expect(typeof hoodie.cryptoStore.removeAll).toBe('function')
+  expect(typeof cryptoStore.setup).toBe('function')
+  expect(typeof cryptoStore.unlock).toBe('function')
+  expect(typeof cryptoStore.changePassword).toBe('function')
 
-  expect(typeof hoodie.cryptoStore.on).toBe('function')
-  expect(typeof hoodie.cryptoStore.off).toBe('function')
-  expect(typeof hoodie.cryptoStore.one).toBe('function')
+  expect(typeof cryptoStore.add).toBe('function')
+  expect(typeof cryptoStore.find).toBe('function')
+  expect(typeof cryptoStore.findOrAdd).toBe('function')
+  expect(typeof cryptoStore.findAll).toBe('function')
+  expect(typeof cryptoStore.update).toBe('function')
+  expect(typeof cryptoStore.updateOrAdd).toBe('function')
+  expect(typeof cryptoStore.updateAll).toBe('function')
+  expect(typeof cryptoStore.remove).toBe('function')
+  expect(typeof cryptoStore.removeAll).toBe('function')
 
-  expect(typeof hoodie.cryptoStore.withIdPrefix).toBe('function')
-  expect(typeof hoodie.cryptoStore.withPassword).toBe('function')
+  expect(typeof cryptoStore.on).toBe('function')
+  expect(typeof cryptoStore.off).toBe('function')
+  expect(typeof cryptoStore.one).toBe('function')
+
+  expect(typeof cryptoStore.withIdPrefix).toBe('function')
+  expect(typeof cryptoStore.withPassword).toBe('function')
 })
 
 test('cryptoStore requires to be unlocked', async () => {
-  await hoodie.cryptoStore.setup('testPassword')
-  await hoodie.cryptoStore.unlock('testPassword')
+  const cryptoStore = new CryptoStore(db.hoodieApi())
+
+  try {
+    await cryptoStore.add({ test: '' })
+    throw new Error('should have thrown')
+  } catch (err) {
+    expect(err.status).toBe(401)
+  }
+
+  await cryptoStore.setup('testPassword')
+  await cryptoStore.unlock('testPassword')
+
+  const added = await cryptoStore.add({ test: 'test' })
+  expect(added).toEqual({
+    _id: expect.any(String),
+    _rev: expect.any(String),
+    hoodie: {
+      createdAt: expect.any(String)
+    },
+    test: 'test'
+  })
 })
 
 test('cryptoStore encrypts documents', async () => {
-  let unencrypted = null
-  let callCount = 0
-  let date = null
+  const cryptoStore = new CryptoStore(db.hoodieApi())
 
-  hoodie.store.add = function (doc) {
-    callCount += 1
-    unencrypted = doc
+  await cryptoStore.setup('testPassword')
+  await cryptoStore.unlock('testPassword')
 
-    const result = Object.assign({}, doc, {
-      _rev: doc._rev != null && doc._rev.length > 0 ? doc._rev : '1-1234567890',
-      hoodie: {
-        created: new Date().toJSON()
-      }
-    })
-    date = result.hoodie.created
-
-    return Promise.resolve(result)
-  }
-
-  const result = await hoodie.cryptoStore.add({
+  const result = await cryptoStore.add({
     test: 'object',
     value: 2
   })
 
-  expect(result.test).toBe('object')
-  expect(result.value).toBe(2)
-  expect(typeof result._id).toBe('string')
-  expect(typeof result._rev).toBe('string')
-  expect(result.hoodie.created).toBe(date)
+  expect(result).toEqual({
+    _id: expect.any(String),
+    _rev: expect.any(String),
+    hoodie: {
+      createdAt: expect.any(String)
+    },
+    test: 'object',
+    value: 2
+  })
 
-  expect(callCount).toBe(1)
-  expect(unencrypted._id).toBe(result._id)
-  expect(typeof unencrypted.data).toBe('string')
-  expect(typeof unencrypted.nonce).toBe('string')
-  expect(typeof unencrypted.tag).toBe('string')
-
-  expect(unencrypted.test).toBeUndefined()
-  expect(unencrypted.value).toBeUndefined()
+  const doc = await db.get(result._id)
+  expect(doc).toEqual({
+    _id: expect.any(String),
+    _rev: expect.any(String),
+    hoodie: {
+      createdAt: expect.any(String)
+    },
+    data: expect.any(String),
+    nonce: expect.any(String),
+    tag: expect.any(String)
+  })
 })
