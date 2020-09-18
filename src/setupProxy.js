@@ -2,7 +2,25 @@
 
 const { createProxyMiddleware } = require('http-proxy-middleware')
 
-module.exports = proxySetup
+module.exports = process.env.SERVER === 'debug'
+  ? proxySetup
+  : serverAndProxySetup
+
+/**
+ * Setup a server and proxy.
+ * @param {import('express').Application} app  Express App.
+ */
+function serverAndProxySetup (app) {
+  const webSocketBridge = require('../server/bridge')
+  app.use(webSocketBridge.createWebSocketCreationRoute('/api/bridge'))
+
+  const gridSession = require('../server/gridSession')
+  gridSession(app)
+
+  app.use('/api/session', require('../server/account'))
+  app.use('/api/login', require('../server/login'))
+  app.use('/api/proxy', require('../server/httpProxy'))
+}
 
 /**
  * Setup the proxy.

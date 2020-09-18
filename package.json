@@ -10,10 +10,10 @@
     "build:messages": "node ./tools/createMessageTemplate",
     "build:style": "cross-env NODE_ENV=production postcss src/tailwind.css -o src/styles.css",
     "dev": "npm-run-all -p dev:*",
+    "dev-server": "cross-env SERVER=debug npm-run-all -p dev:*",
     "predev:app": "npm run build:messages",
     "dev:app": "react-scripts start",
     "dev:db": "pouchdb-server --config ./config.json",
-    "dev:server": "cross-env NODE_ENV=development node server/index.js",
     "dev:style": "postcss src/tailwind.css -o src/styles.css --watch",
     "fix:docs": "textlint --fix README.md ./*/*.md ./src/*/*.md",
     "fix:style": "standard --fix",
@@ -29,6 +29,7 @@
     "test:app": "react-scripts test --env=jsdom",
     "test": "npm-run-all -s test:standard test:docs test:app",
     "test-coverage": "react-scripts test --env=jsdom --coverage && open-cli ./coverage/lcov-report/index.html",
+    "start-server-dev": "node server/index.js",
     "start": "cross-env NODE_ENV=production node server/index.js"
   },
   "repository": {

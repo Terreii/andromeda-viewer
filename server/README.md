@@ -23,3 +23,20 @@ File | Description
 [`gridSession.js`](./gridSession.js) | Utility function to store and validate active grid sessions.
 [`bridge.js`](./bridge.js) | Is the UDP-bridge between client and sim. The client connects with a Web-Socket to it.
 [`httpProxy.js`](./httpProxy.js) | A proxy for all HTTP-requests from the client to a grid.
+
+## Development
+
+In normal development (`npm run dev`), the server-components are loaded into the create-react-app-dev-server ([src/setupProxy.js](../src/setupProxy.js)).
+
+When developing the server, run `npm run dev-server`. It is a variant of `npm run dev`, that proxies API-requests to a separate running server.
+Then also run the *server* in development with `npm run start-server-dev`.
+
+## PouchDB-Server
+
+PouchDB-Server is accessible under [http://127.0.0.1:5984/_utils](http://127.0.0.1:5984/_utils).
+
+If you want to use CouchDB, then all scripts must be run separately:
+- `npm run dev:app` for building the client.
+  - If you need a separate server, then `cross-env SERVER=debug npm run dev:app`.
+- `npm run dev:style` for building TailwindCSS.
+- `npm run start-server-dev` for the server.
