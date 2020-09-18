@@ -165,7 +165,7 @@ async function getMacAddress (req, res, next) {
     const userId = req.headers[LOGIN_USER_ID_HEADER]
 
     try {
-      const user = await usersDB.get(userId)
+      const user = await usersDB.get('org.couchdb.user:' + userId)
 
       if (
         user.mac != null &&

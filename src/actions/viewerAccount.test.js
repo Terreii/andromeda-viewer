@@ -166,14 +166,14 @@ it('loadSavedAvatars', async () => {
   }))
 
   let callback = null
-  const dbOne = jest.fn((event, fn) => {
+  const dbOnce = jest.fn((event, fn) => {
     callback = fn
   })
 
   const store = configureMockStore([
     thunk.withExtraArgument({
       db: {
-        one: dbOne
+        once: dbOnce
       },
       cryptoStore: {
         withIdPrefix
@@ -218,9 +218,9 @@ it('loadSavedAvatars', async () => {
   expect(withIdPrefix.mock.calls).toEqual([
     ['avatars/']
   ])
-  expect(dbOne.mock.calls.length).toBe(1)
-  expect(dbOne.mock.calls[0][0]).toBe('destroyed')
-  expect(dbOne.mock.calls[0][1]).toBeInstanceOf(Function)
+  expect(dbOnce.mock.calls.length).toBe(1)
+  expect(dbOnce.mock.calls[0][0]).toBe('destroyed')
+  expect(dbOnce.mock.calls[0][1]).toBeInstanceOf(Function)
   expect(on.mock.calls.length).toBe(1)
   expect(on.mock.calls[0][0]).toBe('change')
 
@@ -359,14 +359,14 @@ it('loadSavedGrids', async () => {
   }))
 
   let callback = null
-  const dbOne = jest.fn((event, fn) => {
+  const dbOnce = jest.fn((event, fn) => {
     callback = fn
   })
 
   const store = configureMockStore([
     thunk.withExtraArgument({
       db: {
-        one: dbOne
+        once: dbOnce
       },
       cryptoStore: {
         withIdPrefix
@@ -407,9 +407,9 @@ it('loadSavedGrids', async () => {
   expect(withIdPrefix.mock.calls).toEqual([
     ['grids/']
   ])
-  expect(dbOne.mock.calls.length).toBe(1)
-  expect(dbOne.mock.calls[0][0]).toBe('destroyed')
-  expect(dbOne.mock.calls[0][1]).toBeInstanceOf(Function)
+  expect(dbOnce.mock.calls.length).toBe(1)
+  expect(dbOnce.mock.calls[0][0]).toBe('destroyed')
+  expect(dbOnce.mock.calls[0][1]).toBeInstanceOf(Function)
   expect(on.mock.calls.length).toBe(1)
   expect(on.mock.calls[0][0]).toBe('change')
 
@@ -474,8 +474,6 @@ it('loadSavedGrids', async () => {
 it('should check sign in status with "isSignedIn"', async () => {
   let result = null
 
-  const off = jest.fn()
-
   const store = configureMockStore([thunk.withExtraArgument({
     db: new PouchDB('localDB', { adapter: 'memory' }),
     remoteDB: {
@@ -521,7 +519,7 @@ it('should unlock the app with "unlock"', async () => {
   const unlockCryptoStore = jest.fn(() => Promise.resolve())
   const findAll = jest.fn(() => Promise.resolve([]))
   const on = jest.fn()
-  const one = jest.fn()
+  const once = jest.fn()
   const logIn = jest.fn(() => Promise.resolve())
   const sync = jest.fn(() => ({
     on: () => {}
@@ -583,7 +581,7 @@ it('should unlock the app with "unlock"', async () => {
       },
       sync,
       on,
-      one
+      once
     },
     remoteDB: {
       close: () => {},
@@ -624,9 +622,9 @@ it('should unlock the app with "unlock"', async () => {
   expect(on).toHaveBeenNthCalledWith(1, 'grids/', 'change', expect.any(Function))
   expect(on).toHaveBeenNthCalledWith(2, 'avatars/', 'change', expect.any(Function))
 
-  expect(one).toBeCalledTimes(2)
-  expect(one).toHaveBeenNthCalledWith(1, 'destroyed', expect.any(Function))
-  expect(one).toHaveBeenNthCalledWith(2, 'destroyed', expect.any(Function))
+  expect(once).toBeCalledTimes(2)
+  expect(once).toHaveBeenNthCalledWith(1, 'destroyed', expect.any(Function))
+  expect(once).toHaveBeenNthCalledWith(2, 'destroyed', expect.any(Function))
 
   expect(logIn).toHaveBeenCalledWith(
     'a_id',

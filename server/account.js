@@ -14,7 +14,7 @@ api.use(express.json())
 
 module.exports = api
 
-const minPasswordLength = 8
+const minPasswordLength = 64 // 32 bytes as hex -> 64 chars
 
 /**
  * This is the server side implementation of the account and session API.
@@ -45,7 +45,7 @@ setTimeout(() => {
 
 // sign up
 api.put(
-  '/account',
+  '/',
   body('data.type').equals('account'),
   body('data.id').optional().isUUID(),
   body('data.attributes.username').isEmail(),
@@ -139,7 +139,7 @@ api.put(
 )
 
 // get user data
-api.get('/account', ...createAuthValidator(), async (req, res) => {
+api.get('/', ...createAuthValidator(), async (req, res) => {
   res.type('application/vnd.api+json')
 
   // Send the user infos
@@ -161,7 +161,7 @@ api.get('/account', ...createAuthValidator(), async (req, res) => {
 
 // update account
 api.patch(
-  '/account',
+  '/',
   ...createAuthValidator(),
   body('data.type').equals('account'),
   body('data.attributes.username').optional().isEmail(),
@@ -205,7 +205,7 @@ api.patch(
 )
 
 // delete account
-api.delete('/account', ...createAuthValidator(), async (req, res, next) => {
+api.delete('/', ...createAuthValidator(), async (req, res, next) => {
   try {
     await usersDB.destroy(req.user._id, req.user._rev)
 
@@ -218,15 +218,6 @@ api.delete('/account', ...createAuthValidator(), async (req, res, next) => {
     next(err)
   }
 })
-
-// log in
-api.put('', notImplemented)
-
-// is logged in
-api.get('', notImplemented)
-
-// log off
-api.delete('', notImplemented)
 
 // Error handler
 // This transforms the different error styles into application/vnd.api+json errors.
@@ -339,11 +330,4 @@ async function authentication (req, res, next) {
   } catch (error) {
     next(error)
   }
-}
-
-function notImplemented () {
-  const error = new Error('Not yet implemented')
-  error.status = 501
-  error.name = 'Not Implemented'
-  throw error
 }

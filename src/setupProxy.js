@@ -17,7 +17,7 @@ function serverAndProxySetup (app) {
   const gridSession = require('../server/gridSession')
   gridSession(app)
 
-  app.use('/api/session', require('../server/account'))
+  app.use('/api/account', require('../server/account'))
   app.use('/api/login', require('../server/login'))
   app.use('/api/proxy', require('../server/httpProxy'))
 }
