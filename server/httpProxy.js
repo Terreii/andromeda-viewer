@@ -29,8 +29,13 @@ proxy.on('error', (err, req, res) => {
 
 router.all('/:protocol/:hostname/:path(*$)', validateSession, (req, res) => {
   const { protocol, hostname, path } = req.params
-  const target = new URL(`${protocol}://${hostname}/${path || ''}`)
 
+  if (!protocol || !hostname) {
+    res.sendStatus(404)
+    return
+  }
+
+  const target = new URL(`${protocol}://${hostname}/${path || ''}`)
   proxy.web(req, res, {
     target: target.href,
     secure: false, // Self signed certificate of SL.

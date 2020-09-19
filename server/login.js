@@ -1,9 +1,10 @@
 'use strict'
 
 const express = require('express')
-const xmlrpc = require('xmlrpc')
+const { checkSchema, validationResult } = require('express-validator')
 const fetch = require('node-fetch')
 const uuid = require('uuid').v4
+const xmlrpc = require('xmlrpc')
 
 const { usersDB } = require('./db')
 
@@ -14,7 +15,105 @@ const LOGIN_USER_ID_HEADER = 'x-andromeda-login-user-id'
 // SL uses its own tls-certificate
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
-module.exports = [express.json(), getMacAddress, handleLogin]
+module.exports = [
+  express.json(),
+  checkSchema({
+    [LOGIN_URL_HEADER]: {
+      in: 'headers',
+      optional: true,
+      isURL: {
+        protocols: ['http','https'],
+        require_protocol: true,
+        allow_underscores: true,
+        allow_trailing_dot: true
+      }
+    },
+    [LOGIN_CONTENT_TYPE_HEADER]: {
+      in: 'headers',
+      isIn: {
+        options: ['llsd', 'xml-rpc']
+      }
+    },
+    [LOGIN_USER_ID_HEADER]: {
+      in: 'headers',
+      optional: true,
+      notEmpty: true
+    },
+    first: {
+      in: 'body',
+      isString: true,
+      notEmpty: true
+    },
+    last: {
+      in: 'body',
+      isString: true,
+      notEmpty: true
+    },
+    start: {
+      in: 'body',
+      isString: true,
+      notEmpty: true
+    },
+    channel: {
+      in: 'body',
+      isString: true,
+      notEmpty: true
+    },
+    version: {
+      in: 'body',
+      isString: true,
+      notEmpty: true
+    },
+    platform: {
+      in: 'body',
+      isIn: {
+        options: ['Mac', 'Win', 'Lin']
+      }
+    },
+    platform_version: {
+      in: 'body',
+      isString: true,
+      notEmpty: true
+    },
+    platform_string: {
+      in: 'body',
+      optional: true,
+      isString: true,
+      notEmpty: true
+    },
+    last_exec_event: {
+      in: 'body',
+      isInt: true
+    },
+    last_exec_duration: {
+      in: 'body',
+      optional: true,
+      isInt: true
+    },
+    options: {
+      in: 'body',
+      isArray: true
+    },
+    agree_to_tos: {
+      in: 'body',
+      optional: true,
+      exists: true
+    },
+    read_critical: {
+      in: 'body',
+      optional: true,
+      exists: true
+    },
+    address_size: {
+      in: 'body',
+      optional: true,
+      isInt: true
+    }
+  }),
+  handleValidationErrors,
+  getMacAddress,
+  handleLogin
+]
 
 /**
  * Handle a login request to a grid.
@@ -68,7 +167,7 @@ function handleXmlRpc (app, res, loginURL, reqData) {
         }
         : err
 
-      res.sendStatus(body.statusCode || 500).json(body)
+      res.status(body.statusCode || 500).json(body)
     } else {
       const didLogin = data.login === 'true'
       if (didLogin) {
@@ -77,7 +176,7 @@ function handleXmlRpc (app, res, loginURL, reqData) {
         res.setHeader('x-andromeda-session-id', id)
         res.json(data)
       } else {
-        res.sendStatus(401).json(data)
+        res.status(401).json(data)
       }
     }
   })
@@ -111,10 +210,10 @@ async function handleLLSD (app, res, loginURL, reqData) {
     res.send(body)
   } else if (fetchResult.ok) {
     res.type('application/llsd+xml')
-    res.sendStatus(fetchResult.status).send(body)
+    res.status(fetchResult.status).send(body)
   } else {
     res.type(fetchResult.headers.get('content-type'))
-    res.sendStatus(fetchResult.status).send(body)
+    res.status(fetchResult.status).send(body)
   }
 }
 
@@ -146,13 +245,22 @@ function stringifyLLSD (value) {
   }
 }
 
+function handleValidationErrors (req, res, next) {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    res.sendStatus(400)
+  } else {
+    next()
+  }
+}
+
 /**
  * Generate or retrieve an ID/MAC Address for a user.
  * @param {express.Request}      req   Express' request object.
  * @param {express.Response}     res   Express' response object.
  * @param {express.NextFunction} next  Call the next middleware.
  */
-async function getMacAddress (req, res, next) {
+async function getMacAddress (req, _res, next) {
   const addMac = mac => {
     // adding the needed mac-address
     req.body.mac = mac
@@ -203,7 +311,7 @@ async function getMacAddress (req, res, next) {
   }
 }
 
-function generateMacAddress (userId) {
+function generateMacAddress () {
   // generate a UUID and transform it into a "MAC"-address
   const num = uuid().replace(/-/g, '').slice(0, 12)
 
