@@ -163,9 +163,11 @@ api.get('/', ...createAuthValidator(), async (req, res) => {
 api.patch(
   '/',
   ...createAuthValidator(),
-  body('data.type').equals('account'),
-  body('data.attributes.username').optional().isEmail(),
-  body('data.attributes.password').optional().isLength({ min: minPasswordLength }),
+  body('data.type', 'body must be of type account').equals('account'),
+  body('data.attributes.username', 'username must be an email-address').optional().isEmail(),
+  body('data.attributes.password', 'password must be the right size')
+    .optional()
+    .isLength({ min: minPasswordLength }),
   async (req, res, next) => {
     try {
       // handle the validation errors
@@ -190,6 +192,7 @@ api.patch(
       if (username && username !== req.user.email) {
         didChange = true
         req.user.email = username
+        req.user.email_validation = uuid()
         // todo send validation email and set email_validation to an UUID
       }
 
