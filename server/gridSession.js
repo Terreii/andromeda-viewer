@@ -3,6 +3,7 @@
 module.exports = init
 
 const pouchdbErrors = require('pouchdb-errors')
+const ms = require('milliseconds')
 const uuid = require('uuid').v4
 
 /**
@@ -20,30 +21,13 @@ function init (app) {
   // When a WebSocket disconnects, then the time of disconnect will be stored.
   // And after a timeout the session will be deleted.
   const sessions = new Map()
+  const onTimeoutSessionIds = new Set()
   app.set('gridSessions', sessions)
+  app.set('gridSessionsIdsOnTimeout', onTimeoutSessionIds)
 
   app.set('generateSession', generate.bind(null, app))
   app.set('checkSession', check.bind(null, app))
   app.set('changeSessionState', change.bind(null, app))
-
-  setInterval(() => {
-    const timeout = Date.now() - (10 * 60 * 1000) // 10 min
-    const toRemove = []
-
-    for (const [id, state] of sessions.entries()) {
-      if (typeof state === 'number' && state < timeout) {
-        toRemove.push(id)
-      }
-    }
-
-    if (toRemove.length > 0) {
-      process.nextTick(() => {
-        for (const id of toRemove) {
-          sessions.delete(id)
-        }
-      })
-    }
-  }, 10000) // every 10s
 }
 
 /**
@@ -66,12 +50,38 @@ function generate (app) {
  */
 function check (app, id) {
   const sessions = app.get('gridSessions')
+  const timeoutIds = app.get('gridSessionsIdsOnTimeout')
 
-  if (sessions.has(id)) {
-    return sessions.get(id)
-  } else {
+  if (!sessions.has(id)) {
     throw pouchdbErrors.createError(pouchdbErrors.FORBIDDEN, '"x-andromeda-session-id" is wrong')
   }
+
+  // Check if sessions did timeout and remove some of them.
+  process.nextTick(() => {
+    const timeout = Date.now() - ms.minutes(10)
+    const toRemove = []
+    for (const sessionId of timeoutIds) {
+      if (sessions.get(sessionId) < timeout) {
+        toRemove.push(sessionId)
+      } else {
+        break
+      }
+    }
+    if (toRemove.length > 0) {
+      for (const sessionId of toRemove) {
+        sessions.delete(sessionId)
+        timeoutIds.delete(sessionId)
+      }
+    }
+  })
+
+  const state = sessions.get(id)
+  if (typeof state === 'number' && timeoutIds.has(id) && state < (Date.now() - ms.minutes(10))) {
+    sessions.delete(id)
+    timeoutIds.delete(id)
+    throw pouchdbErrors.createError(pouchdbErrors.FORBIDDEN, '"x-andromeda-session-id" is wrong')
+  }
+  return state
 }
 
 /**
@@ -83,9 +93,14 @@ function check (app, id) {
  */
 function change (app, id, state) {
   const sessions = app.get('gridSessions')
+  const timeoutIds = app.get('gridSessionsIdsOnTimeout')
 
   if (!sessions.has(id)) {
     throw pouchdbErrors.createError(pouchdbErrors.FORBIDDEN, '"x-andromeda-session-id" is wrong')
+  }
+
+  if (timeoutIds.has(id) && ['end', 'active'].includes(state)) {
+    timeoutIds.delete(id)
   }
 
   if (state === 'end') {
@@ -95,6 +110,11 @@ function change (app, id, state) {
 
   if (state === 'active' || typeof state === 'number') {
     sessions.set(id, state)
+
+    if (typeof state === 'number') {
+      timeoutIds.add(id)
+    }
+
     return state
   }
 

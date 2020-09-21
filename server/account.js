@@ -46,10 +46,10 @@ setTimeout(() => {
 // sign up
 api.put(
   '/',
-  body('data.type').equals('account'),
-  body('data.id').optional().isUUID(),
-  body('data.attributes.username').isEmail(),
-  body('data.attributes.password').isLength({ min: minPasswordLength }),
+  body('data.type', 'body must be of type account').equals('account'),
+  body('data.id', 'id must be an UUID').optional().isUUID(),
+  body('data.attributes.username', 'username must be an email-address').isEmail(),
+  body('data.attributes.password', 'password must be the right size').isLength({ min: minPasswordLength }),
   async (req, res, next) => {
     try {
       // handle the validation errors

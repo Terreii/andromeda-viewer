@@ -22,7 +22,7 @@ module.exports = [
       in: 'headers',
       optional: true,
       isURL: {
-        protocols: ['http','https'],
+        protocols: ['http', 'https'],
         require_protocol: true,
         allow_underscores: true,
         allow_trailing_dot: true

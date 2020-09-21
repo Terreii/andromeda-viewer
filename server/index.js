@@ -7,11 +7,8 @@ const gridSession = require('./gridSession')
 
 const app = express()
 
-module.exports = app
-
-const port = process.env.PORT || 3001
+const port = parseInt(process.env.PORT || 3001)
 const publicDir = process.env.NODE_ENV === 'production' ? 'build' : 'public'
-app.set('host', process.env.HOST || `http://localhost:${port}`)
 
 gridSession(app)
 
@@ -28,8 +25,12 @@ app.use((req, res, next) => {
   }
 })
 
-if (!module.parent) {
-  const server = app.listen(port, () => console.log(`listening at http://localhost:${port}`))
+const server = app.listen(port, () => {
+  if (!module.parent) {
+    console.log(`listening at http://localhost:${port}`)
+  }
+})
 
-  webSocketBridge.createWebSocketServer(app, server, '/api/bridge')
-}
+webSocketBridge.createWebSocketServer(app, server, '/api/bridge')
+
+module.exports = server
