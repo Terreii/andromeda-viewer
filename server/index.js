@@ -15,7 +15,7 @@ gridSession(app)
 app.use(express.static(publicDir))
 
 app.use('/api/account', require('./account'))
-app.use('/api/login', require('./login'))
+app.post('/api/login', require('./login'))
 app.use('/api/proxy', require('./httpProxy'))
 app.use((req, res, next) => {
   if (req.path.startsWith('/api')) {

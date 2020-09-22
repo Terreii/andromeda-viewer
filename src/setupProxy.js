@@ -18,7 +18,7 @@ function serverAndProxySetup (app) {
   gridSession(app)
 
   app.use('/api/account', require('../server/account'))
-  app.use('/api/login', require('../server/login'))
+  app.post('/api/login', require('../server/login'))
   app.use('/api/proxy', require('../server/httpProxy'))
 }
 

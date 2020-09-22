@@ -31,7 +31,7 @@ module.exports = [
     [LOGIN_CONTENT_TYPE_HEADER]: {
       in: 'headers',
       isIn: {
-        options: ['llsd', 'xml-rpc']
+        options: [['llsd', 'xml-rpc']]
       }
     },
     [LOGIN_USER_ID_HEADER]: {
@@ -119,9 +119,8 @@ module.exports = [
  * Handle a login request to a grid.
  * @param {express.Request}      req   Express' request object.
  * @param {express.Response}     res   Express' response object.
- * @param {express.NextFunction} next  Call the next middleware.
  */
-async function handleLogin (req, res, next) {
+async function handleLogin (req, res) {
   try {
     const reqData = req.body
 
@@ -141,7 +140,7 @@ async function handleLogin (req, res, next) {
       handleXmlRpc(req.app, res, loginURL, reqData)
     }
   } catch (err) {
-    next(err)
+    sendError(res, err)
   }
 }
 
@@ -190,30 +189,34 @@ function handleXmlRpc (app, res, loginURL, reqData) {
  * @param {object} reqData            Login info.
  */
 async function handleLLSD (app, res, loginURL, reqData) {
-  const fetchResult = await fetch(loginURL, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/llsd+xml'
-    },
-    body: `<?xml version="1.0" encoding="UTF-8"?>
-    <llsd>${stringifyLLSD(reqData)}</llsd>
-    `
-  })
-  const body = await fetchResult.text()
-  const didLogin = body.includes('<key>login</key><string>true</string>')
+  try {
+    const fetchResult = await fetch(loginURL, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/llsd+xml'
+      },
+      body: `<?xml version="1.0" encoding="UTF-8"?>
+<llsd>${stringifyLLSD(reqData)}</llsd>
+`
+    })
+    const body = await fetchResult.text()
+    const didLogin = body.includes('<key>login</key><string>true</string>')
 
-  if (fetchResult.ok && didLogin) {
-    const generateSession = app.get('generateSession')
-    const id = generateSession()
-    res.type('application/llsd+xml')
-    res.setHeader('x-andromeda-session-id', id)
-    res.send(body)
-  } else if (fetchResult.ok) {
-    res.type('application/llsd+xml')
-    res.status(fetchResult.status).send(body)
-  } else {
-    res.type(fetchResult.headers.get('content-type'))
-    res.status(fetchResult.status).send(body)
+    if (fetchResult.ok && didLogin) {
+      const generateSession = app.get('generateSession')
+      const id = generateSession()
+      res.type('application/llsd+xml')
+      res.setHeader('x-andromeda-session-id', id)
+      res.send(body)
+    } else if (fetchResult.ok) {
+      res.type('application/llsd+xml')
+      res.status(fetchResult.status).send(body)
+    } else {
+      res.type(fetchResult.headers.get('content-type'))
+      res.status(fetchResult.status).send(body)
+    }
+  } catch (err) {
+    sendError(res, err)
   }
 }
 
@@ -254,13 +257,24 @@ function handleValidationErrors (req, res, next) {
   }
 }
 
+function sendError (res, error) {
+  res.status(error.status || error.statusCode || 500)
+    .json({
+      errors: [{
+        status: error.status || error.statusCode || 500,
+        title: error.title || error.name,
+        detail: error.detail || error.message
+      }]
+    })
+}
+
 /**
  * Generate or retrieve an ID/MAC Address for a user.
  * @param {express.Request}      req   Express' request object.
  * @param {express.Response}     res   Express' response object.
  * @param {express.NextFunction} next  Call the next middleware.
  */
-async function getMacAddress (req, _res, next) {
+async function getMacAddress (req, res, next) {
   const addMac = mac => {
     // adding the needed mac-address
     req.body.mac = mac
@@ -297,12 +311,8 @@ async function getMacAddress (req, _res, next) {
         return
       }
     } catch (err) {
-      if (err.status !== 404) {
-        next(err)
-        return
-      }
-      const mac = generateMacAddressFromIP(req.ip)
-      addMac(mac)
+      sendError(res, err)
+      return
     }
   } else {
     // new and anonym user
