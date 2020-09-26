@@ -33,4 +33,5 @@ const server = app.listen(port, () => {
 
 webSocketBridge.createWebSocketServer(app, server, '/api/bridge')
 
-module.exports = server
+exports.app = app
+exports.server = server

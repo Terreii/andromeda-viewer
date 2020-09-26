@@ -27,7 +27,7 @@ describe('login', function () {
 
     usersDbCreateIndex.resolves()
 
-    server = proxyquire('../server/index', {
+    const backend = proxyquire('../server/index', {
       './db': {
         '@global': true,
         usersDB: {
@@ -43,6 +43,7 @@ describe('login', function () {
       },
       'node-fetch': fetch
     })
+    server = backend.server
   })
 
   afterEach('close server', function (done) {

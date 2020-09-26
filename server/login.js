@@ -263,7 +263,7 @@ function sendError (res, error) {
       errors: [{
         status: error.status || error.statusCode || 500,
         title: error.title || error.name,
-        detail: error.detail || error.message
+        detail: error.reason || error.detail || error.message
       }]
     })
 }

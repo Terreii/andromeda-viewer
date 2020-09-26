@@ -33,7 +33,7 @@ describe('account', function () {
 
     usersDbCreateIndex.resolves()
 
-    server = proxyquire('../server/index', {
+    const backend = proxyquire('../server/index', {
       './db': {
         '@global': true,
         usersDB: {
@@ -52,6 +52,7 @@ describe('account', function () {
       },
       'node-fetch': fetch
     })
+    server = backend.server
   })
 
   afterEach('close server', function (done) {
@@ -220,7 +221,7 @@ describe('account', function () {
             {
               status: 409,
               title: 'conflict',
-              detail: 'Document update conflict'
+              detail: 'An account with that id already exists'
             }
           ]
         }, done)
@@ -294,7 +295,7 @@ describe('account', function () {
             {
               status: 409,
               title: 'conflict',
-              detail: 'Document update conflict'
+              detail: 'An account with that username already exists'
             }
           ]
         }, done)

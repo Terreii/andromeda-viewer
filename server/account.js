@@ -235,7 +235,7 @@ api.use((err, req, res, next) => {
   const format = anError => ({
     status: getStatus(anError),
     title: anError.title || anError.name,
-    detail: anError.detail || anError.message
+    detail: anError.reason || anError.detail || anError.message
   })
 
   if (Array.isArray(err)) {
