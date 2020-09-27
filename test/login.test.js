@@ -6,6 +6,7 @@ const uuid = require('uuid')
 
 describe('login', function () {
   let clock
+  let app
   let server // express server
   let usersDbCreateIndex
   let usersDbGet
@@ -43,6 +44,7 @@ describe('login', function () {
       },
       'node-fetch': fetch
     })
+    app = backend.app
     server = backend.server
   })
 
@@ -100,6 +102,14 @@ describe('login', function () {
             'x-andromeda-session-id',
             /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i
           )
+          .expect(res => {
+            // adds the session Id to the session store
+            const checkSession = app.get('checkSession')
+            assert.strictEqual(
+              checkSession(res.headers['x-andromeda-session-id']),
+              'inactive'
+            )
+          })
           .expect(200, {
             login: 'true',
             first: 'First Name',
@@ -166,6 +176,14 @@ describe('login', function () {
             'x-andromeda-session-id',
             /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i
           )
+          .expect(res => {
+            // adds the session Id to the session store
+            const checkSession = app.get('checkSession')
+            assert.strictEqual(
+              checkSession(res.headers['x-andromeda-session-id']),
+              'inactive'
+            )
+          })
           .expect(function () {
             assert.strictEqual(xmlRpcCreateClient.firstCall.firstArg.href, loginURL)
           })
@@ -274,6 +292,14 @@ describe('login', function () {
             'x-andromeda-session-id',
             /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i
           )
+          .expect(res => {
+            // adds the session Id to the session store
+            const checkSession = app.get('checkSession')
+            assert.strictEqual(
+              checkSession(res.headers['x-andromeda-session-id']),
+              'inactive'
+            )
+          })
           .expect(function () {
             assert.strictEqual(
               usersDbGet.firstCall.firstArg,
@@ -314,6 +340,14 @@ describe('login', function () {
             'x-andromeda-session-id',
             /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i
           )
+          .expect(res => {
+            // adds the session Id to the session store
+            const checkSession = app.get('checkSession')
+            assert.strictEqual(
+              checkSession(res.headers['x-andromeda-session-id']),
+              'inactive'
+            )
+          })
           .expect(function () {
             assert.deepStrictEqual(methodCall.firstCall.args[1], [
               {
@@ -374,6 +408,14 @@ describe('login', function () {
             'x-andromeda-session-id',
             /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i
           )
+          .expect(res => {
+            // adds the session Id to the session store
+            const checkSession = app.get('checkSession')
+            assert.strictEqual(
+              checkSession(res.headers['x-andromeda-session-id']),
+              'inactive'
+            )
+          })
           .expect(function () {
             assert.ok(
               /(?:[a-fA-F\d]{1,2}:){5}[a-fA-F\d]{1,2}/i.test(usersDbInsert.firstCall.firstArg.mac)

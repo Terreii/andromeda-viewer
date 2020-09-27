@@ -13,7 +13,7 @@ const uuid = require('uuid').v4
 function init (app) {
   // Stores the active session ids and their state.
   // The state can be:
-  // - {number} Date.now() of when the last activity.
+  // - {number} Date.now() of when the last activity. But the check returns 'inactive'
   // - 'active' when there is an open WebSocket connection.
   //
   // When the user logs in the session will be generated and the date will be stored.
@@ -38,7 +38,9 @@ function init (app) {
 function generate (app) {
   const id = uuid()
   const sessions = app.get('gridSessions')
+  const timeoutIds = app.get('gridSessionsIdsOnTimeout')
   sessions.set(id, Date.now())
+  timeoutIds.add(id)
   return id
 }
 
@@ -46,14 +48,17 @@ function generate (app) {
  * Check if the session is active.
  * @param {import('express').Application} app  Express Server App
  * @param {string}   id   UUID of the session.
- * @returns {number | 'active'} State of the session. Number = timeout & no active connection.
+ * @returns {'active'|'inactive|} State of the session. Number = timeout & no active connection.
  */
 function check (app, id) {
   const sessions = app.get('gridSessions')
   const timeoutIds = app.get('gridSessionsIdsOnTimeout')
 
   if (!sessions.has(id)) {
-    throw pouchdbErrors.createError(pouchdbErrors.FORBIDDEN, '"x-andromeda-session-id" is wrong')
+    throw pouchdbErrors.createError(
+      pouchdbErrors.UNAUTHORIZED,
+      '"x-andromeda-session-id" is wrong'
+    )
   }
 
   // Check if sessions did timeout and remove some of them.
@@ -79,16 +84,19 @@ function check (app, id) {
   if (typeof state === 'number' && timeoutIds.has(id) && state < (Date.now() - ms.minutes(10))) {
     sessions.delete(id)
     timeoutIds.delete(id)
-    throw pouchdbErrors.createError(pouchdbErrors.FORBIDDEN, '"x-andromeda-session-id" is wrong')
+    throw pouchdbErrors.createError(
+      pouchdbErrors.UNAUTHORIZED,
+      '"x-andromeda-session-id" is wrong'
+    )
   }
-  return state
+  return typeof state === 'number' ? 'inactive' : state
 }
 
 /**
  * Change the session state
  * @param {import('express').Application} app  Express Server App
  * @param {string}                id     UUID of the session
- * @param {'active'|'end'|number} state  Session is active (has a connection) or time of inactive
+ * @param {'active'|'inactive'|'end'} state  Session is active (has a connection), inactive or did end
  * @returns {'active'|'end'|number}      The next state.
  */
 function change (app, id, state) {
@@ -96,27 +104,34 @@ function change (app, id, state) {
   const timeoutIds = app.get('gridSessionsIdsOnTimeout')
 
   if (!sessions.has(id)) {
-    throw pouchdbErrors.createError(pouchdbErrors.FORBIDDEN, '"x-andromeda-session-id" is wrong')
+    throw pouchdbErrors.createError(
+      pouchdbErrors.UNAUTHORIZED,
+      '"x-andromeda-session-id" is wrong'
+    )
   }
 
-  if (timeoutIds.has(id) && ['end', 'active'].includes(state)) {
-    timeoutIds.delete(id)
-  }
+  switch (state) {
+    case 'end':
+      sessions.delete(id)
+      if (timeoutIds.has(id)) {
+        timeoutIds.delete(id)
+      }
+      return 'end'
 
-  if (state === 'end') {
-    sessions.delete(id)
-    return 'end'
-  }
+    case 'active':
+      sessions.set(id, 'active')
+      if (timeoutIds.has(id)) {
+        timeoutIds.delete(id)
+      }
+      return 'active'
 
-  if (state === 'active' || typeof state === 'number') {
-    sessions.set(id, state)
-
-    if (typeof state === 'number') {
+    case 'inactive':
+      const now = Date.now()
+      sessions.set(id, now)
       timeoutIds.add(id)
-    }
+      return 'inactive'
 
-    return state
+    default:
+      throw pouchdbErrors.createError(pouchdbErrors.INVALID_REQUEST, `bad state "${state}"`)
   }
-
-  throw pouchdbErrors.createError(pouchdbErrors.INVALID_REQUEST, `bad state "${state}"`)
 }

@@ -54,11 +54,11 @@ describe('httpProxy', function () {
     request(server)
       .get(`/api/proxy/http/127.0.0.1:${testServerPort}/`)
       .expect('Content-Type', 'application/vnd.api+json; charset=utf-8')
-      .expect(403, {
+      .expect(401, {
         errors: [
           {
-            status: 403,
-            title: 'forbidden',
+            status: 401,
+            title: 'unauthorized',
             detail: '"x-andromeda-session-id" is wrong'
           }
         ]

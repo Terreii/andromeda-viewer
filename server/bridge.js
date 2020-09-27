@@ -73,7 +73,7 @@ class Bridge {
     try {
       const state = this.checkSession(sessionId)
 
-      if (typeof state === 'number') {
+      if (state === 'inactive') {
         // Session has no active socket -> open
         this.didAuth = true
         this.changeSessionState(sessionId, 'active')
@@ -134,7 +134,7 @@ class Bridge {
 
   onSocketClose (code, reason) {
     if (this.socket && this.sessionId !== '') {
-      const nextState = code === 1000 ? 'end' : Date.now()
+      const nextState = code === 1000 ? 'end' : 'inactive'
 
       try {
         this.changeSessionState(this.sessionId, nextState)
