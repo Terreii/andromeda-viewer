@@ -31,17 +31,28 @@ const minPasswordLength = 64 // 32 bytes as hex -> 64 chars
  */
 
 // Create the email to user index.
-setTimeout(() => {
+const mainIndexCreatedKey = 'didCreateUsersByEMailIndex'
+api.use((req, _res, next) => {
+  if (req.app.get(mainIndexCreatedKey)) {
+    next()
+    return
+  }
+
+  req.app.set(mainIndexCreatedKey, true)
   usersDB.createIndex({
     index: {
       fields: ['email']
     },
     ddoc: 'users-by-email',
     name: 'users-by-email'
-  }).catch(err => {
-    console.error("couldn't create the email index\nlogins will be slower!", err)
   })
-}, 1000)
+    .catch(err => {
+      console.error("couldn't create the email index\nlogins will be slower!", err)
+    })
+    .then(() => {
+      next()
+    })
+})
 
 // sign up
 api.put(
@@ -190,6 +201,19 @@ api.patch(
       }
 
       if (username && username !== req.user.email) {
+        const { docs } = await usersDB.find({
+          selector: {
+            email: username
+          },
+          fields: ['_id', 'email']
+        })
+        if (docs.length > 0) {
+          throw pouchErrors.createError(
+            pouchErrors.REV_CONFLICT,
+            'An account with that username already exists'
+          )
+        }
+
         didChange = true
         req.user.email = username
         req.user.email_validation = uuid()
