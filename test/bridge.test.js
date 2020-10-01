@@ -1,7 +1,6 @@
 const assert = require('assert')
 const dgram = require('dgram')
 const proxyquire = require('proxyquire')
-const sinon = require('sinon')
 const WebSocket = require('ws')
 
 describe('bridge', function () {
@@ -9,7 +8,6 @@ describe('bridge', function () {
   let testServerPort
   let ws
 
-  let clock
   let server // express server
   let app    // express app
 
@@ -29,10 +27,6 @@ describe('bridge', function () {
     testServer.bind()
   })
 
-  beforeEach('fake timers', function () {
-    clock = sinon.useFakeTimers(Date.now())
-  })
-
   beforeEach('load server', function () {
     const backend = proxyquire('../server/index', {})
     app = backend.app
@@ -47,10 +41,6 @@ describe('bridge', function () {
 
   afterEach('close server', function (done) {
     server.close(done)
-  })
-
-  afterEach('restore timers', function () {
-    clock.restore()
   })
 
   afterEach('close UDP server', function (done) {
@@ -166,8 +156,6 @@ describe('bridge', function () {
   })
 
   it('should end the session if the socket was closed', function (done) {
-    clock.restore()
-
     const sessionId = app.get('generateSession')()
     const checkSession = app.get('checkSession')
     ws = new WebSocket(getBridgeURL())
@@ -194,14 +182,10 @@ describe('bridge', function () {
           }
         }
       }, 15)
-
-      clock.runAll()
     })
   })
 
   it('should not end the session if the socket was unexpectedly closed', function (done) {
-    clock.restore()
-
     const sessionId = app.get('generateSession')()
     const checkSession = app.get('checkSession')
     ws = new WebSocket(getBridgeURL())
@@ -223,8 +207,6 @@ describe('bridge', function () {
           done(err)
         }
       }, 15)
-
-      clock.runAll()
     })
   })
 })

@@ -79,9 +79,6 @@ describe('gridSession', function () {
   })
 
   it('should invalidate a session after a timeout', function () {
-    clock.restore() // for the createIndex call in account
-    clock = sinon.useFakeTimers(Date.now())
-
     const id = generateSession()
 
     clock.tick(ms.minutes(10) + ms.seconds(2))
@@ -101,9 +98,6 @@ describe('gridSession', function () {
   })
 
   it('should not invalidate an active session after the timeout', function () {
-    clock.restore() // for the createIndex call in account
-    clock = sinon.useFakeTimers(Date.now())
-
     const id = generateSession()
     changeSessionState(id, 'active')
 
@@ -113,9 +107,6 @@ describe('gridSession', function () {
   })
 
   it('should invalidate a session that became inactive after a timeout', function () {
-    clock.restore() // for the createIndex call in account
-    clock = sinon.useFakeTimers(Date.now())
-
     const id = generateSession()
     changeSessionState(id, 'active')
     changeSessionState(id, 'inactive')
@@ -156,9 +147,6 @@ describe('gridSession', function () {
   })
 
   it('should cleanup inactive sessions that timeouted on a session check', function (done) {
-    clock.restore() // for the createIndex call in account
-    clock = sinon.useFakeTimers(Date.now())
-
     const idActive1 = generateSession()
     changeSessionState(idActive1, 'active')
     const idInactive1 = generateSession()

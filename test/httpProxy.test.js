@@ -1,7 +1,6 @@
 const assert = require('assert')
 const express = require('express')
 const proxyquire = require('proxyquire')
-const sinon = require('sinon')
 const request = require('supertest')
 const uuid = require('uuid')
 
@@ -9,7 +8,6 @@ describe('httpProxy', function () {
   let testServer
   let testServerPort
 
-  let clock
   let server // express server
   let app    // express app
 
@@ -29,10 +27,6 @@ describe('httpProxy', function () {
   })
 
   beforeEach(function () {
-    clock = sinon.useFakeTimers(Date.now())
-  })
-
-  beforeEach(function () {
     const backend = proxyquire('../server/index', {})
     app = backend.app
     server = backend.server
@@ -40,10 +34,6 @@ describe('httpProxy', function () {
 
   afterEach('close server', function (done) {
     server.close(done)
-  })
-
-  afterEach('restore timers', function () {
-    clock.restore()
   })
 
   afterEach('close test target server', function (done) {
