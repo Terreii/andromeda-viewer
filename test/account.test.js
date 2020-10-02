@@ -119,7 +119,6 @@ describe('account', function () {
             name: 'users-by-email'
           }, 'createIndex index argument')
         })
-
     })
   })
 
