@@ -312,7 +312,6 @@ async function getMacAddress (req, res, next) {
       }
     } catch (err) {
       sendError(res, err)
-      return
     }
   } else {
     // new and anonym user

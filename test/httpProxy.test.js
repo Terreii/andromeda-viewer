@@ -1,3 +1,5 @@
+'use strict'
+
 const assert = require('assert')
 const express = require('express')
 const proxyquire = require('proxyquire')
@@ -9,7 +11,7 @@ describe('httpProxy', function () {
   let testServerPort
 
   let server // express server
-  let app    // express app
+  let app // express app
 
   beforeEach(function (done) {
     const testApp = express()
@@ -89,8 +91,9 @@ describe('httpProxy', function () {
         const id = uuid.v4()
         app.get('gridSessions').set(id, 'active')
 
-        let req = request(server)
-          [method.toLowerCase()](`/api/proxy/http/127.0.0.1:${testServerPort}/`)
+        const req = request(server)[method.toLowerCase()](
+          `/api/proxy/http/127.0.0.1:${testServerPort}/`
+        )
           .set('x-andromeda-session-id', id)
 
         // Methods with body

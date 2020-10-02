@@ -164,7 +164,7 @@ function gridsDidChange (type, grid) {
 /**
  * Get the users data.
  * @param {PouchDB.Database} db The local Database.
- * @returns {{ _id: string, _rev: string, accountId: string, name: string }} Doc with user info
+ * @returns {Promise<{ _id: string, _rev: string, accountId: string, name: string }>} Doc with user info
  */
 async function getUserInfo (db) {
   const userDoc = await db.get('_local/account')

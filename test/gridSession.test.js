@@ -1,3 +1,5 @@
+'use strict'
+
 const assert = require('assert')
 const ms = require('milliseconds')
 const proxyquire = require('proxyquire')
@@ -7,7 +9,7 @@ const uuid = require('uuid')
 describe('gridSession', function () {
   let clock
   let server // express server
-  let app    // express app
+  let app // express app
   let generateSession
   let checkSession
   let changeSessionState

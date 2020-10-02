@@ -1,3 +1,5 @@
+'use strict'
+
 const assert = require('assert')
 const express = require('express')
 const expressPouchDB = require('express-pouchdb')({
@@ -16,16 +18,15 @@ describe('account', function () {
   const USERNAME = 'tester.mactestface@example.com'
   const PASSWORD = 'bc0e734068f4ef43e22d84e3412c4c0221daa3a001fcd0c7ab24a565f9e7503d'
 
-  let testApp
   let testServer
-  let testUsersDb
+  let usersDb
   let server // express server
 
-  before('start test server with pouchdb', function (done) {
-    testApp = express()
-    testApp.use(expressPouchDB)
+  global.before('start test server with pouchdb', function (done) {
+    const app = express()
+    app.use(expressPouchDB)
 
-    testServer = testApp.listen(0, () => {
+    testServer = app.listen(0, () => {
       const port = testServer.address().port
       process.env.COUCH_URL = `http://localhost:${port}`
       done()
@@ -38,7 +39,7 @@ describe('account', function () {
     })
     PouchDB.plugin(proxyquire('pouchdb-adapter-memory', {}))
     expressPouchDB.setPouchDB(PouchDB)
-    testUsersDb = new PouchDB('_users')
+    usersDb = new PouchDB('_users')
   })
 
   beforeEach('load server', async function () {
@@ -51,16 +52,16 @@ describe('account', function () {
   })
 
   afterEach('destroy the user database', async function () {
-    await testUsersDb.destroy()
+    await usersDb.destroy()
   })
 
-  after('close the server with pouchdb', function () {
+  global.after('close the server with pouchdb', function () {
     testServer.close()
   })
 
   // Helper functions
   function addUserDoc () {
-    return testUsersDb.put({
+    return usersDb.put({
       _id: USER_DOC_ID,
       type: 'user',
       name: USER_ID,
@@ -87,7 +88,7 @@ describe('account', function () {
           }
         })
 
-      const { indexes } = await testUsersDb.getIndexes()
+      const { indexes } = await usersDb.getIndexes()
       assert.deepStrictEqual(indexes[1], {
         ddoc: '_design/users-by-email',
         def: {
@@ -126,7 +127,7 @@ describe('account', function () {
         username: USERNAME
       }, 'returns the username')
 
-      const userDoc = await testUsersDb.get('org.couchdb.user:' + response.body.data.id)
+      const userDoc = await usersDb.get('org.couchdb.user:' + response.body.data.id)
       assert.strictEqual(userDoc.type, 'user')
       assert.deepStrictEqual(userDoc.roles, [])
       assert.strictEqual(userDoc.email, USERNAME)
@@ -168,7 +169,7 @@ describe('account', function () {
     it('should return a conflict if an account with id exists', async function () {
       const id = uuid.v4()
 
-      await testUsersDb.put({
+      await usersDb.put({
         _id: 'org.couchdb.user:' + id,
         type: 'user',
         name: id,
@@ -251,7 +252,7 @@ describe('account', function () {
 
     it('should return a confict if the username already exists', async function () {
       const id = uuid.v4()
-      await testUsersDb.put({
+      await usersDb.put({
         _id: 'org.couchdb.user:' + id,
         type: 'user',
         name: id,
@@ -365,7 +366,7 @@ describe('account', function () {
   describe('PATCH', function () {
     it('should update the users document', async function () {
       await addUserDoc()
-      const oldDoc = await testUsersDb.get(USER_DOC_ID)
+      const oldDoc = await usersDb.get(USER_DOC_ID)
 
       const result = await request(server)
         .patch('/api/account')
@@ -381,7 +382,7 @@ describe('account', function () {
         })
         .expect(204)
 
-      const userDoc = await testUsersDb.get(USER_DOC_ID)
+      const userDoc = await usersDb.get(USER_DOC_ID)
 
       assert.deepStrictEqual(result.body, {}, 'result')
 
@@ -400,7 +401,7 @@ describe('account', function () {
 
     it('should update the user doc with only a password change', async function () {
       await addUserDoc()
-      const oldDoc = await testUsersDb.get(USER_DOC_ID)
+      const oldDoc = await usersDb.get(USER_DOC_ID)
 
       await request(server)
         .patch('/api/account')
@@ -415,7 +416,7 @@ describe('account', function () {
         })
         .expect(204)
 
-      const userDoc = await testUsersDb.get(USER_DOC_ID)
+      const userDoc = await usersDb.get(USER_DOC_ID)
 
       assert.notStrictEqual(
         userDoc.derived_key,
@@ -455,7 +456,7 @@ describe('account', function () {
       const id = 'something'
       const nextMail = 'next@example.com'
 
-      await testUsersDb.put({
+      await usersDb.put({
         _id: 'org.couchdb.user:' + id,
         type: 'user',
         name: id,
@@ -606,7 +607,7 @@ describe('account', function () {
 
       await assert.rejects(
         async () => {
-          await testUsersDb.get(USER_DOC_ID)
+          await usersDb.get(USER_DOC_ID)
         },
         {
           docId: 'org.couchdb.user:3989c4e7-e7ed-48a2-9f2a-a40e520ecd32',

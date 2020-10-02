@@ -1,3 +1,5 @@
+'use strict'
+
 const assert = require('assert')
 const dgram = require('dgram')
 const proxyquire = require('proxyquire')
@@ -9,7 +11,7 @@ describe('bridge', function () {
   let ws
 
   let server // express server
-  let app    // express app
+  let app // express app
 
   beforeEach('setup UDP server', function (done) {
     testServer = dgram.createSocket('udp4')
@@ -61,7 +63,7 @@ describe('bridge', function () {
 
   it('should require a valid grid session', function (done) {
     ws = new WebSocket(getBridgeURL())
-    let sendData = []
+    const sendData = []
 
     ws.on('open', () => {
       ws.send('oisdfg')
@@ -138,7 +140,7 @@ describe('bridge', function () {
               data.readUInt8(0),
               data.readUInt8(1),
               data.readUInt8(2),
-              data.readUInt8(3),
+              data.readUInt8(3)
             ],
             [127, 0, 0, 1],
             'IP part was send'

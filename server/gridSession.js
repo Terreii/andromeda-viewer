@@ -126,10 +126,12 @@ function change (app, id, state) {
       return 'active'
 
     case 'inactive':
+    {
       const now = Date.now()
       sessions.set(id, now)
       timeoutIds.add(id)
       return 'inactive'
+    }
 
     default:
       throw pouchdbErrors.createError(pouchdbErrors.INVALID_REQUEST, `bad state "${state}"`)

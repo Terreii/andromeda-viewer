@@ -1,8 +1,9 @@
+'use strict'
+
 const assert = require('assert')
 const proxyquire = require('proxyquire')
 const sinon = require('sinon')
 const request = require('supertest')
-const uuid = require('uuid')
 
 describe('login', function () {
   let clock
@@ -14,11 +15,11 @@ describe('login', function () {
   let xmlRpcCreateClient
   let fetch
 
-  beforeEach(function () {
+  beforeEach('fake timers', function () {
     clock = sinon.useFakeTimers(Date.now())
   })
 
-  beforeEach(function () {
+  beforeEach('load server', function () {
     usersDbCreateIndex = sinon.stub()
     usersDbGet = sinon.stub()
     usersDbInsert = sinon.stub()
@@ -574,7 +575,7 @@ describe('login', function () {
             /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i
           )
           .expect(function () {
-            assert.strictEqual(fetch.firstCall.firstArg.href,loginURL)
+            assert.strictEqual(fetch.firstCall.firstArg.href, loginURL)
           })
           .expect(200, done)
       })
@@ -620,14 +621,14 @@ describe('login', function () {
             assert.strictEqual(res.headers['x-andromeda-session-id'], undefined)
           })
           .expect(500, {
-              errors: [
-                {
-                  status: 500,
-                  title: 'Error',
-                  detail: 'test'
-                }
-              ]
-            }, done)
+            errors: [
+              {
+                status: 500,
+                title: 'Error',
+                detail: 'test'
+              }
+            ]
+          }, done)
       })
     })
 
