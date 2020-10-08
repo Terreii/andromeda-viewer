@@ -50,15 +50,7 @@ describe('bridge', function () {
   })
 
   function getBridgeURL () {
-    const serverAddress = server.address()
-    const url = new URL(
-      serverAddress.family === 'IPv6'
-        ? `ws://[${serverAddress.address}]`
-        : `ws://${serverAddress.address}`
-    )
-    url.port = serverAddress.port
-    url.pathname = '/api/bridge'
-    return url
+    return `ws://127.0.0.1:${server.address().port}/api/bridge`
   }
 
   it('should require a valid grid session', function (done) {
