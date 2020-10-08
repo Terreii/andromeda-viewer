@@ -25,7 +25,7 @@
     "update-files": "node tools/updateFiles.js",
     "test:docs": "textlint README.md ./*/*.md ./src/*/*.md",
     "test:standard": "standard",
-    "test:server": "cross-env PORT=0 mocha",
+    "test:server": "cross-env PORT=0 NODE_ENV=test mocha",
     "pretest:app": "npm run build:messages",
     "test:app": "react-scripts test --env=jsdom",
     "test": "npm-run-all -s test:standard test:docs test:server test:app",

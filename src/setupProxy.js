@@ -1,25 +1,28 @@
 'use strict'
 
-const { createProxyMiddleware } = require('http-proxy-middleware')
-
 module.exports = process.env.SERVER === 'debug'
   ? proxySetup
   : serverAndProxySetup
+
+const { createProxyMiddleware } = require('http-proxy-middleware')
+const morgan = require('morgan')
 
 /**
  * Setup a server and proxy.
  * @param {import('express').Application} app  Express App.
  */
 function serverAndProxySetup (app) {
+  const logger = morgan('dev')
+
   const webSocketBridge = require('../server/bridge')
   app.use(webSocketBridge.createWebSocketCreationRoute('/api/bridge'))
 
   const gridSession = require('../server/gridSession')
   gridSession(app)
 
-  app.use('/api/account', require('../server/account'))
-  app.post('/api/login', require('../server/login'))
-  app.use('/api/proxy', require('../server/httpProxy'))
+  app.use('/api/account', logger, require('../server/account'))
+  app.post('/api/login', logger, require('../server/login'))
+  app.use('/api/proxy', logger, require('../server/httpProxy'))
 }
 
 /**

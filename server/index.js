@@ -2,6 +2,8 @@
 
 const path = require('path')
 const express = require('express')
+const morgan = require('morgan')
+
 const webSocketBridge = require('./bridge')
 const gridSession = require('./gridSession')
 
@@ -9,6 +11,15 @@ const app = express()
 
 const port = parseInt(process.env.PORT || 3001)
 const publicDir = process.env.NODE_ENV === 'production' ? 'build' : 'public'
+
+// Add logger
+if (process.env.NODE_ENV !== 'test') { // but only if it is not a test
+  const format = process.env.NODE_ENV === 'production'
+    // like "common" but with an ISO-Date
+    ? ':remote-addr - :remote-user [:date[iso]] ":method :url HTTP/:http-version" :status :res[content-length]'
+    : 'dev'
+  app.use(morgan(format))
+}
 
 gridSession(app)
 
