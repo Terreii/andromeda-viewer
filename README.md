@@ -10,7 +10,7 @@ Small web-client for connecting to the virtual world of [Second Life](https://se
 _**This viewer is not production ready!**_
 
 ## Contributing
-Feel free to contribute in any way you like. You can't programm? You are still needed!
+Feel free to contribute in any way you like. You can't program? You are still needed!
 
 Please read and review the documentation. You can find it in the **doc-folder**.
 
@@ -34,7 +34,7 @@ npm run build
 npm start
 ```
 
-If you want to start developing you should run `npm run dev` instead. It will build the viewer every time you make a change and also start the server.
+If you want to start developing you should run `npm run dev` instead. It will build the viewer every time you make a change, start the server and also starts pouchdb-server.
 
 ```sh
 npm run dev
@@ -48,8 +48,10 @@ To make the setup-process easier, everything needed for this project should be a
 
 command | what it does
 --------|-------------
-`npm run build` | Builds the viewer for production. The viewer is in a unusable state after cloning.
+`npm run build` | Builds the viewer for production. The viewer is in an unusable state after cloning.
 `npm run dev` | Builds the viewer. It continues to run and build the viewer when a file changes. This is the recommended build command while developing!
+`npm run start-server-dev` | Runs the server in development. Intended to be run with `npm run dev-server`.
+`npm run dev-server` | Like `npm run dev` but configured to proxy to the server which runs on `npm start` or `npm run start-server-dev`. Intended to be used for developing the **server** _together_ with the **client**.
 `npm test` | Runs all tests. Please run this before committing!
 `npm run test-coverage` | Runs all test and outputs a test coverage report. And will open the report.
 `npm run test:docs` | Runs [textlint](https://textlint.github.io/) and [alex.js](https://alexjs.com/) for catching misspelled, insensitive, inconsiderate writing in the documentation.

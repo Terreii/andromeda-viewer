@@ -101,11 +101,13 @@ circuit.send('TestMessage', {
 
 ## LLSD
 
-More and more UDP packages get obsoleted in favor of HTTP(S) based messages. They get encoded using LindenLabs [LLSD](http://wiki.secondlife.com/wiki/LLSD) format. `src/llsd.js` is a complete Javascript implementation from LindenLab. It supports all encodings: XML, Binary and JSON. The XML encoding is the default one.
+More and more UDP packages get obsoleted in favour of HTTP(S) based messages. They get encoded using LindenLabs [LLSD](http://wiki.secondlife.com/wiki/LLSD) format. `src/llsd.js` is a complete Javascript implementation from LindenLab. It supports all encodings: XML, Binary and JSON. The XML encoding is the default one.
 
 The http endpoints get revered as capabilities. Their URL change for every session and sometimes also when changing the SIM. The login result will contain the `SeedCapabilities`. it will result a list of all capability-urls.
 
-A LLSD-List with all capabilities-names gets pushed to the SeedCapabilities. Resulting to a LLSD-Dictionary ({ cap-name: URL }).
+A LLSD-List with all capabilities-names gets pushed to the SeedCapabilities.
+The names are in **src/actions/capabilities.json**.
+The server returns then a LLSD-Dictionary ({ cap-name: URL }).
 
 ### EventQueueGet
 

@@ -32,13 +32,13 @@ const accountSlice = createSlice({
         }
       }
     },
-  
+
     signOut: getDefault,
-  
+
     unlocked (state) {
       state.unlocked = true
     },
-  
+
     displayResetKeys (state, action: PayloadAction<string[]>) {
       state.resetKeys = action.payload
     },
@@ -46,54 +46,50 @@ const accountSlice = createSlice({
     closeResetKeys (state, action: Action) {
       state.resetKeys = null
     },
-  
-    didUpdate (state: { [key: string]: any }, action: PayloadAction<{ [key: string]: any }>) {
-      Object.entries(action.payload)
-        .filter(([key]) => key !== 'id')
-        .forEach(([key, value]) => {
-          state[key] = value
-        })
+
+    didUpdateUsername (state, action: PayloadAction<{ username: string }>) {
+      state.username = action.payload.username
     },
-  
+
     avatarSaved (state, action: PayloadAction<SavedAvatarData>) {
       state.savedAvatars.push(action.payload)
     },
-  
+
     avatarsLoaded (state, action: PayloadAction<SavedAvatarData[]>) {
       state.savedAvatars = action.payload
       state.savedAvatarsLoaded = true
     },
-  
+
     savedAvatarUpdated (state, action: PayloadAction<SavedAvatarData>) {
       const index = state.savedAvatars.findIndex(avatar => avatar._id === action.payload._id)
       if (index >= 0) {
         state.savedAvatars[index] = action.payload
       }
     },
-  
+
     savedAvatarRemoved (state, action: PayloadAction<SavedAvatarData | HoodieObject>) {
       state.savedAvatars = state.savedAvatars.filter(avatar => avatar._id !== action.payload._id)
     },
-  
+
     gridAdded (state, action: PayloadAction<Grid>) {
       state.savedGrids.push(action.payload)
     },
-  
+
     gridsLoaded (state, action: PayloadAction<Grid[]>) {
       state.savedGrids.push(...action.payload)
       state.savedGridsLoaded = true
     },
-  
+
     savedGridDidChanged (state, action: PayloadAction<Grid>) {
       const index = state.savedGrids.findIndex(grid => {
         return grid._id != null // If grid has an id
           ? grid._id === action.payload._id
           : grid.name === action.payload.name
       })
-  
+
       state.savedGrids[index] = action.payload
     },
-  
+
     savedGridRemoved (state, action: PayloadAction<Grid>) {
       state.savedGrids = state.savedGrids.filter(grid => grid._id != null
         ? grid._id !== action.payload._id
@@ -101,7 +97,7 @@ const accountSlice = createSlice({
       )
     }
   },
-  
+
   extraReducers: {
     'session/login' (state, action: PayloadAction<any>) {
       if (!action.payload.save) { // Anonym
@@ -129,7 +125,7 @@ export const {
   signInStatus,
   signOut,
   unlocked,
-  didUpdate,
+  didUpdateUsername,
 
   displayResetKeys,
   closeResetKeys,
@@ -177,7 +173,7 @@ export const selectSavedGridsAreLoaded = (state: any): boolean => state.account.
 export const selectShowUnlockDialog = createSelector(
   [
     selectIsSignedIn,
-    selectIsUnlocked,
+    selectIsUnlocked
   ],
   (isSignedIn, isUnlocked) => !isUnlocked && isSignedIn
 )
@@ -191,27 +187,30 @@ function getDefault () {
     unlocked: false,
     loggedIn: false,
     username: '',
-    resetKeys: null as string[] | null,
-    savedAvatars: [] as SavedAvatarData[],
+    resetKeys: ((): string[] | null => null)(),
+    savedAvatars: ((): SavedAvatarData[] => [])(),
     savedAvatarsLoaded: false,
-    anonymAvatarData: null as AvatarData | null,
-    savedGrids: [
+    anonymAvatarData: ((): AvatarData | null => null)(),
+    savedGrids: ((): Grid[] => [
       {
+        _id: 'second_life',
         name: 'Second Life',
         loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi',
         isLLSDLogin: true
       },
       {
+        _id: 'second_life_beta',
         name: 'Second Life Beta',
         loginURL: 'https://login.aditi.lindenlab.com/cgi-bin/login.cgi',
         isLLSDLogin: true
       },
       {
+        _id: 'os_grid',
         name: 'OS Grid',
         loginURL: 'http://login.osgrid.org/',
         isLLSDLogin: false
       }
-    ] as Grid[],
+    ])(),
     savedGridsLoaded: false
   }
   return defaultData

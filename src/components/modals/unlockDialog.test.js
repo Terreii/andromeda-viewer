@@ -23,7 +23,11 @@ const Container = ({ store }) => {
 
 it('should render without crashing', () => {
   const store = {
-    getState: () => ({}),
+    getState: () => ({
+      account: {
+        username: 'Tester MacTestface'
+      }
+    }),
     dispatch: () => {},
     subscribe: () => () => {}
   }
@@ -34,7 +38,11 @@ it('should render without crashing', () => {
 })
 
 it('should unlock with return key', async () => {
-  const store = mockStore()
+  const store = mockStore({
+    account: {
+      username: 'Tester MacTestface'
+    }
+  })
 
   const oldUnlockCallCount = unlock.mock.calls.length
 
@@ -63,7 +71,11 @@ it('should unlock with return key', async () => {
 })
 
 it('should unlock with unlock button clicked', async () => {
-  const store = mockStore()
+  const store = mockStore({
+    account: {
+      username: 'Tester MacTestface'
+    }
+  })
 
   const oldUnlockCallCount = unlock.mock.calls.length
 
@@ -91,7 +103,11 @@ it('should unlock with unlock button clicked', async () => {
 })
 
 it('should call sign out when sign out button is clicked', async () => {
-  const store = mockStore()
+  const store = mockStore({
+    account: {
+      username: 'Tester MacTestface'
+    }
+  })
 
   signOut.mockReturnValueOnce({ type: 'signOut' })
 
@@ -108,7 +124,11 @@ it('should call sign out when sign out button is clicked', async () => {
 })
 
 it('should show reset crypto password if the reset password button is clicked', async () => {
-  const store = mockStore()
+  const store = mockStore({
+    account: {
+      username: 'Tester MacTestface'
+    }
+  })
 
   const { queryByText } = render(<Container store={store} />)
 
@@ -119,7 +139,11 @@ it('should show reset crypto password if the reset password button is clicked', 
 
 it('should pass aXe', async () => {
   const store = {
-    getState: () => ({}),
+    getState: () => ({
+      account: {
+        username: 'Tester MacTestface'
+      }
+    }),
     dispatch: () => {},
     subscribe: () => () => {}
   }

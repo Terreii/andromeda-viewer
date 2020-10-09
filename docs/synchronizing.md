@@ -1,30 +1,55 @@
-# Synchronizing
+# Synchronising
 
 ## General
 
-Andromeda is a [Hoodie](https://hood.ie) ([GitHub](https://github.com/hoodiehq)) web-app. Hoodie handles the server, accounts, and synchronizing of user data.
+Andromeda is an [Express](https://expressjs.com/), [CouchDB](https://couchdb.apache.org/) & [PouchDB](https://pouchdb.com/) web-app.
+
+PouchDB handles the storing and synchronising of user data.
+Server side CouchDB handles accounts, syncing sessions, and storing user data.
+While Express gets used for account creation, updating and more.
 
 ## Account
 
-An account of the viewer is a hoodie-account. Hoodies account module handles sign up, sign in and sign out. Look at its [readme.md](https://github.com/hoodiehq/hoodie-account-client/blob/master/README.md) and [documentation](http://docs.hood.ie/en/latest/api/client/hoodie.account.html) of it.
-An account name is always an email-address.
+An account of the viewer is a [CouchDB-account](https://docs.couchdb.org/en/stable/intro/security.html). To create, update, delete and password reset, the methods in __account.js__ must get used.
+
+An account name is always an UUID. The login-name is an email-address.
+The email get stored in an `email` field.
+
+To get the UUID/name a GET request gets made to `/api/session/account` with a basic login. The result contains the account infos. With them the client can login to CouchDB.
+
+The account data will get stored in `_local/account`.
+It is a [local doc](https://docs.couchdb.org/en/stable/api/local.html) that isn't synchronised.
+
+## Password
+
+The users password gets hashed on the client. First with `PBKDF2` and then with `HKDF`.
+Using them the password gets hashed into 64 byte. The first 32 bytes are the server password,
+while the last 32 bytes are the encryption password.
+
+__The encryption password and users password will never leave the client!__
 
 ## Store
 
-All synchronizing data, must get stored in hoodies user store. [hoodie-plugin-store-crypto](https://github.com/Terreii/hoodie-plugin-store-crypto) must get used for it! It builds on top of [hoodie-store-client](https://github.com/hoodiehq/hoodie-store-client/).
-[Hoodies store](https://github.com/hoodiehq/hoodie-store-client/) ([documentation](http://docs.hood.ie/en/latest/api/client/hoodie.store.html)) is a NoSQL database based on PouchDB and CouchDB. Documents (doc) are the data unit of CouchDB. A doc is a JSON-Object. No Array as base! Every doc has an ID-string (`_id` key) that is unique for a database. It is the way to find a doc.
+All synchronising data, must get stored in a local PouchDB database.
+[hoodie-plugin-store-crypto](https://github.com/Terreii/hoodie-plugin-store-crypto) must get used to encrypt the users data!
+
+PouchDB and CouchDB are NoSQL databases. Documents (doc) are the data unit of CouchDB.
+A doc is a JSON-Object. No Array as base!
+
+Every doc has an ID-string (`_id` key) that is unique for a database. It is the primary way to find a doc.
+
 Every user has their own database.
 
 ## Encryption
 
 Andromeda uses [hoodie-plugin-store-crypto](https://github.com/Terreii/hoodie-plugin-store-crypto) to encrypt and decrypt user data.
 It uses `pbkdf2` with `sha256` to generate a key and `AES-GCM` for data encryption.
-The salt gets synced, but the encryption password and key are not synchronized!
+The salt gets synced, but the encryption password and key are not synchronised!
 Because the `_id` can't get encrypted, most data uses some random generated UUIDs in their names.
 
 ## Store Layout
 
-Docs get organized using prefixes on their IDs, separated with `/`. View it as folders with JSON-files in it.
+Docs get organised using prefixes on their IDs, separated with `/`. View it as folders with JSON-files in it.
 Data from an avatar (chats) have `dataSaveId` as prefix. This is a random generated UUID unique to that avatar!
 - [`avatars/`](#avatars)
 - [`grids/`](#grids)

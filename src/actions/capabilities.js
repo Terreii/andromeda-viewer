@@ -47,7 +47,7 @@ async function * eventQueueGet (getState, fetchLLSD) {
       continue
     }
 
-    if (response.ok && response.status >= 200 && response.status < 300) {
+    if (response.ok) {
       const body = await response.llsd()
       ack = body.id
       for (const event of body.events) {

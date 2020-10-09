@@ -99,7 +99,7 @@ test('it should create an instance', () => {
   expect(circuit.ip).toBe('127.0.0.1')
   expect(circuit.ipArray).toEqual([127, 0, 0, 1])
   expect(circuit.port).toBe(8080)
-  expect(window.WebSocket).lastCalledWith('ws://localhost/andromeda-bridge')
+  expect(window.WebSocket).lastCalledWith('ws://localhost/api/bridge')
 
   expect(circuit.websocketIsOpen).toBe(false)
 })

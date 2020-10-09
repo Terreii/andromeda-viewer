@@ -68,7 +68,15 @@ it('should display and update the account name', async () => {
     }
   })
   expect((await findByLabelText('Username / Mail')).value).toBe('tester.mactestface@viewer.net')
-  expect(updateButton.disabled).toBeFalsy()
+  expect(updateButton.disabled).toBeTruthy()
+
+  fireEvent.change(queryByLabelText('Current password'), {
+    target: {
+      value: 'password'
+    }
+  })
+  // Update button
+  expect((await findByText('update')).disabled).toBeFalsy()
 
   // change username
   fireEvent.submit(username)
@@ -76,7 +84,10 @@ it('should display and update the account name', async () => {
   expect((await findByLabelText('Username / Mail')).value).toBe('tester.mactestface@viewer.net')
   expect(updateAccount.mock.calls.length).toBe(1)
   expect(updateAccount.mock.calls[0]).toEqual([
-    { nextUsername: 'tester.mactestface@viewer.net' }
+    {
+      nextUsername: 'tester.mactestface@viewer.net',
+      password: 'password'
+    }
   ])
 })
 
@@ -92,7 +103,7 @@ it('should change the password', async () => {
     </Provider>
   )
 
-  const passwordChangeOld = queryByLabelText('Old password')
+  const passwordChangeOld = queryByLabelText('Current password')
   expect(passwordChangeOld).toBeTruthy()
   expect(passwordChangeOld.nodeName).toBe('INPUT')
   expect(passwordChangeOld.type).toBe('password')
@@ -118,14 +129,14 @@ it('should change the password', async () => {
   fireEvent.submit(queryByLabelText('Username / Mail'))
   expect(updateAccount.mock.calls.length).toBe(startUpdateCallCount)
 
-  // enter old password
+  // enter Current password
   fireEvent.change(passwordChangeOld, {
     target: {
       value: 'oldPassword'
     }
   })
 
-  expect((await findByLabelText('Old password')).value).toBe('oldPassword')
+  expect((await findByLabelText('Current password')).value).toBe('oldPassword')
   expect(passwordChangeNew.value).toBe('')
   expect(passwordChangeRepeat.value).toBe('')
   expect(updateButton.disabled).toBeTruthy()
@@ -140,7 +151,7 @@ it('should change the password', async () => {
     }
   })
 
-  expect((await findByLabelText('Old password')).value).toBe('oldPassword')
+  expect((await findByLabelText('Current password')).value).toBe('oldPassword')
   expect(passwordChangeNew.value).toBe('newPassword')
   expect(passwordChangeRepeat.value).toBe('')
   expect(updateButton.disabled).toBeTruthy()
@@ -155,7 +166,7 @@ it('should change the password', async () => {
     }
   })
 
-  expect((await findByLabelText('Old password')).value).toBe('oldPassword')
+  expect((await findByLabelText('Current password')).value).toBe('oldPassword')
   expect(passwordChangeNew.value).toBe('newPassword')
   expect(passwordChangeRepeat.value).toBe('otherPassword')
   expect(updateButton.disabled).toBeTruthy()
@@ -170,7 +181,7 @@ it('should change the password', async () => {
     }
   })
 
-  expect((await findByLabelText('Old password')).value).toBe('oldPassword')
+  expect((await findByLabelText('Current password')).value).toBe('oldPassword')
   expect(passwordChangeNew.value).toBe('newPassword')
   expect(passwordChangeRepeat.value).toBe('newPassword')
   expect(updateButton.disabled).toBeFalsy()
@@ -178,7 +189,7 @@ it('should change the password', async () => {
   // change username
   fireEvent.click(updateButton)
 
-  expect((await findByLabelText('Old password')).value).toBe('')
+  expect((await findByLabelText('Current password')).value).toBe('')
   expect(passwordChangeNew.value).toBe('')
   expect(passwordChangeRepeat.value).toBe('')
   expect(updateButton.disabled).toBeTruthy()
@@ -210,7 +221,7 @@ it('should allow to change username and password at the same time', async () => 
     }
   })
 
-  fireEvent.change(await findByLabelText('Old password'), {
+  fireEvent.change(await findByLabelText('Current password'), {
     target: {
       value: 'oldPassword'
     }
@@ -231,7 +242,7 @@ it('should allow to change username and password at the same time', async () => 
   fireEvent.click(await findByText('update'))
 
   expect((await findByLabelText('Username / Mail')).value).toBe('tester.mactestface@viewer.net')
-  expect(queryByLabelText('Old password').value).toBe('')
+  expect(queryByLabelText('Current password').value).toBe('')
   expect(queryByLabelText('New password').value).toBe('')
   expect(queryByLabelText('Repeat password').value).toBe('')
 

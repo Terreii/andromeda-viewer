@@ -4,12 +4,18 @@ import { useDialogState } from 'reakit'
 
 import Modal from './modal'
 
+import { viewerName } from '../../viewerInfo'
 import { closeResetKeys } from '../../bundles/account'
 
 import { useAutoFocus } from '../../hooks/utils'
 
 import keepItSecret from '../../icons/keepitsecret.png'
 
+/**
+ * Display the Password reset keys and generate a downloadable file containing them.
+ * @param {object}   param           React arguments.
+ * @param {string[]} param.resetKeys Password reset keys.
+ */
 export default function ResetKeysModal ({ resetKeys }) {
   const dispatch = useDispatch()
   const dialog = useDialogState({ visible: process.env.NODE_ENV !== 'test' })
@@ -35,11 +41,25 @@ export default function ResetKeysModal ({ resetKeys }) {
       <form className='flex flex-col leading-6 text-center'>
         <p id='reset_keys_info_text'>
           Those are your <b>encryption reset-keys</b>.<br />
-          You need them, when you did forget your encryption-password!<br />
+          You need them, when you did forget your password!<br />
           <b>Please save them!</b><br />
           <b>Save them some where secure!</b><br />
           There is no other way to get your data back!
         </p>
+
+        <details className='my-3'>
+          <summary>Why do I need them?</summary>
+
+          <p>
+            All your data gets encrypted on your machine.
+            <br />
+            And only the encrypted data is stored on our servers.
+            <br />
+            But if you loose your password, there is no way to regain your data!
+            <br />
+            Except with one of those reset keys.
+          </p>
+        </details>
 
         <ul className='p-0 font-mono text-sm list-none'>
           {resetKeys.map((key, index) => (
@@ -56,9 +76,9 @@ export default function ResetKeysModal ({ resetKeys }) {
           href={fileURL}
           target='_blank'
           rel='noopener noreferrer'
-          download='andromeda-viewer-reset-keys.txt'
+          download={viewerName + '-reset-keys.txt'}
           ref={doAutoFocus}
-          title='download all your encryption-password-reset-keys as a file'
+          title='download all your password-reset-keys as a file'
           aria-describedby='reset_keys_info_text'
         >
           Download as a file
@@ -73,7 +93,7 @@ export default function ResetKeysModal ({ resetKeys }) {
         />
 
         <p className='mt-4'>
-          Remember: If you lose your encryption password and the reset-keys, you lose your data!
+          Remember: If you lose your password and the reset-keys, you lose your data!
         </p>
 
         <button
