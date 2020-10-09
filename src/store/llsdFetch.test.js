@@ -2,7 +2,7 @@ import { proxyFetch, fetchLLSD } from './llsdFetch'
 import LLSD, { UUID } from '../llsd'
 
 describe('proxyFetch', () => {
-  it('should make a fetch request to /hoodie/andromeda-viewer/proxy/', async () => {
+  it('should make a fetch request to /api/proxy/', async () => {
     const result = { test: 'hello' }
     global.fetch = jest.fn().mockImplementationOnce(async () => result)
 
@@ -18,7 +18,7 @@ describe('proxyFetch', () => {
 
     expect(global.fetch.mock.calls.length).toBe(1)
     expect(global.fetch.mock.calls[0]).toEqual([
-      'http://localhost/hoodie/andromeda-viewer/proxy/https/example.com/test',
+      'http://localhost/api/proxy/https/example.com/test',
       {
         headers: {
           'x-andromeda-session-id': 'test'
@@ -47,7 +47,7 @@ describe('proxyFetch', () => {
 
     expect(global.fetch.mock.calls.length).toBe(1)
     expect(global.fetch.mock.calls[0]).toEqual([
-      'http://localhost/hoodie/andromeda-viewer/proxy/https/example.com/test',
+      'http://localhost/api/proxy/https/example.com/test',
       {
         method: 'POST',
         headers: new window.Headers([
@@ -146,7 +146,7 @@ describe('fetchLLSD', () => {
     })
 
     expect(global.fetch.mock.calls[0]).toEqual([
-      'http://localhost/hoodie/andromeda-viewer/proxy/https/example.com/test',
+      'http://localhost/api/proxy/https/example.com/test',
       {
         headers: {
           'x-andromeda-session-id': 'test'
@@ -204,7 +204,7 @@ describe('fetchLLSD', () => {
     })
 
     expect(global.fetch.mock.calls[0]).toEqual([
-      'http://localhost/hoodie/andromeda-viewer/proxy/https/example.com/test',
+      'http://localhost/api/proxy/https/example.com/test',
       {
         method: 'POST',
         headers: new window.Headers([

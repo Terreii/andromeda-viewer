@@ -31,5 +31,6 @@ build/
 docs/types/
 src/network/messages.json
 *.map
-.hoodie
+db/
+log.txt
 src/styles.css

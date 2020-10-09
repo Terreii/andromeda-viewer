@@ -89,7 +89,7 @@ export default class Circuit extends events.EventEmitter {
   }
 
   _createNewWebSocket () {
-    const socketUrl = new URL('/andromeda-bridge', window.location)
+    const socketUrl = new URL('/api/bridge', window.location)
     // http -> ws  &  https -> wss
     socketUrl.protocol = socketUrl.protocol.replace(/^http/, 'ws')
 

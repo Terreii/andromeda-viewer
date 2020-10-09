@@ -6,8 +6,8 @@ import {
   signInStatus,
   signOut as accountDidSignOut,
   unlocked,
+  didUpdateUsername,
   displayResetKeys,
-  didUpdate as accountDidUpdate,
   avatarSaved,
   avatarsLoaded,
   savedAvatarUpdated,
@@ -18,6 +18,7 @@ import {
   savedGridRemoved,
 
   selectIsSignedIn,
+  selectUserName,
   selectIsUnlocked,
   selectSavedAvatars,
   selectSavedAvatarsAreLoaded,
@@ -25,11 +26,18 @@ import {
   selectSavedGridsAreLoaded
 } from '../bundles/account'
 import { selectIsLoggedIn } from '../bundles/session'
+import {
+  createLocalDB,
+  createCryptoStore,
+  createRemoteDB,
+  getUserDatabaseName,
+  startSyncing
+} from '../store/db'
 
 import { IMChatType } from '../types/chat'
 
 export function saveAvatar (name, agentId, grid) {
-  return (dispatch, getState, { hoodie }) => {
+  return (dispatch, getState, { cryptoStore }) => {
     const gridName = typeof grid === 'string' ? grid : grid.name
 
     const avatarIdentifier = `${agentId}@${gridName}`
@@ -40,7 +48,7 @@ export function saveAvatar (name, agentId, grid) {
       return Promise.reject(new Error('Avatar already exist!'))
     }
 
-    return hoodie.cryptoStore.withIdPrefix('avatars/').add({
+    return cryptoStore.withIdPrefix('avatars/').add({
       dataSaveId: uuid(),
       avatarIdentifier,
       name: name.getFullName(),
@@ -50,7 +58,7 @@ export function saveAvatar (name, agentId, grid) {
 }
 
 export function loadSavedAvatars () {
-  return async (dispatch, getState, { hoodie }) => {
+  return async (dispatch, getState, { db, cryptoStore }) => {
     const activeState = getState()
 
     if (!selectIsSignedIn(activeState)) {
@@ -59,14 +67,14 @@ export function loadSavedAvatars () {
 
     if (selectSavedAvatarsAreLoaded(activeState)) return
 
-    const avatarsStore = hoodie.cryptoStore.withIdPrefix('avatars/')
+    const avatarsStore = cryptoStore.withIdPrefix('avatars/')
 
     const changeHandler = (eventName, doc) => {
       dispatch(avatarsDidChange(eventName, doc))
     }
 
     avatarsStore.on('change', changeHandler)
-    hoodie.account.one('signout', () => {
+    db.once('destroyed', () => {
       avatarsStore.off('change', changeHandler)
     })
 
@@ -99,14 +107,14 @@ function avatarsDidChange (type, doc) {
 }
 
 export function saveGrid (newGrid) {
-  return (dispatch, getState, { hoodie }) => {
+  return (dispatch, getState, { cryptoStore }) => {
     const name = newGrid.name.trim()
 
     if (selectSavedGrids(getState()).some(grid => grid.name === name)) {
       return Promise.reject(new Error('Grid already exist!'))
     }
 
-    return hoodie.cryptoStore.withIdPrefix('grids/').add({
+    return cryptoStore.withIdPrefix('grids/').add({
       name,
       loginURL: newGrid.loginURL,
       isLLSDLogin: false
@@ -115,7 +123,7 @@ export function saveGrid (newGrid) {
 }
 
 export function loadSavedGrids () {
-  return async (dispatch, getState, { hoodie }) => {
+  return async (dispatch, getState, { db, cryptoStore }) => {
     const activeState = getState()
 
     if (!selectIsSignedIn(activeState)) {
@@ -124,14 +132,14 @@ export function loadSavedGrids () {
 
     if (selectSavedGridsAreLoaded(activeState)) return
 
-    const gridsStore = hoodie.cryptoStore.withIdPrefix('grids/')
+    const gridsStore = cryptoStore.withIdPrefix('grids/')
 
     const changeHandler = (change, doc) => {
       dispatch(gridsDidChange(change, doc))
     }
 
     gridsStore.on('change', changeHandler)
-    hoodie.account.one('signout', () => {
+    db.once('destroyed', () => {
       gridsStore.off('change', changeHandler)
     })
 
@@ -153,33 +161,104 @@ function gridsDidChange (type, grid) {
   }
 }
 
+/**
+ * Get the users data.
+ * @param {PouchDB.Database} db The local Database.
+ * @returns {Promise<{ _id: string, _rev: string, accountId: string, name: string }>} Doc with user info
+ */
+async function getUserInfo (db) {
+  const userDoc = await db.get('_local/account')
+  return userDoc
+}
+
 export function isSignedIn () {
-  return async (dispatch, getState, { hoodie }) => {
-    const properties = await hoodie.account.get(['session', 'username'])
-    const isLoggedIn = properties.session != null
-    const username = properties != null ? properties.username : undefined
-    dispatch(signInStatus(isLoggedIn, null, username))
+  return async (dispatch, getState, args) => {
+    const session = await args.remoteDB.getSession()
+    let username = session?.userCtx?.name
+
+    if (username == null) {
+      try {
+        const userDoc = await getUserInfo(args.db)
+        username = userDoc.name
+      } catch (err) {
+        if (err.status === 404) {
+          username = null
+        } else {
+          throw err
+        }
+      }
+    }
+
+    const isLoggedIn = username != null
 
     if (isLoggedIn) {
-      listenToAccountChanges(hoodie.account, dispatch)
+      const userDbName = getUserDatabaseName(username)
+      args.remoteDB = createRemoteDB(userDbName)
+      args.cryptoStore = createCryptoStore(args.db, args.remoteDB)
     }
+
+    dispatch(signInStatus(isLoggedIn, null, username))
 
     return isLoggedIn
   }
 }
 
-function listenToAccountChanges (account, dispatch) {
-  const handler = changes => {
-    dispatch(accountDidUpdate(changes))
+/**
+ * Generate/derive the login and encryption passwords from one password and username.
+ * Inspired by https://github.com/mozilla/fxa/blob/main/packages/fxa-auth-client/lib/crypto.ts
+ * @param {string} username User' name
+ * @param {string} password User password
+ */
+async function derivePasswords (username, password) {
+  const enc = new TextEncoder()
+  const NAMESPACE = 'account.andromeda-viewer.com/v1/'
+  const key = await window.crypto.subtle.importKey(
+    'raw',
+    enc.encode(password),
+    'PBKDF2',
+    false,
+    ['deriveBits']
+  )
+  const stretchedRaw = await window.crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt: enc.encode(`${NAMESPACE}quickStretch:${username}`),
+      iterations: 100000,
+      hash: 'SHA-512'
+    },
+    key,
+    512
+  )
+  const stretchedKey = await window.crypto.subtle.importKey(
+    'raw',
+    stretchedRaw,
+    'HKDF',
+    false,
+    ['deriveBits']
+  )
+  const authPW = await window.crypto.subtle.deriveBits(
+    {
+      name: 'HKDF',
+      salt: new Uint8Array(0),
+      info: enc.encode(`${NAMESPACE}authPW`),
+      hash: 'SHA-512'
+    },
+    stretchedKey,
+    512
+  )
+  const toString = buffy => {
+    return Array.from(new Uint8Array(buffy))
+      .map(byte => byte.toString(16).padStart(2, '0'))
+      .join('')
   }
-  account.on('update', handler)
-  account.one('signout', () => {
-    account.off('update', handler)
-  })
+  return {
+    loginPassword: toString(authPW.slice(0, 32)),
+    cryptoPassword: toString(authPW.slice(32))
+  }
 }
 
-export function unlock (cryptoPassword) {
-  return async (dispatch, getState, { hoodie }) => {
+export function unlock (password) {
+  return async (dispatch, getState, args) => {
     const activeState = getState()
     if (selectIsUnlocked(activeState)) {
       return
@@ -189,7 +268,18 @@ export function unlock (cryptoPassword) {
       throw new Error('Not signed in!')
     }
 
-    await hoodie.cryptoStore.unlock(cryptoPassword)
+    const username = selectUserName(activeState)
+    const accountDoc = await getUserInfo(args.db)
+    const { loginPassword, cryptoPassword } = await derivePasswords(username, password)
+    await args.remoteDB.logIn(accountDoc.accountId, loginPassword)
+
+    const userDbName = getUserDatabaseName(accountDoc.accountId)
+    args.remoteDB.close()
+    args.remoteDB = createRemoteDB(userDbName, false)
+
+    startSyncing(args.db, args.remoteDB)
+
+    await args.cryptoStore.unlock(cryptoPassword)
 
     dispatch(unlocked())
 
@@ -198,62 +288,102 @@ export function unlock (cryptoPassword) {
   }
 }
 
-export function signIn (username, password, cryptoPassword) {
-  return async (dispatch, getState, { hoodie }) => {
-    try {
-      const accountProperties = await hoodie.account.signIn({ username, password })
-      await hoodie.cryptoStore.unlock(cryptoPassword)
+function signInAndSync (accountProperties, password, cryptoPassword) {
+  return async (dispatch, getState, args) => {
+    await args.remoteDB.logIn(accountProperties.data.id, password)
 
-      dispatch(signInStatus(true, true, accountProperties.username))
+    const userDbName = getUserDatabaseName(accountProperties.data.id)
+    args.remoteDB.close()
+    args.remoteDB = createRemoteDB(userDbName, false)
+    args.cryptoStore = createCryptoStore(args.db, args.remoteDB)
 
-      listenToAccountChanges(hoodie.account, dispatch)
+    startSyncing(args.db, args.remoteDB)
 
-      await dispatch(loadSavedGrids())
-      dispatch(loadSavedAvatars())
-    } catch (err) {
-      console.error(err)
+    await args.db.put({
+      _id: '_local/account',
+      accountId: accountProperties.data.id,
+      name: accountProperties.data.attributes.username
+    })
+    await args.cryptoStore.unlock(cryptoPassword)
 
-      // if the cryptoPassword is wrong, but the user password right
-      const properties = await hoodie.account.get(['session', 'username'])
-      const signedIn = properties.session != null
-      if (signedIn) {
-        await hoodie.account.signOut()
-        throw new Error('Encryption password is wrong!')
-      }
-      throw new Error('Username or password is wrong!')
-    }
+    dispatch(signInStatus(true, true, accountProperties.data.attributes.username))
+
+    await dispatch(loadSavedGrids())
+    await dispatch(loadSavedAvatars())
   }
 }
 
-export function signUp (username, password, cryptoPassword) {
-  return async (dispatch, getState, { hoodie }) => {
-    await hoodie.account.signUp({ username, password })
-    const resetKeys = await hoodie.cryptoStore.setup(cryptoPassword)
+export function signIn (username, password) {
+  return async (dispatch, getState) => {
+    if (selectIsSignedIn(getState())) return
 
-    await dispatch(
-      signIn(username, password, cryptoPassword)
-    )
+    const { loginPassword, cryptoPassword } = await derivePasswords(username, password)
+    const accountDataReq = await window.fetch('/api/account', {
+      method: 'GET',
+      headers: {
+        Authorization: 'Basic ' + window.btoa(`${username}:${loginPassword}`),
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+    const accountProperties = await accountDataReq.json()
+    if (accountProperties.error) {
+      throw accountProperties.error[0]
+    }
+    await dispatch(signInAndSync(accountProperties, loginPassword, cryptoPassword))
+  }
+}
 
+export function signUp (username, password) {
+  return async (dispatch, getState, { cryptoStore }) => {
+    if (selectIsSignedIn(getState())) return
+
+    const { loginPassword, cryptoPassword } = await derivePasswords(username, password)
+
+    const request = await window.fetch('/api/account', {
+      method: 'PUT',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        data: {
+          type: 'account',
+          attributes: {
+            username,
+            password: loginPassword
+          }
+        }
+      })
+    })
+    const accountProperties = await request.json()
+    if (accountProperties.error) {
+      throw accountProperties.error[0]
+    }
+    const resetKeys = await cryptoStore.setup(cryptoPassword)
     dispatch(displayResetKeys(resetKeys))
+
+    await dispatch(signInAndSync(accountProperties, loginPassword, cryptoPassword))
   }
 }
 
 /**
- * Update the Viewer Account (using hoodie).
+ * Update the Viewer Account.
  * @param {object} options Object containing optional params.
  * @param {string?} options.nextUsername If the username should be updated, then this is it.
- * @param {string?} options.password If the password should be updated, then this is the
- *                                   current password
+ * @param {string} options.password      The current password. Always needed, for encryption.
  * @param {string?} options.nextPassword If the password should be updated, then this is the new one
  */
 export function updateAccount ({ nextUsername, password, nextPassword }) {
   const mailReg = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/i
 
   const shouldUpdateUsername = nextUsername != null && nextUsername.length > 0
-  const shouldUpdatePassword = password != null && password.length > 0 &&
-    nextPassword != null && nextPassword.length > 0
+  const shouldUpdatePassword = nextPassword != null && nextPassword.length > 0
 
-  return async (dispatch, getState, { hoodie }) => {
+  return async (dispatch, getState, { db, cryptoStore }) => {
+    if (password == null || password.length < 8) {
+      throw new TypeError('Please enter the current password!')
+    }
     if (shouldUpdateUsername && !mailReg.test(nextUsername)) {
       throw new TypeError('Username must be a valid e-mail address!')
     }
@@ -261,20 +391,53 @@ export function updateAccount ({ nextUsername, password, nextPassword }) {
       throw new Error('Password must have 8 characters or more!')
     }
 
-    const username = await hoodie.account.get('username')
+    const { name } = await getUserInfo(db)
+    const updateName = shouldUpdateUsername ? nextUsername : undefined
+    const { loginPassword, cryptoPassword } = await derivePasswords(name, password)
+    const { loginPassword: nextLoginPw, cryptoPassword: nextCryptoPw } = await derivePasswords(
+      updateName ?? name,
+      shouldUpdatePassword ? nextPassword : password
+    )
 
-    const options = {
-      username: shouldUpdateUsername ? nextUsername : username
+    const accountDataReq = await window.fetch('/api/account', {
+      method: 'PATCH',
+      headers: {
+        Authorization: 'Basic ' + window.btoa(`${name}:${loginPassword}`),
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        data: {
+          type: 'account',
+          attributes: {
+            username: updateName,
+            password: nextLoginPw
+          }
+        }
+      })
+    })
+    const accountDataTxt = await accountDataReq.text()
+    const accountData = accountDataTxt.length > 0 ? JSON.parse(accountDataTxt) : {}
+
+    if (accountDataReq.ok && accountData.errors == null) {
+      const result = await cryptoStore.changePassword(cryptoPassword, nextCryptoPw)
+
+      dispatch(displayResetKeys(result.resetKeys))
+
+      if (shouldUpdateUsername) {
+        const userDoc = await getUserInfo(db)
+        userDoc.name = nextUsername
+        await db.put(userDoc)
+        dispatch(didUpdateUsername({ username: nextUsername }))
+      }
+    } else if (accountData.errors) {
+      const err = new Error(accountData.errors[0].title)
+      err.name = accountData.errors[0].title
+      err.message = accountData.errors[0].detail
+      throw err
+    } else {
+      throw new Error('unknown')
     }
-
-    // check if old password is correct
-    if (shouldUpdatePassword) {
-      await hoodie.account.signIn({ username, password }) // will reject if password is wrong
-
-      options.password = nextPassword
-    }
-
-    return hoodie.account.update(options)
   }
 }
 
@@ -299,13 +462,20 @@ export function changeEncryptionPassword (resetKey, newPassword) {
 }
 
 export function signOut () {
-  return async (dispatch, getState, { hoodie }) => {
+  return async (dispatch, getState, args) => {
     await dispatch(logoutAvatar())
 
     try {
-      await hoodie.account.signOut()
+      await args.remoteDB.logOut()
+      await args.remoteDB.close()
+      await args.db.destroy()
+      args.cryptoStore.lock()
 
       dispatch(accountDidSignOut())
+
+      args.db = createLocalDB()
+      args.remoteDB = createRemoteDB('_users')
+      args.cryptoStore = createCryptoStore(args.db, args.remoteDB)
     } catch (err) {
       console.error(err)
     }
@@ -318,11 +488,11 @@ export function signOut () {
  * @returns {object} JSON data and array of files (text).
  */
 export function downloadAccountData () {
-  return async (dispatch, getState, { hoodie }) => {
-    const allAvatars = await hoodie.cryptoStore.withIdPrefix('avatars/').findAll()
+  return async (dispatch, getState, { cryptoStore }) => {
+    const allAvatars = await cryptoStore.withIdPrefix('avatars/').findAll()
 
     const avatarData = await Promise.all(allAvatars.map(async avatar => {
-      const avatarStore = hoodie.cryptoStore.withIdPrefix(avatar.dataSaveId + '/')
+      const avatarStore = cryptoStore.withIdPrefix(avatar.dataSaveId + '/')
 
       const [localChat, imChatsInfos] = await Promise.all([
         avatarStore.withIdPrefix('localchat').findAll(),
@@ -344,15 +514,9 @@ export function downloadAccountData () {
     }))
 
     // Get other data
-    const [grids, account, profile] = await Promise.all([
-      hoodie.cryptoStore.withIdPrefix('grids/').findAll(),
-      hoodie.account.get(),
-      hoodie.account.profile.get()
-    ])
+    const grids = await cryptoStore.withIdPrefix('grids/').findAll()
 
     const raw = {
-      account,
-      profile,
       grids,
       avatars: avatarData
     }
@@ -429,12 +593,46 @@ function reduceExportChatLines (file, line) {
   return `${file}[${year}/${month}/${day} ${hours}:${min}]  ${line.fromName}: ${line.message}\n`
 }
 
-export function deleteAccount () {
-  return async (dispatch, getState, { hoodie }) => {
-    await dispatch(logoutAvatar())
+export function deleteAccount (password) {
+  return async (dispatch, getState, { db }) => {
+    const { name } = await getUserInfo(db)
+    const { loginPassword } = await derivePasswords(name, password)
 
-    const results = await hoodie.account.destroy()
-    dispatch({ type: 'ViewerAccountSignOut', results })
+    const accountDataReq = await window.fetch('/api/account', {
+      method: 'GET',
+      headers: {
+        Authorization: 'Basic ' + window.btoa(`${name}:${loginPassword}`),
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+
+    const toError = async req => {
+      const result = await req.json()
+      const err = new Error(result.errors[0].title)
+      err.name = result.errors[0].title
+      err.message = result.errors[0].detail
+      throw err
+    }
+
+    if (accountDataReq.ok) {
+      dispatch(signOut())
+
+      const accountDelReq = await window.fetch('/api/account', {
+        method: 'DELETE',
+        headers: {
+          Authorization: 'Basic ' + window.btoa(`${name}:${loginPassword}`),
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!accountDelReq.ok) {
+        await toError(accountDelReq)
+      }
+    } else {
+      await toError(accountDataReq)
+    }
   }
 }
 

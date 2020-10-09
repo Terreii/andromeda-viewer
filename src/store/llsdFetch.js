@@ -29,7 +29,7 @@ export function proxyFetch (getState, resource, init = {}) {
     // transform url to the proxy url
     const protocol = aURL.protocol.replace(/:$/, '')
     const requestURL = new URL(
-      `/hoodie/andromeda-viewer/proxy/${protocol}/${aURL.host}${aURL.pathname}`,
+      `/api/proxy/${protocol}/${aURL.host}${aURL.pathname}`,
       window.location.href
     )
     requestURL.search = aURL.search

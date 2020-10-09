@@ -188,10 +188,8 @@ describe('local chat', () => {
 
     const store = configureMockStore([
       thunk.withExtraArgument({
-        hoodie: {
-          cryptoStore: {
-            updateOrAdd
-          }
+        cryptoStore: {
+          updateOrAdd
         }
       })
     ])({
@@ -270,10 +268,8 @@ describe('local chat', () => {
     const withIdPrefix = jest.fn(() => ({ findAll }))
 
     const store = configureMockStore([thunk.withExtraArgument({
-      hoodie: {
-        cryptoStore: {
-          withIdPrefix
-        }
+      cryptoStore: {
+        withIdPrefix
       }
     })])()
 
@@ -321,10 +317,8 @@ describe('local chat', () => {
 
     const storeWithToMuch = configureMockStore([
       thunk.withExtraArgument({
-        hoodie: {
-          cryptoStore: {
-            remove: removeFn
-          }
+        cryptoStore: {
+          remove: removeFn
         }
       })
     ])({ account, session, localChat })
@@ -338,10 +332,8 @@ describe('local chat', () => {
 
     const storeWithLess = configureMockStore([
       thunk.withExtraArgument({
-        hoodie: {
-          cryptoStore: {
-            remove: removeFn
-          }
+        cryptoStore: {
+          remove: removeFn
         }
       })
     ])({ account, session, localChat: localChat.slice(0, 200) })
@@ -394,10 +386,8 @@ describe('save, loading and sending IMs', () => {
     ]))
 
     const store = configureMockStore([thunk.withExtraArgument({
-      hoodie: {
-        cryptoStore: {
-          findOrAdd
-        }
+      cryptoStore: {
+        findOrAdd
       }
     })])({
       IMs: {
@@ -516,8 +506,7 @@ describe('save, loading and sending IMs', () => {
       name: 'Great group'
     }
 
-    const hoodieEventCallbacks = []
-    const hoodieOneEvent = jest.fn((_, callback) => { hoodieEventCallbacks.push(callback) })
+    const onAvatarLogout = []
 
     const callbacks = []
     const storeOn = jest.fn((_, callback) => { callbacks.push(callback) })
@@ -535,11 +524,9 @@ describe('save, loading and sending IMs', () => {
     }))
 
     const store = configureMockStore([thunk.withExtraArgument({
-      hoodie: {
-        one: hoodieOneEvent,
-        cryptoStore: {
-          withIdPrefix
-        }
+      onAvatarLogout,
+      cryptoStore: {
+        withIdPrefix
       }
     })])({
       account: {
@@ -582,9 +569,8 @@ describe('save, loading and sending IMs', () => {
 
     expect(storeOff.mock.calls.length).toBe(0)
 
-    expect(hoodieEventCallbacks.length).toBe(1)
-    expect(hoodieOneEvent.mock.calls[0][0]).toBe('avatarDidLogout')
-    expect(typeof hoodieOneEvent.mock.calls[0][1]).toBe('function')
+    expect(onAvatarLogout.length).toBe(1)
+    expect(typeof onAvatarLogout[0]).toBe('function')
 
     const doc = {
       _id: 'another-id',
@@ -606,7 +592,7 @@ describe('save, loading and sending IMs', () => {
       }
     ])
 
-    hoodieEventCallbacks[0]()
+    onAvatarLogout[0]()
 
     expect(storeOff.mock.calls.length).toBe(1)
     expect(storeOff.mock.calls[0][0]).toBe('add')
@@ -618,7 +604,6 @@ describe('save, loading and sending IMs', () => {
       error: null,
       value: null
     }
-    let findResult = null
 
     const allDocs = jest.fn(() => {
       if (shouldResolveWith.error != null) {
@@ -627,20 +612,10 @@ describe('save, loading and sending IMs', () => {
       return Promise.resolve(shouldResolveWith.value)
     })
 
-    const find = jest.fn(() => Promise.resolve(findResult))
-
-    const findAll = jest.fn(() => Promise.resolve(findResult))
-    const withIdPrefix = jest.fn(() => ({ findAll }))
-
     const store = configureMockStore([thunk.withExtraArgument({
-      hoodie: {
-        store: {
-          db: { allDocs }
-        },
-        cryptoStore: {
-          find,
-          withIdPrefix
-        }
+      db: { allDocs },
+      cryptoStore: {
+        decrypt: obj => Promise.resolve(obj)
       }
     })])({
       account: {
@@ -684,15 +659,22 @@ describe('save, loading and sending IMs', () => {
 
     shouldResolveWith.value = {
       rows: [
-        { id: 'saveId/imChats/abcd/2019-07-07T00:02:04.000Z' },
-        { id: 'saveId/imChats/abcd/2019-07-08T00:02:04.000Z' },
-        { id: 'saveId/imChats/abcd/2019-07-09T00:02:04.000Z' }
+        {
+          id: 'saveId/imChats/abcd/2019-07-07T00:02:04.000Z',
+          doc: {
+            _id: 'saveId/imChats/abcd/2019-07-07T00:02:04.000Z',
+            message: 'Hello'
+          }
+        },
+        {
+          id: 'saveId/imChats/abcd/2019-07-08T00:02:04.000Z',
+          doc: {
+            _id: 'saveId/imChats/abcd/2019-07-08T00:02:04.000Z',
+            message: 'Hello'
+          }
+        }
       ]
     }
-    findResult = [
-      { _id: 'saveId/imChats/abcd/2019-07-08T00:02:04.000Z', message: 'Hello' },
-      { _id: 'saveId/imChats/abcd/2019-07-07T00:02:04.000Z', message: 'Hello' }
-    ]
     await store.dispatch(getIMHistory('5657e9ca-315c-47e3-bfde-7bfe2e5b7e25', 'abcd'))
 
     expect(allDocs.mock.calls.length).toBe(1)
@@ -700,111 +682,12 @@ describe('save, loading and sending IMs', () => {
       {
         startkey: 'saveId/imChats/abcd/2019-07-09T00:02:04.000Z',
         endkey: 'saveId/imChats/abcd',
-        limit: 101,
-        descending: true
-      }
-    ])
-
-    expect(find.mock.calls.length).toBe(1)
-    expect(find.mock.calls[0]).toEqual([
-      [
-        'saveId/imChats/abcd/2019-07-08T00:02:04.000Z',
-        'saveId/imChats/abcd/2019-07-07T00:02:04.000Z'
-      ]
-    ])
-
-    expect(store.getActions()).toEqual([
-      {
-        type: 'im/historyLoadingStarted',
-        payload: {
-          sessionId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25'
-        }
-      },
-      {
-        type: 'im/historyLoadingFinished',
-        payload: {
-          sessionId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
-          messages: findResult,
-          didLoadAll: true
-        }
-      }
-    ])
-
-    shouldResolveWith.value = null
-    findResult = null
-    store.clearActions()
-
-    // can access PouchDb & loads all but no message
-
-    shouldResolveWith.value = {
-      rows: [
-        { id: 'saveId/imChats/efgh/2019-07-07T00:02:04.000Z' },
-        { id: 'saveId/imChats/efgh/2019-07-08T00:02:04.000Z' },
-        { id: 'saveId/imChats/efgh/2019-07-09T00:02:04.000Z' }
-      ]
-    }
-    findResult = [
-      { _id: 'saveId/imChats/efgh/2019-07-09T00:02:04.000Z', message: 'Hello' },
-      { _id: 'saveId/imChats/efgh/2019-07-08T00:02:04.000Z', message: 'Hello' },
-      { _id: 'saveId/imChats/efgh/2019-07-07T00:02:04.000Z', message: 'Hello' }
-    ]
-    await store.dispatch(getIMHistory('da4bf092-5e29-4577-a662-171bd57915f8', 'efgh'))
-
-    expect(allDocs.mock.calls.length).toBe(2)
-    expect(allDocs.mock.calls[1]).toEqual([
-      {
-        startkey: 'saveId/imChats/efgh/\uffff',
-        endkey: 'saveId/imChats/efgh',
         limit: 100,
+        skip: 1,
+        include_docs: true,
         descending: true
       }
     ])
-
-    expect(find.mock.calls.length).toBe(2)
-    expect(find.mock.calls[1]).toEqual([
-      [
-        'saveId/imChats/efgh/2019-07-09T00:02:04.000Z',
-        'saveId/imChats/efgh/2019-07-08T00:02:04.000Z',
-        'saveId/imChats/efgh/2019-07-07T00:02:04.000Z'
-      ]
-    ])
-
-    expect(store.getActions()).toEqual([
-      {
-        type: 'im/historyLoadingStarted',
-        payload: {
-          sessionId: 'da4bf092-5e29-4577-a662-171bd57915f8'
-        }
-      },
-      {
-        type: 'im/historyLoadingFinished',
-        payload: {
-          sessionId: 'da4bf092-5e29-4577-a662-171bd57915f8',
-          messages: findResult,
-          didLoadAll: true
-        }
-      }
-    ])
-
-    shouldResolveWith.value = null
-    findResult = null
-    store.clearActions()
-
-    // No access to PouchDb
-
-    shouldResolveWith.error = new Error('database is destroyed')
-    findResult = [
-      { _id: 'saveId/imChats/abcd/2019-07-07T00:02:04.000Z', message: 'Hello' },
-      { _id: 'saveId/imChats/abcd/2019-07-08T00:02:04.000Z', message: 'Hello' },
-      { _id: 'saveId/imChats/abcd/2019-07-09T00:02:04.000Z', message: 'Hello' }
-    ]
-
-    await store.dispatch(getIMHistory('5657e9ca-315c-47e3-bfde-7bfe2e5b7e25', 'abcd'))
-
-    expect(withIdPrefix.mock.calls.length).toBe(1)
-    expect(withIdPrefix.mock.calls[0]).toEqual(['saveId/imChats/abcd'])
-
-    expect(findAll.mock.calls.length).toBe(1)
 
     expect(store.getActions()).toEqual([
       {
@@ -818,10 +701,75 @@ describe('save, loading and sending IMs', () => {
         payload: {
           sessionId: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
           messages: [
-            { _id: 'saveId/imChats/abcd/2019-07-07T00:02:04.000Z', message: 'Hello' },
-            { _id: 'saveId/imChats/abcd/2019-07-08T00:02:04.000Z', message: 'Hello' }
+            { _id: 'saveId/imChats/abcd/2019-07-08T00:02:04.000Z', message: 'Hello' },
+            { _id: 'saveId/imChats/abcd/2019-07-07T00:02:04.000Z', message: 'Hello' }
           ],
-          didLoadAll: false
+          didLoadAll: true
+        }
+      }
+    ])
+
+    shouldResolveWith.value = null
+    store.clearActions()
+
+    // can access PouchDb & loads all but no message
+
+    shouldResolveWith.value = {
+      rows: [
+        {
+          id: 'saveId/imChats/efgh/2019-07-07T00:02:04.000Z',
+          doc: {
+            _id: 'saveId/imChats/efgh/2019-07-07T00:02:04.000Z',
+            message: 'Hello'
+          }
+        },
+        {
+          id: 'saveId/imChats/efgh/2019-07-08T00:02:04.000Z',
+          doc: {
+            _id: 'saveId/imChats/efgh/2019-07-08T00:02:04.000Z',
+            message: 'Hello'
+          }
+        },
+        {
+          id: 'saveId/imChats/efgh/2019-07-09T00:02:04.000Z',
+          doc: {
+            _id: 'saveId/imChats/efgh/2019-07-09T00:02:04.000Z',
+            message: 'Hello'
+          }
+        }
+      ]
+    }
+    await store.dispatch(getIMHistory('da4bf092-5e29-4577-a662-171bd57915f8', 'efgh'))
+
+    expect(allDocs.mock.calls.length).toBe(2)
+    expect(allDocs.mock.calls[1]).toEqual([
+      {
+        startkey: 'saveId/imChats/efgh',
+        endkey: 'saveId/imChats/efgh',
+        include_docs: true,
+        limit: 100,
+        skip: 0,
+        descending: true
+      }
+    ])
+
+    expect(store.getActions()).toEqual([
+      {
+        type: 'im/historyLoadingStarted',
+        payload: {
+          sessionId: 'da4bf092-5e29-4577-a662-171bd57915f8'
+        }
+      },
+      {
+        type: 'im/historyLoadingFinished',
+        payload: {
+          sessionId: 'da4bf092-5e29-4577-a662-171bd57915f8',
+          messages: [
+            { _id: 'saveId/imChats/efgh/2019-07-09T00:02:04.000Z', message: 'Hello' },
+            { _id: 'saveId/imChats/efgh/2019-07-08T00:02:04.000Z', message: 'Hello' },
+            { _id: 'saveId/imChats/efgh/2019-07-07T00:02:04.000Z', message: 'Hello' }
+          ],
+          didLoadAll: true
         }
       }
     ])
