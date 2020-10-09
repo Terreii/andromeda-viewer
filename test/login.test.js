@@ -155,7 +155,7 @@ describe('login', function () {
           })
       })
 
-      it('should hanlde logins with an URL', function (done) {
+      it('should handle logins with an URL', function (done) {
         methodCall.callsFake(function request (_name, _data, cb) {
           cb(null, {
             login: 'true',
@@ -560,7 +560,7 @@ describe('login', function () {
           })
       })
 
-      it('should hanlde logins with an URL', function (done) {
+      it('should handle logins with an URL', function (done) {
         loginRequest(true, '<key>login</key><string>true</string>')
         const loginURL = 'http://login.osgrid.org/'
 
