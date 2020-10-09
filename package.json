@@ -112,7 +112,7 @@
     "textlint-rule-alex": "^3.0.0",
     "textlint-rule-common-misspellings": "^1.0.1",
     "textlint-rule-rousseau": "^1.4.6",
-    "typedoc": "^0.19.1",
+    "typedoc": "^0.19.2",
     "typescript": "^4.0.3",
     "weallbehave": "^1.2.0",
     "weallcontribute": "^1.0.9"
