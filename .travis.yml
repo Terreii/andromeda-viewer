@@ -5,21 +5,16 @@ notifications:
 language: node_js
 node_js:
   - "node"
+  - "14"
   - "12"
 
-# Trigger a push build on latest and greenkeeper branches + PRs build on every branches
 # Avoid double build on PRs (See https://github.com/travis-ci/travis-ci/issues/1147)
 branches:
   only:
     - latest
-    - /^greenkeeper.*$/
 
 install:
-  - if [[ $TRAVIS_BRANCH =~ greenkeeper ]]; then
-      npm install;
-    else
-      npm ci;
-    fi
+  - npm ci;
 env:
   - CXX=g++-4.9
 addons:
