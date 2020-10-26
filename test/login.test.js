@@ -6,6 +6,8 @@ const sinon = require('sinon')
 const request = require('supertest')
 
 describe('login', function () {
+  this.timeout(5000)
+
   let clock
   let app
   let server // express server
