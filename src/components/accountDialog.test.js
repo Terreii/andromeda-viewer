@@ -1,5 +1,4 @@
 import { axe } from 'jest-axe'
-import React from 'react'
 import { Provider } from 'react-redux'
 import { render, fireEvent } from '@testing-library/react'
 
@@ -10,8 +9,10 @@ import { signInStatus } from '../bundles/account'
 
 jest.mock('../actions/viewerAccount')
 
-updateAccount.mockImplementation(args => async () => {
-  return args // mock a promise
+beforeEach(() => {
+  updateAccount.mockImplementation(args => async () => {
+    return args // mock a promise
+  })
 })
 
 it('should display and update the account name', async () => {

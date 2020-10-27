@@ -2,7 +2,7 @@
  * Displays a single conversation/dialog. Also the input
  */
 
-import React, { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 
 import ChatMessagesList from './chatMessagesList'
@@ -43,7 +43,14 @@ export default function ChatDialog ({ isIM = false, data = {}, sendTo, loadHisto
       loadHistory(data.sessionId, data.saveId)
     }
   }
-  useEffect(doLoadHistory, [isIM, data.sessionId])
+  useEffect(doLoadHistory, [
+    loadHistory,
+    isIM,
+    data.sessionId,
+    data.saveId,
+    data.didLoadHistory,
+    data.isLoadingHistory
+  ])
 
   const placeholderText = `Send ${isIM ? 'Instant Message' : 'to local chat'}`
 

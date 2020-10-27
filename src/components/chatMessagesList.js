@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import { memo, Component } from 'react'
 import autoscroll from 'autoscroll-react'
 
 import Text from './text'
@@ -40,7 +40,7 @@ const TextLine = memo(({ msg, isIM }) => {
   )
 })
 
-class ChatList extends React.Component {
+class ChatList extends Component {
   render () {
     const { messages, isIM, ...props } = this.props
 

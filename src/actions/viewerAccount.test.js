@@ -23,7 +23,10 @@ PouchDB.plugin(memoryAdapter)
 PouchDB.plugin(hoodieApi)
 
 jest.mock('uuid')
-v4.mockReturnValue('b039f51f-41d9-41e7-a4b1-5490fbfd5eb9')
+
+beforeEach(() => {
+  v4.mockReturnValue('b039f51f-41d9-41e7-a4b1-5490fbfd5eb9')
+})
 
 window.TextEncoder = class TextEncoder {
   encode (text) {
@@ -127,10 +130,10 @@ it('saveAvatar', async () => {
   expect(add.mock.calls.length).toBe(1)
   expect(add.mock.calls[0]).toEqual([
     {
-      dataSaveId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9',
       avatarIdentifier: 'f2373437-a2ef-4435-82b9-68d283538bb2@grid.org',
-      name: 'Tester Resident',
-      grid: 'grid.org'
+      dataSaveId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9',
+      grid: 'grid.org',
+      name: 'Tester Resident'
     }
   ])
 })
@@ -551,7 +554,6 @@ it('should unlock the app with "unlock"', async () => {
       lastKey = key
       return Promise.resolve(key)
     } else if (args.name === 'HKDF') {
-      expect(lastPw).toBe(lastKey)
       return Promise.resolve(Buffer.concat([
         Buffer.alloc(32, 1),
         Buffer.alloc(32, 2)
@@ -615,6 +617,7 @@ it('should unlock the app with "unlock"', async () => {
     }
   ])
 
+  expect(lastPw).toBe(lastKey)
   expect(findAll).toHaveBeenNthCalledWith(1, 'grids/')
   expect(findAll).toHaveBeenNthCalledWith(2, 'avatars/')
 

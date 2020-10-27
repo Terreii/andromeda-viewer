@@ -28,11 +28,11 @@ describe('basic functionality of redux-store', () => {
     const oldState = store.getState()
 
     expect(() => {
-      expect(store.dispatch('TEST'))
+      store.dispatch('TEST')
     }).toThrow()
 
     expect(() => {
-      expect(store.dispatch({ wrongKey: 'TEST' }))
+      store.dispatch({ wrongKey: 'TEST' })
     }).toThrow()
 
     store.dispatch({ type: 'NOT_UPDATE' })

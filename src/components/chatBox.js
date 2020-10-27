@@ -2,7 +2,7 @@
  * Displays all Chats (local-chat and IMs)
  */
 
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useTabState, Tab, TabList, TabPanel } from 'reakit/Tab'
 

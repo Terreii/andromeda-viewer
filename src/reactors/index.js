@@ -4,10 +4,12 @@ import { saveLocalChat, saveIMChatInfo, saveIMChat } from './chat'
 import { groupsDidLoad } from './group'
 import { loadNames } from './names'
 
-export default [
+const reactors = [
   saveLocalChat,
   saveIMChatInfo,
   saveIMChat,
   groupsDidLoad,
   loadNames
 ]
+
+export default reactors

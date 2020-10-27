@@ -217,14 +217,14 @@ describe('fetchLLSD', () => {
     ])
   })
 
-  it('should throw when a window.Request is used', () => {
+  it('should throw when a window.Request is used', async () => {
     const getState = () => ({
       session: {
         andromedaSessionId: 'test'
       }
     })
 
-    expect(fetchLLSD(getState, new window.Request('https://example.com/test')))
+    await expect(fetchLLSD(getState, new window.Request('https://example.com/test')))
       .rejects.toThrowError('Using "Request" is not yet supported!')
   })
 })

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 
@@ -160,10 +160,10 @@ export default function LoginForm ({ isSignedIn }) {
             {errorMessage.title.length > 0 && <h4>{errorMessage.title}</h4>}
             <p>
               {errorMessage.body.split('\n').map((line, index) => (
-                <React.Fragment key={index}>
+                <Fragment key={index}>
                   {line}
                   <br />
-                </React.Fragment>
+                </Fragment>
               ))}
             </p>
           </div>

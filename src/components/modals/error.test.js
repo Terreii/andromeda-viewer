@@ -1,6 +1,5 @@
 import { axe } from 'jest-axe'
 import configureMockStore from 'redux-mock-store'
-import React from 'react'
 import { Provider } from 'react-redux'
 import { render } from 'reakit-test-utils'
 import thunk from 'redux-thunk'

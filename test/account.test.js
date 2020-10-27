@@ -7,6 +7,8 @@ const request = require('supertest')
 const uuid = require('uuid')
 
 describe('account', function () {
+  this.timeout(5000)
+
   const USERNAME = 'tester.mactestface@example.com'
   const PASSWORD = 'bc0e734068f4ef43e22d84e3412c4c0221daa3a001fcd0c7ab24a565f9e7503d'
 
