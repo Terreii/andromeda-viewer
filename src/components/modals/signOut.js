@@ -1,5 +1,3 @@
-import React from 'react'
-
 import Modal from './modal'
 
 import { useAutoFocus } from '../../hooks/utils'

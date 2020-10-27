@@ -1,4 +1,4 @@
-import React from 'react'
+import { Fragment } from 'react'
 import { useDispatch } from 'react-redux'
 import { useDialogState, Dialog, DialogBackdrop } from 'reakit'
 
@@ -43,10 +43,10 @@ export default function ErrorDialog ({ errorMessage }) {
         </div>
         <article className='relative flex flex-col m-4 overflow-y-scroll overscroll-y-contain'>
           {errorMessage.split('\n').map((line, index) => (
-            <React.Fragment key={index}>
+            <Fragment key={index}>
               {line}
               <br />
-            </React.Fragment>
+            </Fragment>
           ))}
 
           <button

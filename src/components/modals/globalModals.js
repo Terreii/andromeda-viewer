@@ -1,4 +1,4 @@
-import React from 'react'
+import { memo } from 'react'
 import { useSelector } from 'react-redux'
 
 import ErrorDialog from './error'
@@ -8,7 +8,7 @@ import ResetKeysPopup from './resetKeys'
 import { selectShowUnlockDialog, selectResetKeys } from '../../bundles/account'
 import { selectErrorMessage } from '../../bundles/session'
 
-export default React.memo(() => {
+export default memo(() => {
   const showUnlockDialog = useSelector(selectShowUnlockDialog)
   const resetKeys = useSelector(selectResetKeys)
   const errorMessage = useSelector(selectErrorMessage)

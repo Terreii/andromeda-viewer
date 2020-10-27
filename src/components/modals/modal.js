@@ -1,4 +1,3 @@
-import React from 'react'
 import { Dialog, DialogBackdrop } from 'reakit'
 
 import closeIcon from '../../icons/icon_close.svg'

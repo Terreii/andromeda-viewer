@@ -1,5 +1,4 @@
 import { axe } from 'jest-axe'
-import React from 'react'
 import { render } from 'reakit-test-utils'
 import { useDialogState, DialogDisclosure } from 'reakit'
 

@@ -1,5 +1,4 @@
 import { axe } from 'jest-axe'
-import React from 'react'
 import { Provider } from 'react-redux'
 import { render, fireEvent } from 'reakit-test-utils'
 import configureMockStore from 'redux-mock-store'
