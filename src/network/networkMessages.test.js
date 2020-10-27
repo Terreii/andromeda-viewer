@@ -1,7 +1,3 @@
-/* eslint-env jest */
-
-'use strict'
-
 import { v4 as uuid } from 'uuid'
 
 import { parseBody, createBody } from './networkMessages'

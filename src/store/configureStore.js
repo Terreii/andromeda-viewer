@@ -8,7 +8,7 @@ import { proxyFetch, fetchLLSD } from './llsdFetch'
 import AvatarName from '../avatarName'
 
 // Create Redux-Store with local db, remote db and more
-export default function (preloadedState) {
+export default function createStore (preloadedState) {
   const db = createLocalDB()
   const extraArgument = {
     cryptoStore: createCryptoStore(db),

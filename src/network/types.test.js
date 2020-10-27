@@ -1,7 +1,3 @@
-/* eslint-env jest */
-
-'use strict'
-
 import { v4 as uuid } from 'uuid'
 
 import {
@@ -56,12 +52,15 @@ describe('Fixed', () => {
   it(`buffer should have the size of ${size}`, () => {
     expect(buffer.byteLength).toBe(size)
   })
+
   it(`should return a buffer with the size of ${size}`, () => {
     expect(fixed.byteLength).toBe(size)
   })
+
   it('should return a buffer with 2 at index 2', () => {
     expect(fixed.readUInt8(2)).toBe(2)
   })
+
   it(`offset should be ${size}`, () => {
     expect(offset).toEqual({
       value: size
@@ -84,22 +83,23 @@ describe('Variable1', () => {
   it(`buffer should have the size of ${size + 1}`, () => {
     expect(buffer.byteLength).toBe(size + 1)
   })
+
   it(`should return a buffer with the size of ${size}`, () => {
     expect(variable.byteLength).toBe(size)
   })
+
   it('should return a buffer with 1 at index 0', () => {
     expect(variable.readUInt8(0)).toBe(1)
   })
+
   it('should throw an error if non array like structures are given to ' +
     'createBuffer', () => {
-    try {
-      let test = Variable1.createBuffer({ 0: 2 })
-      test = Variable1.createBuffer({ length: 256 })
-      expect(test).toBeNull()
-    } catch (e) {
-      expect(true).toBe(true)
-    }
+    expect(() => Variable1.createBuffer({ 0: 2 }))
+      .toThrow('value must not be bigger than 255 bytes!')
+    expect(() => Variable1.createBuffer({ length: 256 }))
+      .toThrow('value must not be bigger than 255 bytes!')
   })
+
   it(`offset should be ${size + 1}`, () => {
     expect(offset).toEqual({
       value: size + 1
@@ -131,22 +131,23 @@ describe('Variable2', () => {
   it(`buffer should have the size of ${size + 2}`, () => {
     expect(buffer.byteLength).toBe(size + 2)
   })
+
   it(`should return a buffer with the size of ${size}`, () => {
     expect(variable.byteLength).toBe(size)
   })
+
   it('should return a buffer with 1 at index 0', () => {
     expect(variable.readUInt8(0)).toBe(1)
   })
+
   it('should throw an error if non array like structures are given to ' +
     'createBuffer', () => {
-    try {
-      let test = Variable1.createBuffer({ 0: 2 })
-      test = Variable1.createBuffer({ length: 65536 })
-      expect(test).toBeNull()
-    } catch (e) {
-      expect(true).toBe(true)
-    }
+    expect(() => Variable2.createBuffer({ 0: 2 }))
+      .toThrow('value must not be bigger than 65535 bytes!')
+    expect(() => Variable2.createBuffer({ length: 65536 }))
+      .toThrow('value must not be bigger than 65535 bytes!')
   })
+
   it(`offset should be ${size + 2}`, () => {
     expect(offset).toEqual({
       value: size + 2

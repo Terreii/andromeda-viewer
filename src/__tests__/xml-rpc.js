@@ -1,5 +1,3 @@
-'use strict'
-
 const http = require('http')
 
 const xmlrpc = require('xmlrpc')

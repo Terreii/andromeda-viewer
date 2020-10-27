@@ -1,5 +1,3 @@
-'use strict'
-
 import { viewerName, viewerPlatform } from './viewerInfo'
 
 global.test('should have the viewer name', () => {

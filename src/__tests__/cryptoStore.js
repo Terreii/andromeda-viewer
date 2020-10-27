@@ -1,5 +1,3 @@
-'use strict'
-
 import PouchDB from 'pouchdb-browser'
 import memoryAdapter from 'pouchdb-adapter-memory'
 import hoodieAPI from 'pouchdb-hoodie-api'
@@ -48,12 +46,7 @@ test('cryptoStore and its methods exists', () => {
 test('cryptoStore requires to be unlocked', async () => {
   const cryptoStore = new CryptoStore(db.hoodieApi())
 
-  try {
-    await cryptoStore.add({ test: '' })
-    throw new Error('should have thrown')
-  } catch (err) {
-    expect(err.status).toBe(401)
-  }
+  await expect(cryptoStore.add({ test: '' })).rejects.toThrow("Name or password is incorrect.")
 
   await cryptoStore.setup('testPassword')
   await cryptoStore.unlock('testPassword')

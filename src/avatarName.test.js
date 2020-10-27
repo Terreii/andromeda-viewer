@@ -1,5 +1,3 @@
-'use strict'
-
 import AvatarName from './avatarName'
 
 test('should parse a given name', () => {

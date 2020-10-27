@@ -1,5 +1,3 @@
-'use strict'
-
 import ms from 'milliseconds'
 
 import Circuit from './circuit'
@@ -11,19 +9,21 @@ let circuit
 
 // Utility for testing
 
-window.WebSocket = jest.fn().mockImplementation(() => {
-  return {
-    send: jest.fn(),
-    close: jest.fn(),
-
-    onopen () {},
-
-    onerror () {},
-
-    onclose () {},
-
-    onmessage () {}
-  }
+beforeEach(() => {
+  window.WebSocket = jest.fn().mockImplementation(() => {
+    return {
+      send: jest.fn(),
+      close: jest.fn(),
+  
+      onopen () {},
+  
+      onerror () {},
+  
+      onclose () {},
+  
+      onmessage () {}
+    }
+  })
 })
 
 let sequenceNumberForTests = 0
@@ -332,29 +332,34 @@ test('circuit should send after 100ms a PacketAck', () => {
   websocket.onmessage({ data: createTestMessage(true, false, false) })
   websocket.onmessage({ data: createTestMessage(true, false, false) })
 
-  jest.runOnlyPendingTimers()
+  jest.advanceTimersByTime(200)
 
   expect(setTimeout).toHaveBeenCalledTimes(1)
   expect(setTimeout).toHaveBeenLastCalledWith(expect.any(Function), 100)
   expect(setInterval).toHaveBeenLastCalledWith(expect.any(Function), 100)
+
+  let packageAck
+  let startPingCheck
 
   for (const [pack] of circuit.websocket.send.mock.calls) {
     const msg = parseBody(pack.slice(12))
 
     switch (msg.name) {
       case 'PacketAck':
-        expect(getValueOf(msg, 'Packets', 0, 'ID')).toBeGreaterThanOrEqual(0)
+        packageAck = msg
         continue
 
       case 'StartPingCheck':
-        expect(getValueOf(msg, 'PingID', 0, 'PingID')).toBe(0)
+        startPingCheck = msg
         continue
-
+        
       default:
-        expect(msg.name).toBeUndefined()
         continue
+      }
     }
-  }
+
+    expect(getValueOf(packageAck, 'Packets', 0, 'ID')).toBeGreaterThanOrEqual(0)
+    expect(getValueOf(startPingCheck, 'PingID', 0, 'PingID')).toBe(0)
 })
 
 test('circuit should resend a package after 500ms', () => {
@@ -816,6 +821,7 @@ describe('disconnection', () => {
 
     expect(window.WebSocket).toBeCalledTimes(1)
     jest.clearAllTimers()
+    const reconnectCounts = []
 
     for (let i = 0; i <= 11; ++i) {
       circuit.websocket.onclose(new window.CloseEvent('Abnormal Closure', {
@@ -825,11 +831,10 @@ describe('disconnection', () => {
       }))
       jest.runAllTimers()
 
-      if (i < 11) {
-        expect(circuit.reconnectCount).toBe(i + 1)
-      }
+      reconnectCounts.push(circuit.reconnectCount)
     }
 
+    expect(reconnectCounts).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 11])
     expect(window.WebSocket).toHaveBeenCalledTimes(12)
     expect(closeEvent).toHaveBeenCalledWith({
       code: 1006,

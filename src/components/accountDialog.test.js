@@ -9,8 +9,10 @@ import { signInStatus } from '../bundles/account'
 
 jest.mock('../actions/viewerAccount')
 
-updateAccount.mockImplementation(args => async () => {
-  return args // mock a promise
+beforeEach(() => {
+  updateAccount.mockImplementation(args => async () => {
+    return args // mock a promise
+  })
 })
 
 it('should display and update the account name', async () => {
