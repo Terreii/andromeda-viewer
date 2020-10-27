@@ -16,10 +16,10 @@ branches:
 install:
   - npm ci;
 env:
-  - CXX=g++-4.9
+  - CXX=g++-10.2
 addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
     packages:
-      - g++-4.9
+      - g++-10.2
