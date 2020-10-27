@@ -4,7 +4,6 @@ notifications:
 
 language: node_js
 node_js:
-  - "node"
   - "14"
   - "12"
 
@@ -16,10 +15,10 @@ branches:
 install:
   - npm ci;
 env:
-  - CXX=g++-7.5
+  - CXX=g++-4.9
 addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
     packages:
-      - g++-7.5
+      - g++-4.9
