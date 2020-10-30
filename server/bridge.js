@@ -123,7 +123,7 @@ class Bridge {
     ])
     // add IP address
     const ipParts = rinfo.address.split('.')
-    for (var i = 0; i < 4; i++) {
+    for (let i = 0; i < 4; i++) {
       buffy.writeUInt8(Number(ipParts[i]), i)
     }
     // add port

@@ -25,7 +25,7 @@ $/LicenseInfo$
 
 // Source https://bitbucket.org/lindenlab/llsd/src/7d2646cd3f9b4c806e73aebc4b32bd81e4047fdc/js/?at=default
 
-var ArrayBuffer, Uint8Array, DataView // typedarray.js
+let ArrayBuffer, Uint8Array, DataView // typedarray.js
 
 //
 // LLSD Type          ECMAScript Type
@@ -43,7 +43,7 @@ var ArrayBuffer, Uint8Array, DataView // typedarray.js
 // Array              Array
 //
 
-var LL_LEGACY // Set to true to enable notation formatting
+let LL_LEGACY // Set to true to enable notation formatting
 export var LLSD, URI, UUID, Binary;
 
 (function () {
@@ -90,7 +90,7 @@ export var LLSD, URI, UUID, Binary;
         this.uuid = String(val).toLowerCase()
       } else if (typeof val === 'object' && val instanceof Array) {
         if (val.length !== 16) { throw new Error('Invalid UUID array length') }
-        var uuid =
+        const uuid =
                     hex2(val[0]) + hex2(val[1]) + hex2(val[2]) + hex2(val[3]) + '-' +
                     hex2(val[4]) + hex2(val[5]) + '-' +
                     hex2(val[6]) + hex2(val[7]) + '-' +
@@ -112,9 +112,9 @@ export var LLSD, URI, UUID, Binary;
     }
 
     UUID.prototype.getOctets = function () {
-      var string = this.uuid.replace(/-/g, '')
-      var octets = []
-      var i
+      const string = this.uuid.replace(/-/g, '')
+      const octets = []
+      let i
       for (i = 0; i < 16; i += 1) {
         octets[i] = parseInt(string.substring(i * 2, i * 2 + 2), 16)
       }
@@ -125,20 +125,20 @@ export var LLSD, URI, UUID, Binary;
   }
 
   // Browser compatibility shims
-  var B64_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
+  const B64_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
   if (!window.atob) {
     window.atob = function (a) {
       /* jslint plusplus: false, bitwise: false */
-      var pos = 0
-      var len = a.length
-      var octets = []
-      var e1
-      var e2
-      var e3
-      var e4
-      var o1
-      var o2
-      var o3
+      let pos = 0
+      const len = a.length
+      const octets = []
+      let e1
+      let e2
+      let e3
+      let e4
+      let o1
+      let o2
+      let o3
 
       while (pos < len) {
         e1 = B64_ALPHABET.indexOf(a.charAt(pos++))
@@ -166,16 +166,16 @@ export var LLSD, URI, UUID, Binary;
   if (!window.btoa) {
     window.btoa = function (b) {
       /* jslint plusplus: false, bitwise: false */
-      var pos = 0
-      var len = b.length
-      var out = []
-      var o1
-      var o2
-      var o3
-      var e1
-      var e2
-      var e3
-      var e4
+      let pos = 0
+      const len = b.length
+      const out = []
+      let o1
+      let o2
+      let o3
+      let e1
+      let e2
+      let e3
+      let e4
       while (pos < len) {
         o1 = b.charCodeAt(pos++)
         o2 = b.charCodeAt(pos++)
@@ -220,10 +220,10 @@ export var LLSD, URI, UUID, Binary;
     (function () {
       // Convert binary string (each octet stored as character 0x00-0xff) to array of numbers
       function binstrToArray (s) {
-        var a = []
-        var len = s.length
-        var i
-        var c
+        const a = []
+        const len = s.length
+        let i
+        let c
         for (i = 0; i < len; i += 1) {
           c = s.charCodeAt(i)
           if (c > 0xff) {
@@ -236,10 +236,10 @@ export var LLSD, URI, UUID, Binary;
 
       // Convert array of numbers to binary string (each octet stored as character 0x00-0xff)
       function arrayToBinstr (a) {
-        var s = []
-        var len = a.length
-        var i
-        var c
+        const s = []
+        const len = a.length
+        let i
+        let c
         for (i = 0; i < len; i += 1) {
           c = a[i]
           if (c > 0xff) {
@@ -250,7 +250,7 @@ export var LLSD, URI, UUID, Binary;
         return s.join('')
       }
 
-      var encodings = {
+      const encodings = {
         BINARY: {
           encode: binstrToArray,
           decode: arrayToBinstr
@@ -259,11 +259,11 @@ export var LLSD, URI, UUID, Binary;
         'UTF-8': {
           encode: function (s) {
             /* jslint bitwise: false */
-            var o = []
-            var len
-            var i
-            var cp
-            var cp2
+            const o = []
+            let len
+            let i
+            let cp
+            let cp2
 
             function utf8 (cp) {
               if (cp >= 0x0000 && cp <= 0x007F) {
@@ -310,15 +310,15 @@ export var LLSD, URI, UUID, Binary;
 
           decode: function (a) {
             /* jslint bitwise: false, plusplus: false */
-            var s = []
-            var offset = 0
-            var len = a.length
-            var cp
+            const s = []
+            let offset = 0
+            const len = a.length
+            let cp
 
             function cb () {
               if (offset >= len) { throw new RangeError('Truncated UTF-8 sequence') }
 
-              var b = a[offset++]
+              const b = a[offset++]
               if (b < 0x80 || b > 0xBF) { throw new RangeError('Invalid UTF-8 continuation byte') }
 
               return b & 0x3F
@@ -376,10 +376,10 @@ export var LLSD, URI, UUID, Binary;
               throw new RangeError('Invalid base16 sequence')
             }
 
-            var out = []
-            var i
-            var o
-            var len = s.length
+            const out = []
+            let i
+            let o
+            const len = s.length
             for (i = 0, o = 0; i < len; o += 1, i += 2) {
               out[o] = parseInt(s.substring(i, i + 2), 16)
             }
@@ -387,10 +387,10 @@ export var LLSD, URI, UUID, Binary;
           },
 
           decode: function (a) {
-            var s = []
-            var len = a.length
-            var i
-            var c
+            const s = []
+            const len = a.length
+            let i
+            let c
             for (i = 0; i < len; i += 1) {
               c = a[i]
               s.push(('00' + c.toString(16)).slice(-2).toUpperCase())
@@ -411,7 +411,7 @@ export var LLSD, URI, UUID, Binary;
       Binary = function () {
       /* jslint bitwise: false */
 
-        var array, binary, string, encoding
+        let array, binary, string, encoding
 
         // new Binary()
         if (arguments.length === 0) {
@@ -509,7 +509,7 @@ export var LLSD, URI, UUID, Binary;
     // Matches "YY-MM-DDThh:mm:ssZ" or "YY-MM-DDThh:mm:ss.fffZ".
     // Throws an error if the string doesn't match.
     LLSD.parseISODate = function (str) {
-      var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(str)
+      const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(str)
       if (m) {
         return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]))
       } else {
@@ -610,7 +610,7 @@ export var LLSD, URI, UUID, Binary;
     // ECMAScript object data structure.
     //
     LLSD.parseXML = function (xmltext) {
-      var xmldoc
+      let xmldoc
 
       if (window.DOMParser) {
         xmldoc = (new window.DOMParser()).parseFromString(xmltext, 'text/xml')
@@ -627,8 +627,8 @@ export var LLSD, URI, UUID, Binary;
 
       function processElement (elem) {
         function nodeText (node) {
-          var NODE_TEXT = 3
-          var child
+          const NODE_TEXT = 3
+          let child
 
           if (!node.hasChildNodes()) { return '' }
           if (node.childNodes.length > 1) { throw new Error('Expected single child of: ' + node.nodeName) }
@@ -638,7 +638,7 @@ export var LLSD, URI, UUID, Binary;
           return child.data
         }
 
-        var child, map, key, encoding, array
+        let child, map, key, encoding, array
 
         switch (elem.nodeName) {
           case 'undef': return null
@@ -690,14 +690,14 @@ export var LLSD, URI, UUID, Binary;
     LLSD.formatXML = function (data) {
       // *TODO: Cross browser XML DOM generation
 
-      var xml = []
+      const xml = []
 
       function writeValue (datum) {
         function xmlEscape (string) {
           return string.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         }
 
-        var i, key, keys
+        let i, key, keys
 
         switch (LLSD.type(datum)) {
           case 'undefined':
@@ -792,16 +792,16 @@ export var LLSD, URI, UUID, Binary;
         binary = new Binary(binary)
       }
 
-      var octets = binary.toArray()
-      var offset = 0
-      var value
+      const octets = binary.toArray()
+      let offset = 0
+      let value
 
       function eod () {
         return offset >= octets.length
       }
       function read (n) {
         if (offset + n > octets.length) { throw new Error('Unexpected end of data') }
-        var result = octets.slice(offset, offset + n)
+        const result = octets.slice(offset, offset + n)
         offset += n
         return result
       }
@@ -809,28 +809,28 @@ export var LLSD, URI, UUID, Binary;
       function readOctet () { return read(1)[0] }
 
       function readU32 () {
-        var u8array = new Uint8Array(read(4))
-        var dv = new DataView(u8array.buffer)
+        const u8array = new Uint8Array(read(4))
+        const dv = new DataView(u8array.buffer)
 
         return dv.getUint32(0)
       }
 
       function readS32 () {
-        var u8array = new Uint8Array(read(4))
-        var dv = new DataView(u8array.buffer)
+        const u8array = new Uint8Array(read(4))
+        const dv = new DataView(u8array.buffer)
 
         return dv.getInt32(0)
       }
 
       function readF64 () {
-        var u8array = new Uint8Array(read(8))
-        var dv = new DataView(u8array.buffer)
+        const u8array = new Uint8Array(read(8))
+        const dv = new DataView(u8array.buffer)
 
         return dv.getFloat64(0)
       }
 
       function readString () {
-        var len = readU32()
+        const len = readU32()
         return new Binary(read(len)).toString('UTF-8')
       }
 
@@ -841,12 +841,12 @@ export var LLSD, URI, UUID, Binary;
       function readValue () {
         if (eod()) { throw new Error('Unexpected end of data') }
 
-        var octet = readOctet()
-        var i
-        var len
-        var array
-        var map
-        var key
+        const octet = readOctet()
+        let i
+        let len
+        let array
+        let map
+        let key
         switch (octet) {
           case LLSD.OCTET_UNDEFINED:
             return null
@@ -918,10 +918,10 @@ export var LLSD, URI, UUID, Binary;
     }
 
     LLSD.formatBinary = function (data) {
-      var octets = []
+      const octets = []
 
       function write (array) {
-        var i
+        let i
         if (array instanceof DataView) {
           for (i = 0; i < array.byteLength; i += 1) {
             octets.push(array.getUint8(i))
@@ -936,31 +936,31 @@ export var LLSD, URI, UUID, Binary;
       function writeOctet (octet) { write([octet]) }
 
       function writeU32 (u32) {
-        var dv = new DataView(new ArrayBuffer(4))
+        const dv = new DataView(new ArrayBuffer(4))
         dv.setUint32(0, u32)
         write(dv)
       }
 
       function writeS32 (s32) {
-        var dv = new DataView(new ArrayBuffer(4))
+        const dv = new DataView(new ArrayBuffer(4))
         dv.setInt32(0, s32)
         write(dv)
       }
 
       function writeF64 (f64) {
-        var dv = new DataView(new ArrayBuffer(8))
+        const dv = new DataView(new ArrayBuffer(8))
         dv.setFloat64(0, f64)
         write(dv)
       }
 
       function writeString (string) {
-        var bytes = new Binary(string, 'UTF-8').toArray()
+        const bytes = new Binary(string, 'UTF-8').toArray()
         writeU32(bytes.length)
         write(bytes)
       }
 
       function writeValue (datum) {
-        var len, i, bytes, keys, key
+        let len, i, bytes, keys, key
 
         switch (LLSD.type(datum)) {
           case 'undefined':
@@ -1055,7 +1055,7 @@ export var LLSD, URI, UUID, Binary;
           if (!(regex instanceof RegExp)) {
             regex = new RegExp('^' + regex)
           }
-          var m = regex.exec(string)
+          const m = regex.exec(string)
           if (m) {
             string = string.substring(m[0].length)
             return m.length > 1 ? m[1] : m[0]
@@ -1064,7 +1064,7 @@ export var LLSD, URI, UUID, Binary;
         }
 
         function req (regex, errmsg) {
-          var t = test(regex)
+          const t = test(regex)
           if (t) { return t }
           error(errmsg)
         }
@@ -1073,14 +1073,14 @@ export var LLSD, URI, UUID, Binary;
           test(/^\s+/)
         }
 
-        var reReal = /^([-+]?([0-9]*\.?[0-9]+)([eE][-+]?[0-9]+)?|[-+]?Infinity|NaN)/
-        var reUUID = /^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/
-        var reDate = /^((\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z)/
-        var value
+        const reReal = /^([-+]?([0-9]*\.?[0-9]+)([eE][-+]?[0-9]+)?|[-+]?Infinity|NaN)/
+        const reUUID = /^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/
+        const reDate = /^((\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z)/
+        let value
 
         function parseValue () {
           /* jslint regexp: false */
-          var res, key
+          let res, key
 
           ws()
           if (!string.length) { error('unexpected end-of-string') }
@@ -1177,14 +1177,14 @@ export var LLSD, URI, UUID, Binary;
       }
 
       LLSD.formatNotation = function (data) {
-        var out = []
+        const out = []
 
         function writeString (value) {
           out.push('"', value.replace(/[\\]/g, '\\\\').replace(/["]/g, '\\"'), '"')
         }
 
         function writeValue (value) {
-          var i, key, keys
+          let i, key, keys
           switch (LLSD.type(value)) {
             case 'undefined': out.push('!'); break
             case 'boolean': out.push(value ? '1' : '0'); break

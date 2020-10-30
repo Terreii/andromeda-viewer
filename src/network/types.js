@@ -277,7 +277,7 @@ export const LLUUID = new MessageDataType(
     let parts = []
     if (typeof value === 'string') {
       const uuidString = value.replace(/-/gi, '')
-      for (var i = 0; i < 16; ++i) {
+      for (let i = 0; i < 16; ++i) {
         const index = i * 2
         const chars = uuidString.charAt(index) + uuidString.charAt(index + 1)
         const part = parseInt(chars, 16)

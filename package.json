@@ -149,10 +149,6 @@
     ]
   },
   "standard": {
-    "extensions": [
-      ".ts",
-      ".tsx"
-    ],
     "parser": "babel-eslint",
     "env": [
       "jest",

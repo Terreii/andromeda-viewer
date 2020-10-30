@@ -53,7 +53,7 @@ export default function BurgerMenu ({ isLoggedIn }) {
             <br />
             <small>{userName}</small>
           </NavLink>
-        )
+          )
         : (
           <SignInDialogOpener
             id='burgerMenuSignIn'
@@ -61,7 +61,7 @@ export default function BurgerMenu ({ isLoggedIn }) {
           >
             Sign into Andromeda
           </SignInDialogOpener>
-        )}
+          )}
 
       {!isSignedIn && (
         <SignInDialogOpener

@@ -11,8 +11,8 @@ import { GroupInvitationNotification } from '../../types/chat'
 const numberFormater = Intl && Intl.NumberFormat
   ? Intl.NumberFormat()
   : {
-    format: (number: Number) => number.toString()
-  }
+      format: (number: Number) => number.toString()
+    }
 
 export default function GroupInvitation (
   { data, onClose }: ComponentArguments<GroupInvitationNotification>

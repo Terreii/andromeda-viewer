@@ -70,8 +70,8 @@ function combineBlocks (combined, line) { // combine the blocks together
 
 function parseMessage (message) {
   // parse a message
-  var head = message[0].trim().split(/\s+/g)
-  var body = message.slice(1).reduce(parseBlocks, {
+  const head = message[0].trim().split(/\s+/g)
+  const body = message.slice(1).reduce(parseBlocks, {
     all: [],
     thisBlock: null
   }).all
@@ -87,7 +87,7 @@ function parseMessage (message) {
 }
 
 function parseBlocks (blocks, line) {
-  var trimed = line.trim()
+  const trimed = line.trim()
   if (trimed.length === 1 && trimed.charAt(0) === '{') {
     blocks.thisBlock = {
       name: '',
@@ -99,14 +99,14 @@ function parseBlocks (blocks, line) {
     blocks.all.push(blocks.thisBlock)
   } else if (trimed.charAt(0) !== '{') {
     // block info has no { at the beginning
-    var info = trimed.split(/\s+/g)
+    const info = trimed.split(/\s+/g)
     blocks.thisBlock.name = info[0]
     blocks.thisBlock.quantity = info[1]
     blocks.thisBlock.times = +info[2]
   } else if (trimed.charAt(0) === '{' && trimed.length > 2) {
     // all variables have the fromat { name type quantity? }
-    var variable = trimed.split(/\s+/g)
-    var type = variable[2]
+    const variable = trimed.split(/\s+/g)
+    let type = variable[2]
     if (type === 'Variable') {
       type += variable[3].trim()
     }

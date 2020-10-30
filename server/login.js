@@ -160,10 +160,10 @@ function handleXmlRpc (app, res, loginURL, reqData) {
     if (err) {
       const body = err.body != null
         ? {
-          statusCode: (err.res && err.res.statusCode) || 500,
-          error: 'Login fail',
-          message: err.body
-        }
+            statusCode: (err.res && err.res.statusCode) || 500,
+            error: 'Login fail',
+            message: err.body
+          }
         : err
 
       res.status(body.statusCode || 500).json(body)

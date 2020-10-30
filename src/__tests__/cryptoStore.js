@@ -46,7 +46,7 @@ test('cryptoStore and its methods exists', () => {
 test('cryptoStore requires to be unlocked', async () => {
   const cryptoStore = new CryptoStore(db.hoodieApi())
 
-  await expect(cryptoStore.add({ test: '' })).rejects.toThrow("Name or password is incorrect.")
+  await expect(cryptoStore.add({ test: '' })).rejects.toThrow('Name or password is incorrect.')
 
   await cryptoStore.setup('testPassword')
   await cryptoStore.unlock('testPassword')
