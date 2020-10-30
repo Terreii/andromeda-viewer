@@ -44,7 +44,7 @@ let ArrayBuffer, Uint8Array, DataView // typedarray.js
 //
 
 let LL_LEGACY // Set to true to enable notation formatting
-export var LLSD, URI, UUID, Binary;
+export let LLSD, URI, UUID, Binary;
 
 (function () {
 //
@@ -260,7 +260,7 @@ export var LLSD, URI, UUID, Binary;
           encode: function (s) {
             /* jslint bitwise: false */
             const o = []
-            let len
+            const len = s.length
             let i
             let cp
             let cp2
@@ -282,8 +282,6 @@ export var LLSD, URI, UUID, Binary;
                 o.push(0x80 | ((cp >> 0) & 0x3F))
               }
             }
-
-            len = s.length
 
             for (i = 0; i < len; i += 1) {
               cp = s.charCodeAt(i)
@@ -628,11 +626,10 @@ export var LLSD, URI, UUID, Binary;
       function processElement (elem) {
         function nodeText (node) {
           const NODE_TEXT = 3
-          let child
 
           if (!node.hasChildNodes()) { return '' }
           if (node.childNodes.length > 1) { throw new Error('Expected single child of: ' + node.nodeName) }
-          child = node.firstChild
+          const child = node.firstChild
           if (child.nodeType !== NODE_TEXT) { throw new Error('Expected text node child of: ' + node.nodeName) }
 
           return child.data
@@ -794,7 +791,6 @@ export var LLSD, URI, UUID, Binary;
 
       const octets = binary.toArray()
       let offset = 0
-      let value
 
       function eod () {
         return offset >= octets.length
@@ -911,7 +907,7 @@ export var LLSD, URI, UUID, Binary;
         }
       }
 
-      value = readValue()
+      const value = readValue()
       if (!eod()) { throw new Error('Unexpected continuation of binary data') }
 
       return value
@@ -1076,7 +1072,6 @@ export var LLSD, URI, UUID, Binary;
         const reReal = /^([-+]?([0-9]*\.?[0-9]+)([eE][-+]?[0-9]+)?|[-+]?Infinity|NaN)/
         const reUUID = /^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/
         const reDate = /^((\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z)/
-        let value
 
         function parseValue () {
           /* jslint regexp: false */
@@ -1170,7 +1165,7 @@ export var LLSD, URI, UUID, Binary;
           error('unexpected token: ' + string.charAt(0))
         }
 
-        value = parseValue()
+        const value = parseValue()
         ws()
         if (string.length) { error('expected end-of-string, saw: ' + string) }
         return value

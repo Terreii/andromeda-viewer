@@ -10,7 +10,7 @@ test('redux and thunk should have their public functions', () => {
 
 describe('basic functionality of redux-store', () => {
   const store = createStore(
-    (state = { text: 'hello' }, action) => action.type === 'UPDATE' ? action.next : state
+    (state = { text: 'hello' }, action = {}) => action.type === 'UPDATE' ? action.next : state
   )
 
   test('the store should have the expected methods', () => {
@@ -142,7 +142,7 @@ describe('middleware adding and thunk', () => {
     )
 
     store = createStore(
-      (state = { text: 'hello' }, action) => action.type === 'UPDATE' ? action.next : state,
+      (state = { text: 'hello' }, action = {}) => action.type === 'UPDATE' ? action.next : state,
       // undefined, // old state
       enhancers
     )
