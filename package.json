@@ -151,8 +151,7 @@
   "standard": {
     "parser": "babel-eslint",
     "env": [
-      "jest",
-      "es6"
+      "jest"
     ]
   }
 }
