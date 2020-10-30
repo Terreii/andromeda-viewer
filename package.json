@@ -24,7 +24,7 @@
     "update-contrib": "weallcontribute -o . && git add CONTRIBUTING.md && git commit -m 'docs(contributing): update CONTRIBUTING.md'",
     "update-files": "node tools/updateFiles.js",
     "test:docs": "textlint README.md ./*/*.md ./src/*/*.md",
-    "test:standard": "echo standard",
+    "test:standard": "standard",
     "test:server": "cross-env PORT=0 NODE_ENV=test mocha",
     "pretest:app": "npm run build:messages",
     "test:app": "react-scripts test --env=jsdom",
@@ -103,6 +103,7 @@
     "requestidlecallback": "^0.3.0",
     "reselect": "^4.0.0",
     "sinon": "^9.2.0",
+    "standard": "^16.0.0",
     "supertest": "^5.0.0",
     "tailwindcss": "^1.9.6",
     "textlint": "^11.7.6",
@@ -148,6 +149,10 @@
     ]
   },
   "standard": {
+    "extensions": [
+      ".ts",
+      ".tsx"
+    ],
     "parser": "babel-eslint",
     "env": [
       "jest",
