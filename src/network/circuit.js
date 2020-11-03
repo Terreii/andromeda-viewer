@@ -238,7 +238,7 @@ export default class Circuit extends events.EventEmitter {
       : Buffer.alloc(0)
 
     const ipPort = Buffer.alloc(6)
-    for (var i = 0; i < 4; i++) {
+    for (let i = 0; i < 4; i++) {
       ipPort.writeUInt8(this.ipArray[i], i)
     }
     ipPort.writeUInt16LE(this.port, 4)

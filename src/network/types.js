@@ -14,7 +14,7 @@ export const NullType = new MessageDataType(
 
 // Arrays
 
-export const Fixed = new MessageDataType('Fixed', (value = [], length) => {
+export const Fixed = new MessageDataType('Fixed', (value = [], length = 0) => {
   const buffy = Buffer.alloc(length)
   if (typeof value === 'string') {
     buffy.write(value.substr(0, length))
@@ -25,7 +25,7 @@ export const Fixed = new MessageDataType('Fixed', (value = [], length) => {
     }
   }
   return buffy
-}, (buffer, offset = { value: 0 }, size) => {
+}, (buffer, offset = { value: 0 }, size = 0) => {
   const start = offset.value
   offset.value += size
   return buffer.slice(start, offset.value)
@@ -277,7 +277,7 @@ export const LLUUID = new MessageDataType(
     let parts = []
     if (typeof value === 'string') {
       const uuidString = value.replace(/-/gi, '')
-      for (var i = 0; i < 16; ++i) {
+      for (let i = 0; i < 16; ++i) {
         const index = i * 2
         const chars = uuidString.charAt(index) + uuidString.charAt(index + 1)
         const part = parseInt(chars, 16)

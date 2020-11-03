@@ -26,7 +26,7 @@ export default function Modal ({ children, title, icon, showCloseButton, dialog,
       >
         <img src={closeIcon} alt={`close dialog ${title}`} height='32' width='32' />
       </button>
-    )
+      )
     : <span />
 
   return (

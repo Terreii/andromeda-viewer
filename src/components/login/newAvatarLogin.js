@@ -70,10 +70,10 @@ export default function NewAvatarLogin ({
     const grid = selectedGrid !== ''
       ? selectedGrid
       : {
-        name: gridName,
-        loginUrl: gridUrl,
-        isLoginLLSD: isGridLLSD
-      }
+          name: gridName,
+          loginUrl: gridUrl,
+          isLoginLLSD: isGridLLSD
+        }
     const save = saveAvatar && isSignedIn
 
     onLogin(name, password, grid, save)

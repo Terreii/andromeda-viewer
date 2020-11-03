@@ -14,13 +14,13 @@ beforeEach(() => {
     return {
       send: jest.fn(),
       close: jest.fn(),
-  
+
       onopen () {},
-  
+
       onerror () {},
-  
+
       onclose () {},
-  
+
       onmessage () {}
     }
   })
@@ -352,14 +352,14 @@ test('circuit should send after 100ms a PacketAck', () => {
       case 'StartPingCheck':
         startPingCheck = msg
         continue
-        
+
       default:
         continue
-      }
     }
+  }
 
-    expect(getValueOf(packageAck, 'Packets', 0, 'ID')).toBeGreaterThanOrEqual(0)
-    expect(getValueOf(startPingCheck, 'PingID', 0, 'PingID')).toBe(0)
+  expect(getValueOf(packageAck, 'Packets', 0, 'ID')).toBeGreaterThanOrEqual(0)
+  expect(getValueOf(startPingCheck, 'PingID', 0, 'PingID')).toBe(0)
 })
 
 test('circuit should resend a package after 500ms', () => {
