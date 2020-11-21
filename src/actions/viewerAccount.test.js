@@ -7,6 +7,8 @@ import PouchDB from 'pouchdb-browser'
 import memoryAdapter from 'pouchdb-adapter-memory'
 import hoodieApi from 'pouchdb-hoodie-api'
 
+import { createTestStore } from '../testUtils'
+
 import { signInStatus } from '../bundles/account'
 import {
   saveAvatar,
@@ -22,17 +24,21 @@ import AvatarName from '../avatarName'
 PouchDB.plugin(memoryAdapter)
 PouchDB.plugin(hoodieApi)
 
-jest.mock('uuid')
-
-beforeEach(() => {
-  v4.mockReturnValue('b039f51f-41d9-41e7-a4b1-5490fbfd5eb9')
-})
-
 window.TextEncoder = class TextEncoder {
   encode (text) {
     return Buffer.from(text)
   }
 }
+
+let localDB
+
+beforeEach(() => {
+  localDB = new PouchDB('local_test_db', { adapter: 'memory' })
+})
+
+afterEach(async () => {
+  await localDB.destroy()
+})
 
 it('didSignIn', () => {
   const store = configureMockStore([thunk])()
@@ -101,377 +107,296 @@ it('didSignIn', () => {
   ])
 })
 
-it('saveAvatar', async () => {
-  const add = jest.fn(arg => Promise.resolve(arg))
-  const withIdPrefix = jest.fn(() => ({ add }))
+describe('avatars', () => {
+  it('should load avatars', async () => {
+    const { store, cryptoStore, setMark, getDiff } = createTestStore({ localDB })
 
-  const store = configureMockStore([
-    thunk.withExtraArgument({
-      cryptoStore: {
-        withIdPrefix
-      }
-    })
-  ])({
-    account: {
-      savedAvatars: [
-        { avatarIdentifier: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e@grid.org' }
-      ]
-    }
-  })
+    await cryptoStore.setup('testPassword')
+    await cryptoStore.unlock('testPassword')
 
-  const name = new AvatarName('tester')
-
-  await expect(
-    store.dispatch(saveAvatar(name, 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e', 'grid.org'))
-  ).rejects.toThrow('Avatar already exist!')
-
-  await store.dispatch(saveAvatar(name, 'f2373437-a2ef-4435-82b9-68d283538bb2', 'grid.org'))
-
-  expect(add.mock.calls.length).toBe(1)
-  expect(add.mock.calls[0]).toEqual([
-    {
-      avatarIdentifier: 'f2373437-a2ef-4435-82b9-68d283538bb2@grid.org',
-      dataSaveId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9',
-      grid: 'grid.org',
-      name: 'Tester Resident'
-    }
-  ])
-})
-
-it('loadSavedAvatars', async () => {
-  const findAll = jest.fn(() => Promise.resolve([
-    {
-      _id: 'avatars/5e922960-d3f6-451d-9e76-346e4e8a988c',
-      _rev: '1-2983e9823',
-      hoodie: { createdAt: '2019-12-04T19:10:47.756Z' },
-      avatarIdentifier: 'f2373437-a2ef-4435-82b9-68d283538bb2@grid.org',
-      dataSaveId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9',
-      grid: 'grid.org',
-      name: 'Tester Resident'
-    },
-    {
-      _id: 'avatars/5e922960-d3f6-451d-9e76-346e4e8a988c',
-      _rev: '1-2983e9823',
-      hoodie: { createdAt: '2019-12-03T19:10:47.756Z' },
-      avatarIdentifier: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e@grid.org',
-      dataSaveId: 'e3b35551-3896-44c0-b1d7-2459e35c39fd',
-      grid: 'grid.org',
-      name: 'Tester MacTestface'
-    }
-  ]))
-  const on = jest.fn()
-  const off = jest.fn()
-
-  const withIdPrefix = jest.fn(() => ({
-    findAll,
-    on,
-    off
-  }))
-
-  let callback = null
-  const dbOnce = jest.fn((event, fn) => {
-    callback = fn
-  })
-
-  const store = configureMockStore([
-    thunk.withExtraArgument({
-      db: {
-        once: dbOnce
+    await cryptoStore.withIdPrefix('avatars/').add([
+      {
+        _id: '36e414df-5629-4eec-b1c2-da4fa1d91be7',
+        avatarIdentifier: 'f2373437-a2ef-4435-82b9-68d283538bb2@grid.org',
+        dataSaveId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9',
+        grid: 'grid.org',
+        name: 'Tester Resident'
       },
-      cryptoStore: {
-        withIdPrefix
+      {
+        _id: '98d0193b-6358-4144-b65c-a871f1692dbb',
+        avatarIdentifier: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e@grid.org',
+        dataSaveId: 'e3b35551-3896-44c0-b1d7-2459e35c39fd',
+        grid: 'grid.org',
+        name: 'Tester MacTestface'
+      }
+    ])
+
+    store.dispatch(signInStatus(true, true, 'tester.mactestface@example.com'))
+
+    setMark('A')
+    await store.dispatch(loadSavedAvatars())
+
+    expect(getDiff('A')).toEqual({
+      account: {
+        savedAvatars: {
+          0: {
+            _id: 'avatars/36e414df-5629-4eec-b1c2-da4fa1d91be7',
+            _rev: expect.any(String),
+            hoodie: {
+              createdAt: expect.any(String)
+            },
+            dataSaveId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9',
+            avatarIdentifier: 'f2373437-a2ef-4435-82b9-68d283538bb2@grid.org',
+            grid: 'grid.org',
+            name: 'Tester Resident'
+          },
+          1: {
+            _id: 'avatars/98d0193b-6358-4144-b65c-a871f1692dbb',
+            _rev: expect.any(String),
+            hoodie: {
+              createdAt: expect.any(String)
+            },
+            avatarIdentifier: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e@grid.org',
+            dataSaveId: 'e3b35551-3896-44c0-b1d7-2459e35c39fd',
+            grid: 'grid.org',
+            name: 'Tester MacTestface'
+          }
+        },
+        savedAvatarsLoaded: true
       }
     })
-  ])({
-    account: {
-      loggedIn: true,
-      username: 'tester@viewer.com',
-      savedAvatarsLoaded: false
-    }
   })
 
-  await store.dispatch(loadSavedAvatars())
+  it('should load avatars that are added later', async () => {
+    const { store, cryptoStore, setMark, getDiff } = createTestStore({ localDB })
 
-  expect(store.getActions()).toEqual([
-    {
-      type: 'account/avatarsLoaded',
-      payload: [
-        {
-          _id: 'avatars/5e922960-d3f6-451d-9e76-346e4e8a988c',
-          _rev: '1-2983e9823',
-          hoodie: { createdAt: '2019-12-03T19:10:47.756Z' },
-          avatarIdentifier: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e@grid.org',
-          dataSaveId: 'e3b35551-3896-44c0-b1d7-2459e35c39fd',
-          grid: 'grid.org',
-          name: 'Tester MacTestface'
-        },
-        {
-          _id: 'avatars/5e922960-d3f6-451d-9e76-346e4e8a988c',
-          _rev: '1-2983e9823',
-          hoodie: { createdAt: '2019-12-04T19:10:47.756Z' },
-          avatarIdentifier: 'f2373437-a2ef-4435-82b9-68d283538bb2@grid.org',
-          dataSaveId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9',
-          grid: 'grid.org',
-          name: 'Tester Resident'
-        }
-      ]
-    }
-  ])
+    await cryptoStore.setup('testPassword')
+    await cryptoStore.unlock('testPassword')
+    store.dispatch(signInStatus(true, true, 'tester.mactestface@example.com'))
+    await store.dispatch(loadSavedAvatars())
 
-  expect(withIdPrefix.mock.calls).toEqual([
-    ['avatars/']
-  ])
-  expect(dbOnce.mock.calls.length).toBe(1)
-  expect(dbOnce.mock.calls[0][0]).toBe('destroyed')
-  expect(dbOnce.mock.calls[0][1]).toBeInstanceOf(Function)
-  expect(on.mock.calls.length).toBe(1)
-  expect(on.mock.calls[0][0]).toBe('change')
+    setMark('A')
 
-  const eventHandler = on.mock.calls[0][1]
-  expect(eventHandler).toBeInstanceOf(Function)
-  expect(off.mock.calls.length).toBe(0)
-
-  store.clearActions()
-
-  for (const type of ['add', 'update', 'remove']) {
-    eventHandler(type, {
-      _id: 'avatars/5e922960-d3f6-451d-9e76-346e4e8a988c',
-      _rev: '1-2983e9823',
-      hoodie: { createdAt: '2019-12-04T19:10:47.756Z' },
-      avatarIdentifier: 'f2373437-a2ef-4435-82b9-68d283538bb2@grid.org',
+    await cryptoStore.add({
+      _id: 'avatars/b039f51f-41d9-41e7-a4b1-5490fbfd5eb9',
       dataSaveId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9',
-      grid: 'grid.org',
-      name: 'Tester Resident'
+      avatarIdentifier: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9@Second Life',
+      name: 'Tester Resident',
+      grid: 'Second Life'
     })
-  }
 
-  callback() // simulate signout
+    await new Promise(resolve => setTimeout(resolve, 5))
 
-  expect(off.mock.calls.length).toBe(1)
-  expect(off.mock.calls[0]).toEqual([
-    'change',
-    eventHandler // same function
-  ])
+    expect(getDiff('A')).toEqual({
+      account: {
+        savedAvatars: {
+          0: {
+            _id: 'avatars/b039f51f-41d9-41e7-a4b1-5490fbfd5eb9',
+            _rev: expect.any(String),
+            hoodie: {
+              createdAt: expect.any(String)
+            },
+            dataSaveId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9',
+            avatarIdentifier: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9@Second Life',
+            name: 'Tester Resident',
+            grid: 'Second Life'
+          }
+        }
+      }
+    })
+  })
 
-  expect(store.getActions()).toEqual([
-    {
-      type: 'account/avatarSaved',
-      payload: {
-        _id: 'avatars/5e922960-d3f6-451d-9e76-346e4e8a988c',
-        _rev: '1-2983e9823',
-        hoodie: { createdAt: '2019-12-04T19:10:47.756Z' },
-        avatarIdentifier: 'f2373437-a2ef-4435-82b9-68d283538bb2@grid.org',
-        dataSaveId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9',
-        grid: 'grid.org',
-        name: 'Tester Resident'
+  it('should save an avatar', async () => {
+    const { store, cryptoStore, setMark, getDiff } = createTestStore({ localDB })
+
+    await cryptoStore.setup('testPassword')
+    await cryptoStore.unlock('testPassword')
+    store.dispatch(signInStatus(true, true, 'tester.mactestface@example.com'))
+    await store.dispatch(loadSavedAvatars())
+
+    setMark('A')
+
+    const avatarIdentifier = v4()
+    const result = await store.dispatch(saveAvatar(
+      new AvatarName('Tester'),
+      avatarIdentifier,
+      'Second Life'
+    ))
+
+    expect(result).toEqual({
+      _id: expect.any(String),
+      _rev: expect.any(String),
+      hoodie: {
+        createdAt: expect.any(String)
+      },
+      dataSaveId: expect.any(String),
+      avatarIdentifier: avatarIdentifier + '@Second Life',
+      name: 'Tester Resident',
+      grid: 'Second Life'
+    })
+
+    await new Promise(resolve => setTimeout(resolve, 5))
+
+    expect(getDiff('A')).toEqual({
+      account: {
+        savedAvatars: {
+          0: {
+            _id: expect.any(String),
+            _rev: expect.any(String),
+            hoodie: {
+              createdAt: expect.any(String)
+            },
+            dataSaveId: expect.any(String),
+            avatarIdentifier: avatarIdentifier + '@Second Life',
+            name: 'Tester Resident',
+            grid: 'Second Life'
+          }
+        }
       }
-    },
-    {
-      type: 'account/savedAvatarUpdated',
-      payload: {
-        _id: 'avatars/5e922960-d3f6-451d-9e76-346e4e8a988c',
-        _rev: '1-2983e9823',
-        hoodie: { createdAt: '2019-12-04T19:10:47.756Z' },
-        avatarIdentifier: 'f2373437-a2ef-4435-82b9-68d283538bb2@grid.org',
-        dataSaveId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9',
-        grid: 'grid.org',
-        name: 'Tester Resident'
-      }
-    },
-    {
-      type: 'account/savedAvatarRemoved',
-      payload: {
-        _id: 'avatars/5e922960-d3f6-451d-9e76-346e4e8a988c',
-        _rev: '1-2983e9823',
-        hoodie: { createdAt: '2019-12-04T19:10:47.756Z' },
-        avatarIdentifier: 'f2373437-a2ef-4435-82b9-68d283538bb2@grid.org',
-        dataSaveId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9',
-        grid: 'grid.org',
-        name: 'Tester Resident'
-      }
-    }
-  ])
+    })
+  })
 })
 
-it('saveGrid', async () => {
-  const add = jest.fn(arg => Promise.resolve(arg))
-  const withIdPrefix = jest.fn(() => ({ add }))
+describe('grids', () => {
+  it('should load grids', async () => {
+    const { store, cryptoStore, setMark, getDiff } = createTestStore({ localDB })
 
-  const store = configureMockStore([
-    thunk.withExtraArgument({
-      cryptoStore: {
-        withIdPrefix
+    await cryptoStore.setup('testPassword')
+    await cryptoStore.unlock('testPassword')
+
+    await cryptoStore.withIdPrefix('grids/').add([
+      {
+        _id: '36e414df-5629-4eec-b1c2-da4fa1d91be7',
+        name: 'Test Land',
+        loginURL: 'https://login.test-land.grid/login',
+        isLLSDLogin: false
+      },
+      {
+        _id: '98d0193b-6358-4144-b65c-a871f1692dbb',
+        name: 'Private Land',
+        loginURL: 'https://localhost:1234/login',
+        isLLSDLogin: true
+      }
+    ])
+
+    await new Promise(resolve => setTimeout(resolve, 5))
+
+    store.dispatch(signInStatus(true, true, 'tester.mactestface@example.com'))
+
+    setMark('A')
+    await store.dispatch(loadSavedGrids())
+
+    expect(getDiff('A')).toEqual({
+      account: {
+        savedGridsLoaded: true,
+        savedGrids: {
+          3: {
+            _id: 'grids/36e414df-5629-4eec-b1c2-da4fa1d91be7',
+            _rev: expect.any(String),
+            hoodie: {
+              createdAt: expect.any(String)
+            },
+            name: 'Test Land',
+            loginURL: 'https://login.test-land.grid/login',
+            isLLSDLogin: false
+          },
+          4: {
+            _id: 'grids/98d0193b-6358-4144-b65c-a871f1692dbb',
+            _rev: expect.any(String),
+            hoodie: {
+              createdAt: expect.any(String)
+            },
+            name: 'Private Land',
+            loginURL: 'https://localhost:1234/login',
+            isLLSDLogin: true
+          }
+        }
       }
     })
-  ])({
-    account: {
-      savedGrids: [
-        {
-          name: 'Second Life',
-          loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi',
-          isLoginLLSD: true
-        }
-      ]
-    }
   })
 
-  await expect(store.dispatch(saveGrid({
-    name: 'Second Life',
-    loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi'
-  }))).rejects.toThrow('Grid already exist!')
+  it('should load grids that are added later', async () => {
+    const { store, cryptoStore, setMark, getDiff } = createTestStore({ localDB })
 
-  await store.dispatch(saveGrid({
-    name: 'AwsomeGrid',
-    loginURL: 'https://login.grid.org/login'
-  }))
+    await cryptoStore.setup('testPassword')
+    await cryptoStore.unlock('testPassword')
+    store.dispatch(signInStatus(true, true, 'tester.mactestface@example.com'))
+    await store.dispatch(loadSavedGrids())
 
-  expect(add.mock.calls.length).toBe(1)
-  expect(add.mock.calls[0]).toEqual([
-    {
-      name: 'AwsomeGrid',
-      loginURL: 'https://login.grid.org/login',
+    setMark('A')
+
+    await cryptoStore.add({
+      _id: 'grids/36e414df-5629-4eec-b1c2-da4fa1d91be7',
+      name: 'Test Land',
+      loginURL: 'https://login.test-land.grid/login',
       isLLSDLogin: false
-    }
-  ])
-})
-
-it('loadSavedGrids', async () => {
-  const findAll = jest.fn(() => Promise.resolve([
-    {
-      _id: 'grids/5e922960-d3f6-451d-9e76-346e4e8a988c',
-      _rev: '1-2983e9823',
-      hoodie: { createdAt: '2019-12-04T19:10:47.756Z' },
-      name: 'Grid',
-      loginURL: 'https://login.grid.org/login'
-    },
-    {
-      _id: 'grids/e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-      _rev: '1-2983e9823',
-      hoodie: { createdAt: '2019-12-03T19:10:47.756Z' },
-      name: 'Other',
-      loginURL: 'https://login.example.org/'
-    }
-  ]))
-  const on = jest.fn()
-  const off = jest.fn()
-
-  const withIdPrefix = jest.fn(() => ({
-    findAll,
-    on,
-    off
-  }))
-
-  let callback = null
-  const dbOnce = jest.fn((event, fn) => {
-    callback = fn
-  })
-
-  const store = configureMockStore([
-    thunk.withExtraArgument({
-      db: {
-        once: dbOnce
-      },
-      cryptoStore: {
-        withIdPrefix
-      }
     })
-  ])({
-    account: {
-      loggedIn: true,
-      username: 'tester@viewer.com',
-      savedGridsLoaded: false
-    }
-  })
 
-  await store.dispatch(loadSavedGrids())
+    await new Promise(resolve => setTimeout(resolve, 5))
 
-  expect(store.getActions()).toEqual([
-    {
-      type: 'account/gridsLoaded',
-      payload: [
-        {
-          _id: 'grids/5e922960-d3f6-451d-9e76-346e4e8a988c',
-          _rev: '1-2983e9823',
-          hoodie: { createdAt: '2019-12-04T19:10:47.756Z' },
-          name: 'Grid',
-          loginURL: 'https://login.grid.org/login'
-        },
-        {
-          _id: 'grids/e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-          _rev: '1-2983e9823',
-          hoodie: { createdAt: '2019-12-03T19:10:47.756Z' },
-          name: 'Other',
-          loginURL: 'https://login.example.org/'
+    expect(getDiff('A')).toEqual({
+      account: {
+        savedGrids: {
+          3: {
+            _id: 'grids/36e414df-5629-4eec-b1c2-da4fa1d91be7',
+            _rev: expect.any(String),
+            hoodie: {
+              createdAt: expect.any(String)
+            },
+            name: 'Test Land',
+            loginURL: 'https://login.test-land.grid/login',
+            isLLSDLogin: false
+          }
         }
-      ]
-    }
-  ])
-
-  expect(withIdPrefix.mock.calls).toEqual([
-    ['grids/']
-  ])
-  expect(dbOnce.mock.calls.length).toBe(1)
-  expect(dbOnce.mock.calls[0][0]).toBe('destroyed')
-  expect(dbOnce.mock.calls[0][1]).toBeInstanceOf(Function)
-  expect(on.mock.calls.length).toBe(1)
-  expect(on.mock.calls[0][0]).toBe('change')
-
-  const eventHandler = on.mock.calls[0][1]
-  expect(eventHandler).toBeInstanceOf(Function)
-  expect(off.mock.calls.length).toBe(0)
-
-  store.clearActions()
-
-  for (const type of ['add', 'update', 'remove']) {
-    eventHandler(type, {
-      _id: 'grids/e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-      _rev: '1-2983e9823',
-      hoodie: { createdAt: '2019-12-03T19:10:47.756Z' },
-      name: 'Other',
-      loginURL: 'https://login.example.org/'
+      }
     })
-  }
+  })
 
-  callback() // simulate signout
+  it('should save a grid', async () => {
+    const { store, cryptoStore, setMark, getDiff } = createTestStore({ localDB })
 
-  expect(off.mock.calls.length).toBe(1)
-  expect(off.mock.calls[0]).toEqual([
-    'change',
-    eventHandler // same function
-  ])
+    await cryptoStore.setup('testPassword')
+    await cryptoStore.unlock('testPassword')
+    store.dispatch(signInStatus(true, true, 'tester.mactestface@example.com'))
+    await store.dispatch(loadSavedGrids())
 
-  expect(store.getActions()).toEqual([
-    {
-      type: 'account/gridAdded',
-      payload: {
-        _id: 'grids/e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-        _rev: '1-2983e9823',
-        hoodie: { createdAt: '2019-12-03T19:10:47.756Z' },
-        name: 'Other',
-        loginURL: 'https://login.example.org/'
+    setMark('A')
+
+    const result = await store.dispatch(saveGrid({
+      name: 'Test Land',
+      loginURL: 'https://login.test-land.grid/login'
+    }))
+
+    expect(result).toEqual({
+      _id: expect.any(String),
+      _rev: expect.any(String),
+      hoodie: {
+        createdAt: expect.any(String)
+      },
+      name: 'Test Land',
+      loginURL: 'https://login.test-land.grid/login',
+      isLLSDLogin: false
+    })
+
+    await new Promise(resolve => setTimeout(resolve, 5))
+
+    expect(getDiff('A')).toEqual({
+      account: {
+        savedGrids: {
+          3: {
+            _id: expect.any(String),
+            _rev: expect.any(String),
+            hoodie: {
+              createdAt: expect.any(String)
+            },
+            name: 'Test Land',
+            loginURL: 'https://login.test-land.grid/login',
+            isLLSDLogin: false
+          }
+        }
       }
-    },
-    {
-      type: 'account/savedGridDidChanged',
-      payload: {
-        _id: 'grids/e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-        _rev: '1-2983e9823',
-        hoodie: { createdAt: '2019-12-03T19:10:47.756Z' },
-        name: 'Other',
-        loginURL: 'https://login.example.org/'
-      }
-    },
-    {
-      type: 'account/savedGridRemoved',
-      payload: {
-        _id: 'grids/e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-        _rev: '1-2983e9823',
-        hoodie: { createdAt: '2019-12-03T19:10:47.756Z' },
-        name: 'Other',
-        loginURL: 'https://login.example.org/'
-      }
-    }
-  ])
+    })
+  })
 })
 
 it('should check sign in status with "isSignedIn"', async () => {

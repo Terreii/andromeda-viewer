@@ -23,10 +23,10 @@ export function createTestStore ({ localDB, remoteDB }: {
   // Get the diff from one state to another (default the current)
   const getDiff = (startKey?: string, endKey?: string) => {
     if (startKey && !states.has(startKey)) {
-      throw new Error('unknown start key ' + startKey)
+      throw new Error(`unknown start key '${startKey}'`)
     }
     if (endKey && !states.has(endKey)) {
-      throw new Error('unknown end key ' + endKey)
+      throw new Error(`unknown end key '${endKey}'`)
     }
 
     const oldState = startKey ? states.get(startKey)! : initialState
