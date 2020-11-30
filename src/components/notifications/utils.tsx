@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { NotificationBase } from '../../types/chat'
 
 interface ContainerArgs {
