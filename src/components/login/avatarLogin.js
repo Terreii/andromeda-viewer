@@ -60,7 +60,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
         <input
           id={passwordInputId}
           type='password'
-          className='block w-full mt-1 text-gray-900 form-input'
+          className='block w-full mt-1 text-gray-900 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
           value={password}
           onChange={event => { setPassword(event.target.value) }}
           required

@@ -62,7 +62,7 @@ export default function ResetPasswordDialog ({ type, dialog }) {
           <input
             id='oldInput'
             type='text'
-            className='block w-full mt-1 text-gray-900 form-input'
+            className='block w-full mt-1 text-gray-900 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
             value={resetKey}
             onChange={event => { setResetKey(event.target.value) }}
             autoFocus
@@ -91,7 +91,7 @@ export default function ResetPasswordDialog ({ type, dialog }) {
           <input
             id='newPassword'
             type='password'
-            className='block w-full mt-1 text-gray-900 form-input'
+            className='block w-full mt-1 text-gray-900 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
             value={password1}
             onChange={event => { setPassword1(event.target.value) }}
             required
@@ -109,7 +109,7 @@ export default function ResetPasswordDialog ({ type, dialog }) {
           <input
             id='newPassword2'
             type='password'
-            className='block w-full mt-1 text-gray-900 form-input'
+            className='block w-full mt-1 text-gray-900 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
             value={password2}
             onChange={event => { setPassword2(event.target.value) }}
             required

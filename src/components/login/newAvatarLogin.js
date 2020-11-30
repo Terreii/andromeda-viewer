@@ -45,9 +45,9 @@ export default function NewAvatarLogin ({
       >
         <button className='flex flex-col text-white btn-transparent focus:outline-none'>
           <h2 className='block m-1 text-xl text-center'>
-            <span className='whitespace-no-wrap'>Add avatar</span>
+            <span className='whitespace-nowrap'>Add avatar</span>
             <span> or </span>
-            <span className='whitespace-no-wrap'>login anonymously</span>
+            <span className='whitespace-nowrap'>login anonymously</span>
           </h2>
 
           <span className='text-center text-gray-400'>click to add</span>
@@ -90,18 +90,18 @@ export default function NewAvatarLogin ({
       <h2 className='block m-1 text-xl text-center'>
         {isSignedIn && (
           <>
-            <span className='whitespace-no-wrap'>Add avatar</span>
+            <span className='whitespace-nowrap'>Add avatar</span>
             <span> or </span>
           </>
         )}
-        <span className='whitespace-no-wrap'>login anonymously</span>
+        <span className='whitespace-nowrap'>login anonymously</span>
       </h2>
 
       <label className='text-left'>
         <span>Avatar</span>
         <input
           type='text'
-          className='block w-full mt-1 text-gray-900 form-input'
+          className='block w-full mt-1 text-gray-900 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
           value={name}
           onChange={onNameChange}
           disabled={isLoggingIn}
@@ -132,7 +132,7 @@ export default function NewAvatarLogin ({
         <span>Password</span>
         <input
           type='password'
-          className='block w-full mt-1 text-gray-900 form-input'
+          className='block w-full mt-1 text-gray-900 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
           value={password}
           onChange={onPasswordChange}
           disabled={isLoggingIn}
@@ -144,7 +144,7 @@ export default function NewAvatarLogin ({
       <label className='mt-3 text-left'>
         <span>Grid</span>
         <select
-          className='block w-full mt-1 text-gray-900 form-select'
+          className='block w-full mt-1 text-gray-900 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
           value={selectedGrid}
           onChange={event => { setSelectedGrid(event.target.value) }}
         >
@@ -166,7 +166,7 @@ export default function NewAvatarLogin ({
             <span>Name</span>
             <input
               type='text'
-              className='block w-full mt-1 text-gray-900 form-input'
+              className='block w-full mt-1 text-gray-900 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
               value={gridName}
               onChange={onGridNameChange}
               minLength='1'
@@ -178,7 +178,7 @@ export default function NewAvatarLogin ({
             <span>URL</span>
             <input
               type='url'
-              className='block w-full mt-1 text-gray-900 form-input'
+              className='block w-full mt-1 text-gray-900 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
               placeholder='https://example.com/login'
               value={gridUrl}
               onChange={onGridUrlChange}
@@ -193,7 +193,7 @@ export default function NewAvatarLogin ({
           >
             <input
               type='checkbox'
-              className='form-checkbox'
+              className='rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
               checked={isGridLLSD}
               onChange={event => { setIsGridLLSD(event.target.checked) }}
             />
@@ -206,7 +206,7 @@ export default function NewAvatarLogin ({
         <label>
           <input
             type='checkbox'
-            className='form-checkbox'
+            className='rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
             onChange={event => { setSaveAvatar(event.target.checked) }}
             checked={saveAvatar}
             disabled={!isSignedIn || isLoggingIn}

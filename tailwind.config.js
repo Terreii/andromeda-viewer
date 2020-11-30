@@ -1,5 +1,4 @@
 module.exports = {
-  future: {},
   purge: [
     './public/**/*.html',
     './src/components/**/*.js',
@@ -18,6 +17,6 @@ module.exports = {
     }
   },
   plugins: [
-    require('@tailwindcss/custom-forms')
+    require('@tailwindcss/forms')
   ]
 }
