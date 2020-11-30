@@ -15,7 +15,7 @@ export function createTestStore ({ localDB, remoteDB }: {
   const initialState = store.getState()
   const states = new Map<string, ReturnType<typeof store.getState>>()
 
-  // Saves the current state unter that key for later comparison
+  // Saves the current state under that key for later comparison
   const setMark = (key: string) => {
     states.set(key, store.getState())
   }
