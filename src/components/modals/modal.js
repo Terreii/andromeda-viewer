@@ -18,7 +18,7 @@ export default function Modal ({ children, title, icon, showCloseButton, dialog,
   const closeIconInHeader = showCloseButton && closeable
     ? (
       <button
-        className='p-0 bg-transparent border-0 rounded focus:outline-none focus:shadow-outline'
+        className='p-0 bg-transparent border-0 rounded focus:outline-none focus:ring'
         onClick={event => {
           event.preventDefault()
           dialog.hide()

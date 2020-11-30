@@ -118,7 +118,7 @@ export default function ChatBox () {
           {...tab}
           id={friendsId}
           className={'flex-auto px-4 py-2 mt-px -mb-px bg-white border-b border-black rounded-t ' +
-            'focus:shadow-outline focus:outline-none ' +
+            'focus:ring focus:outline-none ' +
             (isFriendsTabActive ? 'border' : '')}
         >
           Friends
@@ -128,7 +128,7 @@ export default function ChatBox () {
           {...tab}
           id={groupsId}
           className={'flex-auto px-4 py-2 mt-px -mb-px bg-white border-b border-black rounded-t ' +
-            'focus:shadow-outline focus:outline-none ' +
+            'focus:ring focus:outline-none ' +
             (isGroupsTabActive ? 'border' : '')}
         >
           Groups
@@ -139,7 +139,7 @@ export default function ChatBox () {
             {...tab}
             id={notificationsId}
             className={'flex-auto px-4 py-2 mt-px -mb-px bg-white border-b border-black ' +
-              'rounded-t focus:shadow-outline focus:outline-none ' +
+              'rounded-t focus:ring focus:outline-none ' +
               (isNotificationsTabActive ? 'border' : '')}
           >
             Notifications
@@ -150,7 +150,7 @@ export default function ChatBox () {
           {...tab}
           id={localChatId}
           className={'flex-auto px-4 py-2 mt-px -mb-px bg-white border-b border-black ' +
-            'rounded-t focus:shadow-outline focus:outline-none ' +
+            'rounded-t focus:ring focus:outline-none ' +
             (isLocalChatTabActive ? 'border' : '')}
         >
           Local

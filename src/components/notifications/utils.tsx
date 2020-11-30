@@ -8,7 +8,7 @@ interface ContainerArgs {
 export function Container ({ title, children }: ContainerArgs) {
   return (
     <div
-      className='p-4 space-y-2 bg-gray-400 rounded focus:shadow-outline focus:outline-none'
+      className='p-4 space-y-2 bg-gray-400 rounded focus:ring focus:outline-none'
       tabIndex={0}
     >
       {title && <h4 className='text-xl font-medium'>{title}</h4>}

@@ -31,7 +31,7 @@ export default function ErrorDialog ({ errorMessage }) {
       >
         <div className='flex flex-row-reverse justify-between mx-1 mt-1 mb-0 border-b border-black'>
           <button
-            className='p-0 bg-transparent border-0 rounded focus:outline-none focus:shadow-outline'
+            className='p-0 bg-transparent border-0 rounded focus:outline-none focus:ring'
             onClick={event => {
               event.preventDefault()
               dialog.hide()
