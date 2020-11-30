@@ -1,21 +1,21 @@
 module.exports = {
-  future: {
-    removeDeprecatedGapUtilities: true,
-    purgeLayersByDefault: true
-  },
+  future: {},
   purge: [
     './public/**/*.html',
     './src/components/**/*.js',
     './src/components/**/*.tsx',
     './src/components/**/*.jsx'
   ],
+  darkMode: false, // it should be 'media' once enabled
   theme: {
     extend: {}
   },
   variants: {
-    backgroundColor: ['responsive', 'even', 'hover', 'focus'],
-    boxShadow: ['responsive', 'hover', 'focus', 'focus-within'],
-    textColor: ['responsive', 'hover', 'focus', 'visited']
+    extend: {
+      backgroundColor: ['even', 'active'],
+      opacity: ['disabled'],
+      textColor: ['visited']
+    }
   },
   plugins: [
     require('@tailwindcss/custom-forms')
