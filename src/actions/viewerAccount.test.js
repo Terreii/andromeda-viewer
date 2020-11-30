@@ -3,11 +3,8 @@ import nodeCrypto from 'crypto'
 import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
 import { v4 } from 'uuid'
-import PouchDB from 'pouchdb-browser'
-import memoryAdapter from 'pouchdb-adapter-memory'
-import hoodieApi from 'pouchdb-hoodie-api'
 
-import { createTestStore } from '../testUtils'
+import { createTestStore, createUniqueDb } from '../testUtils'
 
 import { signInStatus } from '../bundles/account'
 import {
@@ -21,9 +18,6 @@ import {
 
 import AvatarName from '../avatarName'
 
-PouchDB.plugin(memoryAdapter)
-PouchDB.plugin(hoodieApi)
-
 window.TextEncoder = class TextEncoder {
   encode (text) {
     return Buffer.from(text)
@@ -31,13 +25,126 @@ window.TextEncoder = class TextEncoder {
 }
 
 let localDB
+let remoteDB
 
 beforeEach(() => {
-  localDB = new PouchDB('local_test_db', { adapter: 'memory' })
+  localDB = createUniqueDb('local_test_db')
 })
 
 afterEach(async () => {
   await localDB.destroy()
+  if (remoteDB) {
+    try {
+      await remoteDB.destroy()
+    } catch (_err) {}
+    remoteDB = null
+  }
+})
+
+describe('isSignedIn', () => {
+  it('should check the remote db for the login state', async () => {
+    remoteDB = createUniqueDb('remote_test_db')
+    const getSession = jest.fn()
+    remoteDB.getSession = getSession
+
+    const { store, getDiff, getCurrentDbs } = createTestStore({
+      localDB,
+      remoteDB
+    })
+
+    getSession.mockResolvedValueOnce({
+      info: {
+        authenticated: 'cookie',
+        authentication_db: '_users',
+        authentication_handlers: ['cookie', 'default']
+      },
+      ok: true,
+      userCtx: {
+        name: 'tester.mactestface@example.com',
+        roles: []
+      }
+    })
+    await store.dispatch(isSignedIn())
+
+    expect(getDiff()).toEqual({
+      account: {
+        loggedIn: true,
+        username: 'tester.mactestface@example.com'
+      }
+    })
+    expect(getCurrentDbs().local).toBe(localDB)
+    expect(getCurrentDbs().remote).not.toBe(remoteDB)
+    remoteDB = getCurrentDbs().remote
+  })
+
+  it('should check the local database if no cookie session is active', async () => {
+    remoteDB = createUniqueDb('remote_test_db')
+    const getSession = jest.fn()
+    remoteDB.getSession = getSession
+
+    const { store, getDiff, getCurrentDbs } = createTestStore({
+      localDB,
+      remoteDB
+    })
+
+    getSession.mockResolvedValueOnce({
+      info: {
+        authenticated: 'cookie',
+        authentication_db: '_users',
+        authentication_handlers: ['cookie', 'default']
+      },
+      ok: true,
+      userCtx: {
+        name: null,
+        roles: []
+      }
+    })
+    await localDB.put({
+      _id: '_local/account',
+      accountId: v4(),
+      name: 'tester.mactestface@example.com'
+    })
+    await store.dispatch(isSignedIn())
+
+    expect(getDiff()).toEqual({
+      account: {
+        loggedIn: true,
+        username: 'tester.mactestface@example.com'
+      }
+    })
+    expect(getCurrentDbs().local).toBe(localDB)
+    expect(getCurrentDbs().remote).not.toBe(remoteDB)
+    remoteDB = getCurrentDbs().remote
+  })
+
+  it('should set the state to loggedOut if no cookie session and account doc exists', async () => {
+    remoteDB = createUniqueDb('remote_test_db')
+    const getSession = jest.fn()
+    remoteDB.getSession = getSession
+
+    const { store, getDiff, getCurrentDbs } = createTestStore({
+      localDB,
+      remoteDB
+    })
+
+    getSession.mockResolvedValueOnce({
+      info: {
+        authenticated: 'cookie',
+        authentication_db: '_users',
+        authentication_handlers: ['cookie', 'default']
+      },
+      ok: true,
+      userCtx: {
+        name: null,
+        roles: []
+      }
+    })
+    await store.dispatch(isSignedIn())
+
+    expect(getDiff()).toEqual({})
+    expect(getCurrentDbs().local).toBe(localDB)
+    expect(getCurrentDbs().remote).toBe(remoteDB)
+  })
 })
 
 it('didSignIn', () => {
@@ -399,7 +506,7 @@ describe('grids', () => {
   })
 })
 
-it('should check sign in status with "isSignedIn"', async () => {
+it.skip('should check sign in status with "isSignedIn"', async () => {
   let result = null
 
   const store = configureMockStore([thunk.withExtraArgument({
@@ -443,7 +550,7 @@ it('should check sign in status with "isSignedIn"', async () => {
   ])
 })
 
-it('should unlock the app with "unlock"', async () => {
+it.skip('should unlock the app with "unlock"', async () => {
   const unlockCryptoStore = jest.fn(() => Promise.resolve())
   const findAll = jest.fn(() => Promise.resolve([]))
   const on = jest.fn()

@@ -14,7 +14,16 @@ export default function createStore (preloadedState) {
   const db = createLocalDB()
   const remoteDB = createRemoteDB('_users')
 
-  const extraArgument = createExtraArgument(db, remoteDB)
+  const extraArgument = createExtraArgument(db, remoteDB, ({ local, remote, skipSetup }) => {
+    const result = { local: null, remote: null }
+    if (local) {
+      result.local = createLocalDB()
+    }
+    if (remote) {
+      result.remote = createRemoteDB(remote, skipSetup)
+    }
+    return result
+  })
   const store = createStoreCore(preloadedState, extraArgument)
 
   extraArgument.proxyFetch = proxyFetch.bind(null, store.getState)
@@ -43,11 +52,12 @@ export default function createStore (preloadedState) {
  * Create the thunk extraArgument.
  * It adds the localDB and remoteDB to it, but does not setup proxyFetch or fetchLLSD.
  */
-export function createExtraArgument (localDB, remoteDB) {
+export function createExtraArgument (localDB, remoteDB, createDatabases) {
   const extraArgument = {
     cryptoStore: createCryptoStore(localDB),
     db: localDB,
     remoteDB,
+    createDatabases,
     proxyFetch: null, // Must be added after the store was created
     fetchLLSD: null, // Must be added after the store was created
     onAvatarLogout: [],

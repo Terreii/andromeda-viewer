@@ -6,8 +6,4 @@ import '@testing-library/jest-dom'
 
 import { toHaveNoViolations } from 'jest-axe'
 
-const webHashToNode = {
-  'SHA-256': 'sha256'
-}
-
 expect.extend(toHaveNoViolations)
