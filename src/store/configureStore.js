@@ -11,10 +11,7 @@ import AvatarName from '../avatarName'
  * Create Redux-Store with local db, remote db and more.
  */
 export default function createStore (preloadedState) {
-  const db = createLocalDB()
-  const remoteDB = createRemoteDB('_users')
-
-  const extraArgument = createExtraArgument(db, remoteDB, ({ local, remote, skipSetup }) => {
+  const extraArgument = createExtraArgument(({ local, remote, skipSetup }) => {
     const result = { local: null, remote: null }
     if (local) {
       result.local = createLocalDB()
@@ -52,11 +49,12 @@ export default function createStore (preloadedState) {
  * Create the thunk extraArgument.
  * It adds the localDB and remoteDB to it, but does not setup proxyFetch or fetchLLSD.
  */
-export function createExtraArgument (localDB, remoteDB, createDatabases) {
+export function createExtraArgument (createDatabases) {
+  const { local, remote } = createDatabases({ local: true, remote: '_users', skipSetup: true })
   const extraArgument = {
-    cryptoStore: createCryptoStore(localDB),
-    db: localDB,
-    remoteDB,
+    cryptoStore: createCryptoStore(local),
+    db: local,
+    remoteDB: remote,
     createDatabases,
     proxyFetch: null, // Must be added after the store was created
     fetchLLSD: null, // Must be added after the store was created

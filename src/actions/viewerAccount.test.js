@@ -4,7 +4,7 @@ import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
 import { v4 } from 'uuid'
 
-import { createTestStore, createUniqueDb } from '../testUtils'
+import { createTestStore, createUniqueDb, AppState } from '../testUtils'
 
 import { signInStatus } from '../bundles/account'
 import {
@@ -47,7 +47,7 @@ describe('isSignedIn', () => {
     const getSession = jest.fn()
     remoteDB.getSession = getSession
 
-    const { store, getDiff, getCurrentDbs } = createTestStore({
+    const { store, getDiff, getCurrentDbs } = await createTestStore({
       localDB,
       remoteDB
     })
@@ -82,7 +82,7 @@ describe('isSignedIn', () => {
     const getSession = jest.fn()
     remoteDB.getSession = getSession
 
-    const { store, getDiff, getCurrentDbs } = createTestStore({
+    const { store, getDiff, getCurrentDbs } = await createTestStore({
       localDB,
       remoteDB
     })
@@ -122,7 +122,7 @@ describe('isSignedIn', () => {
     const getSession = jest.fn()
     remoteDB.getSession = getSession
 
-    const { store, getDiff, getCurrentDbs } = createTestStore({
+    const { store, getDiff, getCurrentDbs } = await createTestStore({
       localDB,
       remoteDB
     })
@@ -145,78 +145,47 @@ describe('isSignedIn', () => {
     expect(getCurrentDbs().local).toBe(localDB)
     expect(getCurrentDbs().remote).toBe(remoteDB)
   })
-})
 
-it('didSignIn', () => {
-  const store = configureMockStore([thunk])()
+  it('should match the same state to createTestStore with LoggedIn state option', async () => {
+    remoteDB = createUniqueDb('remote_test_db')
+    const getSession = jest.fn()
+    remoteDB.getSession = getSession
 
-  store.dispatch(signInStatus(true, false))
+    const { store } = await createTestStore({
+      localDB,
+      remoteDB
+    })
 
-  store.dispatch(signInStatus())
-
-  store.dispatch(signInStatus(true, true))
-
-  store.dispatch(signInStatus(true, true, 'tester.mactestface@viewer.com'))
-
-  store.dispatch(signInStatus(true, false, 'tester.mactestface@viewer.com'))
-
-  store.dispatch(signInStatus(false, false, 'tester.mactestface@viewer.com'))
-
-  expect(store.getActions()).toEqual([
-    {
-      type: 'account/signInStatus',
-      payload: {
-        isLoggedIn: true,
-        isUnlocked: false,
-        username: ''
+    getSession.mockResolvedValueOnce({
+      info: {
+        authenticated: 'cookie',
+        authentication_db: '_users',
+        authentication_handlers: ['cookie', 'default']
+      },
+      ok: true,
+      userCtx: {
+        name: 'tester.mactestface@example.com',
+        roles: []
       }
-    },
-    {
-      type: 'account/signInStatus',
-      payload: {
-        isLoggedIn: false,
-        isUnlocked: undefined,
-        username: ''
-      }
-    },
-    {
-      type: 'account/signInStatus',
-      payload: {
-        isLoggedIn: true,
-        isUnlocked: true,
-        username: ''
-      }
-    },
-    {
-      type: 'account/signInStatus',
-      payload: {
-        isLoggedIn: true,
-        isUnlocked: true,
-        username: 'tester.mactestface@viewer.com'
-      }
-    },
-    {
-      type: 'account/signInStatus',
-      payload: {
-        isLoggedIn: true,
-        isUnlocked: false,
-        username: 'tester.mactestface@viewer.com'
-      }
-    },
-    {
-      type: 'account/signInStatus',
-      payload: {
-        isLoggedIn: false,
-        isUnlocked: false,
-        username: ''
-      }
-    }
-  ])
+    })
+    await store.dispatch(isSignedIn())
+
+    const state = store.getState()
+    await localDB.destroy()
+    localDB = createUniqueDb('local_test_db')
+
+    const { store: store2 } = await createTestStore({ localDB, state: AppState.LoggedIn })
+
+    expect(store2.getState()).toEqual(state)
+  })
 })
 
 describe('avatars', () => {
   it('should load avatars', async () => {
-    const { store, cryptoStore, setMark, getDiff } = createTestStore({ localDB })
+    const { store, cryptoStore, getDiff } = await createTestStore({
+      localDB,
+      state: AppState.LoggedIn
+    })
 
     await cryptoStore.setup('testPassword')
     await cryptoStore.unlock('testPassword')
@@ -238,12 +207,9 @@ describe('avatars', () => {
       }
     ])
 
-    store.dispatch(signInStatus(true, true, 'tester.mactestface@example.com'))
-
-    setMark('A')
     await store.dispatch(loadSavedAvatars())
 
-    expect(getDiff('A')).toEqual({
+    expect(getDiff()).toEqual({
       account: {
         savedAvatars: {
           0: {
@@ -275,11 +241,14 @@ describe('avatars', () => {
   })
 
   it('should load avatars that are added later', async () => {
-    const { store, cryptoStore, setMark, getDiff } = createTestStore({ localDB })
+    const { store, cryptoStore, setMark, getDiff } = await createTestStore({
+      localDB,
+      state: AppState.LoggedIn
+    })
 
     await cryptoStore.setup('testPassword')
     await cryptoStore.unlock('testPassword')
-    store.dispatch(signInStatus(true, true, 'tester.mactestface@example.com'))
+
     await store.dispatch(loadSavedAvatars())
 
     setMark('A')
@@ -292,7 +261,7 @@ describe('avatars', () => {
       grid: 'Second Life'
     })
 
-    await new Promise(resolve => setTimeout(resolve, 5))
+    await new Promise(resolve => setTimeout(resolve, 10))
 
     expect(getDiff('A')).toEqual({
       account: {
@@ -314,11 +283,14 @@ describe('avatars', () => {
   })
 
   it('should save an avatar', async () => {
-    const { store, cryptoStore, setMark, getDiff } = createTestStore({ localDB })
+    const { store, cryptoStore, setMark, getDiff } = await createTestStore({
+      localDB,
+      state: AppState.LoggedIn
+    })
 
     await cryptoStore.setup('testPassword')
     await cryptoStore.unlock('testPassword')
-    store.dispatch(signInStatus(true, true, 'tester.mactestface@example.com'))
+
     await store.dispatch(loadSavedAvatars())
 
     setMark('A')
@@ -366,7 +338,10 @@ describe('avatars', () => {
 
 describe('grids', () => {
   it('should load grids', async () => {
-    const { store, cryptoStore, setMark, getDiff } = createTestStore({ localDB })
+    const { store, cryptoStore, setMark, getDiff } = await createTestStore({
+      localDB,
+      state: AppState.LoggedIn
+    })
 
     await cryptoStore.setup('testPassword')
     await cryptoStore.unlock('testPassword')
@@ -387,8 +362,6 @@ describe('grids', () => {
     ])
 
     await new Promise(resolve => setTimeout(resolve, 5))
-
-    store.dispatch(signInStatus(true, true, 'tester.mactestface@example.com'))
 
     setMark('A')
     await store.dispatch(loadSavedGrids())
@@ -423,11 +396,14 @@ describe('grids', () => {
   })
 
   it('should load grids that are added later', async () => {
-    const { store, cryptoStore, setMark, getDiff } = createTestStore({ localDB })
+    const { store, cryptoStore, setMark, getDiff } = await createTestStore({
+      localDB,
+      state: AppState.LoggedIn
+    })
 
     await cryptoStore.setup('testPassword')
     await cryptoStore.unlock('testPassword')
-    store.dispatch(signInStatus(true, true, 'tester.mactestface@example.com'))
+
     await store.dispatch(loadSavedGrids())
 
     setMark('A')
@@ -460,11 +436,14 @@ describe('grids', () => {
   })
 
   it('should save a grid', async () => {
-    const { store, cryptoStore, setMark, getDiff } = createTestStore({ localDB })
+    const { store, cryptoStore, setMark, getDiff } = await createTestStore({
+      localDB,
+      state: AppState.LoggedIn
+    })
 
     await cryptoStore.setup('testPassword')
     await cryptoStore.unlock('testPassword')
-    store.dispatch(signInStatus(true, true, 'tester.mactestface@example.com'))
+
     await store.dispatch(loadSavedGrids())
 
     setMark('A')
@@ -504,50 +483,6 @@ describe('grids', () => {
       }
     })
   })
-})
-
-it.skip('should check sign in status with "isSignedIn"', async () => {
-  let result = null
-
-  const store = configureMockStore([thunk.withExtraArgument({
-    db: new PouchDB('localDB', { adapter: 'memory' }),
-    remoteDB: {
-      getSession: () => {
-        return Promise.resolve({
-          userCtx: { name: result }
-        })
-      }
-    }
-  })])()
-
-  result = null
-  const isSignedInResultNotLoggedIn = await store.dispatch(isSignedIn())
-
-  expect(isSignedInResultNotLoggedIn).toBeFalsy()
-
-  result = 'tester.mactestface@viewer.com'
-  const isSignedInResult = await store.dispatch(isSignedIn())
-
-  expect(isSignedInResult).toBeTruthy()
-
-  expect(store.getActions()).toEqual([
-    {
-      type: 'account/signInStatus',
-      payload: {
-        isLoggedIn: false,
-        isUnlocked: null,
-        username: ''
-      }
-    },
-    {
-      type: 'account/signInStatus',
-      payload: {
-        isLoggedIn: true,
-        isUnlocked: null,
-        username: 'tester.mactestface@viewer.com'
-      }
-    }
-  ])
 })
 
 it.skip('should unlock the app with "unlock"', async () => {

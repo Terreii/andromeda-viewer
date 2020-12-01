@@ -5,6 +5,7 @@ import auth from 'pouchdb-authentication'
 import hoodieApi from 'pouchdb-hoodie-api'
 
 import { createExtraArgument, createStoreCore } from './store/configureStore'
+import { isSignedIn } from './actions/viewerAccount'
 
 PouchDB.plugin(memoryAdapter)
 PouchDB.plugin(auth)
@@ -22,13 +23,26 @@ export function createUniqueDb (
 }
 
 /**
+ * Different states the App can be in.
+ * Used to set the starting state from the TestStore.
+ */
+export enum AppState {
+  /** Default start state. No user is logged in. */
+  LoggedOff,
+  /** A user is logged in, but not unlocked. */
+  LoggedIn
+}
+
+/**
  * Create a store and some helper functions for testing actions.
  */
-export function createTestStore ({ localDB, remoteDB }: {
+export async function createTestStore ({ localDB, remoteDB, state = AppState.LoggedOff }: {
   localDB: PouchDB.Database,
-  remoteDB?: PouchDB.Database
+  remoteDB?: PouchDB.Database,
+  state?: AppState
 }) {
-  const extraArgument = createExtraArgument(localDB, remoteDB, ({ local, remote }: {
+  let isSetup = true // when the the create Databases callback is called the first time
+  const extraArgument = createExtraArgument(({ local, remote }: {
     local?: boolean,
     remote?: string,
     skipSetup?: boolean
@@ -37,16 +51,51 @@ export function createTestStore ({ localDB, remoteDB }: {
       local: null,
       remote: null
     }
+    if (isSetup && state === AppState.LoggedOff) {
+      isSetup = false
+      return {
+        local: localDB,
+        remote: remoteDB ?? createUniqueDb('remote')
+      }
+    }
+
     if (local) {
       result.local = createUniqueDb('local')
     }
     if (remote) {
       result.remote = createUniqueDb('remote')
     }
+
+    // create the session mock
+    if (isSetup) {
+      isSetup = false
+      const getSession = jest.fn()
+      getSession.mockResolvedValueOnce({
+        info: {
+          authenticated: 'cookie',
+          authentication_db: '_users',
+          authentication_handlers: ['cookie', 'default']
+        },
+        ok: true,
+        userCtx: {
+          name: 'tester.mactestface@example.com',
+          roles: []
+        }
+      })
+      result.remote!.getSession = getSession
+    }
     return result
   })
+
+  // Create the actual store
   const store = createStoreCore(undefined, extraArgument)
 
+  // Set the app state
+  if (state !== AppState.LoggedOff) {
+    await store.dispatch(isSignedIn())
+  }
+
+  // Setup the state diffing
   const initialState = store.getState()
   const states = new Map<string, ReturnType<typeof store.getState>>()
 
