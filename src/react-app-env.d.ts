@@ -17,3 +17,7 @@ declare module 'redux-burger-menu' {
 
   export function reducer (state: ReduxBurgerMenuState, action: any): ReduxBurgerMenuState
 }
+
+declare module 'pouchdb-hoodie-api' {
+  export default {} as PouchDB.plugin
+}

@@ -5,6 +5,7 @@ import auth from 'pouchdb-authentication'
 import hoodieApi from 'pouchdb-hoodie-api'
 
 import { createExtraArgument, createStoreCore } from './store/configureStore'
+import { signInStatus } from './bundles/account'
 import { isSignedIn } from './actions/viewerAccount'
 
 PouchDB.plugin(memoryAdapter)
@@ -30,7 +31,9 @@ export enum AppState {
   /** Default start state. No user is logged in. */
   LoggedOff,
   /** A user is logged in, but not unlocked. */
-  LoggedIn
+  LoggedIn,
+  /** A user is logged in and the App was unlocked */
+  Unlocked
 }
 
 /**
@@ -78,7 +81,7 @@ export async function createTestStore ({ localDB, remoteDB, state = AppState.Log
         },
         ok: true,
         userCtx: {
-          name: 'tester.mactestface@example.com',
+          name: null,
           roles: []
         }
       })
@@ -92,7 +95,7 @@ export async function createTestStore ({ localDB, remoteDB, state = AppState.Log
 
   // Set the app state
   if (state !== AppState.LoggedOff) {
-    await store.dispatch(isSignedIn())
+    await setStateToLoggedin(state, store, extraArgument)
   }
 
   // Setup the state diffing
@@ -127,4 +130,41 @@ export async function createTestStore ({ localDB, remoteDB, state = AppState.Log
       return { local: extraArgument.db, remote: extraArgument.remoteDB }
     }
   }
+}
+
+/**
+ * Sets the initial state of the test-store to logged in, but not unlocked.
+ */
+async function setStateToLoggedin (
+  state: AppState,
+  store: ReturnType<typeof createStoreCore>,
+  extraArgument: ReturnType<typeof createExtraArgument>
+) {
+  if (state === AppState.LoggedOff) return
+
+  await extraArgument.db.put({
+    _id: '_local/account',
+    accountId: '6197db66-7452-47d6-bf47-85cfd71a2c71',
+    name: 'tester.mactestface@example.com'
+  })
+  await extraArgument.cryptoStore.setup('testPassword')
+  await store.dispatch(isSignedIn())
+
+  if (state !== AppState.LoggedIn) {
+    await setStateToUnlocked(state, store, extraArgument)
+  }
+}
+
+/**
+ * Sets the initial state of the test-store to logged in and unlocked.
+ *
+ * This _must_ be called from `setStateToLoggedin`!
+ */
+async function setStateToUnlocked (
+  _state: AppState,
+  store: ReturnType<typeof createStoreCore>,
+  extraArgument: ReturnType<typeof createExtraArgument>
+) {
+  await extraArgument.cryptoStore.unlock('testPassword')
+  await store.dispatch(signInStatus(true, true, 'tester.mactestface@example.com'))
 }

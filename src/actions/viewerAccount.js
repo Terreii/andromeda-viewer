@@ -26,13 +26,7 @@ import {
   selectSavedGridsAreLoaded
 } from '../bundles/account'
 import { selectIsLoggedIn } from '../bundles/session'
-import {
-  createLocalDB,
-  createCryptoStore,
-  createRemoteDB,
-  getUserDatabaseName,
-  startSyncing
-} from '../store/db'
+import { createCryptoStore, getUserDatabaseName, startSyncing } from '../store/db'
 
 import { IMChatType } from '../types/chat'
 

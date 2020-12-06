@@ -1,19 +1,13 @@
-import nodeCrypto from 'crypto'
-
-import configureMockStore from 'redux-mock-store'
-import thunk from 'redux-thunk'
 import { v4 } from 'uuid'
 
 import { createTestStore, createUniqueDb, AppState } from '../testUtils'
 
-import { signInStatus } from '../bundles/account'
 import {
   saveAvatar,
   loadSavedAvatars,
   saveGrid,
   loadSavedGrids,
-  isSignedIn,
-  unlock
+  isSignedIn
 } from './viewerAccount'
 
 import AvatarName from '../avatarName'
@@ -180,6 +174,25 @@ describe('isSignedIn', () => {
   })
 })
 
+describe('unlock', () => {
+  // can only be fully tested, once the tests run in a browser.
+
+  it('should have an unlocked state with createTestStore', async () => {
+    const { store, cryptoStore, getCurrentDbs } = await createTestStore({
+      localDB,
+      state: AppState.Unlocked
+    })
+
+    expect(store.getState().account.loggedIn).toBe(true)
+    expect(store.getState().account.unlocked).toBe(true)
+    expect(store.getState().account.username).toBe('tester.mactestface@example.com')
+
+    await cryptoStore.add({ _id: 'test', value: 42 })
+
+    expect((await getCurrentDbs().local.get('test')).value).toBeUndefined()
+  })
+})
+
 describe('avatars', () => {
   it('should load avatars', async () => {
     const { store, cryptoStore, getDiff } = await createTestStore({
@@ -187,7 +200,6 @@ describe('avatars', () => {
       state: AppState.LoggedIn
     })
 
-    await cryptoStore.setup('testPassword')
     await cryptoStore.unlock('testPassword')
 
     await cryptoStore.withIdPrefix('avatars/').add([
@@ -246,7 +258,6 @@ describe('avatars', () => {
       state: AppState.LoggedIn
     })
 
-    await cryptoStore.setup('testPassword')
     await cryptoStore.unlock('testPassword')
 
     await store.dispatch(loadSavedAvatars())
@@ -288,7 +299,6 @@ describe('avatars', () => {
       state: AppState.LoggedIn
     })
 
-    await cryptoStore.setup('testPassword')
     await cryptoStore.unlock('testPassword')
 
     await store.dispatch(loadSavedAvatars())
@@ -343,7 +353,6 @@ describe('grids', () => {
       state: AppState.LoggedIn
     })
 
-    await cryptoStore.setup('testPassword')
     await cryptoStore.unlock('testPassword')
 
     await cryptoStore.withIdPrefix('grids/').add([
@@ -401,7 +410,6 @@ describe('grids', () => {
       state: AppState.LoggedIn
     })
 
-    await cryptoStore.setup('testPassword')
     await cryptoStore.unlock('testPassword')
 
     await store.dispatch(loadSavedGrids())
@@ -441,7 +449,6 @@ describe('grids', () => {
       state: AppState.LoggedIn
     })
 
-    await cryptoStore.setup('testPassword')
     await cryptoStore.unlock('testPassword')
 
     await store.dispatch(loadSavedGrids())
@@ -483,125 +490,4 @@ describe('grids', () => {
       }
     })
   })
-})
-
-it.skip('should unlock the app with "unlock"', async () => {
-  const unlockCryptoStore = jest.fn(() => Promise.resolve())
-  const findAll = jest.fn(() => Promise.resolve([]))
-  const on = jest.fn()
-  const once = jest.fn()
-  const logIn = jest.fn(() => Promise.resolve())
-  const sync = jest.fn(() => ({
-    on: () => {}
-  }))
-
-  let lastKeyObj = null
-  let lastHashFn = ''
-  let lastPw = ''
-  const importKey = jest.fn((type, pw, hashFn, exportable, arg) => {
-    expect(type).toBe('raw')
-    expect(exportable).toBeFalsy()
-    expect(arg).toEqual(['deriveBits'])
-    lastKeyObj = {}
-    lastHashFn = hashFn
-    lastPw = pw
-    return Promise.resolve(lastKeyObj)
-  })
-
-  let lastKey = null
-  const deriveBits = jest.fn((args, key, keyLength) => {
-    expect(key).toBe(lastKeyObj)
-    expect(args.name).toBe(lastHashFn)
-    expect(args.hash).toBe('SHA-512')
-    expect(keyLength).toBe(512)
-
-    if (args.name === 'PBKDF2') {
-      const hash = args.hash.toLowerCase().replace('-', '')
-      const key = nodeCrypto.pbkdf2Sync(lastPw, args.salt, args.iterations, keyLength, hash)
-      lastKey = key
-      return Promise.resolve(key)
-    } else if (args.name === 'HKDF') {
-      return Promise.resolve(Buffer.concat([
-        Buffer.alloc(32, 1),
-        Buffer.alloc(32, 2)
-      ]))
-    } else {
-      throw new TypeError('unknown hash: ' + args.name)
-    }
-  })
-
-  window.crypto = {
-    subtle: {
-      importKey,
-      deriveBits
-    }
-  }
-
-  const store = configureMockStore([thunk.withExtraArgument({
-    db: {
-      get (id) {
-        if (id === '_local/account') {
-          return Promise.resolve({
-            _id: '_local/account',
-            accountId: 'a_id',
-            name: 'tester'
-          })
-        }
-      },
-      sync,
-      on,
-      once
-    },
-    remoteDB: {
-      close: () => {},
-      logIn
-    },
-    cryptoStore: {
-      unlock: unlockCryptoStore,
-      withIdPrefix: prefix => ({
-        findAll: findAll.bind(null, prefix),
-        on: on.bind(null, prefix)
-      })
-    }
-  })])({
-    account: {
-      loggedIn: true,
-      unlocked: false
-    }
-  })
-
-  await store.dispatch(unlock('password'))
-
-  expect(store.getActions()).toEqual([
-    { type: 'account/unlocked', payload: undefined },
-    {
-      type: 'account/gridsLoaded',
-      payload: []
-    },
-    {
-      type: 'account/avatarsLoaded',
-      payload: []
-    }
-  ])
-
-  expect(lastPw).toBe(lastKey)
-  expect(findAll).toHaveBeenNthCalledWith(1, 'grids/')
-  expect(findAll).toHaveBeenNthCalledWith(2, 'avatars/')
-
-  expect(on).toBeCalledTimes(2)
-  expect(on).toHaveBeenNthCalledWith(1, 'grids/', 'change', expect.any(Function))
-  expect(on).toHaveBeenNthCalledWith(2, 'avatars/', 'change', expect.any(Function))
-
-  expect(once).toBeCalledTimes(2)
-  expect(once).toHaveBeenNthCalledWith(1, 'destroyed', expect.any(Function))
-  expect(once).toHaveBeenNthCalledWith(2, 'destroyed', expect.any(Function))
-
-  expect(logIn).toHaveBeenCalledWith(
-    'a_id',
-    '0101010101010101010101010101010101010101010101010101010101010101'
-  )
-  expect(unlockCryptoStore).toHaveBeenCalledWith(
-    '0202020202020202020202020202020202020202020202020202020202020202'
-  )
-  expect(sync).toBeCalled()
 })
