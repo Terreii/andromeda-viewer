@@ -1,3 +1,5 @@
+import { EventEmitter } from 'events'
+
 import { diff as getObjDiff } from 'deep-object-diff'
 import PouchDB from 'pouchdb-browser'
 import memoryAdapter from 'pouchdb-adapter-memory'
@@ -6,7 +8,10 @@ import hoodieApi from 'pouchdb-hoodie-api'
 
 import { createExtraArgument, createStoreCore } from './store/configureStore'
 import { signInStatus } from './bundles/account'
-import { isSignedIn } from './actions/viewerAccount'
+import { isSignedIn, loadSavedAvatars, loadSavedGrids } from './actions/viewerAccount'
+import { startLogin, login } from './bundles/session'
+import connectCircuit from './actions/connectCircuit'
+import AvatarName from './avatarName'
 
 PouchDB.plugin(memoryAdapter)
 PouchDB.plugin(auth)
@@ -33,7 +38,9 @@ export enum AppState {
   /** A user is logged in, but not unlocked. */
   LoggedIn,
   /** A user is logged in and the App was unlocked */
-  Unlocked
+  Unlocked,
+  /** A user is logged in, App unlocked and a grid session is active */
+  Connected
 }
 
 /**
@@ -121,9 +128,11 @@ export async function createTestStore ({ localDB, remoteDB, state = AppState.Log
     return getObjDiff(oldState, newerState)
   }
 
+  console.log(store)
   return {
     store,
     cryptoStore: extraArgument.cryptoStore,
+    circuit: extraArgument.circuit,
     setMark,
     getDiff,
     getCurrentDbs () {
@@ -278,10 +287,137 @@ async function setStateToLoggedin (
  * This _must_ be called from `setStateToLoggedin`!
  */
 async function setStateToUnlocked (
-  _state: AppState,
+  state: AppState,
   store: ReturnType<typeof createStoreCore>,
   extraArgument: ReturnType<typeof createExtraArgument>
 ) {
   await extraArgument.cryptoStore.unlock('testPassword')
-  await store.dispatch(signInStatus(true, true, 'tester.mactestface@example.com'))
+  store.dispatch(signInStatus(true, true, 'tester.mactestface@example.com'))
+
+  await store.dispatch(loadSavedGrids())
+  await store.dispatch(loadSavedAvatars())
+
+  if (state !== AppState.Unlocked) {
+    await setStateToConnectedToGrid(state, store, extraArgument)
+  }
+}
+
+/**
+ * Sets the initial state of the test-store to be "connected" to a Grid.
+ *
+ * Simulates an avatar logged in. It also sets up the circuit-mock.
+ *
+ * This _must_ be called from `setStateToUnlocked`!
+ */
+async function setStateToConnectedToGrid (
+  state: AppState,
+  store: ReturnType<typeof createStoreCore>,
+  extraArgument: ReturnType<typeof createExtraArgument>
+) {
+  const name = new AvatarName('AndromedaViewerTester')
+  const grid = {
+    _id: 'second_life',
+    name: 'Second Life',
+    loginURL: 'https://login.agni.lindenlab.com:443/cgi-bin/login.cgi',
+    isLLSDLogin: true
+  }
+  store.dispatch(startLogin({ name, grid, sync: true }))
+
+  store.dispatch(login({
+    name,
+    save: true,
+    avatarIdentifier: '1ad4a264-c480-4322-a7e6-491e82450713@Second Life',
+    dataSaveId: '5d14a0ae-b88c-44ed-99b0-b889db7aa700',
+    grid,
+    uuid: '1ad4a264-c480-4322-a7e6-491e82450713',
+    sessionInfo: {
+      login: 'true',
+      andromedaSessionId: 'e95ecf9b-9104-4d6b-9a4d-09de71e956e8',
+      first_name: `"${name.first}"`,
+      last_name: name.last,
+      account_type: 'Base',
+      account_level_benefits: {
+        lastname_change_allowed: '',
+        lastname_change_rate: 168,
+        lastname_change_cost: 0,
+        animated_object_limit: 1,
+        one_time_event_allowed: 1,
+        live_chat: '',
+        signup_bonus: 0,
+        mainland_tier: 0,
+        partner_fee: 10,
+        unpartner_fee: 25,
+        stored_im_limit: 15,
+        marketplace_concierge_support: '',
+        picks_limit: 10,
+        gridwide_experience_limit: 0,
+        premium_alts: 0,
+        create_repeating_events: '',
+        script_limit: 20,
+        marketplace_listing_limit: 0,
+        voice_morphing: '',
+        premium_gifts: '',
+        repeating_events_cost: -1,
+        premium_access: '',
+        animation_upload_cost: 10,
+        texture_upload_cost: 10,
+        mesh_upload_cost: 10,
+        sound_upload_cost: 10,
+        one_time_event_cost: 50,
+        phone_support: '',
+        transaction_history_limit: 33,
+        priority_entry: '',
+        marketplace_ple_limit: 0,
+        linden_buy_fee: 0.99,
+        attachment_limit: 38,
+        beta_grid_land: '',
+        use_animesh: '',
+        local_experiences: 0,
+        stipend: 0,
+        create_group_cost: 100,
+        group_membership_limit: 42,
+        place_pages: {
+          num_free_listings: 0,
+          additional_listing_cost: 30
+        }
+      },
+      agent_flags: 0,
+      'max-agent-groups': 42,
+      agent_id: '1ad4a264-c480-4322-a7e6-491e82450713',
+      session_id: 'a9795ee4-a246-4314-9925-c140f9a25629',
+      secure_session_id: '72295bd5-6f3d-40b1-a702-dec5ff06af78',
+      start_location: 'last',
+      circuit_code:  1318860113,
+      sim_ip: '52.12.223.155',
+      sim_port: 12345,
+      region_x: 238336,
+      region_y: 244736,
+      look_at: '[r0.9990919999999999801,r-0.04261430000000000079,r0]',
+      agent_access: 'M',
+      agent_access_max: 'A',
+      'buddy-list': [],
+      'inventory-skeleton': [],
+      'inventory-root': [],
+      message: 'The best tester is Tester MacTestface! https://example.com/',
+      seconds_since_epoch: 1607364288,
+      openid_url: 'https://id.secondlife.com/openid/webkit',
+      openid_token: '123456789abcdefghijk',
+      udp_blacklist: 'EnableSimulator,TeleportFinish,CrossedRegion,OpenCircuit',
+      agent_region_access: 'A',
+      agent_appearance_service: 'http://bake-texture.glb.agni.lindenlab.com/',
+      snapshot_config_url: 'http://photos.apps.avatarsunited.com/viewer_config',
+      search_token: 'kjihgfedcba9876543210',
+      ao_transition: 0,
+      seed_capability: 'https://simhost-0b4956d0ed798efbe.agni.secondlife.io:12043/cap/a009835e-9596-d226-0a0a-4472cfac659c',
+      cof_version: 0
+    },
+    localChatHistory: []
+  }))
+
+  ;(extraArgument as any).circuit = new CircuitMock()
+  store.dispatch(connectCircuit())
+}
+
+export class CircuitMock extends EventEmitter {
+  send = jest.fn(() => Promise.resolve())
 }

@@ -12,12 +12,6 @@ import {
 
 import AvatarName from '../avatarName'
 
-window.TextEncoder = class TextEncoder {
-  encode (text) {
-    return Buffer.from(text)
-  }
-}
-
 let localDB
 let remoteDB
 

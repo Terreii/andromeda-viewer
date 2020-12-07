@@ -7,3 +7,9 @@ import '@testing-library/jest-dom'
 import { toHaveNoViolations } from 'jest-axe'
 
 expect.extend(toHaveNoViolations)
+
+window['TextEncoder'] = class TextEncoder {
+  encode (text: string) {
+    return Buffer.from(text)
+  }
+}
