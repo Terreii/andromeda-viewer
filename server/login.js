@@ -164,7 +164,11 @@ function handleXmlRpc (app, res, loginURL, reqData) {
             error: 'Login fail',
             message: err.body
           }
-        : err
+        : {
+            statusCode: err.status || err.statusCode || 500,
+            error: err.name,
+            message: err.message
+          }
 
       res.status(body.statusCode || 500).json(body)
     } else {

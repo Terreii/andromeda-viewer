@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { Container, ComponentArguments, ButtonsRow } from './utils'
 import Name from '../name'
 

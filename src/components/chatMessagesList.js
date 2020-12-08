@@ -46,7 +46,7 @@ class ChatList extends Component {
 
     return (
       <div
-        className='mt-1 overflow-y-scroll focus:shadow-outline focus:outline-none'
+        className='mt-1 overflow-y-scroll focus:ring focus:outline-none'
         role='log'
         tabIndex='0'
         {...props}

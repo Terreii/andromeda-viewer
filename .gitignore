@@ -38,3 +38,4 @@ src/network/messages.json
 db/
 log.txt
 src/styles.css
+.eslintcache

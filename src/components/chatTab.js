@@ -32,7 +32,7 @@ export default function ChatTab ({ tab, id, chat, isActive }) {
       {...tab}
       id={id}
       className={'flex-auto px-4 py-2 mt-px -mb-px bg-white border-b border-black rounded-t ' +
-        'focus:shadow-outline focus:outline-none ' +
+        'focus:ring focus:outline-none ' +
         (isActive ? 'border' : '')}
     >
       {nameString}
