@@ -15,8 +15,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
   if (!isSelected) {
     return (
       <form
-        className={'flex flex-col row-auto p-4 m-4 text-white bg-gray-700 rounded ' +
-        'focus-within:shadow-outline'}
+        className='flex flex-col row-auto p-4 m-4 text-white bg-gray-700 rounded focus-within:ring'
         onSubmit={event => {
           event.preventDefault()
           onSelect(avatar.avatarIdentifier)

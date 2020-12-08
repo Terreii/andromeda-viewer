@@ -36,8 +36,7 @@ export default function NewAvatarLogin ({
   if (!isSelected) {
     return (
       <form
-        className={'flex flex-col row-auto p-4 m-4 text-white bg-gray-700 rounded ' +
-        'focus-within:shadow-outline'}
+        className='flex flex-col row-auto p-4 m-4 text-white bg-gray-700 rounded focus-within:ring'
         onSubmit={event => {
           event.preventDefault()
           onSelect('new')
@@ -193,7 +192,7 @@ export default function NewAvatarLogin ({
           >
             <input
               type='checkbox'
-              className='rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
+              className='text-indigo-600 border-gray-300 rounded shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
               checked={isGridLLSD}
               onChange={event => { setIsGridLLSD(event.target.checked) }}
             />
@@ -206,7 +205,7 @@ export default function NewAvatarLogin ({
         <label>
           <input
             type='checkbox'
-            className='rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
+            className='text-indigo-600 border-gray-300 rounded shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
             onChange={event => { setSaveAvatar(event.target.checked) }}
             checked={saveAvatar}
             disabled={!isSignedIn || isLoggingIn}
