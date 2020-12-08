@@ -119,7 +119,7 @@
   "dependencies": {
     "basic-auth": "^2.0.1",
     "express": "^4.17.1",
-    "express-validator": "^6.7.0",
+    "express-validator": "^6.8.0",
     "http-proxy": "^1.18.1",
     "milliseconds": "^1.0.3",
     "nano": "^9.0.1",
