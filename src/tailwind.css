@@ -1,56 +1,23 @@
 @tailwind base;
 
 .btn {
-  @apply p-2 text-base font-normal text-center text-black bg-gray-100 border-0 rounded;
-}
-.btn:hover, .btn:focus {
-  @apply bg-gray-300 shadow-outline outline-none;
-}
-.btn:active {
-  @apply bg-gray-400;
-}
-.btn:disabled {
-  @apply opacity-75;
+  @apply p-2 text-base font-normal text-center text-black bg-gray-100 border-0 rounded focus:bg-gray-300 focus:outline-none hover:bg-gray-300 active:bg-gray-400 disabled:opacity-75;
 }
 
 .btn--danger {
-  @apply text-white bg-red-700;
-}
-.btn--danger:hover, .btn--danger:focus {
-  @apply bg-red-800;
-}
-.btn--danger:active {
-  @apply bg-red-900;
+  @apply text-white bg-red-700 hover:bg-red-800 focus:bg-red-800 active:bg-red-900;
 }
 
 .btn--ok {
-  @apply text-black bg-green-500;
-}
-.btn--ok:hover, .btn--ok:focus {
-  @apply bg-green-600;
-}
-.btn--ok:active {
-  @apply bg-green-700;
+  @apply text-black bg-green-500 hover:bg-green-600 focus:bg-green-600 active:bg-green-700;
 }
 
 .btn--primary {
-  @apply text-white bg-blue-700;
-}
-.btn--primary:hover, .btn--primary:focus {
-  @apply bg-blue-800;
-}
-.btn--primary:active {
-  @apply bg-blue-900;
+  @apply text-white bg-blue-700 hover:bg-blue-800 focus:bg-blue-800 active:bg-blue-900;
 }
 
 .btn--secondary {
-  @apply text-black bg-gray-400;
-}
-.btn--secondary:hover, .btn--secondary:focus {
-  @apply bg-gray-500;
-}
-.btn--secondary:active {
-  @apply bg-gray-600;
+  @apply text-black bg-gray-400 hover:bg-gray-500 focus:bg-gray-500 active:bg-gray-600;
 }
 
 .btn-transparent {
@@ -75,8 +42,8 @@
 .bm-burger-button {
   @apply fixed top-0 left-0 w-10 h-8 mt-2 ml-2;
 }
-.bm-burger-button > button:focus {
-  @apply rounded shadow-outline outline-none;
+.bm-burger-button > button {
+  @apply rounded focus:ring focus:outline-none;
 }
 
 .bm-overlay {
@@ -99,13 +66,7 @@
   @apply px-6 pt-10 pb-0 text-lg bg-gray-700;
 }
 .bm-menu button, .bm-menu span, .bm-menu a {
-  @apply font-sans text-gray-400;
-}
-.bm-menu button:hover, .bm-menu span:hover, .bm-menu a:hover {
-  @apply text-red-400;
-}
-.bm-menu button:focus, .bm-menu span:focus, .bm-menu a:focus {
-  @apply rounded shadow-outline outline-none;
+  @apply font-sans text-gray-400 rounded hover:text-red-400 focus:ring focus:outline-none;
 }
 
 .bm-item-list button, .bm-item-list span, .bm-item-list a {
@@ -125,8 +86,8 @@
 .bm-cross:hover {
   @apply bg-red-400;
 }
-.bm-cross-button > button:focus {
-  @apply rounded shadow-outline outline-none;
+.bm-cross-button > button {
+  @apply rounded focus:ring focus:outline-none;
 }
 
 @tailwind components;

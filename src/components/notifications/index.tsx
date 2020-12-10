@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import { memo } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
 import FriendOnlineNotification from './friendOnlineNotification'
@@ -21,7 +21,7 @@ export default memo(function NotificationsList () {
 
   return (
     <main
-      className='p-4 mt-1 overflow-y-scroll focus:shadow-outline focus:outline-none'
+      className='p-4 mt-1 overflow-y-scroll focus:ring focus:outline-none'
       tabIndex={0}
       aria-label='Notifications'
     >

@@ -1,4 +1,3 @@
-import React from 'react'
 import { useDispatch } from 'react-redux'
 
 import { Container, ComponentArguments, ButtonsRow } from './utils'

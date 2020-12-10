@@ -14,7 +14,7 @@ function GroupRow ({ group, startNewIMChat }) {
       <div className='flex-auto'>{name}</div>
       <button
         type='button'
-        className='rounded focus:outline-none focus:shadow-outline'
+        className='rounded focus:outline-none focus:ring'
         onClick={event => { startNewIMChat(IMChatType.group, group.id, name) }}
       >
         <img src={chatBubble} height='20' width='20' alt={`Start new chat with ${name}`} />
@@ -28,7 +28,7 @@ export default function GroupsList ({ startNewIMChat }) {
 
   return (
     <main
-      className='p-4 mt-1 overflow-y-scroll focus:shadow-outline focus:outline-none'
+      className='p-4 mt-1 overflow-y-scroll focus:ring focus:outline-none'
       tabIndex='0'
       aria-label='Groups'
     >

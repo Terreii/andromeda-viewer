@@ -15,8 +15,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
   if (!isSelected) {
     return (
       <form
-        className={'flex flex-col row-auto p-4 m-4 text-white bg-gray-700 rounded ' +
-        'focus-within:shadow-outline'}
+        className='flex flex-col row-auto p-4 m-4 text-white bg-gray-700 rounded focus-within:ring'
         onSubmit={event => {
           event.preventDefault()
           onSelect(avatar.avatarIdentifier)
@@ -60,7 +59,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
         <input
           id={passwordInputId}
           type='password'
-          className='block w-full mt-1 text-gray-900 form-input'
+          className='block w-full mt-1 text-gray-900 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
           value={password}
           onChange={event => { setPassword(event.target.value) }}
           required

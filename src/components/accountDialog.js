@@ -103,7 +103,7 @@ export default function AccountPanel () {
           {...changedUsername}
           id='usernameChange'
           type='email'
-          className='block w-full mt-1 text-gray-900 form-input'
+          className='block w-full mt-1 text-gray-900 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
           disabled={isUpdating}
           autoFocus
           required
@@ -117,7 +117,7 @@ export default function AccountPanel () {
           {...oldPassword}
           id='passwordChangeOld'
           type='password'
-          className='block w-full mt-1 text-gray-900 form-input'
+          className='block w-full mt-1 text-gray-900 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
           autoComplete='current-password'
           minLength='8'
           required={username !== changedUsername.value || passwordRequired}
@@ -138,7 +138,7 @@ export default function AccountPanel () {
             {...newPassword}
             id='passwordChangeNew'
             type='password'
-            className='block w-full mt-1 text-gray-900 form-input'
+            className='block w-full mt-1 text-gray-900 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
             autoComplete='new-password'
             minLength='8'
             required={passwordRequired}
@@ -162,7 +162,7 @@ export default function AccountPanel () {
             {...newPassword2}
             id='passwordChangeNew2'
             type='password'
-            className='block w-full mt-1 text-gray-900 form-input'
+            className='block w-full mt-1 text-gray-900 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
             autoComplete='new-password'
             minLength='8'
             required={passwordRequired}
@@ -361,7 +361,7 @@ function DeleteAccountModal () {
 
             <input
               type='password'
-              className='block w-full mt-1 text-gray-900 form-input'
+              className='block w-full mt-1 text-gray-900 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
               value={password}
               onChange={event => {
                 setPassword(event.target.value)

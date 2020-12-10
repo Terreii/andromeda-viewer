@@ -40,7 +40,7 @@ function FriendRow ({ friend, name, skipLink, onRightsChanged, startNewIMChat })
         <input
           key={`friend-${friend.id}-${key}-${rightName}`}
           type='checkbox'
-          className='m-1 form-checkbox'
+          className='m-1 rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
           disabled={key === 'rightsHas'} // on the rights friend has given me
           checked={rightsMap[rightName]}
           title={titles[key][rightName]}
@@ -79,7 +79,7 @@ function FriendRow ({ friend, name, skipLink, onRightsChanged, startNewIMChat })
 
       <button
         type='button'
-        className='m-1 rounded focus:outline-none focus:shadow-outline'
+        className='m-1 rounded focus:outline-none focus:ring'
         onClick={event => { startNewIMChat(IMChatType.personal, friend.id, name) }}
       >
         <img src={chatBubble} height='20' width='20' alt={`Start new chat with ${name}`} />
@@ -96,7 +96,7 @@ export default function FriendsList ({ startNewIMChat }) {
 
   return (
     <main
-      className='p-4 mt-1 overflow-y-scroll focus:shadow-outline focus:outline-none'
+      className='p-4 mt-1 overflow-y-scroll focus:ring focus:outline-none'
       tabIndex='0'
       aria-label='Friends'
     >

@@ -64,7 +64,7 @@ export default function ChatDialog ({ isIM = false, data = {}, sendTo, loadHisto
       <form className='flex flex-row flex-shrink-0 m-2 space-x-2' onSubmit={send}>
         <input
           type='text'
-          className='flex-grow flex-shrink-0 form-input'
+          className='flex-grow flex-shrink-0 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
           name='chatInput'
           placeholder={placeholderText}
           aria-label={placeholderText}
