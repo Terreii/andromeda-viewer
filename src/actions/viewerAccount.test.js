@@ -19,16 +19,6 @@ beforeEach(() => {
   localDB = createUniqueDb('local_test_db')
 })
 
-afterEach(async () => {
-  await localDB.destroy()
-  if (remoteDB) {
-    try {
-      await remoteDB.destroy()
-    } catch (_err) {}
-    remoteDB = null
-  }
-})
-
 describe('isSignedIn', () => {
   it('should check the remote db for the login state', async () => {
     remoteDB = createUniqueDb('remote_test_db')

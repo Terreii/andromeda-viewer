@@ -5,28 +5,50 @@ import PouchDB from 'pouchdb-browser'
 import memoryAdapter from 'pouchdb-adapter-memory'
 import auth from 'pouchdb-authentication'
 import hoodieApi from 'pouchdb-hoodie-api'
+import { NIL } from 'uuid'
 
-import { createExtraArgument, createStoreCore } from './store/configureStore'
-import { signInStatus } from './bundles/account'
-import { isSignedIn, loadSavedAvatars, loadSavedGrids } from './actions/viewerAccount'
-import { startLogin, login } from './bundles/session'
-import connectCircuit from './actions/connectCircuit'
 import AvatarName from './avatarName'
+import connectCircuit from './actions/connectCircuit'
+import { isSignedIn, loadSavedAvatars, loadSavedGrids } from './actions/viewerAccount'
+import { signInStatus } from './bundles/account'
+import { startLogin, login } from './bundles/session'
+import { createExtraArgument, createStoreCore } from './store/configureStore'
+
+import { AssetType } from './types/inventory'
 
 PouchDB.plugin(memoryAdapter)
 PouchDB.plugin(auth)
 PouchDB.plugin(hoodieApi)
 
+let dbs: PouchDB.Database[] = []
+
 let counter = 0
 export function createUniqueDb (
   name: string,
-  options?: PouchDB.MemoryAdapter.MemoryAdapterConfiguration
+  options?: PouchDB.MemoryAdapter.MemoryAdapterConfiguration,
+  autoDestroy: boolean = true
 ) {
-  return new PouchDB(name + (counter++), {
+  const db = new PouchDB(name + (counter++), {
     ...(options || {}),
     adapter: 'memory'
   })
+  if (autoDestroy) {
+    dbs.push(db)
+  }
+  return db
 }
+
+beforeEach(() => {
+  dbs = []
+})
+
+afterEach(async () => {
+  for (const db of dbs) {
+    try {
+      await db.destroy()
+    } catch (err) {}
+  }
+})
 
 /**
  * Different states the App can be in.
@@ -47,7 +69,7 @@ export enum AppState {
  * Create a store and some helper functions for testing actions.
  */
 export async function createTestStore ({ localDB, remoteDB, state = AppState.LoggedOff }: {
-  localDB: PouchDB.Database,
+  localDB?: PouchDB.Database,
   remoteDB?: PouchDB.Database,
   state?: AppState
 }) {
@@ -64,7 +86,7 @@ export async function createTestStore ({ localDB, remoteDB, state = AppState.Log
     if (isSetup && state === AppState.LoggedOff) {
       isSetup = false
       return {
-        local: localDB,
+        local: localDB ?? createUniqueDb('local'),
         remote: remoteDB ?? createUniqueDb('remote')
       }
     }
@@ -128,7 +150,6 @@ export async function createTestStore ({ localDB, remoteDB, state = AppState.Log
     return getObjDiff(oldState, newerState)
   }
 
-  console.log(store)
   return {
     store,
     cryptoStore: extraArgument.cryptoStore,
@@ -396,8 +417,33 @@ async function setStateToConnectedToGrid (
       agent_access: 'M',
       agent_access_max: 'A',
       'buddy-list': [],
-      'inventory-skeleton': [],
-      'inventory-root': [],
+      'inventory-skeleton': [
+        // TODO: get correct and full Folder skeleton as soon as the inventory is fixed.
+        {
+          name: 'Inventory',
+          folder_id: 'b47bd021-f252-475e-bda1-a8b84debe6a0',
+          type_default: AssetType.Folder,
+          parent_id: NIL,
+          version: 10
+        },
+        {
+          name: 'Objects',
+          folder_id: 'e1a3951e-f276-4ded-9751-a3f09986122b',
+          type_default: AssetType.Object,
+          parent_id: 'b47bd021-f252-475e-bda1-a8b84debe6a0',
+          version: 5
+        },
+        {
+          name: 'Notecards',
+          folder_id: 'c0bb2a28-58c9-42de-841b-3e4550ba28c4',
+          type_default: AssetType.Notecard,
+          parent_id: 'b47bd021-f252-475e-bda1-a8b84debe6a0',
+          version: 25
+        }
+      ],
+      'inventory-root': [
+        { folder_id: 'b47bd021-f252-475e-bda1-a8b84debe6a0' }
+      ],
       message: 'The best tester is Tester MacTestface! https://example.com/',
       seconds_since_epoch: 1607364288,
       openid_url: 'https://id.secondlife.com/openid/webkit',

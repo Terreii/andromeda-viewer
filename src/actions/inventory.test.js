@@ -1,25 +1,16 @@
-import configureMockStore from 'redux-mock-store'
-import thunk from 'redux-thunk'
-import { set as setMockDate } from 'mockdate'
-
 import {
   acceptInventoryOffer,
   declineInventoryOffer
 } from './inventory'
-import AvatarName from '../avatarName'
+
+import { createTestStore, AppState } from '../testUtils'
 
 import { IMDialog } from '../types/chat'
 import { AssetType } from '../types/inventory'
 
-setMockDate(1562630524418)
-
 describe('inventory offers', () => {
-  it('should handle offers from avatars', () => {
-    const send = jest.fn(() => Promise.resolve())
-
-    const store = configureMockStore([thunk.withExtraArgument({
-      circuit: { send }
-    })])(getState())
+  it('should handle accepting inventory offers from avatars', async () => {
+    const { store, circuit, getDiff } = await createTestStore({ state: AppState.Connected })
 
     store.dispatch(acceptInventoryOffer(
       'f2373437-a2ef-4435-82b9-68d283538bb2',
@@ -29,6 +20,51 @@ describe('inventory offers', () => {
       false
     ))
 
+    expect(circuit.send).toHaveBeenCalledWith(
+      'ImprovedInstantMessage',
+      {
+        AgentData: [
+          {
+            AgentID: '1ad4a264-c480-4322-a7e6-491e82450713',
+            SessionID: 'a9795ee4-a246-4314-9925-c140f9a25629'
+          }
+        ],
+        MessageBlock: [
+          {
+            FromAgentName: 'Andromedaviewertester Resident',
+            ToAgentID: 'f2373437-a2ef-4435-82b9-68d283538bb2',
+            ID: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+            Dialog: IMDialog.InventoryAccepted,
+            Timestamp: Math.floor(Date.now() / 1000),
+            BinaryBucket: [
+              192,
+              187,
+              42,
+              40,
+              88,
+              201,
+              66,
+              222,
+              132,
+              27,
+              62,
+              69,
+              80,
+              186,
+              40,
+              196
+            ]
+          }
+        ]
+      },
+      true
+    )
+    expect(getDiff()).toEqual({})
+  })
+
+  it('should handle declining inventory offers from avatars', async () => {
+    const { store, circuit, getDiff } = await createTestStore({ state: AppState.Connected })
+
     store.dispatch(declineInventoryOffer(
       'f2373437-a2ef-4435-82b9-68d283538bb2',
       '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
@@ -36,60 +72,18 @@ describe('inventory offers', () => {
       false
     ))
 
-    expect(send.mock.calls.length).toBe(2)
-
-    expect(send.mock.calls[0]).toEqual([
+    expect(circuit.send).toHaveBeenCalledWith(
       'ImprovedInstantMessage',
       {
         AgentData: [
           {
-            AgentID: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-            SessionID: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9'
+            AgentID: '1ad4a264-c480-4322-a7e6-491e82450713',
+            SessionID: 'a9795ee4-a246-4314-9925-c140f9a25629'
           }
         ],
         MessageBlock: [
           {
-            FromAgentName: 'Tester Avatar',
-            ToAgentID: 'f2373437-a2ef-4435-82b9-68d283538bb2',
-            ID: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
-            Dialog: IMDialog.InventoryAccepted,
-            Timestamp: Math.floor(Date.now() / 1000),
-            BinaryBucket: [
-              224,
-              241,
-              173,
-              172,
-              210,
-              80,
-              77,
-              113,
-              180,
-              228,
-              16,
-              224,
-              238,
-              133,
-              93,
-              14
-            ]
-          }
-        ]
-      },
-      true
-    ])
-
-    expect(send.mock.calls[1]).toEqual([
-      'ImprovedInstantMessage',
-      {
-        AgentData: [
-          {
-            AgentID: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-            SessionID: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9'
-          }
-        ],
-        MessageBlock: [
-          {
-            FromAgentName: 'Tester Avatar',
+            FromAgentName: 'Andromedaviewertester Resident',
             ToAgentID: 'f2373437-a2ef-4435-82b9-68d283538bb2',
             ID: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
             Dialog: IMDialog.InventoryDeclined,
@@ -99,15 +93,12 @@ describe('inventory offers', () => {
         ]
       },
       true
-    ])
+    )
+    expect(getDiff()).toEqual({})
   })
 
-  it('should handle offers from group notices', () => {
-    const send = jest.fn(() => Promise.resolve())
-
-    const store = configureMockStore([thunk.withExtraArgument({
-      circuit: { send }
-    })])(getState())
+  it('should handle accepting inventory offers from group notices', async () => {
+    const { store, circuit, getDiff } = await createTestStore({ state: AppState.Connected })
 
     store.dispatch(acceptInventoryOffer(
       'f2373437-a2ef-4435-82b9-68d283538bb2',
@@ -117,6 +108,51 @@ describe('inventory offers', () => {
       false
     ))
 
+    expect(circuit.send).toHaveBeenCalledWith(
+      'ImprovedInstantMessage',
+      {
+        AgentData: [
+          {
+            AgentID: '1ad4a264-c480-4322-a7e6-491e82450713',
+            SessionID: 'a9795ee4-a246-4314-9925-c140f9a25629'
+          }
+        ],
+        MessageBlock: [
+          {
+            FromAgentName: 'Andromedaviewertester Resident',
+            ToAgentID: 'f2373437-a2ef-4435-82b9-68d283538bb2',
+            ID: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+            Dialog: IMDialog.GroupNoticeInventoryAccepted,
+            Timestamp: Math.floor(Date.now() / 1000),
+            BinaryBucket: [
+              192,
+              187,
+              42,
+              40,
+              88,
+              201,
+              66,
+              222,
+              132,
+              27,
+              62,
+              69,
+              80,
+              186,
+              40,
+              196
+            ]
+          }
+        ]
+      },
+      true
+    )
+    expect(getDiff()).toEqual({})
+  })
+
+  it('should handle declining inventory offers from group notices', async () => {
+    const { store, circuit, getDiff } = await createTestStore({ state: AppState.Connected })
+
     store.dispatch(declineInventoryOffer(
       'f2373437-a2ef-4435-82b9-68d283538bb2',
       '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
@@ -124,60 +160,18 @@ describe('inventory offers', () => {
       false
     ))
 
-    expect(send.mock.calls.length).toBe(2)
-
-    expect(send.mock.calls[0]).toEqual([
+    expect(circuit.send).toHaveBeenCalledWith(
       'ImprovedInstantMessage',
       {
         AgentData: [
           {
-            AgentID: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-            SessionID: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9'
+            AgentID: '1ad4a264-c480-4322-a7e6-491e82450713',
+            SessionID: 'a9795ee4-a246-4314-9925-c140f9a25629'
           }
         ],
         MessageBlock: [
           {
-            FromAgentName: 'Tester Avatar',
-            ToAgentID: 'f2373437-a2ef-4435-82b9-68d283538bb2',
-            ID: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
-            Dialog: IMDialog.GroupNoticeInventoryAccepted,
-            Timestamp: Math.floor(Date.now() / 1000),
-            BinaryBucket: [
-              224,
-              241,
-              173,
-              172,
-              210,
-              80,
-              77,
-              113,
-              180,
-              228,
-              16,
-              224,
-              238,
-              133,
-              93,
-              14
-            ]
-          }
-        ]
-      },
-      true
-    ])
-
-    expect(send.mock.calls[1]).toEqual([
-      'ImprovedInstantMessage',
-      {
-        AgentData: [
-          {
-            AgentID: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-            SessionID: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9'
-          }
-        ],
-        MessageBlock: [
-          {
-            FromAgentName: 'Tester Avatar',
+            FromAgentName: 'Andromedaviewertester Resident',
             ToAgentID: 'f2373437-a2ef-4435-82b9-68d283538bb2',
             ID: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
             Dialog: IMDialog.GroupNoticeInventoryDeclined,
@@ -187,15 +181,12 @@ describe('inventory offers', () => {
         ]
       },
       true
-    ])
+    )
+    expect(getDiff()).toEqual({})
   })
 
-  it('should handle offers from objects', () => {
-    const send = jest.fn(() => Promise.resolve())
-
-    const store = configureMockStore([thunk.withExtraArgument({
-      circuit: { send }
-    })])(getState())
+  it('should handle accepting inventory offers from objects', async () => {
+    const { store, circuit, getDiff } = await createTestStore({ state: AppState.Connected })
 
     store.dispatch(acceptInventoryOffer(
       'f2373437-a2ef-4435-82b9-68d283538bb2',
@@ -205,6 +196,51 @@ describe('inventory offers', () => {
       true
     ))
 
+    expect(circuit.send).toHaveBeenCalledWith(
+      'ImprovedInstantMessage',
+      {
+        AgentData: [
+          {
+            AgentID: '1ad4a264-c480-4322-a7e6-491e82450713',
+            SessionID: 'a9795ee4-a246-4314-9925-c140f9a25629'
+          }
+        ],
+        MessageBlock: [
+          {
+            FromAgentName: 'Andromedaviewertester Resident',
+            ToAgentID: 'f2373437-a2ef-4435-82b9-68d283538bb2',
+            ID: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
+            Dialog: IMDialog.TaskInventoryAccepted,
+            Timestamp: Math.floor(Date.now() / 1000),
+            BinaryBucket: [
+              192,
+              187,
+              42,
+              40,
+              88,
+              201,
+              66,
+              222,
+              132,
+              27,
+              62,
+              69,
+              80,
+              186,
+              40,
+              196
+            ]
+          }
+        ]
+      },
+      true
+    )
+    expect(getDiff()).toEqual({})
+  })
+
+  it('should handle declining inventory offers from objects', async () => {
+    const { store, circuit, getDiff } = await createTestStore({ state: AppState.Connected })
+
     store.dispatch(declineInventoryOffer(
       'f2373437-a2ef-4435-82b9-68d283538bb2',
       '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
@@ -212,60 +248,18 @@ describe('inventory offers', () => {
       true
     ))
 
-    expect(send.mock.calls.length).toBe(2)
-
-    expect(send.mock.calls[0]).toEqual([
+    expect(circuit.send).toHaveBeenCalledWith(
       'ImprovedInstantMessage',
       {
         AgentData: [
           {
-            AgentID: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-            SessionID: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9'
+            AgentID: '1ad4a264-c480-4322-a7e6-491e82450713',
+            SessionID: 'a9795ee4-a246-4314-9925-c140f9a25629'
           }
         ],
         MessageBlock: [
           {
-            FromAgentName: 'Tester Avatar',
-            ToAgentID: 'f2373437-a2ef-4435-82b9-68d283538bb2',
-            ID: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
-            Dialog: IMDialog.TaskInventoryAccepted,
-            Timestamp: Math.floor(Date.now() / 1000),
-            BinaryBucket: [
-              224,
-              241,
-              173,
-              172,
-              210,
-              80,
-              77,
-              113,
-              180,
-              228,
-              16,
-              224,
-              238,
-              133,
-              93,
-              14
-            ]
-          }
-        ]
-      },
-      true
-    ])
-
-    expect(send.mock.calls[1]).toEqual([
-      'ImprovedInstantMessage',
-      {
-        AgentData: [
-          {
-            AgentID: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-            SessionID: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9'
-          }
-        ],
-        MessageBlock: [
-          {
-            FromAgentName: 'Tester Avatar',
+            FromAgentName: 'Andromedaviewertester Resident',
             ToAgentID: 'f2373437-a2ef-4435-82b9-68d283538bb2',
             ID: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
             Dialog: IMDialog.TaskInventoryDeclined,
@@ -275,47 +269,7 @@ describe('inventory offers', () => {
         ]
       },
       true
-    ])
+    )
+    expect(getDiff()).toEqual({})
   })
-
-  function getState () {
-    return {
-      account: {
-        savedAvatars: [
-          {
-            avatarIdentifier: 'Tester',
-            dataSaveId: 'saveId'
-          }
-        ]
-      },
-      session: {
-        avatarIdentifier: 'Tester',
-        agentId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-        sessionId: 'b039f51f-41d9-41e7-a4b1-5490fbfd5eb9'
-      },
-      names: {
-        names: { 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e': new AvatarName('Tester Avatar') }
-      },
-      inventory: {
-        root: '1',
-        folders: {
-          1: {
-            folderId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-            children: ['2', '3'],
-            typeDefault: AssetType.Folder
-          },
-          2: {
-            folderId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-            children: [],
-            typeDefault: AssetType.Object
-          },
-          3: {
-            folderId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-            children: [],
-            typeDefault: AssetType.Notecard
-          }
-        }
-      }
-    }
-  }
 })
