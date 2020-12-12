@@ -36,7 +36,9 @@ export default createReducer({
       }
     }
 
-    state.root = action.payload.sessionInfo['inventory-root'][0].folder_id
+    if ((action.payload.sessionInfo['inventory-root']?.length ?? 0) > 0) {
+      state.root = action.payload.sessionInfo['inventory-root'][0].folder_id
+    }
   },
 
   [logout.type] () {

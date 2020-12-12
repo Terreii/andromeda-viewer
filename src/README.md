@@ -31,7 +31,8 @@ In this directory are the general and setup modules located. Most of the App is 
 - [`react-app-env.d.ts`](./react-app-env.d.ts) importing of react-app types.
 - [`registerServiceWorker.js`](./registerServiceWorker.js).
 - [`setupProxy.js`](./setupProxy.js) sets up the [create-react-app dev proxy](https://create-react-app.dev/docs/proxying-api-requests-in-development/#configuring-the-proxy-manually "Documentation for the development proxy").
-- [`setupTests.js`](./setupTests.js) global functions and settings for the tests ([documentation](https://create-react-app.dev/docs/running-tests/#srcsetuptestsjs)).
+- [`setupTests.ts`](./setupTests.ts) global functions and settings for the tests ([documentation](https://create-react-app.dev/docs/running-tests/#srcsetuptestsjs)).
+- [`testUtils.ts`](./testUtils.ts) has test helper functions. __Please use the `createTestStore` function to test Redux code__. This file exports `createTestStore`.
 - [`viewerInfo.js`](./viewerInfo.js) functions for accessing viewer infos.
 
 ## Tests
@@ -41,3 +42,57 @@ In this directory are the general and setup modules located. Most of the App is 
 *Integration tests* are in `__test__` located.
 
 *Dependency tests* are in `__test__` located.
+
+### Testing Redux code (action, reducers)
+
+[`testUtils.ts`](./testUtils.ts) implements the `createTestStore` function. It creates test-utils and store for testing all redux code!
+
+#### API createTestStore
+
+```javascript
+const result = await createTestStore({ localDB, remoteDB, state })
+```
+
+Argument | Type | Description | Required
+---------|------|-------------|---------
+`options` | Object | Object containing all option. | Yes
+`options.localDB` | PouchDB.Database | If you want to use a database created by your tests. Only required if the database should have data before store-init. | No
+`options.remoteDB` | PouchDB.Database | If you want to use a database created by your tests. Only required if the database should have data before store-init. Almost never required. | No
+`options.state` | AppState | Set the state of the redux store. The AppState-enum is defined in [`testUtils.ts`](./testUtils.ts). | No
+
+`createTestStore` Returns an Object with those fields:
+
+Result | Type | Description
+-------|------|------------
+`store` | Redux-Store | The created test redux store. It is set to the provided state.
+`cryptoStore` | [CryptoStore](github.com/Terreii/hoodie-plugin-store-crypto) | Instance to the cryptoStore for the localDB. Setup and/or unlocked if the state is >= LoggedIn.
+`circuit` | Circuit | Mock for the UDP Circuit. `send` method is a `jest.fn` mock.
+`fetchLLSD` | `jest.fn` | Mock for fetching LLSD data. Use JSON data for its result.
+`proxyFetch` | `jest.fn` | Mock for the proxy fetch. Use `Response` for the result.
+`setMark` | Function | Function to store the current redux-state with a key (string). Use that key with `getDiff`.
+`getDiff` | Function | Calculates the diff between to states (using [deep-object-diff](https://www.npmjs.com/package/deep-object-diff)). Default is the initial (the state after the state option) and the current. But up to two keys can be passed.
+`getCurrentDbs` | Function | Returns the current databases. `local` and `remote`.
+
+#### Setting a initial state
+
+The `state`-option sets the initial state.
+
+```javascript
+const { store, getDiff } = await createTestStore({ state: AppState.Connected })
+```
+
+The store is now set in a state representing a logged in user with an to a grid connected avatar.
+
+The user data are:
+
+Prop | Value
+-----|------
+Username | `tester.mactestface@example.com`
+User-id | `6197db66-7452-47d6-bf47-85cfd71a2c71`
+Avatar-name | `AndromedaViewerTester Resident`
+
+For more values, please go to `setStateToConnectedToGrid` in [`testUtils.ts`](./testUtils.ts).
+
+If `getDiff` is now called it will return `{}`, because the connected state is the initial test-state.
+
+Any changes to the state will be in the diff.

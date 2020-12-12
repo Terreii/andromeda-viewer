@@ -26,13 +26,7 @@ import {
   selectSavedGridsAreLoaded
 } from '../bundles/account'
 import { selectIsLoggedIn } from '../bundles/session'
-import {
-  createLocalDB,
-  createCryptoStore,
-  createRemoteDB,
-  getUserDatabaseName,
-  startSyncing
-} from '../store/db'
+import { createCryptoStore, getUserDatabaseName, startSyncing } from '../store/db'
 
 import { IMChatType } from '../types/chat'
 
@@ -193,7 +187,9 @@ export function isSignedIn () {
 
     if (isLoggedIn) {
       const userDbName = getUserDatabaseName(username)
-      args.remoteDB = createRemoteDB(userDbName)
+      args.remoteDB.close()
+      const { remote } = args.createDatabases({ remote: userDbName })
+      args.remoteDB = remote
       args.cryptoStore = createCryptoStore(args.db, args.remoteDB)
     }
 
@@ -275,7 +271,8 @@ export function unlock (password) {
 
     const userDbName = getUserDatabaseName(accountDoc.accountId)
     args.remoteDB.close()
-    args.remoteDB = createRemoteDB(userDbName, false)
+    const { remote } = args.createDatabases({ remote: userDbName })
+    args.remoteDB = remote
 
     startSyncing(args.db, args.remoteDB)
 
@@ -294,7 +291,8 @@ function signInAndSync (accountProperties, password, cryptoPassword) {
 
     const userDbName = getUserDatabaseName(accountProperties.data.id)
     args.remoteDB.close()
-    args.remoteDB = createRemoteDB(userDbName, false)
+    const { remote } = args.createDatabases({ remote: userDbName, skipSetup: false })
+    args.remoteDB = remote
     args.cryptoStore = createCryptoStore(args.db, args.remoteDB)
 
     startSyncing(args.db, args.remoteDB)
@@ -473,8 +471,9 @@ export function signOut () {
 
       dispatch(accountDidSignOut())
 
-      args.db = createLocalDB()
-      args.remoteDB = createRemoteDB('_users')
+      const { local, remote } = args.createDatabases({ local: true, remote: '_users' })
+      args.db = local
+      args.remoteDB = remote
       args.cryptoStore = createCryptoStore(args.db, args.remoteDB)
     } catch (err) {
       console.error(err)
@@ -483,7 +482,7 @@ export function signOut () {
 }
 
 /**
- * Fetch all data of the user and process it into a formated JSON (row data)
+ * Fetch all data of the user and process it into a formatted JSON (row data)
  * and Second Life viewers files format.
  * @returns {object} JSON data and array of files (text).
  */

@@ -7,19 +7,67 @@ import { proxyFetch, fetchLLSD } from './llsdFetch'
 
 import AvatarName from '../avatarName'
 
-// Create Redux-Store with local db, remote db and more
+/**
+ * Create Redux-Store with local db, remote db and more.
+ */
 export default function createStore (preloadedState) {
-  const db = createLocalDB()
+  const extraArgument = createExtraArgument(({ local, remote, skipSetup }) => {
+    const result = { local: null, remote: null }
+    if (local) {
+      result.local = createLocalDB()
+    }
+    if (remote) {
+      result.remote = createRemoteDB(remote, skipSetup)
+    }
+    return result
+  })
+  const store = createStoreCore(preloadedState, extraArgument)
+
+  extraArgument.proxyFetch = proxyFetch.bind(null, store.getState)
+  extraArgument.fetchLLSD = fetchLLSD.bind(null, store.getState)
+
+  configureReactors(store)
+
+  if (process.env.NODE_ENV !== 'production') {
+    window.devStore = store
+    window.localDB = extraArgument.db
+    window.remoteDB = extraArgument.remoteDB
+    window.cryptoStore = extraArgument.cryptoStore
+
+    if (module.hot) {
+      // Enable Webpack hot module replacement for reducers
+      module.hot.accept('../bundles', () => {
+        store.replaceReducer(rootReducer)
+      })
+    }
+  }
+
+  return store
+}
+
+/**
+ * Create the thunk extraArgument.
+ * It adds the localDB and remoteDB to it, but does not setup proxyFetch or fetchLLSD.
+ */
+export function createExtraArgument (createDatabases) {
+  const { local, remote } = createDatabases({ local: true, remote: '_users', skipSetup: true })
   const extraArgument = {
-    cryptoStore: createCryptoStore(db),
-    db,
-    remoteDB: createRemoteDB('_users'),
-    proxyFetch: null,
-    fetchLLSD: null,
+    cryptoStore: createCryptoStore(local),
+    db: local,
+    remoteDB: remote,
+    createDatabases,
+    proxyFetch: null, // Must be added after the store was created
+    fetchLLSD: null, // Must be added after the store was created
     onAvatarLogout: [],
     circuit: null // will be set on login
   }
+  return extraArgument
+}
 
+/**
+ * Core of the store creation.
+ */
+export function createStoreCore (preloadedState, extraArgument) {
   const middleware = getDefaultMiddleware({
     thunk: {
       extraArgument
@@ -40,25 +88,6 @@ export default function createStore (preloadedState) {
     devTools: process.env.NODE_ENV !== 'production',
     preloadedState
   })
-
-  extraArgument.proxyFetch = proxyFetch.bind(null, store.getState)
-  extraArgument.fetchLLSD = fetchLLSD.bind(null, store.getState)
-
-  if (process.env.NODE_ENV !== 'production') {
-    window.devStore = store
-    window.localDB = extraArgument.db
-    window.remoteDB = extraArgument.remoteDB
-    window.cryptoStore = extraArgument.cryptoStore
-
-    if (module.hot) {
-      // Enable Webpack hot module replacement for reducers
-      module.hot.accept('../bundles', () => {
-        store.replaceReducer(rootReducer)
-      })
-    }
-  }
-
-  configureReactors(store)
 
   return store
 }

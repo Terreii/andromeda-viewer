@@ -62,10 +62,10 @@ const sessionSlice = createSlice({
     },
 
     startLogout: () => {},
-  
+
     // DidLogout
     logout: getDefaultState,
-  
+
     // UserWasKicked
     userWasKicked (_state, action: PayloadAction<{ reason: string }>) {
       const state = getDefaultState()
@@ -207,6 +207,8 @@ export interface LoginAction {
     andromedaSessionId: string,
     first_name: string
     last_name: string
+    account_type: string
+    account_level_benefits: AccountLevelBenefits
     agent_flags: number
     'max-agent-groups': number
     agent_id: string
@@ -238,7 +240,7 @@ export interface LoginAction {
     seconds_since_epoch: number
     openid_url: string
     openid_token: string
-    udp_blacklist: string
+    udp_blacklist: string // 🙄
     agent_region_access: MaturityString
     agent_appearance_service: string
     snapshot_config_url: string
@@ -246,5 +248,51 @@ export interface LoginAction {
     ao_transition: number
     seed_capability: string
     cof_version: number
+  }
+}
+
+export interface AccountLevelBenefits {
+  lastname_change_allowed: string
+  lastname_change_rate: number
+  lastname_change_cost: number
+  animated_object_limit: number
+  one_time_event_allowed: number
+  live_chat: string
+  signup_bonus: number
+  mainland_tier: number
+  partner_fee: number
+  unpartner_fee: number
+  stored_im_limit: number
+  picks_limit: number
+  gridwide_experience_limit: number
+  premium_alts: number
+  create_repeating_events: string
+  script_limit: number
+  voice_morphing: string
+  premium_gifts: string
+  repeating_events_cost: number
+  premium_access: string
+  animation_upload_cost: number
+  texture_upload_cost: number
+  mesh_upload_cost: number
+  sound_upload_cost: number
+  one_time_event_cost: number
+  phone_support: string
+  transaction_history_limit: number
+  priority_entry: string
+  marketplace_concierge_support: string
+  marketplace_listing_limit: number
+  marketplace_ple_limit: number
+  linden_buy_fee: number
+  attachment_limit: number
+  beta_grid_land: string
+  use_animesh: string
+  local_experiences: number
+  stipend: number
+  create_group_cost: number
+  group_membership_limit: number
+  place_pages: {
+    num_free_listings: number
+    additional_listing_cost: number
   }
 }
