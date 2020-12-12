@@ -67,6 +67,14 @@ export enum AppState {
 
 /**
  * Create a store and some helper functions for testing actions.
+ *
+ * It can also set the state of the Store to be one of:
+ *   - Logged off - No user is logged in
+ *   - Logged in  - An user is logged in, but viewer is not unlocked
+ *   - Unlocked   - An user is logged in and the viewer is unlocked
+ *   - Connected  - There is also an avatar "connected" to a grid
+ *
+ * It returns mocks for the UDP-Circuit and both fatch functions (proxy and LLSD).
  */
 export async function createTestStore ({ localDB, remoteDB, state = AppState.LoggedOff }: {
   localDB?: PouchDB.Database,
@@ -119,6 +127,12 @@ export async function createTestStore ({ localDB, remoteDB, state = AppState.Log
     return result
   })
 
+  const fetchLLSDMock = jest.fn()
+  ;(extraArgument as any).fetchLLSD = fetchLLSDMock
+
+  const proxyFetchMock = jest.fn()
+  ;(extraArgument as any).proxyFetch = proxyFetchMock
+
   // Create the actual store
   const store = createStoreCore(undefined, extraArgument)
 
@@ -154,6 +168,8 @@ export async function createTestStore ({ localDB, remoteDB, state = AppState.Log
     store,
     cryptoStore: extraArgument.cryptoStore,
     circuit: extraArgument.circuit,
+    fetchLLSD: fetchLLSDMock,
+    proxyFetch: proxyFetchMock,
     setMark,
     getDiff,
     getCurrentDbs () {
