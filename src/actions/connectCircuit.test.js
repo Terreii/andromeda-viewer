@@ -45,10 +45,6 @@ it('should close all event-listeners on the close event', () => {
     }
   }))
 
-  expect(dispatch).toHaveBeenLastCalledWith(expect.any(Function))
-  const cb = dispatch.mock.calls[0][0]
-  cb(dispatch, getState, { circuit })
-
   expect(dispatch).toHaveBeenLastCalledWith({
     type: 'session/userWasKicked',
     payload: {
@@ -89,12 +85,7 @@ it('should not dispatch an kick event if the circuit did close with 1000', () =>
     }
   }))
 
-  expect(dispatch).toBeCalledTimes(1)
-  expect(dispatch).toHaveBeenLastCalledWith(expect.any(Function))
-  const cb = dispatch.mock.calls[0][0]
-  cb(dispatch, getState, { circuit })
-
-  expect(dispatch).toBeCalledTimes(1)
+  expect(dispatch).toBeCalledTimes(0)
   expect(getState).not.toHaveBeenCalled()
   expect(circuitRemoveEventListener)
     .toHaveBeenNthCalledWith(1, 'packetReceived', eventListeners.get('packetReceived'))

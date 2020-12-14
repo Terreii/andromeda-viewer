@@ -36,7 +36,7 @@ function connect (dispatch, circuit) {
     },
     closeHandler: null
   }
-  listeners.closeHandler = closeHandler(dispatch, listeners)
+  listeners.closeHandler = closeHandler(dispatch, circuit, listeners)
 
   circuit.addEventListener('packetReceived', listeners.simAction)
   circuit.addEventListener('close', listeners.closeHandler)
@@ -57,9 +57,10 @@ function removeEventListeners (circuit, listeners) {
 /**
  * Listens to close event. If the there is a reason, dispatch it.
  * @param {function} dispatch    Redux Store dispatch
+ * @param {EventTarget} circuit  Circuit from network/circuit.
  * @param {simAction: EventListener, closeHandler: EventListener} listeners Event listeners.
  */
-function closeHandler (dispatch, listeners) {
+function closeHandler (dispatch, circuit, listeners) {
   const disconnectMessage = 'You have been disconnected!\n\n' +
     'Please check if you have an Internet connection.\n' +
     'This problem could also be on our or the grids side.'
@@ -74,13 +75,11 @@ function closeHandler (dispatch, listeners) {
       ? reasonTexts[event.detail.reason]
       : event.detail.reason
 
-    dispatch((dispatch, getState, { circuit }) => {
-      removeEventListeners(circuit, listeners)
+    removeEventListeners(circuit, listeners)
 
-      if (event.detail.code !== 1000) {
-        // not normal circuit close
-        dispatch(userWasKicked({ reason }))
-      }
-    })
+    if (event.detail.code !== 1000) {
+      // not normal circuit close
+      dispatch(userWasKicked({ reason }))
+    }
   }
 }
