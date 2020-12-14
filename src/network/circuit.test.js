@@ -107,15 +107,9 @@ test('it should create an instance', () => {
 test('circuit closes', () => {
   circuit = new Circuit('127.0.0.1', 8080, 123456, 'session id')
 
-  const removeAllListeners = circuit.removeAllListeners
-  circuit.removeAllListeners = jest.fn(() => {
-    removeAllListeners.call(circuit)
-  })
-
   circuit.close()
 
   expect(clearInterval).toBeCalled()
-  expect(circuit.removeAllListeners).toBeCalled()
   expect(circuit.websocket.close).toBeCalled()
   expect(circuit.websocket.close).lastCalledWith(1000, 'session end')
 })
@@ -184,58 +178,26 @@ test('parse a received package', () => {
   const messageBuffer = createTestMessage(false, false, false)
 
   const handler = jest.fn()
-  circuit.on('packetReceived', handler)
+  circuit.addEventListener('packetReceived', handler)
 
   circuit.websocket.onmessage({ data: messageBuffer })
 
-  expect(handler).toBeCalledWith({
-    frequency: 'Low',
-    from: {
-      ip: '127.0.0.1',
-      port: 33
-    },
-    isOld: undefined,
-    isReliable: false,
-    isResend: false,
-    name: 'TestMessage',
-    type: 'udp/TestMessage',
-    number: 1,
-    size: 52,
-    trusted: false,
-    NeighborBlock: [
-      {
-        Test0: 0,
-        Test1: 1,
-        Test2: 2
+  expect(handler).toBeCalledWith(new window.CustomEvent('packetReceived', {
+    detail: {
+      frequency: 'Low',
+      from: {
+        ip: '127.0.0.1',
+        port: 33
       },
-      {
-        Test0: 3,
-        Test1: 4,
-        Test2: 5
-      },
-      {
-        Test0: 6,
-        Test1: 7,
-        Test2: 8
-      },
-      {
-        Test0: 9,
-        Test1: 10,
-        Test2: 11
-      }
-    ],
-    TestBlock1: [
-      {
-        Test1: 0
-      }
-    ],
-    blocks: [
-      [
-        {
-          Test1: 0
-        }
-      ],
-      [
+      isOld: undefined,
+      isReliable: false,
+      isResend: false,
+      name: 'TestMessage',
+      type: 'udp/TestMessage',
+      number: 1,
+      size: 52,
+      trusted: false,
+      NeighborBlock: [
         {
           Test0: 0,
           Test1: 1,
@@ -256,11 +218,44 @@ test('parse a received package', () => {
           Test1: 10,
           Test2: 11
         }
+      ],
+      TestBlock1: [
+        {
+          Test1: 0
+        }
+      ],
+      blocks: [
+        [
+          {
+            Test1: 0
+          }
+        ],
+        [
+          {
+            Test0: 0,
+            Test1: 1,
+            Test2: 2
+          },
+          {
+            Test0: 3,
+            Test1: 4,
+            Test2: 5
+          },
+          {
+            Test0: 6,
+            Test1: 7,
+            Test2: 8
+          },
+          {
+            Test0: 9,
+            Test1: 10,
+            Test2: 11
+          }
+        ]
       ]
-    ]
-  })
+    }
+  }))
   expect(circuit.senderSequenceNumber).toBe(0)
-  circuit.removeAllListeners()
 })
 
 test('save sender sequence number of reliable packages as ack', () => {
@@ -766,7 +761,7 @@ describe('disconnection', () => {
     setTimeout.mockReset()
 
     const closeEvent = jest.fn()
-    circuit.on('close', closeEvent)
+    circuit.addEventListener('close', closeEvent)
 
     circuit.websocket.onclose(new window.CloseEvent('Policy Violation', {
       wasClean: true,
@@ -778,10 +773,12 @@ describe('disconnection', () => {
 
     expect(window.WebSocket).toBeCalledTimes(1)
     expect(closeEvent).toBeCalled()
-    expect(closeEvent).toHaveBeenLastCalledWith({
-      code: 1008,
-      reason: 'wrong session id'
-    })
+    expect(closeEvent).toHaveBeenLastCalledWith(new window.CustomEvent('close', {
+      detail: {
+        code: 1008,
+        reason: 'wrong session id'
+      }
+    }))
   })
 
   test('it should exponentially increase the reconnect timeout', () => {
@@ -817,7 +814,7 @@ describe('disconnection', () => {
     openSocket()
 
     const closeEvent = jest.fn()
-    circuit.on('close', closeEvent)
+    circuit.addEventListener('close', closeEvent)
 
     expect(window.WebSocket).toBeCalledTimes(1)
     jest.clearAllTimers()
@@ -836,10 +833,12 @@ describe('disconnection', () => {
 
     expect(reconnectCounts).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 11])
     expect(window.WebSocket).toHaveBeenCalledTimes(12)
-    expect(closeEvent).toHaveBeenCalledWith({
-      code: 1006,
-      reason: 'Max reconnection tries'
-    })
+    expect(closeEvent).toHaveBeenCalledWith(new window.CustomEvent('close', {
+      detail: {
+        code: 1006,
+        reason: 'Max reconnection tries'
+      }
+    }))
   })
 
   // This is for developing and if there will be a direct UDP connection in the future
@@ -850,13 +849,15 @@ describe('disconnection', () => {
     jest.runOnlyPendingTimers()
 
     const closeHandler = jest.fn()
-    circuit.on('close', closeHandler)
+    circuit.addEventListener('close', closeHandler)
 
     jest.runTimersToTime(ms.minutes(1) + ms.seconds(45) + 150)
 
-    expect(closeHandler).toHaveBeenCalledWith({
-      code: 1006,
-      reason: 'UDP disconnect'
-    })
+    expect(closeHandler).toHaveBeenCalledWith(new window.CustomEvent('close', {
+      detail: {
+        code: 1006,
+        reason: 'UDP disconnect'
+      }
+    }))
   })
 })

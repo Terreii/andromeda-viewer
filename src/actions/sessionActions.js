@@ -244,10 +244,14 @@ export function logout () {
       dispatch(startLogout())
 
       let isLoggedOut = false
-      const logoutHandler = msg => {
+      const logoutHandler = () => {
         if (isLoggedOut) return
-
         isLoggedOut = true
+
+        setTimeout(() => {
+          circuit.removeEventListener('packetReceived', console.log)
+          circuit.removeEventListener('LogoutReply', logoutHandler)
+        }, 0)
         dispatch(afterAvatarSessionEnds())
 
         dispatch(didLogout())
@@ -255,8 +259,8 @@ export function logout () {
         resolve()
       }
 
-      circuit.on('packetReceived', console.log)
-      circuit.once('LogoutReply', logoutHandler)
+      circuit.addEventListener('packetReceived', console.log)
+      circuit.addEventListener('LogoutReply', logoutHandler, { once: true })
       setTimeout(logoutHandler, ms.seconds(30)) // timeout for LogoutReply
     })
   }
@@ -281,7 +285,7 @@ function connectToSim (sessionInfo, circuit) {
 
     dispatch(connectCircuit()) // Connect message parsing with circuit.
 
-    activeCircuit.on('KickUser', msg => dispatch(getKicked(msg)))
+    activeCircuit.addEventListener('KickUser', msg => dispatch(getKicked(msg.detail)))
 
     await activeCircuit.send('UseCircuitCode', {
       CircuitCode: [
@@ -369,7 +373,6 @@ function getKicked (msg) {
 function afterAvatarSessionEnds () {
   return (dispatch, getState, extra) => {
     extra.circuit.close()
-    extra.circuit.removeAllListeners()
     extra.circuit = null
 
     for (const cb of extra.onAvatarLogout || []) {

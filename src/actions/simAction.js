@@ -5,8 +5,13 @@ import { changeRights } from '../bundles/friends'
 import { selectAgentId, selectSessionId } from '../bundles/session'
 import { doHandleFriendOnlineStateChange } from './friendsActions'
 
-// Gets all messages from the SIM and filters them, and if needed: calls their own actions.
-function simActionFilter (msg) {
+/**
+ * Gets all messages from the SIM and filters them, and if needed: calls their own actions.
+ * @param {CustomEvent} event Event from circuit with the Package data in `detail`.
+ */
+export default function simActionFilter (event) {
+  const msg = event.detail
+
   switch (msg.name) {
     case 'ChatFromSimulator':
       return receiveChatFromSimulator(msg)
@@ -37,7 +42,9 @@ function simActionFilter (msg) {
       if (process.env.NODE_ENV !== 'production' && window.debugDispatchAllMsg) {
         return msg
       }
-      break
+      // Don't dispatch an action.
+      // This is an empty thunk action. It will be called and does then nothing.
+      return () => {}
   }
 }
 
@@ -79,14 +86,5 @@ function sendRegionHandshakeReply (RegionHandshake) {
       regionID,
       flags
     })
-  }
-}
-
-export default function createCallback (dispatch) {
-  return msg => {
-    const action = simActionFilter(msg)
-    if (action != null) { // If the packet is parsed, an action will be dispatched.
-      dispatch(action)
-    }
   }
 }

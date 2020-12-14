@@ -407,7 +407,7 @@ describe('grids', () => {
       isLLSDLogin: false
     })
 
-    await new Promise(resolve => setTimeout(resolve, 5))
+    await new Promise(resolve => setTimeout(resolve, 10))
 
     expect(getDiff('A')).toEqual({
       account: {
@@ -455,7 +455,7 @@ describe('grids', () => {
       isLLSDLogin: false
     })
 
-    await new Promise(resolve => setTimeout(resolve, 5))
+    await new Promise(resolve => setTimeout(resolve, 10))
 
     expect(getDiff('A')).toEqual({
       account: {

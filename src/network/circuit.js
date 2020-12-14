@@ -6,13 +6,12 @@
  * and the event 'packetReceived'
  */
 
-import events from 'events'
 import Queue from 'double-ended-queue'
 
 import { parseBody, createBody } from './networkMessages'
 import { getValueOf, mapBlockOf } from './msgGetters'
 
-export default class Circuit extends events.EventEmitter {
+export default class Circuit extends window.EventTarget {
   /**
    * sequenceNumber is the id of a packet.
    * It will be increased for every packed.
@@ -117,25 +116,34 @@ export default class Circuit extends events.EventEmitter {
 
     if (event.code === 1000) {
       // Normal session end
+      this.dispatchEvent(new window.CustomEvent('close', {
+        detail: {
+          code: event.code,
+          reason: event.reason
+        }
+      }))
+      clearInterval(this.acksProcessInterval)
       return
     }
 
     if (event.code === 1008) {
-      this.emit('close', {
-        code: event.code,
-        reason: event.reason
-      })
-      this.removeAllListeners()
+      this.dispatchEvent(new window.CustomEvent('close', {
+        detail: {
+          code: event.code,
+          reason: event.reason
+        }
+      }))
       clearInterval(this.acksProcessInterval)
       return
     }
 
     if (this.reconnectCount > 10) {
-      this.emit('close', {
-        code: 1006,
-        reason: 'Max reconnection tries'
-      })
-      this.removeAllListeners()
+      this.dispatchEvent(new window.CustomEvent('close', {
+        detail: {
+          code: 1006,
+          reason: 'Max reconnection tries'
+        }
+      }))
       clearInterval(this.acksProcessInterval)
       return
     }
@@ -149,7 +157,6 @@ export default class Circuit extends events.EventEmitter {
 
   close () {
     this.websocket.close(1000, 'session end')
-    this.removeAllListeners()
     clearInterval(this.acksProcessInterval)
   }
 
@@ -217,8 +224,12 @@ export default class Circuit extends events.EventEmitter {
       this._resolveAcks(mapBlockOf(parsedBody, 'Packets', getValue => getValue('ID')))
     } else {
       // For every message that is not a circuit control message
-      this.emit(parsedBody.name, parsedBody)
-      this.emit('packetReceived', parsedBody)
+      this.dispatchEvent(new window.CustomEvent(parsedBody.name, {
+        detail: parsedBody
+      }))
+      this.dispatchEvent(new window.CustomEvent('packetReceived', {
+        detail: parsedBody
+      }))
     }
   }
 
@@ -339,10 +350,12 @@ export default class Circuit extends events.EventEmitter {
       this.lastReceivedCount += 1
 
       if (this.lastReceivedCount > 1050) {
-        this.emit('close', {
-          code: 1006,
-          reason: 'UDP disconnect'
-        })
+        this.dispatchEvent(new window.CustomEvent('close', {
+          detail: {
+            code: 1006,
+            reason: 'UDP disconnect'
+          }
+        }))
         this.close()
         return
       }
