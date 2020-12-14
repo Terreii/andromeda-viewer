@@ -116,6 +116,13 @@ export default class Circuit extends window.EventTarget {
 
     if (event.code === 1000) {
       // Normal session end
+      this.dispatchEvent(new window.CustomEvent('close', {
+        detail: {
+          code: event.code,
+          reason: event.reason
+        }
+      }))
+      clearInterval(this.acksProcessInterval)
       return
     }
 
