@@ -1,5 +1,3 @@
-import { EventEmitter } from 'events'
-
 import { diff as getObjDiff } from 'deep-object-diff'
 import PouchDB from 'pouchdb-browser'
 import memoryAdapter from 'pouchdb-adapter-memory'
@@ -480,6 +478,6 @@ async function setStateToConnectedToGrid (
   store.dispatch(connectCircuit())
 }
 
-export class CircuitMock extends EventEmitter {
+export class CircuitMock extends window.EventTarget {
   send = jest.fn(() => Promise.resolve())
 }
