@@ -14,8 +14,8 @@ const webSocket = require('ws')
 const openBridges = new WeakMap()
 
 /**
- * Creates a middleware that will add an WebSocket server on to the server,
- * when first request is made.
+ * Creates a middleware that will add a WebSocket server on to the server,
+ * when the first request is made.
  * This is only for development!
  * Inspired by ws handling of http-proxy-middleware.
  *
@@ -23,11 +23,26 @@ const openBridges = new WeakMap()
  */
 function createWebSocketCreationRoute (url) {
   let hasSubscribed = false
+  let app
+  const wss = new webSocket.Server({ noServer: true })
+
+  wss.on('connection', ws => {
+    openBridges.set(ws, new Bridge(ws, app))
+  })
 
   return (req, res, next) => {
     if (!hasSubscribed) {
       hasSubscribed = true
-      createWebSocketServer(req.app, req.connection.server, url)
+      app = req.app
+
+      // manuel handle upgrade
+      req.connection.server.on('upgrade', (request, socket, head) => {
+        if (request.url === url) {
+          wss.handleUpgrade(request, socket, head, ws => {
+            wss.emit('connection', ws, request)
+          })
+        }
+      })
     }
     next()
   }
