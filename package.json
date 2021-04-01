@@ -36,8 +36,9 @@
     "start": "ember serve",
     "test": "npm-run-all lint test:*",
     "test:ember": "ember test",
-    "server:dev": "node server/index.js",
-    "server:start": "cross-env NODE_ENV=production node server/index.js"
+    "test:server": "cross-env PORT=0 NODE_ENV=test mocha",
+    "server:dev": "node backend/index.js",
+    "server:start": "cross-env NODE_ENV=production node backend/index.js"
   },
   "devDependencies": {
     "@ember/optional-features": "^2.0.0",
