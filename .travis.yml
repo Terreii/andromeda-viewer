@@ -1,24 +1,25 @@
-sudo: false
-notifications:
-  email: false
-
+---
 language: node_js
 node_js:
-  - "14"
-  - "12"
+  - "10"
 
-# Avoid double build on PRs (See https://github.com/travis-ci/travis-ci/issues/1147)
+dist: xenial
+
+addons:
+  chrome: stable
+
+cache:
+  directories:
+    - $HOME/.npm
+
+env:
+  global:
+    # See https://git.io/vdao3 for details.
+    - JOBS=1
+
 branches:
   only:
     - latest
 
-install:
-  - npm ci;
-env:
-  - CXX=g++-4.9
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-4.9
+script:
+  - npm test
