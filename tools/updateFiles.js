@@ -6,14 +6,16 @@ const fetch = require('node-fetch')
 
 const repositoryURL = 'https://bitbucket.org/lindenlab/viewer/raw/master/'
 
-fetch(repositoryURL + 'indra/newview/llviewerregion.cpp')
+async function get (url) {
+  const response = await fetch(url)
 
-  .then(response => {
-    if (response.ok) {
-      return response.text()
-    }
-    throw new Error(`${response.status} - ${response.statusText}`)
-  })
+  if (response.ok) {
+    return response.text()
+  }
+  throw new Error(`${response.status} - ${response.statusText}`)
+}
+
+get(repositoryURL + 'indra/newview/llviewerregion.cpp')
 
   .then(file => file
     .split('\n')
@@ -32,14 +34,7 @@ fetch(repositoryURL + 'indra/newview/llviewerregion.cpp')
     process.exit(1)
   })
 
-fetch(repositoryURL + 'scripts/messages/message_template.msg')
-
-  .then(response => {
-    if (response.ok) {
-      return response.text()
-    }
-    throw new Error(`${response.status} - ${response.statusText}`)
-  })
+get(repositoryURL + 'scripts/messages/message_template.msg')
 
   .then(file => fs.promises.writeFile(
     path.resolve('tools', 'message_template.msg'),
