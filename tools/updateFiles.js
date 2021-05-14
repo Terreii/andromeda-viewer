@@ -2,21 +2,20 @@
 
 const fs = require('fs')
 const path = require('path')
-const util = require('util')
 const fetch = require('node-fetch')
 
-const writeFile = util.promisify(fs.writeFile)
+const repositoryURL = 'https://bitbucket.org/lindenlab/viewer/raw/master/'
 
-const repositoryURL = 'https://bitbucket.org/lindenlab/viewer-release/raw/tip/'
+async function get (url) {
+  const response = await fetch(url)
 
-fetch(repositoryURL + 'indra/newview/llviewerregion.cpp')
+  if (response.ok) {
+    return response.text()
+  }
+  throw new Error(`${response.status} - ${response.statusText}`)
+}
 
-  .then(response => {
-    if (response.status === 200) {
-      return response.text()
-    }
-    throw new Error(`${response.status} - ${response.statusText}`)
-  })
+get(repositoryURL + 'indra/newview/llviewerregion.cpp')
 
   .then(file => file
     .split('\n')
@@ -27,7 +26,7 @@ fetch(repositoryURL + 'indra/newview/llviewerregion.cpp')
   .then(caps => {
     const capsJSON = JSON.stringify(caps, null, 2)
     const outPath = path.resolve('src', 'actions', 'capabilities.json')
-    return writeFile(outPath, capsJSON + '\n')
+    return fs.promises.writeFile(outPath, capsJSON + '\n')
   })
 
   .catch(error => {
@@ -35,16 +34,18 @@ fetch(repositoryURL + 'indra/newview/llviewerregion.cpp')
     process.exit(1)
   })
 
-fetch(repositoryURL + 'scripts/messages/message_template.msg')
+get(repositoryURL + 'scripts/messages/message_template.msg')
 
-  .then(response => {
-    if (response.status < 300) {
-      return response.text()
-    }
-    throw new Error(`${response.status} - ${response.statusText}`)
-  })
+  .then(file => file
+    .split('\n')
+    .map(line => line.toString().trimEnd())
+    .join('\n')
+  )
 
-  .then(file => writeFile(path.resolve('tools', 'message_template.msg'), file))
+  .then(file => fs.promises.writeFile(
+    path.resolve('tools', 'message_template.msg'),
+    file
+  ))
 
   .catch(error => {
     console.error(error)

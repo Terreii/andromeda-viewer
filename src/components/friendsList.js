@@ -40,7 +40,7 @@ function FriendRow ({ friend, name, skipLink, onRightsChanged, startNewIMChat })
         <input
           key={`friend-${friend.id}-${key}-${rightName}`}
           type='checkbox'
-          className='m-1 rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
+          className='m-1 text-indigo-600 border-gray-300 rounded shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
           disabled={key === 'rightsHas'} // on the rights friend has given me
           checked={rightsMap[rightName]}
           title={titles[key][rightName]}
@@ -61,7 +61,6 @@ function FriendRow ({ friend, name, skipLink, onRightsChanged, startNewIMChat })
     >
       <div
         id={`online_status_${friend.id}`}
-        aria-label={friend.online ? 'online' : 'offline'}
         title={friend.online ? 'online' : 'offline'}
         className={`w-2 h-2 my-auto mr-1 border rounded-full ${friend.online
           ? 'bg-green-400 border-green-400'
