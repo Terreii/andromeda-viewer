@@ -41,7 +41,6 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
     }
   }
 
-  const avatarName = new AvatarName(avatar.name).getDisplayName()
   const passwordInputId = `passwordFor${avatar.avatarIdentifier}`
 
   return (
@@ -66,7 +65,6 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
           autoFocus
           ref={doAutoFocus}
           disabled={isLoggingIn}
-          aria-label={'password for ' + avatarName}
           onFocus={event => {
             const target = event.target
 

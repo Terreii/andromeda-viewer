@@ -142,19 +142,14 @@ it('shows the online state of friends', () => {
     }
   })
 
-  const { queryByTitle, queryByLabelText } = render(
+  const { queryByTitle } = render(
     <Provider store={store}>
       <FriendsList />
     </Provider>
   )
 
-  expect(queryByLabelText('online')).toBeTruthy()
   expect(queryByTitle('online')).toBeTruthy()
-  expect(queryByLabelText('online')).toBe(queryByTitle('online'))
-
-  expect(queryByLabelText('offline')).toBeTruthy()
   expect(queryByTitle('offline')).toBeTruthy()
-  expect(queryByLabelText('offline')).toBe(queryByTitle('offline'))
 })
 
 it('event handling/changing rights', () => {
