@@ -36,6 +36,12 @@ get(repositoryURL + 'indra/newview/llviewerregion.cpp')
 
 get(repositoryURL + 'scripts/messages/message_template.msg')
 
+  .then(file => file
+    .split('\n')
+    .map(line => line.toString().trimEnd())
+    .join('\n')
+  )
+
   .then(file => fs.promises.writeFile(
     path.resolve('tools', 'message_template.msg'),
     file
