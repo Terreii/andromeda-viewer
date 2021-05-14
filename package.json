@@ -44,7 +44,7 @@
   },
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=12.16.0"
+    "node": ">=14.16.0"
   },
   "bugs": {
     "url": "https://github.com/Terreii/andromeda-viewer/issues"
