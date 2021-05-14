@@ -47,10 +47,12 @@ async function * eventQueueGet (getState, fetchLLSD) {
       continue
     }
 
-    if (response.ok) {
+    if (response == null) {
+      return
+    } else if (response.ok) {
       const body = await response.llsd()
       ack = body.id
-      for (const event of body.events) {
+      for (const event of (body.events || [])) {
         if (selectAvatarIdentifier(getState()) === avatarIdentifier) {
           yield event
         } else {

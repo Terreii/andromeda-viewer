@@ -308,7 +308,7 @@ describe('avatars', () => {
       grid: 'Second Life'
     })
 
-    await new Promise(resolve => setTimeout(resolve, 10))
+    await new Promise(resolve => setTimeout(resolve, 15))
 
     expect(getDiff('A')).toEqual({
       account: {
