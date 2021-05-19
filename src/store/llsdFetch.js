@@ -4,9 +4,9 @@ const mimeTypes = [LLSD.MIMETYPE_XML, LLSD.MIMETYPE_JSON, LLSD.MIMETYPE_BINARY]
 
 /**
  * Fetch a resource over the proxy.
- * @param {function} getState Get the current state.
- * @param {string}   resource URL of the resource or a Request.
- * @param {object}   [init]   Optional options object
+ * @param {function}   getState Get the current state.
+ * @param {string|URL} resource URL of the resource or a Request.
+ * @param {object}     [init]   Optional options object
  */
 export function proxyFetch (getState, resource, init = {}) {
   if (resource instanceof window.Request) {
