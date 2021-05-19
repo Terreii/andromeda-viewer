@@ -1,8 +1,8 @@
 import { useCallback, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
 
 import { UUID as LLUUID } from '../llsd'
 import { addMissing, selectAvatarNameById } from '../bundles/names'
+import { useSelector, useDispatch } from '../hooks/store'
 
 export default function Name ({
   id,

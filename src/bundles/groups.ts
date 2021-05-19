@@ -7,6 +7,7 @@ import { logout, userWasKicked } from './session'
 
 import { getValueOf, mapBlockOf } from '../network/msgGetters'
 
+import { RootState } from '../store/configureStore'
 import { Group } from '../types/people'
 
 const groupSlice = createSlice({
@@ -125,7 +126,7 @@ export const { chatSessionStarted } = groupSlice.actions
  * Select all groups the user is part of.
  * @param {object} state Reducer State
  */
-export const selectGroups = (state: any): Group[] => state.groups
+export const selectGroups = (state: RootState): Group[] => state.groups
 
 export const selectGroupsIDs = createSelector(
   [

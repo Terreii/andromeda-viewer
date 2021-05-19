@@ -1,8 +1,8 @@
-import { useSelector } from 'react-redux'
 
 import { IMChatType } from '../types/chat'
 
 import { selectGroups } from '../bundles/groups'
+import { useSelector } from '../hooks/store'
 
 import chatBubble from '../icons/chat_bubble.svg'
 

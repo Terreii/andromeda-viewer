@@ -1,5 +1,6 @@
 import { useMemo, useCallback } from 'react'
-import { useSelector } from 'react-redux'
+
+import { useSelector } from './store'
 
 import { selectNames, selectAvatarNameById } from '../bundles/names'
 import { selectGroups } from '../bundles/groups'

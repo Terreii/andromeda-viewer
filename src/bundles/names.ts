@@ -25,6 +25,7 @@ import {
 } from './session'
 import { UUID as LLUUID } from '../llsd'
 
+import { RootState } from '../store/configureStore'
 import {
   LocalChatMessage,
   LocalChatSourceType,
@@ -218,13 +219,13 @@ export const {
   displayNamesLoaded
 } = nameSlice.actions
 
-export const selectNames = (state: any): { [key: string]: AvatarName } => state.names.names
+export const selectNames = (state: RootState): { [key: string]: AvatarName } => state.names.names
 
-export function selectAvatarNameById (state: any, id: string): AvatarName | undefined {
+export function selectAvatarNameById (state: RootState, id: string): AvatarName | undefined {
   return selectNames(state)[id]
 }
 
-export const selectDisplayNamesURL = (state: any): string => state.names.getDisplayNamesURL
+export const selectDisplayNamesURL = (state: RootState): string => state.names.getDisplayNamesURL
 
 export const selectOwnAvatarName = createSelector(
   [

@@ -1,10 +1,10 @@
 import { Fragment } from 'react'
-import { useDispatch } from 'react-redux'
 import { useDialogState, Dialog, DialogBackdrop } from 'reakit'
 
 import { closeErrorMessage } from '../../bundles/session'
 
 import { useAutoFocus } from '../../hooks/utils'
+import { useDispatch } from '../../hooks/store'
 
 import closeIcon from '../../icons/icon_close.svg'
 

@@ -1,7 +1,7 @@
-import { useDispatch } from 'react-redux'
-
 import { Container, ComponentArguments, ButtonsRow } from './utils'
 import Text from '../text'
+
+import { useDispatch } from '../../hooks/store'
 
 import { acceptGroupInvitation, declineGroupInvitation } from '../../actions/groupsActions'
 

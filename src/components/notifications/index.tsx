@@ -1,5 +1,4 @@
 import { memo } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
 
 import FriendOnlineNotification from './friendOnlineNotification'
 import FriendshipOffer from './friendshipOffer'
@@ -10,6 +9,8 @@ import RequestTeleportLure from './requestTeleportLure'
 import TeleportLure from './teleportLure'
 import InventoryOffer from './inventoryOffer'
 import TextNotification from './textNotification'
+
+import { useSelector, useDispatch } from '../../hooks/store'
 
 import { close, selectNotifications } from '../../bundles/notifications'
 

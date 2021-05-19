@@ -4,6 +4,7 @@ import { login, logout, userWasKicked, LoginAction } from './session'
 
 import { getValueOf, getStringValueOf } from '../network/msgGetters'
 
+import { RootState } from '../store/configureStore'
 import { Maturity, parseMaturity } from '../types/viewer'
 
 function getInitialState () {
@@ -32,7 +33,7 @@ function getInitialState () {
       useEstateSun: true,
       sunHour: 0
     },
-  
+
     sim: {
       name: '',
       ip: '',
@@ -125,10 +126,11 @@ const regionSlice = createSlice({
 
 export default regionSlice.reducer
 
-export const selectRegionId = (state: any): string => state.region.region.id
+export const selectRegionId = (state: RootState): string => state.region.region.id
 
-export const selectParentEstateID = (state: any): number => state.region.region.parentEstateID
+export const selectParentEstateID = (state: RootState): number => state.region.region.parentEstateID
 
-export const selectPosition = (state: any): number[] => state.region.position
+export const selectPosition = (state: RootState): number[] => state.region.position
 
-export const selectEventQueueGetUrl = (state: any): string => state.region.sim.eventQueueGetUrl
+export const selectEventQueueGetUrl = (state: RootState): string =>
+  state.region.sim.eventQueueGetUrl

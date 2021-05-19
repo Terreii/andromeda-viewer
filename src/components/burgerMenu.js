@@ -4,12 +4,12 @@ import {
   action as toggleMenu
 } from 'redux-burger-menu'
 import { NavLink } from 'react-router-dom'
-import { useSelector, useDispatch } from 'react-redux'
 import { useDialogState, DialogDisclosure } from 'reakit'
 
 import { selectIsSignedIn, selectUserName } from '../bundles/account'
 import { selectOwnAvatarName } from '../bundles/names'
 
+import { useSelector, useDispatch } from '../hooks/store'
 import { logout } from '../actions/sessionActions'
 import { signOut } from '../actions/viewerAccount'
 

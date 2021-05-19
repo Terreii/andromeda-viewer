@@ -3,7 +3,6 @@
  */
 
 import { useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
 import { useTabState, Tab, TabList, TabPanel } from 'reakit/Tab'
 
 import ChatDialog from './chatDialog'
@@ -18,6 +17,7 @@ import {
   startNewIMChat,
   getIMHistory
 } from '../actions/chatMessageActions'
+import { useSelector, useDispatch } from '../hooks/store'
 
 import { selectActiveIMChats } from '../bundles/imChat'
 import { selectShouldDisplayNotifications } from '../bundles/notifications'

@@ -1,5 +1,6 @@
 import { createSlice, createSelector, PayloadAction, Action } from '@reduxjs/toolkit'
 
+import { RootState } from '../store/configureStore'
 import { AvatarData, SavedAvatarData, Grid, HoodieObject } from '../types/viewer'
 
 // Reducer for viewer-account and state
@@ -143,19 +144,19 @@ export const {
 
 // Selectors
 
-export const selectIsSignedIn = (state: any): boolean => state.account.loggedIn
+export const selectIsSignedIn = (state: RootState) => state.account.loggedIn
 
-export const selectIsUnlocked = (state: any): boolean => state.account.unlocked
+export const selectIsUnlocked = (state: RootState) => state.account.unlocked
 
-export const selectUserName = (state: any): string => state.account.username
+export const selectUserName = (state: RootState) => state.account.username
 
-export const selectSavedAvatars = (state: any): SavedAvatarData[] => state.account.savedAvatars
+export const selectSavedAvatars = (state: RootState) => state.account.savedAvatars
 
-export const selectSavedAvatarsAreLoaded = (state: any): boolean => state.account.savedAvatarsLoaded
+export const selectSavedAvatarsAreLoaded = (state: RootState) => state.account.savedAvatarsLoaded
 
-export const selectAnonymAvatarData = (state: any): AvatarData => state.account.anonymAvatarData
+export const selectAnonymAvatarData = (state: RootState) => state.account.anonymAvatarData!
 
-export const selectSavedGrids = (state: any): Grid[] => state.account.savedGrids
+export const selectSavedGrids = (state: RootState) => state.account.savedGrids as Grid[]
 
 export const selectGridsByName = createSelector(
   selectSavedGrids,
@@ -168,7 +169,7 @@ export const selectGridsByName = createSelector(
   }
 )
 
-export const selectSavedGridsAreLoaded = (state: any): boolean => state.account.savedGridsLoaded
+export const selectSavedGridsAreLoaded = (state: RootState) => state.account.savedGridsLoaded
 
 export const selectShowUnlockDialog = createSelector(
   [
@@ -178,7 +179,7 @@ export const selectShowUnlockDialog = createSelector(
   (isSignedIn, isUnlocked) => !isUnlocked && isSignedIn
 )
 
-export const selectResetKeys = (state: any): string[] | null => state.account.resetKeys
+export const selectResetKeys = (state: RootState) => state.account.resetKeys
 
 // Helpers
 

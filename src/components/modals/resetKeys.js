@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useDispatch } from 'react-redux'
 import { useDialogState } from 'reakit'
 
 import Modal from './modal'
@@ -7,6 +6,7 @@ import Modal from './modal'
 import { viewerName } from '../../viewerInfo'
 import { closeResetKeys } from '../../bundles/account'
 
+import { useDispatch } from '../../hooks/store'
 import { useAutoFocus } from '../../hooks/utils'
 
 import keepItSecret from '../../icons/keepitsecret.png'

@@ -1,10 +1,10 @@
-import { useDispatch } from 'react-redux'
-
 import { Container, ComponentArguments, ButtonsRow } from './utils'
 import Name from '../name'
 import Text from '../text'
 
 import { acceptInventoryOffer, declineInventoryOffer } from '../../actions/inventory'
+
+import { useDispatch } from '../../hooks/store'
 
 import { InventoryOfferedNotification } from '../../types/chat'
 import { getItemTypeName } from '../../types/inventory'

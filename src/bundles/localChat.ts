@@ -7,6 +7,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { UUID as LLUUID } from '../llsd'
 import { login, logout, userWasKicked, LoginAction } from './session'
 
+import { RootState } from '../store/configureStore'
 import {
   LocalChatMessage,
   LocalChatAudible,
@@ -151,4 +152,4 @@ export const {
   savingFinished
 } = chatSlice.actions
 
-export const selectLocalChat = (state: any): LocalChatMessage[] => state.localChat
+export const selectLocalChat = (state: RootState): LocalChatMessage[] => state.localChat

@@ -1,4 +1,3 @@
-import { useSelector, useDispatch } from 'react-redux'
 
 import { IMChatType } from '../types/chat'
 
@@ -6,6 +5,7 @@ import { updateRights } from '../actions/friendsActions'
 import { selectFriends } from '../bundles/friends'
 import { selectNames } from '../bundles/names'
 import Name from './name'
+import { useSelector, useDispatch } from '../hooks/store'
 
 import chatBubble from '../icons/chat_bubble.svg'
 
