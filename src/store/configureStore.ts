@@ -7,6 +7,7 @@ import {
   Action,
   SerializableStateInvariantMiddlewareOptions
 } from '@reduxjs/toolkit'
+import type { CryptoStore } from 'hoodie-plugin-store-crypto'
 
 import rootReducer from '../bundles'
 import configureReactors from './configureReactors'
@@ -29,7 +30,7 @@ export interface LLSDResponse extends Response {
 }
 
 export interface ExtraArguments {
-  cryptoStore: any,
+  cryptoStore: CryptoStore,
   db: PouchDB.Database,
   remoteDB: PouchDB.Database | null,
   /**
