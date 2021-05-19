@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useSelector } from 'react-redux'
 
 import { selectSavedGrids } from '../../bundles/account'
 
+import { useSelector } from '../../hooks/store'
 import { useAutoFocus } from '../../hooks/utils'
 
 export default function NewAvatarLogin ({

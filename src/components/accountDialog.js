@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
 import { useDialogState, DialogDisclosure } from 'reakit'
 
 import { viewerName } from '../viewerInfo'
@@ -8,6 +7,7 @@ import { downloadAccountData, updateAccount, deleteAccount } from '../actions/vi
 
 import { selectUserName } from '../bundles/account'
 import Modal from './modals/modal'
+import { useSelector, useDispatch } from '../hooks/store'
 import { useFormInput, useAutoFocus } from '../hooks/utils'
 
 export default function AccountPanel () {

@@ -13,9 +13,9 @@ Components get connected to the state with the [`useSelector` from `react-redux`
 The state should get accessed with *selectors* using `useSelector`.
 
 ```javascript
-import { useSelector, useDispatch } from 'react-redux'
 import { selectLocalChat } from '../bundles/localChat'
 import { selectNames } from '../bundles/names'
+import { useSelector, useDispatch } from '../hooks/store'
 
 function ChatsBox (props) {
   const dispatch = useDispatch()

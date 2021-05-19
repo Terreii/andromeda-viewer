@@ -3,7 +3,7 @@
  */
 
 import React, { useEffect } from 'react'
-import { Provider, useSelector, useDispatch } from 'react-redux'
+import { Provider } from 'react-redux'
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
 
 import { viewerName } from './viewerInfo'
@@ -14,6 +14,7 @@ import GlobalModals from './components/modals/globalModals'
 import TopMenuBar from './components/topBar'
 import AccountDialog from './components/accountDialog'
 
+import { useSelector, useDispatch } from './hooks/store'
 import { isSignedIn as getIsSignedIn } from './actions/viewerAccount'
 
 import { selectIsSignedIn } from './bundles/account'

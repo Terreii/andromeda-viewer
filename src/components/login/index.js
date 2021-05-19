@@ -1,10 +1,10 @@
 import { useState, useEffect, Fragment } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 
 import { selectSavedAvatars, selectGridsByName } from '../../bundles/account'
 
 import { login } from '../../actions/sessionActions'
+import { useSelector, useDispatch } from '../../hooks/store'
 
 import LoginNewAvatar from './newAvatarLogin'
 import AvatarLogin from './avatarLogin'

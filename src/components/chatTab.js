@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from 'react'
-import { useSelector } from 'react-redux'
 import { Tab } from 'reakit/Tab'
 
 import { selectAvatarNameById } from '../bundles/names'
+import { useSelector } from '../hooks/store'
 
 import { IMChatType } from '../types/chat'
 

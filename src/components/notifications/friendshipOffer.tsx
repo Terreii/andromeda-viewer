@@ -1,8 +1,8 @@
-import { useDispatch } from 'react-redux'
-
 import { Container, ComponentArguments, ButtonsRow } from './utils'
 import Name from '../name'
 import Text from '../text'
+
+import { useDispatch } from '../../hooks/store'
 
 import { acceptFriendshipOffer, declineFriendshipOffer } from '../../actions/friendsActions'
 

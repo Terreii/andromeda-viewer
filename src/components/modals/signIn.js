@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
-import { useDispatch } from 'react-redux'
 
 import Modal from './modal'
 
 import { signIn, signUp } from '../../actions/viewerAccount'
 
+import { useDispatch } from '../../hooks/store'
 import { useFormInput } from '../../hooks/utils'
 
 export default function SignInPopup ({ isSignUp, dialog }) {

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
 import { useDialogState, DialogDisclosure } from 'reakit'
 
 import Modal from './modal'
@@ -8,6 +7,7 @@ import ResetPasswordDialog from './resetPasswordDialog'
 import { signOut, unlock } from '../../actions/viewerAccount'
 import { selectUserName } from '../../bundles/account'
 
+import { useSelector, useDispatch } from '../../hooks/store'
 import { useAutoFocus } from '../../hooks/utils'
 
 import lockIcon from '../../icons/black_lock.svg'

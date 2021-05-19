@@ -3,12 +3,12 @@
  */
 
 import { useState, useEffect, useMemo } from 'react'
-import { useSelector } from 'react-redux'
 
 import ChatMessagesList from './chatMessagesList'
 
 import { selectChatMessages } from '../bundles/imChat'
 import { selectLocalChat } from '../bundles/localChat'
+import { useSelector } from '../hooks/store'
 
 /**
  * Display a chat.

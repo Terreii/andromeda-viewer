@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
-import { useDispatch } from 'react-redux'
 
 import Modal from './modal'
 
 import { signOut, changeEncryptionPassword } from '../../actions/viewerAccount'
 
+import { useDispatch } from '../../hooks/store'
 import { useAutoFocus } from '../../hooks/utils'
 
 export default function ResetPasswordDialog ({ type, dialog }) {
