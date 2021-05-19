@@ -15,6 +15,7 @@ import { createLocalDB, createCryptoStore, createRemoteDB } from './db'
 import { proxyFetch, fetchLLSD } from './llsdFetch'
 
 import AvatarName from '../avatarName'
+import type Circuit from '../network/circuit'
 
 export type RootState = ReturnType<typeof rootReducer>
 export type AppDispatch = ThunkDispatch<RootState, ExtraArguments, Action<string>>
@@ -52,7 +53,7 @@ export interface ExtraArguments {
   /**
    * null if no avatar is logged in.
    */
-  circuit: any | null
+  circuit: Circuit | null
 }
 
 export interface CreateDatabasesArgs {
