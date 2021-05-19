@@ -5,6 +5,7 @@ import { createSlice, createSelector, PayloadAction, Action } from '@reduxjs/too
 import { selectIsSignedIn, selectSavedAvatars, selectAnonymAvatarData } from './account'
 import AvatarName from '../avatarName'
 
+import { RootState } from '../store/configureStore'
 import { LocalChatMessage } from '../types/chat'
 import { Grid, Maturity, MaturityString, parseMaturity } from '../types/viewer'
 
@@ -90,10 +91,10 @@ export const {
 
 // Selectors
 
-export const selectAndromedaSessionId = (state: any): string | null =>
+export const selectAndromedaSessionId = (state: RootState): string | null =>
   state.session.andromedaSessionId
 
-export const selectAvatarIdentifier = (state: any): string => state.session.avatarIdentifier
+export const selectAvatarIdentifier = (state: RootState): string => state.session.avatarIdentifier!
 
 export const selectCurrentAvatarData = createSelector(
   [
@@ -113,11 +114,11 @@ export const selectAvatarDataSaveId = createSelector(
   avatarData => avatarData != null ? avatarData.dataSaveId : null
 )
 
-export const selectErrorMessage = (state: any): string | null => state.session.error
+export const selectErrorMessage = (state: RootState): string | null => state.session.error
 
-export const selectAgentId = (state: any): string => state.session.agentId
+export const selectAgentId = (state: RootState): string => state.session.agentId!
 
-export const selectSessionId = (state: any): string => state.session.sessionId
+export const selectSessionId = (state: RootState): string => state.session.sessionId!
 
 export const selectIsLoggedIn = createSelector(
   [
@@ -127,9 +128,9 @@ export const selectIsLoggedIn = createSelector(
   (avatarIdentifier, sessionId) => avatarIdentifier != null && sessionId != null
 )
 
-export const selectShouldSync = (state: any): boolean => state.session.sync
+export const selectShouldSync = (state: RootState): boolean => state.session.sync
 
-export const selectActiveTab = (state: any): string => state.session.activeChatTab
+export const selectActiveTab = (state: RootState): string => state.session.activeChatTab
 
 // checks if the chat history should be saved and synced
 export const selectShouldSaveChat = createSelector(

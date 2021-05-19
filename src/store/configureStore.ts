@@ -15,8 +15,8 @@ import { proxyFetch, fetchLLSD } from './llsdFetch'
 
 import AvatarName from '../avatarName'
 
-export type AppDispatch = ThunkDispatch<RootState, ExtraArguments, Action<string>>
 export type RootState = ReturnType<typeof rootReducer>
+export type AppDispatch = ThunkDispatch<RootState, ExtraArguments, Action<string>>
 export type AppThunk<ReturnType = void> = ThunkAction<
   ReturnType,
   RootState,

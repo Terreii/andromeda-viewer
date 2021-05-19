@@ -80,11 +80,7 @@ export async function createTestStore ({ localDB, remoteDB, state = AppState.Log
   state?: AppState
 }) {
   let isSetup = true // when the the create Databases callback is called the first time
-  const extraArgument = createExtraArgument(({ local, remote }: {
-    local?: boolean,
-    remote?: string,
-    skipSetup?: boolean
-  }) => {
+  const extraArgument = createExtraArgument(({ local, remote }) => {
     const result: { local: PouchDB.Database | null, remote: PouchDB.Database | null } = {
       local: null,
       remote: null

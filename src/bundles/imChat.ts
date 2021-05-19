@@ -7,6 +7,7 @@ import { createSlice, createSelector, PayloadAction } from '@reduxjs/toolkit'
 import { chatSessionStarted } from './groups'
 import { logout, userWasKicked } from './session'
 
+import { RootState } from '../store/configureStore'
 import { IMChatType, IMChat, InstantMessage } from '../types/chat'
 
 const imSlice = createSlice({
@@ -236,7 +237,7 @@ export const {
 
 // Selectors
 
-export const selectIMChats = (state: any): { [key: string]: IMChat } => state.IMs.chats
+export const selectIMChats = (state: RootState): { [key: string]: IMChat } => state.IMs.chats
 
 export const selectActiveIMChats = createSelector(
   [
@@ -245,7 +246,7 @@ export const selectActiveIMChats = createSelector(
   chats => Object.values(chats).filter(chat => chat.active)
 )
 
-export const selectChatMessages = (state: any, id: string): InstantMessage[] | undefined => {
+export const selectChatMessages = (state: RootState, id: string): InstantMessage[] | undefined => {
   return state.IMs.messages[id]
 }
 

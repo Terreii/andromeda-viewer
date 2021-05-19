@@ -3,6 +3,7 @@ import { createSlice, createSelector, PayloadAction } from '@reduxjs/toolkit'
 import { onlineStateChanged, FriendOnlineStateAction } from './friends'
 import { logout, userWasKicked, selectActiveTab } from './session'
 
+import { RootState } from '../store/configureStore'
 import { Notification, NotificationTypes } from '../types/chat'
 
 const notificationSlice = createSlice({
@@ -59,7 +60,7 @@ export default notificationSlice.reducer
 
 export const { receive, close } = notificationSlice.actions
 
-export const selectNotifications = (state: any): Notification[] => state.notifications.active
+export const selectNotifications = (state: RootState): Notification[] => state.notifications.active
 
 export const selectShouldDisplayNotifications = createSelector(
   [

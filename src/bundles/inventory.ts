@@ -4,6 +4,7 @@ import { createReducer, PayloadAction } from '@reduxjs/toolkit'
 
 import { login, logout, userWasKicked, LoginAction } from './session'
 
+import { RootState } from '../store/configureStore'
 import { Folder, AssetType, FolderType } from '../types/inventory'
 
 export default createReducer({
@@ -56,18 +57,19 @@ export default createReducer({
   }
 })
 
-export const selectFolders = (state: any): { [key: string]: Folder } => state.inventory.folders
+export const selectFolders = (state: RootState): { [key: string]: Folder } =>
+  state.inventory.folders
 
-export const selectFolderById = (state: any, id: string) => selectFolders(state)[id]
+export const selectFolderById = (state: RootState, id: string) => selectFolders(state)[id]
 
-export const selectInventoryRootId = (state: any): string => state.inventory.root
+export const selectInventoryRootId = (state: RootState): string => state.inventory.root!
 
-export const selectInventoryRoot = (state: any) => selectFolderById(
+export const selectInventoryRoot = (state: RootState) => selectFolderById(
   state,
   selectInventoryRootId(state)
 )
 
-export const selectFolderForAssetType = (state: any, type: AssetType) => {
+export const selectFolderForAssetType = (state: RootState, type: AssetType) => {
   const rootFolder = selectInventoryRoot(state)
 
   // Folders are loaded on login and removed on logout.

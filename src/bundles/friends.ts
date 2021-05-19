@@ -8,6 +8,7 @@ import { login, logout, userWasKicked, LoginAction } from './session'
 
 import { getValueOf, mapBlockOf } from '../network/msgGetters'
 
+import { RootState } from '../store/configureStore'
 import { Friend } from '../types/people'
 
 export type FriendOnlineStateAction = PayloadAction<{
@@ -77,11 +78,11 @@ const friendsSlice = createSlice({
     [login.type] (state, action: PayloadAction<LoginAction>) {
       // If a avatar has no buddies, then the buddy-list doesn't exist!
       if (!Array.isArray(action.payload.sessionInfo['buddy-list'])) return state
-  
+
       return action.payload.sessionInfo['buddy-list'].map(friend => {
         const rightsGiven = friend.buddy_rights_given // from me to friend
         const rightsHas = friend.buddy_rights_has // Friend has given me rights
-  
+
         return {
           id: friend.buddy_id,
           online: false,
@@ -101,9 +102,9 @@ export default friendsSlice.reducer
 export const { changeRights, onlineStateChanged } = friendsSlice.actions
 
 // selectors
-export const selectFriends = (state: any): Friend[] => state.friends
+export const selectFriends = (state: RootState): Friend[] => state.friends
 
-export const selectFriendById = (state: any, id: string) => selectFriends(state)
+export const selectFriendById = (state: RootState, id: string) => selectFriends(state)
   .find(friend => friend.id === id)
 
 // Helpers
