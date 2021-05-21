@@ -3,6 +3,7 @@
  */
 
 import { createSlice, createSelector, PayloadAction } from '@reduxjs/toolkit'
+import { NIL } from 'uuid'
 
 import AvatarName from '../avatarName'
 import { mapBlockOf } from '../network/msgGetters'
@@ -23,7 +24,6 @@ import {
   userWasKicked,
   LoginAction
 } from './session'
-import { UUID as LLUUID } from '../llsd'
 
 import { RootState } from '../store/configureStore'
 import {
@@ -47,7 +47,7 @@ const nameSlice = createSlice({
 
   reducers: {
     addMissing (state, action: PayloadAction<{ id: string, fallback?: string }>) {
-      if (!(action.payload.id in state.names) && action.payload.id !== LLUUID.nil) {
+      if (!(action.payload.id in state.names) && action.payload.id !== NIL) {
         state.names[action.payload.id] = action.payload.fallback == null
           ? new AvatarName({ id: action.payload.id })
           : new AvatarName(action.payload.fallback)
@@ -104,7 +104,7 @@ const nameSlice = createSlice({
       state.names[action.payload.uuid] = action.payload.name
 
       for (const msg of action.payload.localChatHistory) {
-        if (String(msg.sourceType) === 'agent' && msg.fromId !== LLUUID.nil) {
+        if (String(msg.sourceType) === 'agent' && msg.fromId !== NIL) {
           addName(state.names, msg.fromId, msg.fromName)
         }
       }
@@ -118,7 +118,7 @@ const nameSlice = createSlice({
       if (
         !(action.payload.fromId in state.names) &&
         action.payload.sourceType === LocalChatSourceType.Agent &&
-        action.payload.fromId !== LLUUID.nil
+        action.payload.fromId !== NIL
       ) {
         addName(state.names, action.payload.fromId, action.payload.fromName)
       }
@@ -129,10 +129,7 @@ const nameSlice = createSlice({
       action: PayloadAction<{ chatType: IMChatType, session: string, msg: InstantMessage }>
     ) {
       const msg = action.payload.msg
-      if (
-        !(action.payload.msg.fromId in state.names) &&
-        action.payload.msg.fromId !== LLUUID.nil
-      ) {
+      if (!(action.payload.msg.fromId in state.names) && action.payload.msg.fromId !== NIL) {
         addName(state.names, msg.fromId, msg.fromName)
       }
     },
@@ -165,7 +162,7 @@ const nameSlice = createSlice({
       action: PayloadAction<{ sessionId: string, messages: InstantMessage[], didLoadAll: boolean }>
     ) {
       for (const msg of action.payload.messages) {
-        if (msg.fromId in state.names || msg.fromId === LLUUID.nil) continue
+        if (msg.fromId in state.names || msg.fromId === NIL) continue
 
         state.names[msg.fromId] = new AvatarName(msg.fromName)
       }
@@ -240,7 +237,7 @@ export const selectOwnAvatarName = createSelector(
 
 // Only adds a Name to names if it is new or did change
 function addName (names: { [key: string]: AvatarName }, uuid: string, name: string) {
-  if (uuid === LLUUID.nil) return
+  if (uuid === NIL) return
 
   const updated = new AvatarName(name)
   if (!(uuid in names) || !names[uuid].compare(updated)) {
