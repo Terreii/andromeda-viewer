@@ -1,6 +1,6 @@
 // All group related actions
 import { chatSessionStarted } from '../bundles/groups'
-import { selectOwnAvatarName } from '../bundles/names'
+import { selectOwnAvatarName, getFullNameString } from '../bundles/names'
 import { selectPosition } from '../bundles/region'
 import { selectAgentId, selectSessionId, selectAvatarDataSaveId } from '../bundles/session'
 
@@ -17,7 +17,7 @@ export function startGroupChat (groups) {
       }
     ]
     const position = selectPosition(activeState)
-    const agentName = selectOwnAvatarName(activeState).getFullName()
+    const agentName = getFullNameString(selectOwnAvatarName(activeState))
     const time = new Date()
 
     groups.forEach(group => {
@@ -57,7 +57,7 @@ export function acceptGroupInvitation (transactionId, groupId) {
           Dialog: IMDialog.GroupInvitationAccept,
           ID: transactionId,
           Timestamp: Math.floor(Date.now() / 1000),
-          FromAgentName: selectOwnAvatarName(activeState).getFullName()
+          FromAgentName: getFullNameString(selectOwnAvatarName(activeState))
         }
       ]
     }, true)
@@ -81,7 +81,7 @@ export function declineGroupInvitation (transactionId, groupId) {
           Dialog: IMDialog.GroupInvitationDecline,
           ID: transactionId,
           Timestamp: Math.floor(Date.now() / 1000),
-          FromAgentName: selectOwnAvatarName(activeState).getFullName()
+          FromAgentName: getFullNameString(selectOwnAvatarName(activeState))
         }
       ]
     }, true)

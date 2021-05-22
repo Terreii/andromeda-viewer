@@ -18,7 +18,7 @@ import { useSelector, useDispatch } from './hooks/store'
 import { isSignedIn as getIsSignedIn } from './actions/viewerAccount'
 
 import { selectIsSignedIn } from './bundles/account'
-import { selectOwnAvatarName } from './bundles/names'
+import { selectOwnAvatarName, getNameString } from './bundles/names'
 import { selectIsLoggedIn } from './bundles/session'
 
 export default function Root ({ store }) {
@@ -79,7 +79,7 @@ function useDocumentTitle () {
   useEffect(() => {
     const viewerNameCapital = viewerName.charAt(0).toUpperCase() + viewerName.slice(1)
     document.title = isLoggedIn
-      ? `${selfName.getName()} - ${viewerNameCapital}`
+      ? `${getNameString(selfName)} - ${viewerNameCapital}`
       : viewerNameCapital
   }, [isLoggedIn, selfName])
 }

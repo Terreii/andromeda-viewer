@@ -30,7 +30,18 @@ it('renders without crashing', () => {
     localChat: [],
     names: {
       names: {
-        first: new AvatarName('Testery MacTestface')
+        ids: ['e0f1adac-d250-4d71-b4e4-10e0ee855d0e'],
+        entities: {
+          'e0f1adac-d250-4d71-b4e4-10e0ee855d0e': {
+            id: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+            firstName: 'Tester',
+            lastName: 'MacTestface',
+            displayName: '',
+            isDisplayNameDefault: false,
+            didLoadDisplayName: false,
+            isLoadingDisplayName: false
+          }
+        }
       }
     }
   })
@@ -75,8 +86,30 @@ describe('local chat', () => {
       ],
       names: {
         names: {
-          first: new AvatarName('Testery MacTestface'),
-          second: new AvatarName('Happy User')
+          ids: [
+            'first',
+            'second'
+          ],
+          entities: {
+            first: {
+              id: 'first',
+              firstName: 'Tester',
+              lastName: 'MacTestface',
+              displayName: '',
+              isDisplayNameDefault: false,
+              didLoadDisplayName: false,
+              isLoadingDisplayName: false
+            },
+            second: {
+              id: 'second',
+              firstName: 'Happy',
+              lastName: 'User',
+              displayName: '',
+              isDisplayNameDefault: false,
+              didLoadDisplayName: false,
+              isLoadingDisplayName: false
+            }
+          }
         }
       }
     })
@@ -131,7 +164,20 @@ describe('local chat', () => {
       localChat: [],
       names: {
         names: {
-          first: new AvatarName('Testery MacTestface')
+          ids: [
+            'first'
+          ],
+          entities: {
+            first: {
+              id: 'first',
+              firstName: 'Tester',
+              lastName: 'MacTestface',
+              displayName: '',
+              isDisplayNameDefault: false,
+              didLoadDisplayName: false,
+              isLoadingDisplayName: false
+            }
+          }
         }
       }
     })
@@ -182,8 +228,30 @@ describe('IM chat', () => {
       ],
       names: {
         names: {
-          first: new AvatarName('Testery MacTestface'),
-          second: new AvatarName('Happy User')
+          ids: [
+            'first',
+            'second'
+          ],
+          entities: {
+            first: {
+              id: 'first',
+              firstName: 'Tester',
+              lastName: 'MacTestface',
+              displayName: '',
+              isDisplayNameDefault: false,
+              didLoadDisplayName: false,
+              isLoadingDisplayName: false
+            },
+            second: {
+              id: 'second',
+              firstName: 'Happy',
+              lastName: 'User',
+              displayName: '',
+              isDisplayNameDefault: false,
+              didLoadDisplayName: false,
+              isLoadingDisplayName: false
+            }
+          }
         }
       }
     })
@@ -256,7 +324,18 @@ describe('IM chat', () => {
       localChat: [],
       names: {
         names: {
-          first: new AvatarName('Testery MacTestface')
+          ids: ['first'],
+          entities: {
+            first: {
+              id: 'first',
+              firstName: 'Tester',
+              lastName: 'MacTestface',
+              displayName: '',
+              isDisplayNameDefault: false,
+              didLoadDisplayName: false,
+              isLoadingDisplayName: false
+            }
+          }
         }
       }
     })

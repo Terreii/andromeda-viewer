@@ -5,7 +5,6 @@ import { render } from 'reakit-test-utils'
 
 import BurgerMenu from './burgerMenu'
 
-import AvatarName from '../avatarName'
 import configureStore from '../store/configureStore'
 
 it('renders without crashing', () => {
@@ -54,7 +53,18 @@ describe('buttons', () => {
         store={configureStore({
           names: {
             names: {
-              abc: new AvatarName('Tester')
+              ids: ['abc'],
+              entities: {
+                abc: {
+                  id: 'abc',
+                  firstName: 'Tester',
+                  lastName: 'MacTestface',
+                  displayName: '',
+                  isDisplayNameDefault: false,
+                  didLoadDisplayName: false,
+                  isLoadingDisplayName: false
+                }
+              }
             }
           },
           session: {
@@ -134,7 +144,18 @@ describe('buttons', () => {
           },
           names: {
             names: {
-              abc: new AvatarName('Tester')
+              ids: ['abc'],
+              entities: {
+                abc: {
+                  id: 'abc',
+                  firstName: 'Tester',
+                  lastName: 'MacTestface',
+                  displayName: '',
+                  isDisplayNameDefault: false,
+                  didLoadDisplayName: false,
+                  isLoadingDisplayName: false
+                }
+              }
             }
           },
           session: {

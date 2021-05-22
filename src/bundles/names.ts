@@ -412,6 +412,10 @@ export function getNameString (name: AvatarName): string {
   return `${name.firstName} ${name.lastName}`
 }
 
+export function getFullNameString (name: AvatarName): string {
+  return name.firstName + ' ' + name.lastName
+}
+
 export function getDisplayName (name: AvatarName): string {
   if (!name.firstName && !name.lastName) {
     return name.id

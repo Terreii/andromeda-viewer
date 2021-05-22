@@ -5,7 +5,6 @@ import thunk from 'redux-thunk'
 import { render, fireEvent } from '@testing-library/react'
 
 import FriendsList from './friendsList'
-import AvatarName from '../avatarName'
 
 import { updateRights } from '../actions/friendsActions'
 
@@ -29,7 +28,18 @@ it('renders without crashing', () => {
     ],
     names: {
       names: {
-        first: new AvatarName('Testery MacTestface')
+        ids: ['first'],
+        entities: {
+          first: {
+            id: 'first',
+            firstName: 'Tester',
+            lastName: 'MacTestface',
+            displayName: '',
+            isDisplayNameDefault: false,
+            didLoadDisplayName: false,
+            isLoadingDisplayName: false
+          }
+        }
       }
     }
   })
@@ -77,8 +87,27 @@ it('rendering', () => {
     ],
     names: {
       names: {
-        first: new AvatarName('Testery MacTestface'),
-        other: new AvatarName('Buddy Budds')
+        ids: ['first', 'other'],
+        entities: {
+          first: {
+            id: 'first',
+            firstName: 'Tester',
+            lastName: 'MacTestface',
+            displayName: '',
+            isDisplayNameDefault: false,
+            didLoadDisplayName: false,
+            isLoadingDisplayName: false
+          },
+          other: {
+            id: 'other',
+            firstName: 'Buddy',
+            lastName: 'Budds',
+            displayName: '',
+            isDisplayNameDefault: false,
+            didLoadDisplayName: false,
+            isLoadingDisplayName: false
+          }
+        }
       }
     }
   })
@@ -89,7 +118,7 @@ it('rendering', () => {
     </Provider>
   )
 
-  const first = queryByText('Testery Mactestface', { selector: '[aria-hidden="true"]' })
+  const first = queryByText('Tester MacTestface', { selector: '[aria-hidden="true"]' })
   expect(first).toBeTruthy()
   expect(first.parentElement.parentElement.nodeName).toBe('LI')
 
@@ -136,8 +165,27 @@ it('shows the online state of friends', () => {
     ],
     names: {
       names: {
-        first: new AvatarName('Testery MacTestface'),
-        other: new AvatarName('Buddy Budds')
+        ids: ['first', 'other'],
+        entities: {
+          first: {
+            id: 'first',
+            firstName: 'Tester',
+            lastName: 'MacTestface',
+            displayName: '',
+            isDisplayNameDefault: false,
+            didLoadDisplayName: false,
+            isLoadingDisplayName: false
+          },
+          other: {
+            id: 'other',
+            firstName: 'Buddy',
+            lastName: 'Budds',
+            displayName: '',
+            isDisplayNameDefault: false,
+            didLoadDisplayName: false,
+            isLoadingDisplayName: false
+          }
+        }
       }
     }
   })
@@ -174,7 +222,18 @@ it('event handling/changing rights', () => {
     ],
     names: {
       names: {
-        first: new AvatarName('Testery MacTestface')
+        ids: ['first'],
+        entities: {
+          first: {
+            id: 'first',
+            firstName: 'Tester',
+            lastName: 'MacTestface',
+            displayName: '',
+            isDisplayNameDefault: false,
+            didLoadDisplayName: false,
+            isLoadingDisplayName: false
+          }
+        }
       }
     }
   })
@@ -248,7 +307,18 @@ it('should handle creating a new chat', () => {
     ],
     names: {
       names: {
-        first: new AvatarName('Testery MacTestface')
+        ids: ['first'],
+        entities: {
+          first: {
+            id: 'first',
+            firstName: 'Tester',
+            lastName: 'MacTestface',
+            displayName: '',
+            isDisplayNameDefault: false,
+            didLoadDisplayName: false,
+            isLoadingDisplayName: false
+          }
+        }
       }
     }
   })
@@ -261,7 +331,7 @@ it('should handle creating a new chat', () => {
     </Provider>
   )
 
-  const newChatButton = queryByAltText('Start new chat with Testery Mactestface')
+  const newChatButton = queryByAltText('Start new chat with Tester MacTestface')
   expect(newChatButton).toBeTruthy()
   expect(newChatButton.nodeName).toBe('IMG')
   expect(newChatButton.parentElement).toBeTruthy()
@@ -269,7 +339,7 @@ it('should handle creating a new chat', () => {
 
   fireEvent.click(newChatButton)
 
-  expect(startNewIMChat).lastCalledWith(IMChatType.personal, 'first', 'Testery Mactestface')
+  expect(startNewIMChat).lastCalledWith(IMChatType.personal, 'first', 'Tester MacTestface')
 })
 
 it('should pass aXe', async () => {
@@ -284,7 +354,18 @@ it('should pass aXe', async () => {
     ],
     names: {
       names: {
-        first: new AvatarName('Testery MacTestface')
+        ids: ['first'],
+        entities: {
+          first: {
+            id: 'first',
+            firstName: 'Tester',
+            lastName: 'MacTestface',
+            displayName: '',
+            isDisplayNameDefault: false,
+            didLoadDisplayName: false,
+            isLoadingDisplayName: false
+          }
+        }
       }
     }
   })

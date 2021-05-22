@@ -6,7 +6,8 @@ import {
   selectNames,
   selectDisplayNamesURL,
   selectOwnAvatarName,
-  selectAvatarNameById
+  selectAvatarNameById,
+  getFullNameString
 } from '../bundles/names'
 import { selectAgentId, selectSessionId } from '../bundles/session'
 
@@ -257,7 +258,7 @@ export function declineTeleportLure (targetId, lureId) {
       ],
       MessageBlock: [
         {
-          FromAgentName: selectOwnAvatarName(activeState).getFullName(),
+          FromAgentName: getFullNameString(selectOwnAvatarName(activeState)),
           ToAgentID: targetId,
           ID: lureId,
           Dialog: IMDialog.DenyTeleport

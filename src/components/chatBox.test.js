@@ -5,7 +5,6 @@ import thunk from 'redux-thunk'
 import { render } from '@testing-library/react'
 
 import ChatBox from './chatBox'
-import AvatarName from '../avatarName'
 
 function configureStore (state = {}) {
   const store = configureMockStore([thunk])
@@ -49,7 +48,18 @@ it('renders without crashing', () => {
     localChat: [],
     names: {
       names: {
-        first: new AvatarName('Testery MacTestface')
+        ids: ['first'],
+        entities: {
+          first: {
+            id: 'first',
+            firstName: 'Tester',
+            lastName: 'MacTestface',
+            displayName: '',
+            isDisplayNameDefault: false,
+            didLoadDisplayName: false,
+            isLoadingDisplayName: false
+          }
+        }
       }
     },
     notifications: { active: [] },
@@ -58,10 +68,7 @@ it('renders without crashing', () => {
 
   const { container } = render(
     <Provider store={store}>
-      <ChatBox
-        selfName={new AvatarName('self Resident')}
-        sendLocalChatMessage={() => {}}
-      />
+      <ChatBox />
     </Provider>
   )
 
@@ -105,7 +112,18 @@ it('should pass aXe', async () => {
     localChat: [],
     names: {
       names: {
-        first: new AvatarName('Testery MacTestface')
+        ids: ['first'],
+        entities: {
+          first: {
+            id: 'first',
+            firstName: 'Tester',
+            lastName: 'MacTestface',
+            displayName: '',
+            isDisplayNameDefault: false,
+            didLoadDisplayName: false,
+            isLoadingDisplayName: false
+          }
+        }
       }
     },
     notifications: { active: [] },
@@ -114,10 +132,7 @@ it('should pass aXe', async () => {
 
   const { container } = render(
     <Provider store={store}>
-      <ChatBox
-        selfName={new AvatarName('self Resident')}
-        sendLocalChatMessage={() => {}}
-      />
+      <ChatBox />
     </Provider>
   )
 
