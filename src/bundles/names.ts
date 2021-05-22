@@ -342,9 +342,11 @@ export const selectNames = selectors.selectEntities
 
 export const selectAvatarNameById = selectors.selectById
 
-export const selectAvatarDisplayName = (state: RootState, id: string): string | undefined => {
+export const selectAvatarDisplayName = (state: RootState, id: string): string => {
   const name = selectAvatarNameById(state, id)
-  if (!name) return
+  if (!name) {
+    return id
+  }
 
   return getDisplayName(name)
 }
@@ -405,12 +407,16 @@ export function getNameString (name: AvatarName): string {
     name.lastName === 'Resident' ||
     name.lastName.toLowerCase() === 'resident'
   ) {
-    return name.firstName
+    return name.firstName || name.id
   }
   return `${name.firstName} ${name.lastName}`
 }
 
 export function getDisplayName (name: AvatarName): string {
+  if (!name.firstName && !name.lastName) {
+    return name.id
+  }
+
   const nameString = getNameString(name)
   if (name.isDisplayNameDefault && name.displayName.length > 0) {
     return `${name.displayName} (${nameString})`
