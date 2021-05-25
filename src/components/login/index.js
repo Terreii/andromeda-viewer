@@ -2,6 +2,7 @@ import { useState, useEffect, Fragment } from 'react'
 import { useHistory } from 'react-router-dom'
 
 import { selectSavedAvatars, selectGridsByName } from '../../bundles/account'
+import { parseNameString } from '../../bundles/names'
 
 import { login } from '../../actions/sessionActions'
 import { useSelector, useDispatch } from '../../hooks/store'
@@ -9,7 +10,6 @@ import { useSelector, useDispatch } from '../../hooks/store'
 import LoginNewAvatar from './newAvatarLogin'
 import AvatarLogin from './avatarLogin'
 import SignIn from './signIn'
-import AvatarName from '../../avatarName'
 
 export default function LoginForm ({ isSignedIn }) {
   const dispatch = useDispatch()
@@ -99,7 +99,7 @@ export default function LoginForm ({ isSignedIn }) {
         return
       }
 
-      const avatarName = new AvatarName(name)
+      const avatarName = parseNameString(name)
       setIsLoggingIn(name)
 
       await dispatch(login(avatarName, password, grid, save, isNew))

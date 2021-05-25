@@ -5,7 +5,6 @@ import thunk from 'redux-thunk'
 import { render, fireEvent } from '@testing-library/react'
 
 import ChatDialog from './chatDialog'
-import AvatarName from '../avatarName'
 
 function configureStore (state = {}) {
   const store = configureMockStore([thunk])

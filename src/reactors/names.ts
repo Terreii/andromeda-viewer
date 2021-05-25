@@ -2,13 +2,13 @@ import { createSelector } from 'reselect'
 
 import { getDisplayName } from '../actions/friendsActions'
 
-import { selectNames } from '../bundles/names'
+import { selectIdOfNamesToLoad } from '../bundles/names'
 
 export const loadNames = createSelector(
   [
-    selectNames
+    selectIdOfNamesToLoad
   ],
-  names => Object.values(names).some(name => !name.willHaveDisplayName())
+  namesToLoad => namesToLoad.length > 0
     ? getDisplayName()
     : null
 )

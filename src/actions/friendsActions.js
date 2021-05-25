@@ -4,6 +4,7 @@ import {
   displayNamesStartLoading,
   displayNamesLoaded,
   selectNames,
+  selectIdOfNamesToLoad,
   selectDisplayNamesURL,
   selectOwnAvatarName,
   selectAvatarNameById,
@@ -82,12 +83,10 @@ export function doHandleFriendOnlineStateChange (msg) {
 
 export function getDisplayName () {
   return (dispatch, getState) => {
-    const names = selectNames(getState())
+    const namesToLoad = selectIdOfNamesToLoad(getState())
 
-    const toLoad = Object.keys(names).filter(id => !names[id].willHaveDisplayName())
-
-    if (toLoad.length > 0) {
-      dispatch(loadDisplayNames(toLoad))
+    if (namesToLoad.length > 0) {
+      dispatch(loadDisplayNames(namesToLoad))
     }
   }
 }

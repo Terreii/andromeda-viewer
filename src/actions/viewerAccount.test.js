@@ -10,7 +10,7 @@ import {
   isSignedIn
 } from './viewerAccount'
 
-import AvatarName from '../avatarName'
+import { parseNameString } from '../bundles/names'
 
 let localDB
 let remoteDB
@@ -291,7 +291,7 @@ describe('avatars', () => {
 
     const avatarIdentifier = v4()
     const result = await store.dispatch(saveAvatar(
-      new AvatarName('Tester'),
+      parseNameString('Tester'),
       avatarIdentifier,
       'Second Life'
     ))

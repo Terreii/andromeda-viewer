@@ -1061,6 +1061,13 @@ describe('save, loading and sending IMs', () => {
     expect(store.getActions()).toEqual([
       // Personal
       {
+        type: 'names/addMissing',
+        payload: {
+          id: 'f2373437-a2ef-4435-82b9-68d283538bb2',
+          fallback: 'Tester FuryTest'
+        }
+      },
+      {
         type: 'im/create',
         payload: {
           _id: 'saveId/imChatsInfos/da4bf092-5e29-4577-a662-171bd57915f8',

@@ -33,7 +33,15 @@ import {
 
 // Actions for the session of an avatar
 
-// Logon the user. It will post using fetch to the server.
+/**
+ * Logon the user. It will post using fetch to the server.
+ * @param {import('../bundles/names').MinimalAvatarName} avatarName Avatar Name
+ * @param {string} password Password of the avatar.
+ * @param {import('../types/viewer').Grid} grid Grid info
+ * @param {boolean} save Should the avatar be saved.
+ * @param {boolean} isNew Is this avatar new. False if this avatar was saved.
+ * @returns {import('../store/configureStore').AppThunk}
+ */
 export function login (avatarName, password, grid, save, isNew) {
   return async (dispatch, getState, extra) => {
     if (selectIsLoggedIn(getState())) throw new Error('There is already an avatar logged in!')
@@ -61,8 +69,8 @@ export function login (avatarName, password, grid, save, isNew) {
     const circuit = import('../network/circuit')
 
     const body = grid.isLLSDLogin
-      ? await loginWithLLSD(viewerData, avatarName.first, avatarName.last, finalPassword)
-      : await loginWithXmlRpc(viewerData, avatarName.first, avatarName.last, finalPassword)
+      ? await loginWithLLSD(viewerData, avatarName.firstName, avatarName.lastName, finalPassword)
+      : await loginWithXmlRpc(viewerData, avatarName.firstName, avatarName.lastName, finalPassword)
 
     if (body.login !== 'true') {
       dispatch(loginFailed({ error: body.message }))

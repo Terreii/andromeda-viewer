@@ -34,6 +34,7 @@ import {
   selectLocalChat
 } from '../bundles/localChat'
 import {
+  addMissing,
   selectAvatarNameById,
   selectOwnAvatarName,
   getFullNameString,
@@ -916,7 +917,14 @@ export function startNewIMChat (chatType, targetId, name) {
       try {
         name = getNameString(selectAvatarNameById(getState(), targetId.toString()))
       } catch (error) {
-        console.error(error)
+        if (name) {
+          dispatch(addMissing({
+            id: targetId,
+            fallback: name
+          }))
+        } else {
+          console.error(error)
+        }
       }
     }
 

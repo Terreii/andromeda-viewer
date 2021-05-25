@@ -13,7 +13,7 @@ import {
   selectAvatarDisplayName
 } from '../bundles/names'
 
-jest.mock('../reactors/index.js', () => [])
+jest.mock('../reactors/index.ts', () => [])
 
 /**
  * Create a Store with names.

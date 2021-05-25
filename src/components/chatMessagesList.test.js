@@ -8,7 +8,7 @@ import configureStore from '../store/configureStore'
 
 import { LocalChatSourceType } from '../types/chat'
 
-jest.mock('../reactors/index.js', () => [])
+jest.mock('../reactors/index.ts', () => [])
 
 function getTimeString (timeSting) {
   const date = new Date(timeSting)

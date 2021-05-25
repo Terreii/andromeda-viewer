@@ -14,7 +14,6 @@ import configureReactors from './configureReactors'
 import { createLocalDB, createCryptoStore, createRemoteDB } from './db'
 import { proxyFetch, fetchLLSD } from './llsdFetch'
 
-import AvatarName from '../avatarName'
 import type Circuit from '../network/circuit'
 
 export type RootState = ReturnType<typeof rootReducer>
@@ -142,9 +141,7 @@ export function createStoreCore (
   extraArgument: ExtraArguments
 ) {
   const serializableCheck: SerializableStateInvariantMiddlewareOptions = {
-    isSerializable: value => isPlain(value) ||
-      value instanceof Uint8Array ||
-      value instanceof AvatarName
+    isSerializable: value => isPlain(value) || value instanceof Uint8Array
   }
   const middleware = getDefaultMiddleware({
     thunk: {

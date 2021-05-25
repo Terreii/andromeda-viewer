@@ -5,10 +5,10 @@ import auth from 'pouchdb-authentication'
 import hoodieApi from 'pouchdb-hoodie-api'
 import { NIL } from 'uuid'
 
-import AvatarName from './avatarName'
 import connectCircuit from './actions/connectCircuit'
 import { isSignedIn, loadSavedAvatars, loadSavedGrids } from './actions/viewerAccount'
 import { signInStatus } from './bundles/account'
+import { parseNameString } from './bundles/names'
 import { startLogin, login } from './bundles/session'
 import { createExtraArgument, createStoreCore } from './store/configureStore'
 
@@ -345,7 +345,7 @@ async function setStateToConnectedToGrid (
   store: ReturnType<typeof createStoreCore>,
   extraArgument: ReturnType<typeof createExtraArgument>
 ) {
-  const name = new AvatarName('AndromedaViewerTester')
+  const name = parseNameString('AndromedaViewerTester')
   const grid = {
     _id: 'second_life',
     name: 'Second Life',
@@ -364,8 +364,8 @@ async function setStateToConnectedToGrid (
     sessionInfo: {
       login: 'true',
       andromedaSessionId: 'e95ecf9b-9104-4d6b-9a4d-09de71e956e8',
-      first_name: `"${name.first}"`,
-      last_name: name.last,
+      first_name: `"${name.firstName}"`,
+      last_name: name.lastName,
       account_type: 'Base',
       account_level_benefits: {
         lastname_change_allowed: '',

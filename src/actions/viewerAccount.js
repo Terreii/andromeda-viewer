@@ -25,6 +25,7 @@ import {
   selectSavedGrids,
   selectSavedGridsAreLoaded
 } from '../bundles/account'
+import { getFullNameString } from '../bundles/names'
 import { selectIsLoggedIn } from '../bundles/session'
 import { createCryptoStore, getUserDatabaseName, startSyncing } from '../store/db'
 
@@ -45,7 +46,7 @@ export function saveAvatar (name, agentId, grid) {
     return cryptoStore.withIdPrefix('avatars/').add({
       dataSaveId: uuid(),
       avatarIdentifier,
-      name: name.getFullName(),
+      name: getFullNameString(name),
       grid: gridName
     })
   }

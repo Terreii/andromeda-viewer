@@ -39,10 +39,13 @@ import {
   NotificationTypes
 } from '../types/chat'
 
-export interface AvatarName {
-  id: string,
+export interface MinimalAvatarName {
   firstName: string,
-  lastName: string,
+  lastName: string
+}
+
+export interface AvatarName extends MinimalAvatarName {
+  id: string,
   displayName: string,
   isDisplayNameDefault: boolean,
   didLoadDisplayName: boolean,
@@ -153,8 +156,8 @@ const nameSlice = createSlice({
     [login.type] (state, action: PayloadAction<LoginAction>) {
       namesAdapter.addOne(state.names, {
         id: action.payload.uuid,
-        firstName: action.payload.name.first,
-        lastName: action.payload.name.last,
+        firstName: action.payload.name.firstName,
+        lastName: action.payload.name.lastName,
         displayName: '',
         isDisplayNameDefault: false,
         didLoadDisplayName: false,
@@ -351,6 +354,19 @@ export const selectAvatarDisplayName = (state: RootState, id: string): string =>
   return getDisplayName(name)
 }
 
+export const selectIdOfNamesToLoad = createSelector(
+  [
+    selectNames
+  ],
+  names => Object.values(names || {})
+    .filter(name => name && !(
+      name.didLoadDisplayName ||
+      name.isLoadingDisplayName ||
+      name.displayName.length > 0
+    ))
+    .map(name => name!.id)
+)
+
 export function selectDisplayNamesURL (state: RootState): string {
   return state.names.getDisplayNamesURL
 }
@@ -401,7 +417,7 @@ export function parseNameString (name: string, last?: string): {
   }
 }
 
-export function getNameString (name: AvatarName): string {
+export function getNameString (name: MinimalAvatarName & { id: string }): string {
   if (
     name.lastName.length === 0 ||
     name.lastName === 'Resident' ||
@@ -412,7 +428,7 @@ export function getNameString (name: AvatarName): string {
   return `${name.firstName} ${name.lastName}`
 }
 
-export function getFullNameString (name: AvatarName): string {
+export function getFullNameString (name: MinimalAvatarName): string {
   return name.firstName + ' ' + name.lastName
 }
 

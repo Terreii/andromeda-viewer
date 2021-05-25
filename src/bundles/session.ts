@@ -3,7 +3,7 @@
 import { createSlice, createSelector, PayloadAction, Action } from '@reduxjs/toolkit'
 
 import { selectIsSignedIn, selectSavedAvatars, selectAnonymAvatarData } from './account'
-import AvatarName from '../avatarName'
+import type { MinimalAvatarName } from './names'
 
 import { RootState } from '../store/configureStore'
 import { LocalChatMessage } from '../types/chat'
@@ -15,7 +15,10 @@ const sessionSlice = createSlice({
   initialState: getDefaultState(),
 
   reducers: {
-    startLogin (state, action: PayloadAction<{ name: AvatarName, grid: Grid, sync: boolean }>) {},
+    startLogin (
+      state,
+      action: PayloadAction<{ name: MinimalAvatarName, grid: Grid, sync: boolean }>
+    ) {},
 
     // didLogin
     login (state, action: PayloadAction<LoginAction>) {
@@ -177,7 +180,7 @@ export interface LoginAction {
   /**
    * Name of the logged in avatar
    */
-  name: AvatarName
+  name: MinimalAvatarName
   /**
    * Should the avatar and its data be saved and synced?
    */
