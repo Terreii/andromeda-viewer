@@ -131,7 +131,7 @@ const nameSlice = createSlice({
               lastName: cleanName(agent.legacy_last_name),
               isLoadingDisplayName: false,
               didLoadDisplayName: true,
-              isDisplayNameDefault: agent.is_display_name_default || agent.display_name.length > 0
+              isDisplayNameDefault: agent.is_display_name_default
             }
           })
         }
@@ -407,7 +407,7 @@ export function parseNameString (name: string, last?: string): {
     const parts = name.split(separator[0])
     return {
       firstName: cleanName(parts[0]),
-      lastName: cleanName(parts[1])
+      lastName: cleanName(parts[1]) || 'Resident'
     }
   } else {
     return {
@@ -429,7 +429,7 @@ export function getNameString (name: MinimalAvatarName & { id: string }): string
 }
 
 export function getFullNameString (name: MinimalAvatarName): string {
-  return name.firstName + ' ' + name.lastName
+  return name.firstName + ' ' + (name.lastName || 'Resident')
 }
 
 export function getDisplayName (name: AvatarName): string {
@@ -438,7 +438,7 @@ export function getDisplayName (name: AvatarName): string {
   }
 
   const nameString = getNameString(name)
-  if (name.isDisplayNameDefault && name.displayName.length > 0) {
+  if (name.didLoadDisplayName && !name.isDisplayNameDefault && name.displayName.length > 0) {
     return `${name.displayName} (${nameString})`
   }
   return nameString

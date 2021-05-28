@@ -48,7 +48,7 @@ function getName (id, first, last, display) {
     firstName: first,
     lastName: last,
     displayName: display || '',
-    isDisplayNameDefault: hasDisplayName,
+    isDisplayNameDefault: display === (first + ' ' + last),
     didLoadDisplayName: hasDisplayName,
     isLoadingDisplayName: false
   }
@@ -200,7 +200,7 @@ it('should update if the missing name gets loaded', () => {
       display_name_next_update: 0,
       legacy_first_name: 'tester',
       legacy_last_name: 'mactestface',
-      is_display_name_default: true
+      is_display_name_default: false
     }
   ]))
 
@@ -231,7 +231,7 @@ it('should update if the name updates', () => {
       display_name_next_update: 0,
       legacy_first_name: 'tester',
       legacy_last_name: 'mactestface',
-      is_display_name_default: true
+      is_display_name_default: false
     }
   ]))
 

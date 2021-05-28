@@ -10,7 +10,7 @@ import { isSignedIn, loadSavedAvatars, loadSavedGrids } from './actions/viewerAc
 import { signInStatus } from './bundles/account'
 import { parseNameString } from './bundles/names'
 import { startLogin, login } from './bundles/session'
-import { createExtraArgument, createStoreCore } from './store/configureStore'
+import { createExtraArgument, createStoreCore, RootState } from './store/configureStore'
 
 import { AssetType } from './types/inventory'
 
@@ -137,7 +137,7 @@ export async function createTestStore ({ localDB, remoteDB, state = AppState.Log
 
   // Setup the state diffing
   const initialState = store.getState()
-  const states = new Map<string, ReturnType<typeof store.getState>>()
+  const states = new Map<string, RootState>()
 
   // Saves the current state under that key for later comparison
   const setMark = (key: string) => {

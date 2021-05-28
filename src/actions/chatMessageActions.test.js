@@ -19,8 +19,6 @@ import {
   getIMHistory
 } from './chatMessageActions'
 
-import { parseNameString } from '../bundles/names'
-
 import { Maturity } from '../types/viewer'
 import {
   LocalChatSourceType,
