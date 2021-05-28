@@ -123,15 +123,23 @@ const nameSlice = createSlice({
         }
 
         for (const agent of action.payload.agents) {
+          const firstName = cleanName(agent.legacy_first_name)
+          const lastName = cleanName(agent.legacy_last_name)
           changes.push({
             id: agent.id,
             changes: {
               displayName: agent.display_name,
-              firstName: cleanName(agent.legacy_first_name),
-              lastName: cleanName(agent.legacy_last_name),
+              firstName,
+              lastName,
               isLoadingDisplayName: false,
               didLoadDisplayName: true,
-              isDisplayNameDefault: agent.is_display_name_default
+              isDisplayNameDefault: agent.is_display_name_default && (
+                agent.display_name.toLowerCase() === `${firstName} ${lastName}`.toLowerCase() ||
+                (
+                  agent.display_name.toLowerCase() === firstName.toLowerCase() &&
+                  lastName === 'Resident'
+                )
+              )
             }
           })
         }

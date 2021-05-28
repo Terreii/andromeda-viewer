@@ -309,6 +309,53 @@ describe('actions', () => {
       expect(selectAvatarDisplayName(store.getState(), 'e856f8e7-f774-4040-8392-df4185fa37e4'))
         .toBe('Andromeda')
     })
+
+    it('should handle displayNames that are wrongly marked as default', async () => {
+      const { store, setMark, getDiff } = await createTestStore()
+
+      store.dispatch(addMissing({
+        id: 'e856f8e7-f774-4040-8392-df4185fa37e4',
+        fallback: 'Andromeda'
+      }))
+      store.dispatch(displayNamesStartLoading([
+        'e856f8e7-f774-4040-8392-df4185fa37e4'
+      ]))
+
+      setMark('A')
+
+      store.dispatch(displayNamesLoaded(
+        [
+          {
+            id: 'e856f8e7-f774-4040-8392-df4185fa37e4',
+            username: 'andromeda.resident',
+            display_name: 'Andro',
+            display_name_next_update: 0,
+            legacy_first_name: 'andromeda',
+            legacy_last_name: 'resident',
+            is_display_name_default: true
+          }
+        ],
+        [],
+        []
+      ))
+
+      expect(getDiff('A')).toEqual({
+        names: {
+          names: {
+            entities: {
+              'e856f8e7-f774-4040-8392-df4185fa37e4': {
+                displayName: 'Andro',
+                didLoadDisplayName: true,
+                isLoadingDisplayName: false
+              }
+            }
+          }
+        }
+      })
+
+      expect(selectAvatarDisplayName(store.getState(), 'e856f8e7-f774-4040-8392-df4185fa37e4'))
+        .toBe('Andro (Andromeda)')
+    })
   })
 })
 

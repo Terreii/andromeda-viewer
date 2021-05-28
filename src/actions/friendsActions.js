@@ -3,7 +3,6 @@ import { selectFolderForAssetType } from '../bundles/inventory'
 import {
   displayNamesStartLoading,
   displayNamesLoaded,
-  selectNames,
   selectIdOfNamesToLoad,
   selectDisplayNamesURL,
   selectOwnAvatarName,
@@ -95,11 +94,15 @@ export function getAllFriendsDisplayNames () {
   return (dispatch, getState) => {
     const state = getState()
 
-    const names = selectNames(state)
     const friendsIds = selectFriends(state)
       .map(friend => friend.id)
       .concat([selectAgentId(state)]) // Add self
-      .filter(id => !(id in names) || !names[id].willHaveDisplayName()) // unknown only
+      .filter(id => { // unknown only
+        const name = selectAvatarNameById(state, id)
+        return !name ||
+          !name.didLoadDisplayName ||
+          !name.isLoadingDisplayName
+      })
 
     dispatch(loadDisplayNames(friendsIds))
   }
