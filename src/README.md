@@ -26,7 +26,6 @@ In this directory are the general and setup modules located. Most of the App is 
   - The store/state
   - Service-Worker
 - [`app.js`](./app.js) is the root component. Routing and different Providers get handled here.
-- [`avatarName.ts`](./avatarName.ts) handles parsing and displaying avatar names.
 - [`llsd.js`](./llsd.js) A copy of LindenLabs [LLSD](http://wiki.secondlife.com/wiki/LLSD "LLSD documentation") [Javascript library](https://bitbucket.org/lindenlab/llsd/src/default/js/ "Repository of different LLSD libraries").
 - [`react-app-env.d.ts`](./react-app-env.d.ts) importing of react-app types.
 - [`registerServiceWorker.js`](./registerServiceWorker.js).

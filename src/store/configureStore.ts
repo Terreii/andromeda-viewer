@@ -118,15 +118,16 @@ export function createExtraArgument (
   createDatabases: (args: CreateDatabasesArgs) => CreateDatabasesResult
 ): ExtraArguments {
   const { local, remote } = createDatabases({ local: true, remote: '_users', skipSetup: true })
+  const placeholder = () => Promise.reject(new Error('unimplemented'))
   const extraArgument = {
     cryptoStore: createCryptoStore(local),
     db: local!,
     remoteDB: remote!,
     createDatabases,
     // Must be added after the store was created
-    proxyFetch: () => Promise.reject(new Error('unimplemented')),
+    proxyFetch: placeholder,
     // Must be added after the store was created
-    fetchLLSD: () => Promise.reject(new Error('unimplemented')),
+    fetchLLSD: placeholder,
     onAvatarLogout: [],
     circuit: null // will be set on login
   }

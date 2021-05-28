@@ -17,7 +17,7 @@ import {
 describe('actions', () => {
   describe('addMissing', () => {
     it('should add a missing name', async () => {
-      const { store, getDiff } = await createTestStore({})
+      const { store, getDiff } = await createTestStore()
 
       store.dispatch(addMissing({
         id: 'e856f8e7-f774-4040-8392-df4185fa37e4'
@@ -44,7 +44,7 @@ describe('actions', () => {
     })
 
     it('should parse the fallback name', async () => {
-      const { store, getDiff } = await createTestStore({})
+      const { store, getDiff } = await createTestStore()
 
       store.dispatch(addMissing({
         id: 'e856f8e7-f774-4040-8392-df4185fa37e4',
@@ -72,7 +72,7 @@ describe('actions', () => {
     })
 
     it('should not change an existing name', async () => {
-      const { store, setMark, getDiff } = await createTestStore({})
+      const { store, setMark, getDiff } = await createTestStore()
 
       store.dispatch(addMissing({
         id: 'e856f8e7-f774-4040-8392-df4185fa37e4',
@@ -90,7 +90,7 @@ describe('actions', () => {
     })
 
     it('should not add a NIL UUID', async () => {
-      const { store, getDiff } = await createTestStore({})
+      const { store, getDiff } = await createTestStore()
 
       store.dispatch(addMissing({
         id: NIL
@@ -102,7 +102,7 @@ describe('actions', () => {
 
   describe('displayNamesStartLoading', () => {
     it('should set isLoadingDisplayName of the names', async () => {
-      const { store, setMark, getDiff } = await createTestStore({})
+      const { store, setMark, getDiff } = await createTestStore()
 
       store.dispatch(addMissing({
         id: 'e856f8e7-f774-4040-8392-df4185fa37e4',
@@ -129,13 +129,13 @@ describe('actions', () => {
       })
 
       const idsAfterStart = selectIdOfNamesToLoad(store.getState())
-      expect(idsAfterStart).toEqual([])
+      expect(idsAfterStart).toHaveLength(0)
     })
   })
 
   describe('displayNamesLoaded', () => {
     it('should add the display names', async () => {
-      const { store, setMark, getDiff } = await createTestStore({})
+      const { store, setMark, getDiff } = await createTestStore()
 
       store.dispatch(addMissing({
         id: 'e856f8e7-f774-4040-8392-df4185fa37e4',
@@ -185,7 +185,7 @@ describe('actions', () => {
     })
 
     it('should update first name and last name', async () => {
-      const { store, setMark, getDiff } = await createTestStore({})
+      const { store, setMark, getDiff } = await createTestStore()
 
       store.dispatch(addMissing({
         id: 'e856f8e7-f774-4040-8392-df4185fa37e4',
@@ -234,7 +234,7 @@ describe('actions', () => {
     })
 
     it('should set bad ids as loaded', async () => {
-      const { store, setMark, getDiff } = await createTestStore({})
+      const { store, setMark, getDiff } = await createTestStore()
 
       store.dispatch(addMissing({
         id: 'e856f8e7-f774-4040-8392-df4185fa37e4',
@@ -263,7 +263,7 @@ describe('actions', () => {
     })
 
     it('should handle displayNames that are the default name', async () => {
-      const { store, setMark, getDiff } = await createTestStore({})
+      const { store, setMark, getDiff } = await createTestStore()
 
       store.dispatch(addMissing({
         id: 'e856f8e7-f774-4040-8392-df4185fa37e4',
