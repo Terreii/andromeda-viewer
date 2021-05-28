@@ -19,8 +19,6 @@ import {
   getIMHistory
 } from './chatMessageActions'
 
-import AvatarName from '../avatarName'
-
 import { Maturity } from '../types/viewer'
 import {
   LocalChatSourceType,
@@ -803,7 +801,18 @@ describe('save, loading and sending IMs', () => {
       },
       names: {
         names: {
-          'e0f1adac-d250-4d71-b4e4-10e0ee855d0e': new AvatarName('Tester MacTestface')
+          ids: ['e0f1adac-d250-4d71-b4e4-10e0ee855d0e'],
+          entities: {
+            'e0f1adac-d250-4d71-b4e4-10e0ee855d0e': {
+              id: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+              firstName: 'Tester',
+              lastName: 'MacTestface',
+              displayName: '',
+              isDisplayNameDefault: false,
+              didLoadDisplayName: false,
+              isLoadingDisplayName: false
+            }
+          }
         }
       },
       IMs: {
@@ -880,7 +889,7 @@ describe('save, loading and sending IMs', () => {
             Dialog: IMDialog.MessageFromAgent,
             ID: '5657e9ca-315c-47e3-bfde-7bfe2e5b7e25',
             Timestamp: 1562630524,
-            FromAgentName: 'Tester Mactestface',
+            FromAgentName: 'Tester MacTestface',
             Message: 'Hello world!',
             BinaryBucket: Buffer.from([])
           }
@@ -909,7 +918,7 @@ describe('save, loading and sending IMs', () => {
             Dialog: IMDialog.SessionSend,
             ID: 'da4bf092-5e29-4577-a662-171bd57915f8',
             Timestamp: 1562630524,
-            FromAgentName: 'Tester Mactestface',
+            FromAgentName: 'Tester MacTestface',
             Message: 'Hello world!',
             BinaryBucket: 'Best group'
           }
@@ -938,7 +947,7 @@ describe('save, loading and sending IMs', () => {
             Dialog: IMDialog.SessionSend,
             ID: 'ee6af506-fa78-408d-869f-78305b3889c3',
             Timestamp: 1562630524,
-            FromAgentName: 'Tester Mactestface',
+            FromAgentName: 'Tester MacTestface',
             Message: 'Hello world!',
             BinaryBucket: 'Dr. Evil Inc.'
           }
@@ -956,7 +965,7 @@ describe('save, loading and sending IMs', () => {
           msg: {
             _id: 'saveId/imChats/abcd/2019-07-09T00:02:04.000Z',
             fromId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-            fromName: 'Tester Mactestface',
+            fromName: 'Tester MacTestface',
             message: 'Hello world!',
             offline: 0,
             time: 1562630524000
@@ -971,7 +980,7 @@ describe('save, loading and sending IMs', () => {
           msg: {
             _id: 'saveId/imChats/efgh/2019-07-09T00:02:04.000Z',
             fromId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-            fromName: 'Tester Mactestface',
+            fromName: 'Tester MacTestface',
             message: 'Hello world!',
             time: 1562630524000
           }
@@ -985,7 +994,7 @@ describe('save, loading and sending IMs', () => {
           msg: {
             _id: 'saveId/imChats/ijkl/2019-07-09T00:02:04.000Z',
             fromId: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
-            fromName: 'Tester Mactestface',
+            fromName: 'Tester MacTestface',
             message: 'Hello world!',
             time: 1562630524000
           }
@@ -1015,7 +1024,18 @@ describe('save, loading and sending IMs', () => {
       },
       names: {
         names: {
-          'f2373437-a2ef-4435-82b9-68d283538bb2': new AvatarName('Tester Furry')
+          ids: ['e0f1adac-d250-4d71-b4e4-10e0ee855d0e'],
+          entities: {
+            'e0f1adac-d250-4d71-b4e4-10e0ee855d0e': {
+              id: 'e0f1adac-d250-4d71-b4e4-10e0ee855d0e',
+              firstName: 'Tester',
+              lastName: 'MacTestface',
+              displayName: '',
+              isDisplayNameDefault: false,
+              didLoadDisplayName: false,
+              isLoadingDisplayName: false
+            }
+          }
         }
       }
     })
@@ -1039,6 +1059,13 @@ describe('save, loading and sending IMs', () => {
     expect(store.getActions()).toEqual([
       // Personal
       {
+        type: 'names/addMissing',
+        payload: {
+          id: 'f2373437-a2ef-4435-82b9-68d283538bb2',
+          fallback: 'Tester FuryTest'
+        }
+      },
+      {
         type: 'im/create',
         payload: {
           _id: 'saveId/imChatsInfos/da4bf092-5e29-4577-a662-171bd57915f8',
@@ -1046,7 +1073,7 @@ describe('save, loading and sending IMs', () => {
           sessionId: '12c6999b-70bf-0944-365d-78326dd6d6bc',
           saveId: 'da4bf092-5e29-4577-a662-171bd57915f8',
           target: 'f2373437-a2ef-4435-82b9-68d283538bb2',
-          name: 'Tester Furry'
+          name: 'Tester FuryTest'
         }
       },
       {

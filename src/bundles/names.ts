@@ -2,9 +2,15 @@
  * Reduces the names of avatars
  */
 
-import { createSlice, createSelector, PayloadAction } from '@reduxjs/toolkit'
+import {
+  createSlice,
+  createSelector,
+  createEntityAdapter,
+  PayloadAction,
+  Update
+} from '@reduxjs/toolkit'
+import { NIL } from 'uuid'
 
-import AvatarName from '../avatarName'
 import { mapBlockOf } from '../network/msgGetters'
 
 import {
@@ -23,7 +29,6 @@ import {
   userWasKicked,
   LoginAction
 } from './session'
-import { UUID as LLUUID } from '../llsd'
 
 import { RootState } from '../store/configureStore'
 import {
@@ -34,56 +39,104 @@ import {
   NotificationTypes
 } from '../types/chat'
 
+export interface MinimalAvatarName {
+  firstName: string,
+  lastName: string
+}
+
+export interface AvatarName extends MinimalAvatarName {
+  id: string,
+  displayName: string,
+  isDisplayNameDefault: boolean,
+  didLoadDisplayName: boolean,
+  isLoadingDisplayName: boolean
+}
+
+interface DisplayNameResultAvatar {
+  id: string,
+  username: string,
+  display_name: string,
+  display_name_next_update: number,
+  legacy_first_name: string,
+  legacy_last_name: string,
+  is_display_name_default: boolean
+}
+
+interface DisplayNameResult {
+  agents: DisplayNameResultAvatar[],
+  badIDs: string[],
+  badNames: string[]
+}
+
+const namesAdapter = createEntityAdapter<AvatarName>()
+
 const nameSlice = createSlice({
   name: 'names',
 
-  initialState: ((): {
-    names: { [key: string]: AvatarName },
-    getDisplayNamesURL: string
-  } => ({
-    names: {},
+  initialState: (() => ({
+    names: namesAdapter.getInitialState(),
     getDisplayNamesURL: ''
   }))(),
 
   reducers: {
     addMissing (state, action: PayloadAction<{ id: string, fallback?: string }>) {
-      if (!(action.payload.id in state.names) && action.payload.id !== LLUUID.nil) {
-        state.names[action.payload.id] = action.payload.fallback == null
-          ? new AvatarName({ id: action.payload.id })
-          : new AvatarName(action.payload.fallback)
+      if (!(action.payload.id in state.names) && action.payload.id !== NIL) {
+        let first = ''
+        let last = ''
+        if (typeof action.payload.fallback === 'string' && action.payload.fallback.length > 0) {
+          const names = parseNameString(action.payload.fallback)
+          first = names.firstName
+          last = names.lastName
+        }
+        namesAdapter.addOne(state.names, {
+          id: action.payload.id,
+          firstName: first,
+          lastName: last,
+          displayName: '',
+          isDisplayNameDefault: false,
+          didLoadDisplayName: false,
+          isLoadingDisplayName: false
+        })
       }
     },
 
     displayNamesStartLoading (state, action: PayloadAction<string[]>) {
-      for (const id of action.payload) {
-        if (id in state.names) {
-          state.names[id] = state.names[id].withIsLoadingSetTo(true)
-        }
-      }
+      const changes = { isLoadingDisplayName: true }
+      namesAdapter.updateMany(state.names, action.payload.map(id => ({
+        id,
+        changes
+      })))
     },
 
     displayNamesLoaded: {
       reducer (state, action: PayloadAction<DisplayNameResult>) {
-        for (const agent of action.payload.agents) {
-          const id = agent.id
-          const old = id in state.names ? state.names[id] : new AvatarName(agent.username)
-
-          const next = old.withDisplayNameSetTo(
-            agent.display_name,
-            agent.legacy_first_name,
-            agent.legacy_last_name
-          )
-
-          state.names[id] = next
-        }
+        const changes: Update<AvatarName>[] = []
 
         for (const badId of action.payload.badIDs) {
-          if (badId in state.names && state.names[badId].isLoadingDisplayName) {
-            state.names[badId] = state.names[badId].withIsLoadingSetTo(false)
-          } else if (!(badId in state.names)) {
-            state.names[badId] = new AvatarName({ first: badId, last: '' })
-          }
+          changes.push({
+            id: badId,
+            changes: {
+              isLoadingDisplayName: false,
+              didLoadDisplayName: true
+            }
+          })
         }
+
+        for (const agent of action.payload.agents) {
+          changes.push({
+            id: agent.id,
+            changes: {
+              displayName: agent.display_name,
+              firstName: cleanName(agent.legacy_first_name),
+              lastName: cleanName(agent.legacy_last_name),
+              isLoadingDisplayName: false,
+              didLoadDisplayName: true,
+              isDisplayNameDefault: agent.is_display_name_default
+            }
+          })
+        }
+
+        namesAdapter.updateMany(state.names, changes)
       },
       prepare: (
         agents: DisplayNameResultAvatar[],
@@ -101,13 +154,32 @@ const nameSlice = createSlice({
 
   extraReducers: {
     [login.type] (state, action: PayloadAction<LoginAction>) {
-      state.names[action.payload.uuid] = action.payload.name
+      namesAdapter.addOne(state.names, {
+        id: action.payload.uuid,
+        firstName: action.payload.name.firstName,
+        lastName: action.payload.name.lastName,
+        displayName: '',
+        isDisplayNameDefault: false,
+        didLoadDisplayName: false,
+        isLoadingDisplayName: false
+      })
 
-      for (const msg of action.payload.localChatHistory) {
-        if (String(msg.sourceType) === 'agent' && msg.fromId !== LLUUID.nil) {
-          addName(state.names, msg.fromId, msg.fromName)
-        }
-      }
+      const localChatNames: AvatarName[] = action.payload.localChatHistory
+        .filter(msg => String(msg.sourceType) === 'agent' && msg.fromId !== NIL)
+        .map(msg => {
+          const { firstName, lastName } = parseNameString(msg.fromName)
+          return {
+            id: msg.fromId,
+            firstName,
+            lastName,
+            displayName: '',
+            isDisplayNameDefault: false,
+            didLoadDisplayName: false,
+            isLoadingDisplayName: false
+          }
+        })
+
+      namesAdapter.addMany(state.names, localChatNames)
     },
 
     SeedCapabilitiesLoaded (state, action) {
@@ -116,11 +188,20 @@ const nameSlice = createSlice({
 
     [localChatReceived.type] (state, action: PayloadAction<LocalChatMessage>) {
       if (
-        !(action.payload.fromId in state.names) &&
+        !(action.payload.fromId in state.names.entities) &&
         action.payload.sourceType === LocalChatSourceType.Agent &&
-        action.payload.fromId !== LLUUID.nil
+        action.payload.fromId !== NIL
       ) {
-        addName(state.names, action.payload.fromId, action.payload.fromName)
+        const { firstName, lastName } = parseNameString(action.payload.fromName)
+        namesAdapter.addOne(state.names, {
+          id: action.payload.fromId,
+          firstName,
+          lastName,
+          displayName: '',
+          isDisplayNameDefault: false,
+          didLoadDisplayName: false,
+          isLoadingDisplayName: false
+        })
       }
     },
 
@@ -129,46 +210,74 @@ const nameSlice = createSlice({
       action: PayloadAction<{ chatType: IMChatType, session: string, msg: InstantMessage }>
     ) {
       const msg = action.payload.msg
-      if (
-        !(action.payload.msg.fromId in state.names) &&
-        action.payload.msg.fromId !== LLUUID.nil
-      ) {
-        addName(state.names, msg.fromId, msg.fromName)
+      if (!(msg.fromId in state.names.entities) && msg.fromId !== NIL) {
+        const { firstName, lastName } = parseNameString(msg.fromName)
+        namesAdapter.addOne(state.names, {
+          id: msg.fromId,
+          firstName,
+          lastName,
+          displayName: '',
+          isDisplayNameDefault: false,
+          didLoadDisplayName: false,
+          isLoadingDisplayName: false
+        })
       }
     },
 
     UUIDNameReply (state, action) {
-      const names = mapBlockOf(action, 'UUIDNameBlock', (getValue: Function) => {
-        return {
-          firstName: getValue('FirstName', true),
-          lastName: getValue('LastName', true),
-          id: getValue('ID')
-        }
-      })
-
-      for (const name of names) {
-        addName(state.names, name.id, name.firstName + ' ' + name.lastName)
-      }
+      namesAdapter.updateMany(
+        state.names,
+        mapBlockOf(action, 'UUIDNameBlock', (getValue: Function): Update<AvatarName> => ({
+          id: getValue('ID'),
+          changes: {
+            firstName: getValue('FirstName', true),
+            lastName: getValue('LastName', true)
+          }
+        }))
+      )
     },
 
     [imInfosLoaded.type] (state, action: PayloadAction<NewChatActionPayload[]>) {
-      for (const chat of action.payload) {
-        const avatarId = chat.target
-        if (chat.chatType !== IMChatType.personal || avatarId in state.names) continue
+      const names: AvatarName[] = action.payload
+        .filter(
+          chat => chat.chatType === IMChatType.personal || !(chat.target in state.names.entities)
+        )
+        .map(chat => {
+          const { firstName, lastName } = parseNameString(chat.name)
+          return {
+            id: chat.target,
+            firstName,
+            lastName,
+            displayName: '',
+            isDisplayNameDefault: false,
+            didLoadDisplayName: false,
+            isLoadingDisplayName: false
+          }
+        })
 
-        state.names[avatarId] = new AvatarName(chat.name)
-      }
+      namesAdapter.addMany(state.names, names)
     },
 
     [imHistoryLoadingFinished.type] (
       state,
       action: PayloadAction<{ sessionId: string, messages: InstantMessage[], didLoadAll: boolean }>
     ) {
-      for (const msg of action.payload.messages) {
-        if (msg.fromId in state.names || msg.fromId === LLUUID.nil) continue
+      const names: AvatarName[] = action.payload.messages
+        .filter(msg => !(msg.fromId in state.names.entities || msg.fromId === NIL))
+        .map(msg => {
+          const { firstName, lastName } = parseNameString(msg.fromName)
+          return {
+            id: msg.fromId,
+            firstName,
+            lastName,
+            displayName: '',
+            isDisplayNameDefault: false,
+            didLoadDisplayName: false,
+            isLoadingDisplayName: false
+          }
+        })
 
-        state.names[msg.fromId] = new AvatarName(msg.fromName)
-      }
+      namesAdapter.addMany(state.names, names)
     },
 
     [notificationReceive.type]: (state, action) => {
@@ -191,7 +300,18 @@ const nameSlice = createSlice({
           ? notification.senderName
           : notification.fromName
 
-        addName(state.names, id, name)
+        if (!(id in state.names.entities)) {
+          const { firstName, lastName } = parseNameString(name)
+          namesAdapter.addOne(state.names, {
+            id,
+            firstName,
+            lastName,
+            displayName: '',
+            isDisplayNameDefault: false,
+            didLoadDisplayName: false,
+            isLoadingDisplayName: false
+          })
+        }
       }
     },
 
@@ -219,13 +339,37 @@ export const {
   displayNamesLoaded
 } = nameSlice.actions
 
-export const selectNames = (state: RootState): { [key: string]: AvatarName } => state.names.names
+const selectors = namesAdapter.getSelectors((state: RootState) => state.names.names)
 
-export function selectAvatarNameById (state: RootState, id: string): AvatarName | undefined {
-  return selectNames(state)[id]
+export const selectNames = selectors.selectEntities
+
+export const selectAvatarNameById = selectors.selectById
+
+export const selectAvatarDisplayName = (state: RootState, id: string): string => {
+  const name = selectAvatarNameById(state, id)
+  if (!name) {
+    return id
+  }
+
+  return getDisplayName(name)
 }
 
-export const selectDisplayNamesURL = (state: RootState): string => state.names.getDisplayNamesURL
+export const selectIdOfNamesToLoad = createSelector(
+  [
+    selectNames
+  ],
+  names => Object.values(names || {})
+    .filter(name => name && !(
+      name.didLoadDisplayName ||
+      name.isLoadingDisplayName ||
+      name.displayName.length > 0
+    ))
+    .map(name => name!.id)
+)
+
+export function selectDisplayNamesURL (state: RootState): string {
+  return state.names.getDisplayNamesURL
+}
 
 export const selectOwnAvatarName = createSelector(
   [
@@ -238,28 +382,64 @@ export const selectOwnAvatarName = createSelector(
     : null
 )
 
-// Only adds a Name to names if it is new or did change
-function addName (names: { [key: string]: AvatarName }, uuid: string, name: string) {
-  if (uuid === LLUUID.nil) return
+// Helpers
 
-  const updated = new AvatarName(name)
-  if (!(uuid in names) || !names[uuid].compare(updated)) {
-    names[uuid] = updated
+function cleanName (name: string) {
+  // deletes characters that will be in names but shouldn't
+  const trimmed = name.trim().replace(/["\0]/gi, '')
+  const upperCased = trimmed.charAt(0).toUpperCase() + // name -> Name
+    trimmed.substring(1).toLowerCase()
+  return upperCased
+}
+
+export function parseNameString (name: string, last?: string): {
+  firstName: string,
+  lastName: string
+} {
+  if (typeof last === 'string') {
+    return {
+      firstName: cleanName(name),
+      lastName: cleanName(last)
+    }
+  }
+  const separator = name.match(/[.\s]/) // either a dot or a space
+  if (separator) {
+    const parts = name.split(separator[0])
+    return {
+      firstName: cleanName(parts[0]),
+      lastName: cleanName(parts[1]) || 'Resident'
+    }
+  } else {
+    return {
+      firstName: cleanName(name),
+      lastName: 'Resident'
+    }
   }
 }
 
-interface DisplayNameResultAvatar {
-  id: string,
-  username: string,
-  display_name: string,
-  display_name_next_update: number,
-  legacy_first_name: string,
-  legacy_last_name: string,
-  is_display_name_default: boolean
+export function getNameString (name: MinimalAvatarName & { id: string }): string {
+  if (
+    name.lastName.length === 0 ||
+    name.lastName === 'Resident' ||
+    name.lastName.toLowerCase() === 'resident'
+  ) {
+    return name.firstName || name.id
+  }
+  return `${name.firstName} ${name.lastName}`
 }
 
-interface DisplayNameResult {
-  agents: DisplayNameResultAvatar[],
-  badIDs: string[],
-  badNames: string[]
+export function getFullNameString (name: MinimalAvatarName): string {
+  return name.firstName + ' ' + (name.lastName || 'Resident')
+}
+
+export function getDisplayName (name: AvatarName): string {
+  if (!name.firstName && !name.lastName) {
+    return name.id
+  }
+
+  const nameString = getNameString(name)
+  if (name.didLoadDisplayName && !name.isDisplayNameDefault && name.displayName.length > 0) {
+    return `${name.displayName} (${nameString})`
+  }
+  return nameString
 }

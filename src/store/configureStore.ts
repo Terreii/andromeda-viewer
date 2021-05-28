@@ -14,7 +14,6 @@ import configureReactors from './configureReactors'
 import { createLocalDB, createCryptoStore, createRemoteDB } from './db'
 import { proxyFetch, fetchLLSD } from './llsdFetch'
 
-import AvatarName from '../avatarName'
 import type Circuit from '../network/circuit'
 
 export type RootState = ReturnType<typeof rootReducer>
@@ -119,15 +118,16 @@ export function createExtraArgument (
   createDatabases: (args: CreateDatabasesArgs) => CreateDatabasesResult
 ): ExtraArguments {
   const { local, remote } = createDatabases({ local: true, remote: '_users', skipSetup: true })
+  const placeholder = () => Promise.reject(new Error('unimplemented'))
   const extraArgument = {
     cryptoStore: createCryptoStore(local),
     db: local!,
     remoteDB: remote!,
     createDatabases,
     // Must be added after the store was created
-    proxyFetch: () => Promise.reject(new Error('unimplemented')),
+    proxyFetch: placeholder,
     // Must be added after the store was created
-    fetchLLSD: () => Promise.reject(new Error('unimplemented')),
+    fetchLLSD: placeholder,
     onAvatarLogout: [],
     circuit: null // will be set on login
   }
@@ -142,9 +142,7 @@ export function createStoreCore (
   extraArgument: ExtraArguments
 ) {
   const serializableCheck: SerializableStateInvariantMiddlewareOptions = {
-    isSerializable: value => isPlain(value) ||
-      value instanceof Uint8Array ||
-      value instanceof AvatarName
+    isSerializable: value => isPlain(value) || value instanceof Uint8Array
   }
   const middleware = getDefaultMiddleware({
     thunk: {

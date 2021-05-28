@@ -3,7 +3,7 @@
 import { UUID as LLUUID } from '../llsd'
 
 import { selectFolderForAssetType } from '../bundles/inventory'
-import { selectOwnAvatarName } from '../bundles/names'
+import { selectOwnAvatarName, getFullNameString } from '../bundles/names'
 import { selectAgentId, selectSessionId } from '../bundles/session'
 
 import { IMDialog } from '../types/chat'
@@ -52,7 +52,7 @@ function handleInventoryOffer (
       ],
       MessageBlock: [
         {
-          FromAgentName: selectOwnAvatarName(activeState).getFullName(),
+          FromAgentName: getFullNameString(selectOwnAvatarName(activeState)),
           ToAgentID: targetId,
           ID: transactionId,
           Dialog: dialog,

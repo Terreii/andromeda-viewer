@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react'
+import { NIL } from 'uuid'
 
-import { UUID as LLUUID } from '../llsd'
-import { addMissing, selectAvatarNameById } from '../bundles/names'
+import { addMissing, selectAvatarNameById, getDisplayName, getNameString } from '../bundles/names'
 import { useSelector, useDispatch } from '../hooks/store'
 
 export default function Name ({
@@ -24,7 +24,7 @@ export default function Name ({
   const name = useSelector(selector)
 
   useEffect(() => {
-    if (name == null && loadMissing && id !== LLUUID.nil) {
+    if (name == null && loadMissing && id !== NIL) {
       dispatch(addMissing({
         id,
         fallback: fallback == null ? undefined : fallback
@@ -34,8 +34,8 @@ export default function Name ({
 
   return (
     <span {...args}>
-      <span aria-hidden>{name?.getDisplayName() ?? fallback ?? id}</span>
-      <span className='sr-only'>{name?.getName() ?? fallback ?? id}</span>
+      <span aria-hidden>{name ? getDisplayName(name) : fallback ?? id}</span>
+      <span className='sr-only'>{name ? getNameString(name) : fallback ?? id}</span>
     </span>
   )
 }

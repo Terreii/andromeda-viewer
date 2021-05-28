@@ -3,7 +3,7 @@ import { IMChatType } from '../types/chat'
 
 import { updateRights } from '../actions/friendsActions'
 import { selectFriends } from '../bundles/friends'
-import { selectNames } from '../bundles/names'
+import { selectNames, getNameString } from '../bundles/names'
 import Name from './name'
 import { useSelector, useDispatch } from '../hooks/store'
 
@@ -101,7 +101,7 @@ export default function FriendsList ({ startNewIMChat }) {
     >
       <ul className='max-w-xl pl-4 mx-auto list-none'>
         {friends.map((friend, index, all) => {
-          const name = friend.id in names ? names[friend.id].getName() : friend.id
+          const name = friend.id in names ? getNameString(names[friend.id]) : friend.id
 
           return (
             <FriendRow

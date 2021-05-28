@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import { Tab } from 'reakit/Tab'
 
-import { selectAvatarNameById } from '../bundles/names'
+import { selectAvatarNameById, getNameString } from '../bundles/names'
 import { useSelector } from '../hooks/store'
 
 import { IMChatType } from '../types/chat'
@@ -24,7 +24,7 @@ export default function ChatTab ({ tab, id, chat, isActive }) {
     if (name == null) {
       return chatName || id
     }
-    return name.getName()
+    return getNameString(name)
   }, [name, id, chatName])
 
   return (

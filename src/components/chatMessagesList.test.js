@@ -3,12 +3,12 @@ import { render } from '@testing-library/react'
 import { Provider } from 'react-redux'
 
 import ChatMessagesList from './chatMessagesList'
-import AvatarName from '../avatarName'
+import { addMissing } from '../bundles/names'
 import configureStore from '../store/configureStore'
 
 import { LocalChatSourceType } from '../types/chat'
 
-jest.mock('../reactors/index.js', () => [])
+jest.mock('../reactors/index.ts', () => [])
 
 function getTimeString (timeSting) {
   const date = new Date(timeSting)
@@ -19,11 +19,14 @@ function getTimeString (timeSting) {
 }
 
 function createStore (names) {
-  return configureStore({
-    names: {
-      names: names || {}
-    }
-  })
+  const store = configureStore()
+  for (const [key, name] of Object.entries(names)) {
+    store.dispatch(addMissing({
+      id: key,
+      fallback: name
+    }))
+  }
+  return store
 }
 
 describe('local chat', () => {
@@ -46,8 +49,8 @@ describe('local chat', () => {
     ]
 
     const names = {
-      ABCB: new AvatarName('Testery MacTestface'),
-      1234: new AvatarName('Viewerer Account')
+      ABCB: 'Testery MacTestface',
+      1234: 'Viewerer Account'
     }
 
     const { queryByText } = render(
@@ -88,8 +91,8 @@ describe('local chat', () => {
     ]
 
     const names = {
-      ABCB: new AvatarName('Testery MacTestface'),
-      1234: new AvatarName('Viewerer Account')
+      ABCB: 'Testery MacTestface',
+      1234: 'Viewerer Account'
     }
 
     const { queryByText } = render(
@@ -137,7 +140,7 @@ describe('local chat', () => {
     ]
 
     const names = {
-      ABCB: new AvatarName('Testery MacTestface')
+      ABCB: 'Testery MacTestface'
     }
 
     const { queryByText } = render(
@@ -166,8 +169,8 @@ describe('local chat', () => {
     ]
 
     const store = createStore({
-      ABCB: new AvatarName('Testery MacTestface'),
-      1234: new AvatarName('Viewerer Account')
+      ABCB: 'Testery MacTestface',
+      1234: 'Viewerer Account'
     })
 
     const { queryByText } = render(
@@ -202,8 +205,8 @@ describe('local chat', () => {
     ]
 
     const names = {
-      ABCB: new AvatarName('Testery MacTestface'),
-      1234: new AvatarName('Viewerer Account')
+      ABCB: 'Testery MacTestface',
+      1234: 'Viewerer Account'
     }
 
     const { container } = render(
@@ -234,8 +237,8 @@ describe('IMs', () => {
     ]
 
     const names = {
-      ABCB: new AvatarName('Testery MacTestface'),
-      1234: new AvatarName('Viewerer Account')
+      ABCB: 'Testery MacTestface',
+      1234: 'Viewerer Account'
     }
 
     const { queryByText } = render(
@@ -274,8 +277,8 @@ describe('IMs', () => {
     ]
 
     const names = {
-      ABCB: new AvatarName('Testery MacTestface'),
-      1234: new AvatarName('Viewerer Account')
+      ABCB: 'Testery MacTestface',
+      1234: 'Viewerer Account'
     }
 
     const { queryByText } = render(
@@ -322,7 +325,7 @@ describe('IMs', () => {
     ]
 
     const names = {
-      ABCB: new AvatarName('Testery MacTestface')
+      ABCB: 'Testery MacTestface'
     }
 
     const { queryByText } = render(
@@ -355,8 +358,8 @@ describe('IMs', () => {
     ]
 
     const names = {
-      ABCB: new AvatarName('Testery MacTestface'),
-      1234: new AvatarName('Viewerer Account')
+      ABCB: 'Testery MacTestface',
+      1234: 'Viewerer Account'
     }
 
     const { container } = render(

@@ -4,9 +4,11 @@ import {
   displayNamesStartLoading,
   displayNamesLoaded,
   selectNames,
+  selectIdOfNamesToLoad,
   selectDisplayNamesURL,
   selectOwnAvatarName,
-  selectAvatarNameById
+  selectAvatarNameById,
+  getFullNameString
 } from '../bundles/names'
 import { selectAgentId, selectSessionId } from '../bundles/session'
 
@@ -81,12 +83,10 @@ export function doHandleFriendOnlineStateChange (msg) {
 
 export function getDisplayName () {
   return (dispatch, getState) => {
-    const names = selectNames(getState())
+    const namesToLoad = selectIdOfNamesToLoad(getState())
 
-    const toLoad = Object.keys(names).filter(id => !names[id].willHaveDisplayName())
-
-    if (toLoad.length > 0) {
-      dispatch(loadDisplayNames(toLoad))
+    if (namesToLoad.length > 0) {
+      dispatch(loadDisplayNames(namesToLoad))
     }
   }
 }
@@ -257,7 +257,7 @@ export function declineTeleportLure (targetId, lureId) {
       ],
       MessageBlock: [
         {
-          FromAgentName: selectOwnAvatarName(activeState).getFullName(),
+          FromAgentName: getFullNameString(selectOwnAvatarName(activeState)),
           ToAgentID: targetId,
           ID: lureId,
           Dialog: IMDialog.DenyTeleport

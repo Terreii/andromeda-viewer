@@ -5,7 +5,6 @@ import { Provider } from 'react-redux'
 import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
 
-import AvatarName from '../../avatarName'
 import {
   acceptFriendshipOffer,
   declineFriendshipOffer,
@@ -45,7 +44,18 @@ function configureStore (state = {}) {
   const store = configureMockStore([thunk])
   state.names = {
     names: {
-      [mockSenderId]: new AvatarName(mockedName)
+      ids: [mockSenderId],
+      entities: {
+        [mockSenderId]: {
+          id: mockSenderId,
+          firstName: 'Tester',
+          lastName: 'Mactestface',
+          displayName: '',
+          isDisplayNameDefault: false,
+          didLoadDisplayName: false,
+          isLoadingDisplayName: false
+        }
+      }
     }
   }
   return store(state)

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-import AvatarName from '../../avatarName'
+import { parseNameString, getNameString } from '../../bundles/names'
 
 import { useAutoFocus } from '../../hooks/utils'
 
@@ -11,6 +11,9 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
   }, [isSelected])
 
   const doAutoFocus = useAutoFocus()
+  const name = parseNameString(avatar.name)
+  name.id = avatar.avatarIdentifier
+  const nameString = getNameString(name)
 
   if (!isSelected) {
     return (
@@ -23,7 +26,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
       >
         <button className='flex flex-col text-white btn--transparent focus:outline-none'>
           <h2 className='block m-1 text-center'>
-            <span className='text-2xl'>{new AvatarName(avatar.name).getDisplayName()}</span>
+            <span className='text-2xl'>{nameString}</span>
             <span className='inline-block ml-3'>@{grid.name}</span>
           </h2>
 
@@ -49,7 +52,7 @@ export default function AvatarLogin ({ avatar, grid, isLoggingIn, onLogin, isSel
       onSubmit={onSubmit}
     >
       <h2 className='block m-1 text-center'>
-        <span className='text-2xl'>{new AvatarName(avatar.name).getDisplayName()}</span>
+        <span className='text-2xl'>{nameString}</span>
         <span className='inline-block ml-3'>@{grid.name}</span>
       </h2>
 

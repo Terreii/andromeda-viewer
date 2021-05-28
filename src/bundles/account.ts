@@ -1,6 +1,7 @@
 import { createSlice, createSelector, PayloadAction, Action } from '@reduxjs/toolkit'
 
 import { RootState } from '../store/configureStore'
+import type { LoginAction } from './session'
 import { AvatarData, SavedAvatarData, Grid, HoodieObject } from '../types/viewer'
 
 // Reducer for viewer-account and state
@@ -100,13 +101,14 @@ const accountSlice = createSlice({
   },
 
   extraReducers: {
-    'session/login' (state, action: PayloadAction<any>) {
-      if (!action.payload.save) { // Anonym
+    'session/login' (state, action: PayloadAction<LoginAction>) {
+      const { save, grid, name, avatarIdentifier, dataSaveId } = action.payload
+      if (!save) { // Anonym
         state.anonymAvatarData = {
-          grid: action.payload.grid.name,
-          name: action.payload.name.getFullName(),
-          avatarIdentifier: action.payload.avatarIdentifier,
-          dataSaveId: action.payload.dataSaveId
+          grid: grid.name,
+          name: name.firstName + ' ' + name.lastName,
+          avatarIdentifier,
+          dataSaveId
         }
       }
     },

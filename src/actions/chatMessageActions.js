@@ -33,7 +33,13 @@ import {
   savingFinished as localChatSavingFinished,
   selectLocalChat
 } from '../bundles/localChat'
-import { selectAvatarNameById, selectOwnAvatarName } from '../bundles/names'
+import {
+  addMissing,
+  selectAvatarNameById,
+  selectOwnAvatarName,
+  getFullNameString,
+  getNameString
+} from '../bundles/names'
 import { receive as notificationActionCreator } from '../bundles/notifications'
 
 import { selectRegionId, selectParentEstateID, selectPosition } from '../bundles/region'
@@ -117,7 +123,7 @@ export function sendInstantMessage (text, to, id, dialog = IMDialog.MessageFromA
           Dialog: dialog,
           ID: id,
           Timestamp: Math.floor(Date.now() / 1000),
-          FromAgentName: selectOwnAvatarName(activeState).getFullName(),
+          FromAgentName: getFullNameString(selectOwnAvatarName(activeState)),
           Message: text,
           BinaryBucket: dialog === IMDialog.SessionSend
             ? name
@@ -909,9 +915,16 @@ export function startNewIMChat (chatType, targetId, name) {
 
     if (chatType === IMChatType.personal) {
       try {
-        name = selectAvatarNameById(getState(), targetId.toString()).getName()
+        name = getNameString(selectAvatarNameById(getState(), targetId.toString()))
       } catch (error) {
-        console.error(error)
+        if (name) {
+          dispatch(addMissing({
+            id: targetId,
+            fallback: name
+          }))
+        } else {
+          console.error(error)
+        }
       }
     }
 
