@@ -124,7 +124,7 @@
     "http-proxy": "^1.18.1",
     "milliseconds": "^1.0.3",
     "nano": "^9.0.1",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^3.1.1",
     "pouchdb-errors": "^7.2.2",
     "uuid": "^8.3.2",
     "ws": "^7.4.6",
